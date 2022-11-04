@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaSession;
 import cn.cyberpeace.mp.flow.v2.client.ixia.PcapFlow;
 import cn.cyberpeace.mp.flow.v2.client.ixia.ProtocolFlow;
+import cn.cyberpeace.mp.flow.v2.client.ixia.StopTestData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,9 @@ class IxiaFlowGenerateService implements IGenerateService {
 
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
-        String neighborhood = ixiaSession.createNeighborhood();
+        String strikeListName = ixiaSession.createStrikeList();
+
+//        String neighborhood = ixiaSession.createNeighborhood();
 
         // 取任务详情
         List<ProtocolFlow> protocolFlows = new ArrayList<>();
@@ -58,8 +61,9 @@ class IxiaFlowGenerateService implements IGenerateService {
         // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
         ixiaSession.createCaptureManager(pcapFlows);
-        String testName = ixiaSession.createTest(neighborhood, "profileName", recreateDatas);
-        ixiaSession.startTest(testName);
+        String testName = ixiaSession.createTest("neighborhood", "profileName", strikeListName, recreateDatas);
+
+//        var res = ixiaSession.startTest(testName);
         ixiaSession.close();
 
 //        IxiaClient ixiaClient = new IxiaClient(generatorBO.getServer());
@@ -92,21 +96,27 @@ class IxiaFlowGenerateService implements IGenerateService {
         // 选择 pcap
         // 执行test
         // 登出
-        return new IxiaFlowCallBackTask(flowTaskRecordBO);
+        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO);
     }
 
     @Override
     public FlowCallBackTask stopFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
-        return new IxiaFlowCallBackTask(flowTaskRecordBO);
+        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        ixiaSession.open();
+        StopTestData stopTestData = new StopTestData();
+        stopTestData.setRunid(flowTaskRecordBO.getStatus());
+        ixiaSession.pauseTest(stopTestData);
+        ixiaSession.close();
+        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO);
     }
 
     @Override
     public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
-        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
-        ixiaSession.open();
-        // todo 暂停TEST没参数？等可以测试了看下怎么用
-        ixiaSession.pauseTest();
-        ixiaSession.close();
+//        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+//        ixiaSession.open();
+//        // todo 暂停TEST没参数？等可以测试了看下怎么用
+//        ixiaSession.pauseTest();
+//        ixiaSession.close();
         return null;
     }
 

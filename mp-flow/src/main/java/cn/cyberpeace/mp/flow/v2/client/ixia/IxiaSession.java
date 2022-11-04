@@ -22,6 +22,7 @@ public class IxiaSession {
     private IxiaApplicationProfileClient applicationProfileClient;
     private IxiaNeighborhoodClient neighborhoodClient;
     private IxiaTestStateClient testStateClient;
+    private IxiaStrikeClient strikeClient;
 
     public IxiaSession(String server, String usrname, String password) {
         this.server = server;
@@ -35,6 +36,7 @@ public class IxiaSession {
         this.applicationProfileClient = new IxiaApplicationProfileClient(httpClient);
         this.neighborhoodClient = new IxiaNeighborhoodClient(httpClient);
         this.testStateClient = new IxiaTestStateClient(httpClient);
+        this.strikeClient = new IxiaStrikeClient(httpClient);
     }
 
     public void open() {
@@ -162,12 +164,12 @@ public class IxiaSession {
         return createNeighborHoodData.getName();
     }
 
-    public String createTest(String neighborhood, String profileName, List<PcapFlow.RecreateData> recreateDatas) {
-        //创建TEST
+    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas) {
+        // 创建TEST
         BaseCreateData baseCreateData = new BaseCreateData();
         this.testClient.createTest(baseCreateData);
-        //向TEST中添加neighborhood
-        this.testClient.configNeighborhood(neighborhood);
+        // 向TEST中添加neighborhood
+//        this.testClient.configNeighborhood(neighborhood);
         // 向TEST中添加Application Simular
         AddAppSimToTestData addApplicationProfileToTestData = new AddAppSimToTestData();
         addApplicationProfileToTestData.setName(profileName);
@@ -177,9 +179,19 @@ public class IxiaSession {
         AddSuperFlowToAppSimData addSuperFlowToAppSimData = new AddSuperFlowToAppSimData();
         addSuperFlowToAppSimData.setProfile(profileName);
 //        this.testClient.configApplicationSimular(addApplicationProfileToTestData, addSuperFlowToAppSimData);
-        //向TEST中添加pcap包
-        this.testClient.configRecreates(recreateDatas);
-        //保存TEST
+        // 向TEST中添加攻击流量
+        AddSecurityToTestData addSecurityToTestData = new AddSecurityToTestData();
+        addSecurityToTestData.setName(strikeListName);
+        addSecurityToTestData.setActive(true);
+        addSecurityToTestData.setType("security_all");
+        addSecurityToTestData.setComponent("security");
+        AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
+        addStrikeListToSecurityData.setAttackPlan(strikeListName);
+        addStrikeListToSecurityData.setAttackProfile("Browser: Low Evasion");
+        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+        // 向TEST中添加pcap包
+//        this.testClient.configRecreates(recreateDatas);
+        // 保存TEST
         SaveTestData saveTestData = new SaveTestData();
         saveTestData.setForce(true);
         saveTestData.setName(TextUtils.uuid());
@@ -187,20 +199,38 @@ public class IxiaSession {
         return saveTestData.getName();
     }
 
-    public void startTest(String name) {
+    public String createStrikeList() {
+        this.strikeClient.createStrikeList();
+
+        AddStrikeToListData addStrikeToListData = new AddStrikeToListData();
+        AddStrikeToListData.Strike strike = new AddStrikeToListData.Strike();
+        strike.setId("/strikes/generic/ixia/apache_1_3_mod_proxy_buffer_overflow_proxy_attack.xml");
+        List<AddStrikeToListData.Strike> strikes = new ArrayList<>();
+        strikes.add(strike);
+        addStrikeToListData.setStrike(strikes);
+        this.strikeClient.addStrikeToList(addStrikeToListData);
+
+        SaveStrikeListData saveStrikeListData = new SaveStrikeListData();
+        saveStrikeListData.setName(TextUtils.uuid());
+        saveStrikeListData.setForce(true);
+        this.strikeClient.saveStrikeList(saveStrikeListData);
+        return saveStrikeListData.getName();
+    }
+
+    public StartTestResult startTest(String name) {
         RunTestData runTestData = new RunTestData();
         runTestData.setGroup("1");
         runTestData.setModelname(name);
-        this.testClient.startTest(runTestData);
+        runTestData.setAllowMalware(true);
+        return this.testClient.startTest(runTestData);
     }
 
-    public void pauseTest() {
-        this.testClient.pauseTest();
+    public void pauseTest(StopTestData stopTestData) {
+        this.testClient.pauseTest(stopTestData);
     }
 
-    public void getTestState() {
-        GetTestStateData getTestStateData = new GetTestStateData();
-        this.testStateClient.getTestState(getTestStateData);
+    public TestStatusResult getTestState(GetTestStateData getTestStateData) {
+        return this.testStateClient.getTestState(getTestStateData);
     }
 
     public void close() {

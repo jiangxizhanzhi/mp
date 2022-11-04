@@ -14,4 +14,5 @@ import lombok.Setter;
 public class RunTestData implements HttpData {
     private String modelname;
     private String group;
+    private Boolean allowMalware;
 }

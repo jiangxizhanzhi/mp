@@ -36,4 +36,12 @@ public interface IxiaUrlConstant {
     String ADD_PCAP_TO_RECREATE = "/api/v2/core/testmodel/component/recreate_";
     String PAUSE_TEST = "/api/v2/core/testmodel/operations/stopRun";
     String GET_TEST_STATE = "/api/v2/core/testmodel/operations/realTimeStats";
+    String CREATE_STRIKE_LIST = "/api/v2/core/strikeList/operations/new";
+    String ADD_STRIKE_TO_LIST = "/api/v2/core/strikeList/operations/add";
+    String SAVE_STRIKE_LIST = "/api/v2/core/strikeList/operations/save";
+    String ADD_SECURITY_TO_TEST = "/api/v2/core/testmodel/operations/add";
+    String ADD_STRIKE_LIST_TO_SECURITY = "/api/v2/core/testmodel/component/security_1";
+    String CREATE_LOAD = "/api/v2/core/loadProfile/operations/createNewCustom";
+    String ADD_PHASE_TO_LOAD = "/api/v2/core/loadProfile/phase/add";
+    String SAVE_LOAD = "/api/v2/core/loadProfile/operations/save";
 }

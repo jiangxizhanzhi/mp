@@ -44,7 +44,16 @@ public class IxiaTestClient {
         log.info("Add application simulator to TEST completed:{}", addAppSimRes);
         var addSuperFlowRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_SUPER_FLOW_TO_APPLICATION_SIMULATOR, addSuperFlowToAppSimData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
-        log.info("Adding super flow to application simulator completed:{}", addSuperFlowRes);
+        log.info("Add super flow to application simulator completed:{}", addSuperFlowRes);
+    }
+
+    public void configSecurity(AddSecurityToTestData addSecurityToTestData, AddStrikeListToSecurityData addStrikeListToSecurityDatad) {
+        var addSecurityRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_SECURITY_TO_TEST, addSecurityToTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        });
+        log.info("Add security to TEST response:{}", addSecurityRes);
+        var addStrikeListRes = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.ADD_STRIKE_LIST_TO_SECURITY, addStrikeListToSecurityDatad, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        });
+        log.info("Add strike list to security response:{}", addStrikeListRes);
     }
 
     public void configRecreates(List<PcapFlow.RecreateData> recreateDatas) {
@@ -69,14 +78,15 @@ public class IxiaTestClient {
         }
     }
 
-    public void startTest(RunTestData runTestData) {
-//        var runTestTes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.RUN_TEST, runTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
-//        });
-//        log.info("Start executing TEST:{}", runTestTes);
+    public StartTestResult startTest(RunTestData runTestData) {
+        var runTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.RUN_TEST, runTestData, null, StartTestResult.class, new TypeReference<StartTestResult>() {
+        });
+        log.info("Start executing TEST:{}", runTestRes);
+        return runTestRes;
     }
 
-    public void pauseTest() {
-        var pauseTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.PAUSE_TEST, null, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+    public void pauseTest(StopTestData stopTestData) {
+        var pauseTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.PAUSE_TEST, stopTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Pause TEST response:{}", pauseTestRes);
     }

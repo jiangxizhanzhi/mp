@@ -16,9 +16,10 @@ public class IxiaTestStateClient {
         this.ixiaHttpClient = ixiaHttpClient;
     }
 
-    public void getTestState(GetTestStateData getTestStateData) {
-        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.GET_TEST_STATE, getTestStateData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+    public TestStatusResult getTestState(GetTestStateData getTestStateData) {
+        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.GET_TEST_STATE, getTestStateData, null, TestStatusResult.class, new TypeReference<TestStatusResult>() {
         });
         log.info("Get TEST response:{}", response);
+        return response;
     }
 }

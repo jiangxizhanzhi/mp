@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
 import cn.cyberpeace.mp.base.util.http.HttpData;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,9 @@ public class GetTestStateData implements HttpData {
     private String rtsgroup;
     private Integer numSeconds;
     private Integer numDataPoints;
+
+    @Override
+    public String toContent() {
+        return JsonUtils.snakeStringify(this);
+    }
 }
