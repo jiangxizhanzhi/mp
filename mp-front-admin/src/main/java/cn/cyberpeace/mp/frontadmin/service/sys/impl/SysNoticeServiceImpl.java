@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -17,8 +19,11 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -34,7 +39,9 @@ import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeOrgService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
+import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -45,10 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -95,6 +99,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private TenantUserService tenantUserService;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private OrgMapper orgMapper;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -208,7 +218,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         SysNoticeModel resultModel = result.getSource().getObj();
         // 组织
         List<SysNoticeOrgModel> noticeOrgModelList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getOrgIds())) {
+        if (CollUtil.isNotEmpty(sysNoticeRequest.getOrgIds())) {
             sysNoticeRequest.getOrgIds().forEach(orgId -> {
                 SysNoticeOrgModel sysNoticeOrgModel = new SysNoticeOrgModel();
                 sysNoticeOrgModel.setOrg(orgId);
@@ -221,7 +231,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 用户
         List<SysNoticeUserModel> noticeUserModelList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getUserIds())) {
+        if (CollUtil.isNotEmpty(sysNoticeRequest.getUserIds())) {
             sysNoticeRequest.getUserIds().forEach(userId -> {
                 SysNoticeUserModel sysNoticeUserModel = new SysNoticeUserModel();
                 sysNoticeUserModel.setUser(userId);
@@ -335,11 +345,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     @Override
-    public PageInfo<SysNoticeModel> getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
+    public ListObjServiceResult getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
         UserModel currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
             log.error("user not login!");
-            return new PageInfo<>();
+            return new ListObjServiceResult<>();
         }
 
         // 查找当前用户所有的角色
@@ -349,11 +359,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 管理员，查看所有有阅读权限的公告消息
         if (isAdmin) {
-            PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
-            PageInfo pageInfo = new PageInfo(notices);
-            convert2NoticeDtoPageInfo(pageInfo, true);
-            return pageInfo;
+            return listNoticeMessageByCurrentAdminUser(currentUser.getId(), req.getPage(), req.getPageSize());
         }
 
         // 非管理员...
@@ -389,7 +395,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         PageInfo pageInfo = new PageInfo(notices);
 
         convert2NoticeDtoPageInfo(pageInfo, true);
-        return pageInfo;
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     @Override
@@ -476,7 +482,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         // org
-        List<OrgModel> orgModels = noticeOrgMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        List<OrgModel> orgModels = sysNoticeOrgService.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
         if (CollectionUtil.isNotEmpty(orgModels)) {
             noticeDto.setOrgIds(orgModels.stream().map(OrgModel::getId).collect(Collectors.toList()));
             List<OrgBO> orgBOS = orgModels.stream().map(orgModel -> orgService.orgModel2OrgBO(orgModel)).collect(Collectors.toList());
@@ -484,7 +490,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         // user
-        List<UserModel> userModels = noticeUserMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        List<UserModel> userModels = listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
         userModels.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
 
         if (CollectionUtil.isNotEmpty(userModels)) {
@@ -533,5 +539,64 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         pageInfo.setList(noticeDtos);
     }
 
+    private List<UserModel> listByNoticeIds(List<String> noticeIds) {
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollUtil.isNotEmpty(noticeIds)) {
+            humanCondition.link(UserModel.class, SysNoticeUserModel.class)
+                    .filterLink(UserModel.class, UserModel::getId, SysNoticeUserModel.class, SysNoticeUserModel::getUser)
+                    .currentLink(SysNoticeUserModel.class)
+                    .filterIn(SysNoticeUserModel::getNoticeId, noticeIds.toArray());
+        }
+        humanCondition.distinct();
+        List<UserModel> userModels = userMapper.list(humanCondition);
+        return userModels;
+    }
 
+    public ListObjServiceResult listNoticeMessageByCurrentAdminUser(String userId, int page, int pageSize) {
+        Set<String> noticeIds = new HashSet<>();
+        HumanCondition orgNoticeCond = new HumanCondition()
+                .select(SysNoticeOrgModel::getNoticeId);
+        List<SysNoticeOrgModel> orgNotices = noticeOrgMapper.list(orgNoticeCond);
+        orgNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        HumanCondition roleNoticeCond = new HumanCondition()
+                .select(SysNoticeRoleModel::getNoticeId);
+        List<SysNoticeRoleModel> roleNotices = noticeRoleMapper.list(roleNoticeCond);
+        roleNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        HumanCondition userNoticeCond = new HumanCondition()
+                .filterEqual(SysNoticeUserModel::getUser, userId)
+                .select(SysNoticeUserModel::getNoticeId);
+        List<SysNoticeUserModel> userNotices = noticeUserMapper.list(userNoticeCond);
+        userNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+
+        HumanCondition readNoticeCond = new HumanCondition()
+                .filterEqual(SysNoticeReadModel::getUser, userId)
+                .filterEqual(SysNoticeReadModel::getIsNeedPush, 0)
+                .select(SysNoticeReadModel::getNoticeId);
+        List<SysNoticeReadModel> notPushNotices = noticeReadMapper.list(readNoticeCond);
+
+        HumanCondition noticeCond = new HumanCondition();
+        if (CollUtil.isEmpty(noticeIds)) {
+            return new ListObjServiceResult<>();
+        }
+        noticeCond.filterIn(SysNoticeModel::getId, noticeIds.toArray());
+        if (CollUtil.isNotEmpty(notPushNotices)) {
+            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
+        }
+        noticeCond.pagination(page, pageSize)
+                .orderBy(SysNoticeModel::getTop, true)
+                .orderBy(SysNoticeModel::getPk, true);
+        int total = getModelMapper().total(noticeCond);
+        List<SysNoticeModel> noticeModels = getModelMapper().list(noticeCond);
+        List<SysNoticeDto> noticeDtos = convert2NoticeDto(noticeModels, true);
+        ListObjServiceResult result = new ListObjServiceResult(new ListObjResult(noticeDtos, total).asResult()).asResult();
+        return result;
+    }
+
+    private List<SysNoticeDto> convert2NoticeDto(List<SysNoticeModel> noticeModels, boolean checkCurrentUserIsRead) {
+        List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
+            SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
+            return noticeDto;
+        }).collect(Collectors.toList());
+        return noticeDtos;
+    }
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
@@ -38,10 +39,10 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
     /**
      * 分页查询当前用户有权看到的公告消息列表
      *
-     * @param pageRequest
+     * @param
      * @return
      */
-    PageInfo getCurrentUserNoticeMessagesPage(SysNoticePageRequest pageRequest);
+    ListObjServiceResult getCurrentUserNoticeMessagesPage(SysNoticePageRequest pageRequest);
 
     int getCurrentUserNoticeMessagesUnreadCount();
 

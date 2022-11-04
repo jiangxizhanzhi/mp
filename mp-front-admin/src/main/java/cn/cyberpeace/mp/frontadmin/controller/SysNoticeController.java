@@ -7,10 +7,6 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.log.annotation.OperateLog;
-import cn.cyberpeace.mp.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
@@ -21,6 +17,10 @@ import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
 import cn.cyberpeace.mp.frontadmin.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
+import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.collection.CollUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -31,15 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -128,9 +120,7 @@ public class SysNoticeController {
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo pageInfo = noticeService.getCurrentUserNoticeMessagesPage(pageRequest);
-
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        return noticeService.getCurrentUserNoticeMessagesPage(pageRequest);
     }
 
 
