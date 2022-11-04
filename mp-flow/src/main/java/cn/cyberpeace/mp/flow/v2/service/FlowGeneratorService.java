@@ -123,6 +123,11 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
         return createBO(bo, fields, FlowGeneratorBO.class);
     }
 
+    public ObjServiceResult<FlowGeneratorBO> registerFlowGenerator(FlowGeneratorBO bo, String[] fields) {
+        // 外部资源 无需创建
+        return createBO(bo, fields, FlowGeneratorBO.class);
+    }
+
     public ObjServiceResult<FlowGeneratorBO> updateFlowGenerator(FlowGeneratorBO bo, String[] fields) {
         // TODO: 更新对应资源
         return updateBO(bo, fields, FlowGeneratorBO.class);
@@ -130,6 +135,11 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
 
     public ServiceResult<Integer> bulkDeleteFlowGenerator(String[] ids) {
         // TODO: 删除对应资源
+        return bulkDeleteBO(ids, FlowGeneratorBO.class);
+    }
+
+    public ServiceResult<Integer> bulkCancelFlowGenerator(String[] ids) {
+        // 外部资源 无需删除
         return bulkDeleteBO(ids, FlowGeneratorBO.class);
     }
 

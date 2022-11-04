@@ -6,8 +6,9 @@
     	join mp_flow_flow_generator mffg
     	where status != 3 and mfftr.flow_generator_id = mffg.id group by mfftr.flow_generator_id
     </select>
-    
-    <select id="generatorTaskList" resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel">
-    	select * from mp_flow_flow_task_record where status != 3
+
+    <select id="generatorTaskList" parameterType="java.util.Map"
+            resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel">
+    	select * from mp_flow_flow_task_record where status != 3 and flow_generator_id = #{flowGeneratorId}
     </select>
 </mapper>

@@ -20,7 +20,7 @@
             flow_id as flowId, #{item.startTime} as time, sum(bandwidth) as bandwidth,sum(packets) as packets,
             sum(tcp_connect_success) as tcpConnectSuccess , sum(tcp_connect_try) as tcpConnectTry
             from mp_flow_flow_task_count
-            where flow_generator_id = #{flowGeneratorId} AND flow_task_record_id = #{flowTaskRecordId}
+            where flow_generator_id = #{flowGeneratorId} AND flow_task_record_id = #{taskRecordId}
             and create_time &gt;= #{item.startTime} and create_time &lt; #{item.endTime} group by flow_id
         </foreach>
     </select>

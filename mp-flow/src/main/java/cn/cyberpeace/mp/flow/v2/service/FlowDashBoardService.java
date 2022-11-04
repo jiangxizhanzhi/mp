@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.flow.v2.bo.FlowBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowDashBoardCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBandwidthCountBO;
@@ -16,12 +17,11 @@ import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -185,17 +185,29 @@ public class FlowDashBoardService {
      *
      * @return
      */
-    public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
+    public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(String flowGeneratorId, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
 
-        PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<FlowTaskRecordModel>(flowTaskRecordMapper.generatorTaskList());
+        PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<>(flowTaskRecordMapper.generatorTaskList(flowGeneratorId));
         List<FlowTaskRecordBO> taskBOs = pageInfo.getList().stream().map(t -> {
             FlowTaskRecordBO bo = new FlowTaskRecordBO();
-            BeanUtils.copyProperties(t, bo);
+            bo.fromModel(t);
             return bo;
         }).collect(Collectors.toList());
 
         return new ListObjServiceResult<>(new ListObjResult<>(taskBOs, (int) pageInfo.getTotal()));
+    }
+
+    /**
+     * 仿真任务流查询
+     *
+     * @return
+     */
+    public ServiceResult<List<FlowBO>> taskFlowList(String recordId) {
+        HumanCondition humanCondition = new HumanCondition().filterEqual(FlowTaskRecordModel::getId, recordId);
+        var models = flowTaskRecordMapper.list(humanCondition);
+        List<FlowBO> flows = JSON.parseArray(models.get(0).getFlows(), FlowBO.class);
+        return new ServiceResult<>(flows);
     }
 
     private List<FlowTaskCountQueryBO> getQueryList(String start, String end) {

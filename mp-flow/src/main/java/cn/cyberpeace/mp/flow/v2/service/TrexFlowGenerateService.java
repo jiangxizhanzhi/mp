@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
-import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
 import cn.cyberpeace.mp.flow.v2.client.trex.FlowResourceData;
 import cn.cyberpeace.mp.flow.v2.client.trex.NetworkInfos;
 import cn.cyberpeace.mp.flow.v2.client.trex.StartTaskData;
@@ -50,7 +49,7 @@ public class TrexFlowGenerateService implements IGenerateService{
         // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
         boolean needCreateNet = true;
         String portMac = null;
-        if (generatorBO != null && !generatorBO.getNics().isEmpty()) {
+        if (!generatorBO.getNics().isEmpty()) {
             for (int i = 0; i < generatorBO.getNics().size(); i++) {
                 if (generatorBO.getNics().get(i).getCpCloudNetworkId().equals(flowTaskRecordBO.getTargetNetworkId())) {
                     needCreateNet = false;
@@ -151,7 +150,7 @@ public class TrexFlowGenerateService implements IGenerateService{
         // 启动流量
         StartTaskData startInfoData = new StartTaskData();
         startInfoData.setId(flowTaskRecordBO.getId());
-        startInfoData.setAction(1);
+        startInfoData.setAction(TaskActionData.Action.START);
         startInfoData.setTime(LocalDateTime.now());
 //        startInfoData.setDuration(DURATION);
         startInfoData.setBandwidth(flowTaskRecordBO.getBandwidth());
@@ -161,7 +160,7 @@ public class TrexFlowGenerateService implements IGenerateService{
             StartTaskData.Flow taskFlow = new StartTaskData.Flow();
             taskFlow.setFlowId(f.getFlowId());
             taskFlow.setWeight(f.getWeight());
-            taskFlow.setResourceType(f.getResourceType());;
+            taskFlow.setResourceType(f.getResourceType());
             taskFlow.setDelay(f.getDelay());
             return taskFlow;
         }).collect(Collectors.toList());

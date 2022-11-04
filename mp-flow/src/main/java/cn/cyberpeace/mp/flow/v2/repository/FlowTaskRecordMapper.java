@@ -16,5 +16,5 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
 
     List<FlowTaskCountResultModel> countStartTask();
     
-    List<FlowTaskRecordModel> generatorTaskList();
+    List<FlowTaskRecordModel> generatorTaskList(String flowGeneratorId);
 }

@@ -57,6 +57,16 @@ public class FlowGeneratorController implements
         return getModelService().createFlowGenerator(bo, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
+    @ApiOperation("仪表注册")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
+    })
+    @PostMapping("/register")
+    public ObjServiceResult<FlowGeneratorBO> register(@RequestBody FlowGeneratorBO bo,
+                                                      @RequestParam(required = false) String[] fields) {
+        return getModelService().registerFlowGenerator(bo, ControllerCommon.convertValidFields(fields)).asResult();
+    }
+
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
@@ -75,6 +85,13 @@ public class FlowGeneratorController implements
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody BaseBulkDeleteData deleteData) {
         return getModelService().bulkDeleteFlowGenerator(deleteData.getIds()).asResult();
+    }
+
+    @ApiOperation("批量注销仪表")
+    @ApiImplicitParam(name = "deleteData", value = "删除数据请求体", dataTypeClass = BaseBulkDeleteData.class)
+    @DeleteMapping("/bulk_cancel")
+    public ServiceResult<Integer> bulkCancel(@RequestBody BaseBulkDeleteData deleteData) {
+        return getModelService().bulkCancelFlowGenerator(deleteData.getIds()).asResult();
     }
 
     @ApiOperation("统计仪表数量")

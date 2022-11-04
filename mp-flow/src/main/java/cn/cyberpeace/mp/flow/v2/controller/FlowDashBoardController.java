@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.v2.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.v2.bo.FlowBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowDashBoardCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBandwidthCountBO;
@@ -88,7 +89,17 @@ public class FlowDashBoardController {
             @RequestParam(name = "flow_generator_id", required = false) String flowGeneratorId,
             @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(name = "page_size", required = false, defaultValue = "10") Integer pageSize) {
-        return flowDashBoardService.generatorTaskList(page, pageSize).asResult();
+        return flowDashBoardService.generatorTaskList(flowGeneratorId, page, pageSize).asResult();
+    }
+
+    @ApiOperation("仿真任务流查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "record_id", value = "流量任务执行id", dataTypeClass = String.class),
+    })
+    @GetMapping("/task/flow_list")
+    public ServiceResult<List<FlowBO>> taskFlowList(
+            @RequestParam(name = "record_id") String recordId) {
+        return flowDashBoardService.taskFlowList(recordId).asResult();
     }
 
 }

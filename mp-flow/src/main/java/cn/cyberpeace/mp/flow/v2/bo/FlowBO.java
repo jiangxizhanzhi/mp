@@ -40,6 +40,10 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private List<ScriptParam> scriptParams;
     private String ixiaFlowName;
     private LocalDateTime createTime;
+    private Integer status = 0;
+    private Integer delay;
+    private Integer weight;
+    private String flowId;
 
     @Override
     public FlowBO fromModel(FlowModel obj, String... ignoreFields) {
