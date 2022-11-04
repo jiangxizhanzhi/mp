@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
  * @Date 2022/10/20
  */
 @Service
-public class TrexFlowGenerateService implements IGenerateService{
+public class TrexFlowGenerateService implements IGenerateService {
     private static final Integer DURATION = 50;
+    private static final Integer TIME_SCALE = 1000000;
+
     @Override
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
@@ -98,8 +100,8 @@ public class TrexFlowGenerateService implements IGenerateService{
             StartTaskData.Flow taskFlow = new StartTaskData.Flow();
             taskFlow.setFlowId(f.getFlowId());
             taskFlow.setWeight(f.getWeight());
-            taskFlow.setResourceType(f.getResourceType());;
-            taskFlow.setDelay(f.getDelay());
+            taskFlow.setResourceType(f.getResourceType());
+            taskFlow.setDelay(f.getDelay() * TIME_SCALE);
             return taskFlow;
         }).collect(Collectors.toList());
         startInfoData.getFlows().addAll(flows);
@@ -161,8 +163,8 @@ public class TrexFlowGenerateService implements IGenerateService{
             StartTaskData.Flow taskFlow = new StartTaskData.Flow();
             taskFlow.setFlowId(f.getFlowId());
             taskFlow.setWeight(f.getWeight());
-            taskFlow.setResourceType(f.getResourceType());;
-            taskFlow.setDelay(f.getDelay());
+            taskFlow.setResourceType(f.getResourceType());
+            taskFlow.setDelay(f.getDelay() * TIME_SCALE);
             return taskFlow;
         }).collect(Collectors.toList());
         startInfoData.getFlows().addAll(flows);
