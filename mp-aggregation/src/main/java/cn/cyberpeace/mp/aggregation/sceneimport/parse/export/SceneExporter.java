@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -151,19 +151,19 @@ public class SceneExporter {
                 }
                 // 生成service.yml
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
-                    List<AccessModeParseResult> normal = new ArrayList<>();
-                    List<AccessModeParseResult> manage = new ArrayList<>();
+                    List<AccessModeExportResult> normal = new ArrayList<>();
+                    List<AccessModeExportResult> manage = new ArrayList<>();
                     for (var m : device.getAccessModes()) {
-                        AccessModeParseResult accessModeParseResult = new AccessModeParseResult();
+                        AccessModeExportResult accessModeParseResult = new AccessModeExportResult();
                         accessModeParseResult.setDesc(m.getDesc());
                         accessModeParseResult.setProtocol(m.getProtocol());
                         if (m.getPort() != null) {
-                            accessModeParseResult.setPort(String.valueOf(m.getPort()));
+                            accessModeParseResult.setPort(m.getPort());
                         }
                         if (Boolean.TRUE.equals(m.getProxy())) {
-                            accessModeParseResult.setIsproxy("true");
+                            accessModeParseResult.setIsproxy(true);
                         } else {
-                            accessModeParseResult.setIsproxy("false");
+                            accessModeParseResult.setIsproxy(false);
                         }
                         accessModeParseResult.setPassword(m.getPassword());
                         accessModeParseResult.setUsername(m.getUsername());
@@ -368,7 +368,7 @@ public class SceneExporter {
         private String 角色;
         private String 虚拟类型;
         private Boolean cloudInit;
-        private List<AccessModeParseResult> 接入方式;
-        private List<AccessModeParseResult> 管理接入;
+        private List<AccessModeExportResult> 接入方式;
+        private List<AccessModeExportResult> 管理接入;
     }
 }
