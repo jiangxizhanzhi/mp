@@ -117,6 +117,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String host;
 
+    // 实体防火墙NAT配置
+    @DefaultStr
+    private String natConfigs;
 
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;

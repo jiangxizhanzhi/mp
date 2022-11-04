@@ -117,6 +117,11 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "快速创建参数")
     @Valid
     private List<QuickCreateParam> quickCreateParams;
+    
+    // 实体防火墙NAT配置
+    @ApiModelProperty(value = "NAT配置")
+    @Valid
+    private List<NATConfig> natConfigs;
 
     @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
     @JsonIgnore
@@ -253,6 +258,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (quickCreateParams != null) {
             obj.setQuickCreateParams(JsonCommon.stringify(quickCreateParams));
+        }
+        if (natConfigs != null) {
+            obj.setNatConfigs(JsonCommon.stringify(natConfigs));
         }
         if (auxiliaryNetworkDnsNameservers != null) {
             obj.setAuxiliaryNetworkDnsNameservers(JsonCommon.stringify(auxiliaryNetworkDnsNameservers));

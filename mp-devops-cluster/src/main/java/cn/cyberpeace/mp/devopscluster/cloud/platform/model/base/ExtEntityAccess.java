@@ -54,6 +54,12 @@ public class ExtEntityAccess implements Serializable {
     private String mac;
 
     /**
+     * VLANID
+     */
+    @ApiModelProperty("VLANID")
+    private String vlanId;
+
+    /**
      * 管理协议列表
      */
     @ApiModelProperty("管理协议列表")
