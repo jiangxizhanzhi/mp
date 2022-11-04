@@ -364,7 +364,7 @@ public class TenantUserServiceImpl
             selfUserId = selfUser.getId();
         }
 
-        PageHelper.startPage(req.getPage(), req.getPageSize());
+//        PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
@@ -500,11 +500,14 @@ public class TenantUserServiceImpl
                                          Integer pageSize
     ) {
         HumanCondition humanCondition = genHumanCondition(orgIds, userIds, orders, userBo, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        int total = userMapper.total(humanCondition);
         Map<String, String> userOrgMap = getUserOrgMap();
         Map<String, String> userRoleMap = getUserRoleMap();
 
         PageHelper.startPage(page, pageSize);
         List<UserModel> userModels = userMapper.list(humanCondition);
+        PageInfo pageInfo = new PageInfo(userModels);
+        pageInfo.setTotal(total);
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
         for (UserModel model : userModels) {
             UserOrgRoleBo bo = new UserOrgRoleBo();
@@ -513,7 +516,7 @@ public class TenantUserServiceImpl
             bo.setRoles(userRoleMap.get(model.getId()));
             userOrgRoleBos.add(bo);
         }
-        PageInfo pageInfo = new PageInfo(userOrgRoleBos);
+
         List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
         pageInfo.setList(userBos);
         return pageInfo;
