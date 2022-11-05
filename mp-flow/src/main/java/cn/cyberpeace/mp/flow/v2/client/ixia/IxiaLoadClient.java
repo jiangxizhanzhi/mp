@@ -35,7 +35,7 @@ public class IxiaLoadClient {
     }
 
     public void addPhase(IxiaPhaseData phaseData) {
-        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_PHASE, phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        var response = ixiaHttpClient.ixiaPut(IxiaUrlConstant.ADD_PHASE, phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Add phase response:{}", response);
     }
@@ -47,7 +47,7 @@ public class IxiaLoadClient {
     }
 
     public void changePhase(IxiaPhaseData phaseData, Integer index) {
-        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.CHANGE_PHASE + index + "}", phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        var response = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.CHANGE_PHASE + index + "}", phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Change phase response:{}", response);
     }

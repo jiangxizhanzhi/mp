@@ -105,6 +105,7 @@ public class IxiaHttpClient {
             }
         }
     }
+
     public <T extends IxiaResponse> T ixiaPut(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
         try {
             return ixiaResultBean(httpClient.put(url, data, param, this.getHeaders(), null), valueTypeRef, "put", url, data, param);

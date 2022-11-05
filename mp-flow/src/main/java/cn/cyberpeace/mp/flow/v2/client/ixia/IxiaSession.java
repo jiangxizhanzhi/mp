@@ -23,6 +23,7 @@ public class IxiaSession {
     private IxiaNeighborhoodClient neighborhoodClient;
     private IxiaTestStateClient testStateClient;
     private IxiaStrikeClient strikeClient;
+    private IxiaLoadClient loadClient;
 
     public IxiaSession(String server, String usrname, String password) {
         this.server = server;
@@ -37,6 +38,7 @@ public class IxiaSession {
         this.neighborhoodClient = new IxiaNeighborhoodClient(httpClient);
         this.testStateClient = new IxiaTestStateClient(httpClient);
         this.strikeClient = new IxiaStrikeClient(httpClient);
+        this.loadClient = new IxiaLoadClient(httpClient);
     }
 
     public void open() {
@@ -215,6 +217,37 @@ public class IxiaSession {
         saveStrikeListData.setForce(true);
         this.strikeClient.saveStrikeList(saveStrikeListData);
         return saveStrikeListData.getName();
+    }
+
+    public void createLoad(List<String> loadList) {
+        CreateLoadData createLoadData = new CreateLoadData();
+        createLoadData.setLoadProfile(TextUtils.uuid());
+        this.loadClient.createLoad(createLoadData);
+        this.loadClient.saveLoad();
+
+        BaseCreateData baseCreateData = new BaseCreateData();
+        baseCreateData.setTemplate(createLoadData.getLoadProfile());
+        for (int i = 0; i < 3; i++) {
+            this.loadClient.strainLoad(baseCreateData);
+            this.loadClient.deletePhase();
+            this.loadClient.saveLoad();
+        }
+
+        this.loadClient.strainLoad(baseCreateData);
+        IxiaPhaseData ixiaPhaseData = new IxiaPhaseData();
+        for (int i = 0; i < loadList.size(); i++) {
+
+            this.loadClient.addPhase(ixiaPhaseData);
+        }
+        this.loadClient.saveLoad();
+
+        this.loadClient.strainLoad(baseCreateData);
+        IxiaPhaseData ixiaPhaseData1 = new IxiaPhaseData();
+        for (int i = 0; i < loadList.size(); i++) {
+
+            this.loadClient.changePhase(ixiaPhaseData1, i);
+        }
+        this.loadClient.saveLoad();
     }
 
     public StartTestResult startTest(String name) {
