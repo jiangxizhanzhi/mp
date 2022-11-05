@@ -143,6 +143,7 @@ mp:
     max-import-user-size: 100
     logout-reset-secret: true
     default-user-avatar: /api/mp/avatar/1.png
+    mq-msg-timeout: 3600000
     # authenticate
     authenticate-cache-time: 30
     authenticate-use-individual-token-secret: true

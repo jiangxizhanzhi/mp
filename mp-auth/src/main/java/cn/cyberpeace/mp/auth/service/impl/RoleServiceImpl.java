@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
 import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -15,8 +15,14 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
+import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
@@ -41,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -73,6 +80,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private OperateRolePermissionService opRolePermCheckService;
 
     @Autowired
+    private UserCacheService userCacheService;
+
+    @Autowired
+    private AuthStatusRabbitmqSender messageSender;
+
+    @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -84,7 +97,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         // todo 删除关联用户关系，权限关系
         deleteReleated(roleId);
-        return super.delete(roleId);
+        var ret = super.delete(roleId);
+        if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
+        }
+        return ret;
     }
 
     @Override
@@ -96,7 +114,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             deleteReleated(id);
         }
 
-        return super.bulkDelete(ids);
+        var ret = super.bulkDelete(ids);
+        if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
+        }
+        return ret;
     }
 
     @Override

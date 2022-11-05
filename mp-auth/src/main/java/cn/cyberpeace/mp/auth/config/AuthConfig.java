@@ -43,6 +43,12 @@ public class AuthConfig {
     // 不需要认证的url
     private List<String> authenticateExcludeUrls;
 
+    // encoder循环次数
     private Integer authenticateEncoderIterations;
+
+    // encoder hash长度
     private Integer authenticateEncoderHashWidth;
+
+    // mq消息过期时间
+    private Long mqMsgTimeout;
 }
