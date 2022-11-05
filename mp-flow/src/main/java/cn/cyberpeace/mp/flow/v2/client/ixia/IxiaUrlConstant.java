@@ -42,6 +42,9 @@ public interface IxiaUrlConstant {
     String ADD_SECURITY_TO_TEST = "/api/v2/core/testmodel/operations/add";
     String ADD_STRIKE_LIST_TO_SECURITY = "/api/v2/core/testmodel/component/security_1";
     String CREATE_LOAD = "/api/v2/core/loadProfile/operations/createNewCustom";
-    String ADD_PHASE_TO_LOAD = "/api/v2/core/loadProfile/phase/add";
+    String STRAIN_LOAD = "/api/v2/core/loadProfile/operations/load";
+    String ADD_PHASE = "/api/v2/core/loadProfile/phase/add";
+    String DELETE_PHASE = "/api/v2/core/loadProfile/phase/{0}";
+    String CHANGE_PHASE = "/api/v2/core/loadProfile/phase/{";
     String SAVE_LOAD = "/api/v2/core/loadProfile/operations/save";
 }

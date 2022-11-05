@@ -105,6 +105,20 @@ public class IxiaHttpClient {
             }
         }
     }
+    public <T extends IxiaResponse> T ixiaPut(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
+        try {
+            return ixiaResultBean(httpClient.put(url, data, param, this.getHeaders(), null), valueTypeRef, "put", url, data, param);
+        } catch (Exception e) {
+            if (!"Entity may not be null".equals(e.getMessage())) {
+                throw e;
+            }
+            try {
+                return tClass.getConstructor().newInstance();
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    }
 
     public <T extends IxiaResponse> T post(String url, HttpData data, HttpParam param, Class<T> valueType, TypeReference<T> valueTypeRef) {
         return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueType, "post", url, data, param);
