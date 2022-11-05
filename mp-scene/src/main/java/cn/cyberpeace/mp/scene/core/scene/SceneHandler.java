@@ -129,10 +129,6 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
-    private final StatusReporter<CollectedSceneStatusBO> sceneStatusReporter = (StatusReporter) BeanCommon.getBean("sceneStatusReporter");
-
-    private final StatusReporter<CollectedElementStatusBO> elementStatusReporter = (StatusReporter) BeanCommon.getBean("elementStatusReporter");
-
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
     private String genEventKey(String targetId, int event) {
