@@ -15,5 +15,6 @@
                 status != 3 AND flow_generator_id = #{flowGeneratorId}
             </if>
         </where>
+        order by pk desc
     </select>
 </mapper>
