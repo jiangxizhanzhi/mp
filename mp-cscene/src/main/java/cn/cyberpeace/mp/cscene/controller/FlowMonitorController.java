@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.util.ResponseUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -39,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Description:
@@ -218,5 +221,10 @@ public class FlowMonitorController {
         return ResultCommon.success(responseList);
     }
 
-
+    @ApiOperation(value = "导出全部流量文件")
+    @GetMapping("/export")
+    public void export(String sceneId, HttpServletResponse response) {
+        flowMonitorService.export(sceneId, response);
+    }
+    
 }
