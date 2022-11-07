@@ -61,22 +61,17 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
         QueryTaskLastStatusData queryTaskLastStatus = new QueryTaskLastStatusData();
         queryTaskLastStatus.setTaskId(flowTaskRecordBO.getId());
         var taskStatus = trexClient.queryTaskLastStatus(queryTaskLastStatus);
-        Map<String, TaskLastStatusResponseData.singleTask> allTaskStatus = new HashMap<>();
-        taskStatus.getRows().forEach(t -> allTaskStatus.put(t.getTaskUuid(), t));
-        var targetTask = allTaskStatus.get(flowTaskRecordBO.getId());
-
-        if (targetTask != null) {
+        taskStatus.getRows().forEach(t -> {
             FlowTaskCountModel flowTaskCountModel = new FlowTaskCountModel();
-            flowTaskCountModel.setFlowId(targetTask.getFlowId());
+            flowTaskCountModel.setFlowId(t.getFlowId());
             flowTaskCountModel.setFlowTaskRecordId(flowTaskRecordBO.getId());
             flowTaskCountModel.setFlowGeneratorId(flowTaskRecordBO.getFlowGeneratorId());
-            flowTaskCountModel.setBandwidth(targetTask.getTxBps());
-            flowTaskCountModel.setTcpConnectTry(targetTask.getCpsTotal());
-            flowTaskCountModel.setPackets(targetTask.getOpackets());
-            flowTaskCountModel.setTcpConnectSuccess(targetTask.getCpsSuccess());
-            // todo : 此处可能有去重问题，暂时忽略
+            flowTaskCountModel.setBandwidth(t.getTxBps());
+            flowTaskCountModel.setTcpConnectTry(t.getCpsTotal());
+            flowTaskCountModel.setPackets(t.getOpackets());
+            flowTaskCountModel.setTcpConnectSuccess(t.getCpsSuccess());
             flowTaskCountMapper.create(flowTaskCountModel);
-        }
+        });
         if (recordModel.getStatus() == 2 || recordModel.getStatus() == 3 || recordModel.getStatus() == 4) {
             return true;
         }
