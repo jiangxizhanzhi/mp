@@ -1,15 +1,19 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.bo.org.OrgBO;
-import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
+import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -26,7 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +66,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Autowired
     private TenantUserService tenantUserService;
+
+    @Autowired
+    private AuthStatusRabbitmqSender messageSender;
 
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
@@ -248,7 +261,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         deleteReleated(orgId);
 
         var ret = super.delete(orgId);
-        userCacheService.evictAllUserCache();
+        if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(orgId), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);
+        }
         return ret;
     }
 
@@ -264,7 +280,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             deleteReleated(id);
         }
         var ret = super.bulkDelete(ids);
-        userCacheService.evictAllUserCache();
+        if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);
+        }
         return ret;
     }
 

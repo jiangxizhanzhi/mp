@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.auth.constant;
 
+import cn.cyberpeace.mp.base.message.rabbitmq.SimpleMessageConfig;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -84,6 +86,26 @@ public class AuthConstant {
      * 导入用户头像支持魔术头类型：png，jpg（对应后缀为：jpg和jpeg）
      */
     public static final List<String> UPLOAD_AVATAR_MAGIC_HEADER_TYPE = Arrays.asList("png", "jpg");
+
+
+    // MQ
+    public static final String AUTH_EXCHANGE_NAME = SimpleMessageConfig.GROUP_NAME + ".auth";
+
+    public static final String ROUTING_KEY_USER_DELETE = AUTH_EXCHANGE_NAME + ".user.delete";
+    public static final String ROUTING_KEY_USER_UPDATE = AUTH_EXCHANGE_NAME + ".user.update";
+    public static final String ROUTING_KEY_USER_CREATE = AUTH_EXCHANGE_NAME + ".user.create";
+
+    public static final String ROUTING_KEY_ORG_DELETE = AUTH_EXCHANGE_NAME + ".org.delete";
+    public static final String ROUTING_KEY_ORG_UPDATE = AUTH_EXCHANGE_NAME + ".org.update";
+    public static final String ROUTING_KEY_ORG_CREATE = AUTH_EXCHANGE_NAME + ".org.create";
+
+    public static final String ROUTING_KEY_ROLE_DELETE = AUTH_EXCHANGE_NAME + ".role.delete";
+    public static final String ROUTING_KEY_ROLE_UPDATE = AUTH_EXCHANGE_NAME + ".role.update";
+    public static final String ROUTING_KEY_ROLE_CREATE = AUTH_EXCHANGE_NAME + ".role.create";
+
+    public static final String MSG_TYPE_USER_DELETE = "user_delete";
+    public static final String MSG_TYPE_ORG_DELETE = "org_delete";
+    public static final String MSG_TYPE_ROLE_DELETE = "role_delete";
 
 
     private AuthConstant() {
