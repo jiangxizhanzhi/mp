@@ -1,0 +1,14 @@
+{
+  "file_probe": {
+    "probe_name": "file_monitor.py",
+    "id": "909651719b054ebca6a3226f18f27431",
+    "interval": "43200s",
+    "output_format": "none"
+  },
+  "registry_probe": {
+    "probe_name": "registry_monitor.py",
+    "id": "5c92e8a3187b40e7b54734c4b03f23a0",
+    "interval": "43200s",
+    "output_format": "none"
+  }
+}
