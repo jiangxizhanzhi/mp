@@ -1,14 +1,15 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -54,6 +56,9 @@ public class UserPermissionServiceImpl
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private OrgPermissionService orgPermissionService;
@@ -110,7 +115,7 @@ public class UserPermissionServiceImpl
     public List<UserModel> listUsersByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
 
-        List<UserModel> users = getModelMapper().listUsersByTargetId(targetId);
+        List<UserModel> users = getUsersByTargetId(targetId);
         users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
@@ -254,5 +259,23 @@ public class UserPermissionServiceImpl
         List<TargetModel> menus = listMenusByLoginUser();
         List<String> menuIdents = menus.stream().map(m -> m.getIdentifier()).collect(Collectors.toList());
         return menuIdents;
+    }
+
+    public List<UserModel> getUsersByTargetId(String targetId) {
+        HumanCondition permissionCondition = new HumanCondition()
+                .filterEqual(UserPermissionModel::getTarget, targetId)
+                .select(UserPermissionModel::getOwner);
+        List<UserPermissionModel> userPermissionModels = getModelMapper().list(permissionCondition);
+        List<String> owners = userPermissionModels.stream()
+                .map(UserPermissionModel::getOwner)
+                .collect(Collectors.toList());
+        if (CollUtil.isEmpty(owners)) {
+            return new ArrayList<>();
+        }
+        HumanCondition userCondition = new HumanCondition()
+                .filterIn(UserModel::getId, owners.toArray())
+                .distinct();
+        List<UserModel> userModels = userMapper.list(userCondition);
+        return userModels;
     }
 }

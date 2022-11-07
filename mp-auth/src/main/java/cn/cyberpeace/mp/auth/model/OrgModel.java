@@ -22,7 +22,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_auth_org")
-@Deprecated
 public class OrgModel extends BaseModel {
 
     @ApiModelProperty(value = "租户")

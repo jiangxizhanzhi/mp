@@ -41,7 +41,7 @@
         left join mp_auth_url_ac_target mauat
         on ua.group = mauat.group
         where ua.is_pattern = 1
-        group by ua.group
+        group by ua.url
     </select>
 
 
@@ -63,7 +63,7 @@
                 </foreach>
             </if>
         </where>
-        group by ua.group
+        group by ua.id
     </select>
 
     <select id="listByTargetIds" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
@@ -84,7 +84,7 @@
                 </foreach>
             </if>
         </where>
-        group by ua.group
+        group by ua.id
     </select>
 
 </mapper>

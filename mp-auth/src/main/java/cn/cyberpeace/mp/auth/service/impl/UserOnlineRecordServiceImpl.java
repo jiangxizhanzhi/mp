@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineCntBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineRecordSummaryBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
@@ -14,10 +14,13 @@ import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
@@ -30,12 +33,9 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -87,14 +87,14 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
         List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();
         if (CollectionUtil.isEmpty(summaryDtos)) {
             return pageInfo;
         }
 
-        Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
+        Map<String, Integer> heatbeatCntMap = new HashMap<>();
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             if (Objects.nonNull(entry.getKey().getId()) && Objects.nonNull(entry.getValue())) {
                 heatbeatCntMap.put(entry.getKey().getId(), entry.getValue().size());
@@ -212,14 +212,8 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
-        Integer cnt = getModelMapper().getOnlinedUserCntByPeriod(startTime, endTime);
+        Integer cnt = findOnlineUserCntByPeriod(startTime, endTime);
         return cnt;
-    }
-
-    @Override
-    public List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlineHistoryTrackByUser(userId, startTime, endTime);
-        return list;
     }
 
     @Override
@@ -237,6 +231,89 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         userOnlineCntBo.setTotalUser(totalUser);
 
         return userOnlineCntBo;
+    }
+
+    private Integer findOnlineUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        HumanCondition notOnlineCondition = new HumanCondition()
+                .filterOrStart()
+                .orGreaterThanOrEqual(UserOnlineRecordModel::getStartTime, endTime)
+                .orLessThanOrEqual(UserOnlineRecordModel::getEndTime, startTime)
+                .filterOrEnd()
+                .select(UserOnlineRecordModel::getPk);
+        List<UserOnlineRecordModel> notOnlines = getModelMapper().list(notOnlineCondition);
+        if (CollUtil.isEmpty(notOnlines)) {
+            UserOnlineRecordModel model = new UserOnlineRecordModel();
+            model.setPk(-1);
+            notOnlines.add(model);
+        }
+        List<Integer> notOnlinePks = notOnlines.stream()
+                .map(UserOnlineRecordModel::getPk)
+                .collect(Collectors.toList());
+        HumanCondition onlineCondition = new HumanCondition()
+                .filterNotIn(UserOnlineRecordModel::getPk, notOnlinePks.toArray())
+                .select(UserOnlineRecordModel::getPk)
+                .groupBy(UserOnlineRecordModel::getUser);
+        List<UserOnlineRecordModel> onlines = getModelMapper().list(onlineCondition);
+        if (CollUtil.isEmpty(onlines)) {
+            return 0;
+        }
+        List<Integer> onlinePks = onlines.stream().map(UserOnlineRecordModel::getPk).collect(Collectors.toList());
+        HumanCondition countCondition = new HumanCondition()
+                .filterIn(UserOnlineRecordModel::getPk, onlinePks.toArray())
+                .selectAs(Count.f(UserOnlineRecordModel::getUser), "cnt");
+        Map<String, Object> countMap = getModelMapper().originFirst(countCondition);
+        Integer cnt = ((Long) countMap.get("cnt")).intValue();
+        return cnt;
+    }
+
+    private List<UserOnlineRecordSummaryBo> listRecordSummary(List<String> userIds,
+                                                             List<String> priorityUserIds,
+                                                             LocalDateTime startTime,
+                                                             LocalDateTime endTime) {
+        HumanCondition condition = new HumanCondition()
+                .link(UserOnlineRecordModel.class, UserModel.class)
+                .filterLink(UserOnlineRecordModel.class, UserOnlineRecordModel::getUser, UserModel.class, UserModel::getId);
+        if (CollUtil.isNotEmpty(userIds)) {
+            condition.currentLink(UserOnlineRecordModel.class)
+                    .filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+        }
+        condition.currentLink(UserOnlineRecordModel.class)
+                .select(UserOnlineRecordModel::getUser)
+                .selectAs(Sum.f(UserOnlineRecordModel::getDurationMinutes), "total_online_minutes")
+                .selectAs(Sum.f(UserOnlineRecordModel::getStatus).addCalc(s -> s + " = 0"), "unCompleteCnt")
+                .currentLink(UserModel.class)
+                .select(UserModel::getUsername, UserModel::getName)
+                .currentLink(UserOnlineRecordModel.class)
+                .groupBy(UserOnlineRecordModel::getUser);
+        List<Map<String, Object>> originList = getModelMapper().originList(condition);
+        List<UserOnlineRecordSummaryBo> summaryBos = new ArrayList<>(originList.size());
+        PriorityQueue<UserOnlineRecordSummaryBo> summaryBoQueue = new PriorityQueue<>((o1, o2) -> {
+            if (o1.getUnCompleteCnt() == o2.getUnCompleteCnt()) {
+                if (
+                        (priorityUserIds.contains(o1.getUser()) && priorityUserIds.contains(o2.getUser())) ||
+                                (!priorityUserIds.contains(o1.getUser()) && !priorityUserIds.contains(o2.getUser()))
+                ) {
+                    return -Long.compare(o1.getTotalOnlineMinutes(), o2.getTotalOnlineMinutes());
+                }
+                return priorityUserIds.contains(o1.getUser()) ? -1 : 1;
+            }
+            return -Integer.compare(o1.getUnCompleteCnt(), o2.getUnCompleteCnt());
+        });
+        originList.forEach(map -> {
+            UserOnlineRecordSummaryBo bo = new UserOnlineRecordSummaryBo();
+            bo.setName(((String) map.get("name")));
+            bo.setUnCompleteCnt(((BigDecimal) map.get("unCompleteCnt")).intValue());
+            bo.setUser(((String) map.get("user")));
+            bo.setTotalOnlineMinutes(((BigDecimal) map.get("total_online_minutes")).longValue());
+            bo.setUsername(((String) map.get("username")));
+            summaryBoQueue.add(bo);
+        });
+        while (CollUtil.isNotEmpty(summaryBoQueue)) {
+            summaryBos.add(summaryBoQueue.poll());
+        }
+
+        return summaryBos;
+
     }
 
 }

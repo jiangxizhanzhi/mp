@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;
+import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgPermissionFields;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -43,6 +46,8 @@ public class OrgPermissionServiceImpl
     @Autowired
     private OrgPermissionService orgPermissionService;
 
+    @Autowired
+    private TargetMapper targetMapper;
 
     @Autowired
     public OrgPermissionServiceImpl(OrgPermissionMapper modelMapper, OrgPermissionFields modelFields) {
@@ -53,12 +58,21 @@ public class OrgPermissionServiceImpl
     @Override
     public Set<TargetModel> listTargetsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-
-//        var objResult = orgService.get(orgId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
-//        }
-        List<TargetModel> targets = getModelMapper().listByOrgId(orgId);
+        HumanCondition orgPermissionCondition = new HumanCondition()
+                .filterEqual(OrgPermissionModel::getOwner, orgId)
+                .select(OrgPermissionModel::getTarget);
+        List<OrgPermissionModel> orgPermissionModels = getModelMapper().list(orgPermissionCondition);
+        List<String> targetIds = orgPermissionModels.stream()
+                .map(OrgPermissionModel::getTarget)
+                .collect(Collectors.toList());
+        if (CollUtil.isEmpty(targetIds)) {
+            return new HashSet<>();
+        }
+        HumanCondition targetCondition = new HumanCondition()
+                .filterIn(TargetModel::getId, targetIds.toArray())
+                .filterEqual(TargetModel::getVisible, 1)
+                .distinct();
+        List<TargetModel> targets = targetMapper.list(targetCondition);
         return new HashSet<>(targets);
     }
 
