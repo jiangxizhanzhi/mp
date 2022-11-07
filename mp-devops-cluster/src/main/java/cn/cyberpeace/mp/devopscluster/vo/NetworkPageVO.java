@@ -44,6 +44,21 @@ public class NetworkPageVO extends BaseVO {
     @ApiModelProperty("IP地址")
     private List<Subnet> subnets;
 
+    @ApiModelProperty("下行带宽(Kb/s)")
+    private String downloadSpeed;
+
+    @ApiModelProperty("上行带宽(Kb/s)")
+    private String uploadSpeed;
+
+    @ApiModelProperty("剩余IP数")
+    private Integer freeIps;
+
+    @ApiModelProperty("已使用IP数")
+    private Integer usedIps;
+
+    @ApiModelProperty("节点个数")
+    private Integer nodeCnt;
+
     /**
      * 创建时间
      */
