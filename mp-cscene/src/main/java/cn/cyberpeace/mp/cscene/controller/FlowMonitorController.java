@@ -223,8 +223,8 @@ public class FlowMonitorController {
 
     @ApiOperation(value = "导出全部流量文件")
     @GetMapping("/export")
-    public void export(String sceneId, HttpServletResponse response) {
-        flowMonitorService.export(sceneId, response);
+    public void export(String csceneId, HttpServletResponse response) {
+        flowMonitorService.export(csceneId, response);
     }
     
 }

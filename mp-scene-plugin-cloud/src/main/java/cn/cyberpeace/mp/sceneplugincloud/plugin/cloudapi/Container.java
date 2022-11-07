@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
@@ -216,14 +217,12 @@ public class Container extends CloudClient {
      * @param filepath
      * @return
      */
-    public boolean retrieveFile(String containerId, String filepath) {
+    public HttpResult retrieveFile(String containerId, String filepath) {
         var data = new ContainerRetrieveParam();
         data.setContainerPath(filepath);
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
-        CloudResponse<FileInputStream> result = cloudGet(requestUrl, data, new TypeReference<CloudResponse<FileInputStream>>() {}, true);
-        Object object = result.getData();
         
-        return true;
+        return cloudDownload(requestUrl, data);
     }
     
 }

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -54,6 +55,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -612,39 +614,52 @@ public class FlowMonitorService {
      * @param sceneId
      * @param response
      */
-    public void export(String sceneId, HttpServletResponse response) {
-//        // csceneId -> sceneId 
-//        sceneId = csceneCommonService.translateSceneId(sceneId);
-//        if(StringUtils.isEmpty(sceneId)) {
-//            log.error("find no sceneId by csceneId {}", sceneId);
-//            return;
-//        }
-//        
-//        // sceneId -> container name
-//        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
-//        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
-//        if(CollectionUtils.isEmpty(flowCollectors)) {
-//            log.error("find no flowCollectors by sceneId {}", sceneId);
-//            return;
-//        }
-//        String containName = flowCollectors.get(0);
-        
-        String containName = "MP_SCENE_ac9ea14affbb418a923dba589c8bd8db";
+    public void export(String csceneId, HttpServletResponse response) {
+        // csceneId -> sceneId
+        String sceneId = csceneCommonService.translateSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            log.error("find no sceneId by csceneId {}", sceneId);
+            return;
+        }
+
+        // sceneId -> container name
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isEmpty(flowCollectors)) {
+            log.error("find no flowCollectors by sceneId {}", sceneId);
+            return;
+        }
+        String containName = flowCollectors.get(0);
+
+        // String containName = "MP_SCENE_ac9ea14affbb418a923dba589c8bd8db";
         // containerName -> containerId
         Container container = new Container();
         String containerId = container.getContainerIdByName(containName);
-        if(containerId == null) {
+        if (containerId == null) {
             log.error("find no containerId by containName {}", containName);
             return;
         }
-        
+
         // execute cmd
-        // String zipFilePath = "/opt/arkime/flow.zip";
-        String zipFilePath = "/opt/flag.txt";
-        // ContainerExecuteResult result = container.executeCommand(containerId, String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
-        container.retrieveFile(containerId, zipFilePath);
-        
-        // ResponseUtil.exportFile(null, null, response);
+        String zipFilePath = "/opt/arkime/flow.zip";
+        ContainerExecuteResult result = container.executeCommand(containerId,
+                String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
+        if (result.getExitCode() != 0) {
+            log.error("exec zip cmd fail, exit code {}, msg {}", result.getExitCode(), result.getOutput());
+            return;
+        }
+
+        HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+        if (httpResult.getException() != null) {
+            return;
+        }
+
+        try {
+            ResponseUtil.transferStream(zipFilePath.substring(zipFilePath.lastIndexOf('/') + 1),
+                    httpResult.getResponse().getEntity().getContent(), response);
+        } catch (IOException e) {
+            log.error("export flow file {} fail, error: {}", zipFilePath, e);
+        }
     }
 
 }
