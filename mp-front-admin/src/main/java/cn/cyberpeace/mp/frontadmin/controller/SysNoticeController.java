@@ -16,13 +16,11 @@ import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
 import cn.cyberpeace.mp.frontadmin.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
-import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.collection.CollUtil;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -110,9 +108,7 @@ public class SysNoticeController {
     @GetMapping("/page")
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo pageInfo = noticeService.page(pageRequest);
-
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        return noticeService.page(pageRequest);
     }
 
 

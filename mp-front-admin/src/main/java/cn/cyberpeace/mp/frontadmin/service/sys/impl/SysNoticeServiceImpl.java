@@ -330,18 +330,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     @Override
-    public PageInfo<SysNoticeModel> page(SysNoticePageRequest req) {
+    public ServiceResult page(SysNoticePageRequest req) {
         List<String> ids = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             ids = Arrays.asList(req.getIds());
         }
 
-        PageHelper.startPage(req.getPage(), req.getPageSize());
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null);
-        PageInfo pageInfo = new PageInfo(notices);
-        convert2NoticeDtoPageInfo(pageInfo, false);
-        return pageInfo;
+        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null, req.getPage(), req.getPageSize());
+        return result;
     }
 
     @Override
@@ -413,7 +410,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 管理员，查看所有有阅读权限的公告消息
         if (isAdmin) {
-            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
+            int totalCnt = getUnreadCountByCurrentAdminUser(currentUser.getId());
             return totalCnt;
         }
 
@@ -598,5 +595,126 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             return noticeDto;
         }).collect(Collectors.toList());
         return noticeDtos;
+    }
+
+    public int getUnreadCountByCurrentAdminUser(String userId) {
+        Set<String> noticeIds = new HashSet<>();
+        HumanCondition orgNoticeCond = new HumanCondition()
+                .select(SysNoticeOrgModel::getNoticeId);
+        List<SysNoticeOrgModel> orgNotices = noticeOrgMapper.list(orgNoticeCond);
+        orgNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        HumanCondition roleNoticeCond = new HumanCondition()
+                .select(SysNoticeRoleModel::getNoticeId);
+        List<SysNoticeRoleModel> roleNotices = noticeRoleMapper.list(roleNoticeCond);
+        roleNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        HumanCondition userNoticeCond = new HumanCondition()
+                .filterEqual(SysNoticeUserModel::getUser, userId)
+                .select(SysNoticeUserModel::getNoticeId);
+        List<SysNoticeUserModel> userNotices = noticeUserMapper.list(userNoticeCond);
+        userNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+
+        HumanCondition readNoticeCond = new HumanCondition()
+                .filterEqual(SysNoticeReadModel::getUser, userId)
+                .filterOrStart()
+                .orEqual(SysNoticeReadModel::getIsNeedPush, 0)
+                .orEqual(SysNoticeReadModel::getIsReaded, 1)
+                .filterOrEnd()
+                .select(SysNoticeReadModel::getNoticeId);
+        List<SysNoticeReadModel> notPushNotices = noticeReadMapper.list(readNoticeCond);
+        HumanCondition noticeCond = new HumanCondition();
+        if (CollUtil.isEmpty(noticeIds)) {
+            return 0;
+        }
+        noticeCond.filterIn(SysNoticeModel::getId, noticeIds.toArray());
+        if (CollUtil.isNotEmpty(notPushNotices)) {
+            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
+        }
+        int total = getModelMapper().total(noticeCond);
+        return total;
+    }
+
+    public ListObjServiceResult listNotices(String title, List<String> ids, List<String> orgs, List<String> roles, String publisher, Integer type, Integer page, Integer pageSize) {
+        HumanCondition publicCondition = new HumanCondition()
+                .filterEqual(SysNoticeModel::getIsPublic, 1)
+                .select(SysNoticeModel::getId)
+                .distinct();
+        List<SysNoticeModel> publicModels = getModelMapper().list(publicCondition);
+        List<String> publicNoticeIds = publicModels.stream().map(SysNoticeModel::getId).collect(Collectors.toList());
+
+        HumanCondition condition = new HumanCondition();
+        if (CollUtil.isNotEmpty(ids)) {
+            condition.filterIn(SysNoticeModel::getId, ids.toArray());
+        }
+
+        List<String> roleOrOrgNoticeIds = new ArrayList<>();
+        if (CollUtil.isNotEmpty(orgs) && CollUtil.isNotEmpty(roles)) {
+            HumanCondition orgCondition = new HumanCondition()
+                    .filterIn(SysNoticeOrgModel::getOrg, orgs.toArray())
+                    .select(SysNoticeOrgModel::getNoticeId)
+                    .distinct();
+            List<SysNoticeOrgModel> noticeOrgModelList = noticeOrgMapper.list(orgCondition);
+            roleOrOrgNoticeIds.addAll(noticeOrgModelList.stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toList()));
+
+            HumanCondition roleCondition = new HumanCondition()
+                    .filterIn(SysNoticeRoleModel::getRole, roles.toArray())
+                    .select(SysNoticeRoleModel::getNoticeId)
+                    .distinct();
+            List<SysNoticeRoleModel> noticeRoleModelList = noticeRoleMapper.list(roleCondition);
+            roleOrOrgNoticeIds.addAll(noticeRoleModelList.stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toList()));
+            if (CollUtil.isEmpty(roleOrOrgNoticeIds)) {
+                roleOrOrgNoticeIds.add("");
+            }
+            condition.filterIn(SysNoticeModel::getId, roleOrOrgNoticeIds.toArray());
+        } else if (CollUtil.isNotEmpty(roles)) {
+            HumanCondition roleCondition = new HumanCondition()
+                    .filterIn(SysNoticeRoleModel::getRole, roles.toArray())
+                    .select(SysNoticeRoleModel::getNoticeId)
+                    .distinct();
+            List<SysNoticeRoleModel> noticeRoleModelList = noticeRoleMapper.list(roleCondition);
+            roleOrOrgNoticeIds.addAll(noticeRoleModelList.stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toList()));
+            if (CollUtil.isEmpty(roleOrOrgNoticeIds)) {
+                roleOrOrgNoticeIds.add("");
+            }
+            condition.filterIn(SysNoticeModel::getId, roleOrOrgNoticeIds.toArray());
+        } else if (CollUtil.isNotEmpty(orgs)) {
+            HumanCondition orgCondition = new HumanCondition()
+                    .filterIn(SysNoticeOrgModel::getOrg, orgs.toArray())
+                    .select(SysNoticeOrgModel::getNoticeId)
+                    .distinct();
+            List<SysNoticeOrgModel> noticeOrgModelList = noticeOrgMapper.list(orgCondition);
+            roleOrOrgNoticeIds.addAll(noticeOrgModelList.stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toList()));
+            if (CollUtil.isEmpty(roleOrOrgNoticeIds)) {
+                roleOrOrgNoticeIds.add("");
+            }
+            condition.filterIn(SysNoticeModel::getId, roleOrOrgNoticeIds.toArray());
+        }
+
+        if (StringUtils.isNotBlank(publisher)) {
+            condition.filterEqual(SysNoticeModel::getPublisher, publisher);
+        }
+        if (Objects.nonNull(type)) {
+            condition.filterEqual(SysNoticeModel::getType, type);
+        }
+        if (StringUtils.isNotBlank(title)) {
+            condition.filterContains(SysNoticeModel::getTitle, title);
+        }
+        if (StringUtils.isNotBlank(title) || CollUtil.isNotEmpty(ids) || CollUtil.isNotEmpty(orgs) || CollUtil.isNotEmpty(roles) || StringUtils.isNotBlank(publisher) || Objects.nonNull(type)) {
+            condition.filterNotEqual(SysNoticeModel::getIsPublic, 1);
+        }
+        condition.select(SysNoticeModel::getId).distinct();
+        List<String> noticeIds = getModelMapper().list(condition).stream().map(SysNoticeModel::getId).collect(Collectors.toList());
+        noticeIds.addAll(publicNoticeIds);
+
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(SysNoticeModel::getId, noticeIds.toArray())
+                .pagination(page, pageSize)
+                .orderBy(SysNoticeModel::getTop, true)
+                .orderBy(SysNoticeModel::getPk, true);
+        int total = getModelMapper().total(humanCondition);
+        List<SysNoticeModel> models = getModelMapper().list(humanCondition);
+        List<SysNoticeDto> dtos = convert2NoticeDto(models, false);
+
+        ListObjServiceResult result = new ListObjServiceResult(new ListObjResult(dtos, total).asResult()).asResult();
+        return result;
     }
 }

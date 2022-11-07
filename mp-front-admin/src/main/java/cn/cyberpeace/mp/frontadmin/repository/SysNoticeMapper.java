@@ -19,9 +19,9 @@ import java.util.List;
 @ModelClass(SysNoticeModel.class)
 public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
 
-    List<SysNoticeModel> listNotices(@Param("title") String title, @Param("ids") List<String> ids,
-                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
-                                     @Param("publisher") String publisher, @Param("type") Integer type);
+//    List<SysNoticeModel> listNotices(@Param("title") String title, @Param("ids") List<String> ids,
+//                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
+//                                     @Param("publisher") String publisher, @Param("type") Integer type);
 
 
     /**
@@ -30,7 +30,7 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      * @param userId
      * @return
      */
-    List<SysNoticeModel> listNoticeMessageByCurrentAdminUser(@Param("userId") String userId);
+//    List<SysNoticeModel> listNoticeMessageByCurrentAdminUser(@Param("userId") String userId);
 
     /**
      * 管理员消息推送列表总数
@@ -38,7 +38,7 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      * @param userId
      * @return
      */
-    int getUnreadCountByCurrentAdminUser(@Param("userId") String userId);
+//    int getUnreadCountByCurrentAdminUser(@Param("userId") String userId);
 
 
     /**
