@@ -453,6 +453,9 @@ public class FlowQueryService {
 
             for (CountBO bo : value) {
                 String targetName = getNameByIp(targetFields, bo.getKey());
+                if(StringUtils.isEmpty(targetName)) {
+                    continue;
+                }
                 TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
                         .orElse(null);
                 if (topEntry == null) {
