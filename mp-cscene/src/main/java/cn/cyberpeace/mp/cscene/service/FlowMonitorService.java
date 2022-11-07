@@ -25,10 +25,13 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.cscene.util.ResponseUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
@@ -62,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Description:
@@ -601,5 +606,45 @@ public class FlowMonitorService {
         return flowTrendMap.get(closestTime);
     }
 
+    /**
+     * 导出全部流量文件
+     * 
+     * @param sceneId
+     * @param response
+     */
+    public void export(String sceneId, HttpServletResponse response) {
+//        // csceneId -> sceneId 
+//        sceneId = csceneCommonService.translateSceneId(sceneId);
+//        if(StringUtils.isEmpty(sceneId)) {
+//            log.error("find no sceneId by csceneId {}", sceneId);
+//            return;
+//        }
+//        
+//        // sceneId -> container name
+//        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
+//        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+//        if(CollectionUtils.isEmpty(flowCollectors)) {
+//            log.error("find no flowCollectors by sceneId {}", sceneId);
+//            return;
+//        }
+//        String containName = flowCollectors.get(0);
+        
+        String containName = "MP_SCENE_ac9ea14affbb418a923dba589c8bd8db";
+        // containerName -> containerId
+        Container container = new Container();
+        String containerId = container.getContainerIdByName(containName);
+        if(containerId == null) {
+            log.error("find no containerId by containName {}", containName);
+            return;
+        }
+        
+        // execute cmd
+        // String zipFilePath = "/opt/arkime/flow.zip";
+        String zipFilePath = "/opt/flag.txt";
+        // ContainerExecuteResult result = container.executeCommand(containerId, String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
+        container.retrieveFile(containerId, zipFilePath);
+        
+        // ResponseUtil.exportFile(null, null, response);
+    }
 
 }
