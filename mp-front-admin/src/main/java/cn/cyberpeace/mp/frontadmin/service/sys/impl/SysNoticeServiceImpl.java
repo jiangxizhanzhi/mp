@@ -621,13 +621,14 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
                 .filterOrEnd()
                 .select(SysNoticeReadModel::getNoticeId);
         List<SysNoticeReadModel> notPushNotices = noticeReadMapper.list(readNoticeCond);
+        List<String> notPushNoticeIds = notPushNotices.stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toList());
         HumanCondition noticeCond = new HumanCondition();
         if (CollUtil.isEmpty(noticeIds)) {
             return 0;
         }
         noticeCond.filterIn(SysNoticeModel::getId, noticeIds.toArray());
-        if (CollUtil.isNotEmpty(notPushNotices)) {
-            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
+        if (CollUtil.isNotEmpty(notPushNoticeIds)) {
+            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNoticeIds.toArray());
         }
         int total = getModelMapper().total(noticeCond);
         return total;
