@@ -13,10 +13,13 @@ import lombok.Setter;
 public class TestStatusResult extends IxiaResponse {
     private Integer progress;
     private Integer time;
-
+    private Values values;
     @Getter
     @Setter
-    private static class values {
+    public static class Values {
+        private String tcpClientEstablished;
+        private String superflowTxFrameData ;
+/*
         private String sctpFlowsConcurrent;
         private String timetonext;
         private String tcpServerEstablished;
@@ -87,31 +90,6 @@ public class TestStatusResult extends IxiaResponse {
         private String appIncomplete;
         private String superflowIterations;
         private String tcpFlowsConcurrent;
-
-    }/*
-                "ethRxFrames": "2437",
-                "totalFlowsConcurrent": "0",
-                "tcpRxFrameDataRate": "0",
-                "totalFalsePositiveBlocked": "0",
-                "txFrames": "2441",
-                "componentActiveFlowsConcurrent": "0",
-                "tcpClientStateSynSent": "0",
-                "appUnsuccessful": "0",
-                "tcpServerCloseRate": "0",
-                "tcpAttempted": "61",
-                "sslEncryptedDataRate": "0",
-                "superflowRxFrameDataRate": "0",
-                "tcpClientEstablished": "61",
-                "totalErrored": "0",
-                "appServerDataNotValid": "0",
-                "sslDecryptedDataRate": "0",
-                "tcpServerStateTimeWait": "0",
-                "sslHandshakesAbortedRate": "0",
-                "tcpClientClosedByReset": "0",
-                "tcpServerClosed": "61",
-                "appSuccessful": "122",
-                "udpFlowsConcurrent": "0"
-    },
-        "testStuck": null
-    }*/
+*/
+    }
 }

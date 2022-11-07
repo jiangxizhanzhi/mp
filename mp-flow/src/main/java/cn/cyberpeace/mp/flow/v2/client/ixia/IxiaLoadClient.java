@@ -1,7 +1,14 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
+import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.distribution.BinomialDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description
@@ -34,8 +41,8 @@ public class IxiaLoadClient {
         log.info("Strain load response:{}", response);
     }
 
-    public void addPhase(IxiaPhaseData phaseData) {
-        var response = ixiaHttpClient.ixiaPut(IxiaUrlConstant.ADD_PHASE, phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+    public void addPhase(IxiaCreatePhaseData createPhaseData) {
+        var response = ixiaHttpClient.ixiaPut(IxiaUrlConstant.ADD_PHASE, createPhaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Add phase response:{}", response);
     }
@@ -47,7 +54,7 @@ public class IxiaLoadClient {
     }
 
     public void changePhase(IxiaPhaseData phaseData, Integer index) {
-        var response = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.CHANGE_PHASE + index + "}", phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        var response = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.CHANGE_PHASE + index + "%7D", phaseData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Change phase response:{}", response);
     }

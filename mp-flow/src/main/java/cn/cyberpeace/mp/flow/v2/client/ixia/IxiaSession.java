@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.distribution.BinomialDistribution;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,12 +169,12 @@ public class IxiaSession {
         return createNeighborHoodData.getName();
     }
 
-    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas) {
+    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas, String loadName) {
         // 创建TEST
         BaseCreateData baseCreateData = new BaseCreateData();
         this.testClient.createTest(baseCreateData);
         // 向TEST中添加neighborhood
-//        this.testClient.configNeighborhood(neighborhood);
+        this.testClient.configNeighborhood(neighborhood);
         // 向TEST中添加Application Simular
         AddAppSimToTestData addApplicationProfileToTestData = new AddAppSimToTestData();
         addApplicationProfileToTestData.setName(profileName);
@@ -190,9 +193,9 @@ public class IxiaSession {
         AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
         addStrikeListToSecurityData.setAttackPlan(strikeListName);
         addStrikeListToSecurityData.setAttackProfile("Browser: Low Evasion");
-        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+//        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
         // 向TEST中添加pcap包
-//        this.testClient.configRecreates(recreateDatas);
+        this.testClient.configRecreates(recreateDatas, loadName);
         // 保存TEST
         SaveTestData saveTestData = new SaveTestData();
         saveTestData.setForce(true);
@@ -219,7 +222,7 @@ public class IxiaSession {
         return saveStrikeListData.getName();
     }
 
-    public void createLoad(List<String> loadList) {
+    public String createLoad(List<TrexClient.LoadInfo> loadList) {
         CreateLoadData createLoadData = new CreateLoadData();
         createLoadData.setLoadProfile(TextUtils.uuid());
         this.loadClient.createLoad(createLoadData);
@@ -234,25 +237,35 @@ public class IxiaSession {
         }
 
         this.loadClient.strainLoad(baseCreateData);
-        IxiaPhaseData ixiaPhaseData = new IxiaPhaseData();
+        IxiaCreatePhaseData ixiaCreatePhaseData = new IxiaCreatePhaseData();
+        ixiaCreatePhaseData.setPhaseId("0");
+        ixiaCreatePhaseData.setType("up");
+        ixiaCreatePhaseData.setDuration(1);
         for (int i = 0; i < loadList.size(); i++) {
-
-            this.loadClient.addPhase(ixiaPhaseData);
+            this.loadClient.addPhase(ixiaCreatePhaseData);
         }
         this.loadClient.saveLoad();
 
         this.loadClient.strainLoad(baseCreateData);
         IxiaPhaseData ixiaPhaseData1 = new IxiaPhaseData();
         for (int i = 0; i < loadList.size(); i++) {
-
+            ixiaPhaseData1.setRateDistunit("fps");
+            ixiaPhaseData1.setSessionsmaxPerSecond("1000");
+            ixiaPhaseData1.setSessionsmax("1500000");
+            ixiaPhaseData1.setRateDistscope("per_if");
+            ixiaPhaseData1.setRateDisttype("constant");
+            ixiaPhaseData1.setRampDiststeadyBehavior("cycle");
+            ixiaPhaseData1.setRateDistmin(String.valueOf(loadList.get(i).getBandwidth()));
             this.loadClient.changePhase(ixiaPhaseData1, i);
         }
         this.loadClient.saveLoad();
+
+        return createLoadData.getLoadProfile();
     }
 
     public StartTestResult startTest(String name) {
         RunTestData runTestData = new RunTestData();
-        runTestData.setGroup("1");
+        runTestData.setGroup("3");
         runTestData.setModelname(name);
         runTestData.setAllowMalware(true);
         return this.testClient.startTest(runTestData);
@@ -268,5 +281,27 @@ public class IxiaSession {
 
     public void close() {
         this.loginClient.logout();
+    }
+
+    public List<TrexClient.LoadInfo> calculateLoad(int time, double maxLoad, String loadMode) {
+        List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
+        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals("binomial")) {
+            binomialDistributionLoad(loadInfos, time, 0.5, maxLoad);
+        }
+        return loadInfos;
+    }
+
+    private void binomialDistributionLoad(List<TrexClient.LoadInfo> loadInfos, int time, double p, double maxLoad) {
+        BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
+        double proportion = maxLoad / binomialDistribution.probability(time / 2);
+        for (int i = 1; i <= time; i++) {
+            TrexClient.LoadInfo loadInfo = new TrexClient.LoadInfo();
+            loadInfo.setBandwidth((int) (binomialDistribution.probability(i) * proportion));
+            loadInfo.setTime(i);
+            if (loadInfo.getBandwidth() <= 0) {
+                loadInfo.setBandwidth(1);
+            }
+            loadInfos.add(loadInfo);
+        }
     }
 }

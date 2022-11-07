@@ -15,18 +15,17 @@ import org.apache.commons.lang3.StringUtils;
 @Setter
 public class IxiaPhaseData implements HttpData {
     private String rateDistunit;
-    private Integer duration;
     private String sessionsmaxPerSecond;
     private String sessionsmax;
     private String rateDistscope;
     private String rateDisttype;
-    private String type;
-    private String phaseId;
+    private String rampDiststeadyBehavior;
     private String rateDistmin;
 
     @Override
     public String toContent() {
         String content = StringUtils.replace(JsonUtils.stringify(this), "rateDist", "rateDist.");
-        return StringUtils.replace(content, "sessions", "sessions.");
+        String content1 = StringUtils.replace(content, "sessions", "sessions.");
+        return StringUtils.replace(content1, "rampDist", "rampDist.");
     }
 }

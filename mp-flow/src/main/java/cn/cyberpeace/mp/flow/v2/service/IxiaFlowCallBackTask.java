@@ -20,9 +20,10 @@ public class IxiaFlowCallBackTask implements FlowCallBackTask {
     private FlowTaskRecordBO flowTaskRecordBO;
     private IxiaSession ixiaSession;
     private Integer runid;
-    public IxiaFlowCallBackTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+    public IxiaFlowCallBackTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO, Integer runid) {
         this.flowTaskRecordBO = flowTaskRecordBO;
         this.ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        this.runid = runid;
     }
 
     @Override
@@ -40,9 +41,9 @@ public class IxiaFlowCallBackTask implements FlowCallBackTask {
         getTestStateData.setNumDataPoints(1);
         getTestStateData.setNumSeconds(-1);
         ixiaSession.open();
-//        var res = ixiaSession.getTestState(getTestStateData);
-//        ixiaSession.close();
-        recordModel.setStatus(1);
+        var res = ixiaSession.getTestState(getTestStateData);
+        ixiaSession.close();
+        recordModel.setStatus(this.runid);
         recordMapper.update(recordModel);
 
         // 查询任务状态 包括流量、速率、包数量、tcp数量等
@@ -51,10 +52,10 @@ public class IxiaFlowCallBackTask implements FlowCallBackTask {
         flowTaskCountModel.setFlowTaskRecordId(flowTaskRecordBO.getId());
         flowTaskCountModel.setFlowGeneratorId(flowTaskRecordBO.getFlowGeneratorId());
         flowTaskCountModel.setBandwidth(1L);
-        flowTaskCountModel.setTcpConnectTry(1L);
-        flowTaskCountModel.setPackets(1L);
-        flowTaskCountModel.setTcpConnectSuccess(1L);
-//        flowTaskCountMapper.create(flowTaskCountModel);
+        flowTaskCountModel.setTcpConnectTry(Long.valueOf(res.getValues().getTcpClientEstablished()));
+        flowTaskCountModel.setPackets(Long.valueOf(res.getValues().getTcpClientEstablished()));
+        flowTaskCountModel.setTcpConnectSuccess(Long.valueOf(res.getProgress()));
+        flowTaskCountMapper.create(flowTaskCountModel);
         return false;
     }
 }

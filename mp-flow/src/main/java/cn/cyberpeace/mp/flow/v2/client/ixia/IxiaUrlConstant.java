@@ -44,7 +44,7 @@ public interface IxiaUrlConstant {
     String CREATE_LOAD = "/api/v2/core/loadProfile/operations/createNewCustom";
     String STRAIN_LOAD = "/api/v2/core/loadProfile/operations/load";
     String ADD_PHASE = "/api/v2/core/loadProfile/phase/add";
-    String DELETE_PHASE = "/api/v2/core/loadProfile/phase/{0}";
-    String CHANGE_PHASE = "/api/v2/core/loadProfile/phase/{";
+    String DELETE_PHASE = "/api/v2/core/loadProfile/phase/%7B0%7D";
+    String CHANGE_PHASE = "/api/v2/core/loadProfile/phase/%7B";
     String SAVE_LOAD = "/api/v2/core/loadProfile/operations/save";
 }

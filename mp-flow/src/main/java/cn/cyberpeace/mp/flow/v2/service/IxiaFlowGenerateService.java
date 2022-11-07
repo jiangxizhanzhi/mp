@@ -29,7 +29,7 @@ class IxiaFlowGenerateService implements IGenerateService {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
         String strikeListName = ixiaSession.createStrikeList();
-
+        String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(50, 100, "binomial"));
 //        String neighborhood = ixiaSession.createNeighborhood();
 
         // 取任务详情
@@ -61,9 +61,9 @@ class IxiaFlowGenerateService implements IGenerateService {
         // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
         ixiaSession.createCaptureManager(pcapFlows);
-        String testName = ixiaSession.createTest("neighborhood", "profileName", strikeListName, recreateDatas);
+        String testName = ixiaSession.createTest("zl_neigh", "profileName", strikeListName, recreateDatas, loadName);
 
-//        var res = ixiaSession.startTest(testName);
+        var res = ixiaSession.startTest(testName);
         ixiaSession.close();
 
 //        IxiaClient ixiaClient = new IxiaClient(generatorBO.getServer());
@@ -96,7 +96,7 @@ class IxiaFlowGenerateService implements IGenerateService {
         // 选择 pcap
         // 执行test
         // 登出
-        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO);
+        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
     }
 
     @Override
@@ -107,7 +107,7 @@ class IxiaFlowGenerateService implements IGenerateService {
         stopTestData.setRunid(flowTaskRecordBO.getStatus());
         ixiaSession.pauseTest(stopTestData);
         ixiaSession.close();
-        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO);
+        return null;
     }
 
     @Override

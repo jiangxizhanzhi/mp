@@ -56,7 +56,9 @@ public class IxiaTestClient {
         log.info("Add strike list to security response:{}", addStrikeListRes);
     }
 
-    public void configRecreates(List<PcapFlow.RecreateData> recreateDatas) {
+    public void configRecreates(List<PcapFlow.RecreateData> recreateDatas, String loadName) {
+        AddPcapToRecreateData.loadProfile loadProfile = new AddPcapToRecreateData.loadProfile();
+        loadProfile.setName(loadName);
         if (recreateDatas != null) {
             for (int i = 0; i < recreateDatas.size(); i++) {
                 AddRecreateToTestData addRecreateToTestData = new AddRecreateToTestData();
@@ -68,6 +70,7 @@ public class IxiaTestClient {
                 AddPcapToRecreateData addPcapToRecreateData = new AddPcapToRecreateData();
                 addPcapToRecreateData.setFile(recreateDatas.get(i).getName());
                 addPcapToRecreateData.setDelayStart(recreateDatas.get(i).getDelay());
+                addPcapToRecreateData.setLoadprofile(loadProfile);
                 var createRecreateRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.CREATE_RECREATE, addRecreateToTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
                 });
                 log.info("Create recreate completed:{}", createRecreateRes);
