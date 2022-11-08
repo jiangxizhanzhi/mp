@@ -420,6 +420,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 roleCondition.orderBy(order);
             }
         }
+        int total = userRoleMapper.total(roleCondition);
+        roleCondition.pagination(page, pageSize);
         List<RoleModel> roleModels = getModelMapper().list(roleCondition);
         List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 
@@ -431,8 +433,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 .select(UserRoleModel::getRole)
                 .selectAs(Count.f(UserRoleModel::getUser).distinct(), "userCnt")
                 .groupBy(UserRoleModel::getRole);
-        int total = userRoleMapper.total(userRoleCondition);
-        userRoleCondition.pagination(page, pageSize);
+
         List<Map<String, Object>> maps = userRoleMapper.originList(userRoleCondition);
         Map<String, Integer> roleCountMap = new HashMap<>(maps.size());
         maps.stream().forEach(map -> {
