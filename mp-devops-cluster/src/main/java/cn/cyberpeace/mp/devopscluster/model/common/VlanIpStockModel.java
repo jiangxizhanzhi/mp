@@ -29,7 +29,7 @@ public final class VlanIpStockModel implements Serializable {
     /**
      * 已使用IP
      */
-    private String usedIps;
+    private Integer usedIps;
 
 
 }
