@@ -11,13 +11,27 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.*;
-import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
+import cn.cyberpeace.mp.flow.enums.PortTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
+import cn.cyberpeace.mp.flow.model.FlowPortModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddPcapRequest;
+import cn.cyberpeace.mp.flow.request.AddScriptsRequest;
+import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddVmRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
@@ -28,9 +42,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
-import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -77,7 +91,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 保存流量发生平台任务
-     *
      * @param request
      * @param isUpdate
      */
@@ -163,7 +176,7 @@ public class AsyncPlatFlowTaskService {
                 if (isUpdate) {
                     // 更新
                     saveAppTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app/"
-                                    + flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(appTaskRequest));
+                            + flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(appTaskRequest));
                 } else {
                     // 新增
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
@@ -190,7 +203,7 @@ public class AsyncPlatFlowTaskService {
                 String saveStandTaskRsp = null;
                 if (isUpdate) {
                     saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/" +
-                                    flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(standTaskRequest));
+                            flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(standTaskRequest));
                 } else {
                     saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
                             JsonUtils.snakeStringify(standTaskRequest));
@@ -341,7 +354,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 异步删除流量发生平台任务
-     *
      * @param resourceType
      * @param flowTaskModels
      */
@@ -417,7 +429,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 异步新增虚拟机、添加网口
-     *
      */
     @Async
     public void addExecutor(String uuid, List<FlowNetworkInfo> networkInfos) {
@@ -527,7 +538,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 删除网口信息
-     *
      * @param flowActuatorModel
      * @param flowPortIds
      */
@@ -565,7 +575,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 查询执行器信息
-     *
      * @param actuatorId
      * @return
      */
@@ -882,7 +891,6 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 上传流量文件
-     *
      * @param flowInfoModel
      * @param flowTaskModel
      * @param addFlowTaskRequest

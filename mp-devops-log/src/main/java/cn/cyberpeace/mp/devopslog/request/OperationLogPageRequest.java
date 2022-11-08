@@ -11,11 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.Objects;
 
@@ -79,90 +74,4 @@ public class OperationLogPageRequest extends BasePageRequest{
     @ApiModelProperty(value = "排除某些操作类型 (例如不查询'登入'操作的日志，传参为0")
     private Integer[] opTypesIgnored;
 
-    /**
-     * 构造BoolQueryBuilder
-     * @return
-     */
-    public BoolQueryBuilder buildBoolQueryBuilder(){
-        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-//        String module = Objects.nonNull(this.getModule()) ? OpModuleEnums.fromValue(this.getModule()).getCode() : null;
-        Integer moduleID = this.getModule();
-        String userName = this.getUserName();
-        String userId = this.getUserId();
-//        String opType = Objects.nonNull(this.getOpType()) ? OpTypeEnums.fromValue(this.getOpType()).getCode() : null;
-        Integer opTypeID = this.getOpType();
-        String userNameOrOpTarget = this.getUserNameOrOpTarget();
-        if (Objects.nonNull(moduleID)) {
-            boolBuilder.must(QueryBuilders.termQuery("opModuleID", moduleID));
-        }
-        if (StringUtils.isNotBlank(userId)) {
-            boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));
-        }
-
-        if (StringUtils.isNotBlank(userName)) {
-            boolBuilder.must(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userName,"*")));
-        }
-        if (Objects.nonNull(opTypeID)) {
-            boolBuilder.must(QueryBuilders.termQuery("opTypeID", opTypeID));
-        }
-        if (StringUtils.isNotBlank(userNameOrOpTarget)){
-            BoolQueryBuilder orQuery = QueryBuilders.boolQuery();
-            orQuery.should(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userNameOrOpTarget,"*")));
-            orQuery.should(QueryBuilders.wildcardQuery("opTarget.keyword", concat("*",userNameOrOpTarget,"*")));
-            boolBuilder.must(orQuery);
-        }
-
-        if (Objects.nonNull(modulesIgnored) && modulesIgnored.length > 0) {
-            for (Integer m : modulesIgnored) {
-                String moduleIgnored = Objects.nonNull(m) ? OpModuleEnums.fromValue(m).getCode() : null;
-                boolBuilder.mustNot(QueryBuilders.termQuery("opModule.keyword", moduleIgnored));
-            }
-        }
-
-        if (Objects.nonNull(opTypesIgnored) && opTypesIgnored.length > 0) {
-            for (Integer t : opTypesIgnored) {
-                String typeIgnored = Objects.nonNull(t) ? OpTypeEnums.fromValue(t).getCode() : null;
-                boolBuilder.mustNot(QueryBuilders.termQuery("opType.keyword", typeIgnored));
-            }
-        }
-
-
-        return boolBuilder;
-    }
-
-    public RangeQueryBuilder buildRangeQueryBuilder() {
-        // f构建范围查询start_date <= opTime and opTime <= end_date
-        String opTime = BeanUtils.getBeanGetterFieldName(OperationLogModel::getOpTime);
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(opTime);
-        if (Objects.nonNull(this.getStartDate())) {
-            rangeQueryBuilder.gte(this.getStartDate());
-        }
-        if (Objects.nonNull(this.getEndDate())) {
-            rangeQueryBuilder.lte(this.getEndDate());
-        }
-        return rangeQueryBuilder;
-    }
-
-    /**
-     * 构建SearchSourceBuilder对象
-     * @return
-     */
-    public SearchSourceBuilder buildSearchSourceBuilder(){
-        return SearchSourceBuilder.searchSource()
-                .query(this.buildBoolQueryBuilder().must(this.buildRangeQueryBuilder()))
-                .sort("opTime", SortOrder.DESC)
-                .from((this.getPage() - 1) * this.getPerPage())
-                .size(this.getPerPage());
-    }
-
-    /**
-     * 拼接字符串
-     * @param prefix
-     * @param middle
-     * @param suffix
-     * @return
-     */
-    private String concat(String prefix,String middle,String suffix){
-        return prefix.concat(middle).concat(suffix);
-    }
 }

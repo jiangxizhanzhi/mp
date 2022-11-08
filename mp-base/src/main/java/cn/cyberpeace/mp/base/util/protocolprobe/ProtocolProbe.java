@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.util.protocolprobe;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.util.IOUtils;
 
 import javax.net.SocketFactory;
 import java.io.IOException;
@@ -57,11 +56,6 @@ public abstract class ProtocolProbe {
             log.error("failed to connect {}//{}:{}", protocol, host, port, e);
             return false;
         } finally {
-            try {
-                IOUtils.close(inputStream, outputStream, socket);
-            } catch (IOException e) {
-                log.error("failed to close socket resource,{}//{}:{}", protocol, host, port, e);
-            }
         }
     }
 

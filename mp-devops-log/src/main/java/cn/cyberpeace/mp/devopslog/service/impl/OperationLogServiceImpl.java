@@ -41,7 +41,6 @@ public class OperationLogServiceImpl implements OperationLogService {
         Locale locale = LocaleContextHolder.getLocale();
         String logDb = devopsLogConfig.getLogDb();
         if (LogDBEnums.ES.getCode().equals(logDb)) {
-            operateLogServiceFactory.create(request, locale);
         } else if (LogDBEnums.MYSQL.getCode().equals(logDb)) {
             operationLogDbService.create(request, locale);
         }
@@ -66,7 +65,6 @@ public class OperationLogServiceImpl implements OperationLogService {
         Locale locale = LocaleContextHolder.getLocale();
         String logDb = devopsLogConfig.getLogDb();
         if (LogDBEnums.ES.getCode().equals(logDb)) {
-            operateLogServiceFactory.create(operateLog, request, locale);
         } else if (LogDBEnums.MYSQL.getCode().equals(logDb))  {
             operationLogDbService.create(operateLog, request, locale);
         }

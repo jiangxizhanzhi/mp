@@ -4,16 +4,12 @@ gradle.ext {
         'mp-common',
         'mp-auth',
         'mp-auth-base',
-        'mp-devops-cluster',
         'mp-scene',
         'mp-scene-plugin-cloud',
         'mp-scene-plugin-flow',
         'mp-cscene',
         'mp-devops-log',
         'mp-flow',
-        'mp-front-admin',
-        'mp-front-admin-business',
-        'mp-front-business'
     ]
 
     flyway = [
