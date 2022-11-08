@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devopscluster.service.upload.VulnerabilityInfoUploadService;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesByIdVO;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesByUuidsVO;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
@@ -100,6 +101,9 @@ public class ImagesController {
 
     @NonNull
     private CustomImageUploadService customImageUploadService;
+    
+    @NonNull
+    private VulnerabilityInfoUploadService vulnerabilityInfoUploadService;
 
     @NonNull
     private CsceneSpecialService csceneSpecialService;
@@ -493,6 +497,21 @@ public class ImagesController {
     public ServiceResult<FileResponseData> uploadSshFile(MultipartFile file, HttpServletRequest request) {
         sshPrivateKeyUploadService = sshPrivateKeyUploadService.build(file);
         return sshPrivateKeyUploadService.upload();
+    }
+    
+    /**
+     * 漏洞信息文件上传
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("漏洞信息文件上传")
+    @PostMapping(value = "/file/upload/vulner")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadVulnerInfoFile(MultipartFile file, HttpServletRequest request) {
+        vulnerabilityInfoUploadService = vulnerabilityInfoUploadService.build(file);
+        return vulnerabilityInfoUploadService.upload();
     }
 
     /**

@@ -76,4 +76,8 @@ public class ExtImageInfo implements Serializable {
 
     @ApiModelProperty("正在执行操作")
     private String deviceActions;
+    
+    @ApiModelProperty("附加信息")
+    private AdditionalInfo additionalInfo;
+    
 }
