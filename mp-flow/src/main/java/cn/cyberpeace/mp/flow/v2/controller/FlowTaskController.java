@@ -1,11 +1,21 @@
 package cn.cyberpeace.mp.flow.v2.controller;
 
-import cn.cyberpeace.mp.base.controller.*;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.controller.BaseModelBulkDeleteBOController;
+import cn.cyberpeace.mp.base.controller.BaseModelCreateBOController;
+import cn.cyberpeace.mp.base.controller.BaseModelGetBOController;
+import cn.cyberpeace.mp.base.controller.BaseModelListBOController;
+import cn.cyberpeace.mp.base.controller.BaseModelUpdateBOController;
 import cn.cyberpeace.mp.base.controller.stereotype.ModelBOClass;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.v2.bo.EvasionProfileBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
+import cn.cyberpeace.mp.flow.v2.model.FlowModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.v2.repository.FlowMapper;
 import cn.cyberpeace.mp.flow.v2.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowTaskQueryParams;
 import io.swagger.annotations.Api;
@@ -13,10 +23,16 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Api(value = "流量任务管理接口", tags = "流量任务管理接口")
 @Slf4j
@@ -42,15 +58,67 @@ public class FlowTaskController implements
     @ApiOperation("新增流量任务")
     @Override
     public ObjServiceResult<FlowTaskBO> create(@Validated FlowTaskBO bo, String[] fields) {
+        FlowMapper flowMapper = BeanCommon.getBean(FlowMapper.class);
+        var list = flowMapper.list(new HumanCondition().filterEqual(FlowModel::getSupportEvasion, true));
+        if (CollectionUtils.isNotEmpty(list) && CollectionUtils.isNotEmpty(bo.getFlows())) {
+            Set<String> evasionIds = new HashSet<>();
+            list.forEach(v -> {
+                if (Boolean.TRUE.equals(v.getSupportEvasion())) {
+                    evasionIds.add(v.getId());
+                }
+            });
+            bo.getFlows().forEach(f -> {
+                if (evasionIds.contains(f.getId())) {
+                    f.setSupportEvasion(true);
+                } else {
+                    f.setSupportEvasion(false);
+                }
+            });
+        }
         return BaseModelCreateBOController.super.create(bo, fields);
     }
-    
+
     @ApiOperation("根据id获取流量任务")
     @Override
     public ObjServiceResult<FlowTaskBO> get(String id, String[] fields) {
-    	ObjServiceResult<FlowTaskBO> boResult = BaseModelGetBOController.super.get(id, fields);
-    	getModelService().fillFlowInfo(boResult.getData());
-    	
-    	return boResult;
+        ObjServiceResult<FlowTaskBO> boResult = BaseModelGetBOController.super.get(id, fields);
+        getModelService().fillFlowInfo(boResult.getData());
+
+        return boResult;
+    }
+
+    @GetMapping("/get_evasion_profiles")
+    public ServiceResult<EvasionProfileBO> getEvasionProfiles() {
+        EvasionProfileBO evasionProfileBO = new EvasionProfileBO();
+        evasionProfileBO.setEvasionProfiles(new ArrayList<>());
+        {
+            String key = "Browser: High Evasion";
+            EvasionProfileBO.Profile profile = new EvasionProfileBO.Profile();
+            profile.setName(key);
+            profile.setValue(key);
+            evasionProfileBO.getEvasionProfiles().add(profile);
+        }
+        {
+            String key = "Browser: Low Evasion";
+            EvasionProfileBO.Profile profile = new EvasionProfileBO.Profile();
+            profile.setName(key);
+            profile.setValue(key);
+            evasionProfileBO.getEvasionProfiles().add(profile);
+        }
+        {
+            String key = "DCERPC: High Evasion";
+            EvasionProfileBO.Profile profile = new EvasionProfileBO.Profile();
+            profile.setName(key);
+            profile.setValue(key);
+            evasionProfileBO.getEvasionProfiles().add(profile);
+        }
+        {
+            String key = "DCERPC: Medium Evasion";
+            EvasionProfileBO.Profile profile = new EvasionProfileBO.Profile();
+            profile.setName(key);
+            profile.setValue(key);
+            evasionProfileBO.getEvasionProfiles().add(profile);
+        }
+        return new ServiceResult<EvasionProfileBO>(evasionProfileBO);
     }
 }

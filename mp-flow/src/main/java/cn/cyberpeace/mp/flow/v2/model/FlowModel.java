@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
@@ -45,6 +46,8 @@ public class FlowModel extends BaseModel {
     private String scriptParams;
     @DefaultStr
     private String ixiaFlowName;
+    @DefaultBool
+    private Boolean supportEvasion;
 
     public static class ResourceType {
         public static final int PCAP = 0;

@@ -16,6 +16,7 @@ CREATE TABLE `mp_flow_flow`
     `script_file`       varchar(255)        NOT NULL COMMENT '脚本文件地址',
     `script_params`     text                NOT NULL COMMENT '脚本参数',
     `ixia_flow_name`    varchar(128)        NOT NULL COMMENT 'ixia流量名称',
+    `support_evasion`   tinyint(1)         NOT NULL COMMENT '是否支持攻击逃逸',
     `create_time`       datetime            NOT NULL COMMENT '创建时间',
     `update_time`       datetime            NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),

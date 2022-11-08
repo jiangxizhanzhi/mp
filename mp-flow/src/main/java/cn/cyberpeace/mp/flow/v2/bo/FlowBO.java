@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.v2.model.FlowModel;
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,8 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private Integer delay;
     private Integer weight;
     private String flowId;
+    @ApiModelProperty("是否支持攻击逃逸")
+    private Boolean supportEvasion;
 
     @Override
     public FlowBO fromModel(FlowModel obj, String... ignoreFields) {
@@ -53,13 +56,17 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
                 BeanUtils.getBeanGetterFieldName(FlowModel::getProtocolFlowUnits),
                 BeanUtils.getBeanGetterFieldName(FlowModel::getScriptParams)));
         protocols = StringUtils.isEmpty(obj.getProtocols()) ? null
-                : JsonCommon.parse(obj.getProtocols(), new TypeReference<>(){});
+                : JsonCommon.parse(obj.getProtocols(), new TypeReference<>() {
+        });
         protocolConfigs = StringUtils.isEmpty(obj.getProtocolConfigs()) ? null
-                : JsonCommon.parse(obj.getProtocolConfigs(), new TypeReference<>(){});
+                : JsonCommon.parse(obj.getProtocolConfigs(), new TypeReference<>() {
+        });
         protocolFlowUnits = StringUtils.isEmpty(obj.getProtocolFlowUnits()) ? null
-                : JsonCommon.parse(obj.getProtocolFlowUnits(), new TypeReference<>(){});
+                : JsonCommon.parse(obj.getProtocolFlowUnits(), new TypeReference<>() {
+        });
         scriptParams = StringUtils.isEmpty(obj.getScriptParams()) ? null
-                : JsonCommon.parse(obj.getScriptParams(), new TypeReference<>(){});
+                : JsonCommon.parse(obj.getScriptParams(), new TypeReference<>() {
+        });
         return this;
     }
 
@@ -121,7 +128,8 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
         public static final String STRING = "string";
         public static final String NUMBER = "number";
 
-        private ScriptParamValueType() {}
+        private ScriptParamValueType() {
+        }
     }
 
     /**

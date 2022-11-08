@@ -31,6 +31,7 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
     private List<String> filterProtocols;
     private List<TaskFlow> flows;
     private LocalDateTime createTime;
+    private String evasionProfile;
 
     @Override
     public FlowTaskBO fromModel(FlowTaskModel obj, String... ignoreFields) {
@@ -78,6 +79,7 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
         private String name;
         private String protocols;
         private String weightRatio;
+        private Boolean supportEvasion;
     }
 
 }
