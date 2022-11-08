@@ -420,7 +420,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 roleCondition.orderBy(order);
             }
         }
-        int total = userRoleMapper.total(roleCondition);
+        int total = getModelMapper().total(roleCondition);
         roleCondition.pagination(page, pageSize);
         List<RoleModel> roleModels = getModelMapper().list(roleCondition);
         List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
