@@ -31,8 +31,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "流量任务管理接口", tags = "流量任务管理接口")
 @Slf4j
@@ -59,19 +61,20 @@ public class FlowTaskController implements
     @Override
     public ObjServiceResult<FlowTaskBO> create(@Validated FlowTaskBO bo, String[] fields) {
         FlowMapper flowMapper = BeanCommon.getBean(FlowMapper.class);
-        var list = flowMapper.list(new HumanCondition().filterEqual(FlowModel::getSupportEvasion, true));
-        if (CollectionUtils.isNotEmpty(list) && CollectionUtils.isNotEmpty(bo.getFlows())) {
-            Set<String> evasionIds = new HashSet<>();
-            list.forEach(v -> {
-                if (Boolean.TRUE.equals(v.getSupportEvasion())) {
-                    evasionIds.add(v.getId());
-                }
+        if (CollectionUtils.isNotEmpty(bo.getFlows())) {
+            List<String> ids = bo.getFlows().stream().map(f -> f.getId()).collect(Collectors.toList());
+            var dbFlow = flowMapper.list(new HumanCondition()
+                    .filterIn(FlowModel::getId, ids.toArray(new String[]{}))
+            );
+            Map<String, FlowModel> results = new HashMap<>();
+            dbFlow.forEach(f -> {
+                results.put(f.getId(), f);
             });
             bo.getFlows().forEach(f -> {
-                if (evasionIds.contains(f.getId())) {
-                    f.setSupportEvasion(true);
-                } else {
-                    f.setSupportEvasion(false);
+                var model = results.get(f.getId());
+                if (model != null) {
+                    f.setSupportEvasion(model.getSupportEvasion());
+                    f.setPcapFile(model.getPcapFile());
                 }
             });
         }
