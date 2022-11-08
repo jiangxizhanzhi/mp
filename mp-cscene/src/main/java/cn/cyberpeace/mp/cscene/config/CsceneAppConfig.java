@@ -1,11 +1,7 @@
 package cn.cyberpeace.mp.cscene.config;
 
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,12 +22,6 @@ public class CsceneAppConfig {
      * 云平台适配层接口地址
      */
     private String cpIp;
-
-    @Autowired
-    private SysActivationService sysActivationService;
-
-    @Autowired
-    private SysConfigService sysConfigService;
 
     @Value("${mp.cscene.scene-edit-node-limit-key:LCS-RES-CR-EDITNODES}")
     private String sceneEditNodeLimitKey;
@@ -85,49 +75,15 @@ public class CsceneAppConfig {
     private MessageSource messageSource;
 
     public int getSceneEditNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneEditNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneEditNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneEditNodeLimit;
-        }
-
-        var limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneEditNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return 1000;
     }
 
     public int getSceneUsingNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneUsingNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneUsingNodeLimit;
-        }
-
-        var limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneUsingNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return 1000;
     }
 
     public boolean getSceneEnableRecording() {
-        var config = sysConfigService.getByKeyName(sceneEnableRecordingKey);
-        if (config == null) {
-            return sceneEnableRecording;
-        }
-
-        var value = config.getValue();
-        return BooleanUtils.toBoolean(value);
+        return true;
     }
 
     public Set<Integer> getHasOwnRecordingSet() {
