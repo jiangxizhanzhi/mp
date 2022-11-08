@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
-import cn.cyberpeace.mp.cscene.util.ResponseUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
