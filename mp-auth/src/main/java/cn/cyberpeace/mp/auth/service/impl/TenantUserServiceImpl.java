@@ -364,7 +364,6 @@ public class TenantUserServiceImpl
             selfUserId = selfUser.getId();
         }
 
-//        PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();

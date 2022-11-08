@@ -42,7 +42,6 @@ import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -386,7 +385,6 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         4. 用户有角色，有组织
         (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
         */
-        PageHelper.startPage(req.getPage(), req.getPageSize());
         ListObjServiceResult result = listNoticeMessageByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId(), req.getPage(), req.getPageSize());
         return result;
     }
