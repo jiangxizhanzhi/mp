@@ -1,0 +1,734 @@
+package cn.cyberpeace.mp.cscene.service;
+
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * @Description: 场景节点监控Service
+ * @Author zhouxinghuai
+ * @Date：2021/11/23 14:45
+ */
+@Slf4j
+@Service
+public class SceneElementMonitorService {
+
+    private static final String CPCLOUD_PLUGIN = "cpcloud";
+
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private HostStateService hostStateService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private SceneMapper sceneMapper;
+
+    private Integer getWazuhVulnerabilityScanInterval() {
+        return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
+    }
+
+    /**
+     * CsceneInstanceBO转为ElementMonitorInfo
+     *
+     * @return
+     */
+    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest, boolean fetchRealTimeHostState) {
+        log.info("baseRequest:{}", baseRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        String sceneId = baseRequest.getSceneId();
+        String elementId = baseRequest.getElementIds().get(0);
+
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
+
+        ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
+        elementMonitorBasicInfo.setSceneId(sceneId);
+        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
+        processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
+
+        // todo 节点实时信息
+        ElementRTInfo rtInfo = processRTInfo(baseRequest);
+        elementMonitorBasicInfo.setRtInfo(rtInfo);
+        return elementMonitorBasicInfo;
+    }
+
+
+
+    public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.ensure();
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+
+        if (Objects.isNull(pageRequest.getFetchIfSceneInstanceShutdown()) || !pageRequest.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
+        }
+
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+        listPageInfoQueryParams.setPage(pageRequest.getPage());
+        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
+        ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
+
+        List<ConnectionState> connectionStates = new ArrayList<>();
+        if (Objects.nonNull(netConns.getSource()) && CollUtil.isNotEmpty(netConns.getSource().getList())) {
+            List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
+            connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
+    }
+
+    /**
+     * 查询操作系统信息
+     * @param baseRequest
+     * @return
+     */
+    public OS getOSInfo(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return null;
+        }
+        String agentName = agentNames.get(0);
+        List<OS> osList = sysCollectorService.getOS(agentName);
+        if (CollectionUtil.isEmpty(osList)) {
+            return null;
+        }
+
+        return osList.get(0);
+    }
+
+
+    public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
+        int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams).getSource();
+        return sum;
+    }
+
+    public int sumProcessesChangedCount(BaseSceneElementRequest baseRequest) {
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
+        int sum = scenePluginCollectionSceneService.sumProcessesChangedCount(listPageInfoQueryParams).getSource();
+        return sum;
+    }
+
+
+    public int sumSysUserChangedCount(BaseSceneElementRequest baseRequest) {
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
+        int sum = scenePluginCollectionSceneService.sumSysUserChangedCount(listPageInfoQueryParams).getSource();
+        return sum;
+    }
+
+
+    /**
+     * 获取节点实时数据
+     * @param baseRequest
+     * @return
+     */
+    public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+        ElementRTInfo rtInfo = processRTInfo(baseRequest);
+
+        return rtInfo;
+    }
+
+
+    public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId, boolean fetchRealTimeHostState) {
+        if (Objects.isNull(csceneInstanceBO)
+                || Objects.isNull(csceneInstanceBO.getScene())
+                || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
+            return;
+        }
+
+        var topology = csceneInstanceBO.getScene().getTopology();
+        var topologyElements = topology.getElements();
+        Optional<SceneElementBO> tpoEleOptional = topologyElements.stream().filter(e -> Objects.equals(elementId, e.getId())).findFirst();
+
+        if (tpoEleOptional.isPresent()) {
+            SceneElementBO tpoEleBO = tpoEleOptional.get();
+            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, csceneInstanceBO, fetchRealTimeHostState);
+        }
+    }
+
+    public void processPluginElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId) {
+        if (Objects.isNull(csceneInstanceBO)
+                || Objects.isNull(csceneInstanceBO.getScene())
+                || Objects.isNull(csceneInstanceBO.getScene().getPlugins())
+                || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
+            return;
+        }
+
+        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        var pluginElements = scenePluginDataBO.getElements();
+        var pluginEleOptional = pluginElements.entrySet().stream().filter(entry -> Objects.equals(entry.getKey(), elementId)).map(Map.Entry::getValue).findFirst();
+
+        if (pluginEleOptional.isPresent()) {
+            CloudPluginSceneElementBO cloudPluginSceneElementBO = JsonCommon.snakeMapToBean(pluginEleOptional.get(), CloudPluginSceneElementBO.class);
+            cpSceneElementBO2ElementMonitorBasicInfo(basicInfo, cloudPluginSceneElementBO);
+        }
+    }
+
+
+    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
+        log.info("fetchHostState:{}", fetchRealTimeHostState);
+        // 获取hostState比较耗时，这里加个开关
+        if (fetchRealTimeHostState) {
+            HostState resource = basicInfo.getHostState();
+            if (Objects.isNull(resource)) {
+                resource = new HostState();
+            }
+
+            BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
+            request.setSceneId(basicInfo.getSceneId());
+            request.setElementIds(Arrays.asList(sceneElementBO.getId()));
+            request.setPage(1);
+            request.setPageSize(1);
+            List<HostState> hostStates = hostStateService.listHostStates(request);
+            if (CollectionUtil.isNotEmpty(hostStates)) {
+                HostState hostState = hostStates.get(0);
+                resource.setAgentName(hostState.getAgentName());
+                resource.setCpuCount(hostState.getCpuCount());
+                resource.setMemoryTotal(hostState.getMemoryTotal());
+                resource.setDiskSpace(hostState.getDiskSpace());
+                //resource.setDiskUsed(hostState.getDiskUsed());
+                resource.setDiskUnused(hostState.getDiskUnused());
+
+                resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
+                resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
+                resource.setMemoryFree(hostState.getMemoryFree());
+                resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
+
+                resource.setDownloadSpeed(hostState.getDownloadSpeed());
+                resource.setUploadSpeed(hostState.getUploadSpeed());
+                resource.setDiskReadBytes(hostState.getDiskReadBytes());
+                resource.setDiskWriteBytes(hostState.getDiskWriteBytes());
+            } else {
+                // 如果从探针中查不到， 从拓扑图中获取数据
+                resource.setCpuCount(sceneElementBO.getCpu());
+                resource.setMemoryTotal(sceneElementBO.getRam().longValue());
+                resource.setDiskSpace(sceneElementBO.getDisk().longValue());
+            }
+            basicInfo.setHostState(resource);
+        }
+
+        // ip地址
+//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
+//        basicInfo.setIps(ipList);
+
+        // ID
+        basicInfo.setId(sceneElementBO.getId());
+        basicInfo.setEid(sceneElementBO.getEid());
+        // 实例名称
+        basicInfo.setName(sceneElementBO.getName());
+
+        // 操作系统
+        // 参考SystemTypeUtils
+        if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
+            basicInfo.setSystemType(sceneElementBO.getSystemType());
+            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType()));
+        }
+
+        // ip, 用户名，登录方式
+        var ports = sceneElementBO.getPorts();
+        List<ElementPort> ePorts = ports.stream().map(p -> {
+            ElementPort port = new ElementPort();
+            port.setIp(p.getIp());
+            port.setName(p.getName());
+            port.setAccessModes(p.getAccessModes());
+            return port;
+        }).collect(Collectors.toList());
+        basicInfo.setPorts(ePorts);
+
+    }
+
+    public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
+        // 镜像名称
+        basicInfo.setImageName(cpSceneElementBO.getImage());
+
+        // 物理节点
+        basicInfo.setHost(cpSceneElementBO.getHost());
+
+        // 实例类型
+        basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
+    }
+
+    public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
+                                                                     String path) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        // 不传节点id默认查询全部节点
+        if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
+            pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
+        }
+        processRequest(pageRequest, sceneHandler);
+        HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+        hostEventQueryParams.setNodeIds(pageRequest.getElementIds());
+        hostEventQueryParams.setStartTime(pageRequest.getStartTime());
+        hostEventQueryParams.setEndTime(pageRequest.getEndTime());
+        hostEventQueryParams.setLevels(pageRequest.getLevels());
+        hostEventQueryParams.setRuleGroups(ruleGroups);
+        hostEventQueryParams.setPath(path);
+        hostEventQueryParams.setPage(pageRequest.getPage());
+        hostEventQueryParams.setPageSize(pageRequest.getPageSize());
+        return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
+    }
+
+    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        processRequest(pageRequest, sceneHandler);
+        startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        // 最大支持查询10000条数据
+        pageRequest.setPageSize(10000);
+        var result = getModifyData(pageRequest, ruleGroups, null);
+        if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
+            return new ArrayList<>();
+        }
+        if (segmentCount == null) {
+            // 默认时间分15段
+            segmentCount = 15;
+        }
+        long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+        List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
+        for (int i = 0; i < segmentCount; i++) {
+            ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
+            histogramInfo.setLocalDateTime(startTime.plusSeconds(intervalSeconds * i));
+            histogramInfo.setTime(TimeUtils.localDateTimeToString(histogramInfo.getLocalDateTime()));
+            histogramInfo.setCount(0);
+            histogramInfos.add(histogramInfo);
+        }
+        result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
+        int currentHistogramInfo = 0;
+        for (int i = 0; i < result.getSource().getObjs().size(); ) {
+            var collectionData = result.getSource().getObjs().get(i);
+            var histogramInfo = histogramInfos.get(currentHistogramInfo);
+            // 超出时间区间的事件放到最后一个区间
+            if ((currentHistogramInfo == histogramInfos.size() - 1) || collectionData.getTime().isBefore(histogramInfo.getLocalDateTime())) {
+                histogramInfo.setCount(histogramInfo.getCount() + 1);
+                i++;
+            } else {
+                currentHistogramInfo = Math.min(currentHistogramInfo + 1, histogramInfos.size() - 1);
+            }
+        }
+        return histogramInfos;
+    }
+
+    public ListObjResult<ElementVulnerabilityInfo> getVulnerabilityInfo(ElementMonitorRequest pageRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ListObjResult<>();
+        }
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
+        LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setPageNum(pageRequest.getPage());
+        request.setPageSize(pageRequest.getPageSize());
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        var result = dataCollectionService.queryVulnerabilityInfo(request, true);
+        List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
+        result.getObjs().forEach(r -> {
+            ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
+            vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
+            vulnerabilityInfo.setCve(r.getVulnerability().getCve());
+            // 等级转化为小写，便于前端转化
+            vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
+            vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
+            vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setPublished(convertDate(r.getVulnerability().getPublished()));
+            vulnerabilityInfo.setUpdate(r.getVulnerability().getUpdated());
+            vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
+            vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
+            vulnerabilityInfos.add(vulnerabilityInfo);
+        });
+        return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
+    }
+
+    private void processTimeRangeForVulnerabilityInfo(ElementMonitorRequest pageRequest, List<String> agentNames) {
+        LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setPageNum(1);
+        request.setPageSize(1);
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        int halfScanTime = getWazuhVulnerabilityScanInterval() / 2;
+        var first = dataCollectionService.queryVulnerabilityInfo(request, false);
+        var last = dataCollectionService.queryVulnerabilityInfo(request, true);
+        if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
+            // 两次上报漏洞信息的间隔超过扫描间隔且查不到数据时，将开始时间往前推扫描间隔的一半进行查询
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-halfScanTime)));
+            return;
+        }
+        var firstTime = first.getObjs().get(0).getTime();
+        var lastTime = last.getObjs().get(0).getTime();
+        if (firstTime.plusHours(halfScanTime).isBefore(lastTime)) {
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(lastTime.plusHours(-halfScanTime)));
+        } else if (firstTime.plusHours(halfScanTime).isAfter(lastTime)) {
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(firstTime.plusHours(-halfScanTime)));
+        }
+    }
+
+    public List<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChartInfo(ElementMonitorRequest pageRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ArrayList<>();
+        }
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
+        LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+                false, "data.vulnerability.severity", "severity");
+        if (CollUtil.isEmpty(result)) {
+            return new ArrayList<>();
+        }
+        result = result.stream()
+                .filter(countModel -> !countModel.getFieldName().equals("-"))
+                .collect(Collectors.toList());
+        long i = 0;
+        for (WazuhVulnerabilityInfoCountModel countModel : result) {
+            i = countModel.getCount() + i;
+        }
+        long sum = i;
+        List<ElementVulnerabilityPieChartInfo> pieChartInfos = new ArrayList<>();
+        result.forEach(r -> {
+            ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
+            // 漏洞等级转化为小写，便于前端转化
+            pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
+            // 设置等级，便于排序
+            if ("low".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(0);
+            } else if ("medium".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(1);
+            } else if ("high".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(2);
+            } else if ("critical".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(3);
+            }
+            // 计算百分比 单位：%
+            pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
+            pieChartInfos.add(pieChartInfo);
+        });
+        pieChartInfos.sort(Comparator.comparing(ElementVulnerabilityPieChartInfo::getSeverityLevel));
+        return pieChartInfos;
+    }
+
+    public List<ElementVulnerabilityCountInfo> getVulnerabilityCountInfo(ElementMonitorRequest pageRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ArrayList<>();
+        }
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
+        LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+                true, "data.vulnerability.package.name", "package_name");
+        List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();
+        result.forEach(r -> {
+            ElementVulnerabilityCountInfo countInfo = new ElementVulnerabilityCountInfo();
+            countInfo.setPackageName(r.getFieldName());
+            countInfo.setCount((int) r.getCount());
+            countInfos.add(countInfo);
+        });
+        return countInfos;
+    }
+
+    private void processRequest(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
+        if (StringUtils.isEmpty(pageRequest.getStartTime())) {
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(sceneHandler.getScene().getCreateTime()));
+        }
+        if (StringUtils.isEmpty(pageRequest.getEndTime())) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
+        }
+    }
+
+    private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel, boolean isRunning) {
+        LocalDateTime endTime;
+        if (isRunning) {
+            endTime = LocalDateTime.now();
+        } else {
+            endTime = sceneModel.getUpdateTime();
+        }
+        if (StringUtils.isEmpty(pageRequest.getStartTime())) {
+            //场景存在时间不足一个扫描周期，取全部漏洞数据
+            if (endTime.plusHours(-getWazuhVulnerabilityScanInterval()).isBefore(sceneModel.getCreateTime())) {
+                pageRequest.setStartTime(TimeUtils.localDateTimeToString(sceneModel.getCreateTime()));
+            } else {
+                //场景存在时间超过一个扫描周期，取最近一个扫描周期的漏洞数据
+                pageRequest.setStartTime(TimeUtils.localDateTimeToString(endTime.plusHours(-getWazuhVulnerabilityScanInterval())));
+            }
+        }
+        if (StringUtils.isEmpty(pageRequest.getEndTime())) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(endTime));
+        }
+    }
+
+    private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
+        List<String> agentNames;
+        agentNames = sceneHandler.getElementMap().values().stream()
+                .filter(e -> pageRequest.getElementIds().contains(e.getId()))
+                .map(e -> e.getEid())
+                .collect(Collectors.toList());
+        return agentNames;
+    }
+
+    private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
+        ConnectionState connectionState = new ConnectionState();
+        connectionState.setState(model.getStatus());
+        connectionState.setProtocol(model.getProto());
+        connectionState.setPid(model.getPid());
+
+        connectionState.setLocalAddress(model.getLaddrIp());
+        connectionState.setLocalPort(model.getLaddrPort());
+
+        connectionState.setForeignAddress(model.getRaddrIp());
+        connectionState.setForeignPort(model.getRaddrPort());
+
+        connectionState.setDescription(model.getDescription());
+        connectionState.setTime(model.getTime());
+
+        return connectionState;
+    }
+
+    /**
+     * 处理节点实时信息，用户，进程，端口，网络连接
+     * @param baseRequest
+     * @return
+     */
+    private ElementRTInfo processRTInfo(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        ElementRTInfo rtInfo = new ElementRTInfo();
+
+        // 用户
+        rtInfo.setUserCount(countNodeSessionUsers(baseRequest));
+
+        ListPageInfoQueryParams portsParams = new ListPageInfoQueryParams();
+        portsParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        portsParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<Port> portsResult = hostStateService.pagePorts(portsParams);
+
+        // pagePorts内部有sceneId转换动作，这里pageProcesses不能共用一个param
+        ListPageInfoQueryParams processParams = new ListPageInfoQueryParams();
+        processParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        processParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<Process> processesResult = hostStateService.pageProcesses(processParams);
+
+        BaseSceneElementPageRequest pageRequest = new BaseSceneElementPageRequest();
+        pageRequest.setSceneId(baseRequest.getSceneId());
+        pageRequest.setElementIds(baseRequest.getElementIds());
+        ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
+
+        if (Objects.nonNull(conns.getSource().getTotal())) {
+            // 网络连接
+            rtInfo.setConnectionCount(conns.getSource().getTotal());
+        }
+
+        if (Objects.nonNull(portsResult.getSource().getTotal())) {
+            // 端口
+            rtInfo.setPortsCount(portsResult.getSource().getTotal());
+        }
+
+        if (Objects.nonNull(processesResult.getSource().getTotal())) {
+            // 进程
+            rtInfo.setProcessCount(processesResult.getSource().getTotal());
+        }
+
+        // 文件
+        HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+        hostEventQueryParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<CollectionHostEventBO> fileResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
+        if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
+            // 文件数量包含其他所有类型，所以这里不会剔除注册表数量
+           rtInfo.setFileOpCount(fileResult.getSource().getTotal());
+        }
+
+        // 注册表
+        hostEventQueryParams.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
+        ListObjServiceResult<CollectionHostEventBO> registryResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
+        if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
+            // 注册表数量
+            rtInfo.setRegistryOpCount(registryResult.getSource().getTotal());
+        }
+
+        // todo 文件操作，注册表变动，环境变量变动
+        // todo 环境变量
+        int envVarChangedCount = sumEnvVarChangedCount(baseRequest);
+        rtInfo.setEnvOpCount(envVarChangedCount);
+
+        return rtInfo;
+    }
+
+    /**
+     * 统计节点当前登录用户数量
+     * @param baseSceneElementRequest
+     * @return
+     */
+    private int countNodeSessionUsers(BaseSceneElementRequest baseSceneElementRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseSceneElementRequest);
+        ServiceResult<List<UserNodeSessionInfo>> result = csceneInstanceService.getNodeSessions(CollectionUtil.toList(baseSceneElementRequest.getSceneId()), baseSceneElementRequest.getElementIds(), null, null);
+        if (CollectionUtil.isNotEmpty(result.getSource())) {
+            return result.getSource().size();
+        } else {
+            return 0;
+        }
+    }
+
+    private ListPageInfoQueryParams buildListPageInfoQueryParams(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
+        return listPageInfoQueryParams;
+    }
+
+
+    private LocalDate convertDate(String date) {
+        try {
+            return TimeUtils.stringToLocalDate(date);
+        } catch (Exception e) {
+            log.warn("date parse error! {}", date);
+        }
+
+        try {
+            LocalDateTime localDateTime = TimeUtils.utcToLocalDateTime(date);
+            return localDateTime.toLocalDate();
+        } catch (Exception e) {
+            log.warn("date parse error! {}", date);
+        }
+
+        return null;
+    }
+
+
+}

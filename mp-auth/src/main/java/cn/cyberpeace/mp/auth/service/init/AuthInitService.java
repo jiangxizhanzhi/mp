@@ -1,0 +1,58 @@
+package cn.cyberpeace.mp.auth.service.init;
+
+import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2022/6/21 17:53
+ */
+@Slf4j
+@Component
+public class AuthInitService implements ApplicationListener<ContextRefreshedEvent>, EnvironmentAware {
+
+    private Environment environment;
+
+
+    @Autowired
+    private AuthConfig authConfig;
+
+    @Autowired
+    private UserService userService;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        String jwtSecret = authConfig.getAuthenticateJwtSecret();
+        if (StringUtils.isBlank(jwtSecret)) {
+            log.error("jwtSecret is null!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+
+        authConfig.setAuthenticateJwtSecret(jwtSecret);
+
+        // 更新admin的tokenSecret
+        /*String env = environment.getProperty("spring.profiles.active");
+        if (StringUtils.isNotBlank(env) && "prod".equals(env)) {
+            var updateUser = new UserModel();
+            updateUser.setId(AuthConstant.ROOT_USER_ID);
+            updateUser.initDefault("tokenSecret");
+            userService.update(updateUser);
+        }*/
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+}

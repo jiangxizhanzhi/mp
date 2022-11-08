@@ -1,0 +1,62 @@
+package cn.cyberpeace.mp.auth.model;
+
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Objects;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table("mp_auth_org")
+@Deprecated
+public class OrgModel extends BaseModel {
+
+    @ApiModelProperty(value = "租户")
+    @DefaultStr(AuthConstant.DEFAULT_TENANT)
+    private String tenant;
+
+    @ApiModelProperty(value = "上级组织ID")
+    @DefaultStr
+    private String parent;
+
+    @ApiModelProperty(value = "编号")
+    @DefaultGen(UuidGenerator.class)
+    private String identifier;
+
+    @ApiModelProperty(value = "名称")
+    @DefaultStr
+    private String name;
+
+    @ApiModelProperty(value = "描述")
+    @DefaultStr
+    private String description;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        OrgModel orgModel = (OrgModel) o;
+        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tenant, parent, identifier, name);
+    }
+}
