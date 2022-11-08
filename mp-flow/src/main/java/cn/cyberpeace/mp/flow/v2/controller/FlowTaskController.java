@@ -75,6 +75,8 @@ public class FlowTaskController implements
                 if (model != null) {
                     f.setSupportEvasion(model.getSupportEvasion());
                     f.setPcapFile(model.getPcapFile());
+                    f.setResourceType(model.getResourceType());
+                    f.setProtocols(model.getProtocols());
                 }
             });
         }
