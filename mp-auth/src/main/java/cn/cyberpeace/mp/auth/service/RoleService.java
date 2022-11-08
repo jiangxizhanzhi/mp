@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.role.RoleBo;
-import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
-import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
+import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import com.github.pagehelper.PageInfo;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     boolean exists(String id);
 
-    PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest);
+    ListObjServiceResult getPageWithUserCnt(RolePageRequest rolePageRequest);
 
     RoleBo getRoleDto(String id);
 

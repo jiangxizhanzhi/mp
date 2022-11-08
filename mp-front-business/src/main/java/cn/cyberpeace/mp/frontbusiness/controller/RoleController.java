@@ -1,24 +1,20 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
-import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Description: 角色管理接口(业务)
@@ -50,9 +46,9 @@ public class RoleController {
     @GetMapping("/page")
     public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo page = roleService.getPageWithUserCnt(pageRequest);
+        ListObjServiceResult result = roleService.getPageWithUserCnt(pageRequest);
 
-        return ResultUtils.pageInfo2ObjServiceResult(page);
+        return result;
     }
 
 }
