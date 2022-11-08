@@ -443,12 +443,6 @@ public class FlowInfoService {
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
         ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
         parsedTermsIp.getBuckets().forEach(bucketIp -> {
             CountBO bo = new CountBO();
@@ -629,12 +623,6 @@ public class FlowInfoService {
 
         List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
         ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
         for (Bucket bucket : parsedTermsIp.getBuckets()) {
             String protocol = bucket.getKeyAsString();
@@ -670,12 +658,6 @@ public class FlowInfoService {
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
         ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
         parsedTermsIp.getBuckets().forEach(bucketIp -> {
             CountBO bo = new CountBO();

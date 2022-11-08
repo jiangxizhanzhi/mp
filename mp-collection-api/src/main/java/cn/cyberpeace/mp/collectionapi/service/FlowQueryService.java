@@ -291,7 +291,7 @@ public class FlowQueryService {
      */
     private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
         List<CountBO> bos = flowInfoService.queryAttackType(request.getTopSize());
-        double total = bos.remove(0).getCount();
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
             AttackFlowTopVO vo = new AttackFlowTopVO();
@@ -312,7 +312,7 @@ public class FlowQueryService {
     private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
         List<CountBO> bos = flowInfoService.queryProtocolTop5(esipFieldBos, request.getTopSize());
-        double total = bos.remove(0).getCount();
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
             AttackFlowTopVO vo = new AttackFlowTopVO();
@@ -333,7 +333,7 @@ public class FlowQueryService {
     private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
         List<CountBO> bos = flowInfoService.queryEquipmentIpAttackCount(esipFieldBos);
-        double total = bos.remove(0).getCount();
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         Map<String, AttackFlowTopVO> vosMap = Maps.newHashMap();
         bos.forEach(bo -> {
