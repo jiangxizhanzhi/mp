@@ -78,6 +78,9 @@ public class ScenePluginFlowSceneService {
                                                                     SceneContextBO context, Boolean isBatch) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ServiceResult<>();
+        }
         var flowElement = pluginHandler.getElement(nodeId);
         if (flowElement == null) {
             return new ServiceResult<>();
