@@ -22,7 +22,6 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
      * TYPE_API = 2;
      * TYPE_DATA = 3;
      * @param userId
-     * @param targetType
      * @return
      */
     List<TargetModel> listTargetsByUserId(String userId);
