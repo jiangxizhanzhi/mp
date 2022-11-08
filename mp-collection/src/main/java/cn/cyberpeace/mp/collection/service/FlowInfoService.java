@@ -434,16 +434,16 @@ public class FlowInfoService {
      * @param topSize
      * @return
      */
-    public List<CountBO> queryAttackType(Integer topSize) {
+    public List<CountBO> queryAttackTypeAllTeams(List<EsIpFieldBO> esIpFieldBOS) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
-        String typeTerm = "cate";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("suricata.category")
-                .order(BucketOrder.count(false)).size(topSize == null ? 1000 : topSize);
+        String cateTerm = "cate";
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(cateTerm).field("suricata.category");
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
-        ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
+        ParsedTerms parsedTermsIp = response.getAggregations().get(cateTerm);
         parsedTermsIp.getBuckets().forEach(bucketIp -> {
             CountBO bo = new CountBO();
             bo.setKey(MessageCommonUtil.convertMessage(bucketIp.getKeyAsString()));
@@ -612,13 +612,12 @@ public class FlowInfoService {
      * @param topSize
      * @return
      */
-    public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS, Integer topSize) {
+    public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         buildRuleIpQuery(esiIpFieldBOS, queryBuilder);
 
         String typeTerm = "protocol";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol")
-                .order(BucketOrder.count(false));
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol");
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
@@ -634,10 +633,6 @@ public class FlowInfoService {
             bo.setKey(protocol);
             bo.setCount(bucket.getDocCount());
             bos.add(bo);
-
-            if (topSize != null && bos.size() == topSize) {
-                break;
-            }
         }
 
         return bos;
