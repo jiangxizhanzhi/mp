@@ -271,7 +271,7 @@ public class IxiaSession {
         return this.testClient.startTest(runTestData);
     }
 
-    public void pauseTest(StopTestData stopTestData) {
+    public void stopTest(StopTestData stopTestData) {
         this.testClient.pauseTest(stopTestData);
     }
 

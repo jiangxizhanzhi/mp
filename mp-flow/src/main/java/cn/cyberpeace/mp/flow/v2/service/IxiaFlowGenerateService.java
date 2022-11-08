@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @Description
@@ -104,8 +103,9 @@ class IxiaFlowGenerateService implements IGenerateService {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
         StopTestData stopTestData = new StopTestData();
+        // todo 为方便用status来存储runid
         stopTestData.setRunid(flowTaskRecordBO.getStatus());
-        ixiaSession.pauseTest(stopTestData);
+        ixiaSession.stopTest(stopTestData);
         ixiaSession.close();
         return null;
     }
@@ -127,7 +127,15 @@ class IxiaFlowGenerateService implements IGenerateService {
 
     @Override
     public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
-        return null;
+        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        ixiaSession.open();
+        StopTestData stopTestData = new StopTestData();
+        // todo 为方便用status来存储runid
+        stopTestData.setRunid(flowTaskRecordBO.getStatus());
+        ixiaSession.stopTest(stopTestData);
+        var res = ixiaSession.startTest(flowTaskRecordBO.getName());
+        ixiaSession.close();
+        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
     }
 
     // 秒数转xx:xx:xx
