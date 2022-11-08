@@ -48,10 +48,16 @@ public class NetworkController {
             List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
             List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
             if (CollectionUtils.isNotEmpty(subnetList)) {
-                subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp())).collect(Collectors.toList());
+                subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps())).collect(Collectors.toList());
             }
-            return  NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
-                    .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
+            return NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+                    .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
+                    .downloadSpeed(networkModel.getDownloadSpeed())
+                    .uploadSpeed(networkModel.getUploadSpeed())
+                    //.freeIps(networkModel.getFreeIps())
+                    //.usedIps(networkModel.getUsedIps())
+                    .nodeNum(networkModel.getNodeNum())
+                    .build();
                 }
         ).collect(Collectors.toList());
         return new PageResult<>(list,model.getTotal());

@@ -34,6 +34,21 @@ public class NetworkBO {
     private List<NetworkSubnetBO> subnets;
 
     /**
+     * 下行带宽(Kb/s)
+     */
+    private Long downloadSpeed;
+
+    /**
+     * 上行带宽(Kb/s)
+     */
+    private Long uploadSpeed;
+
+    /**
+     * 节点个数
+     */
+    private Integer nodeNum;
+
+    /**
      * 创建时间
      */
     private String createdAt;
