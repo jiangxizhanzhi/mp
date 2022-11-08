@@ -1,13 +1,18 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkSubnetBO;
+import cn.cyberpeace.mp.devopscluster.converter.bo.VlanIpStockBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devopscluster.vo.NetworkPageVO;
+import cn.cyberpeace.mp.devopscluster.vo.VlanIpStockVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -61,6 +66,20 @@ public class NetworkController {
                 }
         ).collect(Collectors.toList());
         return new PageResult<>(list,model.getTotal());
+    }
+
+
+    /**
+     * 查询vlan ip占用信息
+     * @return
+     */
+    @ApiOperation("查询vlan ip占用信息")
+    @GetMapping("/vlan_ip")
+    public ServiceResult<VlanIpStockVO> vlanIpStock(){
+        VlanIpStockBO bo = networkConverter.vlanIpStock();
+        VlanIpStockVO vo = new VlanIpStockVO();
+        BeanUtils.copyProperties(bo, vo);
+        return ResultCommon.success(vo);
     }
 
 }

@@ -1,13 +1,17 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkSubnetBO;
+import cn.cyberpeace.mp.devopscluster.converter.bo.VlanIpStockBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkModel;
+import cn.cyberpeace.mp.devopscluster.model.common.VlanIpStockModel;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,6 +61,18 @@ public class NetworkConverter implements BaseConverter{
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    /**
+     * 查询vlanstock信息
+     * @return
+     */
+    public VlanIpStockBO vlanIpStock() {
+        CloudPlatformResult<VlanIpStockModel> result = networkService.vlanIpStock("");
+        VlanIpStockModel model = result.getData();
+        VlanIpStockBO vlanIpStockBO = new VlanIpStockBO();
+        BeanUtils.copyProperties(model, vlanIpStockBO);
+        return vlanIpStockBO;
     }
 
 
