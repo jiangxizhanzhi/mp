@@ -1,0 +1,57 @@
+package cn.cyberpeace.mp.devopslog.service.impl;
+
+import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.devopslog.model.BaseModel;
+import cn.cyberpeace.mp.devopslog.utils.JsonUtils;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * 基础对接接口层
+ * @author wanggang
+ */
+@Slf4j
+@Service
+public class BaseHttpService {
+
+    private static final String ACCEPT_LANGUAGE = "Accept-Language";
+
+    private static final String GET_DOWNLOAD_LOG_INFO = "=====GET download url：{},result：{}";
+
+    private static final String GET_DOWNLOAD_LOG_ERROR = "=====GET download url：{},result：{},error message：{}";
+
+    private static final String POST_LOG_INFO = "=====POST url：{},params：{},>>>>>result：{}";
+
+    protected HttpResponse downLoad(String url,String body){
+        HttpResponse result = null;
+        result = HttpRequest.post(url).body(body).execute();
+        if (log.isInfoEnabled()) {
+            log.info(GET_DOWNLOAD_LOG_INFO, url);
+        }
+        return result;
+    }
+
+    /**
+     * 通过Post方式查询信息
+     * @param url
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendPost(String url, String body, Class<T> valueType) {
+        T model = null;
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        result = HttpRequest.post(url).body(body).header(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage()).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        model = JsonUtils.toSnakeObject(result, valueType);
+        return model;
+    }
+}

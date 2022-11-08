@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.devopscluster.repository.CpNodeMonitorScriptConfigMapper">
+  <select id="listAll" resultType="cn.cyberpeace.mp.devopscluster.model.CpNodeMonitorScriptConfigModel">
+    select *
+    from mp_devops_cpnode_monitor_script_config
+  </select>
+
+
+  <select id="getByAgentName" resultType="cn.cyberpeace.mp.devopscluster.model.CpNodeMonitorScriptConfigModel">
+    select *
+    from mp_devops_cpnode_monitor_script_config
+    where agent_name = #{agentName}
+  </select>
+
+</mapper>

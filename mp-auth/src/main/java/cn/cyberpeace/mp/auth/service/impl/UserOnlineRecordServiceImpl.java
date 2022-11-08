@@ -1,0 +1,242 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
+import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
+import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+@Service
+@Slf4j
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
+public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnlineRecordModel, UserOnlineRecordMapper, UserOnlineRecordFields, QueryParams> implements UserOnlineRecordService {
+
+    @Autowired
+    private UserLogService userLogService;
+
+    @Autowired
+    private TenantUserService tenantUserService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private OrgService orgService;
+
+    @Autowired
+    private UserHeartbeatService heartbeatService;
+
+    public static final String CACHE_KEY_USER_OL_CNT = "USER_OL_CNT";
+
+    private static final int DEFAULT_MINUTES = 5;
+
+
+
+    @Autowired
+    public UserOnlineRecordServiceImpl(UserOnlineRecordMapper modelMapper, UserOnlineRecordFields modelFields) {
+        setModelMapper(modelMapper);
+        setModelFields(modelFields);
+    }
+
+
+    @Override
+    public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
+
+        ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
+        List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
+                .filter(entry -> CollectionUtil.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
+                .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
+        List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
+        if (CollectionUtil.isEmpty(summaryDtos)) {
+            return pageInfo;
+        }
+
+        Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
+        for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
+            if (Objects.nonNull(entry.getKey().getId()) && Objects.nonNull(entry.getValue())) {
+                heatbeatCntMap.put(entry.getKey().getId(), entry.getValue().size());
+            }
+        }
+
+        List<UserOnlineReportDto> reportDtos = new ArrayList<>();
+        summaryDtos.forEach(r -> {
+            UserOnlineReportDto reportDto = new UserOnlineReportDto();
+            BeanUtils.copyProperties(r, reportDto);
+
+            reportDto.setTotalOnlineHours(0.0);
+            Long totalMins = r.getTotalOnlineMinutes();
+            if (totalMins > 0) {
+                double totalHrs = totalMins / 60.0;
+                reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
+            }
+
+            // 只获取最新的一条日志
+            OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
+            logPageRequest.setUserName(r.getUsername());
+            logPageRequest.setPage(1);
+            logPageRequest.setPerPage(1);
+            List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
+            if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
+                // 动作
+                reportDto.setAction(logs.get(0).getOpType());
+                // 对象
+                reportDto.setSubject(logs.get(0).getOpTarget());
+            }
+
+            boolean isOnline = false;
+            if (Objects.nonNull(heatbeatCntMap.get(r.getUser())) && heatbeatCntMap.get(r.getUser()) > 0) {
+                isOnline = true;
+            } else if (Objects.nonNull(r.getUnCompleteCnt()) && r.getUnCompleteCnt() > 0) {
+                isOnline = true;
+            }
+
+            if (isOnline) {
+                reportDto.setIsOnline(1);
+            } else {
+                reportDto.setIsOnline(0);
+            }
+
+            reportDtos.add(reportDto);
+        });
+
+
+        // orgpaths
+        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
+        List<UserOrgDto> userOrgDtos = tenantUserService.listUserOrgByUserIds(userIds);
+        reportDtos.forEach(r -> {
+            List<OrgBO> orgBOList =
+                    userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {
+                        OrgBO orgBO = new OrgBO();
+                        BeanUtils.copyProperties(dto, orgBO);
+                        return orgBO;
+                    }).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(orgBOList)) {
+                r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
+            }
+        });
+
+        // 替换为reportDto
+        pageInfo.setList(reportDtos);
+        return pageInfo;
+    }
+
+    @Override
+    public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollectionUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+        }
+        humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
+        return onlineList;
+    }
+
+    @Override
+    public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
+        // 默认超过5分钟没有更新end_time既判定为离线
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollectionUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+        }
+        humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
+        return onlineList;
+    }
+
+    /*
+    @Override
+    public List<UserOnlineRecordModel> listCurrentOnlinedUser() {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
+        return list;
+    }
+
+
+    @Override
+    public int cntCurrentOnlinedUser() {
+        return getModelMapper().cntOnlinedUser(DEFAULT_MINUTES);
+    }
+
+    @Override
+    public List<UserOnlineRecordModel> listOnlinedUserByPeriod() {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
+        return list;
+    }*/
+
+
+    @Override
+    public Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        Integer cnt = getModelMapper().getOnlinedUserCntByPeriod(startTime, endTime);
+        return cnt;
+    }
+
+    @Override
+    public List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlineHistoryTrackByUser(userId, startTime, endTime);
+        return list;
+    }
+
+    @Override
+    @Cacheable(value = CACHE_KEY_USER_OL_CNT)
+    public UserOnlineCntDto onlineUserCnt() {
+        LocalDateTime now = LocalDateTime.now();
+        int olcnt = 0;
+        int mapcnt = heartbeatService.getHeartbeatMap().size();
+        int dbcnt = getOnlinedUserCntByPeriod(now.minusMinutes(5), now);
+        olcnt = Math.max(mapcnt, dbcnt);
+        int totalUser = userService.totalUserCnt();
+
+        UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();
+        userOnlineCntDto.setOnlineUser(olcnt);
+        userOnlineCntDto.setTotalUser(totalUser);
+
+        return userOnlineCntDto;
+    }
+
+}

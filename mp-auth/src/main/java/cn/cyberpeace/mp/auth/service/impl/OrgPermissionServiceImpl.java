@@ -1,0 +1,145 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;
+import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.fields.OrgPermissionFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+@Service
+public class OrgPermissionServiceImpl
+        extends BaseModelServiceImpl<OrgPermissionModel, OrgPermissionMapper, OrgPermissionFields, QueryParams>
+        implements OrgPermissionService {
+
+
+    @Autowired
+    private OrgService orgService;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
+
+
+    @Autowired
+    public OrgPermissionServiceImpl(OrgPermissionMapper modelMapper, OrgPermissionFields modelFields) {
+        setModelMapper(modelMapper);
+        setModelFields(modelFields);
+    }
+
+    @Override
+    public Set<TargetModel> listTargetsByOrgId(String orgId) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+
+//        var objResult = orgService.get(orgId).getSource();
+//        if (objResult == null || objResult.getObj() == null) {
+//            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+//        }
+        List<TargetModel> targets = getModelMapper().listByOrgId(orgId);
+        return new HashSet<>(targets);
+    }
+
+    @Override
+    public Set<TargetModel> listTargetsByOrgIdIncludeAllParentsOrg(String orgId) {
+        OrgDto orgDto = orgService.getHierarchicalOrgsByOrgId(orgId);
+        if (orgDto == null) {
+            return new HashSet<>();
+        }
+        Set<TargetModel> targetSet = new HashSet<>();
+        recursionTargetsByOrgDto(targetSet, orgDto);
+
+        return targetSet;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+
+        var result = orgService.get(orgId);
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ORG_NOT_EXISTED);
+
+        if (cleanOldTargets) {
+            // 清除组织权限
+            boolean success = deleteByOrgId(orgId);
+            if (!success) {
+                throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_DELETE_ERROR);
+            }
+        }
+
+        if (CollectionUtil.isEmpty(targetIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加组织权限
+        targetIds.forEach(tid -> {
+            // todo 校验权限是否存在
+            OrgPermissionModel orgPerm = new OrgPermissionModel();
+            orgPerm.setOwner(orgId);
+            orgPerm.setTarget(tid);
+            orgPerm.setTenant(AuthConstant.DEFAULT_TENANT);
+            var re = orgPermissionService.create(orgPerm);
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.ORG_TARGET_ADD_ERROR);
+        });
+
+        return true;
+
+
+    }
+
+
+    @Override
+    public boolean deleteByOrgId(String orgId) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgPermissionModel::getOwner, orgId);
+        getModelMapper().filterDelete(humanCondition);
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTargetId(String targetId) {
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgPermissionModel::getTarget, targetId);
+        getModelMapper().filterDelete(humanCondition);
+        return true;
+    }
+
+
+    // 递归查询组织绑定的权限（如果有父级组织，则继续查找）
+    private void recursionTargetsByOrgDto(Set<TargetModel> set, OrgDto orgDto) {
+        if (orgDto == null || StringUtils.isBlank(orgDto.getParent())) {
+            return;
+        }
+        Set<TargetModel> tset = listTargetsByOrgId(orgDto.getParent());
+        set.addAll(tset);
+        recursionTargetsByOrgDto(set, orgDto.getParentOrg());
+    }
+
+
+}

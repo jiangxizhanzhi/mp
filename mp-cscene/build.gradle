@@ -3,6 +3,13 @@ dependencies {
     implementation project(':mp-common')
     implementation project(':mp-scene')
     implementation project(':mp-scene-plugin-cloud')
+    implementation project(':mp-scene-plugin-collection')
     implementation project(':mp-scene-plugin-flow')
+    implementation project(':mp-auth')
+    implementation project(':mp-auth-base')
+    implementation project(':mp-front-admin')
+    implementation project(':mp-situation-aware')
+    implementation project(':mp-devops-log')
     implementation project(':mp-flow')
+    implementation project(':mp-scene-plugin-gns3')
 }

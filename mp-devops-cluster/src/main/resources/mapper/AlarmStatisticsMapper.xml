@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.devopscluster.repository.AlarmStatisticsMapper">
+
+    <select id="todayAlarmStatistics" resultType="cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel">
+        SELECT
+            *
+        FROM
+            mp_devops_alarm_statistics
+        WHERE
+            TO_DAYS( create_time ) = TO_DAYS(#{currentTime})
+    </select>
+
+    <select id="serviceAlarmStatistics" resultType="cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO">
+        SELECT
+            MAX( a.id ) as id,
+            SUM( a.alarm_count ) as alarm_count,
+            a.alarm_date
+        FROM
+            mp_devops_alarm_statistics a
+        WHERE
+            a.alarm_type IN ( 0, 1 )
+            AND TO_DAYS(#{currentTime}) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> #{days}
+        GROUP BY
+            a.alarm_date
+        ORDER BY
+            a.alarm_date
+    </select>
+
+    <select id="serverAlarmStatistics" resultType="cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO">
+        SELECT
+            MAX( a.id ) as id,
+            SUM( a.alarm_count ) as alarm_count,
+            a.alarm_date
+        FROM
+            mp_devops_alarm_statistics a
+        WHERE
+            a.alarm_type = 2
+          AND TO_DAYS(#{currentTime}) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> #{days}
+        GROUP BY
+            a.alarm_date
+        ORDER BY
+            a.alarm_date
+    </select>
+
+
+</mapper>

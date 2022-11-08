@@ -1,0 +1,127 @@
+package cn.cyberpeace.mp.cscene.service;
+
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
+import cn.hutool.core.collection.CollectionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/12/2 14:05
+ */
+@Slf4j
+@Service
+@CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
+public class CsceneCommonService {
+
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Cacheable(value = "translate_sceneids")
+    public List<String> translateSceneIds(List<String> sceneIds) {
+        List<String> translatedScendIds = new ArrayList<>();
+        for (String sceneId : sceneIds) {
+            String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
+            translatedScendIds.add(translatedSceneId);
+        }
+        return translatedScendIds;
+    }
+
+
+    @Cacheable(value = "translate_sceneid")
+    public String translateSceneId(String sceneId) {
+        String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
+        return translatedSceneId;
+    }
+
+    /**
+     * 根据sceneId和elementIds查询agentNames
+     *
+     * @param sceneId
+     * @param elementIds 为空表示获取场景中所有的节点
+     * @return
+     */
+    @Cacheable(value = "query_agentnames_by_elementids")
+    public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
+        List<String> sceneIds = CollectionUtil.toList(sceneId);
+        List<String> translatedSceneIds = translateSceneIds(sceneIds);
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
+
+        List<String> agentNames = new ArrayList<>();
+        if (CollectionUtil.isEmpty(elementIds)) {
+            agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+        } else {
+            agentNames = elementBOs.stream().filter(e -> elementIds.contains(e.getId())).map(SceneElementBO::getEid).collect(Collectors.toList());
+        }
+
+        return agentNames;
+    }
+
+
+    /**
+     * 根据sceneId和elementIds查询agentNames
+     *
+     * @param sceneId
+     * @param elementIds 为空表示获取场景中所有的节点
+     * @return
+     */
+    @Cacheable(value = "get_agentnames_elementids_map")
+    public Map<String, String> getAgentNames2ElementIdMap(String sceneId, List<String> elementIds) {
+        List<String> sceneIds = CollectionUtil.toList(sceneId);
+        List<String> translatedSceneIds = translateSceneIds(sceneIds);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, elementIds);
+        Map<String, SceneElementBO> eid2ElementMap = batchSceneHandler.getAllEid2ElementMap();
+
+        Map<String, String> agentNames2ElementId = new HashMap<>();
+        eid2ElementMap.forEach((key, elementBO) -> {
+            if (Objects.nonNull(elementBO)) {
+                if (CollectionUtil.isEmpty(elementIds)) {
+                    agentNames2ElementId.put(key, elementBO.getId());
+                } else if (elementIds.contains(elementBO.getId())) {
+                    agentNames2ElementId.put(key, elementBO.getId());
+                }
+            }
+        });
+
+        return agentNames2ElementId;
+    }
+
+
+    /**
+     * 查询场景是否是开启状态
+     *
+     * @return
+     */
+    @Cacheable(value = "is_cscene_running")
+    public boolean isCsceneInstanceRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        if (Objects.nonNull(sceneStateInfo)) {
+            return sceneStateInfo.isRunning();
+        }
+        return false;
+    }
+
+}

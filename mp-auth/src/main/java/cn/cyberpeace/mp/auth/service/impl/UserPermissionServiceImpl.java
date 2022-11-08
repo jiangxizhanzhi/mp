@@ -1,0 +1,258 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserPermissionModel;
+import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
+import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+@Service
+public class UserPermissionServiceImpl
+        extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
+        implements UserPermissionService {
+
+    public static final String CACHE_VAL_USER_TARGETS= "USER_TARGETS_CACHE";
+
+
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private RolePermissionModelService rolePermissionService;
+
+    @Autowired
+    private TargetService targetService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
+
+    @Autowired
+    public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
+        setModelMapper(modelMapper);
+        setModelFields(modelFields);
+    }
+
+    @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
+    public List<TargetModel> listTargetsByUserId(String userId) {
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        Set<TargetModel> authorizedTargetsSet = new HashSet<>();
+
+        // 用户绑定的所有角色绑定的target
+        List<RoleModel> roles = userRoleService.listByUserId(userId);
+
+        // 是否是管理员
+        boolean isAdmin = hasAdminRole(roles);
+        if (isAdmin) {
+            // 直接查询该租户下所有权限返回
+            List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+            return allTargets;
+        }
+
+        // 角色绑定的target
+        List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<TargetModel> roleTargets = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(roleIds)) {
+            roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
+        }
+        authorizedTargetsSet.addAll(roleTargets);
+
+        // 用户直接绑定的target
+        //List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);
+        //authorizedTargetsSet.addAll(userTargets);
+
+        // 用户所在组织绑定的target
+        //List<OrgModel> userOrgs = orgUserService.listOrgsByUserId(userId);
+        //Set<TargetModel> allTargetsByOrgSet = new HashSet<>();
+        //userOrgs.forEach(o -> {
+        //    Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
+        //    allTargetsByOrgSet.addAll(tset);
+        //});
+        //authorizedTargetsSet.addAll(allTargetsByOrgSet);
+
+        List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());
+        return targetModelList;
+    }
+
+    @Override
+    public List<UserModel> listUsersByTargetId(String targetId) {
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
+
+        List<UserModel> users = getModelMapper().listUsersByTargetId(targetId);
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
+        return users;
+    }
+
+    @Override
+    public List<TargetModel> listMenusByUserId(String userId) {
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        List<TargetModel> targets = listTargetsByUserId(userId);
+        if (CollectionUtil.isNotEmpty(targets)) {
+            return targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+
+    public List<TargetDto> getTreeByUserId(String userId) {
+        List<TargetModel> targets = listTargetsByUserId(userId);
+        if (CollectionUtil.isEmpty(targets)) {
+            return new ArrayList<>();
+        }
+        List<TargetDto> tree = toTree(targets);
+        return tree;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+
+        var result = userService.get(userId);
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ACCOUNT_NOT_EXISTED);
+
+        if (cleanOldTargets) {
+            // 清除用户原来的权限
+            boolean success = deleteByUserId(userId);
+            if (!success) {
+                throw new MpRuntimeException(AuthErrorCode.USER_TARGET_DELETE_ERROR);
+            }
+        }
+
+        if (CollectionUtil.isEmpty(targetIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加用户角色
+        targetIds.forEach(tid -> {
+            // todo 校验权限是否存在
+            UserPermissionModel userPerm = new UserPermissionModel();
+            userPerm.setOwner(userId);
+            userPerm.setTarget(tid);
+            userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
+            var re = create(userPerm);
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_TARGET_ADD_ERROR);
+        });
+
+        return true;
+    }
+
+
+    public List<TargetDto> toTree(List<TargetModel> targets) {
+        ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
+        Map<String, List<TargetModel>> map = new HashMap<>();
+        Map<String, TargetDto> mapTmp = new HashMap<>();
+
+        //Save all nodes to a map
+        for (TargetModel targetModel : targets) {
+            TargetDto targetDto = new TargetDto();
+            BeanUtils.copyProperties(targetModel, targetDto);
+            mapTmp.put(targetDto.getId(), targetDto);
+        }
+
+        //loop and assign parent/child relationships
+        for (Map.Entry<String, TargetDto> entry : mapTmp.entrySet()) {
+            TargetDto current = entry.getValue();
+            String parentId = current.getParent();
+
+            if (StringUtils.isNotBlank(parentId)) {
+                TargetDto parent = mapTmp.get(parentId);
+                if (parent != null) {
+                    //                    current.(parent);
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(current);
+                    mapTmp.put(parentId, parent);
+//                    mapTmp.put(entry.getId(), current);
+                }
+            }
+
+        }
+
+        List<TargetDto> parentMenus = new ArrayList<>();
+        //get the root
+        for (TargetDto node : mapTmp.values()) {
+            if(StringUtils.isBlank(node.getParent())) {
+                parentMenus.add(node);
+            }
+        }
+
+        return parentMenus;
+    }
+
+
+
+
+    public boolean hasAdminRole(List<RoleModel> roles) {
+        return roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
+    }
+
+
+    public boolean  deleteByUserId(String userId) {
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserPermissionModel::getOwner, userId);
+        getModelMapper().filterDelete(humanCondition);
+        return true;
+    }
+
+    public boolean deleteByTargetId(String targetId) {
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserPermissionModel::getTarget, targetId);
+        getModelMapper().filterDelete(humanCondition);
+        return true;
+    }
+
+    @Override
+    public List<TargetModel> listMenusByLoginUser() {
+        UserModel user = UserUtils.getLoginUser();
+        if (Objects.isNull(user)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
+        List<TargetModel> menus = listMenusByUserId(user.getId());
+        return menus;
+    }
+
+
+    @Override
+    public List<String> listMenuIdentsByLoginUser() {
+        List<TargetModel> menus = listMenusByLoginUser();
+        List<String> menuIdents = menus.stream().map(m -> m.getIdentifier()).collect(Collectors.toList());
+        return menuIdents;
+    }
+}
