@@ -2,18 +2,13 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
 import cn.cyberpeace.mp.auth.request.user.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.ResetSelfPwdRequest;
-import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -21,7 +16,6 @@ import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -47,9 +44,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private UserOnlineRecordService userOnlineRecordService;
 
     @Autowired
     private UserHeartbeatService heartbeatService;
@@ -123,21 +117,6 @@ public class UserController {
     public ServiceResult heartbeat() throws MpRuntimeException {
         heartbeatService.heartbeat();
         return ResultCommon.success();
-    }
-
-    @ApiOperation(value = "用户在线报告", notes = "")
-    @GetMapping("/olreport")
-    public ServiceResult onlineReport(UserOnlineRecordSummaryPageRequest pageRequest) {
-        pageRequest.ensure();
-        PageInfo<UserOnlineReportDto> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }
-
-    @ApiOperation(value = "在线用户数量", notes = "")
-    @GetMapping("/olUserCnt")
-    public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
-        UserOnlineCntDto userOnlineCntDto = userOnlineRecordService.onlineUserCnt();
-        return ResultCommon.success(userOnlineCntDto);
     }
 
 }

@@ -15,14 +15,6 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
-import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
-import cn.cyberpeace.mp.devopslog.service.OperationLogService;
-import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +46,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Autowired
     private UserPermissionService userPermissionService;
 
-    @Autowired
-    private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private OperationLogService operationLogService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -178,25 +166,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
 
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
-        OperationLogRequest logModel = new OperationLogRequest();
-        //操作类型
-        logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
-        logModel.setOpType(OpTypeEnums.LOGIN.ordinal());
-        logModel.setOpTarget(MessageCommon.get(OpTargetEnums.USER.getCode()));
-        //操作主题
-        logModel.setTitle(MessageCommon.get(AuthBasei18nCode.LOGIN));
-        //操作描述
-        logModel.setDescription(MessageCommon.get(AuthBasei18nCode.LOGIN_USERNAME_PASSWORD));
-
-        //操作用户
-        logModel.setUserId(user.getId());
-        logModel.setUserName(user.getUsername());
-        logModel.setUserType(LogConstant.USER_TYPE_USER);
-        logModel.setOpIp(SnUtils.getRealRemoteIp(request));
-
-        // 记录登录日志
-//        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
-        operationLogService.create(logModel);
     }
 
 

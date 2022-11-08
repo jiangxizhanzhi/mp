@@ -10,13 +10,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
-import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
-import cn.cyberpeace.mp.devopslog.service.OperationLogService;
-import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,9 +36,6 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private final ObjectMapper mapper;
 
     private final UserService userService;
-
-    @Autowired
-    private OperationLogService operationLogService;
 
     @Autowired
     private AuthConfig authConfig;
@@ -96,24 +86,5 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     }
 
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
-        OperationLogRequest logModel = new OperationLogRequest();
-        //操作类型
-        logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
-        logModel.setOpType(OpTypeEnums.LOGOUT.ordinal());
-        logModel.setOpTarget(MessageCommon.get(OpTargetEnums.USER.getCode()));
-        //操作主题
-        logModel.setTitle(MessageCommon.get(AuthBasei18nCode.LOGOUT));
-        //操作描述
-        logModel.setDescription(MessageCommon.get(AuthBasei18nCode.LOGOUT));
-
-        //操作用户
-        logModel.setUserId(user.getId());
-        logModel.setUserName(user.getUsername());
-        logModel.setUserType(LogConstant.USER_TYPE_USER);
-
-        logModel.setOpIp(SnUtils.getRealRemoteIp(request));
-
-        // 记录登出日志
-        operationLogService.create(logModel);
     }
 }
