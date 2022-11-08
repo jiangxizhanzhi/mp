@@ -39,7 +39,6 @@ import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeOrgService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
-import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -388,11 +387,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
         */
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId());
-        PageInfo pageInfo = new PageInfo(notices);
-
-        convert2NoticeDtoPageInfo(pageInfo, true);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        ListObjServiceResult result = listNoticeMessageByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId(), req.getPage(), req.getPageSize());
+        return result;
     }
 
     @Override
@@ -442,7 +438,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         4. 用户有角色，有组织
         (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
         */
-        int totalCnt = getModelMapper().getUnreadCountByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId());
+        int totalCnt = getUnreadCountByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId());
         return totalCnt;
     }
 
@@ -597,7 +593,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDtos;
     }
 
-    public int getUnreadCountByCurrentAdminUser(String userId) {
+    private int getUnreadCountByCurrentAdminUser(String userId) {
         Set<String> noticeIds = new HashSet<>();
         HumanCondition orgNoticeCond = new HumanCondition()
                 .select(SysNoticeOrgModel::getNoticeId);
@@ -705,7 +701,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         condition.select(SysNoticeModel::getId).distinct();
         List<String> noticeIds = getModelMapper().list(condition).stream().map(SysNoticeModel::getId).collect(Collectors.toList());
         noticeIds.addAll(publicNoticeIds);
-
+        if (CollUtil.isEmpty(noticeIds)) {
+            return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
+        }
         HumanCondition humanCondition = new HumanCondition()
                 .filterIn(SysNoticeModel::getId, noticeIds.toArray())
                 .pagination(page, pageSize)
@@ -717,5 +715,223 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         ListObjServiceResult result = new ListObjServiceResult(new ListObjResult(dtos, total).asResult()).asResult();
         return result;
+    }
+
+    public ListObjServiceResult listNoticeMessageByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId, int page, int pageSize) {
+        HumanCondition allNoticeCond = new HumanCondition()
+                .select(SysNoticeModel::getId);
+        Set<String> allNoticeIds = getModelMapper().list(allNoticeCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+
+        // 查询发送给指定用户的notice
+        if (CollUtil.isEmpty(userIds)) {
+            userIds.add("");
+        }
+        HumanCondition userNoticeCond = new HumanCondition()
+                .filterIn(SysNoticeUserModel::getUser, userIds.toArray())
+                .select(SysNoticeUserModel::getNoticeId);
+        Set<String> userNoticeIds = noticeUserMapper.list(userNoticeCond).stream().map(SysNoticeUserModel::getNoticeId).collect(Collectors.toSet());
+
+        // 发送目标为仅为org
+        HumanCondition allNoticeInRoleCond = new HumanCondition()
+                .select(SysNoticeRoleModel::getNoticeId);
+        Set<String> allNoticeInRoleIds = noticeRoleMapper.list(allNoticeInRoleCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        HumanCondition allNoticePublicCond = new HumanCondition()
+                .filterEqual(SysNoticeModel::getIsPublic, 1);
+        Set<String> allNoticePublicIds = getModelMapper().list(allNoticePublicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+
+        if (CollUtil.isEmpty(orgs)) {
+            orgs.add("");
+        }
+        HumanCondition inOrgsCond = new HumanCondition()
+                .filterIn(SysNoticeOrgModel::getOrg, orgs.toArray())
+                .select(SysNoticeOrgModel::getNoticeId);
+        Set<String> inOrgsNoticeIds = noticeOrgMapper.list(inOrgsCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        inOrgsNoticeIds.removeAll(allNoticeInRoleIds);
+        inOrgsNoticeIds.removeAll(allNoticePublicIds);
+
+        // 发动目标仅为role
+        HumanCondition allNoticeInOrgCond = new HumanCondition()
+                .select(SysNoticeOrgModel::getNoticeId);
+        Set<String> allNoticeInOrgIds = noticeOrgMapper.list(allNoticeInOrgCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(roles)) {
+            roles.add("");
+        }
+        HumanCondition inRolesCond = new HumanCondition()
+                .filterIn(SysNoticeRoleModel::getRole, roles.toArray())
+                .select(SysNoticeRoleModel::getNoticeId);
+        Set<String> inRolesNoticeIds = noticeRoleMapper.list(inRolesCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        inRolesNoticeIds.removeAll(allNoticeInOrgIds);
+
+        HumanCondition publicCond = new HumanCondition()
+                .filterEqual(SysNoticeModel::getIsPublic, 1)
+                .select(SysNoticeModel::getId);
+        Set<String> publicIds = getModelMapper().list(publicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+        publicIds.removeAll(allNoticeInOrgIds);
+
+        // 发送目标为role和org
+        Set<String> toRoleAndOrg = new HashSet<>();
+        toRoleAndOrg.addAll(allNoticeInOrgIds);
+        toRoleAndOrg.retainAll(allNoticeInRoleIds);
+        Set<String> inRolesAndOrgs = new HashSet<>();
+        Set<String>  inRolesNoticeIds1 = noticeRoleMapper.list(inRolesCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        Set<String>  inOrgsNoticeIds1 = noticeOrgMapper.list(inOrgsCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        inRolesAndOrgs.addAll(inRolesNoticeIds1);
+        inRolesAndOrgs.retainAll(inOrgsNoticeIds1);
+        Set<String> inRolesAndOrgsNoticeids = new HashSet<>();
+        for (String id : inRolesAndOrgs) {
+            if (toRoleAndOrg.contains(id)) {
+                inRolesAndOrgsNoticeids.add(id);
+            }
+        }
+
+        // 发送目标为 public和org
+        Set<String> publicIds1 = getModelMapper().list(publicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+        Set<String> toPublicAndOrg = new HashSet<>();
+        toPublicAndOrg.addAll(publicIds1);
+        toPublicAndOrg.retainAll(allNoticeInOrgIds);
+        Set<String> inPublicAndOrgs = new HashSet<>();
+        inPublicAndOrgs.addAll(publicIds1);
+        inPublicAndOrgs.retainAll(inOrgsNoticeIds);
+        Set<String> inPublicAndOrgsNoticeids = new HashSet<>();
+        for (String id : inPublicAndOrgs) {
+            if (toPublicAndOrg.contains(id)) {
+                inPublicAndOrgsNoticeids.add(id);
+            }
+        }
+
+        Set<String> allMatchIds = new HashSet<>();
+        allMatchIds.addAll(userNoticeIds);
+        allMatchIds.addAll(inOrgsNoticeIds);
+        allMatchIds.addAll(inRolesNoticeIds);
+        allMatchIds.addAll(publicIds);
+        allMatchIds.addAll(inRolesAndOrgsNoticeids);
+        allMatchIds.addAll(inPublicAndOrgsNoticeids);
+        if (CollUtil.isEmpty(allMatchIds)) {
+            return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
+        }
+        HumanCondition notNeedPush = new HumanCondition()
+                .filterEqual(SysNoticeReadModel::getUser, userId)
+                .filterEqual(SysNoticeReadModel::getIsNeedPush, 0)
+                .select(SysNoticeReadModel::getNoticeId);
+        Set<String> notPushNoticeIds = noticeReadMapper.list(notNeedPush).stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toSet());
+        HumanCondition matchCond = new HumanCondition()
+                .filterIn(SysNoticeModel::getId, allMatchIds.toArray());
+        if (CollUtil.isNotEmpty(notPushNoticeIds)) {
+            matchCond.filterNotIn(SysNoticeModel::getId, notPushNoticeIds.toArray());
+        }
+
+        matchCond.orderBy(SysNoticeModel::getTop, true)
+                .orderBy(SysNoticeModel::getPk, true);
+        matchCond.pagination(page, pageSize);
+        int total = getModelMapper().total(matchCond);
+        List<SysNoticeModel> models = getModelMapper().list(matchCond);
+        List<SysNoticeDto> dtos = convert2NoticeDto(models, true);
+        ListObjServiceResult<SysNoticeDto> result = new ListObjServiceResult(new ListObjResult(dtos, total).asResult()).asResult();
+        return result;
+    }
+
+    private int getUnreadCountByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId) {
+        // 查询发送给指定用户的notice
+        if (CollUtil.isEmpty(userIds)) {
+            userIds.add("");
+        }
+        HumanCondition userNoticeCond = new HumanCondition()
+                .filterIn(SysNoticeUserModel::getUser, userIds.toArray())
+                .select(SysNoticeUserModel::getNoticeId);
+        Set<String> userNoticeIds = noticeUserMapper.list(userNoticeCond).stream().map(SysNoticeUserModel::getNoticeId).collect(Collectors.toSet());
+
+        // 发送目标为仅为org
+        HumanCondition allNoticeInRoleCond = new HumanCondition()
+                .select(SysNoticeRoleModel::getNoticeId);
+        Set<String> allNoticeInRoleIds = noticeRoleMapper.list(allNoticeInRoleCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        HumanCondition allNoticePublicCond = new HumanCondition()
+                .filterEqual(SysNoticeModel::getIsPublic, 1);
+        Set<String> allNoticePublicIds = getModelMapper().list(allNoticePublicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+
+        if (CollUtil.isEmpty(orgs)) {
+            orgs.add("");
+        }
+        HumanCondition inOrgsCond = new HumanCondition()
+                .filterIn(SysNoticeOrgModel::getOrg, orgs.toArray())
+                .select(SysNoticeOrgModel::getNoticeId);
+        Set<String> inOrgsNoticeIds = noticeOrgMapper.list(inOrgsCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        inOrgsNoticeIds.removeAll(allNoticeInRoleIds);
+        inOrgsNoticeIds.removeAll(allNoticePublicIds);
+
+        // 发动目标仅为role
+        HumanCondition allNoticeInOrgCond = new HumanCondition()
+                .select(SysNoticeOrgModel::getNoticeId);
+        Set<String> allNoticeInOrgIds = noticeOrgMapper.list(allNoticeInOrgCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(roles)) {
+            roles.add("");
+        }
+        HumanCondition inRolesCond = new HumanCondition()
+                .filterIn(SysNoticeRoleModel::getRole, roles.toArray())
+                .select(SysNoticeRoleModel::getNoticeId);
+        Set<String> inRolesNoticeIds = noticeRoleMapper.list(inRolesCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        inRolesNoticeIds.removeAll(allNoticeInOrgIds);
+
+        HumanCondition publicCond = new HumanCondition()
+                .filterEqual(SysNoticeModel::getIsPublic, 1)
+                .select(SysNoticeModel::getId);
+        Set<String> publicIds = getModelMapper().list(publicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+        publicIds.removeAll(allNoticeInOrgIds);
+
+        // 发送目标为role和org
+        Set<String> toRoleAndOrg = new HashSet<>();
+        toRoleAndOrg.addAll(allNoticeInOrgIds);
+        toRoleAndOrg.retainAll(allNoticeInRoleIds);
+        Set<String> inRolesAndOrgs = new HashSet<>();
+        Set<String>  inRolesNoticeIds1 = noticeRoleMapper.list(inRolesCond).stream().map(SysNoticeRoleModel::getNoticeId).collect(Collectors.toSet());
+        Set<String>  inOrgsNoticeIds1 = noticeOrgMapper.list(inOrgsCond).stream().map(SysNoticeOrgModel::getNoticeId).collect(Collectors.toSet());
+        inRolesAndOrgs.addAll(inRolesNoticeIds1);
+        inRolesAndOrgs.retainAll(inOrgsNoticeIds1);
+        Set<String> inRolesAndOrgsNoticeids = new HashSet<>();
+        for (String id : inRolesAndOrgs) {
+            if (toRoleAndOrg.contains(id)) {
+                inRolesAndOrgsNoticeids.add(id);
+            }
+        }
+
+        // 发送目标为 public和org
+        Set<String> publicIds1 = getModelMapper().list(publicCond).stream().map(SysNoticeModel::getId).collect(Collectors.toSet());
+        Set<String> toPublicAndOrg = new HashSet<>();
+        toPublicAndOrg.addAll(publicIds1);
+        toPublicAndOrg.retainAll(allNoticeInOrgIds);
+        Set<String> inPublicAndOrgs = new HashSet<>();
+        inPublicAndOrgs.addAll(publicIds1);
+        inPublicAndOrgs.retainAll(inOrgsNoticeIds);
+        Set<String> inPublicAndOrgsNoticeids = new HashSet<>();
+        for (String id : inPublicAndOrgs) {
+            if (toPublicAndOrg.contains(id)) {
+                inPublicAndOrgsNoticeids.add(id);
+            }
+        }
+
+        Set<String> allMatchIds = new HashSet<>();
+        allMatchIds.addAll(userNoticeIds);
+        allMatchIds.addAll(inOrgsNoticeIds);
+        allMatchIds.addAll(inRolesNoticeIds);
+        allMatchIds.addAll(publicIds);
+        allMatchIds.addAll(inRolesAndOrgsNoticeids);
+        allMatchIds.addAll(inPublicAndOrgsNoticeids);
+
+        HumanCondition notNeed = new HumanCondition()
+                .filterEqual(SysNoticeReadModel::getUser, userId)
+                .filterOrStart()
+                .orEqual(SysNoticeReadModel::getIsReaded, 1)
+                .orEqual(SysNoticeReadModel::getIsNeedPush, 0)
+                .filterOrEnd();
+        Set<String> readedNoticeIds = noticeReadMapper.list(notNeed).stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(allMatchIds)) {
+            return 0;
+        }
+        HumanCondition matchCond = new HumanCondition()
+                .filterIn(SysNoticeModel::getId, allMatchIds.toArray());
+        if (CollUtil.isNotEmpty(readedNoticeIds)) {
+            matchCond.filterNotIn(SysNoticeModel::getId, readedNoticeIds.toArray());
+        }
+        int total = getModelMapper().total(matchCond);
+        return total;
     }
 }
