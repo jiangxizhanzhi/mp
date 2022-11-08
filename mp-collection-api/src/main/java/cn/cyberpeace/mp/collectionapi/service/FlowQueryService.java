@@ -155,13 +155,17 @@ public class FlowQueryService {
      */
     private void fillEmptyTrendVO(List<TrendVO> vos, List<String> lines, int pointsNum, int interval) {
         final char LAST_CHAR = (char) ((interval % 10) + '0');
-        List<String> timePoints = Lists.newArrayList();
-        if(vos.size() > 0) {
-            timePoints = vos.get(0).getCounts().stream().map(Count::getTime).collect(Collectors.toList());
-        } else {
+        List<String> timePoints = Lists.newArrayList();;
+        for(TrendVO vo : vos) {
+            if(CollectionUtils.isNotEmpty(vo.getCounts())) {
+                timePoints = vo.getCounts().stream().map(Count::getTime).collect(Collectors.toList());
+                break;
+            }
+        }
+        if(CollectionUtils.isEmpty(timePoints)) {
             Calendar now = Calendar.getInstance();
             for(int i = 0; i < pointsNum; i++) {
-                now.add(Calendar.MINUTE, i > 0 ? -5 : 0);
+                now.add(Calendar.MINUTE, i > 0 ? -interval : 0);
                 String time = DateUtil.format(now.getTime(), "HH:mm");
                 char lastChar = time.charAt(time.length() - 1);
                 lastChar = lastChar >= LAST_CHAR ? LAST_CHAR : '0';
