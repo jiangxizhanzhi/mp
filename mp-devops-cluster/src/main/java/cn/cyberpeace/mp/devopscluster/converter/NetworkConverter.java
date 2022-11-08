@@ -43,11 +43,15 @@ public class NetworkConverter implements BaseConverter{
             NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkSubnetBO> subnets = Lists.newArrayList();
             if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp()));
+                subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps()));
             }
-            return  NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+            return NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
                     .status(networkModel.getStatus())
-                    .subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
+                    .subnets(subnets).createdAt(networkModel.getCreatedAt())
+                    .downloadSpeed(networkModel.getInBps())
+                    .uploadSpeed(networkModel.getOutBps())
+                    .nodeNum(networkModel.getNodeNum())
+                    .build();
         }).collect(Collectors.toList());
         BasePageBO<NetworkBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
