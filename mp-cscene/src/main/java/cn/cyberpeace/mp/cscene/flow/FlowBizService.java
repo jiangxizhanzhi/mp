@@ -93,7 +93,7 @@ public class FlowBizService {
 
         var flows = flowTaskBO.getFlows().stream().map(f -> {
             FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
-            taskFlow.setFlowId(f.getFlowId());
+            taskFlow.setFlowId(f.getId());
             taskFlow.setFlowGeneratorId(flowGeneratorId);
             taskFlow.setDelay(f.getDelay());
             taskFlow.setWeight(f.getWeight());

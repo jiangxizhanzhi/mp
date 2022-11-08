@@ -57,7 +57,7 @@ public class FlowTaskService extends BaseModelServiceImpl<FlowTaskModel, FlowTas
 		}
 		
 		List<TaskFlow> taskFlows = flowTaskBO.getFlows();
-		List<String> flowIds = taskFlows.stream().map(TaskFlow::getFlowId).collect(Collectors.toList());
+		List<String> flowIds = taskFlows.stream().map(TaskFlow::getId).collect(Collectors.toList());
 		FlowQueryParams queryParams = new FlowQueryParams();
 		queryParams.setIds(flowIds.toArray(new String[0]));
 		ListObjServiceResult<FlowModel> flowModelResult = flowService.list(queryParams);
@@ -66,7 +66,7 @@ public class FlowTaskService extends BaseModelServiceImpl<FlowTaskModel, FlowTas
 				.collect(Collectors.toMap(FlowModel::getId, Function.identity(), (v1, v2) -> v2));
 		double totalWeight = taskFlows.stream().mapToInt(TaskFlow::getWeight).sum();
 		for (TaskFlow taskFlow : taskFlows) {
-			FlowModel flowModel = flowModelMap.get(taskFlow.getFlowId());
+			FlowModel flowModel = flowModelMap.get(taskFlow.getId());
 			if(flowModel != null) {
 				taskFlow.setName(flowModel.getName());
 				taskFlow.setProtocols(flowModel.getProtocols());
