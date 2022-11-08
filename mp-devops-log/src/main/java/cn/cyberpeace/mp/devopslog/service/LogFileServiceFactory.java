@@ -35,16 +35,59 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LogFileServiceFactory {
 
+    @javax.annotation.Resource(name = "sysOptionServiceImpl")
+    private OptionService optionService;
+
     private final List<LogFileService> fileServiceList;
 
-    private Map<String, LogFileService> logFileServiceMap = new ConcurrentHashMap();
+    private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
+
+    @PostConstruct
+    public void init(){
+        logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
+    }
 
     /**
      * 查询全部日志上报数据
      * @return
      */
     public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
-        return new ArrayList<>();
+        List<LogReportDTO> result = Lists.newArrayList();
+        if (Objects.nonNull(basePageRequest.getType())) {
+            LogFileService logFileService = logFileServiceMap.get(basePageRequest.getType().name());
+            if (Objects.isNull(logFileService)) {
+                result.addAll(logFileServiceMap.get(LogReportTypeEnum.REPORT.name()).list(basePageRequest.getType().name()));
+            } else {
+                result.addAll(logFileService.list(basePageRequest.getType().name()));
+            }
+        } else {
+            var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
+            List<OptionBO> options = res.getSource();
+            List<String> codes = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(options)) {
+                codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
+            }
+
+
+            List<LogFileService> logFileServices = new ArrayList<>();
+            CollectionUtil.addAll(logFileServices, fileServiceList);
+            //processVisibleLogFileServices(logFileServices);
+
+            for (LogFileService logFileService : fileServiceList) {
+                if (isReportTypeMatch(logFileService.logReportType(), codes)) {
+                    var list = logFileService.list(null);
+                    result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+                }
+            }
+
+            var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
+            for (String code : codes) {
+                var list = logservice.list(code);
+                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+            }
+        }
+
+        return result;
     }
 
     private boolean isReportTypeMatch(String reportType, List<String> codes) {
@@ -61,7 +104,7 @@ public class LogFileServiceFactory {
     public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
         String logReportType = downloadDTO.getType();
         LogFileService logFileService = logFileServiceMap.get(logReportType);
-        if (Objects.isNull(logFileService)) {
+        if (Objects.isNull(logFileService)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         return logFileService.download(downloadDTO);
