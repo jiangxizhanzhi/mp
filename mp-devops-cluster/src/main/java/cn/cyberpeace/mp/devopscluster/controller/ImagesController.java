@@ -148,9 +148,9 @@ public class ImagesController {
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
         List<ImagesPageVO> list = convertBOToPageVO(model);
-
-        return new PageResult<>(list,model.getTotal());
+        return new PageResult<>(list, model.getTotal());
     }
+
 
     /**
      * 新增

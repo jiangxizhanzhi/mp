@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.service.ImageMockService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,8 @@ public class TargetConverter{
     private final CsceneSpecialService csceneSpecialService;
 
     private final DevopsTargetService devopsTargetService;
+
+    private final ImageMockService imageMockService;
 
     /**
      * 分页查询
@@ -81,7 +84,10 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+        //CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
+        List<Device> deviceList = imageMockService.filterByIds(ids);
+        model.setList(deviceList);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             sceneConvertModel.setList(Lists.newArrayList());

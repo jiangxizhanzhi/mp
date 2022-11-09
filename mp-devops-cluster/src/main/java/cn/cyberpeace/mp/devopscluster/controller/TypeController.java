@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 类型管理类
@@ -722,7 +721,7 @@ public class TypeController {
     @ApiImplicitParam(name = "firstTypeId", value = "一级分类id", dataTypeClass = Integer.class)
     @GetMapping("/l2-categories")
     public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId){
-        ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
+        /*ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
         if (Objects.isNull(l1AndL2AndL3Type)){
             return new Result<>();
         }
@@ -730,8 +729,108 @@ public class TypeController {
             List<TargetType> l2AndL3TypeList = l1AndL2AndL3Type.getList();
             l2AndL3TypeList = l2AndL3TypeList.stream().filter(type -> Objects.equals(firstTypeId, type.getId())).collect(Collectors.toList());
             l1AndL2AndL3Type.setList(l2AndL3TypeList);
-        }
+        }*/
+        ListResult<TargetType> l1AndL2AndL3Type = mockTypes();
         return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));
+    }
+
+    private ListResult<TargetType> mockTypes() {
+        String itemsStr = "[\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"应用系统\",\n" +
+                "    \"parent_id\": null,\n" +
+                "    \"child\": [\n" +
+                "      {\n" +
+                "        \"id\": 30,\n" +
+                "        \"name\": \"网络服务\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 31,\n" +
+                "        \"name\": \"中间件\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 32,\n" +
+                "        \"name\": \"数据库\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 33,\n" +
+                "        \"name\": \"软件开发\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 34,\n" +
+                "        \"name\": \"基础镜像\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 35,\n" +
+                "        \"name\": \"运维工具\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 36,\n" +
+                "        \"name\": \"邮件服务器\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 37,\n" +
+                "        \"name\": \"文件服务器\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 38,\n" +
+                "        \"name\": \"企业办公\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 39,\n" +
+                "        \"name\": \"统计分析\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 40,\n" +
+                "        \"name\": \"负载均衡\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 41,\n" +
+                "        \"name\": \"应用框架\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 42,\n" +
+                "        \"name\": \"Web服务器\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"id\": 43,\n" +
+                "        \"name\": \"其他\",\n" +
+                "        \"parent_id\": 2,\n" +
+                "        \"child\": null\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]";
+
+        List<TargetType> types = JSONObject.parseArray(itemsStr, TargetType.class);
+        return new ListResult<>(types);
     }
 
 

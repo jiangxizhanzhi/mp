@@ -160,8 +160,8 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
-        /*
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        //TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel l1AndL2AndL3Type = mockTypeAllModel();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
 
@@ -193,10 +193,7 @@ public class DevopsTargetController {
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
             deviceList.addAll(secondDeviceList);
         }
-        */
-
-        ListResult listResult = mockAllDevices(request.getParentSystemType());
-        return new Result(listResult);
+        return new Result(new ListResult<>(deviceList));
     }
 
     private ListResult mockAllDevices(Integer systemType) {
@@ -2174,6 +2171,422 @@ public class DevopsTargetController {
         }
 
         return new ListResult<>(finalList);
+    }
+
+
+    private TypeAllConvertModel mockTypeAllModel() {
+        String str = "{\n" +
+                "    \"secondTypeList\": [\n" +
+                "        {\n" +
+                "            \"name\": \"WINDOWS\",\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 1\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"LINUX\",\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 2\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"UNIX\",\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 3\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"BSD\",\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 4\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"OTHER\",\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 5\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u7f51\\u7edc\\u670d\\u52a1\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 30\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u4e2d\\u95f4\\u4ef6\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 31\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u6570\\u636e\\u5e93\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 32\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u8f6f\\u4ef6\\u5f00\\u53d1\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 33\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u57fa\\u7840\\u955c\\u50cf\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 34\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u8fd0\\u7ef4\\u5de5\\u5177\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 35\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u90ae\\u4ef6\\u670d\\u52a1\\u5668\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 36\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u6587\\u4ef6\\u670d\\u52a1\\u5668\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 37\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u4f01\\u4e1a\\u529e\\u516c\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 38\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u7edf\\u8ba1\\u5206\\u6790\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 39\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u8d1f\\u8f7d\\u5747\\u8861\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 40\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5e94\\u7528\\u6846\\u67b6\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 41\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Web\\u670d\\u52a1\\u5668\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 42\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5176\\u4ed6\",\n" +
+                "            \"l1ParentId\": 2,\n" +
+                "            \"id\": 43\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u4ea4\\u6362\\u673a\",\n" +
+                "            \"l1ParentId\": 3,\n" +
+                "            \"id\": 50\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u8def\\u7531\\u5668\",\n" +
+                "            \"l1ParentId\": 3,\n" +
+                "            \"id\": 51\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u9632\\u706b\\u5899\",\n" +
+                "            \"l1ParentId\": 3,\n" +
+                "            \"id\": 52\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"IDS\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 500\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"WAF\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 501\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"VPN\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 502\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u884c\\u4e3a\\u7ba1\\u7406\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 503\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5b89\\u5168\\u5ba1\\u8ba1\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 504\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u9632\\u706b\\u5899\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 505\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"IPS\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 506\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"SIEM\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 507\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5176\\u4ed6\",\n" +
+                "            \"l1ParentId\": 4,\n" +
+                "            \"id\": 508\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"idStringModelList\": [],\n" +
+                "    \"firstTypeList\": [\n" +
+                "        {\n" +
+                "            \"name\": \"\\u64cd\\u4f5c\\u7cfb\\u7edf\",\n" +
+                "            \"id\": 1\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5e94\\u7528\\u7cfb\\u7edf\",\n" +
+                "            \"id\": 2\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u7f51\\u7edc\\u8bbe\\u5907\",\n" +
+                "            \"id\": 3\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5b89\\u5168\\u8bbe\\u5907\",\n" +
+                "            \"id\": 4\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"thirdTypeList\": [\n" +
+                "        {\n" +
+                "            \"name\": \"WindowsXP\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 97\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2016\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 98\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows8\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 99\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2008\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 100\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2003\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 101\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows Vista\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 102\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2019\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 103\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2012\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 104\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2010\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 105\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows10\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 106\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows7\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 107\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Windows-Server2000\",\n" +
+                "            \"l2ParentId\": 1,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 108\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Gentoo\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 301\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Mint\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 302\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Arch\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 303\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Ubuntu\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 304\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Deepin\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 305\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"CentOS\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 306\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Debian\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 307\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Rocky\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 308\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Kali\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 309\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Fedora\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 310\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Android\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 311\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Redhat\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 312\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"SUSE\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 313\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"\\u5176\\u4ed6\",\n" +
+                "            \"l2ParentId\": 2,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 314\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"AIX\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 1\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"HP-UX\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 2\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Solaris\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 3\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"IRIX\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 4\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"A/UX\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 5\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"Xenix\",\n" +
+                "            \"l2ParentId\": 3,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 6\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"FreeBSD\",\n" +
+                "            \"l2ParentId\": 4,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 201\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"OpenBSD\",\n" +
+                "            \"l2ParentId\": 4,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 202\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"NetBSD\",\n" +
+                "            \"l2ParentId\": 4,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 203\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"DragonFly BSD\",\n" +
+                "            \"l2ParentId\": 4,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 204\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"IOS\",\n" +
+                "            \"l2ParentId\": 5,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 401\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"name\": \"MacOS\",\n" +
+                "            \"l2ParentId\": 5,\n" +
+                "            \"l1ParentId\": 1,\n" +
+                "            \"id\": 402\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"idIntegerModelList\": [],\n" +
+                "    \"items\": []\n" +
+                "}";
+        TypeAllConvertModel model = JSONObject.parseObject(str, TypeAllConvertModel.class);
+        return model;
     }
 
 
