@@ -6,11 +6,13 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devopscluster.converter.ComputeStatusConverter;
 import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devopscluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
@@ -21,6 +23,7 @@ import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devopscluster.converter.RouterConverter;
 import cn.cyberpeace.mp.devopscluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
+import cn.cyberpeace.mp.devopscluster.converter.bo.ComputeStatusBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -28,6 +31,7 @@ import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorServiceStateConv
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.ComputeStatusDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.HypervisorActionDTO;
 import cn.cyberpeace.mp.devopscluster.dto.HypervisorWeightAndMaxInstanceDTO;
@@ -44,6 +48,7 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
+import cn.cyberpeace.mp.devopscluster.vo.ComputeStatusVO;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorServiceStateVO;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorStatisticsVO;
@@ -115,6 +120,8 @@ public class CloudPlatformMonitorController {
     private final MonitorScriptControlService monitorScriptControlService;
 
     private final HostStateService hostStateService;
+
+    private final ComputeStatusConverter computeStatusConverter;
 
     /**
      * 资源统计
@@ -386,6 +393,54 @@ public class CloudPlatformMonitorController {
             hypervisorPageVOList.add(hypervisorPageVO);
         });
         return ResultCommon.success(hypervisorPageVOList);
+    }
+
+
+    /**
+     * 获取云平台服务器状态
+     * @return
+     */
+    @ApiOperation("获取云平台服务器状态")
+    @GetMapping("/compute_status")
+    public ServiceResult<ComputeStatusVO> getComputeStatus(@Validated ComputeStatusDTO dto){
+        ComputeStatusBO bo = computeStatusConverter.getComputeStatus(dto);
+        ComputeStatusVO vo = computeStatusBO2VO(bo);
+        return ResultCommon.success(vo);
+    }
+
+
+
+    private ComputeStatusVO computeStatusBO2VO(ComputeStatusBO bo) {
+        if (Objects.isNull(bo)) {
+            return null;
+        }
+        ComputeStatusVO vo = new ComputeStatusVO();
+        ComputeStatusVO.CpuData cpuData = new ComputeStatusVO.CpuData();
+        if (Objects.nonNull(bo.getCpuData())) {
+            BeanUtils.copyProperties(bo.getCpuData(), cpuData);
+            vo.setCpuData(cpuData);
+        }
+
+        ComputeStatusVO.DiskData diskData = new ComputeStatusVO.DiskData();
+        if (Objects.nonNull(bo.getDiskData())) {
+            BeanUtils.copyProperties(bo.getDiskData(), diskData);
+            vo.setDiskData(diskData);
+        }
+
+
+        ComputeStatusVO.MemoryData memoryData = new ComputeStatusVO.MemoryData();
+        if (Objects.nonNull(bo.getMemoryData())) {
+            BeanUtils.copyProperties(bo.getMemoryData(), memoryData);
+            vo.setMemoryData(memoryData);
+        }
+
+        ComputeStatusVO.AssistStorage assistStorage = new ComputeStatusVO.AssistStorage();
+        if (Objects.nonNull(bo.getAssistStorage())) {
+            BeanUtils.copyProperties(bo.getAssistStorage(), assistStorage);
+            vo.setAssistStorage(assistStorage);
+        }
+
+        return vo;
     }
 
 
