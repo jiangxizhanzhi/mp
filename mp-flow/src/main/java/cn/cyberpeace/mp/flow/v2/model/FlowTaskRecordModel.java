@@ -39,4 +39,8 @@ public class FlowTaskRecordModel extends BaseModel {
     private String filterProtocols;
     @DefaultStr
     private String flows;
+    @DefaultInt
+    private Integer ixiaRunId;
+    @DefaultStr
+    private String ixiaTestName;
 }

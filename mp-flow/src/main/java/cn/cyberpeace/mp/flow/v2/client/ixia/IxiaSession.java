@@ -115,11 +115,11 @@ public class IxiaSession {
         }
     }
 
-    public String createNeighborhood() {
+    public String createNeighborhood(String targetIp) {
         // 新建neighborhood
         BaseCreateData baseCreateData = new BaseCreateData();
         // todo 暂时写死要加载的模板
-        baseCreateData.setTemplate("zl_nei_tem_1");
+        baseCreateData.setTemplate("server_zl");
         this.neighborhoodClient.addNeighborhood(baseCreateData);
         // 配置neighborhood
 //        IpRouterData addIpRouterToNeighborhoodData = new IpRouterData();
@@ -152,12 +152,13 @@ public class IxiaSession {
 //        staticHostsData.setBehindSnapt(false);
 //        staticHostsData.setNetmask(8);
 //        this.neighborhoodClient.addStaticHostsToNeighborhood(addStaticHostsToNeighborhoodData);
-        this.neighborhoodClient.changeStaticHosts(staticHostsData);
+
+//        this.neighborhoodClient.changeStaticHosts(staticHostsData);
         ExternalHostsData externalHostsData = new ExternalHostsData();
 //        externalHostsData.setId("66666");
 //        externalHostsData.setIpAddress("192.168.1.3");
-        externalHostsData.setIpAddress("192.168.1.3");
-        externalHostsData.setTags("i1_default");
+        externalHostsData.setIpAddress(targetIp);
+//        externalHostsData.setTags("i2_default");
 //        this.neighborhoodClient.addExternalHostsToNeighborhood(addExternalHostsToNeighborhoodData);
         this.neighborhoodClient.changeExternalHosts(externalHostsData);
         // 保存neighborhood
@@ -265,7 +266,7 @@ public class IxiaSession {
 
     public StartTestResult startTest(String name) {
         RunTestData runTestData = new RunTestData();
-        runTestData.setGroup("3");
+        runTestData.setGroup("2");
         runTestData.setModelname(name);
         runTestData.setAllowMalware(true);
         return this.testClient.startTest(runTestData);

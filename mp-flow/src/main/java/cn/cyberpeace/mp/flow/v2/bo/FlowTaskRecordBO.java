@@ -20,6 +20,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     private String targetIp;
     private String targetMac;
     private String targetNetworkId;
+    private String targetResourceId;
     private Integer status;
 
     private String name;
@@ -27,6 +28,8 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     private Integer category;
     private Integer bandwidth;
     private String loadMode;
+    private Integer ixiaRunId;
+    private String ixiaTestName;
     /**
      * 负载矩阵集合
      */

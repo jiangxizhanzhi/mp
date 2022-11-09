@@ -120,6 +120,11 @@ public class CloudHttpClient {
         return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
+    public <T> CloudResponse<T> cloudGet(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
+
+        return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "get", url, data, param);
+    }
+
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
         return cloudResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
     }

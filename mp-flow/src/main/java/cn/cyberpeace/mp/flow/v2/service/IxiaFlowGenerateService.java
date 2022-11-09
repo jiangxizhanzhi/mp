@@ -1,13 +1,18 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaSession;
 import cn.cyberpeace.mp.flow.v2.client.ixia.PcapFlow;
 import cn.cyberpeace.mp.flow.v2.client.ixia.ProtocolFlow;
 import cn.cyberpeace.mp.flow.v2.client.ixia.StopTestData;
+import cn.cyberpeace.mp.flow.v2.client.trex.NetworkInfos;
+import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
+import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +31,38 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
 
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        // 创建网卡
+        // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
+//        boolean needCreateNet = true;
+//        String portMac = null;
+        String portIp = null;
+//        VirtualMachine virtualMachine = new VirtualMachine();
+//        var addPortResult = virtualMachine.addPort(flowTaskRecordBO.getTargetResourceId(),"56e0eaed-c3f9-44f0-a964-ab9107a067d1");
+        portIp = "172.27.1.55";
+//        if (!generatorBO.getNics().isEmpty()) {
+//            for (int i = 0; i < generatorBO.getNics().size(); i++) {
+//                if (generatorBO.getNics().get(i).getCpCloudNetworkId().equals(flowTaskRecordBO.getTargetNetworkId())) {
+//                    needCreateNet = false;
+//                    portMac = generatorBO.getNics().get(i).getMac();
+//                    portIp = generatorBO.getNics().get(i).getIp();
+//                }
+//            }
+//        }
+//        if (needCreateNet) {
+//            var flowGeneratorService = BeanCommon.getBean(FlowGeneratorService.class);
+//            List<FlowGeneratorBO.Nic> nics = new ArrayList<>();
+//            FlowGeneratorBO.Nic nic = new FlowGeneratorBO.Nic();
+//            nic.setCpCloudNetworkId(flowTaskRecordBO.getTargetNetworkId());
+//            nics.add(nic);
+//            var addPortResult = flowGeneratorService.addFlowGeneratorNics(generatorBO.getId(), nics);
+//            if (addPortResult != null && !addPortResult.getSource().isEmpty()) {
+//                portIp = addPortResult.getSource().get(0).getIp();
+//            }
+//        }
         ixiaSession.open();
         String strikeListName = ixiaSession.createStrikeList();
         String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(50, 100, "binomial"));
-//        String neighborhood = ixiaSession.createNeighborhood();
+        String neighborhood = ixiaSession.createNeighborhood(portIp);
 
         // 取任务详情
         List<ProtocolFlow> protocolFlows = new ArrayList<>();
@@ -60,11 +93,16 @@ class IxiaFlowGenerateService implements IGenerateService {
         // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
         ixiaSession.createCaptureManager(pcapFlows);
-        String testName = ixiaSession.createTest("zl_neigh", "profileName", strikeListName, recreateDatas, loadName);
+        String testName = ixiaSession.createTest(neighborhood, "profileName", strikeListName, recreateDatas, loadName);
 
         var res = ixiaSession.startTest(testName);
         ixiaSession.close();
-
+        FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
+        recordModel.setId(flowTaskRecordBO.getId());
+        recordModel.setIxiaTestName(testName);
+        recordModel.setIxiaRunId(res.getRunid());
+        FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+        recordMapper.update(recordModel);
 //        IxiaClient ixiaClient = new IxiaClient(generatorBO.getServer());
 //        // 登录
 //        ixiaClient.login(generatorBO.getUsername(), generatorBO.getPassword());
@@ -103,8 +141,7 @@ class IxiaFlowGenerateService implements IGenerateService {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
         StopTestData stopTestData = new StopTestData();
-        // todo 为方便用status来存储runid
-        stopTestData.setRunid(flowTaskRecordBO.getStatus());
+        stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
         ixiaSession.stopTest(stopTestData);
         ixiaSession.close();
         return null;
@@ -112,11 +149,6 @@ class IxiaFlowGenerateService implements IGenerateService {
 
     @Override
     public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
-//        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
-//        ixiaSession.open();
-//        // todo 暂停TEST没参数？等可以测试了看下怎么用
-//        ixiaSession.pauseTest();
-//        ixiaSession.close();
         return null;
     }
 
@@ -130,11 +162,15 @@ class IxiaFlowGenerateService implements IGenerateService {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
         StopTestData stopTestData = new StopTestData();
-        // todo 为方便用status来存储runid
-        stopTestData.setRunid(flowTaskRecordBO.getStatus());
+        stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
         ixiaSession.stopTest(stopTestData);
-        var res = ixiaSession.startTest(flowTaskRecordBO.getName());
+        var res = ixiaSession.startTest(flowTaskRecordBO.getIxiaTestName());
         ixiaSession.close();
+        FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
+        recordModel.setId(flowTaskRecordBO.getId());
+        recordModel.setIxiaRunId(res.getRunid());
+        FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+        recordMapper.update(recordModel);
         return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
     }
 

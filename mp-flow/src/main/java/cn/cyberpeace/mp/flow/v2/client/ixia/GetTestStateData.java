@@ -17,9 +17,4 @@ public class GetTestStateData implements HttpData {
     private String rtsgroup;
     private Integer numSeconds;
     private Integer numDataPoints;
-
-    @Override
-    public String toContent() {
-        return JsonUtils.snakeStringify(this);
-    }
 }

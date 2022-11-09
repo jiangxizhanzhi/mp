@@ -111,6 +111,7 @@ public class FlowBizService {
         FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
         recordBO.fromModel(taskRecord);
         recordBO.setTargetNetworkId(networkId);
+        recordBO.setTargetResourceId(targetId);
         flowGenerateService.startFlowTask(recordBO);
         return new ServiceResult<>(recordBO);
     }
