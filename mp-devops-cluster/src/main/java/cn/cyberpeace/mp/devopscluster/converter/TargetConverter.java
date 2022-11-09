@@ -72,6 +72,7 @@ public class TargetConverter{
      * @return
      */
     public BasePageBO<Device> allTarget(ImagePageDTO dto) {
+        dto.setOwner(null);
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
