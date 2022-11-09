@@ -270,6 +270,7 @@ public class SceneExporter {
         result.put("virtualPlatform", "virtual-platform");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_EMPTY, "");
         return result;
     }
 

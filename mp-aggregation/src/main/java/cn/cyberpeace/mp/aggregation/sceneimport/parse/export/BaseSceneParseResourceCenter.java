@@ -47,6 +47,8 @@ public class BaseSceneParseResourceCenter {
 
     public static String SPECIAL_STR_OFF = "mp_special_str_off";
 
+    public static String SPECIAL_STR_EMPTY = "mp_special_str_empty";
+
     protected void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
         Map<String, Integer> fileName2Index = new HashMap<>();
         fileName2Index.put("file", 1);
