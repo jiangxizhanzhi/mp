@@ -59,8 +59,6 @@ public class NetworkController {
                     .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
                     .downloadSpeed(networkModel.getDownloadSpeed())
                     .uploadSpeed(networkModel.getUploadSpeed())
-                    //.freeIps(networkModel.getFreeIps())
-                    //.usedIps(networkModel.getUsedIps())
                     .nodeNum(networkModel.getNodeNum())
                     .build();
                 }
