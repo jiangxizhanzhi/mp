@@ -21,10 +21,11 @@ import java.util.List;
 public class SystemAlarmVO {
 
     public SystemAlarmVO(CloudPlatformMonitorVO cloudPlatformMonitorVO, BizServiceMonitorVO bizServiceMonitorVO,
-                         ServerMonitorVO serverMonitorVO) {
+                         ServerMonitorVO serverMonitorVO, NetworkMonitorVO networkMonitorVO) {
         this.cloudPlatformMonitorVO = cloudPlatformMonitorVO;
         this.bizServiceMonitorVO = bizServiceMonitorVO;
         this.serverMonitorVO = serverMonitorVO;
+        this.networkMonitorVO = networkMonitorVO;
     }
 
     @ApiModelProperty("云平台服务监控")
@@ -35,6 +36,9 @@ public class SystemAlarmVO {
 
     @ApiModelProperty("服务器监控")
     private ServerMonitorVO serverMonitorVO;
+
+    @ApiModelProperty("网络监控")
+    private NetworkMonitorVO networkMonitorVO;
 
     @ApiModelProperty("服务告警趋势")
     List<AlarmStatisticsVO> serviceAlarmList = new ArrayList<>();

@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.devopscluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devopscluster.vo.BizServiceMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.CloudPlatformMonitorVO;
+import cn.cyberpeace.mp.devopscluster.vo.NetworkMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
@@ -34,7 +35,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -200,7 +205,13 @@ public class ServiceMonitorService {
             }
         }
 
-        return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO);
+        // todo 网络监控
+        NetworkMonitorVO networkMonitorVO = new NetworkMonitorVO();
+        networkMonitorVO.setAlarmCount(0);
+        networkMonitorVO.setErrorCount(0);
+        networkMonitorVO.setTotalCount(0);
+
+        return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO, networkMonitorVO);
     }
 
 
