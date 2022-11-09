@@ -101,6 +101,7 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public BasePageBO<ImageConvertModel> page(ImagePageDTO dto) {
+        dto.setOwner(null);
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
