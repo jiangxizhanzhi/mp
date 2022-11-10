@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description: 网络监控对象
@@ -25,5 +29,8 @@ public class NetworkMonitorVO {
 
     @ApiModelProperty("告警数量")
     private int alarmCount;
+
+    @ApiModelProperty("虚拟网络")
+    private List<NetworkBO> networks = new ArrayList<>();
 
 }

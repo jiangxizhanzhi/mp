@@ -24,7 +24,7 @@ public class SystemAlarmModel extends BaseModel {
 	/**
 	 * 告警类型：0 云平台服务, 1 业务服务 2 服务器
 	 */
-	@ApiModelProperty(value = "告警类型：0 云平台服务, 1 业务服务 2 服务器")
+	@ApiModelProperty(value = "告警类型：0 云平台服务, 1 业务服务 2 服务器, 3 虚拟网络(子网数不足), 4 虚拟网络(网络IO负载过高)")
 	private Integer alarmType;
 
 	/**

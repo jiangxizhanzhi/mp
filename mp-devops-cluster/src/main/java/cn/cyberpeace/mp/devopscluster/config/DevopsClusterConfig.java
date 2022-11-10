@@ -26,6 +26,16 @@ public class DevopsClusterConfig {
      */
     private Integer diskAlarmPercent;
 
+    /**
+     * 虚拟网络已使用IP占比告警阈值
+     */
+    private Integer netIPUsageAlarmPercent;
+
+    /**
+     * 虚拟网络IO占比告警阈值
+     */
+    private Integer netIOUsageAlarmPercent;
+
     private Boolean publicNetProxyServer;
 
     /**
@@ -77,4 +87,5 @@ public class DevopsClusterConfig {
      * MP端口
      */
     private String mpPort;
+
 }

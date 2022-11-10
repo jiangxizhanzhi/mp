@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
+import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ServiceRestartStatusDto;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmTypeEnum;
@@ -62,6 +65,8 @@ public class ServiceMonitorService {
     private final MonitorScriptControlService monitorScriptControlService;
 
     private final ImagesConverter imagesConverter;
+
+    private final NetworkConverter networkConverter;
 
 
     /**
@@ -140,6 +145,7 @@ public class ServiceMonitorService {
         CloudPlatformMonitorVO cloudPlatformMonitorVO = new CloudPlatformMonitorVO();
         BizServiceMonitorVO bizServiceMonitorVO = new BizServiceMonitorVO();
         ServerMonitorVO serverMonitorVO = new ServerMonitorVO();
+        NetworkMonitorVO networkMonitorVO = new NetworkMonitorVO();
 
         // 查询当前生效的告警信息
         List<SystemAlarmModel> enabledAlarms =
@@ -149,9 +155,12 @@ public class ServiceMonitorService {
             Long cpAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CP.toValue()).count();
             Long crAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CR.toValue()).count();
             Long serverAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.SERVER.toValue()).count();
+            Long netIPAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.NETWORK_IP_USAGE.toValue()).count();
+            Long netIOAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.NETWORK_IO_USAGE.toValue()).count();
             cloudPlatformMonitorVO.setAlarmCount(cpAlarmCount.intValue());
             bizServiceMonitorVO.setAlarmCount(crAlarmCount.intValue());
             serverMonitorVO.setAlarmCount(serverAlarmCount.intValue());
+            networkMonitorVO.setAlarmCount(netIPAlarmCount.intValue() + netIOAlarmCount.intValue());
         }
 
         // 服务器监控
@@ -203,13 +212,13 @@ public class ServiceMonitorService {
                 bizServiceMonitorVO.setTotalCount(bizTotalCount);
                 bizServiceMonitorVO.setErrorCount(bizErrorCount);
             }
-        }
 
-        // todo 网络监控
-        NetworkMonitorVO networkMonitorVO = new NetworkMonitorVO();
-        networkMonitorVO.setAlarmCount(0);
-        networkMonitorVO.setErrorCount(0);
-        networkMonitorVO.setTotalCount(0);
+            // todo 网络监控
+            BasePageBO<NetworkBO> model = networkConverter.page(new NetworkPageDTO());
+            List<NetworkBO> networks = model.getList();
+            networkMonitorVO.setTotalCount(model.getTotal());
+            networkMonitorVO.setNetworks(networks);
+        }
 
         return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO, networkMonitorVO);
     }
