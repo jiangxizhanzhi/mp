@@ -69,12 +69,12 @@ public class ResourceCenterService {
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 
-    public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath) {
+    public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         var cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath);
+        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath,sceneNumber,disableImageExport);
         return new ServiceResult<>(result);
     }
 
