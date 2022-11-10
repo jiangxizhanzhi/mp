@@ -369,6 +369,11 @@ public class SceneElementMonitorService {
      */
     private void mergeModifyData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
             HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
+        // 无分页标识忽略
+        if(hostEventQueryParams.getPage() == null) {
+            return;
+        }
+        
         List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         List<String> ruleGroups = hostEventQueryParams.getRuleGroups();
         String sicLaunchId = null;
@@ -388,8 +393,11 @@ public class SceneElementMonitorService {
         Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
                 .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
         ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
-        hostEventsBos.getSource().setTotal(hostEventsBos.getSource().getTotal() + fileEventModels.getTotal());
 
+        // 设置total
+        int alreadyHasNum = hostEventsBos.getSource().getTotal();
+        hostEventsBos.getSource().setTotal(alreadyHasNum + fileEventModels.getTotal());
+        
         // 当前页元素数量足够
         int pageSize = hostEventQueryParams.getPageSize();
         if (bos.size() == pageSize) {
@@ -397,11 +405,9 @@ public class SceneElementMonitorService {
         }
         
         // 计算分页起始位置
-        int alreadyHasNum = hostEventsBos.getSource().getTotal();
         int totalNeedNum = pageSize * hostEventQueryParams.getPage();
         int stillNeedNum = totalNeedNum - alreadyHasNum;
         int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
-
         List<FileEventModel> fEventModels = fileEventModels.getObjs();
         if (startIndex >= fEventModels.size()) {
             return;
