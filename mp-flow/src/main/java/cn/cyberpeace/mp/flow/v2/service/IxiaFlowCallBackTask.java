@@ -57,6 +57,7 @@ public class IxiaFlowCallBackTask implements FlowCallBackTask {
             }
         } catch (Exception e) {
             log.info("ixia get TEST status fail, runid is {}, error message is {}", this.runid, e.getMessage());
+        } finally {
             ixiaSession.close();
         }
         ixiaSession.close();

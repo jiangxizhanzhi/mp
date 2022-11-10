@@ -95,7 +95,6 @@ class IxiaFlowGenerateService implements IGenerateService {
                 }
             }
             // 攻击流量
-            stringList.add("/strikes/generic/ixia/apache_1_3_mod_proxy_buffer_overflow_proxy_attack.xml");
             String strikeListName = ixiaSession.createStrikeList(stringList);
             // 计算负载
             String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
@@ -106,7 +105,7 @@ class IxiaFlowGenerateService implements IGenerateService {
             // 上传pcap
             ixiaSession.createCaptureManager(pcapFlows);
             // 创建TEST
-            String attackProfile = "Browser: Low Evasion";
+            String attackProfile = "Default evasion settings";
             testName = ixiaSession.createTest(neighborhood, "profileName", strikeListName, recreateDatas, loadName, attackProfile);
             // 启动TEST
             var res = ixiaSession.startTest(testName);
@@ -119,6 +118,7 @@ class IxiaFlowGenerateService implements IGenerateService {
             return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         } catch (Exception e) {
             log.info("ixia start TEST fail, TEST name is {}, error message is {}", testName, e.getMessage());
+        } finally {
             ixiaSession.close();
         }
         ixiaSession.close();
@@ -135,6 +135,7 @@ class IxiaFlowGenerateService implements IGenerateService {
             ixiaSession.stopTest(stopTestData);
         } catch (Exception e) {
             log.info("ixia stop TEST fail, runid is {}, error message is {}", flowTaskRecordBO.getIxiaRunId(), e.getMessage());
+        } finally {
             ixiaSession.close();
         }
         ixiaSession.close();
@@ -168,6 +169,7 @@ class IxiaFlowGenerateService implements IGenerateService {
             return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         } catch (Exception e) {
             log.info("ixia restart TEST fail, ixia test name is {}, error message is {}", flowTaskRecordBO.getIxiaTestName(), e.getMessage());
+        } finally {
             ixiaSession.close();
         }
         ixiaSession.close();
