@@ -340,23 +340,6 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        var request = new WazuhEventRequest();
-        request.setPageNum(queryParams.getPage());
-        request.setPageSize(queryParams.getPageSize());
-        request.setAgentNames(new ArrayList<>(agentNameElementMap.keySet()));
-
-        // 查询时间段 默认使用场景创建到当前时间
-        if (StringUtils.isBlank(queryParams.getStartTime())) {
-            request.setStartTime(sceneHandler.getScene().getCreateTime());
-        } else {
-            request.setStartTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
-        }
-        if (StringUtils.isBlank(queryParams.getEndTime())) {
-            request.setEndTime(LocalDateTime.now());
-        } else {
-            request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
-        }
-
         // catagories -> rule id set
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories()).getSource();
@@ -376,6 +359,7 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> ruleId2Files = new HashMap<>(ruleId2File);
         ruleId2Files.putAll(ruleId2AppNames);
 
+        WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>(agentNameElementMap.keySet()));
         if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
             // 取交集
             List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
@@ -388,27 +372,6 @@ public class ScenePluginCollectionSceneService {
                 request.setRuleIds(ruleIds);
             }
         }
-
-        if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
-            request.setLevels(queryParams.getLevels());
-        }
-
-        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
-            request.setKeyword(queryParams.getKeyword());
-        }
-
-        if (CollectionUtils.isNotEmpty(queryParams.getRuleGroups())) {
-            request.setRuleGroups(queryParams.getRuleGroups());
-        }
-
-        if (StringUtils.isNotEmpty(queryParams.getPath())) {
-            request.setPath(queryParams.getPath());
-        }
-
-        if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
-            request.setScroll(true);
-        }
-
         var result = dataCollectionService.queryFileEvents(request);
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
@@ -454,6 +417,49 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
     }
 
+    /**
+     * 生成Wazuh时间查询请求参数
+     * 
+     * @param queryParams
+     * @param sceneCreateTime
+     * @param agentNames
+     * @return
+     */
+    public WazuhEventRequest genWazuhEventRequest(HostEventQueryParams queryParams, LocalDateTime sceneCreateTime, List<String> agentNames) {
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setPageNum(queryParams.getPage());
+        request.setPageSize(queryParams.getPageSize());
+        request.setAgentNames(agentNames);
+        
+        // 查询时间段 默认使用场景创建到当前时间
+        if (StringUtils.isBlank(queryParams.getStartTime())) {
+            request.setStartTime(sceneCreateTime);
+        } else {
+            request.setStartTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
+        }
+        if (StringUtils.isBlank(queryParams.getEndTime())) {
+            request.setEndTime(LocalDateTime.now());
+        } else {
+            request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
+            request.setLevels(queryParams.getLevels());
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            request.setKeyword(queryParams.getKeyword());
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getRuleGroups())) {
+            request.setRuleGroups(queryParams.getRuleGroups());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getPath())) {
+            request.setPath(queryParams.getPath());
+        }
+        if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
+            request.setScroll(true);
+        }
+        
+        return request;
+    }
 
     /**
      * 滚动分页列表

@@ -89,4 +89,9 @@ public class WazuhEventRequest {
     @ApiModelProperty(value = "是否是滚动分页请求")
     private boolean scroll = false;
 
+    /**
+     * 事件触发标识id
+     */
+    @ApiModelProperty(value = "事件触发标识id")
+    private String sicLaunchId;
 }

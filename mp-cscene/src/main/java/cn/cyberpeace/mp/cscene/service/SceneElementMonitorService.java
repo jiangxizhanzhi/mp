@@ -34,6 +34,8 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -350,7 +353,73 @@ public class SceneElementMonitorService {
         hostEventQueryParams.setPath(path);
         hostEventQueryParams.setPage(pageRequest.getPage());
         hostEventQueryParams.setPageSize(pageRequest.getPageSize());
-        return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
+        ListObjServiceResult<CollectionHostEventBO> hostEventsBos = csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
+        mergeModifyData(hostEventsBos, hostEventQueryParams, pageRequest, sceneHandler);        
+        
+        return hostEventsBos;
+    }
+    
+    /**
+     * 合并已有采集变动数据
+     * 
+     * @param hostEventsBos
+     * @param hostEventQueryParams
+     * @param pageRequest
+     * @param sceneHandler
+     */
+    private void mergeModifyData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
+            HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
+        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
+        // 当前页元素数量足够
+        int pageSize = hostEventQueryParams.getPageSize();
+        if (bos.size() == pageSize) {
+            return;
+        }
+
+        List<String> ruleGroups = hostEventQueryParams.getRuleGroups();
+        String sicLaunchId = null;
+        if (ruleGroups == CsceneBizConstant.FILE_MODIFY_GROUP) {
+            sicLaunchId = SicLaunchConfig.LAUNCH_ID_FILE;
+        } else if (ruleGroups == CsceneBizConstant.REGISTRY_MODIFY_GROUP) {
+            sicLaunchId = SicLaunchConfig.LAUNCH_ID_REGISTRY;
+        } else {
+            return;
+        }
+
+        WazuhEventRequest request = scenePluginCollectionSceneService.genWazuhEventRequest(hostEventQueryParams,
+                sceneHandler.getScene().getCreateTime(), getAgentNames(pageRequest, sceneHandler));
+        request.setSicLaunchId(sicLaunchId);
+        request.setRuleGroups(null);
+
+        Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
+                .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
+        ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
+
+        // 计算分页起始位置
+        int alreadyHasNum = hostEventsBos.getSource().getTotal();
+        int totalNeedNum = pageSize * hostEventQueryParams.getPage();
+        int stillNeedNum = totalNeedNum - alreadyHasNum;
+        int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
+        hostEventsBos.getSource().setTotal(alreadyHasNum + fileEventModels.getTotal());
+
+        List<FileEventModel> fEventModels = fileEventModels.getObjs();
+        if (startIndex >= fEventModels.size()) {
+            return;
+        }
+        fEventModels = fEventModels.subList(startIndex, Math.min(fEventModels.size(), stillNeedNum));
+
+        for (FileEventModel file : fEventModels) {
+            CollectionHostEventBO bo = new CollectionHostEventBO();
+            SceneElementBO ele = eidMap.get(file.getAgentId());
+            bo.setNodeId(ele.getId());
+            bo.setNodeName(ele.getName());
+            bo.setPath(file.getFilePath());
+            bo.setTime(file.getUpdateTime());
+            bos.add(bo);
+            if (bos.size() == hostEventQueryParams.getPageSize()) {
+                return;
+            }
+        }
     }
 
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
