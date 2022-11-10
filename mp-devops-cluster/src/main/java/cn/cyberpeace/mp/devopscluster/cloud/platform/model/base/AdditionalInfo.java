@@ -38,7 +38,7 @@ public class AdditionalInfo {
     private List<PasswordInfo> passwdInfos;
     
     @Data
-    public class ServiceInfo {
+    public static class ServiceInfo {
         private String cat;
         private String name;
         private Integer port;
@@ -47,12 +47,12 @@ public class AdditionalInfo {
     }
     
     @Data
-    public class DependentService extends ServiceInfo {
+    public static class DependentService extends ServiceInfo {
         private String dependentIp;
     }
     
     @Data
-    public class SoftwareInfo {
+    public static class SoftwareInfo {
         private String cat;
         private String name;
         private String language;
@@ -62,12 +62,12 @@ public class AdditionalInfo {
     }
     
     @Data
-    public class SourceInfo extends SoftwareInfo {
+    public static class SourceInfo extends SoftwareInfo {
         
     }
     
     @Data
-    public class PasswordInfo {
+    public static class PasswordInfo {
         private String user;
         private String passwd;
         private String relatedService;
