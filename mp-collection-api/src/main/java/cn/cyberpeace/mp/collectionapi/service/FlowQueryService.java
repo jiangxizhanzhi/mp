@@ -122,6 +122,9 @@ public class FlowQueryService {
      */
     public ListObjServiceResult<TrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
+        if(CollectionUtils.isEmpty(esipFieldBos)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
+        }
         Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTrend(esipFieldBos);
         Map<String, TrendVO> resultMap = Maps.newHashMap();
 
@@ -228,6 +231,9 @@ public class FlowQueryService {
      */
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(AttackFlowBaseRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
+        if(CollectionUtils.isEmpty(esipFieldBos)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
+        }
         List<AttackFlowBO> bos = flowInfoService.queryAttackFlow(esipFieldBos);
 
         List<AggAttackFlowVO> vos = bos.stream().map(bo -> {
@@ -386,6 +392,9 @@ public class FlowQueryService {
      */
     public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(AttackAggTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
+        if(CollectionUtils.isEmpty(esipFieldBos)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
+        }
         List<TeamAttackCountBO> bos = flowInfoService.queryTeamAttackAgg(esipFieldBos);
 
         Map<String, TeamAttackCountVO> name2CountMap = Maps.newHashMap();
@@ -441,6 +450,9 @@ public class FlowQueryService {
      * @return
      */
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
+        if(CollectionUtils.isEmpty(request.getSources())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
+        }
         // 转换数据结构
         List<IPField> sourceFields = request.getSources().stream().map(s -> {
             IPField ipField = new IPField();
@@ -510,8 +522,11 @@ public class FlowQueryService {
      * @return
      */
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
-        List<EsIpFieldBO> esIpFieldBOS = genIPFieldBos(request);
-        List<AttackFlowBO> bos = flowInfoService.queryAttackType(esIpFieldBOS);
+        List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
+        if(CollectionUtils.isEmpty(esipFieldBos)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
+        }
+        List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
 
         Map<String, TeamTopVO> vosMap = Maps.newHashMap();
         bos.forEach(bo -> {
