@@ -124,6 +124,6 @@ public class FlowTaskController implements
             profile.setValue(key);
             evasionProfileBO.getEvasionProfiles().add(profile);
         }
-        return new ServiceResult<EvasionProfileBO>(evasionProfileBO);
+        return new ServiceResult<EvasionProfileBO>(evasionProfileBO).asResult();
     }
 }
