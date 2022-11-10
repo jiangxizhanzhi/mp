@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.flow.v2.client.ixia.StopTestData;
 import cn.cyberpeace.mp.flow.v2.client.trex.NetworkInfos;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.List;
  * @Author maojun
  * @Date 2022/10/20
  */
+@Slf4j
 @Service
 class IxiaFlowGenerateService implements IGenerateService {
     private static final Integer DURATION = 50;
@@ -32,6 +34,7 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
 
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        String testName = null;
         // 创建网卡
         // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
         boolean needCreateNet = true;
@@ -60,60 +63,65 @@ class IxiaFlowGenerateService implements IGenerateService {
 
         // 登录
         ixiaSession.open();
-        // 取任务详情
-        List<String>  stringList= new ArrayList<>();
-        List<ProtocolFlow> protocolFlows = new ArrayList<>();
-        List<PcapFlow> pcapFlows = new ArrayList<>();
-        List<PcapFlow.RecreateData> recreateDatas = new ArrayList<>();
-        for (var flow : flowTaskRecordBO.getFlows()) {
-            if (StringUtils.isNotEmpty(flow.getPcapFile())) {
-                if (flow.getSupportEvasion()) {
-                    stringList.add(flow.getPcapFile());
+        try {
+            // 取任务详情
+            List<String> stringList = new ArrayList<>();
+            List<ProtocolFlow> protocolFlows = new ArrayList<>();
+            List<PcapFlow> pcapFlows = new ArrayList<>();
+            List<PcapFlow.RecreateData> recreateDatas = new ArrayList<>();
+            for (var flow : flowTaskRecordBO.getFlows()) {
+                if (StringUtils.isNotEmpty(flow.getPcapFile())) {
+                    if (flow.getSupportEvasion()) {
+                        stringList.add(flow.getPcapFile());
+                    } else {
+                        PcapFlow pcapFlow = new PcapFlow();
+                        PcapFlow.FileInfo fileInfo = new PcapFlow.FileInfo();
+                        // todo pcap包上传后的名字？
+                        fileInfo.setName(TextUtils.uuid());
+                        pcapFlow.setFileInfo(fileInfo);
+
+                        PcapFlow.RecreateData recreateData = new PcapFlow.RecreateData();
+                        recreateData.setName(fileInfo.getName());
+                        recreateData.setDelay(secToTime(flow.getDelay()));
+                        recreateDatas.add(recreateData);
+
+                        byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
+                        pcapFlow.setFile(fileByte);
+                        pcapFlows.add(pcapFlow);
+                    }
                 } else {
-                    PcapFlow pcapFlow = new PcapFlow();
-                    PcapFlow.FileInfo fileInfo = new PcapFlow.FileInfo();
-                    // todo pcap包上传后的名字？
-                    fileInfo.setName(TextUtils.uuid());
-                    pcapFlow.setFileInfo(fileInfo);
-
-                    PcapFlow.RecreateData recreateData = new PcapFlow.RecreateData();
-                    recreateData.setName(fileInfo.getName());
-                    recreateData.setDelay(secToTime(flow.getDelay()));
-                    recreateDatas.add(recreateData);
-
-                    byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
-                    pcapFlow.setFile(fileByte);
-                    pcapFlows.add(pcapFlow);
+                    ProtocolFlow protocolFlow = new ProtocolFlow();
+                    // flow.getProtocolConfigs().get(0).getConfig() 转换一下
+                    protocolFlows.add(protocolFlow);
                 }
-            } else {
-                ProtocolFlow protocolFlow = new ProtocolFlow();
-                // flow.getProtocolConfigs().get(0).getConfig() 转换一下
-                protocolFlows.add(protocolFlow);
             }
-        }
-        // 攻击流量
-        stringList.add("/strikes/generic/ixia/apache_1_3_mod_proxy_buffer_overflow_proxy_attack.xml");
-        String strikeListName = ixiaSession.createStrikeList(stringList);
-        // 计算负载
-        String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
-        // 构建neighborhood
-        String neighborhood = ixiaSession.createNeighborhood(portIp);
-        // todo 此处返回的profileName作为要添加到TEST中的application profile的名
+            // 攻击流量
+            stringList.add("/strikes/generic/ixia/apache_1_3_mod_proxy_buffer_overflow_proxy_attack.xml");
+            String strikeListName = ixiaSession.createStrikeList(stringList);
+            // 计算负载
+            String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
+            // 构建neighborhood
+            String neighborhood = ixiaSession.createNeighborhood(portIp);
+            // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
-        // 上传pcap
-        ixiaSession.createCaptureManager(pcapFlows);
-        // 创建TEST
-        String attackProfile = "Browser: Low Evasion";
-        String testName = ixiaSession.createTest(neighborhood, "profileName", strikeListName, recreateDatas, loadName, attackProfile);
-        // 启动TEST
-        var res = ixiaSession.startTest(testName);
+            // 上传pcap
+            ixiaSession.createCaptureManager(pcapFlows);
+            // 创建TEST
+            String attackProfile = "Browser: Low Evasion";
+            testName = ixiaSession.createTest(neighborhood, "profileName", strikeListName, recreateDatas, loadName, attackProfile);
+            // 启动TEST
+            var res = ixiaSession.startTest(testName);
+            FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
+            recordModel.setId(flowTaskRecordBO.getId());
+            recordModel.setIxiaTestName(testName);
+            recordModel.setIxiaRunId(res.getRunid());
+            FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+            recordMapper.update(recordModel);
+        } catch (Exception e) {
+            log.info("ixia start TEST fail, TEST name is {}, error message is {}", testName, e.getMessage());
+            ixiaSession.close();
+        }
         ixiaSession.close();
-        FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
-        recordModel.setId(flowTaskRecordBO.getId());
-        recordModel.setIxiaTestName(testName);
-        recordModel.setIxiaRunId(res.getRunid());
-        FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
-        recordMapper.update(recordModel);
 
 //        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         int a = 1;
@@ -124,9 +132,14 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask stopFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
-        StopTestData stopTestData = new StopTestData();
-        stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
-        ixiaSession.stopTest(stopTestData);
+        try {
+            StopTestData stopTestData = new StopTestData();
+            stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
+            ixiaSession.stopTest(stopTestData);
+        } catch (Exception e) {
+            log.info("ixia stop TEST fail, runid is {}, error message is {}", flowTaskRecordBO.getIxiaRunId(), e.getMessage());
+            ixiaSession.close();
+        }
         ixiaSession.close();
         return null;
     }
@@ -145,17 +158,23 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         ixiaSession.open();
-        StopTestData stopTestData = new StopTestData();
-        stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
-        ixiaSession.stopTest(stopTestData);
-        var res = ixiaSession.startTest(flowTaskRecordBO.getIxiaTestName());
+        try {
+            StopTestData stopTestData = new StopTestData();
+            stopTestData.setRunid(flowTaskRecordBO.getIxiaRunId());
+            ixiaSession.stopTest(stopTestData);
+            var res = ixiaSession.startTest(flowTaskRecordBO.getIxiaTestName());
+            FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
+            recordModel.setId(flowTaskRecordBO.getId());
+            recordModel.setIxiaRunId(res.getRunid());
+            FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+            recordMapper.update(recordModel);
+        } catch (Exception e) {
+            log.info("ixia restart TEST fail, ixia test name is {}, error message is {}", flowTaskRecordBO.getIxiaTestName(), e.getMessage());
+            ixiaSession.close();
+        }
         ixiaSession.close();
-        FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
-        recordModel.setId(flowTaskRecordBO.getId());
-        recordModel.setIxiaRunId(res.getRunid());
-        FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
-        recordMapper.update(recordModel);
-        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
+//        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
+        return null;
     }
 
     // 秒数转xx:xx:xx

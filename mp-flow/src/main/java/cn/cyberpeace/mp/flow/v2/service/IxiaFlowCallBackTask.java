@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.formula.functions.T;
 
 /**
@@ -16,6 +17,7 @@ import org.apache.poi.ss.formula.functions.T;
  * @Author maojun
  * @Date 2022/10/25
  */
+@Slf4j
 public class IxiaFlowCallBackTask implements FlowCallBackTask {
 
     private FlowTaskRecordBO flowTaskRecordBO;
@@ -46,18 +48,18 @@ public class IxiaFlowCallBackTask implements FlowCallBackTask {
         Integer status = 0;
         try {
             var res = ixiaSession.getTestState(getTestStateData);
-            System.out.println(res.getProgress()+"============================================+++++++");
             if (res != null && res.getProgress() == 100) {
-
                 status = 3;
             } else if (res == null) {
                 status = 5;
             } else {
                 status = 1;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
+            log.info("ixia get TEST status fail, runid is {}, error message is {}", this.runid, e.getMessage());
             ixiaSession.close();
         }
+        ixiaSession.close();
 
 
         recordModel.setStatus(status);

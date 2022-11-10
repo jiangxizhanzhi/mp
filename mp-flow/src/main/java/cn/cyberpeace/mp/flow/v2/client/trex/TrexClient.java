@@ -46,7 +46,7 @@ public class TrexClient {
     public void uploadResource(List<FlowResourceData> resources) {
         resources.stream().forEach(resource -> {
             JSONObject object = new JSONObject();
-            object.put("fileName", resource.getFileName());
+            object.put("fileName", resource.getFileName() + ".pcap");
             object.put("flow_id", resource.getFlowId());
             String pcapRsp = HttpUtils.postFile(server + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
