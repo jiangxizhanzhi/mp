@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class AdditionalInfo {
 
     @ApiModelProperty("漏洞信息文件路径")
-    private VulnerabilityInfo vulnerabilityInfo;
+    private String vulnerabilityInfo;
     
     @ApiModelProperty("服务信息")
     private List<ServiceInfo> serviceInfos;
@@ -36,12 +36,6 @@ public class AdditionalInfo {
     
     @ApiModelProperty("密码信息")
     private List<PasswordInfo> passwdInfos;
-    
-    @Data
-    public static class VulnerabilityInfo {
-        private String fileName;
-        private String filePath;
-    }
     
     @Data
     public static class ServiceInfo {
