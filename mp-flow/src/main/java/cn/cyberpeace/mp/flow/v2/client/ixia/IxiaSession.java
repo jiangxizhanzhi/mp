@@ -170,7 +170,7 @@ public class IxiaSession {
         return createNeighborHoodData.getName();
     }
 
-    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas, String loadName) {
+    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas, String loadName, String attackProfile) {
         // 创建TEST
         BaseCreateData baseCreateData = new BaseCreateData();
         this.testClient.createTest(baseCreateData);
@@ -193,8 +193,8 @@ public class IxiaSession {
         addSecurityToTestData.setComponent("security");
         AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
         addStrikeListToSecurityData.setAttackPlan(strikeListName);
-        addStrikeListToSecurityData.setAttackProfile("Browser: Low Evasion");
-//        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+        addStrikeListToSecurityData.setAttackProfile(attackProfile);
+        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
         // 向TEST中添加pcap包
         this.testClient.configRecreates(recreateDatas, loadName);
         // 保存TEST
@@ -205,14 +205,16 @@ public class IxiaSession {
         return saveTestData.getName();
     }
 
-    public String createStrikeList() {
+    public String createStrikeList(List<String> stringList) {
         this.strikeClient.createStrikeList();
 
         AddStrikeToListData addStrikeToListData = new AddStrikeToListData();
-        AddStrikeToListData.Strike strike = new AddStrikeToListData.Strike();
-        strike.setId("/strikes/generic/ixia/apache_1_3_mod_proxy_buffer_overflow_proxy_attack.xml");
         List<AddStrikeToListData.Strike> strikes = new ArrayList<>();
-        strikes.add(strike);
+        for (int i = 0; i < stringList.size(); i++) {
+            AddStrikeToListData.Strike strike = new AddStrikeToListData.Strike();
+            strike.setId(stringList.get(i));
+            strikes.add(strike);
+        }
         addStrikeToListData.setStrike(strikes);
         this.strikeClient.addStrikeToList(addStrikeToListData);
 

@@ -102,6 +102,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
 
         private Integer delay;
         private Integer weight;
+        private Boolean supportEvasion;
 
         /**
          * 转换为行拼接的脚本参数

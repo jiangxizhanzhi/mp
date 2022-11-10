@@ -145,10 +145,15 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
 
     public ServiceResult<List<FlowGeneratorBO.Nic>> addFlowGeneratorNics(String id, List<FlowGeneratorBO.Nic> nics) {
         var bo = getFlowGeneratorBO(id);
+        if (bo != null) {
+            String resourceId = null;
+            if (bo.getType().equals("cpcloud_trex")) {
+                resourceId = bo.getResourceId();
+            } else {
+                resourceId = nics.get(0).getResourceId();
+            }
 
-        String resourceId = bo.getResourceId();
-        nics.forEach(nic -> {
-            String networkId = nic.getCpCloudNetworkId();
+            String networkId = nics.get(0).getCpCloudNetworkId();
             try {
                 JSONObject addPortReq = new JSONObject();
                 addPortReq.put("network_id", networkId);
@@ -163,11 +168,11 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
                     String ip = clientDataObj.getString("fixed_ip");
                     String portId = clientDataObj.getString("port_id");
 
-                    nic.setId(portId);
-                    nic.setResourceId(resourceId);
-                    nic.setCpCloudNetworkId(networkId);
-                    nic.setMac(mac);
-                    nic.setIp(ip);
+                    nics.get(0).setId(portId);
+                    nics.get(0).setResourceId(resourceId);
+                    nics.get(0).setCpCloudNetworkId(networkId);
+                    nics.get(0).setMac(mac);
+                    nics.get(0).setIp(ip);
                 } else {
                     log.error("【{}】add networkInfo error for networkId: {}", resourceId, networkId);
                     throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
@@ -176,19 +181,18 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
                 log.error("【{}】add networkInfo error for networkId: {}", resourceId, networkId, e);
                 throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
             }
-        });
 
-        // 添加对应网卡，注意同步问题
-        if (bo != null) {
+
+            // 添加对应网卡，注意同步问题
             if (bo.getNics() != null) {
                 bo.getNics().addAll(nics);
             } else {
                 bo.setNics(nics);
             }
+            updateBO(bo, FlowGeneratorBO.class);
         } else {
             log.error("Flow generator does not exist!");
         }
-        updateBO(bo, FlowGeneratorBO.class);
         return new ServiceResult<>(nics);
     }
 

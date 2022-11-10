@@ -100,6 +100,7 @@ public class FlowBizService {
             taskFlow.setName(f.getName());
             taskFlow.setPcapFile(f.getPcapFile());
             taskFlow.setResourceType(f.getResourceType());
+            taskFlow.setSupportEvasion(f.getSupportEvasion());
             return taskFlow;
         }).collect(Collectors.toList());
 
