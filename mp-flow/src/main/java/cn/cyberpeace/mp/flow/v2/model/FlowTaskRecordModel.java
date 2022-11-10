@@ -16,6 +16,7 @@ public class FlowTaskRecordModel extends BaseModel {
     private String flowGeneratorId;
     private String targetIp;
     private String targetMac;
+    private String targetName;
     /**
      * 任务状态: 0 初始化，1 运行中，2 异常， 3 已停止，4 暂停
      */

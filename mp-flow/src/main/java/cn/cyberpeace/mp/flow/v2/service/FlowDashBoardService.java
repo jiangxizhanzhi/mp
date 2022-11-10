@@ -13,8 +13,10 @@ import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskCountQueryBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.bo.ValueBO;
+import cn.cyberpeace.mp.flow.v2.model.FlowGeneratorModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
+import cn.cyberpeace.mp.flow.v2.repository.FlowGeneratorMapper;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
 import com.alibaba.fastjson.JSON;
@@ -27,9 +29,11 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -41,9 +45,12 @@ import java.util.stream.Collectors;
 public class FlowDashBoardService {
     @Resource
     private FlowTaskCountMapper flowTaskCountMapper;
-    
+
     @Resource
     private FlowTaskRecordMapper flowTaskRecordMapper;
+
+    @Resource
+    private FlowGeneratorMapper generatorMapper;
 
     public ServiceResult<FlowGeneratorBandwidthCountBO> countFlowGenerator(String flowGeneratorId, String start, String end) {
         var queryList = getQueryList(start, end);
@@ -144,7 +151,6 @@ public class FlowDashBoardService {
 
     /**
      * 实时仿真数量统计
-     *
      * @return
      */
     public ServiceResult<List<FlowDashBoardCountBO>> countStartTask() {
@@ -161,7 +167,6 @@ public class FlowDashBoardService {
 
     /**
      * 实时总带宽统计
-     *
      * @return
      */
     public ServiceResult<List<FlowDashBoardCountBO>> sumBandwidth() {
@@ -182,25 +187,35 @@ public class FlowDashBoardService {
 
     /**
      * 流量执行器仿真任务查询
-     *
      * @return
      */
     public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(String flowGeneratorId, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
 
         PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<>(flowTaskRecordMapper.generatorTaskList(flowGeneratorId));
+        Set<String> generatorIds = new HashSet<>();
         List<FlowTaskRecordBO> taskBOs = pageInfo.getList().stream().map(t -> {
             FlowTaskRecordBO bo = new FlowTaskRecordBO();
             bo.fromModel(t);
+            generatorIds.add(bo.getFlowGeneratorId());
             return bo;
         }).collect(Collectors.toList());
+        if (!generatorIds.isEmpty()) {
+            var generator = generatorMapper.list(new HumanCondition().filterIn(FlowGeneratorModel::getId, generatorIds.toArray()));
+            Map<String, FlowGeneratorModel> generatorMap = new HashMap<>();
+            generator.forEach(g -> generatorMap.put(g.getId(), g));
+            taskBOs.forEach(t -> {
+                if (generatorMap.containsKey(t.getFlowGeneratorId())) {
+                    t.setFlowGeneratorName(generatorMap.get(t.getFlowGeneratorId()).getName());
+                }
+            });
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(taskBOs, (int) pageInfo.getTotal()));
     }
 
     /**
      * 仿真任务流查询
-     *
      * @return
      */
     public ServiceResult<List<FlowBO>> taskFlowList(String recordId) {

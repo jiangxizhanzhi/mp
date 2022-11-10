@@ -73,6 +73,7 @@ CREATE TABLE `mp_flow_flow_task_record`
     `id`                varchar(64)         NOT NULL COMMENT 'id',
     `flow_generator_id` varchar(64)         NOT NULL COMMENT '流量发生器id',
     `target_ip`         varchar(32)         NOT NULL COMMENT '目标ip',
+    `target_name`         varchar(32)       NOT NULL COMMENT '目标名称',
     `target_mac`        varchar(32)         NOT NULL COMMENT '目标mac',
     `status`            tinyint(2)          NOT NULL COMMENT '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止，4 暂停',
     `name`              varchar(128)        NOT NULL COMMENT '流量任务名称',

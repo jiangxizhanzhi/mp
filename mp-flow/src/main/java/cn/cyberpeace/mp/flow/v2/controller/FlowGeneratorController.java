@@ -104,25 +104,12 @@ public class FlowGeneratorController implements
     @GetMapping("/nodes")
     public ServiceResult<List<NodeBO>> getNodes() {
         List<NodeBO> nodeBOList = new ArrayList<>();
-        NodeBO nodeBO1 = new NodeBO();
-        nodeBO1.setName("target_1");
-        nodeBO1.setResourceId("9345f211-264b-4fa2-84ea-97338b430454");
-        nodeBOList.add(nodeBO1);
-
-        NodeBO nodeBO2 = new NodeBO();
-        nodeBO2.setName("target_2");
-        nodeBO2.setResourceId("97e0fc80-5fb1-4f1a-bcca-64b0ecec43ee");
-        nodeBOList.add(nodeBO2);
-
-        NodeBO nodeBO3 = new NodeBO();
-        nodeBO3.setName("target_3");
-        nodeBO3.setResourceId("28de2fde-ce4d-479b-a176-407437637dd1");
-        nodeBOList.add(nodeBO3);
-
-        NodeBO nodeBO4 = new NodeBO();
-        nodeBO4.setName("target_4");
-        nodeBO4.setResourceId("4f792ffe-41b8-4320-b58f-955ae0d647ba");
-        nodeBOList.add(nodeBO4);
+        NodeBO.VALUE.entrySet().forEach(e -> {
+            NodeBO nodeBO = new NodeBO();
+            nodeBO.setName(e.getValue());
+            nodeBO.setResourceId(e.getKey());
+            nodeBOList.add(nodeBO);
+        });
         return new ServiceResult<>(nodeBOList).asResult();
     }
 }

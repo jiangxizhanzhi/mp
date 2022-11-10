@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.bo.NodeBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.v2.service.FlowGenerateService;
@@ -64,6 +65,7 @@ public class FlowBizService {
         var ports = plugin.getPorts(e);
         String networkId = "";
         String ip = "";
+        String targetName = NodeBO.VALUE.get(targetId);
         for (var p : ports) {
             networkId = p.getAuxiliaryNetworkId();
             ip = p.getSrcPort().getIp();
@@ -89,6 +91,7 @@ public class FlowBizService {
         taskRecord.setLoadMode(flowTaskBO.getLoadMode());
         taskRecord.setTargetIp(ip);
         taskRecord.setTargetMac(mac);
+        taskRecord.setTargetName(targetName);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
 
         var flows = flowTaskBO.getFlows().stream().map(f -> {
