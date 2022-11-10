@@ -52,7 +52,11 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
     public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
-        return ResultCommon.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
+        String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
+        boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
+        return ResultCommon.success(resourceCenterService.exportScene(
+                request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath(), sceneNumber, disableImageExport
+        ).getSource());
     }
 
     @ApiOperation("挂载")
