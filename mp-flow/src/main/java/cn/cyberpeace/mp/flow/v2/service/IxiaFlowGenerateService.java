@@ -39,27 +39,26 @@ class IxiaFlowGenerateService implements IGenerateService {
         // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
         boolean needCreateNet = true;
         String portIp = null;
-        portIp = "172.27.1.55";
-//        if (!generatorBO.getNics().isEmpty()) {
-//            for (int i = 0; i < generatorBO.getNics().size(); i++) {
-//                if (generatorBO.getNics().get(i).getResourceId().equals(flowTaskRecordBO.getTargetResourceId())) {
-//                    needCreateNet = false;
-//                    portIp = generatorBO.getNics().get(i).getIp();
-//                }
-//            }
-//        }
-//        if (needCreateNet) {
-//            var flowGeneratorService = BeanCommon.getBean(FlowGeneratorService.class);
-//            List<FlowGeneratorBO.Nic> nics = new ArrayList<>();
-//            FlowGeneratorBO.Nic nic = new FlowGeneratorBO.Nic();
-//            nic.setCpCloudNetworkId(flowTaskRecordBO.getTargetNetworkId());
-//            nic.setResourceId(flowTaskRecordBO.getTargetResourceId());
-//            nics.add(nic);
-//            var addPortResult = flowGeneratorService.addFlowGeneratorNics(generatorBO.getId(), nics);
-//            if (addPortResult != null && !addPortResult.getSource().isEmpty()) {
-//                portIp = addPortResult.getSource().get(0).getIp();
-//            }
-//        }
+        if (!generatorBO.getNics().isEmpty()) {
+            for (int i = 0; i < generatorBO.getNics().size(); i++) {
+                if (generatorBO.getNics().get(i).getResourceId().equals(flowTaskRecordBO.getTargetResourceId())) {
+                    needCreateNet = false;
+                    portIp = generatorBO.getNics().get(i).getIp();
+                }
+            }
+        }
+        if (needCreateNet) {
+            var flowGeneratorService = BeanCommon.getBean(FlowGeneratorService.class);
+            List<FlowGeneratorBO.Nic> nics = new ArrayList<>();
+            FlowGeneratorBO.Nic nic = new FlowGeneratorBO.Nic();
+            nic.setCpCloudNetworkId(flowTaskRecordBO.getTargetNetworkId());
+            nic.setResourceId(flowTaskRecordBO.getTargetResourceId());
+            nics.add(nic);
+            var addPortResult = flowGeneratorService.addFlowGeneratorNics(generatorBO.getId(), nics);
+            if (addPortResult != null && !addPortResult.getSource().isEmpty()) {
+                portIp = addPortResult.getSource().get(0).getIp();
+            }
+        }
 
         // 登录
         ixiaSession.open();
@@ -117,14 +116,12 @@ class IxiaFlowGenerateService implements IGenerateService {
             recordModel.setIxiaRunId(res.getRunid());
             FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
             recordMapper.update(recordModel);
+            return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         } catch (Exception e) {
             log.info("ixia start TEST fail, TEST name is {}, error message is {}", testName, e.getMessage());
             ixiaSession.close();
         }
         ixiaSession.close();
-
-//        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
-        int a = 1;
         return null;
     }
 
@@ -168,12 +165,12 @@ class IxiaFlowGenerateService implements IGenerateService {
             recordModel.setIxiaRunId(res.getRunid());
             FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
             recordMapper.update(recordModel);
+            return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         } catch (Exception e) {
             log.info("ixia restart TEST fail, ixia test name is {}, error message is {}", flowTaskRecordBO.getIxiaTestName(), e.getMessage());
             ixiaSession.close();
         }
         ixiaSession.close();
-//        return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         return null;
     }
 

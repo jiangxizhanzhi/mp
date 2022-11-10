@@ -119,7 +119,7 @@ public class IxiaSession {
         // 新建neighborhood
         BaseCreateData baseCreateData = new BaseCreateData();
         // todo 暂时写死要加载的模板
-        baseCreateData.setTemplate("server_zl");
+        baseCreateData.setTemplate("9k_neighborhood");
         this.neighborhoodClient.addNeighborhood(baseCreateData);
         // 配置neighborhood
 //        IpRouterData addIpRouterToNeighborhoodData = new IpRouterData();
@@ -194,7 +194,7 @@ public class IxiaSession {
         AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
         addStrikeListToSecurityData.setAttackPlan(strikeListName);
         addStrikeListToSecurityData.setAttackProfile(attackProfile);
-        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+//        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
         // 向TEST中添加pcap包
         this.testClient.configRecreates(recreateDatas, loadName);
         // 保存TEST
@@ -268,7 +268,7 @@ public class IxiaSession {
 
     public StartTestResult startTest(String name) {
         RunTestData runTestData = new RunTestData();
-        runTestData.setGroup("2");
+        runTestData.setGroup("5");
         runTestData.setModelname(name);
         runTestData.setAllowMalware(true);
         return this.testClient.startTest(runTestData);

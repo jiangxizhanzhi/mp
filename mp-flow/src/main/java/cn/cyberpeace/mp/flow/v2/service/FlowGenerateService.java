@@ -26,7 +26,7 @@ public class FlowGenerateService {
         FlowGeneratorBO flowGeneratorBO = this.getFlowGeneratorBO(flowTaskRecordBO.getFlowGeneratorId());
         if (flowGeneratorBO.getType().equals("cpcloud_ixia")) {
             // todo 查询ixia的网络id
-            flowTaskRecordBO.setTargetNetworkId("a838c53b-4411-4db0-94e4-37559cf83769");
+            flowTaskRecordBO.setTargetNetworkId("937f5af1-2510-4b8e-9e1d-959c4dc6939d");
         }
         FlowCallBackTask callBack = this.getActionGenerateService(flowGeneratorBO).startFlowTask(flowTaskRecordBO, flowGeneratorBO);
         flowStartPostProcessor.addTask(callBack);
