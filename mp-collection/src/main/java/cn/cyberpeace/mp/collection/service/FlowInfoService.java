@@ -434,22 +434,16 @@ public class FlowInfoService {
      * @param topSize
      * @return
      */
-    public List<CountBO> queryAttackType(Integer topSize) {
+    public List<CountBO> queryAttackTypeAllTeams(List<EsIpFieldBO> esIpFieldBOS) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
-        String typeTerm = "cate";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("suricata.category")
-                .order(BucketOrder.count(false)).size(topSize == null ? 1000 : topSize);
+        String cateTerm = "cate";
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(cateTerm).field("suricata.category");
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
-        ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
+        ParsedTerms parsedTermsIp = response.getAggregations().get(cateTerm);
         parsedTermsIp.getBuckets().forEach(bucketIp -> {
             CountBO bo = new CountBO();
             bo.setKey(MessageCommonUtil.convertMessage(bucketIp.getKeyAsString()));
@@ -618,23 +612,16 @@ public class FlowInfoService {
      * @param topSize
      * @return
      */
-    public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS, Integer topSize) {
+    public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS) {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         buildRuleIpQuery(esiIpFieldBOS, queryBuilder);
 
         String typeTerm = "protocol";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol")
-                .order(BucketOrder.count(false));
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol");
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
         ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
         for (Bucket bucket : parsedTermsIp.getBuckets()) {
             String protocol = bucket.getKeyAsString();
@@ -646,10 +633,6 @@ public class FlowInfoService {
             bo.setKey(protocol);
             bo.setCount(bucket.getDocCount());
             bos.add(bo);
-
-            if (topSize != null && bos.size() == topSize) {
-                break;
-            }
         }
 
         return bos;
@@ -670,12 +653,6 @@ public class FlowInfoService {
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
-        // 第一个元素是总数
-        CountBO total = new CountBO();
-        total.setKey("total");
-        total.setCount(response.getHits().getTotalHits().value);
-        bos.add(total);
-
         ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
         parsedTermsIp.getBuckets().forEach(bucketIp -> {
             CountBO bo = new CountBO();

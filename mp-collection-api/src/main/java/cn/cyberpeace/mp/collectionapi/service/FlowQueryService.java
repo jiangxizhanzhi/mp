@@ -155,13 +155,17 @@ public class FlowQueryService {
      */
     private void fillEmptyTrendVO(List<TrendVO> vos, List<String> lines, int pointsNum, int interval) {
         final char LAST_CHAR = (char) ((interval % 10) + '0');
-        List<String> timePoints = Lists.newArrayList();
-        if(vos.size() > 0) {
-            timePoints = vos.get(0).getCounts().stream().map(Count::getTime).collect(Collectors.toList());
-        } else {
+        List<String> timePoints = Lists.newArrayList();;
+        for(TrendVO vo : vos) {
+            if(CollectionUtils.isNotEmpty(vo.getCounts())) {
+                timePoints = vo.getCounts().stream().map(Count::getTime).collect(Collectors.toList());
+                break;
+            }
+        }
+        if(CollectionUtils.isEmpty(timePoints)) {
             Calendar now = Calendar.getInstance();
             for(int i = 0; i < pointsNum; i++) {
-                now.add(Calendar.MINUTE, i > 0 ? -5 : 0);
+                now.add(Calendar.MINUTE, i > 0 ? -interval : 0);
                 String time = DateUtil.format(now.getTime(), "HH:mm");
                 char lastChar = time.charAt(time.length() - 1);
                 lastChar = lastChar >= LAST_CHAR ? LAST_CHAR : '0';
@@ -286,8 +290,9 @@ public class FlowQueryService {
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
-        List<CountBO> bos = flowInfoService.queryAttackType(request.getTopSize());
-        double total = bos.remove(0).getCount();
+        List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
+        List<CountBO> bos = flowInfoService.queryAttackTypeAllTeams(esipFieldBos);
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
             AttackFlowTopVO vo = new AttackFlowTopVO();
@@ -296,6 +301,12 @@ public class FlowQueryService {
             vo.setPercent(bo.getCount() / total);
             return vo;
         }).collect(Collectors.toList());
+        
+        // 排序取top
+        vos = vos.stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
+        if (request.getTopSize() != null) {
+            vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
     }
@@ -307,8 +318,8 @@ public class FlowQueryService {
      */
     private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-        List<CountBO> bos = flowInfoService.queryProtocolTop5(esipFieldBos, request.getTopSize());
-        double total = bos.remove(0).getCount();
+        List<CountBO> bos = flowInfoService.queryProtocolTop5(esipFieldBos);
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
             AttackFlowTopVO vo = new AttackFlowTopVO();
@@ -317,6 +328,12 @@ public class FlowQueryService {
             vo.setPercent(bo.getCount() / total);
             return vo;
         }).collect(Collectors.toList());
+        
+        // 排序取top
+        vos = vos.stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
+        if (request.getTopSize() != null) {
+            vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
     }
@@ -329,7 +346,7 @@ public class FlowQueryService {
     private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
         List<CountBO> bos = flowInfoService.queryEquipmentIpAttackCount(esipFieldBos);
-        double total = bos.remove(0).getCount();
+        double total = bos.stream().mapToLong(CountBO::getCount).sum();
 
         Map<String, AttackFlowTopVO> vosMap = Maps.newHashMap();
         bos.forEach(bo -> {
@@ -339,7 +356,7 @@ public class FlowQueryService {
             vo.setCount(vo.getCount() + bo.getCount());
         });
 
-        // 排序取top5
+        // 排序取top
         List<AttackFlowTopVO> vos = vosMap.values().stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
         if (request.getTopSize() != null) {
             vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
@@ -350,7 +367,7 @@ public class FlowQueryService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
     }
-
+    
     /**
      * 总攻击次数
      *
@@ -453,6 +470,9 @@ public class FlowQueryService {
 
             for (CountBO bo : value) {
                 String targetName = getNameByIp(targetFields, bo.getKey());
+                if(StringUtils.isEmpty(targetName)) {
+                    continue;
+                }
                 TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
                         .orElse(null);
                 if (topEntry == null) {
@@ -551,6 +571,9 @@ public class FlowQueryService {
                 : EsIpFieldBO.Field.DESTINATION;
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
                 : request.getTargets();
+        if(ipFields == null) {
+            return bos;
+        }
 
         for (IPField field : ipFields) {
             EsIpFieldBO bo = new EsIpFieldBO();
@@ -589,6 +612,9 @@ public class FlowQueryService {
     private String getNameByIp(AttackFlowBaseRequest request, String ip) {
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
                 : request.getTargets();
+        if(ipFields == null) {
+            return "";
+        }
         return getNameByIp(ipFields, ip);
     }
 
