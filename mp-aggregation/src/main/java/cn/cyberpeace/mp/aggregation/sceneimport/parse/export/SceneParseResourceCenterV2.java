@@ -117,7 +117,11 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
     private SceneElementParseResult getSceneElementParseResult(SceneConfigHandler sceneHandler) {
         SceneElementParseResult sceneElementParseResult = new SceneElementParseResult();
         sceneElementParseResult.setName(sceneHandler.getScene().getName());
-        sceneElementParseResult.setDesc(sceneHandler.getScene().getDescription());
+        if (StringUtils.isNotEmpty(sceneHandler.getScene().getDescription())) {
+            sceneElementParseResult.setDesc(sceneHandler.getScene().getDescription());
+        }else{
+            sceneElementParseResult.setDesc(SPECIAL_STR_EMPTY);
+        }
         return sceneElementParseResult;
     }
 
