@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
 import cn.cyberpeace.mp.collection.model.contest.RuntimeLogModel;
+import cn.cyberpeace.mp.collection.request.IndexQueryRequest;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.service.ContestLogService;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,5 +76,10 @@ public class LogService {
         runtimeLogModel.setMessage(runtimeLogReportBO.getMessage());
         runtimeLogModel.setLogType(runtimeLogReportBO.getLogType());
         contestLogService.addRuntimeLog(runtimeLogModel);
+    }
+
+    public ListObjServiceResult<Map> queryByIndex(IndexQueryRequest request) {
+        var res = contestLogService.queryByIndex(request);
+        return new ListObjServiceResult<>(res);
     }
 }

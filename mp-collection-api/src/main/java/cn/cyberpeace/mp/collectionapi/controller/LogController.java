@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collection.request.IndexQueryRequest;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
 import cn.cyberpeace.mp.collectionapi.bo.RuntimeLogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/log")
@@ -40,5 +42,11 @@ public class LogController {
     public ServiceResult<Boolean> report(@RequestBody RuntimeLogReportBO runtimeLogReportBO) {
         logQueryService.addRuntimeLog(runtimeLogReportBO);
         return new ServiceResult<>(true).asResult();
+    }
+
+    @GetMapping("/query_by_index")
+    @ApiOperation(value = "分页查询指定索引")
+    public ListObjServiceResult<Map> queryByIndex(IndexQueryRequest request) {
+        return logQueryService.queryByIndex(request).asResult();
     }
 }

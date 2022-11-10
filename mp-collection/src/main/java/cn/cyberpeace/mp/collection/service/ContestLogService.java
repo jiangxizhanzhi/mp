@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
 import cn.cyberpeace.mp.collection.model.contest.RuntimeLogModel;
+import cn.cyberpeace.mp.collection.request.IndexQueryRequest;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.util.EsResponseParseUtil;
 import cn.hutool.core.io.FileUtil;
@@ -103,6 +104,36 @@ public class ContestLogService {
             total = response.getHits().getTotalHits().value;
         }
         return new ListObjResult<>(contestLogModels, BigDecimal.valueOf(total).intValue());
+    }
+
+    public ListObjResult<Map> queryByIndex(IndexQueryRequest request) {
+        if (StringUtils.isEmpty(request.getIndex())) {
+            return new ListObjResult<>(new ArrayList<>(), 0);
+        }
+        var sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.sort("time", SortOrder.DESC);
+        int offset = (request.getPageNum() - 1) * (request.getPageSize());
+        sourceBuilder.from(Math.min(offset, 10000));
+        if ((offset + request.getPageSize()) > 10000) {
+            sourceBuilder.size(Math.max(10000 - offset, 0));
+        } else {
+            sourceBuilder.size(request.getPageSize());
+        }
+
+        var searchRequest = new SearchRequest(request.getIndex());
+        searchRequest.source(sourceBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        var response = restHighLevelClient.search(searchRequest);
+        List<Map> objects = new ArrayList<>();
+        if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
+            return new ListObjResult<>(objects, 0);
+        }
+        objects = EsResponseParseUtil.parseResponse(response, Map.class);
+        long total = 0L;
+        if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+            total = response.getHits().getTotalHits().value;
+        }
+        return new ListObjResult<>(objects, BigDecimal.valueOf(total).intValue());
     }
 
     private SearchSourceBuilder buildSearchSourceBuilder(LogQueryRequest request) {
