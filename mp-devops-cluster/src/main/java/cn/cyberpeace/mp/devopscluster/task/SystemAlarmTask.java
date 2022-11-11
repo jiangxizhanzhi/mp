@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
@@ -84,7 +85,7 @@ public class SystemAlarmTask {
                                 .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
                                 .alarmType(AlarmTypeEnum.SERVER.toValue())
                                 .hostname(hostState.getAgentName())
-                                .servername(hostState.getAgentName())
+                                .servername(DevopsClusterConstant.ALARM_SERVER_DISK_USAGE)
                                 .runningTime(RUNNING_TIME)
                                 .build();
                         alarmModels.add(serverAlarmModel);
@@ -134,6 +135,17 @@ public class SystemAlarmTask {
 
         // todo 网络监控
         List<NetworkBO> networks = systemAlarmVO.getNetworkMonitorVO().getNetworks();
+
+        // tofix
+        networks.forEach(net -> {
+            net.setUploadSpeed(810 * 1024l);
+            net.setDownloadSpeed(801 * 1024l);
+            net.getSubnets().forEach(sub -> {
+                sub.setUsedIps(240);
+                sub.setFreeIps(13);
+            });
+        });
+
         if (CollectionUtils.isNotEmpty(networks)) {
             networks.forEach(net -> {
                 // 可用IP告警
@@ -150,13 +162,13 @@ public class SystemAlarmTask {
                                         .alarmMsg(String.format("%s network IP usage percent is over %s%%", net.getName(), devopsClusterConfig.getNetIOUsageAlarmPercent()))
                                         .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
                                         .alarmType(AlarmTypeEnum.NETWORK_IP_USAGE.toValue())
+                                        .servername(DevopsClusterConstant.ALARM_NET_IP_USAGE)
                                         .runningTime(RUNNING_TIME)
                                         .build();
                                 alarmModels.add(networkIPAlarmModel);
                             }
                         }
                     }
-
 
 
                     // 网络IO告警
@@ -178,6 +190,7 @@ public class SystemAlarmTask {
                                 .alarmMsg(String.format("%s network IO percent is over %s%%", net.getName(), devopsClusterConfig.getNetIOUsageAlarmPercent()))
                                 .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
                                 .alarmType(AlarmTypeEnum.NETWORK_IO_USAGE.toValue())
+                                .servername(DevopsClusterConstant.ALARM_NET_IO_USAGE)
                                 .runningTime(RUNNING_TIME)
                                 .build();
                         alarmModels.add(networkAlarmModel);
