@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.bo.role.UserRoleStatisticBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.role.UserRoleStatisticBo;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.request.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -44,15 +43,15 @@ public class UserRoleController {
     @ApiOperation(value = "分页查询 根据userId查询用户所有角色", notes = "")
     @GetMapping("/roles/page/byuser")
     public ListObjServiceResult<RoleModel> getRolesByUser(UserRolePageRequest pageRequest) {
-        PageInfo<RoleModel> pageInfo = userRoleService.pageByUserId(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        ListObjServiceResult result = userRoleService.pageByUserId(pageRequest);
+        return result;
     }
 
     @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/page/byrole")
     public ListObjServiceResult<UserBo> getUsersByRole(UserRolePageRequest pageRequest) {
-        PageInfo<UserBo> pageInfo = userRoleService.pageByRoleId(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        ListObjServiceResult result = userRoleService.pageByRoleId(pageRequest);
+        return result;
     }
 
     @ApiOperation(value = "查询所有角色以及绑定的用户数量", notes = "")
