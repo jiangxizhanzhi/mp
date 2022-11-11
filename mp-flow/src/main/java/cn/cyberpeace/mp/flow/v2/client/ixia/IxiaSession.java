@@ -170,33 +170,37 @@ public class IxiaSession {
         return createNeighborHoodData.getName();
     }
 
-    public String createTest(String neighborhood, String profileName, String strikeListName, List<PcapFlow.RecreateData> recreateDatas, String loadName, String attackProfile) {
+    public String createTest(CreateTestBO createTestBO) {
         // 创建TEST
         BaseCreateData baseCreateData = new BaseCreateData();
         this.testClient.createTest(baseCreateData);
         // 向TEST中添加neighborhood
-        this.testClient.configNeighborhood(neighborhood);
+        this.testClient.configNeighborhood(createTestBO.getNeighborhood());
         // 向TEST中添加Application Simular
         AddAppSimToTestData addApplicationProfileToTestData = new AddAppSimToTestData();
-        addApplicationProfileToTestData.setName(profileName);
+        addApplicationProfileToTestData.setName("profileName");
         addApplicationProfileToTestData.setComponent("appsim");
         addApplicationProfileToTestData.setType("appsim");
         addApplicationProfileToTestData.setActive(true);
         AddSuperFlowToAppSimData addSuperFlowToAppSimData = new AddSuperFlowToAppSimData();
-        addSuperFlowToAppSimData.setProfile(profileName);
+        addSuperFlowToAppSimData.setProfile("profileName");
 //        this.testClient.configApplicationSimular(addApplicationProfileToTestData, addSuperFlowToAppSimData);
         // 向TEST中添加攻击流量
-        AddSecurityToTestData addSecurityToTestData = new AddSecurityToTestData();
-        addSecurityToTestData.setName(strikeListName);
-        addSecurityToTestData.setActive(true);
-        addSecurityToTestData.setType("security_all");
-        addSecurityToTestData.setComponent("security");
-        AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
-        addStrikeListToSecurityData.setAttackPlan(strikeListName);
-        addStrikeListToSecurityData.setAttackProfile(attackProfile);
-//        this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+        if (createTestBO.getStrikeEnable()) {
+            AddSecurityToTestData addSecurityToTestData = new AddSecurityToTestData();
+            addSecurityToTestData.setName(createTestBO.getStrikeListName());
+            addSecurityToTestData.setActive(true);
+            addSecurityToTestData.setType("security_all");
+            addSecurityToTestData.setComponent("security");
+            AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
+            addStrikeListToSecurityData.setAttackPlan(createTestBO.getStrikeListName());
+            addStrikeListToSecurityData.setAttackProfile(createTestBO.getAttackProfile());
+            this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+        }
         // 向TEST中添加pcap包
-        this.testClient.configRecreates(recreateDatas, loadName);
+        if (createTestBO.getRecreateEnable()) {
+            this.testClient.configRecreates(createTestBO.getRecreateDatas(), createTestBO.getLoadName());
+        }
         // 保存TEST
         SaveTestData saveTestData = new SaveTestData();
         saveTestData.setForce(true);

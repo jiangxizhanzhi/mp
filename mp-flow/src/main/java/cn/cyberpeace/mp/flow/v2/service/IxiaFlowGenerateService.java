@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
+import cn.cyberpeace.mp.flow.v2.client.ixia.CreateTestBO;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaSession;
 import cn.cyberpeace.mp.flow.v2.client.ixia.PcapFlow;
 import cn.cyberpeace.mp.flow.v2.client.ixia.ProtocolFlow;
@@ -35,6 +36,7 @@ class IxiaFlowGenerateService implements IGenerateService {
 
         IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
         String testName = null;
+        CreateTestBO createTestBO = new CreateTestBO();
         // 创建网卡
         // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
         boolean needCreateNet = true;
@@ -94,19 +96,35 @@ class IxiaFlowGenerateService implements IGenerateService {
                     protocolFlows.add(protocolFlow);
                 }
             }
+            createTestBO.setRecreateDatas(recreateDatas);
             // 攻击流量
-            String strikeListName = ixiaSession.createStrikeList(stringList);
+//            String strikeListName = ixiaSession.createStrikeList(stringList);
+            if (stringList != null && !stringList.isEmpty()) {
+                createTestBO.setStrikeEnable(true);
+                createTestBO.setStrikeListName(ixiaSession.createStrikeList(stringList));
+            } else {
+                createTestBO.setStrikeEnable(false);
+            }
+            if (pcapFlows != null && !pcapFlows.isEmpty()) {
+                createTestBO.setLoadName(ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode())));
+                ixiaSession.createCaptureManager(pcapFlows);
+                createTestBO.setRecreateEnable(true);
+            } else {
+                createTestBO.setRecreateEnable(false);
+            }
             // 计算负载
-            String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
-            // 构建neighborhood
-            String neighborhood = ixiaSession.createNeighborhood(portIp);
-            // todo 此处返回的profileName作为要添加到TEST中的application profile的名
-//        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
+//            String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
             // 上传pcap
             ixiaSession.createCaptureManager(pcapFlows);
+            // 构建neighborhood
+//            String neighborhood = ixiaSession.createNeighborhood(portIp);
+            createTestBO.setNeighborhood(ixiaSession.createNeighborhood(portIp));
+            // todo 此处返回的profileName作为要添加到TEST中的application profile的名
+//        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
             // 创建TEST
-            String attackProfile = "Default evasion settings";
-            testName = ixiaSession.createTest(neighborhood, "profileName", strikeListName, recreateDatas, loadName, attackProfile);
+//            String attackProfile = "Default evasion settings";
+            createTestBO.setAttackProfile("Default evasion settings");
+            testName = ixiaSession.createTest(createTestBO);
             // 启动TEST
             var res = ixiaSession.startTest(testName);
             FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
