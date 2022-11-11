@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -225,6 +226,17 @@ public class BaseCpService {
     }
 
     /**
+     * 获取响应流，下载文件
+     * 
+     * @param api
+     * @return
+     */
+    protected InputStream streamGet(String api) {
+        String url = this.buildUrl(api);
+        return HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().bodyStream();
+    }
+    
+    /**
      * 通用分页接口
      * @param url 请求URL 例如：/abc/page?name=test&type=1
      * @param tClass 数据转换类
@@ -310,6 +322,7 @@ public class BaseCpService {
         T toSnakeObject;
         try {
             toSnakeObject = JsonUtils.toSnakeObject(result, tClass);
+            toSnakeObject.setHttpResponse(result);
         } catch (Exception e) {
             log.error("cp service result toSnakeObject error:", e);
             throw new MpRuntimeException(DevopsClusterErrorCode.CP_SERVICE_ERROR);

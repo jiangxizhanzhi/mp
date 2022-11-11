@@ -12,4 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class BaseModel implements Serializable {
 
+    private String httpResponse;
+    
 }

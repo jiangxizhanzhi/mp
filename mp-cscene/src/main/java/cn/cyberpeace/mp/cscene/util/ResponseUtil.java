@@ -42,6 +42,9 @@ public class ResponseUtil {
             log.error("setResponse error:", e);
         } finally {
             try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
                 if (outputStream != null) {
                     outputStream.close();
                 }
