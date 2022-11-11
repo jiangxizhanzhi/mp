@@ -105,8 +105,9 @@ class IxiaFlowGenerateService implements IGenerateService {
             } else {
                 createTestBO.setStrikeEnable(false);
             }
-            if (pcapFlows != null && !pcapFlows.isEmpty()) {
-                createTestBO.setLoadName(ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode())));
+            if (!pcapFlows.isEmpty()) {
+                var flowLoadService = BeanCommon.getBean(FlowLoadService.class);
+                createTestBO.setLoadName(ixiaSession.createLoad(flowLoadService.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode())));
                 ixiaSession.createCaptureManager(pcapFlows);
                 createTestBO.setRecreateEnable(true);
             } else {

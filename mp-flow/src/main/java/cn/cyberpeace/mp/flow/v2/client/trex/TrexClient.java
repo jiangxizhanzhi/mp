@@ -90,53 +90,8 @@ public class TrexClient {
         return reslut.getData();
     }
 
-    public List<LoadInfo> calculateLoad(int time, double maxLoad, String loadMode) {
-        List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
-        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals(BINOMIAL)) {
-            binomialDistributionLoad(loadInfos, time, 0.5, maxLoad);
-        } else if (StringUtils.isNotEmpty(loadMode) && loadMode.equals(GAUSS)){
-            normalDistributionLoad(loadInfos, time, maxLoad);
-        }
-        return loadInfos;
-    }
-
-    private void binomialDistributionLoad(List<LoadInfo> loadInfos, int time, double p, double maxLoad) {
-        BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
-        double proportion = maxLoad / binomialDistribution.probability(time / 2);
-        for (int i = 1; i <= time; i++) {
-            LoadInfo loadInfo = new LoadInfo();
-            loadInfo.setBandwidth((int) (binomialDistribution.probability(i) * proportion));
-            loadInfo.setTime(i);
-            if (loadInfo.getBandwidth() <= 0){
-                loadInfo.setBandwidth(1);
-            }
-            loadInfos.add(loadInfo);
-        }
-    }
-
-    private void normalDistributionLoad(List<LoadInfo> loadInfos, int time, double maxLoad) {
-        NormalDistribution normalDistribution = new NormalDistribution();
-        double interval = standardInterval / time;
-        double index = -(standardInterval / 2);
-        double proportion = maxLoad / normalDistribution.density(0);
-        for (int i = 1; i <= time; i++) {
-            LoadInfo loadInfo = new LoadInfo();
-            loadInfo.setTime(i);
-            loadInfo.setBandwidth((int) (normalDistribution.density(index) * proportion));
-            loadInfos.add(loadInfo);
-            index += interval;
-        }
-    }
-
     public static class ProtocolInfo {
 
-    }
-
-    @Getter
-    @Setter
-    public static class LoadInfo {
-        private Integer time;
-        private Integer bandwidth;
     }
 
     @Getter

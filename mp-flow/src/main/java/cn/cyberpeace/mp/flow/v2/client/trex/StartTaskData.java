@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.v2.client.trex;
 
 import cn.cyberpeace.mp.base.util.http.HttpData;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.flow.v2.service.FlowLoadService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +25,7 @@ public class StartTaskData implements HttpData {
     private Integer bandwidth;
     private String targetIp;
     List<Flow> flows = new ArrayList<>();
-    List<TrexClient.LoadInfo> loadLists = new ArrayList<>();
+    List<FlowLoadService.LoadInfo> loadLists = new ArrayList<>();
 
     @Getter
     @Setter

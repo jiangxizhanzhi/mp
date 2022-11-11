@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.distribution.BinomialDistribution;
+import cn.cyberpeace.mp.flow.v2.service.FlowLoadService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,7 +227,7 @@ public class IxiaSession {
         return saveStrikeListData.getName();
     }
 
-    public String createLoad(List<TrexClient.LoadInfo> loadList) {
+    public String createLoad(List<FlowLoadService.LoadInfo> loadList) {
         CreateLoadData createLoadData = new CreateLoadData();
         createLoadData.setLoadProfile(TextUtils.uuid());
         this.loadClient.createLoad(createLoadData);
@@ -288,27 +286,5 @@ public class IxiaSession {
 
     public void close() {
         this.loginClient.logout();
-    }
-
-    public List<TrexClient.LoadInfo> calculateLoad(int time, double maxLoad, String loadMode) {
-        List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
-        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals("binomial")) {
-            binomialDistributionLoad(loadInfos, time, 0.5, maxLoad);
-        }
-        return loadInfos;
-    }
-
-    private void binomialDistributionLoad(List<TrexClient.LoadInfo> loadInfos, int time, double p, double maxLoad) {
-        BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
-        double proportion = maxLoad / binomialDistribution.probability(time / 2);
-        for (int i = 1; i <= time; i++) {
-            TrexClient.LoadInfo loadInfo = new TrexClient.LoadInfo();
-            loadInfo.setBandwidth((int) (binomialDistribution.probability(i) * proportion));
-            loadInfo.setTime(i);
-            if (loadInfo.getBandwidth() <= 0) {
-                loadInfo.setBandwidth(1);
-            }
-            loadInfos.add(loadInfo);
-        }
     }
 }

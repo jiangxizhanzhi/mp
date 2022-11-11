@@ -84,7 +84,8 @@ public class TrexFlowGenerateService implements IGenerateService {
         trexClient.uploadResource(flowResources);
 
         // 计算负载
-        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode());
+        var flowLoadService = BeanCommon.getBean(FlowLoadService.class);
+        List<FlowLoadService.LoadInfo> loadInfos = flowLoadService.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode());
 
         // 启动流量
         StartTaskData startInfoData = new StartTaskData();
@@ -148,7 +149,8 @@ public class TrexFlowGenerateService implements IGenerateService {
         stopFlowTask(flowTaskRecordBO, generatorBO);
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
         // 执行同一个流量任务,直接传递流量信息执行即可，不用初始化trex/上传pcap文件
-        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode());
+        var flowLoadService = BeanCommon.getBean(FlowLoadService.class);
+        List<FlowLoadService.LoadInfo> loadInfos = flowLoadService.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode());
         // 启动流量
         StartTaskData startInfoData = new StartTaskData();
         startInfoData.setId(flowTaskRecordBO.getId());
