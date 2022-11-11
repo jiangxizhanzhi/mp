@@ -108,7 +108,7 @@ public class FlowLoadService {
         }
         double border = Math.log(load);
         double interval = border / time;
-        double index = 0;
+        double index = interval;
         for (int i = 1; i <= time; i++) {
             LoadInfo loadInfo = new LoadInfo();
             loadInfo.setTime(i);
