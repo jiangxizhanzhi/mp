@@ -327,6 +327,7 @@ public class HostStateService {
 
             hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
             hs.setUploadSpeed(hostStateBO.getUploadSpeed());
+            hs.setMaxNetSpeed(hostStateBO.getMaxNetSpeed());
             hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
             hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
             hs.setDiskIoPercent(hostStateBO.getDiskIoPercent());

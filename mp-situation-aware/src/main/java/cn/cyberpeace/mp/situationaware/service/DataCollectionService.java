@@ -1528,6 +1528,18 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
         }
 
+        // 网卡最大速率
+        if (StringUtils.isNotBlank(output.getMaxNetSpeed())) {
+            // 默认1000
+            wazuhHostStateModel.setMaxNetSpeed(1000);
+            String maxSpeedStr = output.getUploadSpeed();
+            if (maxSpeedStr.contains("Mb/s")) {
+                maxSpeedStr = maxSpeedStr.replaceAll("Mb/s", "");
+                long maxSpeed = Long.valueOf(maxSpeedStr);
+                wazuhHostStateModel.setMaxNetSpeed(maxSpeed);
+            }
+        }
+
         if (StringUtils.isBlank(output.getDiskReadBytes())) {
             wazuhHostStateModel.setDiskReadBytes(0);
         } else {
