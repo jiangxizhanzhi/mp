@@ -91,6 +91,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     @Override
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
+        sysConfigModel.setInitValue(null);
 
         if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
