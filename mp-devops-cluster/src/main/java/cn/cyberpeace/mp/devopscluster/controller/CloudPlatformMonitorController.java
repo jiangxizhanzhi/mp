@@ -338,7 +338,10 @@ public class CloudPlatformMonitorController {
             // todo 上下行带宽占比
             Double downloadPercent = 0.00;
             Double uploadPercent = 0.00;
-            long maxNetSpeed = hostState.getMaxNetSpeed();
+            Long maxNetSpeed = hostState.getMaxNetSpeed();
+            if (Objects.isNull(maxNetSpeed)) {
+                maxNetSpeed = Long.valueOf(1000);
+            }
             if (StringUtils.isNotBlank(hostState.getDownloadSpeed())) {
                 String downloadSpeed = hostState.getDownloadSpeed();
                 downloadSpeed = downloadSpeed.replace("KB/s", "");
