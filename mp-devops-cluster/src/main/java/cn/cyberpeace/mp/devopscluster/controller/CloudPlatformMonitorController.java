@@ -351,7 +351,7 @@ public class CloudPlatformMonitorController {
                 if (ds > 0 && decimal.doubleValue() == 0.00) {
                     downloadPercent = 0.01;
                 } else {
-                    downloadPercent = decimal.doubleValue();
+                    downloadPercent = decimal.doubleValue() * 100;
                     downloadPercent = downloadPercent > 100 ? 100.00 : downloadPercent;
                 }
             }
@@ -365,7 +365,7 @@ public class CloudPlatformMonitorController {
                 if (us > 0 && decimal.doubleValue() == 0.00) {
                     uploadPercent = 0.01;
                 } else {
-                    uploadPercent = decimal.doubleValue();
+                    uploadPercent = decimal.doubleValue() * 100;
                     uploadPercent = uploadPercent > 100 ? 100.00 : uploadPercent;
                 }
             }
