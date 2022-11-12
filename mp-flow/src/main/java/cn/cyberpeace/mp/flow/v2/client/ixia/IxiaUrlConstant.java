@@ -40,7 +40,7 @@ public interface IxiaUrlConstant {
     String ADD_STRIKE_TO_LIST = "/api/v2/core/strikeList/operations/add";
     String SAVE_STRIKE_LIST = "/api/v2/core/strikeList/operations/save";
     String ADD_SECURITY_TO_TEST = "/api/v2/core/testmodel/operations/add";
-    String ADD_STRIKE_LIST_TO_SECURITY = "/api/v2/core/testmodel/component/security_1";
+    String ADD_STRIKE_LIST_TO_SECURITY = "/api/v2/core/testmodel/component/security_";
     String CREATE_LOAD = "/api/v2/core/loadProfile/operations/createNewCustom";
     String STRAIN_LOAD = "/api/v2/core/loadProfile/operations/load";
     String ADD_PHASE = "/api/v2/core/loadProfile/phase/add";

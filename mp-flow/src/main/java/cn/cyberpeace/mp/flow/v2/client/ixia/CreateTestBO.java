@@ -15,7 +15,7 @@ import java.util.List;
 public class CreateTestBO {
     String neighborhood;
     String profileName;
-    String strikeListName;
+    List<String> strikeListName;
     Boolean strikeEnable;
     List<PcapFlow.RecreateData> recreateDatas;
     Boolean recreateEnable;

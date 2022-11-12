@@ -47,11 +47,11 @@ public class IxiaTestClient {
         log.info("Add super flow to application simulator completed:{}", addSuperFlowRes);
     }
 
-    public void configSecurity(AddSecurityToTestData addSecurityToTestData, AddStrikeListToSecurityData addStrikeListToSecurityDatad) {
+    public void configSecurity(AddSecurityToTestData addSecurityToTestData, AddStrikeListToSecurityData addStrikeListToSecurityDatad, int index) {
         var addSecurityRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_SECURITY_TO_TEST, addSecurityToTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Add security to TEST response:{}", addSecurityRes);
-        var addStrikeListRes = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.ADD_STRIKE_LIST_TO_SECURITY, addStrikeListToSecurityDatad, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        var addStrikeListRes = ixiaHttpClient.ixiaPatch(IxiaUrlConstant.ADD_STRIKE_LIST_TO_SECURITY + index, addStrikeListToSecurityDatad, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
         });
         log.info("Add strike list to security response:{}", addStrikeListRes);
     }

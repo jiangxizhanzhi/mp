@@ -185,15 +185,17 @@ public class IxiaSession {
 //        this.testClient.configApplicationSimular(addApplicationProfileToTestData, addSuperFlowToAppSimData);
         // 向TEST中添加攻击流量
         if (createTestBO.getStrikeEnable()) {
-            AddSecurityToTestData addSecurityToTestData = new AddSecurityToTestData();
-            addSecurityToTestData.setName(createTestBO.getStrikeListName());
-            addSecurityToTestData.setActive(true);
-            addSecurityToTestData.setType("security_all");
-            addSecurityToTestData.setComponent("security");
-            AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
-            addStrikeListToSecurityData.setAttackPlan(createTestBO.getStrikeListName());
-            addStrikeListToSecurityData.setAttackProfile(createTestBO.getAttackProfile());
-            this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData);
+            for (int i = 0; i < createTestBO.getStrikeListName().size(); i++) {
+                AddSecurityToTestData addSecurityToTestData = new AddSecurityToTestData();
+                addSecurityToTestData.setName(createTestBO.getStrikeListName().get(i));
+                addSecurityToTestData.setActive(true);
+                addSecurityToTestData.setType("security_all");
+                addSecurityToTestData.setComponent("security");
+                AddStrikeListToSecurityData addStrikeListToSecurityData = new AddStrikeListToSecurityData();
+                addStrikeListToSecurityData.setAttackPlan(createTestBO.getStrikeListName().get(i));
+                addStrikeListToSecurityData.setAttackProfile(createTestBO.getAttackProfile());
+                this.testClient.configSecurity(addSecurityToTestData, addStrikeListToSecurityData, i + 1);
+            }
         }
         // 向TEST中添加pcap包
         if (createTestBO.getRecreateEnable()) {
@@ -207,24 +209,28 @@ public class IxiaSession {
         return saveTestData.getName();
     }
 
-    public String createStrikeList(List<String> stringList) {
+    public List<String> createStrikeList(List<String> strikeList) {
         this.strikeClient.createStrikeList();
 
         AddStrikeToListData addStrikeToListData = new AddStrikeToListData();
         List<AddStrikeToListData.Strike> strikes = new ArrayList<>();
-        for (int i = 0; i < stringList.size(); i++) {
+        List<String> strikeListName = new ArrayList<>();
+        for (int i = 0; i < strikeList.size(); i++) {
             AddStrikeToListData.Strike strike = new AddStrikeToListData.Strike();
-            strike.setId(stringList.get(i));
+            strike.setId(strikeList.get(i));
             strikes.add(strike);
-        }
-        addStrikeToListData.setStrike(strikes);
-        this.strikeClient.addStrikeToList(addStrikeToListData);
 
-        SaveStrikeListData saveStrikeListData = new SaveStrikeListData();
-        saveStrikeListData.setName(TextUtils.uuid());
-        saveStrikeListData.setForce(true);
-        this.strikeClient.saveStrikeList(saveStrikeListData);
-        return saveStrikeListData.getName();
+            addStrikeToListData.setStrike(strikes);
+            this.strikeClient.addStrikeToList(addStrikeToListData);
+
+            SaveStrikeListData saveStrikeListData = new SaveStrikeListData();
+            saveStrikeListData.setName(TextUtils.uuid());
+            saveStrikeListData.setForce(true);
+            this.strikeClient.saveStrikeList(saveStrikeListData);
+            strikeListName.add(saveStrikeListData.getName());
+            strikes.clear();
+        }
+        return strikeListName;
     }
 
     public String createLoad(List<FlowLoadService.LoadInfo> loadList) {

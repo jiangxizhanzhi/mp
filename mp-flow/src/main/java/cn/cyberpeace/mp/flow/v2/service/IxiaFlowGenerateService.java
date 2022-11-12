@@ -66,14 +66,14 @@ class IxiaFlowGenerateService implements IGenerateService {
         ixiaSession.open();
         try {
             // 取任务详情
-            List<String> stringList = new ArrayList<>();
+            List<String> strikeList = new ArrayList<>();
             List<ProtocolFlow> protocolFlows = new ArrayList<>();
             List<PcapFlow> pcapFlows = new ArrayList<>();
             List<PcapFlow.RecreateData> recreateDatas = new ArrayList<>();
             for (var flow : flowTaskRecordBO.getFlows()) {
                 if (StringUtils.isNotEmpty(flow.getPcapFile())) {
                     if (flow.getSupportEvasion()) {
-                        stringList.add(flow.getPcapFile());
+                        strikeList.add(flow.getPcapFile());
                     } else {
                         PcapFlow pcapFlow = new PcapFlow();
                         PcapFlow.FileInfo fileInfo = new PcapFlow.FileInfo();
@@ -98,13 +98,13 @@ class IxiaFlowGenerateService implements IGenerateService {
             }
             createTestBO.setRecreateDatas(recreateDatas);
             // 攻击流量
-//            String strikeListName = ixiaSession.createStrikeList(stringList);
-            if (stringList != null && !stringList.isEmpty()) {
+            if (strikeList != null && !strikeList.isEmpty()) {
                 createTestBO.setStrikeEnable(true);
-                createTestBO.setStrikeListName(ixiaSession.createStrikeList(stringList));
+                createTestBO.setStrikeListName(ixiaSession.createStrikeList(strikeList));
             } else {
                 createTestBO.setStrikeEnable(false);
             }
+            // 计算负载
             if (!pcapFlows.isEmpty()) {
                 var flowLoadService = BeanCommon.getBean(FlowLoadService.class);
                 createTestBO.setLoadName(ixiaSession.createLoad(flowLoadService.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode())));
@@ -113,28 +113,24 @@ class IxiaFlowGenerateService implements IGenerateService {
             } else {
                 createTestBO.setRecreateEnable(false);
             }
-            // 计算负载
-//            String loadName = ixiaSession.createLoad(ixiaSession.calculateLoad(DURATION, flowTaskRecordBO.getBandwidth(), flowTaskRecordBO.getLoadMode()));
             // 上传pcap
             ixiaSession.createCaptureManager(pcapFlows);
             // 构建neighborhood
-//            String neighborhood = ixiaSession.createNeighborhood(portIp);
             createTestBO.setNeighborhood(ixiaSession.createNeighborhood(portIp));
             // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
             // 创建TEST
-//            String attackProfile = "Default evasion settings";
             createTestBO.setAttackProfile("Default evasion settings");
             testName = ixiaSession.createTest(createTestBO);
             // 启动TEST
-            var res = ixiaSession.startTest(testName);
-            FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
-            recordModel.setId(flowTaskRecordBO.getId());
-            recordModel.setIxiaTestName(testName);
-            recordModel.setIxiaRunId(res.getRunid());
-            FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
-            recordMapper.update(recordModel);
-            return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
+//            var res = ixiaSession.startTest(testName);
+//            FlowTaskRecordModel recordModel = new FlowTaskRecordModel();
+//            recordModel.setId(flowTaskRecordBO.getId());
+//            recordModel.setIxiaTestName(testName);
+//            recordModel.setIxiaRunId(res.getRunid());
+//            FlowTaskRecordMapper recordMapper = BeanCommon.getBean(FlowTaskRecordMapper.class);
+//            recordMapper.update(recordModel);
+//            return new IxiaFlowCallBackTask(flowTaskRecordBO, generatorBO, res.getRunid());
         } catch (Exception e) {
             log.info("ixia start TEST fail, TEST name is {}, error message is {}", testName, e.getMessage());
         } finally {
