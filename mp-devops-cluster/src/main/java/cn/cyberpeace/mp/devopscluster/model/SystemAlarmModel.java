@@ -21,6 +21,11 @@ import lombok.NoArgsConstructor;
 @Table("mp_devops_system_alarm")
 public class SystemAlarmModel extends BaseModel {
 
+	public static final String QUERY_FIELD_ALARM_TYPE = "alarm_type";
+	public static final String QUERY_FIELD_CNT = "cnt";
+
+
+
 	/**
 	 * 告警类型：0 云平台服务, 1 业务服务 2 服务器
 	 */

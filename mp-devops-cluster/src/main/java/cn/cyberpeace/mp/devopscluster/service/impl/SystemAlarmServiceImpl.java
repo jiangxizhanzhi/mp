@@ -1,17 +1,21 @@
 package cn.cyberpeace.mp.devopscluster.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
 import cn.cyberpeace.mp.devopscluster.repository.SystemAlarmMapper;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmDistributionRequest;
 import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmQueryParams;
 import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devopscluster.service.fields.SystemAlarmFields;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmCountVO;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,6 +26,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -112,6 +117,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
 
     /**
      * 当天告警数量统计
+     *
      * @return
      */
     @Override
@@ -147,5 +153,33 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
         int total = getModelMapper().total(condition);
         return new ListObjServiceResult<>(new ListObjResult<>(list, total));
 
+    }
+
+    @Override
+    public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterGreaterThanOrEqual(SystemAlarmModel::getCreateTime, request.getStartTime())
+                .filterLessThanOrEqual(SystemAlarmModel::getCreateTime, request.getEndTime())
+                .selectAs(Count.f(SystemAlarmModel::getPk), SystemAlarmModel.QUERY_FIELD_CNT)
+                .select(SystemAlarmModel::getAlarmType)
+                .groupBy(SystemAlarmModel::getAlarmType);
+        List<Map<String, Object>> resultMaps = getModelMapper().originList(humanCondition);
+        AlarmDistributionVo distributionVo = new AlarmDistributionVo();
+        resultMaps.forEach(map -> {
+            Integer alarm_type = (Integer) map.get(SystemAlarmModel.QUERY_FIELD_ALARM_TYPE);
+            Long count = (Long) map.getOrDefault(SystemAlarmModel.QUERY_FIELD_CNT, 0);
+            switch (alarm_type) {
+                case 0:
+                    distributionVo.setCpAlarmCount(count);
+                    break;
+                case 1:
+                    distributionVo.setCrAlarmCount(count);
+                    break;
+                case 2:
+                    distributionVo.setServerAlarmCount(count);
+                    break;
+            }
+        });
+        return new ServiceResult<>(distributionVo).asResult();
     }
 }
