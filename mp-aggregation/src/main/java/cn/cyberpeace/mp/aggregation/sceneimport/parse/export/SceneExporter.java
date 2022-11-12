@@ -48,18 +48,40 @@ public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath) {
+    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         // 生成topo.yml
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
+        if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
+            resultV1.getYmlResult().getNodes().forEach(n -> {
+                if (StringUtils.isNotEmpty(n.getImage())) {
+                    n.setImage(sceneNumber + n.getImage());
+                }
+                if (StringUtils.isNotEmpty(n.getImages())) {
+                    n.setImages(sceneNumber + n.getImages());
+                }
+            });
+        }
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
         SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
+        if (CollectionUtils.isNotEmpty(parseResult.getYmlResult().getNodes())) {
+            parseResult.getYmlResult().getNodes().forEach(n -> {
+                if (StringUtils.isNotEmpty(n.getImage())) {
+                    n.setImage(sceneNumber + n.getImage());
+                }
+                if (StringUtils.isNotEmpty(n.getImages())) {
+                    n.setImages(sceneNumber + n.getImages());
+                }
+            });
+        }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
         // 下载附件
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
-        this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices());
+        if (!disableImageExport) {
+            this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(),sceneNumber);
+        }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
         parseResult.getIdConvert().forEach((k, v) -> {
@@ -72,14 +94,14 @@ public class SceneExporter {
         return exportResult;
     }
 
-    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices) {
+    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices,String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
                 String currentImageDir = null;
                 if (StringUtils.isNotEmpty(singleImagePath)) {
                     currentImageDir = singleImagePath;
                 } else {
-                    currentImageDir = imagePath + "/" + device.getImage();
+                    currentImageDir = imagePath + "/" + (sceneNumber + device.getImage());
                 }
                 File file = new File(currentImageDir);
                 if (!file.exists()) {
@@ -172,7 +194,7 @@ public class SceneExporter {
                 dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                 Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
-                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
+                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber+device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
                 content = StringUtils.replace(content, "privateKey", "private-key");
                 this.createFile(content, currentImageDir + "/servers.yml");
@@ -270,6 +292,7 @@ public class SceneExporter {
         result.put("virtualPlatform", "virtual-platform");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_EMPTY, "");
         return result;
     }
 

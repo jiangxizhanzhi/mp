@@ -75,6 +75,9 @@ public class HostState {
     @ApiModelProperty("上行带宽/总带宽占比")
     private Double uploadPercent;
 
+    @ApiModelProperty("最大网卡速率")
+    private Long maxNetSpeed;
+
     @ApiModelProperty("磁盘读速度 Bytes")
     private Long diskReadBytes;
 

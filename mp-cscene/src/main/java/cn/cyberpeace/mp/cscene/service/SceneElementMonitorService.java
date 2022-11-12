@@ -277,6 +277,7 @@ public class SceneElementMonitorService {
                 resource.setDownloadSpeed(hostState.getDownloadSpeed());
                 resource.setUploadSpeed(hostState.getUploadSpeed());
                 resource.setDiskReadBytes(hostState.getDiskReadBytes());
+                resource.setMaxNetSpeed(hostState.getMaxNetSpeed());
                 resource.setDiskWriteBytes(hostState.getDiskWriteBytes());
                 resource.setDiskIoPercent(hostState.getDiskIoPercent());
                 resource.setDiskIoPercent(hostState.getDiskIoPercent());
