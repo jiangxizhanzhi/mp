@@ -354,7 +354,7 @@ public class ServiceMonitorService {
             comparator = new Comparator<ServiceMonitorDto>() {
                 @Override
                 public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
-                    if (Objects.nonNull(o1.getUptime()) && Objects.nonNull(o1.getUptime())) {
+                    if (Objects.nonNull(o1.getUptime()) && Objects.nonNull(o2.getUptime())) {
                         if (o1.getUptime() > o2.getUptime()) {
                             return 1;
                         } else if (o1.getUptime() < o2.getUptime()) {
