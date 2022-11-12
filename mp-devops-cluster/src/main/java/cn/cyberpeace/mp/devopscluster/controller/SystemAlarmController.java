@@ -26,12 +26,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.formula.functions.Now;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -140,10 +144,17 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @ApiOperation("系统告警分布")
     @GetMapping("/distribution")
     public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
-        request.ensure();
+        // 检验参数
+        // 如果没有传结束时间，默认为当前日期24:59:59
+        // 如果没有传开始时间，默认为结束时间往前推7天
+        if (Objects.isNull(request.getEndTime())) {
+            LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+            request.setEndTime(now);
+        }
+        if (Objects.isNull(request.getStartTime())) {
+            request.setStartTime(LocalDateTime.of(request.getEndTime().toLocalDate().minusWeeks(1), LocalTime.MAX));
+        }
         return getModelService().getSystemAlarmDistribution(request);
     }
-
-
 
 }

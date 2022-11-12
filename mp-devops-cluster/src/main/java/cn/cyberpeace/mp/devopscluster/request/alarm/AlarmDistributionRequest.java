@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * @Description
@@ -32,15 +31,4 @@ public class AlarmDistributionRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    public void ensure() {
-        LocalDateTime now = LocalDateTime.now();
-
-        if (Objects.isNull(getEndTime())) {
-            setEndTime(now);
-        }
-
-        if (Objects.isNull(getStartTime())) {
-            setStartTime(getEndTime().minusDays(7));
-        }
-    }
 }
