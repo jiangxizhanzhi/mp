@@ -10,11 +10,13 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmDistributionRequest;
 import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmQueryParams;
 import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmTrendRequest;
 import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
@@ -131,6 +133,15 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         return ResultCommon.success(result);
     }
 
+    /**
+     * 系统告警分布
+     * @return
+     */
+    @ApiOperation("系统告警分布")
+    @GetMapping("/distribution")
+    public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
+        return getModelService().getSystemAlarmDistribution(request);
+    }
 
 
 
