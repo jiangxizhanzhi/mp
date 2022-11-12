@@ -140,6 +140,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @ApiOperation("系统告警分布")
     @GetMapping("/distribution")
     public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
+        request.ensure();
         return getModelService().getSystemAlarmDistribution(request);
     }
 
