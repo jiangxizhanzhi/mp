@@ -130,7 +130,11 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             } else {
                 networkElementParseResult.setId("network-" + index);
             }
-            networkElementParseResult.setName("网络" + index);
+            if (element.getType() != null && (element.getType() == BaseSceneElementModel.Type.SWITCH)) {
+                networkElementParseResult.setName(element.getName());
+            } else {
+                networkElementParseResult.setName("网络" + index);
+            }
             id2Network.put(net.getNetwork().getId(), networkElementParseResult);
         }
         int serverIndex = 1;
