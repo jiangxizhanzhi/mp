@@ -97,27 +97,25 @@ public class CloudStorageService extends BaseCpService {
 
     /**
      * 获取云盘目录list
+     * @throws Exception 
      */
-    public ListObjServiceResult<FileVO> list(String conId, String path) {
+    public ListObjServiceResult<FileVO> list(String conId, String path) throws Exception {
         BaseModel result = super.sendGet(
                 BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId + "&path=" + path,
                 BaseModel.class);
-        JSONObject resultJson = convertToJson(result);
-        String stdout = resultJson.getString("stdout").trim();
-        List<FileVO> vos = genFileVOs(stdout);
+        List<FileVO> vos = genFileVOs(convertToJson(result));
 
         return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
     }
 
     /**
      * 搜索文件
+     * @throws Exception 
      */
-    public ListObjServiceResult<FileVO> search(String conId, String searchWord) {
+    public ListObjServiceResult<FileVO> search(String conId, String searchWord) throws Exception {
         BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId
                 + "&search_word=" + searchWord, BaseModel.class);
-        JSONObject resultJson = convertToJson(result);
-        String stdout = resultJson.getString("stdout").trim();
-        List<FileVO> vos = genFileVOs(stdout);
+        List<FileVO> vos = genFileVOs(convertToJson(result));
 
         return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
     }
@@ -138,11 +136,16 @@ public class CloudStorageService extends BaseCpService {
      * 
      * @param stdout
      * @return
+     * @throws Exception 
      */
-    private List<FileVO> genFileVOs(String stdout) {
+    private List<FileVO> genFileVOs(JSONObject resultJson) throws Exception {
         List<FileVO> vos = Lists.newArrayList();
-
-        String[] files = stdout.split("\\n");
+        
+        String stdout = resultJson.getString("stdout");
+        if(StringUtils.isBlank(stdout)) {
+            throw new Exception(resultJson.getString("message"));
+        }
+        String[] files = stdout.trim().split("\\n");
         if (files.length <= 1) {
             return vos;
         }

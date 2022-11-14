@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -89,22 +90,15 @@ public class CloudStorageController {
 
     /**
      * 获取云盘目录list
+     * @throws Exception 
      */
-    @ApiOperation("获取云盘目录list")
+    @ApiOperation("目录 or 搜索")
     @GetMapping("/list")
     public ListObjServiceResult<FileVO> list(@RequestParam(required = true, value = "con_id") String conId,
-            @RequestParam(required = false, value = "path") String path) {
-        return cloudStorageService.list(conId, path);
-    }
-
-    /**
-     * 搜索文件
-     */
-    @ApiOperation("搜索文件")
-    @GetMapping("/search")
-    public ListObjServiceResult<FileVO> search(@RequestParam(required = true, value = "con_id") String conId,
-            @RequestParam(required = false, value = "search_word ") String searchWord) {
-        return cloudStorageService.search(conId, searchWord);
+            @RequestParam(required = false, value = "path") String path,
+            @RequestParam(required = false, value = "search_word") String searchWord) throws Exception {
+        return StringUtils.isBlank(searchWord) ? cloudStorageService.list(conId, path)
+                : cloudStorageService.search(conId, searchWord);
     }
 
 }
