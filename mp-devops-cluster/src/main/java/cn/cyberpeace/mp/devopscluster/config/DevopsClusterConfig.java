@@ -77,4 +77,9 @@ public class DevopsClusterConfig {
      * MP端口
      */
     private String mpPort;
+
+    /**
+     * 是否允许导出我方资源
+     */
+    private Boolean allowExport;
 }

@@ -97,6 +97,7 @@ mp:
     disk-alarm-percent: 80 # 磁盘空间告警阈值
     cp-ip: 10.100.7.1                # 云平台适配层接口地址
     mp-ip: 10.100.1.12:8001          # MP中台地址
+    allow-export: false
   # mp-situationaware 模块配置
   situationaware:
     # monitor
