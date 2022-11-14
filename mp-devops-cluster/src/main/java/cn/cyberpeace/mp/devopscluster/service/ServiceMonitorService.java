@@ -27,7 +27,7 @@ import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -211,7 +211,7 @@ public class ServiceMonitorService {
      */
     private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
         TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
-        if (CollectionUtil.isEmpty(timedCache)) {
+        if (CollUtil.isEmpty(timedCache)) {
             return;
         }
 
@@ -246,7 +246,7 @@ public class ServiceMonitorService {
                 .map(HypervisorBO::getName)
                 .collect(Collectors.toList());
 
-        if (CollectionUtil.isNotEmpty(activeHostNames)) {
+        if (CollUtil.isNotEmpty(activeHostNames)) {
             if (StringUtils.isNotBlank(hostName)) {
                 if (activeHostNames.contains(hostName)) {
                     hostNameList.add(hostName);
@@ -269,7 +269,7 @@ public class ServiceMonitorService {
     private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<ServerMonitorConfig.MonitorProbe> monitorProbes) {
         List<String> allRestrictSrvs = new ArrayList<>();
         monitorProbes.forEach(p -> {
-            if (CollectionUtil.isNotEmpty(p.getRestartRestrictList())) {
+            if (CollUtil.isNotEmpty(p.getRestartRestrictList())) {
                 allRestrictSrvs.addAll(p.getRestartRestrictList());
             }
         });
@@ -282,7 +282,7 @@ public class ServiceMonitorService {
                 dto.setDisableRestart(Boolean.TRUE);
             }
 
-            if (CollectionUtil.isNotEmpty(allRestrictSrvs)) {
+            if (CollUtil.isNotEmpty(allRestrictSrvs)) {
                 if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) && allRestrictSrvs.contains(dto.getName())) {
                     // 状态为RUNNING，且在限制列表中，则禁止重启，既disableRestart=true
                     dto.setDisableRestart(Boolean.TRUE);
@@ -414,12 +414,7 @@ public class ServiceMonitorService {
 
     private boolean isReversed(String sortStr, String sortField) {
         String symbol = StringUtils.substringBefore(sortStr, sortField);
-        if (Objects.equals("-", symbol)) {
-            return false;
-        }
-
-        return true;
+        return !Objects.equals("-", symbol);
     }
-
 
 }
