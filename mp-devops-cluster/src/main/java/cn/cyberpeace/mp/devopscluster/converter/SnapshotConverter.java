@@ -24,9 +24,14 @@ import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -111,7 +116,6 @@ public class SnapshotConverter {
         snapshotCreate.setName(request.getName());
         snapshotCreate.setDescription(request.getDescription());
         scenariosService.create(snapshotCreate);
-        return;
     }
 
     /**
@@ -120,35 +124,57 @@ public class SnapshotConverter {
      * @return
      */
     public void merge(SnapshotMergeRequest request) {
-        validSnapshot(Arrays.asList(request.getUuid()));
+        validSnapshot(Collections.singletonList(request.getUuid()));
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
         mergeCloudPlatform.setSnapshotName(request.getSnapshotName());
         mergeCloudPlatform.setNewName(request.getNewName());
         mergeCloudPlatform.setDeviceUuid(request.getUuid());
         mergeCloudPlatform.setImageType(request.getImageType());
         scenariosService.mergeSnapshot(mergeCloudPlatform);
-        return;
     }
 
     /**
      * 验证快照是否被引用或使用
      * @param uuids
      */
-    public void validSnapshot(List<String> uuids){
+    public void validSnapshot(List<String> uuids) {
 
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(referStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE);
+        List<String> sceneNames = new ArrayList<>();
+        String sceneName = StringUtils.EMPTY;
+
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                sceneName = sceneNames.get(0);
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(sceneName));
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(useStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_USED_SCENE);
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
+                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                sceneName = sceneNames.get(0);
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_USED_SCENE.format(sceneName));
         }
     }
 }
