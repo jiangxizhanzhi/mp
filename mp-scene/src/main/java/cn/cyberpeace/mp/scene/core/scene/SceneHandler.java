@@ -650,9 +650,39 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void startElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.START);
+        startElementEvent(nodeId, SceneElementModel.Event.START);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.startElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.START, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.START);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void stopElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.STOP);
+        startElementEvent(nodeId, SceneElementModel.Event.STOP);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.stopElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.STOP, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.STOP);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void restartElement(String nodeId) {

@@ -143,6 +143,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void startElement(String nodeId) {
+
+    }
+
+    public void stopElement(String nodeId) {
+
+    }
+
     public void restartElement(String nodeId) {
 
     }

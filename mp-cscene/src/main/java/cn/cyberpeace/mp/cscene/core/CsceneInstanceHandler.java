@@ -218,6 +218,22 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.resumeElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
+    public boolean stopElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.stopElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean startElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.startElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
     public boolean snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {

@@ -674,6 +674,64 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    private void receiveEntityInterfaceInfo(CloudPluginSceneElementBO cloudElement,
+                                            List<EntityNodeCreateData.Interface> entityInterfaces) {
+        if (entityInterfaces == null) {
+            return;
+        }
+
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        if (cloudPorts.isEmpty()) {
+            return;
+        }
+
+        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        cloudPorts.forEach(cloudPort -> {
+            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+        });
+
+        entityInterfaces.forEach(entityInterface -> {
+            var cloudPort = networkIdCloudPortMap.getOrDefault(entityInterface.getNetworkId(), null);
+            if (cloudPort == null) {
+                return;
+            }
+
+            var accessModesData = entityInterface.getAccessModes();
+            if (accessModesData != null && !accessModesData.isEmpty()) {
+                Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
+                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                cloudPort.getAccessModes().forEach(accessMode -> {
+                    var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
+                    if (accessModeData == null) {
+                        return;
+                    }
+
+                    var connection = accessModeData.getConnection();
+                    if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+                        accessMode.setConnectionId(connection.getConnectionId());
+                        accessMode.setConnectionUrl(connection.getUrl());
+                    }
+                    var portMapping = accessModeData.getPortMapping();
+                    if (portMapping != null) {
+                        accessMode.setProxyId(portMapping.getId());
+                        accessMode.setAccessIp(portMapping.getHost());
+                        accessMode.setAccessPort(portMapping.getHostPort());
+                    } else {
+                        accessMode.setAccessIp(accessModeData.getIpAddress());
+                        accessMode.setAccessPort(accessModeData.getPort());
+                    }
+                    if (StringUtils.isNotEmpty(accessModeData.getIpAddress()) && cloudPort.getSrcPort() != null) {
+                        cloudPort.getSrcPort().setIp(accessModeData.getIpAddress());
+                    }
+                    if (Boolean.TRUE.equals(accessMode.getProxy()) && CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
+                        this.trySetPublicNetProxy(accessMode);
+                    }
+                });
+            }
+        });
+    }
+
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         if (virtualNics == null) {
             return;
@@ -762,64 +820,6 @@ public class CreateHandler extends HandlerCommon {
                     });
                 }
             });
-        });
-    }
-
-    private void receiveEntityInterfaceInfo(CloudPluginSceneElementBO cloudElement,
-                                            List<EntityNodeCreateData.Interface> entityInterfaces) {
-        if (entityInterfaces == null) {
-            return;
-        }
-
-        var cloudPorts = getPluginHandler().getPorts(cloudElement);
-        if (cloudPorts.isEmpty()) {
-            return;
-        }
-
-        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
-        cloudPorts.forEach(cloudPort -> {
-            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
-        });
-
-        entityInterfaces.forEach(entityInterface -> {
-            var cloudPort = networkIdCloudPortMap.getOrDefault(entityInterface.getNetworkId(), null);
-            if (cloudPort == null) {
-                return;
-            }
-
-            var accessModesData = entityInterface.getAccessModes();
-            if (accessModesData != null && !accessModesData.isEmpty()) {
-                Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
-                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
-                cloudPort.getAccessModes().forEach(accessMode -> {
-                    var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
-                    if (accessModeData == null) {
-                        return;
-                    }
-
-                    var connection = accessModeData.getConnection();
-                    if (connection != null) {
-                        accessMode.setConnectionUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
-                        accessMode.setConnectionId(connection.getConnectionId());
-                        accessMode.setConnectionUrl(connection.getUrl());
-                    }
-                    var portMapping = accessModeData.getPortMapping();
-                    if (portMapping != null) {
-                        accessMode.setProxyId(portMapping.getId());
-                        accessMode.setAccessIp(portMapping.getHost());
-                        accessMode.setAccessPort(portMapping.getHostPort());
-                    } else {
-                        accessMode.setAccessIp(accessModeData.getIpAddress());
-                        accessMode.setAccessPort(accessModeData.getPort());
-                    }
-                    if (StringUtils.isNotEmpty(accessModeData.getIpAddress()) && cloudPort.getSrcPort() != null) {
-                        cloudPort.getSrcPort().setIp(accessModeData.getIpAddress());
-                    }
-                    if (Boolean.TRUE.equals(accessMode.getProxy()) && CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
-                        this.trySetPublicNetProxy(accessMode);
-                    }
-                });
-            }
         });
     }
 

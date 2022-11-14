@@ -695,6 +695,38 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("关机节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/stop_element")
+    public ServiceResult<Boolean> stopElement(@RequestParam(required = false) String id,
+                                                @RequestParam(value = "node_id", required = false) String nodeId,
+                                                @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request, id, nodeId);
+        var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
+        return result;
+    }
+
+    @ApiOperation("开机节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/start_element")
+    public ServiceResult<Boolean> startElement(@RequestParam(required = false) String id,
+                                                @RequestParam(value = "node_id", required = false) String nodeId,
+                                                @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request, id, nodeId);
+        var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
+        return result;
+    }
+
     @ApiOperation("场景链路状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)

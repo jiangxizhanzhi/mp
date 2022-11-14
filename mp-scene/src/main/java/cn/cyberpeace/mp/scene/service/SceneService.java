@@ -255,6 +255,20 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.startElement(nodeId);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.stopElement(nodeId);
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotId, String snapshotName, String description, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
