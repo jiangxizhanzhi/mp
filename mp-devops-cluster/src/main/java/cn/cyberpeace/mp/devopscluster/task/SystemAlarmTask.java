@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
-import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkSubnetBO;
@@ -59,8 +58,6 @@ public class SystemAlarmTask {
     private final HostStateService hostStateService;
 
     private final HypervisorConverter hypervisorConverter;
-
-    private final NetworkConverter networkConverter;
 
     // 默认持续时间
     private static final Integer RUNNING_TIME = 0;
@@ -135,16 +132,6 @@ public class SystemAlarmTask {
 
         // todo 网络监控
         List<NetworkBO> networks = systemAlarmVO.getNetworkMonitorVO().getNetworks();
-
-        // tofix
-        networks.forEach(net -> {
-            net.setUploadSpeed(810 * 1024l);
-            net.setDownloadSpeed(801 * 1024l);
-            net.getSubnets().forEach(sub -> {
-                sub.setUsedIps(240);
-                sub.setFreeIps(13);
-            });
-        });
 
         if (CollectionUtils.isNotEmpty(networks)) {
             networks.forEach(net -> {
