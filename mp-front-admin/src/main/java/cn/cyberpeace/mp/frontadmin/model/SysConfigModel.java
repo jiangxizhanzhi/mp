@@ -28,4 +28,7 @@ public class SysConfigModel extends BaseModel {
 
     @ApiModelProperty(value = "配置值")
     private String value;
+
+    @ApiModelProperty(value = "初始值")
+    private String initValue;
 }
