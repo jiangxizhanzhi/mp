@@ -15,17 +15,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.CloudStorageService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devopscluster.vo.FileVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 /**
  * 云存储相关接口
  * 
- * @Description: 
+ * @Description:
  * @author zhangjiaxin
- * @date 2022年11月10日下午3:30:55 
+ * @date 2022年11月10日下午3:30:55
  */
 
 @RestController
@@ -35,34 +37,34 @@ public class CloudStorageController {
 
     @Autowired
     private CloudStorageService cloudStorageService;
-    
+
     /**
      * 云盘容量使用量
      */
     @ApiOperation("云盘容量使用量")
     @GetMapping("/capacity")
-    public JSONObject capacity(@RequestParam(required = true, value = "con_id") String conId){
+    public JSONObject capacity(@RequestParam(required = true, value = "con_id") String conId) {
         return cloudStorageService.capacity(conId);
     }
-    
+
     /**
      * 变更分类
      */
     @ApiOperation("变更分类")
     @PutMapping("/file")
-    public JSONObject changeFile(@RequestBody JSONObject request){
+    public JSONObject changeFile(@RequestBody JSONObject request) {
         return cloudStorageService.changeFile(request);
     }
-    
+
     /**
      * 删除文件或者目录
      */
     @ApiOperation("删除文件或者目录")
     @DeleteMapping("/file")
-    public JSONObject deleteFile(@RequestBody JSONObject request){
+    public JSONObject deleteFile(@RequestBody JSONObject request) {
         return cloudStorageService.deleteFile(request);
     }
-    
+
     /**
      * 上传文件
      */
@@ -70,10 +72,10 @@ public class CloudStorageController {
     @PostMapping("/file")
     public JSONObject uploadFile(@RequestParam(required = true, value = "con_id") String conId,
             @RequestParam(required = false, value = "dest_path") String destPath,
-            @RequestParam(required = true, value = "file") MultipartFile file){
+            @RequestParam(required = true, value = "file") MultipartFile file) {
         return cloudStorageService.uploadFile(conId, destPath, file);
     }
-    
+
     /**
      * 下载文件
      */
@@ -81,27 +83,27 @@ public class CloudStorageController {
     @GetMapping("/file")
     public void downloadFile(@RequestParam(required = true, value = "con_id") String conId,
             @RequestParam(required = false, value = "download_file") String downloadFile,
-            HttpServletResponse response){
+            HttpServletResponse response) {
         cloudStorageService.downloadFile(conId, downloadFile, response);
     }
-    
+
     /**
      * 获取云盘目录list
      */
     @ApiOperation("获取云盘目录list")
     @GetMapping("/list")
-    public JSONObject list(@RequestParam(required = true, value = "con_id") String conId,
-            @RequestParam(required = false, value = "path") String path){
+    public ListObjServiceResult<FileVO> list(@RequestParam(required = true, value = "con_id") String conId,
+            @RequestParam(required = false, value = "path") String path) {
         return cloudStorageService.list(conId, path);
     }
-    
+
     /**
      * 搜索文件
      */
     @ApiOperation("搜索文件")
     @GetMapping("/search")
-    public JSONObject search(@RequestParam(required = true, value = "con_id") String conId,
-            @RequestParam(required = false, value = "search_word ") String searchWord){
+    public ListObjServiceResult<FileVO> search(@RequestParam(required = true, value = "con_id") String conId,
+            @RequestParam(required = false, value = "search_word ") String searchWord) {
         return cloudStorageService.search(conId, searchWord);
     }
 

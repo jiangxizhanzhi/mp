@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,10 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.util.ResponseUtil;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.BaseModel;
+import cn.cyberpeace.mp.devopscluster.vo.FileVO;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -95,25 +98,70 @@ public class CloudStorageService extends BaseCpService {
     /**
      * 获取云盘目录list
      */
-    public JSONObject list(String conId, String path) {
+    public ListObjServiceResult<FileVO> list(String conId, String path) {
         BaseModel result = super.sendGet(
                 BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId + "&path=" + path,
                 BaseModel.class);
-        return convertToJson(result);
+        JSONObject resultJson = convertToJson(result);
+        String stdout = resultJson.getString("stdout").trim();
+        List<FileVO> vos = genFileVOs(stdout);
+
+        return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
     }
 
     /**
      * 搜索文件
      */
-    public JSONObject search(String conId, String searchWord) {
+    public ListObjServiceResult<FileVO> search(String conId, String searchWord) {
         BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId
                 + "&search_word=" + searchWord, BaseModel.class);
-        return convertToJson(result);
+        JSONObject resultJson = convertToJson(result);
+        String stdout = resultJson.getString("stdout").trim();
+        List<FileVO> vos = genFileVOs(stdout);
+
+        return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
     }
 
+    /**
+     * json转换
+     * 
+     * @param baseModel
+     * @return
+     */
     private JSONObject convertToJson(BaseModel baseModel) {
         String httpResponse = baseModel.getHttpResponse();
         return StringUtils.isBlank(httpResponse) ? new JSONObject() : JSONObject.parseObject(httpResponse);
+    }
+
+    /**
+     * 标准输出格式化文件列表
+     * 
+     * @param stdout
+     * @return
+     */
+    private List<FileVO> genFileVOs(String stdout) {
+        List<FileVO> vos = Lists.newArrayList();
+
+        String[] files = stdout.split("\\n");
+        if (files.length <= 1) {
+            return vos;
+        }
+
+        for (int i = 1; i < files.length; i++) {
+            String[] line = files[i].replaceAll("\\s+", " ").split(" ");
+
+            FileVO vo = new FileVO();
+            vo.setAuthority(line[0]);
+            vo.setRefers(Integer.parseInt(line[1]));
+            vo.setOwner(line[2]);
+            vo.setOwnerGroup(line[3]);
+            vo.setSize(Long.parseLong(line[4]));
+            vo.setModifyTime(line[5] + " " + line[6] + " " + line[7]);
+            vo.setName(line[8]);
+            vos.add(vo);
+        }
+
+        return vos;
     }
 
 }
