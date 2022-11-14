@@ -127,10 +127,10 @@ public class SnapshotService extends BaseCpService {
         }
 
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{imageName});
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{imageName});
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(useStateMap) && CollectionUtils.isNotEmpty(useStateMap.get(imageName))){
+        if (MapUtils.isNotEmpty(useStateMap) && CollectionUtils.isNotEmpty(useStateMap.get(imageName))) {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(useStateMap.get(imageName).get(0).getName()));
         }
     }

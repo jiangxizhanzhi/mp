@@ -88,6 +88,8 @@ public class ImagesController {
 
     private final SnapshotService snapshotService;
 
+    private final DevopsClusterConfig devopsClusterConfig;
+
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
@@ -256,8 +258,15 @@ public class ImagesController {
     })
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
-        String downloadUrl = imagesConverter.export(uuid,imageName);
+    public ServiceResult<String> export(@RequestParam("id") String uuid, @RequestParam("image_name") String imageName) {
+        if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
+            var image = imagesConverter.findByUuid(uuid);
+            if (Boolean.TRUE.equals(image.getIsImport()) || Boolean.TRUE.equals(image.getIsInit()) ||
+                    Boolean.TRUE.equals(image.getIsInternal())) {
+                throw new MpRuntimeException(DevopsClusterErrorCode.BUILD_IN_TARGET_NOT_ALLOWED_EXPORT);
+            }
+        }
+        String downloadUrl = imagesConverter.export(uuid, imageName);
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
