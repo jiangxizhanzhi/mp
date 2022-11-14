@@ -130,7 +130,6 @@ public class ImagesConverter implements BaseConverter{
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
-        return;
     }
 
     /**
@@ -167,7 +166,6 @@ public class ImagesConverter implements BaseConverter{
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return;
     }
 
     /**
@@ -188,7 +186,6 @@ public class ImagesConverter implements BaseConverter{
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
         devopsTargetService.insert(Collections.singletonList(device));
-        return;
     }
 
     /**
@@ -208,7 +205,6 @@ public class ImagesConverter implements BaseConverter{
             deviceTargetMapper.delete(dto);
             devopsTargetAuthService.deleteByTargets(request.getImageIds());
         }
-        return;
     }
 
     /**
@@ -285,7 +281,6 @@ public class ImagesConverter implements BaseConverter{
             model.setWaitForStatus(Boolean.TRUE);
             containerService.action(model, request.getInstanceId());
         }
-        return;
     }
 
     /**

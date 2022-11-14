@@ -21,8 +21,10 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,7 +119,7 @@ public class TargetConverter{
      * 验证靶标是否可删除
      * @param uuids
      */
-    public void validTargetCanDelete(List<String> uuids){
+    public void validTargetCanDelete(List<String> uuids) {
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         deviceTargetPOS.forEach(deviceTargetPO -> {
@@ -130,15 +132,38 @@ public class TargetConverter{
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(referStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE);
+        List<String> sceneNames = new ArrayList<>();
+        String sceneName = StringUtils.EMPTY;
+
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                sceneName = sceneNames.get(0);
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(useStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE);
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
+                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                sceneName = sceneNames.get(0);
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(sceneName));
         }
     }
 

@@ -98,6 +98,7 @@ mp:
     cp-port: ${CP_PORT:11111}                # 云平台适配层接口地址
     mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
     mp-port: ${MP_API_PORT:8001}          # MP中台地址
+    allow-export: ${MP_ALLOW_EXPORT:false}
   # mp-situationaware 模块配置
   situationaware:
     # monitor
