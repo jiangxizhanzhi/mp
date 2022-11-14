@@ -166,9 +166,9 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
         List<Map<String, Object>> resultMaps = getModelMapper().originList(humanCondition);
         AlarmDistributionVo distributionVo = new AlarmDistributionVo();
         resultMaps.forEach(map -> {
-            Integer alarm_type = (Integer) map.get(SystemAlarmModel.QUERY_FIELD_ALARM_TYPE);
+            Integer alarmType = (Integer) map.get(SystemAlarmModel.QUERY_FIELD_ALARM_TYPE);
             Long count = (Long) map.getOrDefault(SystemAlarmModel.QUERY_FIELD_CNT, 0);
-            switch (alarm_type) {
+            switch (alarmType) {
                 case 0:
                     distributionVo.setCpAlarmCount(count);
                     break;
