@@ -14,4 +14,5 @@ import lombok.Data;
 @AllArgsConstructor
 @Table("mp_auth_role_permission")
 public class RolePermissionModel extends BasePermissionModel {
+    public static final String QUERY_FIELD_TARGET = "target";
 }

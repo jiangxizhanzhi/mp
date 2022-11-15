@@ -21,7 +21,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollUtil;
-import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description:
@@ -69,7 +67,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         HumanCondition rolePermissionCondition = new HumanCondition()
                 .filterEqual(RolePermissionModel::getTenant, AuthConstant.DEFAULT_TENANT)
                 .filterIn(RolePermissionModel::getOwner, roleIds.toArray())
-                .select("target");
+                .select(RolePermissionModel.QUERY_FIELD_TARGET);
         List<RolePermissionModel> rolePermissionModels = rolePermissionMapper.list(rolePermissionCondition);
         List<String> ids = new ArrayList<>();
         rolePermissionModels.forEach(model -> ids.add(model.getTarget()));
@@ -97,26 +95,20 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
                 .filterLink(TargetModel.class, TargetModel::getId, RolePermissionModel.class, RolePermissionModel::getTarget)
                 .currentLink(RoleModel.class)
                 .filterIn(RoleModel::getId, roleIds.toArray())
-                .selectAs(RoleModel::getId, "roleId")
+                .selectAs(RoleModel::getId, TargetRoleBo.QUERY_FIELD_ROLE_ID)
                 .currentLink(TargetModel.class)
-                .selectAs(TargetModel::getId, "id")
-                .selectAs(TargetModel::getName, "name")
-                .selectAs(TargetModel::getPk, "pk")
-                .selectAs(TargetModel::getParent, "parent")
-                .selectAs(TargetModel::getPath, "path")
-                .selectAs(TargetModel::getVisible, "visible")
-                .selectAs(TargetModel::getTenant, "tenant")
-                .selectAs(TargetModel::getIdentifier, "identifier")
-                .selectAs(TargetModel::getType, "type")
-                .selectAs(TargetModel::getCreateTime, "createTime")
-                .selectAs(TargetModel::getUpdateTime, "updateTime");
-        List<Map<String, Object>> maps = rolePermissionMapper.originList(condition);
-
-        List<TargetRoleBo> targetRoles = new ArrayList<>();
-        for (Map<String, Object> map : maps) {
-            TargetRoleBo targetRoleBo = JSON.parseObject(JSON.toJSONString(map), TargetRoleBo.class);
-            targetRoles.add(targetRoleBo);
-        }
+                .selectAs(TargetModel::getId, TargetRoleBo.QUERY_FIELD_ID)
+                .selectAs(TargetModel::getName, TargetRoleBo.QUERY_FIELD_NAME)
+                .selectAs(TargetModel::getPk, TargetRoleBo.QUERY_FIELD_PK)
+                .selectAs(TargetModel::getParent, TargetRoleBo.QUERY_FIELD_PARENT)
+                .selectAs(TargetModel::getPath, TargetRoleBo.QUERY_FIELD_PATH)
+                .selectAs(TargetModel::getVisible, TargetRoleBo.QUERY_FIELD_VISIBLE)
+                .selectAs(TargetModel::getTenant, TargetRoleBo.QUERY_FIELD_TENANT)
+                .selectAs(TargetModel::getIdentifier, TargetRoleBo.QUERY_FIELD_IDENTIFIER)
+                .selectAs(TargetModel::getType, TargetRoleBo.QUERY_FIELD_TYPE)
+                .selectAs(TargetModel::getCreateTime, TargetRoleBo.QUERY_FIELD_CREATE_TIME)
+                .selectAs(TargetModel::getUpdateTime, TargetRoleBo.QUERY_FIELD_UPDATE_TIME);
+        List<TargetRoleBo> targetRoles = rolePermissionMapper.list(condition, TargetRoleBo.class);
         return targetRoles;
     }
 
