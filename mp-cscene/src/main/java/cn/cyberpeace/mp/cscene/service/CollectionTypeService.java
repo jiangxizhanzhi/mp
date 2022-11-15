@@ -198,7 +198,7 @@ public class CollectionTypeService {
      * @return
      */
     private CollectionType logEventApp(String code, Integer type) {
-        CollectionType appType = CollectionType.builder().name("应用系统服务日志").code(code).type(-1).build();
+        CollectionType appType = CollectionType.builder().name("应用系统日志").code(code).type(-1).build();
 
         CollectionType mailServer = CollectionType.builder().name("邮件服务器").code(code + "01").type(type).build();
         CollectionType webserver = CollectionType.builder().name("WEB服务器").code(code + "02").type(type).build();
