@@ -118,6 +118,10 @@ public class SceneExporter {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
                 }
                 var image = JsonCommon.mapToBean(imageMap, Image.class);
+                if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
+                    String flavor = String.format("mx.%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
+                    image.set实例大小(flavor);
+                }
 
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
