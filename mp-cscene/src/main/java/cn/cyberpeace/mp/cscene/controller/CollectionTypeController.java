@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
-import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,13 +45,7 @@ public class CollectionTypeController {
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
-
-        CsceneMapper csceneMapper = null ;
-
-        csceneMapper.bulkUpdate(new ArrayList<>());
-
         return ResultCommon.success(appNames);
     }
-
 
 }
