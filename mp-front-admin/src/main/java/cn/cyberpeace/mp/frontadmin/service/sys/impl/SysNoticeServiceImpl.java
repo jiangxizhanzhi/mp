@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
@@ -100,9 +99,6 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private UserMapper userMapper;
-
-    @Autowired
-    private OrgMapper orgMapper;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
