@@ -113,7 +113,7 @@ public class CloudStorageService extends BaseCpService {
      * @throws Exception 
      */
     public ListObjServiceResult<FileVO> search(String conId, String searchWord) throws Exception {
-        BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId
+        BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/search?con_id=" + conId
                 + "&search_word=" + searchWord, BaseModel.class);
         List<FileVO> vos = genFileVOs(convertToJson(result));
 
@@ -142,7 +142,7 @@ public class CloudStorageService extends BaseCpService {
         List<FileVO> vos = Lists.newArrayList();
         
         String stdout = resultJson.getString("stdout");
-        if(StringUtils.isBlank(stdout)) {
+        if(stdout == null) {
             throw new Exception(resultJson.getString("message"));
         }
         String[] files = stdout.trim().split("\\n");
