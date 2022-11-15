@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
@@ -21,7 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -61,13 +60,10 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Autowired
     private TargetMapper targetMapper;
 
-    @Autowired
-    private RoleMapper roleMapper;
-
     @Override
     @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
-        if (CollectionUtil.isEmpty(roleIds)) {
+        if (CollUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
         HumanCondition rolePermissionCondition = new HumanCondition()
@@ -90,7 +86,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
     @Override
     public List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds) {
-        if (CollectionUtil.isEmpty(roleIds)) {
+        if (CollUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
         HumanCondition condition = new HumanCondition()
@@ -142,7 +138,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             }
         }
 
-        if (CollectionUtil.isEmpty(targetIds)) {
+        if (CollUtil.isEmpty(targetIds)) {
             // 完成，直接返回
             return true;
         }
