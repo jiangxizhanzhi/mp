@@ -16,10 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONObject;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.CloudStorageService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devopscluster.vo.FileVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -82,10 +80,10 @@ public class CloudStorageController {
      */
     @ApiOperation("下载文件")
     @GetMapping("/file")
-    public void downloadFile(@RequestParam(required = true, value = "con_id") String conId,
+    public JSONObject downloadFile(@RequestParam(required = true, value = "con_id") String conId,
             @RequestParam(required = false, value = "download_file") String downloadFile,
             HttpServletResponse response) {
-        cloudStorageService.downloadFile(conId, downloadFile, response);
+        return cloudStorageService.downloadFile(conId, downloadFile, response);
     }
 
     /**
@@ -94,7 +92,7 @@ public class CloudStorageController {
      */
     @ApiOperation("目录 or 搜索")
     @GetMapping("/list")
-    public ListObjServiceResult<FileVO> list(@RequestParam(required = true, value = "con_id") String conId,
+    public JSONObject list(@RequestParam(required = true, value = "con_id") String conId,
             @RequestParam(required = false, value = "path") String path,
             @RequestParam(required = false, value = "search_word") String searchWord) throws Exception {
         return StringUtils.isBlank(searchWord) ? cloudStorageService.list(conId, path)

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,10 +35,9 @@ public class ResponseUtil {
 
             // 设置返回
             response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
             outputStream = response.getOutputStream();
             StreamUtils.copy(inputStream, outputStream);
-            outputStream.flush();
         } catch (IOException e) {
             log.error("setResponse error:", e);
         } finally {

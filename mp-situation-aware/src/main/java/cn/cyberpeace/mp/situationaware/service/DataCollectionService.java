@@ -241,7 +241,6 @@ public class DataCollectionService extends CollectionBaseService {
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
-            
             String agentNameTerm = "agent_name", sicLaunchIdTerm = "sic_launch_id";
             AggregationBuilder aggBuilder = AggregationBuilders.terms(agentNameTerm).field("agent.name")
                     .subAggregation(AggregationBuilders.terms(sicLaunchIdTerm).field("data.sic_launch_time").order(BucketOrder.key(true)).size(1));
@@ -251,10 +250,13 @@ public class DataCollectionService extends CollectionBaseService {
             List<FileEventModel> fileEventModels = Lists.newArrayList();
             for(SearchHit hit : response.getHits().getHits()) {
                 JSONObject json = JSONObject.parseObject(hit.getSourceAsString());
-                String agentName = json.getJSONObject("agent").getString("name");
-                String rawOutput = json.getJSONObject("data").getJSONObject("sic_launch_output").getString("raw_output").trim();
-                LocalDateTime time = TimeUtils.stringToLocalDateTime(json.getJSONObject("data").getString("sic_launch_time"), TimeUtils.tz6MillsDateTimeFormatter);
+                String rawOutput = Optional.of(json.getJSONObject("data")).map(j -> j.getJSONObject("sic_launch_output")).map(j -> j.getString("raw_output")).orElse(null);
+                if(rawOutput == null) {
+                    continue;
+                }
                 
+                String agentName = json.getJSONObject("agent").getString("name");
+                LocalDateTime time = TimeUtils.stringToLocalDateTime(json.getJSONObject("data").getString("sic_launch_time"), TimeUtils.tz6MillsDateTimeFormatter);
                 JSONArray files = JSONArray.parseArray(rawOutput);
                 for(Object f : files.toArray()) {
                     FileEventModel m = new FileEventModel();

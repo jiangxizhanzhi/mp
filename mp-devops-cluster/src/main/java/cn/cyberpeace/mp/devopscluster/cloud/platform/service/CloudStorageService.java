@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,8 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.cscene.util.ResponseUtil;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.BaseModel;
@@ -89,35 +86,46 @@ public class CloudStorageService extends BaseCpService {
     /**
      * 下载文件
      */
-    public void downloadFile(String conId, String downloadFile, HttpServletResponse response) {
-        InputStream responseStream = super.streamGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id="
-                + conId + "&download_file=" + downloadFile);
-        ResponseUtil.transferStream(downloadFile, responseStream, response);
+    public JSONObject downloadFile(String conId, String downloadFile, HttpServletResponse response) {
+//        InputStream responseStream = super.streamGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/file?con_id="
+//                + conId + "&download_file=" + downloadFile);
+//        ResponseUtil.transferStream(downloadFile, responseStream, response);
+
+        BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/file?con_id=" + conId
+                + "&download_file=" + downloadFile, BaseModel.class);
+        return convertToJson(result);
     }
 
     /**
      * 获取云盘目录list
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
-    public ListObjServiceResult<FileVO> list(String conId, String path) throws Exception {
+    public JSONObject list(String conId, String path) throws Exception {
         BaseModel result = super.sendGet(
                 BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId + "&path=" + path,
                 BaseModel.class);
         List<FileVO> vos = genFileVOs(convertToJson(result));
+        
+        // 为了和搜索结果返回格式一致
+        JSONObject data = new JSONObject();
+        data.put("total", vos.size());
+        data.put("list", vos);
+        JSONObject returnJson = new JSONObject();
+        returnJson.put("data", data);
 
-        return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
+        return returnJson;
     }
 
     /**
      * 搜索文件
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
-    public ListObjServiceResult<FileVO> search(String conId, String searchWord) throws Exception {
+    public JSONObject search(String conId, String searchWord) throws Exception {
         BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/search?con_id=" + conId
                 + "&search_word=" + searchWord, BaseModel.class);
-        List<FileVO> vos = genFileVOs(convertToJson(result));
-
-        return new ListObjServiceResult<FileVO>(vos, vos.size()).asResult();
+        return convertToJson(result);
     }
 
     /**
@@ -136,13 +144,13 @@ public class CloudStorageService extends BaseCpService {
      * 
      * @param stdout
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private List<FileVO> genFileVOs(JSONObject resultJson) throws Exception {
         List<FileVO> vos = Lists.newArrayList();
-        
+
         String stdout = resultJson.getString("stdout");
-        if(stdout == null) {
+        if (stdout == null) {
             throw new Exception(resultJson.getString("message"));
         }
         String[] files = stdout.trim().split("\\n");

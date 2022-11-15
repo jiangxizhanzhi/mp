@@ -47,6 +47,8 @@ public class BaseCpService {
     private static final String PUT_LOG_INFO = "=====PUT url：{},params：{},>>>>>>>result：{}";
 
     private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},>>>>>>>result：{}";
+    
+    private static final String GET_STREAM_LOG_INFO = "=====GET STREAM url：{}";
 
     private final DevopsClusterConfig devopsClusterConfig;
 
@@ -233,6 +235,10 @@ public class BaseCpService {
      */
     protected InputStream streamGet(String api) {
         String url = this.buildUrl(api);
+        if (log.isInfoEnabled()) {
+            log.info(GET_STREAM_LOG_INFO, url);
+        }
+        
         return HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().bodyStream();
     }
     
