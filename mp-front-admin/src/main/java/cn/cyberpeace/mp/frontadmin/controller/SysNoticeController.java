@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -28,6 +29,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -136,6 +138,7 @@ public class SysNoticeController {
     @ApiOperation("新增公告")
     @ApiImplicitParam(name = "noticeReq", value = "新增公告请求", dataTypeClass = SysNoticeRequest.class)
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
@@ -145,6 +148,7 @@ public class SysNoticeController {
     @ApiOperation("更新公告")
     @ApiImplicitParam(name = "noticeReq", value = "更新公告请求", dataTypeClass = SysNoticeRequest.class)
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "修改公告", target = OpTargetEnums.NOTICE)
     public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.modify(id, noticeReq);
@@ -156,6 +160,7 @@ public class SysNoticeController {
     @ApiOperation("批量删除公告")
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String[].class)
     @DeleteMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
@@ -167,6 +172,7 @@ public class SysNoticeController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> delete(@PathVariable String id) {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
