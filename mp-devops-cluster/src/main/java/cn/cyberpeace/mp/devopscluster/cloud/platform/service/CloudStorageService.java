@@ -106,7 +106,7 @@ public class CloudStorageService extends BaseCpService {
                 BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/list?con_id=" + conId + "&path=" + path,
                 BaseModel.class);
         List<FileVO> vos = genFileVOs(convertToJson(result));
-        
+
         // 为了和搜索结果返回格式一致
         JSONObject data = new JSONObject();
         data.put("total", vos.size());
@@ -159,7 +159,8 @@ public class CloudStorageService extends BaseCpService {
         }
 
         for (int i = 1; i < files.length; i++) {
-            String[] line = files[i].replaceAll("\\s+", " ").split(" ");
+            String entry = files[i].replaceAll("\\s+", " ");
+            String[] line = entry.split(" ");
 
             FileVO vo = new FileVO();
             vo.setAuthority(line[0]);
@@ -168,7 +169,8 @@ public class CloudStorageService extends BaseCpService {
             vo.setOwnerGroup(line[3]);
             vo.setSize(Long.parseLong(line[4]));
             vo.setModifyTime(line[5] + " " + line[6] + " " + line[7]);
-            vo.setName(line[8]);
+            // 文件名可能有空格
+            vo.setName(entry.substring(entry.lastIndexOf(line[7]) + line[7].length() + 1));
             vos.add(vo);
         }
 
