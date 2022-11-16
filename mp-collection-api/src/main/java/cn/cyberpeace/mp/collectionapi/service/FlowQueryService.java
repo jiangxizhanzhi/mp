@@ -595,7 +595,7 @@ public class FlowQueryService {
             bo.setField(ipField);
             bos.add(bo);
 
-            if (CollectionUtils.isNotEmpty(field.getIps())) {
+            if (field.getIps() != null) {
                 bo.setFilterType(EsIpFieldBO.FilterType.LIST);
                 bo.setIps(field.getIps());
             } else {
