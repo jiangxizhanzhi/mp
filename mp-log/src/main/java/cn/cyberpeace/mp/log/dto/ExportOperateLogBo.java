@@ -24,9 +24,13 @@ public class ExportOperateLogBo {
     @ColumnWidth(15)
     private String name;
 
-    @ExcelProperty("登录时间")
+    @ExcelProperty("时间")
     @ColumnWidth(30)
     private String time;
+
+    @ExcelProperty("操作")
+    @ColumnWidth(30)
+    private String opType;
 
     @ExcelProperty(value = "IP")
     @ColumnWidth(20)

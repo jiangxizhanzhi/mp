@@ -103,6 +103,9 @@ public class OperationLogPageRequest extends BasePageRequest{
             boolBuilder.must(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userName,"*")));
         }
         if (Objects.nonNull(opTypeID)) {
+            //List<Integer> types = new ArrayList<>();
+            //types.add(0);
+            //types.add(1);
             boolBuilder.must(QueryBuilders.termQuery("opTypeID", opTypeID));
         }
         if (StringUtils.isNotBlank(userNameOrOpTarget)){

@@ -45,13 +45,14 @@ public class OperateLogServiceImpl implements OperateLogService {
     public List<ExportOperateLogBo> toExportBOList(List<OperationLogPageResponse> list) {
 
         List<ExportOperateLogBo> boList =
-            list.stream().map(log -> {
-                        return ExportOperateLogBo.builder()
-                                .ip(log.getOpIp())
-                                .username(log.getUserName())
-                                .time(TimeUtils.localDateTimeToString(log.getOpTime()))
-                                .build();
-                    }
+                list.stream().map(log -> {
+                    return ExportOperateLogBo.builder()
+                            .ip(log.getOpIp())
+                            .username(log.getUserName())
+                            .time(TimeUtils.localDateTimeToString(log.getOpTime()))
+                            .opType(log.getOpType())
+                            .build();
+                }
             ).collect(Collectors.toList());
 
         return boList;

@@ -39,6 +39,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,6 +54,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -162,10 +165,24 @@ public class UserExcelController {
         request.setPage(1);
         Map<String, String> map = userService.listAll();
 
-        ListObjServiceResult<OperationLogPageResponse> ret = operateLogService.search(request);
+        request.setOpType(0);
+        ListObjServiceResult<OperationLogPageResponse> loginret = operateLogService.search(request);
 
-        List<OperationLogPageResponse> list = ret.getSource().getObjs();
-        List<ExportOperateLogBo> boList = operateLogService.toExportBOList(list);
+        OperationLogPageRequest newReq = new OperationLogPageRequest();
+        BeanUtils.copyProperties(request, newReq);
+        newReq.setOpType(1);
+
+        ListObjServiceResult<OperationLogPageResponse> logoutret = operateLogService.search(newReq);
+
+        List<OperationLogPageResponse> loginList = loginret.getSource().getObjs();
+        List<OperationLogPageResponse> logoutList = logoutret.getSource().getObjs();
+        List<OperationLogPageResponse> allList = new ArrayList<>();
+        allList.addAll(loginList);
+        allList.addAll(logoutList);
+
+        allList.sort(Comparator.comparing(OperationLogPageResponse::getOpTime).reversed());
+
+        List<ExportOperateLogBo> boList = operateLogService.toExportBOList(allList);
 
         boList.forEach(bo -> {
             bo.setName(map.get(bo.getUsername()));
