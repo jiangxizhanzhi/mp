@@ -2,7 +2,11 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -91,9 +95,16 @@ public class CloudStorageService extends BaseCpService {
 //                + conId + "&download_file=" + downloadFile);
 //        ResponseUtil.transferStream(downloadFile, responseStream, response);
 
-        BaseModel result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/file?con_id=" + conId
-                + "&download_file=" + downloadFile, BaseModel.class);
-        return convertToJson(result);
+        BaseModel result;
+        try {
+            result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CLOUD_STORAGE + "/file?con_id=" + conId
+                    + "&download_file=" + URLEncoder.encode(downloadFile, "UTF-8"), BaseModel.class);
+            return convertToJson(result);
+        } catch (UnsupportedEncodingException e) {
+            log.error("cloud storage download file failed", e);
+        }
+        
+        return null;
     }
 
     /**
@@ -158,8 +169,19 @@ public class CloudStorageService extends BaseCpService {
             return vos;
         }
 
+        Pattern timePattern = Pattern.compile("\\d{2}:\\d{2}");
         for (int i = 1; i < files.length; i++) {
-            String entry = files[i].replaceAll("\\s+", " ");
+            String entry = files[i];
+            // 找出时间位置
+            Matcher matcher = timePattern.matcher(entry);
+            if(!matcher.find()) {
+               continue; 
+            }
+            String time = matcher.group();
+            // 取出文件名，避免文件名中空格被replace
+            String fileName = entry.substring(entry.lastIndexOf(time) + 6);
+            
+            entry = entry.replaceAll("\\s+", " ");
             String[] line = entry.split(" ");
 
             FileVO vo = new FileVO();
@@ -169,8 +191,7 @@ public class CloudStorageService extends BaseCpService {
             vo.setOwnerGroup(line[3]);
             vo.setSize(Long.parseLong(line[4]));
             vo.setModifyTime(line[5] + " " + line[6] + " " + line[7]);
-            // 文件名可能有空格
-            vo.setName(entry.substring(entry.lastIndexOf(line[7]) + line[7].length() + 1));
+            vo.setName(fileName);
             vos.add(vo);
         }
 
