@@ -640,10 +640,10 @@ public class FlowMonitorService {
             return;
         }
 
-        // execute cmd
+        // zip 压缩 -q：不显示指令执行过程；-r：递归处理 -u：更换较新的文件到压缩文件内；-j：只保存文件名称及其内容，而不存放任何目录名称；
         String zipFilePath = "/opt/arkime/flow.zip";
         ContainerExecuteResult result = container.executeCommand(containerId,
-                String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
+                String.format("zip -q -r -u -j %s /opt/arkime/raw/*", zipFilePath));
         if (result.getExitCode() != 0) {
             log.error("exec zip cmd fail, exit code {}, msg {}", result.getExitCode(), result.getOutput());
             return;

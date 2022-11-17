@@ -175,7 +175,7 @@ public class CloudStorageService extends BaseCpService {
             // 找出时间位置
             Matcher matcher = timePattern.matcher(entry);
             if(!matcher.find()) {
-               continue; 
+               continue;
             }
             String time = matcher.group();
             // 取出文件名，避免文件名中空格被replace
