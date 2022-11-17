@@ -32,7 +32,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
         var cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
         cscene.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         cscene.setCallAction(CsceneContextHolder.getCallAction());
-        log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE, JsonCommon.stringify(cscene), JsonCommon.stringify(TransferContext.getContextMap()));
+        log.info("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE, JsonCommon.stringify(cscene), JsonCommon.stringify(TransferContext.getContextMap()));
         messageSender.send(cscene, MESSAGE_TYPE_SCENE, null, csceneAppConfig.getSceneMessageTimeout());
     }
 
@@ -41,7 +41,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
         var csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);
         csceneElement.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         csceneElement.setCallAction(CsceneContextHolder.getCallAction());
-        log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE_ELEMENT, JsonCommon.stringify(csceneElement), JsonCommon.stringify(TransferContext.getContextMap()));
+        log.info("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE_ELEMENT, JsonCommon.stringify(csceneElement), JsonCommon.stringify(TransferContext.getContextMap()));
         messageSender.send(csceneElement, MESSAGE_TYPE_SCENE_ELEMENT, null, csceneAppConfig.getSceneMessageTimeout());
     }
 }
