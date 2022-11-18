@@ -31,7 +31,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +137,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listAll() {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         HumanCondition humanCondition = new HumanCondition();
-        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
             humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }
         List<RoleModel> roles = getModelMapper().list(humanCondition);
@@ -196,7 +195,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public ListObjServiceResult getPageWithUserCnt(RolePageRequest rolePageRequest) {
         ArrayList<String> orders = null;
         if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
-            orders = CollectionUtil.newArrayList(rolePageRequest.getOrders());
+            orders = CollUtil.newArrayList(rolePageRequest.getOrders());
         }
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
         ListObjServiceResult result = listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles(), rolePageRequest.getPage(), rolePageRequest.getPageSize());
@@ -251,8 +250,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         log.info("role created id:{}", roleId);
 
         // 保存角色-权限关系
-        if (CollectionUtil.isNotEmpty(createRequest.getTargetIds())) {
-            createRequest.getTargetIds().forEach(id -> {
+        List<String> targetIds = createRequest.getTargetIds();
+        if (CollUtil.isNotEmpty(targetIds)) {
+            // 对 targetIds 去重
+            TreeSet<String> set = new TreeSet<>(targetIds);
+
+            set.forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("target id:{} not existed!", id);
@@ -295,7 +298,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         // 保存角色-权限关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getTargetIds())) {
+        if (CollUtil.isNotEmpty(modifyRequest.getTargetIds())) {
             modifyRequest.getTargetIds().forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
@@ -380,7 +383,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         List<UserModel> users = userRoleService.listUsersByRoleIdNoRestrict(roleId);
-        if (CollectionUtil.isNotEmpty(users)) {
+        if (CollUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
@@ -458,15 +461,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         List<String> roleBoIds =
                 rolebos.stream().map(r -> {
-                    if (CollectionUtil.isEmpty(r.getTargets())) {
+                    if (CollUtil.isEmpty(r.getTargets())) {
                         return r.getId();
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        if (CollectionUtil.isNotEmpty(roleBoIds)) {
+        if (CollUtil.isNotEmpty(roleBoIds)) {
             List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleBoIds);
-            if (CollectionUtil.isNotEmpty(targetRoleBos)) {
+            if (CollUtil.isNotEmpty(targetRoleBos)) {
                 rolebos.forEach(r -> {
                     List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
                         if (Objects.equals(tr.getRoleId(), r.getId())) {
