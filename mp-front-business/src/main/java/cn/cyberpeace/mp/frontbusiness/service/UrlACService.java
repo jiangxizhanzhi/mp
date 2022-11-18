@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.frontbusiness.model.UrlACModel;
 import cn.cyberpeace.mp.frontbusiness.model.UrlACTargetModel;
 import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
