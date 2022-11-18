@@ -132,4 +132,7 @@ public class ImagesPageVO extends BaseVO {
     @ApiModelProperty("容器信息")
     private ExtDocker extDocker;
 
+    @ApiModelProperty("是否允许导出")
+    private Boolean allowExport;
+
 }
