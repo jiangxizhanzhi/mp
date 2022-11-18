@@ -585,10 +585,10 @@ public class ImagesController {
                     }
                 }
             }
-            if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
-                if (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal()))) {
-                    vo.setAllowExport(false);
-                }
+            // 内置靶标是否允许导出可配置
+            if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport()) &&
+                    (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal())))) {
+                vo.setAllowExport(false);
             }
             return vo;
         }).collect(Collectors.toList());
