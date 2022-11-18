@@ -561,6 +561,7 @@ public class ImagesController {
                     .imageType(v.getImageType())
                     .isImport(v.getIsImport())
                     .isInternal(v.getIsInternal())
+                    .allowExport(true)
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
@@ -582,6 +583,11 @@ public class ImagesController {
                     if (result != null) {
                         map.put("message", result);
                     }
+                }
+            }
+            if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
+                if (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal()))) {
+                    vo.setAllowExport(false);
                 }
             }
             return vo;
