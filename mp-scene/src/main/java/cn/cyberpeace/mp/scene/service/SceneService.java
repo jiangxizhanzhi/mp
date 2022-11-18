@@ -258,14 +258,14 @@ public class SceneService {
     public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.startElement(nodeId);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.startElement(nodeId));
         return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.stopElement(nodeId);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.stopElement(nodeId));
         return new ServiceResult<>(true);
     }
 
