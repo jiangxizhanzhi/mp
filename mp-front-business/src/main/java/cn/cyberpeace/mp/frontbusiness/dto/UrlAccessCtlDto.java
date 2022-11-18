@@ -19,6 +19,10 @@ import java.util.List;
 @NoArgsConstructor
 public class UrlAccessCtlDto {
 
+    public static final String QUERY_FIELD_METHODS = "methods";
+    public static final String QUERY_FIELD_GROUPS = "groups";
+    public static final String QUERY_FIELD_TARGET_IDS = "targetIds";
+
     private String url;
 
     private Integer isPattern;

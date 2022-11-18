@@ -127,13 +127,12 @@ public class UrlACService {
 
         if (CollUtil.isNotEmpty(addReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                addReq.getTargetIds().stream().map(tid -> {
-                    UrlACTargetModel acTargetModel = UrlACTargetModel.builder()
+                addReq.getTargetIds().stream().map(tid ->
+                    UrlACTargetModel.builder()
                             .urlacId(urlacId)
                             .target(tid)
-                            .build();
-                    return acTargetModel;
-                }).collect(Collectors.toList());
+                            .build()
+                ).collect(Collectors.toList());
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -173,13 +172,12 @@ public class UrlACService {
         urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
         if (CollUtil.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                    updateReq.getTargetIds().stream().map(tid -> {
-                        UrlACTargetModel acTargetModel = UrlACTargetModel.builder()
+                    updateReq.getTargetIds().stream().map(tid ->
+                        UrlACTargetModel.builder()
                                 .urlacId(urlacId)
                                 .target(tid)
-                                .build();
-                        return acTargetModel;
-                    }).collect(Collectors.toList());
+                                .build()
+                    ).collect(Collectors.toList());
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -307,10 +305,10 @@ public class UrlACService {
                 .filterStartsWith(UrlACModel::getUrl, url);
         cond.currentLink(UrlACModel.class)
                 .select(UrlACModel::getUrl, UrlACModel::getIsPattern)
-                .selectAs(UrlACModel::getMethods, "methods")
-                .selectAs(GroupConcat.f(UrlACModel::getGroup).distinct(), "groups")
+                .selectAs(UrlACModel::getMethods, UrlAccessCtlDto.QUERY_FIELD_METHODS)
+                .selectAs(GroupConcat.f(UrlACModel::getGroup).distinct(), UrlAccessCtlDto.QUERY_FIELD_GROUPS)
                 .currentLink(UrlACTargetModel.class)
-                .selectAs(GroupConcat.f(UrlACTargetModel::getTarget).distinct(), "targetIds")
+                .selectAs(GroupConcat.f(UrlACTargetModel::getTarget).distinct(), UrlAccessCtlDto.QUERY_FIELD_TARGET_IDS)
                 .currentLink(UrlACModel.class)
                 .groupBy(UrlACModel::getUrl, UrlACModel::getIsPattern, UrlACModel::getMethods);
         return urlACMapper.list(cond, UrlAccessCtlDto.class);
@@ -322,12 +320,12 @@ public class UrlACService {
                 .filterLink(UrlACModel.class, UrlACModel::getGroup, UrlACTargetModel.class, UrlACTargetModel::getGroup)
                 .currentLink(UrlACModel.class)
                 .filterEqual(UrlACModel::getGroup, group)
-                .selectAs(UrlACModel::getGroup, "group")
-                .selectAs(UrlACModel::getUrl, "url")
-                .selectAs(UrlACModel::getIsPattern, "isPattern")
-                .selectAs(UrlACModel::getMethods, "methods")
+                .selectAs(UrlACModel::getGroup, UrlAcCtlGroupBo.QUERY_FIELD_GROUP)
+                .selectAs(UrlACModel::getUrl, UrlAcCtlGroupBo.QUERY_FIELD_URL)
+                .selectAs(UrlACModel::getIsPattern, UrlAcCtlGroupBo.QUERY_FIELD_IS_PATTERN)
+                .selectAs(UrlACModel::getMethods, UrlAcCtlGroupBo.QUERY_FIELD_METHODS)
                 .currentLink(UrlACTargetModel.class)
-                .selectAs(UrlACTargetModel::getTarget, "targets")
+                .selectAs(UrlACTargetModel::getTarget, UrlAcCtlGroupBo.QUERY_FIELD_TARGETS)
                 .distinct();
         return urlACMapper.list(cond, UrlAcCtlGroupBo.class);
     }
