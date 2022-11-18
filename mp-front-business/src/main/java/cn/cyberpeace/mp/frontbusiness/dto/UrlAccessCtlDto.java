@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.frontbusiness.dto;
 
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +19,6 @@ import java.util.List;
 @NoArgsConstructor
 public class UrlAccessCtlDto {
 
-    private String id;
-
     private String url;
 
     private Integer isPattern;
@@ -35,4 +32,9 @@ public class UrlAccessCtlDto {
     private String targetsStr;
 
     private List<String> targetIds;
+
+    @JsonIgnore
+    private String groupsStr;
+
+    private List<String> groups;
 }
