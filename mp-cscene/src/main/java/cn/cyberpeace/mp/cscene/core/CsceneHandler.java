@@ -7,10 +7,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -27,10 +24,14 @@ import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -325,13 +326,19 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
             if (elements != null && !elements.isEmpty()) {
+                CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
                 elements.values().forEach(e -> {
                     if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                         String image = e.get("image").toString();
-                        CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
                         var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
                         if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
                             throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
+                        }
+                    }
+                    if (e.get("vlan_id") != null) {
+                        var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
+                        if(CollectionUtils.isNotEmpty(result)){
+                            throw new MpRuntimeException(CsceneErrorCode.VLANID_HAS_BEEN_USED.format(String.valueOf(e.get("vlan_id")), JsonCommon.stringify(result.get(0).getName())));
                         }
                     }
                 });

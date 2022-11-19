@@ -41,6 +41,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
@@ -893,6 +894,21 @@ public class CsceneSpecialService {
             }
         }
         return new ServiceResult<>(list);
+    }
+
+    public ServiceResult<List<CsceneInstanceModel>> getInstanceUseVlanId(Integer vlanId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.link(CsceneInstanceModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .selectAs(CsceneInstanceModel::getName, CsceneInstanceModel::getName)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getVlanId, vlanId)
+                .setLimit(1);
+        CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        var result = csceneInstanceMapper.list(humanCondition);
+        return new ServiceResult<>(result).asResult();
     }
 
 }
