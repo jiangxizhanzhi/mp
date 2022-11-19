@@ -29,7 +29,7 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: 10.100.0.101
+    host: 10.100.7.1
     port: 5673
     username: guest
     password: guest
@@ -110,7 +110,7 @@ mp:
     # arkime
     arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
     arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1
-    arkime-es-host: 10.100.0.101
+    arkime-es-host: 10.100.7.1
     arkime-es-port: 9205
     arkime-image-name: centos-arkime_arkime:v2
     arkime-username: api
@@ -126,16 +126,22 @@ mp:
     probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
     probe-mgr-task-enable: false
     # wazuh es节点地址
-    wazuh-es-nodes: 10.100.0.101:9205
+    wazuh-es-nodes: 10.100.7.1:9205
+    wazuh-es-username: elastic
+    wazuh-es-password: cyberpeace@2020
     # arkime es 地址
-    arkime-es-nodes: 10.100.0.101:9205
+    arkime-es-nodes: 10.100.7.1:9205
+    arkime-es-username: elastic
+    arkime-es-password: cyberpeace@2020
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   # mp-log 模块配置
   log:
     exclude-urls: /login
     exclude-methods: OPTIONS
-    es-nodes: 10.100.0.101:9205
+    es-nodes: 10.100.7.1:9205
+    es-username: elastic
+    es-password: cyberpeace@2020
     cp-url: http://10.100.7.1:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
     log-db: sql #日志存储数据库可以配置：es、sql
@@ -197,7 +203,9 @@ mp:
     wazuh-server-host: 10.100.7.1
     wazuh-api-server: http://10.100.7.1:15500
     wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://10.100.0.101:9205
+    wazuh-es-server: http://10.100.7.1:9205
+    wazuh-es-username: elastic
+    wazuh-es-password: cyberpeace@2020
     wazuh-godfs-server: http://10.100.7.1:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result

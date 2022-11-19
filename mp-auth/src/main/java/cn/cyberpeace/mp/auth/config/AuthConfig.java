@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -51,4 +52,9 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    @PostConstruct
+    public void init() {
+        System.out.println(this);
+    }
 }

@@ -128,8 +128,12 @@ mp:
     probe-mgr-task-enable: true
     # wazuh es节点地址
     wazuh-es-nodes: ${WAZUH_ES_IP:10.100.0.101}:${WAZUH_ES_PORT:9205}
+    wazuh-es-username: ${WAZUH_ES_USERNAME:elastic}
+    wazuh-es-password: ${WAZUH_ES_PASSWORD:}
     # arkime es 地址
     arkime-es-nodes: ${ARKIME_ES_IP:10.100.0.101}:${ARKIME_ES_PORT:9205}
+    arkime-es-username: ${ARKIME_ES_USERNAME:elastic}
+    arkime-es-password: ${ARKIME_ES_PASSWORD:}
     # es 日期格式
     es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
   # mp-log 模块
@@ -137,6 +141,8 @@ mp:
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
+    es-username: ${LOG_ES_USERNAME:elastic}
+    es-password: ${LOG_ES_PASSWORD:}
     cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
     mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
     log-db: ${MP_DEVOPS_LOG_DB:es} #日志存储数据库可以配置：es、sql
@@ -199,6 +205,8 @@ mp:
     wazuh-api-server: http://${WAZUH_IP:10.100.7.1}:15500
     wazuh-api-pass: Abcd123#
     wazuh-es-server: http://${WAZUH_ES_IP:10.100.0.101}:9205
+    wazuh-es-username: ${WAZUH_ES_USERNAME:elastic}
+    wazuh-es-password: ${WAZUH_ES_PASSWORD}
     wazuh-godfs-server: http://${WAZUH_IP:10.100.7.1}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${MP_SELF_IP:mp}:${MP_SELF_PORT:8001}/api/mp/scene_plugin_collection/wazuh_run_command_result

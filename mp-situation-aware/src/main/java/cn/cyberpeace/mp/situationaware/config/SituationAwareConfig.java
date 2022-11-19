@@ -18,6 +18,10 @@ public class SituationAwareConfig {
      */
     private String wazuhEsNodes;
 
+    private String wazuhEsUsername;
+
+    private String wazuhEsPassword;
+
     /**
      * MP新中台ES地址
      */
@@ -45,6 +49,8 @@ public class SituationAwareConfig {
     private String arkimeCpcloudNetworkMirrorUrl;
     private String arkimeEsHost;
     private String arkimeEsPort;
+    private String arkimeEsUsername;
+    private String arkimeEsPassword;
     private String arkimeImageName;
     private String arkimeUsername;
     private String arkimePassword;
@@ -67,6 +73,7 @@ public class SituationAwareConfig {
     public static DateTimeFormatter esDateTimeFormatter = null;
     @PostConstruct
     public void init() {
+        System.out.println(this);
         esDateTimeFormatter = DateTimeFormatter.ofPattern(esDatePattern);
     }
 

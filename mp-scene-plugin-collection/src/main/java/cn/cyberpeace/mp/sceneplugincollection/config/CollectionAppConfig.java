@@ -67,6 +67,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_es_server:}")
     private String wazuhEsServer;
 
+    @Value("${mp.sceneplugincollection.wazuh_es_username:elastic}")
+    private String wazuhEsUsername;
+
+    @Value("${mp.sceneplugincollection.wazuh_es_password:}")
+    private String wazuhEsPassword;
+
     @Value("${mp.sceneplugincollection.wazuh_godfs_server:http://127.0.0.1:1888}")
     private String wazuhGodfsServer;
 

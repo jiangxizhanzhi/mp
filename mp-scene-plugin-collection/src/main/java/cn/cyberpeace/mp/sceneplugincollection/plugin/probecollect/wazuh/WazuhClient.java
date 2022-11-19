@@ -14,6 +14,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 
@@ -117,6 +120,8 @@ public class WazuhClient {
         private String wazuhUser;
         private String wazuhPass;
         private String esServer;
+        private String esUsername;
+        private String esPassword;
         private String mongoServer;
 
         public WazuhClientBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
@@ -137,11 +142,11 @@ public class WazuhClient {
         }
 
         public WazuhClient build() {
-            return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer, mongoServer);
+            return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer, esUsername, esPassword, mongoServer);
         }
     }
 
-    private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer, String mongoServer) {
+    private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer, String esUsername, String esPassword, String mongoServer) {
         this.wazuhHttpClient = HttpClient.builder()
                 .configServer(wazuhServer)
                 .configTimeout(60000)
@@ -155,6 +160,13 @@ public class WazuhClient {
         if (!StringUtils.isEmpty(esServer)) {
             var esHostParts = esServer.split("://")[1].split(":");
             var restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
+
+            final var credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(esUsername, esPassword));
+            restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> {
+                httpClientBuilder.disableAuthCaching();
+                return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            });
             this.esClient = new RestHighLevelClient(restClientBuilder);
         }
 

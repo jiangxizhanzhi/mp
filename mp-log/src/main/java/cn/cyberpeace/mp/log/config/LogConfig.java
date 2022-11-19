@@ -32,6 +32,16 @@ public class LogConfig {
     private String esNodes;
 
     /**
+     * es账号
+     */
+    private String esUsername;
+
+    /**
+     * es密码
+     */
+    private String esPassword;
+
+    /**
      * 云平台地址
      */
     private String cpUrl;

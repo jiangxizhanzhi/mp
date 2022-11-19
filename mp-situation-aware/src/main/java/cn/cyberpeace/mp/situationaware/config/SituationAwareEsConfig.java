@@ -2,8 +2,13 @@ package cn.cyberpeace.mp.situationaware.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,12 +24,28 @@ public class SituationAwareEsConfig {
 
     @Bean(name="wazuhRestHighLevelClient")
     public RestHighLevelClient wazuhRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createWazuHttpHost()));
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(situationAwareConfig.getWazuhEsUsername(), situationAwareConfig.getWazuhEsPassword()));
+
+        RestClientBuilder builder = RestClient.builder(this.createWazuHttpHost());
+        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+            httpClientBuilder.disableAuthCaching();
+            return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        });
+
+        return new RestHighLevelClient(builder);
     }
 
     @Bean(name="datasandtableRestHighLevelClient")
     public RestHighLevelClient datasandtableRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(situationAwareConfig.getArkimeEsUsername(), situationAwareConfig.getArkimeEsPassword()));
+        RestClientBuilder builder = RestClient.builder(this.createArkimeHttpHost());
+        builder.setHttpClientConfigCallback(httpClientBuilder -> {
+            httpClientBuilder.disableAuthCaching();
+            return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        });
+        return new RestHighLevelClient(builder);
     }
 
     /**cn.cyberpeace.mp.situationaware
