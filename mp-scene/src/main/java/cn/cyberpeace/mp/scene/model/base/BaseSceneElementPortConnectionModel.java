@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scene.model.base;
 
+import java.util.List;
+
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
@@ -24,4 +26,8 @@ public class BaseSceneElementPortConnectionModel extends BaseModel {
     private Boolean unidirectional;
     @DefaultStr
     private String displayContext;
+    @DefaultStr
+    private String type;
+    @DefaultStr
+    private List<Integer> vertices;
 }
