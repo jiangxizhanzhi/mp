@@ -50,7 +50,6 @@ public class JsonMockService {
                 List<Device> filteredDevices = allDevices.stream().filter(d -> ids.contains(d.getId())).collect(Collectors.toList());
                 return filteredDevices;
             }
-
         }
 
         return allDevices;
