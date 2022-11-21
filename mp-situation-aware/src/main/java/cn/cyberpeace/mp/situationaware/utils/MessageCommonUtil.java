@@ -21,7 +21,7 @@ public class MessageCommonUtil {
 
     }
 
-    private static List<String> names;
+    private static List<String> keys;
     private static Map<String, String> zhMap;
     private static Map<String, String> enMap;
 
@@ -31,18 +31,18 @@ public class MessageCommonUtil {
         if (CollectionUtils.isEmpty(messages)) {
             return;
         }
-        names = new ArrayList<>();
+        keys = new ArrayList<>();
         zhMap = new ConcurrentHashMap<>();
         enMap = new ConcurrentHashMap<>();
         for (var message : messages) {
-            names.add(message.getName());
-            zhMap.put(message.getName(), message.getZhName());
-            enMap.put(message.getName(), message.getEnName());
+            keys.add(message.getKey());
+            zhMap.put(message.getKey(), message.getZhName());
+            enMap.put(message.getKey(), message.getEnName());
         }
     }
 
     public static String convertMessage(String name) {
-        if (!names.contains(name)) {
+        if (!keys.contains(name)) {
             return name;
         }
         if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
@@ -54,7 +54,7 @@ public class MessageCommonUtil {
 
     @Data
     public static class Message {
-        private String name;
+        private String key;
         private String zhName;
         private String enName;
     }
