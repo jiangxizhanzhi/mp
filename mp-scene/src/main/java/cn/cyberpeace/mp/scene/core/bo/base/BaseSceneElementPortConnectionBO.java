@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import java.util.List;
+
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -19,6 +21,10 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     private Boolean unidirectional;
     @ApiModelProperty(value = "显示参数")
     private String displayContext;
+    @ApiModelProperty(value = "连线类型")
+    private String type;
+    @ApiModelProperty(value = "路径点")
+    private List<Integer> vertices;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
