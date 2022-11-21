@@ -1,36 +1,36 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
 import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.RolePermissionModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
+import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.hutool.core.collection.CollectionUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +67,16 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private UserRoleService userRoleService;
 
     @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
     private OperateRolePermissionService opRolePermCheckService;
+
+    @Autowired
+    private UserCacheService userCacheService;
+
+    @Autowired
+    private AuthStatusRabbitmqSender messageSender;
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -84,7 +90,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         // todo 删除关联用户关系，权限关系
         deleteReleated(roleId);
-        return super.delete(roleId);
+        var ret = super.delete(roleId);
+        if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
+        }
+        return ret;
     }
 
     @Override
@@ -96,7 +107,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             deleteReleated(id);
         }
 
-        return super.bulkDelete(ids);
+        var ret = super.bulkDelete(ids);
+        if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
+            userCacheService.evictAllUserCache();
+            messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
+        }
+        return ret;
     }
 
     @Override
@@ -121,7 +137,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listAll() {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         HumanCondition humanCondition = new HumanCondition();
-        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
             humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }
         List<RoleModel> roles = getModelMapper().list(humanCondition);
@@ -176,50 +192,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
+    public ListObjServiceResult getPageWithUserCnt(RolePageRequest rolePageRequest) {
         ArrayList<String> orders = null;
         if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
-            orders = CollectionUtil.newArrayList(rolePageRequest.getOrders());
+            orders = CollUtil.newArrayList(rolePageRequest.getOrders());
         }
-
-        PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
-        List<RoleBo> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
-        PageInfo pageInfo = new PageInfo(roleDtos);
-        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+        ListObjServiceResult result = listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles(), rolePageRequest.getPage(), rolePageRequest.getPageSize());
 
-        roleDtos.forEach(r -> {
-            if (r.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
-                r.setTargets(allTargets);
-            }
-        });
-
-        List<String> roleIds =
-        roleDtos.stream().map(r -> {
-            if (CollectionUtil.isEmpty(r.getTargets())) {
-                return r.getId();
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        if (CollectionUtil.isNotEmpty(roleIds)) {
-            List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
-            if (CollectionUtil.isNotEmpty(targetRoleBos)) {
-                roleDtos.forEach(r -> {
-                    List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
-                        if (Objects.equals(tr.getRoleId(), r.getId())) {
-                            TargetModel targetModel = new TargetModel();
-                            BeanUtils.copyProperties(tr, targetModel);
-                            return targetModel;
-                        }
-                        return null;
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
-                    r.setTargets(targetModels);
-                });
-            }
-        }
-
-        return pageInfo;
+        return result;
     }
 
     @Override
@@ -269,8 +250,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         log.info("role created id:{}", roleId);
 
         // 保存角色-权限关系
-        if (CollectionUtil.isNotEmpty(createRequest.getTargetIds())) {
-            createRequest.getTargetIds().forEach(id -> {
+        List<String> targetIds = createRequest.getTargetIds();
+        if (CollUtil.isNotEmpty(targetIds)) {
+            // 对 targetIds 去重
+            TreeSet<String> set = new TreeSet<>(targetIds);
+
+            set.forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("target id:{} not existed!", id);
@@ -313,7 +298,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         // 保存角色-权限关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getTargetIds())) {
+        if (CollUtil.isNotEmpty(modifyRequest.getTargetIds())) {
             modifyRequest.getTargetIds().forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
@@ -398,7 +383,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         List<UserModel> users = userRoleService.listUsersByRoleIdNoRestrict(roleId);
-        if (CollectionUtil.isNotEmpty(users)) {
+        if (CollUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
@@ -423,6 +408,83 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_IDENT_CANNOT_BE_ADMIN);
         }
+    }
+
+    public ListObjServiceResult listWithUserCnt(String roleName, List<String> orders, List<String> excludeRoleIds, int page, int pageSize) {
+        HumanCondition roleCondition = new HumanCondition();
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            roleCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+        }
+        if (StringUtils.isNotBlank(roleName)) {
+            roleCondition.filterContains(RoleModel::getName, roleName);
+        }
+        if (CollUtil.isNotEmpty(orders)) {
+            for (String order : orders) {
+                roleCondition.orderBy(order);
+            }
+        }
+        int total = getModelMapper().total(roleCondition);
+        roleCondition.pagination(page, pageSize);
+        List<RoleModel> roleModels = getModelMapper().list(roleCondition);
+        List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+
+        if (CollUtil.isEmpty(roleIds)) {
+            roleIds.add("");
+        }
+        HumanCondition userRoleCondition = new HumanCondition()
+                .filterIn(UserRoleModel::getRole, roleIds.toArray())
+                .select(UserRoleModel::getRole)
+                .selectAs(Count.f(UserRoleModel::getUser).distinct(), "userCnt")
+                .groupBy(UserRoleModel::getRole);
+
+        List<Map<String, Object>> maps = userRoleMapper.originList(userRoleCondition);
+        Map<String, Integer> roleCountMap = new HashMap<>(maps.size());
+        maps.stream().forEach(map -> {
+            roleCountMap.put((String) map.get("role"), ((Long) map.get("userCnt")).intValue());
+        });
+
+        List<RoleBo> rolebos = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            RoleBo roleBo = new RoleBo();
+            BeanUtils.copyProperties(roleModel, roleBo);
+            roleBo.setUserCnt(roleCountMap.getOrDefault(roleModel.getId(), 0));
+            rolebos.add(roleBo);
+        }
+
+        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+
+        rolebos.forEach(r -> {
+            if (r.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
+                r.setTargets(allTargets);
+            }
+        });
+
+        List<String> roleBoIds =
+                rolebos.stream().map(r -> {
+                    if (CollUtil.isEmpty(r.getTargets())) {
+                        return r.getId();
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        if (CollUtil.isNotEmpty(roleBoIds)) {
+            List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleBoIds);
+            if (CollUtil.isNotEmpty(targetRoleBos)) {
+                rolebos.forEach(r -> {
+                    List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
+                        if (Objects.equals(tr.getRoleId(), r.getId())) {
+                            TargetModel targetModel = new TargetModel();
+                            BeanUtils.copyProperties(tr, targetModel);
+                            return targetModel;
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
+                    r.setTargets(targetModels);
+                });
+            }
+        }
+        ListObjServiceResult<RoleBo> result = new ListObjServiceResult(new ListObjResult(rolebos, total).asResult()).asResult();
+        return result;
     }
 
 }

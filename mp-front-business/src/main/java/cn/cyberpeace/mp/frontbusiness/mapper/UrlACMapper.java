@@ -26,8 +26,6 @@ public interface UrlACMapper extends BaseModelMapper<UrlACModel> {
 
     List<UrlAccessCtlDto> listAllUrlAccessCtlPatternDtos();
 
-    List<UrlAccessCtlDto> listByUrls(@Param("urls") List<String> urls);
-
     List<UrlAccessCtlDto> listByTargetIds(@Param("targetIds") List<String> targetIds);
 
 }

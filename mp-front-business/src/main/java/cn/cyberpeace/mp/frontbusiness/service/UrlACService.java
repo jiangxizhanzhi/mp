@@ -1,16 +1,19 @@
 package cn.cyberpeace.mp.frontbusiness.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.service.aggregation.GroupConcat;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.frontbusiness.dto.ImportUrlAuth;
+import cn.cyberpeace.mp.frontbusiness.dto.UrlAcCtlGroupBo;
 import cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto;
-import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.frontbusiness.mapper.UrlACMapper;
 import cn.cyberpeace.mp.frontbusiness.mapper.UrlACTargetMapper;
 import cn.cyberpeace.mp.frontbusiness.model.UrlACModel;
 import cn.cyberpeace.mp.frontbusiness.model.UrlACTargetModel;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
+import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +64,7 @@ public class UrlACService {
      * @return
      */
     public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
-        if (CollectionUtil.isEmpty(targetIds)) {
+        if (CollUtil.isEmpty(targetIds)) {
             return Collections.emptyList();
         }
         List<UrlAccessCtlDto> dtos = urlACMapper.listByTargetIds(targetIds);
@@ -78,25 +81,25 @@ public class UrlACService {
     }
 
     /**
-     * 根绝url批量模糊查询
+     * 根据url模糊查询
      * @return
      */
-    public List<UrlAccessCtlDto> listByUrlFuzzyQuery(List<String> urls) {
-        if (CollectionUtil.isEmpty(urls)) {
+    public List<UrlAccessCtlDto> listByUrlFuzzyQuery(String url) {
+        if (StringUtils.isBlank(url)) {
             return Collections.emptyList();
         }
-        List<UrlAccessCtlDto> dtos = urlACMapper.listByUrls(urls);
+        return listByUrl(url);
+    }
 
-        dtos.forEach(d -> {
-            if (StringUtils.isNotBlank(d.getTargetsStr())) {
-                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
-            }
-
-            if (StringUtils.isNotBlank(d.getMethodStr())) {
-                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
-            }
-        });
-        return dtos;
+    /**
+     * 根据 group 查询
+     * @return
+     */
+    public List<UrlAcCtlGroupBo> listByGroupQuery(String group) {
+        if (StringUtils.isBlank(group)) {
+            return Collections.emptyList();
+        }
+        return listByGroup(group);
     }
 
 
@@ -113,7 +116,7 @@ public class UrlACService {
             urlACModel.setIsPattern(1);
         }
 
-        if (CollectionUtil.isNotEmpty(addReq.getMethods())) {
+        if (CollUtil.isNotEmpty(addReq.getMethods())) {
             urlACModel.setMethods(addReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
@@ -122,15 +125,14 @@ public class UrlACService {
             throw new MpRuntimeException("save urlac failed!");
         }
 
-        if (CollectionUtil.isNotEmpty(addReq.getTargetIds())) {
+        if (CollUtil.isNotEmpty(addReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                addReq.getTargetIds().stream().map(tid -> {
-                    UrlACTargetModel acTargetModel = UrlACTargetModel.builder()
+                addReq.getTargetIds().stream().map(tid ->
+                    UrlACTargetModel.builder()
                             .urlacId(urlacId)
                             .target(tid)
-                            .build();
-                    return acTargetModel;
-                }).collect(Collectors.toList());
+                            .build()
+                ).collect(Collectors.toList());
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -158,7 +160,7 @@ public class UrlACService {
             urlACModel.setIsPattern(1);
         }
 
-        if (CollectionUtil.isNotEmpty(updateReq.getMethods())) {
+        if (CollUtil.isNotEmpty(updateReq.getMethods())) {
             urlACModel.setMethods(updateReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
@@ -168,15 +170,14 @@ public class UrlACService {
         }
 
         urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
-        if (CollectionUtil.isNotEmpty(updateReq.getTargetIds())) {
+        if (CollUtil.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                    updateReq.getTargetIds().stream().map(tid -> {
-                        UrlACTargetModel acTargetModel = UrlACTargetModel.builder()
+                    updateReq.getTargetIds().stream().map(tid ->
+                        UrlACTargetModel.builder()
                                 .urlacId(urlacId)
                                 .target(tid)
-                                .build();
-                        return acTargetModel;
-                    }).collect(Collectors.toList());
+                                .build()
+                    ).collect(Collectors.toList());
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -265,7 +266,7 @@ public class UrlACService {
 
     @Transactional(rollbackFor = Exception.class)
     public void importByExcel(List<ImportUrlAuth> importUrlAuths) {
-        if (CollectionUtil.isNotEmpty(importUrlAuths)) {
+        if (CollUtil.isNotEmpty(importUrlAuths)) {
             List<UrlACModel> urlACModels = new ArrayList<>();
             List<UrlACTargetModel> urlACTargetModels = new ArrayList<>();
             for (ImportUrlAuth importUrlAuth : importUrlAuths) {
@@ -294,6 +295,39 @@ public class UrlACService {
             urlACTargetMapper.bulkCreate(urlACTargetModels);
         }
 
+    }
+
+    private List<UrlAccessCtlDto> listByUrl(String url) {
+        HumanCondition cond = new HumanCondition()
+                .link(UrlACModel.class, UrlACTargetModel.class)
+                .filterLink(UrlACModel.class, UrlACModel::getGroup, UrlACTargetModel.class, UrlACTargetModel::getGroup)
+                .currentLink(UrlACModel.class)
+                .filterStartsWith(UrlACModel::getUrl, url);
+        cond.currentLink(UrlACModel.class)
+                .select(UrlACModel::getUrl, UrlACModel::getIsPattern)
+                .selectAs(UrlACModel::getMethods, UrlAccessCtlDto.QUERY_FIELD_METHODS)
+                .selectAs(GroupConcat.f(UrlACModel::getGroup).distinct(), UrlAccessCtlDto.QUERY_FIELD_GROUPS)
+                .currentLink(UrlACTargetModel.class)
+                .selectAs(GroupConcat.f(UrlACTargetModel::getTarget).distinct(), UrlAccessCtlDto.QUERY_FIELD_TARGET_IDS)
+                .currentLink(UrlACModel.class)
+                .groupBy(UrlACModel::getUrl, UrlACModel::getIsPattern, UrlACModel::getMethods);
+        return urlACMapper.list(cond, UrlAccessCtlDto.class);
+    }
+
+    private List<UrlAcCtlGroupBo> listByGroup(String group) {
+        HumanCondition cond = new HumanCondition()
+                .link(UrlACModel.class, UrlACTargetModel.class)
+                .filterLink(UrlACModel.class, UrlACModel::getGroup, UrlACTargetModel.class, UrlACTargetModel::getGroup)
+                .currentLink(UrlACModel.class)
+                .filterEqual(UrlACModel::getGroup, group)
+                .selectAs(UrlACModel::getGroup, UrlAcCtlGroupBo.QUERY_FIELD_GROUP)
+                .selectAs(UrlACModel::getUrl, UrlAcCtlGroupBo.QUERY_FIELD_URL)
+                .selectAs(UrlACModel::getIsPattern, UrlAcCtlGroupBo.QUERY_FIELD_IS_PATTERN)
+                .selectAs(UrlACModel::getMethods, UrlAcCtlGroupBo.QUERY_FIELD_METHODS)
+                .currentLink(UrlACTargetModel.class)
+                .selectAs(UrlACTargetModel::getTarget, UrlAcCtlGroupBo.QUERY_FIELD_TARGETS)
+                .distinct();
+        return urlACMapper.list(cond, UrlAcCtlGroupBo.class);
     }
 
 

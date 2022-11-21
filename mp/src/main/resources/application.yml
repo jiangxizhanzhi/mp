@@ -67,10 +67,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, mappings, caches, env, scheduledtasks
+        include: health, info
   info:
     git:
-      mode: full
+      mode: simple
   health:
     elasticsearch:
       enabled: false
@@ -97,6 +97,7 @@ mp:
     disk-alarm-percent: 80 # 磁盘空间告警阈值
     cp-ip: 10.100.7.1                # 云平台适配层接口地址
     mp-ip: 10.100.1.12:8001          # MP中台地址
+    allow-export: false
   # mp-situationaware 模块配置
   situationaware:
     # monitor
@@ -143,6 +144,7 @@ mp:
     max-import-user-size: 100
     logout-reset-secret: true
     default-user-avatar: /api/mp/avatar/1.png
+    mq-msg-timeout: 3600000
     # authenticate
     authenticate-cache-time: 30
     authenticate-use-individual-token-secret: true
@@ -161,7 +163,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
-    url-ac-filter-exclude-urls: /api/mp/actuator/**
+    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -48,18 +48,40 @@ public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath) {
+    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         // 生成topo.yml
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
+        if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
+            resultV1.getYmlResult().getNodes().forEach(n -> {
+                if (StringUtils.isNotEmpty(n.getImage())) {
+                    n.setImage(sceneNumber + n.getImage());
+                }
+                if (StringUtils.isNotEmpty(n.getImages())) {
+                    n.setImages(sceneNumber + n.getImages());
+                }
+            });
+        }
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
         SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
+        if (CollectionUtils.isNotEmpty(parseResult.getYmlResult().getNodes())) {
+            parseResult.getYmlResult().getNodes().forEach(n -> {
+                if (StringUtils.isNotEmpty(n.getImage())) {
+                    n.setImage(sceneNumber + n.getImage());
+                }
+                if (StringUtils.isNotEmpty(n.getImages())) {
+                    n.setImages(sceneNumber + n.getImages());
+                }
+            });
+        }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
         // 下载附件
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
-        this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices());
+        if (!disableImageExport) {
+            this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(),sceneNumber);
+        }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
         parseResult.getIdConvert().forEach((k, v) -> {
@@ -72,14 +94,14 @@ public class SceneExporter {
         return exportResult;
     }
 
-    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices) {
+    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices,String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
                 String currentImageDir = null;
                 if (StringUtils.isNotEmpty(singleImagePath)) {
                     currentImageDir = singleImagePath;
                 } else {
-                    currentImageDir = imagePath + "/" + device.getImage();
+                    currentImageDir = imagePath + "/" + (sceneNumber + device.getImage());
                 }
                 File file = new File(currentImageDir);
                 if (!file.exists()) {
@@ -96,6 +118,10 @@ public class SceneExporter {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
                 }
                 var image = JsonCommon.mapToBean(imageMap, Image.class);
+                if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
+                    String flavor = String.format("mx.%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
+                    image.set实例大小(flavor);
+                }
 
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
@@ -130,22 +156,22 @@ public class SceneExporter {
                 }
                 // 生成service.yml
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
-                    List<AccessModeParseResult> normal = new ArrayList<>();
-                    List<AccessModeParseResult> manage = new ArrayList<>();
+                    List<AccessModeExportResult> normal = new ArrayList<>();
+                    List<AccessModeExportResult> manage = new ArrayList<>();
                     for (var m : device.getAccessModes()) {
-                        AccessModeParseResult accessModeParseResult = new AccessModeParseResult();
+                        AccessModeExportResult accessModeParseResult = new AccessModeExportResult();
                         accessModeParseResult.setDesc(m.getDesc());
                         accessModeParseResult.setProtocol(m.getProtocol());
                         accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
                         //下载密钥文件
                         downloadPrivateKeyFile(m.getPrivateKeyPath(), currentImageDir, m.getPrivateKeyFileName());
                         if (m.getPort() != null) {
-                            accessModeParseResult.setPort(String.valueOf(m.getPort()));
+                            accessModeParseResult.setPort(m.getPort());
                         }
                         if (Boolean.TRUE.equals(m.getProxy())) {
-                            accessModeParseResult.setIsproxy("true");
+                            accessModeParseResult.setIsproxy(true);
                         } else {
-                            accessModeParseResult.setIsproxy("false");
+                            accessModeParseResult.setIsproxy(false);
                         }
                         accessModeParseResult.setPassword(m.getPassword());
                         accessModeParseResult.setUsername(m.getUsername());
@@ -172,7 +198,7 @@ public class SceneExporter {
                 dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                 Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
-                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
+                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber+device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
                 content = StringUtils.replace(content, "privateKey", "private-key");
                 this.createFile(content, currentImageDir + "/servers.yml");
@@ -237,7 +263,7 @@ public class SceneExporter {
             try {
                 FileUtils.writeByteArrayToFile(new File(imagePath + "/" + fileName), content);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Download the private key file error:{}", e.getMessage());
             }
         }
     }
@@ -270,6 +296,7 @@ public class SceneExporter {
         result.put("virtualPlatform", "virtual-platform");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_EMPTY, "");
         return result;
     }
 
@@ -361,7 +388,7 @@ public class SceneExporter {
         private String 角色;
         private String 虚拟类型;
         private Boolean cloudInit;
-        private List<AccessModeParseResult> 接入方式;
-        private List<AccessModeParseResult> 管理接入;
+        private List<AccessModeExportResult> 接入方式;
+        private List<AccessModeExportResult> 管理接入;
     }
 }

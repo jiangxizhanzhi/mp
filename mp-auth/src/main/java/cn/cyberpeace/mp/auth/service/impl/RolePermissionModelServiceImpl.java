@@ -1,13 +1,15 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
+import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
@@ -18,7 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,23 +52,64 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         setModelFields(modelFields);
     }
 
+    @Autowired
+    private RolePermissionMapper rolePermissionMapper;
+
+    @Autowired
+    private TargetMapper targetMapper;
+
     @Override
     @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
-        if (CollectionUtil.isEmpty(roleIds)) {
+        if (CollUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
-        List<TargetModel> targets = getModelMapper().listTargetsByRoleIds(AuthConstant.DEFAULT_TENANT, roleIds);
-        return targets;
+        HumanCondition rolePermissionCondition = new HumanCondition()
+                .filterEqual(RolePermissionModel::getTenant, AuthConstant.DEFAULT_TENANT)
+                .filterIn(RolePermissionModel::getOwner, roleIds.toArray())
+                .select(RolePermissionModel.QUERY_FIELD_TARGET);
+        List<RolePermissionModel> rolePermissionModels = rolePermissionMapper.list(rolePermissionCondition);
+        List<String> ids = new ArrayList<>();
+        rolePermissionModels.forEach(model -> ids.add(model.getTarget()));
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        HumanCondition targetCondition = new HumanCondition()
+                .filterIn(TargetModel::getId, ids.toArray())
+                .filterEqual(TargetModel::getVisible, 1)
+                .distinct();
+        List<TargetModel> targetModels = targetMapper.list(targetCondition);
+        return targetModels;
     }
 
     @Override
     public List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds) {
-        if (CollectionUtil.isEmpty(roleIds)) {
+        if (CollUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
-        List<TargetRoleBo> targetRoleBos = getModelMapper().listTargetRoleDtos(roleIds);
-        return targetRoleBos;
+        HumanCondition condition = new HumanCondition()
+                .link(RolePermissionModel.class)
+                .link(RoleModel.class)
+                .filterLink(RoleModel.class, RoleModel::getId, RolePermissionModel.class, RolePermissionModel::getOwner)
+                .link(TargetModel.class)
+                .filterLink(TargetModel.class, TargetModel::getId, RolePermissionModel.class, RolePermissionModel::getTarget)
+                .currentLink(RoleModel.class)
+                .filterIn(RoleModel::getId, roleIds.toArray())
+                .selectAs(RoleModel::getId, TargetRoleBo.QUERY_FIELD_ROLE_ID)
+                .currentLink(TargetModel.class)
+                .selectAs(TargetModel::getId, TargetRoleBo.QUERY_FIELD_ID)
+                .selectAs(TargetModel::getName, TargetRoleBo.QUERY_FIELD_NAME)
+                .selectAs(TargetModel::getPk, TargetRoleBo.QUERY_FIELD_PK)
+                .selectAs(TargetModel::getParent, TargetRoleBo.QUERY_FIELD_PARENT)
+                .selectAs(TargetModel::getPath, TargetRoleBo.QUERY_FIELD_PATH)
+                .selectAs(TargetModel::getVisible, TargetRoleBo.QUERY_FIELD_VISIBLE)
+                .selectAs(TargetModel::getTenant, TargetRoleBo.QUERY_FIELD_TENANT)
+                .selectAs(TargetModel::getIdentifier, TargetRoleBo.QUERY_FIELD_IDENTIFIER)
+                .selectAs(TargetModel::getType, TargetRoleBo.QUERY_FIELD_TYPE)
+                .selectAs(TargetModel::getCreateTime, TargetRoleBo.QUERY_FIELD_CREATE_TIME)
+                .selectAs(TargetModel::getUpdateTime, TargetRoleBo.QUERY_FIELD_UPDATE_TIME);
+        List<TargetRoleBo> targetRoles = rolePermissionMapper.list(condition, TargetRoleBo.class);
+        return targetRoles;
     }
 
 
@@ -87,7 +130,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             }
         }
 
-        if (CollectionUtil.isEmpty(targetIds)) {
+        if (CollUtil.isEmpty(targetIds)) {
             // 完成，直接返回
             return true;
         }
@@ -125,6 +168,5 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         getModelMapper().filterDelete(humanCondition);
         return true;
     }
-
 
 }

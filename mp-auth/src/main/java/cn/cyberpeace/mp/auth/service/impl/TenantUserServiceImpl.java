@@ -1,19 +1,23 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
@@ -24,7 +28,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.StrBuilder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +81,18 @@ public class TenantUserServiceImpl
     @Autowired
     private UserCacheService userCacheService;
 
+    @Autowired
+    private OrgMapper orgMapper;
+
+    @Autowired
+    private TenantUserMapper tenantUserMapper;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -87,8 +104,7 @@ public class TenantUserServiceImpl
 
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
+        List<UserModel> users = getUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
         users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
@@ -96,8 +112,7 @@ public class TenantUserServiceImpl
     @Override
     public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
+        List<UserModel> users = getUsersByOrgId(orgId, null, null, null);
         users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
@@ -125,7 +140,7 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleBo> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        List<UserOrgRoleBo> users = listAllUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
@@ -141,8 +156,7 @@ public class TenantUserServiceImpl
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<OrgBO> listOrgsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-        List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
-
+        List<OrgModel> orgs = selectOrgsByUserId(userId);
         List<OrgBO> orgBOS =
                 orgs.stream().map(orgModel -> {
                     OrgBO orgBO = new OrgBO();
@@ -157,24 +171,86 @@ public class TenantUserServiceImpl
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgMapBo> userOrgMapBos = getModelMapper().listUserOrgMapDtosByUserIds(userIds);
+
+        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
+        Map<String, List<String>> userOrgMap = new HashMap<>(tenantUserModels.size());
+        Set<String> orgIds = new HashSet<>(tenantUserModels.size());
+        for (TenantUserModel model : tenantUserModels) {
+            String userId = model.getUser();
+            String orgId = model.getOrg();
+            List<String> orgs = Objects.isNull(userOrgMap.get(userId)) ? new ArrayList<>() : userOrgMap.get(userId);
+            orgs.add(orgId);
+            userOrgMap.put(userId, orgs);
+            orgIds.add(orgId);
+        }
+        if (CollUtil.isEmpty(orgIds)) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, orgIds.toArray())
+                .select(OrgModel::getId)
+                .select(OrgModel::getName)
+                .distinct();
+        List<OrgModel> orgModels = orgMapper.list(orgCondition);
+        Map<String, String> orgMap = new HashMap<>(orgModels.size());
+        orgModels.forEach(orgModel ->
+                orgMap.put(orgModel.getId(), orgModel.getName())
+        );
+
+        List<UserOrgMapBo> userOrgMapBos = new ArrayList<>(userOrgMap.size());
+        userOrgMap.forEach((userId, orgs) -> {
+            UserOrgMapBo userOrgMapBo = new UserOrgMapBo();
+            userOrgMapBo.setUserId(userId);
+            userOrgMapBo.setOrgIds(StringUtils.join(orgs, ','));
+            StrBuilder orgNames = new StrBuilder();
+            int i = 0;
+            for (String org : orgs) {
+                if (i > 0) {
+                    orgNames.append(",");
+                }
+                orgNames.append(orgMap.get(org));
+            }
+            userOrgMapBo.setOrgNames(orgNames.toString());
+            userOrgMapBos.add(userOrgMapBo);
+        });
+
         return userOrgMapBos;
     }
 
     @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgBo> userOrgBos = getModelMapper().listUserOrgByUserIds(userIds);
-        for (UserOrgBo userOrgBo : userOrgBos) {
+
+        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
+        Map<String, String> orgUserMap = new HashMap<>(tenantUserModels.size());
+        List<String> orgIds = new ArrayList<>(tenantUserModels.size());
+        for (TenantUserModel model : tenantUserModels) {
+            orgUserMap.put(model.getOrg(), model.getUser());
+            orgIds.add(model.getOrg());
+        }
+        if (CollUtil.isEmpty(orgIds)) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, orgIds.toArray())
+                .distinct();
+        List<OrgModel> orgModels = orgMapper.list(orgCondition);
+        List<UserOrgBo> userOrgBos = new ArrayList<>(orgModels.size());
+        for (OrgModel orgModel : orgModels) {
+            UserOrgBo userOrgBo = new UserOrgBo();
+            BeanUtils.copyProperties(orgModel, userOrgBo);
+            userOrgBo.setUserId(orgUserMap.get(orgModel.getId()));
             String path = orgService.getPath(userOrgBo);
             userOrgBo.setPath(path);
+            userOrgBos.add(userOrgBo);
         }
+
         return userOrgBos;
     }
 
     @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
-        List<OrgModel> orgModels = getModelMapper().listOrgsByUserId(userId);
+        List<OrgModel> orgModels = selectOrgsByUserId(userId);
         List<OrgBO> orgBOS =
                 orgModels.stream().map(orgModel ->
                         orgService.orgModel2OrgBO(orgModel)
@@ -203,7 +279,7 @@ public class TenantUserServiceImpl
 
         // 不清楚组织-用户关系，而是增量添加
 
-        if (CollectionUtil.isEmpty(userIds)) {
+        if (CollUtil.isEmpty(userIds)) {
             // 完成，直接返回
             return true;
         }
@@ -264,7 +340,7 @@ public class TenantUserServiceImpl
             orgIds.add(req.getOrg());
             if (req.isShowAllUnderLevel()) {
                 List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
-                if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+                if (CollUtil.isNotEmpty(childOrgDtos)) {
                     orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
                 }
             }
@@ -272,7 +348,7 @@ public class TenantUserServiceImpl
 
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
-            orders = CollectionUtil.newArrayList(req.getOrders());
+            orders = CollUtil.newArrayList(req.getOrders());
         }
 
         String likeUsername = SQLUtils.escapeLike(req.getUsername());
@@ -288,15 +364,11 @@ public class TenantUserServiceImpl
             selfUserId = selfUser.getId();
         }
 
-        PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleBo> userOrgRoleBos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
-        PageInfo pageInfo = new PageInfo(userOrgRoleBos);
-        List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
+        PageInfo pageInfo = listPageUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime, req.getPage(), req.getPageSize());
 
-        pageInfo.setList(userBos);
         return pageInfo;
     }
 
@@ -324,5 +396,235 @@ public class TenantUserServiceImpl
     public boolean deleteByTenantId(String tenantId) {
         // todo
         return true;
+    }
+
+    private List<OrgModel> selectOrgsByUserId(String userId) {
+        HumanCondition tenantUserCondition = new HumanCondition()
+                .filterEqual(TenantUserModel::getUser, userId)
+                .select(TenantUserModel::getOrg);
+        List<Map<String, Object>> tenantUserMaps = getModelMapper().originList(tenantUserCondition);
+        List<String> ids = new ArrayList<>();
+        tenantUserMaps.forEach(map ->
+                ids.add((String) map.get("org"))
+        );
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, ids.toArray())
+                .distinct();
+        List<OrgModel> list = orgMapper.list(orgCondition);
+        return list;
+    }
+
+    private List<UserModel> getUsersByOrgId(String orgId, String selfUserId, List<String> excludeRoleIds, List<String> excludeUserIds) {
+        HumanCondition humanCondition = new HumanCondition();
+
+        HumanCondition tenantCondition = new HumanCondition()
+                .filterEqual(TenantUserModel::getOrg, orgId)
+                .select(TenantUserModel::getUser);
+        List<TenantUserModel> tenantUserModels = tenantUserMapper.list(tenantCondition);
+        List<String> tenantUserIds = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
+        if (CollUtil.isEmpty(tenantUserIds)) {
+            return new ArrayList<>();
+        }
+        humanCondition.filterIn(UserModel::getId, tenantUserIds.toArray());
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            HumanCondition userRoleCondition = new HumanCondition()
+                    .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
+            if (StringUtils.isNotBlank(selfUserId)) {
+                userRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
+            }
+            userRoleCondition.select(UserRoleModel::getUser).distinct();
+            List<UserRoleModel> userRoleModels = userRoleMapper.list(userRoleCondition);
+            List<String> roleUserIds = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(roleUserIds)) {
+                humanCondition.filterNotIn(UserModel::getId, roleUserIds.toArray());
+            }
+        }
+
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
+        }
+        humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
+        List<UserModel> userModels = userMapper.list(humanCondition);
+        return userModels;
+    }
+
+    private List<TenantUserModel> getTenantUserModelsByUserIds(List<String> userIds) {
+        HumanCondition tenantCondition = new HumanCondition()
+                .filterNotEqual(TenantUserModel::getUser, "");
+        if (CollUtil.isNotEmpty(userIds)) {
+            tenantCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
+        }
+        tenantCondition.select(TenantUserModel::getUser)
+                .select(TenantUserModel::getOrg)
+                .distinct();
+        return tenantUserMapper.list(tenantCondition);
+    }
+
+    public List<UserOrgRoleBo> listAllUsers(List<String> orgIds,
+                                            List<String> userIds,
+                                            List<String> orders,
+                                            UserBo userBo,
+                                            String selfUserId,
+                                            List<String> excludeRoleIds,
+                                            List<String> excludeUserIds,
+                                            LocalDateTime currentDateTime
+    ) {
+        HumanCondition humanCondition = genHumanCondition(orgIds, userIds, orders, userBo, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        Map<String, String> userOrgMap = getUserOrgMap();
+        Map<String, String> userRoleMap = getUserRoleMap();
+        List<UserModel> userModels = userMapper.list(humanCondition);
+        List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
+        for (UserModel model : userModels) {
+            UserOrgRoleBo bo = new UserOrgRoleBo();
+            BeanUtils.copyProperties(model, bo);
+            bo.setOrgs(userOrgMap.get(model.getId()));
+            bo.setRoles(userRoleMap.get(model.getId()));
+            userOrgRoleBos.add(bo);
+        }
+        return userOrgRoleBos;
+    }
+
+    public PageInfo<UserBo> listPageUsers(List<String> orgIds,
+                                         List<String> userIds,
+                                         List<String> orders,
+                                         UserBo userBo,
+                                         String selfUserId,
+                                         List<String> excludeRoleIds,
+                                         List<String> excludeUserIds,
+                                         LocalDateTime currentDateTime,
+                                         Integer page,
+                                         Integer pageSize
+    ) {
+        HumanCondition humanCondition = genHumanCondition(orgIds, userIds, orders, userBo, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        int total = userMapper.total(humanCondition);
+        Map<String, String> userOrgMap = getUserOrgMap();
+        Map<String, String> userRoleMap = getUserRoleMap();
+
+        PageHelper.startPage(page, pageSize);
+        List<UserModel> userModels = userMapper.list(humanCondition);
+        PageInfo pageInfo = new PageInfo(userModels);
+        pageInfo.setTotal(total);
+        List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
+        for (UserModel model : userModels) {
+            UserOrgRoleBo bo = new UserOrgRoleBo();
+            BeanUtils.copyProperties(model, bo);
+            bo.setOrgs(userOrgMap.get(model.getId()));
+            bo.setRoles(userRoleMap.get(model.getId()));
+            userOrgRoleBos.add(bo);
+        }
+
+        List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
+        pageInfo.setList(userBos);
+        return pageInfo;
+    }
+
+    private HumanCondition genHumanCondition(List<String> orgIds,
+                                             List<String> userIds,
+                                             List<String> orders,
+                                             UserBo userBo,
+                                             String selfUserId,
+                                             List<String> excludeRoleIds,
+                                             List<String> excludeUserIds,
+                                             LocalDateTime currentDateTime) {
+        HumanCondition humanCondition = new HumanCondition();
+
+        if (CollUtil.isNotEmpty(orgIds)) {
+            HumanCondition orgCondition = new HumanCondition()
+                    .filterIn(TenantUserModel::getOrg, orgIds.toArray())
+                    .select(TenantUserModel::getUser)
+                    .distinct();
+            List<TenantUserModel> tenantUserModels = tenantUserMapper.list(orgCondition);
+            List<String> ids = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(ids)) {
+                humanCondition.filterIn(UserModel::getId, ids.toArray());
+            }
+        }
+
+        if (CollUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserModel::getId, userIds.toArray());
+        }
+
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            HumanCondition excludeRoleCondition = new HumanCondition()
+                    .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
+            if (StringUtils.isNotBlank(selfUserId)) {
+                excludeRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
+            }
+            excludeRoleCondition.select(UserRoleModel::getUser);
+            List<UserRoleModel> userRoleModels = userRoleMapper.list(excludeRoleCondition);
+            List<String> ids = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(ids)) {
+                humanCondition.filterNotIn(UserModel::getId, ids.toArray());
+            }
+        }
+
+        if (CollUtil.isNotEmpty(excludeUserIds)) {
+            humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
+        }
+
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            humanCondition.filterNotIn(UserModel::getId, excludeRoleIds.toArray());
+        }
+
+        if (Objects.nonNull(userBo)) {
+            if (Objects.nonNull(userBo.getIsEnabled())) {
+                humanCondition.filterEqual(UserModel::getIsEnabled, userBo.getIsEnabled());
+            }
+            if (Objects.nonNull(userBo.getIsAudited())) {
+                humanCondition.filterEqual(UserModel::getIsAudited, userBo.getIsAudited());
+            }
+            if (Objects.nonNull(userBo.getIsExpired()) && Objects.equals(userBo.getIsExpired(), 0)) {
+                humanCondition.filterGreaterThan(UserModel::getExpiredTime, currentDateTime);
+            }
+            if (Objects.nonNull(userBo.getIsExpired()) && !Objects.equals(userBo.getIsExpired(), 0)) {
+                humanCondition.filterLessThan(UserModel::getExpiredTime, currentDateTime);
+            }
+            if (StringUtils.isNotBlank((userBo.getUsername()))) {
+                humanCondition.filterOrStart()
+                        .orContains(UserModel::getUsername, userBo.getUsername())
+                        .orContains(UserModel::getName, userBo.getUsername())
+                        .filterOrEnd();
+            }
+        }
+        humanCondition.groupBy(UserModel::getId);
+        if (CollUtil.isNotEmpty(orders)) {
+            for (String order : orders) {
+                humanCondition.orderBy(order);
+            }
+        }
+        return humanCondition;
+    }
+
+    private Map<String, String> getUserOrgMap() {
+        HumanCondition orgCondition = new HumanCondition()
+                .select(TenantUserModel::getUser)
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs")
+                .groupBy(TenantUserModel::getUser);
+        List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
+        Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
+        userOrgMaps.forEach(map -> {
+            String userId = (String) map.get("user");
+            String orgs = (String) map.get("orgs");
+            userOrgMap.put(userId, orgs);
+        });
+        return userOrgMap;
+    }
+
+    private Map<String, String> getUserRoleMap() {
+        HumanCondition roleCondition = new HumanCondition()
+                .select(UserRoleModel::getUser)
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles")
+                .groupBy(UserRoleModel::getUser);
+        List<Map<String, Object>> userRoleMaps = userRoleMapper.originList(roleCondition);
+        Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
+        userRoleMaps.forEach(map -> {
+            String userId = (String) map.get("user");
+            String roles = (String) map.get("roles");
+            userRoleMap.put(userId, roles);
+        });
+        return userRoleMap;
     }
 }

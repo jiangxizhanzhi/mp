@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.frontbusiness.dto.UrlAcCtlGroupBo;
 import cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto;
 import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.frontbusiness.service.UrlACService;
@@ -32,11 +33,18 @@ public class UrlACController {
 
 
     @ApiOperation(value = "根据url模糊查询", notes = "")
-    @ApiImplicitParam(name = "urls", value = "url列表", dataTypeClass = String[].class, required = true, dataType = "query")
-    @GetMapping("/by_urls")
-    public ServiceResult<List<UrlAccessCtlDto>> listByFuzzyUrls(@RequestParam String[] urls) {
-        List<UrlAccessCtlDto> urlAccessCtlDtoList = urlACService.listByUrlFuzzyQuery(Arrays.asList(urls));
+    @ApiImplicitParam(name = "url", value = "url", dataTypeClass = String.class, required = true, dataType = "query")
+    @GetMapping("/by_url")
+    public ServiceResult<List<UrlAccessCtlDto>> listByFuzzyUrl(@RequestParam String url) {
+        List<UrlAccessCtlDto> urlAccessCtlDtoList = urlACService.listByUrlFuzzyQuery(url);
         return ResultCommon.success(urlAccessCtlDtoList);
+    }
+
+    @ApiOperation(value = "根据 group 查询", notes = "")
+    @ApiImplicitParam(name = "group", value = "菜单", dataTypeClass = String.class, required = true, dataType = "query")
+    @GetMapping("/by_group")
+    public ServiceResult<List<UrlAcCtlGroupBo>> listByTarget(@RequestParam String group) {
+        return ResultCommon.success(urlACService.listByGroupQuery(group));
     }
 
     @ApiOperation(value = "根据权限绑定的url", notes = "")
@@ -51,7 +59,7 @@ public class UrlACController {
     @ApiOperation(value = "新增URL访问控制", notes = "")
     @ApiImplicitParam(name = "addRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PostMapping("/add")
-    public ServiceResult add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
+    public ServiceResult<String> add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
         String urlACId = urlACService.add(addRequest);
         urlACService.evictURLACCache();
         return ResultCommon.success(urlACId);
@@ -61,7 +69,7 @@ public class UrlACController {
     @ApiOperation(value = "更新URL访问控制", notes = "")
     @ApiImplicitParam(name = "updateRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PatchMapping("/modify")
-    public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
+    public ServiceResult<String> modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
         String urlACId = urlACService.modify(updateRequest);
         urlACService.evictURLACCache();
         return ResultCommon.success(urlACId);
@@ -71,7 +79,7 @@ public class UrlACController {
     @ApiOperation(value = "删除URL访问控制", notes = "")
     @ApiImplicitParam(name = "ids", value = "id列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @DeleteMapping
-    public ServiceResult delete(@RequestParam String[] ids) {
+    public ServiceResult<Integer> delete(@RequestParam String[] ids) {
         int cnt = urlACService.delete(ids);
         urlACService.evictURLACCache();
         return ResultCommon.success(cnt);

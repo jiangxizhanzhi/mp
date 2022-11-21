@@ -6,14 +6,22 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmDistributionRequest;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmQueryParams;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmTrendRequest;
 import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +32,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,15 +67,20 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      */
     @ApiOperation("分页查询告警信息")
     @GetMapping("/page")
-    public ListObjServiceResult<SystemAlarmModel> page(QueryParams queryParams) {
+    public ListObjServiceResult<SystemAlarmModel> page(AlarmQueryParams queryParams) {
+        queryParams.ensure();
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
-            queryParams.setOrders(new String[]{"-updateTime"});
+            String updateTime = BeanUtils.getBeanGetterFieldName(SystemAlarmModel::getUpdateTime);
+            updateTime = StrUtil.toUnderlineCase(updateTime);
+            queryParams.setOrders(new String[]{"-" + updateTime});
         }
-        // 只查询生效中的告警
-        queryParams.setSearchFields(new String[]{"alarmStatus"});
-        queryParams.setSearch(String.valueOf(AlarmStatusEnum.ENABLED.toValue()));
-        ListObjServiceResult<SystemAlarmModel> listResult = getModelService().list(queryParams).asResult();
+        // 默认只查询生效中的告警
+        if (ArrayUtil.isEmpty(queryParams.getAlarmStatus())) {
+            queryParams.setAlarmStatus(new Integer[]{AlarmStatusEnum.ENABLED.toValue()});
+        }
+
+        ListObjServiceResult<SystemAlarmModel> listResult = getModelService().listSystemAlarm(queryParams).asResult();
         List<SystemAlarmModel> systemAlarmModels = listResult.getData().getList();
         this.changeServiceName(systemAlarmModels);
         return listResult;
@@ -105,6 +121,39 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
             systemAlarm.setServerAlarmList(serverAlarmList);
         }
         return ResultCommon.success(systemAlarm);
+    }
+
+
+    /**
+     * 系统告警统计信息
+     * @return
+     */
+    @ApiOperation("系统告警趋势")
+    @GetMapping("/trend")
+    public ServiceResult<List<AlarmStatisticsTrendVO>> getSystemAlarmTrend(AlarmTrendRequest trendRequest) {
+        var result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(),
+                trendRequest.getCount(), trendRequest.getStartTime(), trendRequest.getEndTime());
+        return ResultCommon.success(result);
+    }
+
+    /**
+     * 系统告警分布
+     * @return
+     */
+    @ApiOperation("系统告警分布")
+    @GetMapping("/distribution")
+    public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
+        // 检验参数
+        // 如果没有传结束时间，默认为当前日期24:59:59
+        // 如果没有传开始时间，默认为结束时间往前推7天
+        if (Objects.isNull(request.getEndTime())) {
+            LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+            request.setEndTime(now);
+        }
+        if (Objects.isNull(request.getStartTime())) {
+            request.setStartTime(LocalDateTime.of(request.getEndTime().toLocalDate().minusWeeks(1), LocalTime.MAX));
+        }
+        return getModelService().getSystemAlarmDistribution(request);
     }
 
 }

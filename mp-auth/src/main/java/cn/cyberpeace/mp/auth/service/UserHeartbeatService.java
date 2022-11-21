@@ -18,8 +18,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
-    List<UserOlReportCntBo> groupCntByUserId(LocalDateTime time);
-
     void heartbeat();
 
     ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> getHeartbeatMap();

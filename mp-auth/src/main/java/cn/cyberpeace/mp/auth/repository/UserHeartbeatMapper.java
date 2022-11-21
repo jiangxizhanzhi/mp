@@ -20,22 +20,4 @@ import java.util.List;
 @Repository
 @ModelClass(UserHeartbeatModel.class)
 public interface UserHeartbeatMapper extends BaseModelMapper<UserHeartbeatModel> {
-
-
-    /**
-     * 一定时间内的心跳次数
-     * @param userId
-     * @param time
-     * @return
-     */
-    int getCntByUserId(@Param("userId") String userId, @Param("time") LocalDateTime time);
-
-    /**
-     * 一定时间内的心跳次数
-     * @param time
-     * @return
-     */
-    List<UserOlReportCntBo> groupCntByUserId(@Param("time") LocalDateTime time);
-
-
 }

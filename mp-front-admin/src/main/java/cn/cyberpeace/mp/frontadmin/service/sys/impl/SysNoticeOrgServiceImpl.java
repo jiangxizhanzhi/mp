@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeOrgFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeOrgService;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +30,21 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
         setModelMapper(sysNoticeOrgMapper);
     }
 
+    @Autowired
+    private OrgMapper orgMapper;
+
     @Override
     public List<OrgModel> listByNoticeIds(List<String> noticeIds) {
-        return getModelMapper().listByNoticeIds(noticeIds);
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollUtil.isNotEmpty(noticeIds)) {
+            humanCondition.link(OrgModel.class, SysNoticeOrgModel.class)
+                    .filterLink(OrgModel.class, OrgModel::getId, SysNoticeOrgModel.class, SysNoticeOrgModel::getOrg)
+                    .currentLink(SysNoticeOrgModel.class)
+                    .filterIn(SysNoticeOrgModel::getNoticeId, noticeIds.toArray());
+        }
+        humanCondition.distinct();
+        List<OrgModel> orgModels = orgMapper.list(humanCondition);
+        return orgModels;
     }
 
     @Override

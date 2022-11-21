@@ -47,6 +47,8 @@ public class BaseSceneParseResourceCenter {
 
     public static String SPECIAL_STR_OFF = "mp_special_str_off";
 
+    public static String SPECIAL_STR_EMPTY = "mp_special_str_empty";
+
     protected void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
         Map<String, Integer> fileName2Index = new HashMap<>();
         fileName2Index.put("file", 1);
@@ -93,6 +95,9 @@ public class BaseSceneParseResourceCenter {
                 device.setImageUuid(node.getImageUuid());
                 device.setImage(node.getImage());
                 device.setAccessModes(new ArrayList<>());
+                device.setCpu(node.getSrcElement().getCpu());
+                device.setRam(node.getSrcElement().getRam());
+                device.setDisk(node.getSrcElement().getDisk());
                 devices.add(device);
                 var element = sceneHandler.getElement(nodeId);
                 device.setLogo(element.getIcon2());
@@ -125,6 +130,9 @@ public class BaseSceneParseResourceCenter {
         private String image;
         private String logo;
         private String imageUuid;
+        private Integer cpu;
+        private Integer ram;
+        private Integer disk;
         private List<AccessMode> accessModes;
     }
 
