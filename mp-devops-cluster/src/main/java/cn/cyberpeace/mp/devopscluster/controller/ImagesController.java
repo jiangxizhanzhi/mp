@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -36,7 +35,6 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
@@ -52,6 +50,7 @@ import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
+import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
@@ -124,6 +123,8 @@ public class ImagesController {
 
     private final SnapshotService snapshotService;
 
+    private final JsonMockService jsonMockService;
+
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
@@ -139,6 +140,8 @@ public class ImagesController {
 
     @NonNull
     private CsceneSpecialService csceneSpecialService;
+
+
 
     /**
      * 分页查询
@@ -472,11 +475,8 @@ public class ImagesController {
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
     public Result<List<Flavor>> pageFlavor(){
-        BasePageRequest request = new BasePageRequest();
-        request.setPerPage(1000);
-        String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-        CloudPlatformPageResult<Flavor> page = flavorService.page(getParams);
-        List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
+        List<Flavor> flavors = jsonMockService.getFlavors();
+        List<Flavor> flavorList = flavors.stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
         return new Result<>(flavorList);
