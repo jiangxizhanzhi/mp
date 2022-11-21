@@ -49,7 +49,7 @@ import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devopscluster.service.ImageMockService;
+import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -93,7 +93,7 @@ public class ImagesConverter implements BaseConverter{
 
     private final SnapshotConverter snapshotConverter;
 
-    private final ImageMockService imageMockService;
+    private final JsonMockService jsonMockService;
 
     /**
      * 分页查询镜像列表
@@ -118,7 +118,7 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         //List<Device> deviceList = this.findByIds(ids);
-        List<Device> deviceList = imageMockService.filterByIds(ids);
+        List<Device> deviceList = jsonMockService.filterDevicesByIds(ids);
         POLogoUtils.changeLogoPathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){

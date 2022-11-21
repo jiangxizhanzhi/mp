@@ -16,7 +16,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devopscluster.service.ImageMockService;
+import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class TargetConverter{
 
     private final DevopsTargetService devopsTargetService;
 
-    private final ImageMockService imageMockService;
+    private final JsonMockService jsonMockService;
 
     /**
      * 分页查询
@@ -87,7 +87,7 @@ public class TargetConverter{
         }
         //CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
-        List<Device> deviceList = imageMockService.filterByIds(ids);
+        List<Device> deviceList = jsonMockService.filterDevicesByIds(ids);
         model.setList(deviceList);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
