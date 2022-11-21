@@ -106,6 +106,15 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
                 flowCollectionRelService.selectByCollectionIds(Collections.singletonList(addRequest.getCollectionId()));
         List<String> oldFlowIds = relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
         List<String> addFlowIds = addRequest.getFlowIds();
+
+        List<FlowInfoModel> existFlowInfos = flowInfoMapper.selectByFlowIds(addFlowIds);
+        if (CollectionUtils.isNotEmpty(existFlowInfos)) {
+            addFlowIds = existFlowInfos.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+        } else {
+            log.warn("flows not exist for ids:{}", addFlowIds);
+            return ResultCommon.success(0);
+        }
+
         // 过滤已有关联信息
         addFlowIds.removeAll(oldFlowIds);
         if (CollectionUtils.isNotEmpty(addFlowIds)) {

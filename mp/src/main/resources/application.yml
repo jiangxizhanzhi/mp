@@ -79,7 +79,7 @@ management:
 mp:
   base:
     fdfs-tracker-servers:
-        - 10.100.1.26:22122
+      - 10.100.1.26:22122
     fdfs-inner-http-server: http://10.100.1.26:8888
     fdfs-outer-http-server: /fdfs
 
@@ -150,8 +150,7 @@ mp:
     authenticate-use-individual-token-secret: true
     authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
     authenticate-jwt-expires: 604800
-    authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/aggr/**
-    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public
+    authenticate-urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
     authenticate-encoder-iterations:
     authenticate-encoder-hash-width:
   # mp-front-admin 模块配置
@@ -221,8 +220,6 @@ mp:
     scene-handler-realtime-update: true
     scene-process-save-realtime: true
     element-process-save-realtime: true
-  aggregation:
-    export-image-timeout: 1200000
 
 
 ---
