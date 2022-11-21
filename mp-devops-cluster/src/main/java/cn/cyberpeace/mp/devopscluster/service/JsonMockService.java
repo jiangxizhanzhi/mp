@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
@@ -66,7 +65,7 @@ public class JsonMockService {
         String content = getContent(TYPE_JSON);
 
         if (StringUtils.isNotBlank(content)) {
-            typeAllVO = JsonCommon.parse(content, TypeAllVO.class);
+            typeAllVO = JSONObject.parseObject(content, TypeAllVO.class);
         }
 
         return typeAllVO;
