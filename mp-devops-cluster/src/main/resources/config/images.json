@@ -465,7 +465,7 @@
             "imageSource": 1,
             "uploadType": ""
         },
-        "description": "GBA",
+        "description": "BGA",
         "updatedAt": "2022-11-09T03:38:30Z",
         "role": 4,
         "imageType": "vm",
@@ -473,7 +473,7 @@
         "logo": "/api/mp/network-equipment/internet.png",
         "isHide": false,
         "total": 0,
-        "name": "GBA",
+        "name": "BGA",
         "createdAt": "2022-11-09T03:38:30Z",
         "uuid": "f7ebab70-ac8e-4aaf-b4b9-18a4d205b207",
         "defaultLaunchImageName": "linux_cloud_init",
