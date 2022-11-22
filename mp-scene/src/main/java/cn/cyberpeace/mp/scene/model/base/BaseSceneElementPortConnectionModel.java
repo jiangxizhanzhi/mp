@@ -29,5 +29,5 @@ public class BaseSceneElementPortConnectionModel extends BaseModel {
     @DefaultStr
     private String type;
     @DefaultStr
-    private List<Integer> vertices;
+    private String vertices;
 }
