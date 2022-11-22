@@ -219,6 +219,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
         quickCreateParams = StringUtils.isEmpty(obj.getQuickCreateParams()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
+        natConfigs = StringUtils.isEmpty(obj.getNatConfigs()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getNatConfigs(), new TypeReference<List<NATConfig>>(){});
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
