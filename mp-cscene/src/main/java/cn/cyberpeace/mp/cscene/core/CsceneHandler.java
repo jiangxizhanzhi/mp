@@ -335,9 +335,9 @@ public class CsceneHandler extends BaseCsceneHandler<
                             throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
                         }
                     }
-                    if (e.get("vlan_id") != null) {
+                    if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0) {
                         var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
-                        if(CollectionUtils.isNotEmpty(result)){
+                        if (CollectionUtils.isNotEmpty(result)) {
                             throw new MpRuntimeException(CsceneErrorCode.VLANID_HAS_BEEN_USED.format(String.valueOf(e.get("vlan_id")), JsonCommon.stringify(result.get(0).getName())));
                         }
                     }
