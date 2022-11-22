@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
@@ -250,7 +251,8 @@ public class CollectionTypeService {
 
     private void processCollectionType(CollectionType type) {
         // 国际化处理
-        String name = MessageCommonUtil.convertMessage(type.getName());
+        String key = String.format(SituationBase18nCode.COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX, type.getCode());
+        String name = MessageCommonUtil.convertMessage(key);
         type.setName(name);
         processCollectionTypeChildren(type);
     }
@@ -260,7 +262,8 @@ public class CollectionTypeService {
             return;
         }
         type.getChildren().forEach(t -> {
-            String childrenName = MessageCommonUtil.convertMessage(t.getName());
+            String key = String.format(SituationBase18nCode.COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX, t.getCode());
+            String childrenName = MessageCommonUtil.convertMessage(key);
             t.setName(childrenName);
             processCollectionTypeChildren(t);
         });

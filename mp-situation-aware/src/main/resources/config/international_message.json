@@ -1,1188 +1,1287 @@
 [
   {
-    "name": "主板序列号",
+    "key": "主板序列号",
     "zh_name": "主板序列号",
     "en_name": "motherboard serial number"
   },
   {
-    "name": "CPU名称",
+    "key": "CPU名称",
     "zh_name": "CPU名称",
     "en_name": "CPU name"
   },
   {
-    "name": "CPU核数",
+    "key": "CPU核数",
     "zh_name": "CPU核数",
     "en_name": "number of CPU cores"
   },
   {
-    "name": "CPU使用率",
+    "key": "CPU使用率",
     "zh_name": "CPU使用率",
     "en_name": "CPU usage"
   },
   {
-    "name": "内存总大小",
+    "key": "内存总大小",
     "zh_name": "内存总大小",
     "en_name": "total memory size"
   },
   {
-    "name": "内存使用率",
+    "key": "内存使用率",
     "zh_name": "内存使用率",
     "en_name": "memory usage"
   },
   {
-    "name": "硬盘总大小",
+    "key": "硬盘总大小",
     "zh_name": "硬盘总大小",
     "en_name": "total hard disk size"
   },
   {
-    "name": "硬盘使用率",
+    "key": "硬盘使用率",
     "zh_name": "硬盘使用率",
     "en_name": "hard disk usage"
   },
   {
-    "name": "主机名",
+    "key": "主机名",
     "zh_name": "主机名",
     "en_name": "hostname"
   },
   {
-    "name": "OS架构",
+    "key": "OS架构",
     "zh_name": "OS架构",
     "en_name": "OS Architecture"
   },
   {
-    "name": "系统名称",
+    "key": "系统名称",
     "zh_name": "系统名称",
     "en_name": "system name"
   },
   {
-    "name": "系统版本",
+    "key": "系统版本",
     "zh_name": "系统版本",
     "en_name": "system version"
   },
   {
-    "name": "平台",
+    "key": "平台",
     "zh_name": "平台",
     "en_name": "platform"
   },
   {
-    "name": "发布版本",
+    "key": "发布版本",
     "zh_name": "发布版本",
     "en_name": "release version"
   },
   {
-    "name": "接口名称",
+    "key": "接口名称",
     "zh_name": "接口名称",
     "en_name": "interface name"
   },
   {
-    "name": "适配器类型",
+    "key": "适配器类型",
     "zh_name": "适配器类型",
     "en_name": "adapter type"
   },
   {
-    "name": "接口状态",
+    "key": "接口状态",
     "zh_name": "接口状态",
     "en_name": "interface status"
   },
   {
-    "name": "发包数",
+    "key": "发包数",
     "zh_name": "发包数",
     "en_name": "number of packets sent"
   },
   {
-    "name": "收包数",
+    "key": "收包数",
     "zh_name": "收包数",
     "en_name": "number of packages received"
   },
   {
-    "name": "发送字节数",
+    "key": "发送字节数",
     "zh_name": "发送字节数",
     "en_name": "number of bytes sent"
   },
   {
-    "name": "接收字节数",
+    "key": "接收字节数",
     "zh_name": "接收字节数",
     "en_name": "received bytes"
   },
   {
-    "name": "网络掩码",
+    "key": "网络掩码",
     "zh_name": "网络掩码",
     "en_name": "netmask"
   },
   {
-    "name": "本地IP",
+    "key": "本地IP",
     "zh_name": "本地IP",
     "en_name": "local IP"
   },
   {
-    "name": "本地端口",
+    "key": "本地端口",
     "zh_name": "本地端口",
     "en_name": "local port"
   },
   {
-    "name": "协议",
+    "key": "协议",
     "zh_name": "协议",
     "en_name": "protocol"
   },
   {
-    "name": "对端IP",
+    "key": "对端IP",
     "zh_name": "对端IP",
     "en_name": "peer IP"
   },
   {
-    "name": "对端端口",
+    "key": "对端端口",
     "zh_name": "对端端口",
     "en_name": "peer port"
   },
   {
-    "name": "端口的状态",
+    "key": "端口的状态",
     "zh_name": "端口的状态",
     "en_name": "the state of the port"
   },
   {
-    "name": "进程名称",
+    "key": "进程名称",
     "zh_name": "进程名称",
     "en_name": "process name"
   },
   {
-    "name": "进程状态",
+    "key": "进程状态",
     "zh_name": "进程状态",
     "en_name": "process status"
   },
   {
-    "name": "size变更",
+    "key": "size变更",
     "zh_name": "size变更",
     "en_name": "size change"
   },
   {
-    "name": "mtime变更",
+    "key": "mtime变更",
     "zh_name": "mtime变更",
     "en_name": "mtime change"
   },
   {
-    "name": "uid变更",
+    "key": "uid变更",
     "zh_name": "uid变更",
     "en_name": "uid change"
   },
   {
-    "name": "inode变更",
+    "key": "inode变更",
     "zh_name": "inode变更",
     "en_name": "inode change"
   },
   {
-    "name": "hash md5变更",
+    "key": "hash md5变更",
     "zh_name": "hash md5变更",
     "en_name": "hash md5 change"
   },
   {
-    "name": "hash sha1变更",
+    "key": "hash sha1变更",
     "zh_name": "hash sha1变更",
     "en_name": "hash sha1 change"
   },
   {
-    "name": "hash sha256变更",
+    "key": "hash sha256变更",
     "zh_name": "hash sha256变更",
     "en_name": "hash sha256 change"
   },
   {
-    "name": "checksum变更",
+    "key": "checksum变更",
     "zh_name": "checksum变更",
     "en_name": "checksum change"
   },
   {
-    "name": "owner变更",
+    "key": "owner变更",
     "zh_name": "owner变更",
     "en_name": "owner change"
   },
   {
-    "name": "value变更",
+    "key": "value变更",
     "zh_name": "value变更",
     "en_name": "value change"
   },
   {
-    "name": "自定义添加日志路径或日志文件",
+    "key": "自定义添加日志路径或日志文件",
     "zh_name": "自定义添加日志路径或日志文件",
     "en_name": "add custom log path or log file"
   },
   {
-    "name": "硬件信息",
+    "key": "probe.name.001",
     "zh_name": "硬件信息",
     "en_name": "hardware information"
   },
   {
-    "name": "主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
+    "key": "probe.description.001",
     "zh_name": "主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
     "en_name": "Motherboard serial number, CPU name, number of CPU cores, CPU frequency, total memory size, remaining memory, memory usage, total hard disk size, hard disk usage"
   },
   {
-    "name": "操作系统信息",
+    "key": "probe.name.002",
     "zh_name": "操作系统信息",
     "en_name": "operating system information"
   },
   {
-    "name": "主机名、架构、系统名称、系统版本、平台、发布版本",
+    "key": "probe.description.002",
     "zh_name": "主机名、架构、系统名称、系统版本、平台、发布版本",
     "en_name": "Hostname, Architecture, System Name, System Version, Platform, Release Version"
   },
   {
-    "name": "网络接口信息",
+    "key": "probe.name.003",
     "zh_name": "网络接口信息",
     "en_name": "network interface information"
   },
   {
-    "name": "名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数",
+    "key": "probe.description.003",
     "zh_name": "名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数",
     "en_name": "Name, adapter, type, status, MTU, MAC address, IP address, number of packets sent, number of received packets, number of bytes sent, bytes received"
   },
   {
-    "name": "端口信息",
+    "key": "probe.name.004",
     "zh_name": "端口信息",
     "en_name": "port information"
   },
   {
-    "name": "协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程",
+    "key": "probe.description.004",
     "zh_name": "协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程",
     "en_name": "Protocol type, local IP, local port, peer ip, peer port, inode, status, PID, process"
   },
   {
-    "name": "进程信息",
+    "key": "probe.name.005",
     "zh_name": "进程信息",
     "en_name": "process information"
   },
   {
-    "name": "PID、进程名、状态、PPID、utime、stime",
+    "key": "probe.description.005",
     "zh_name": "PID、进程名、状态、PPID、utime、stime",
     "en_name": "PID, process name, status, PPID, utime, stime"
   },
   {
-    "name": "文件变更事件",
+    "key": "probe.name.006",
     "zh_name": "文件变更事件",
     "en_name": "file change event"
   },
   {
-    "name": "包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）",
+    "key": "probe.description.006",
     "zh_name": "包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）",
     "en_name": "Contains changes to size, permissions, owner, last modified date, checksum and directory files (when monitoring directories up to level 3 subdirectories)"
   },
   {
-    "name": "注册表变更事件",
+    "key": "probe.name.007",
     "zh_name": "注册表变更事件",
     "en_name": "registry change event"
   },
   {
-    "name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）",
+    "key": "probe.description.007",
     "zh_name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）",
     "en_name": "Including the changes of size, mtime, inode, md5, sha1, sha256 (when monitoring the directory, the level 5 subdirectory is monitored, and the HKEY_CURRENT_USER directory is not supported)"
   },
   {
-    "name": "日志文件",
+    "key": "probe.name.011",
     "zh_name": "日志文件",
     "en_name": "log file"
   },
   {
-    "name": "安全软件",
+    "key": "probe.description.011",
+    "zh_name": "日志文件",
+    "en_name": "log file"
+  },
+  {
+    "key": "probe.name.010",
     "zh_name": "安全软件",
     "en_name": "security software"
   },
   {
-    "name": "操作系统",
+    "key": "probe.description.010",
+    "zh_name": "安全软件",
+    "en_name": "security software"
+  },
+  {
+    "key": "probe.name.008",
     "zh_name": "操作系统",
     "en_name": "operating system"
   },
   {
-    "name": "应用系统日志",
+    "key": "probe.description.008",
+    "zh_name": "操作系统",
+    "en_name": "operating system"
+  },
+  {
+    "key": "probe.name.009",
     "zh_name": "应用系统日志",
     "en_name": "application system log"
   },
   {
-    "name": "变更事件",
+    "key": "probe.description.009",
+    "zh_name": "应用系统日志",
+    "en_name": "application system log"
+  },
+  {
+    "key": "collection.type.00",
     "zh_name": "变更事件",
     "en_name": "change event"
   },
   {
-    "name": "原始日志",
+    "key": "collection.type.0001",
+    "zh_name": "文件变更事件",
+    "en_name": "file change event"
+  },
+  {
+    "key": "collection.type.0002",
+    "zh_name": "注册表变更事件",
+    "en_name": "registry change event"
+  },
+  {
+    "key": "collection.type.01",
     "zh_name": "原始日志",
     "en_name": "original log"
   },
   {
-    "name": "日志事件",
+    "key": "collection.type.02",
     "zh_name": "日志事件",
     "en_name": "log events"
   },
   {
-    "name": "操作系统日志",
+    "key": "collection.type.0201",
     "zh_name": "操作系统日志",
     "en_name": "OS log"
   },
   {
-    "name": "邮件服务器",
+    "key": "collection.type.020101",
+    "zh_name": "Windows",
+    "en_name": "Windows"
+  },
+  {
+    "key": "collection.type.020102",
+    "zh_name": "Linux",
+    "en_name": "Linux"
+  },
+  {
+    "key": "collection.type.020103",
+    "zh_name": "Cisco",
+    "en_name": "Cisco"
+  },
+  {
+    "key": "collection.type.020104",
+    "zh_name": "HP",
+    "en_name": "HP"
+  },
+  {
+    "key": "collection.type.020105",
+    "zh_name": "FreeBSD",
+    "en_name": "FreeBSD"
+  },
+  {
+    "key": "collection.type.020106",
+    "zh_name": "Junos",
+    "en_name": "Junos"
+  },
+  {
+    "key": "collection.type.020107",
+    "zh_name": "solaris",
+    "en_name": "solaris"
+  },
+  {
+    "key": "collection.type.020108",
+    "zh_name": "common",
+    "en_name": "common"
+  },
+  {
+    "key": "collection.type.0202",
+    "zh_name": "应用系统日志",
+    "en_name": "application system log"
+  },
+  {
+    "key": "collection.type.020201",
     "zh_name": "邮件服务器",
     "en_name": "mail server"
   },
   {
-    "name": "WEB服务器",
+    "key": "collection.type.020202",
     "zh_name": "WEB服务器",
     "en_name": "web server"
   },
   {
-    "name": "数据库",
+    "key": "collection.type.020203",
     "zh_name": "数据库",
     "en_name": "database"
   },
   {
-    "name": "网络服务",
+    "key": "collection.type.020204",
     "zh_name": "网络服务",
     "en_name": "internet service"
   },
   {
-    "name": "应用软件",
+    "key": "collection.type.020205",
     "zh_name": "应用软件",
     "en_name": "application"
   },
   {
-    "name": "云",
+    "key": "collection.type.020206",
     "zh_name": "云",
     "en_name": "cloud"
   },
   {
-    "name": "负载均衡",
+    "key": "collection.type.020207",
     "zh_name": "负载均衡",
     "en_name": "load balancing"
   },
   {
-    "name": "应用框架",
+    "key": "collection.type.020208",
     "zh_name": "应用框架",
     "en_name": "application framework"
   },
   {
-    "name": "定时任务",
+    "key": "collection.type.020209",
     "zh_name": "定时任务",
     "en_name": "timed task"
   },
   {
-    "name": "文件服务器",
+    "key": "collection.type.020210",
     "zh_name": "文件服务器",
     "en_name": "file server"
   },
   {
-    "name": "虚拟机",
+    "key": "collection.type.020211",
     "zh_name": "虚拟机",
     "en_name": "virtual machine"
   },
   {
-    "name": "安全系统日志",
+    "key": "collection.type.0203",
     "zh_name": "安全系统日志",
     "en_name": "security system Log"
   },
   {
-    "name": "其他",
+    "key": "collection.type.020301",
+    "zh_name": "AV",
+    "en_name": "AV"
+  },
+  {
+    "key": "collection.type.020302",
+    "zh_name": "FW",
+    "en_name": "FW"
+  },
+  {
+    "key": "collection.type.020303",
+    "zh_name": "IDS/IPS",
+    "en_name": "IDS/IPS"
+  },
+  {
+    "key": "collection.type.020304",
+    "zh_name": "VPN",
+    "en_name": "VPN"
+  },
+  {
+    "key": "collection.type.020305",
     "zh_name": "其他",
     "en_name": "other"
   },
   {
-    "name": "接入控制",
+    "key": "collection.type.020306",
     "zh_name": "接入控制",
     "en_name": "access control"
   },
   {
-    "name": "错误",
+    "key": "collection.type.020307",
     "zh_name": "错误",
     "en_name": "error"
   },
   {
-    "name": "用户",
+    "key": "collection.type.020308",
     "zh_name": "用户",
     "en_name": "user"
   },
   {
-    "name": "远程登录",
+    "key": "collection.type.020309",
     "zh_name": "远程登录",
     "en_name": "remote login"
   },
   {
-    "name": "攻击",
+    "key": "collection.type.020310",
+    "zh_name": "sca",
+    "en_name": "sca"
+  },
+  {
+    "key": "collection.type.020311",
     "zh_name": "攻击",
     "en_name": "attack"
   },
   {
-    "name": "windows安全事件",
+    "key": "collection.type.020312",
     "zh_name": "windows安全事件",
     "en_name": "windows security event"
   },
   {
-    "name": "自定义采集",
+    "key": "collection.type.03",
     "zh_name": "自定义采集",
     "en_name": "custom collection"
   },
 
-
   {
-    "name": "cloudmusic",
+    "key": "cloudmusic",
     "zh_name": "cloudmusic",
     "en_name": "cloudmusic"
   },
   {
-    "name": "百度网盘",
+    "key": "百度网盘",
     "zh_name": "百度网盘",
     "en_name": "Baidu network disk"
   },
   {
-    "name": "160WiFi",
+    "key": "160WiFi",
     "zh_name": "160WiFi",
     "en_name": "160WiFi"
   },
   {
-    "name": "桌面日历",
+    "key": "桌面日历",
     "zh_name": "桌面日历",
     "en_name": "desktop calendar"
   },
   {
-    "name": "飞鸽传书",
+    "key": "飞鸽传书",
     "zh_name": "飞鸽传书",
     "en_name": "flying pigeon biography"
   },
   {
-    "name": "千牛工作台",
+    "key": "千牛工作台",
     "zh_name": "千牛工作台",
     "en_name": "Thousand cattle workbench"
   },
   {
-    "name": "1905影音",
+    "key": "1905影音",
     "zh_name": "1905影音",
     "en_name": "1905 Video"
   },
   {
-    "name": "vnc",
+    "key": "vnc",
     "zh_name": "vnc",
     "en_name": "vnc"
   },
   {
-    "name": "钉钉上传文件数据包",
+    "key": "钉钉上传文件数据包",
     "zh_name": "钉钉上传文件数据包",
     "en_name": "DingTalk upload file data package"
   },
   {
-    "name": "叶子猪手游模拟",
+    "key": "叶子猪手游模拟",
     "zh_name": "叶子猪手游模拟",
     "en_name": "Leaf pig mobile game simulation"
   },
   {
-    "name": "weibo1",
+    "key": "weibo1",
     "zh_name": "weibo1",
     "en_name": "weibo1"
   },
   {
-    "name": "净网专家",
+    "key": "净网专家",
     "zh_name": "净网专家",
     "en_name": "Net net expert"
   },
   {
-    "name": "光影看图",
+    "key": "光影看图",
     "zh_name": "光影看图",
     "en_name": "light and shadow"
   },
   {
-    "name": "腾讯手游助手",
+    "key": "腾讯手游助手",
     "zh_name": "腾讯手游助手",
     "en_name": "Tencent mobile game assistant"
   },
   {
-    "name": "5902",
+    "key": "5902",
     "zh_name": "5902",
     "en_name": "5902"
   },
   {
-    "name": "baidu",
+    "key": "baidu",
     "zh_name": "baidu",
     "en_name": "baidu"
   },
   {
-    "name": "斗鱼直播",
+    "key": "斗鱼直播",
     "zh_name": "斗鱼直播",
     "en_name": "Douyu Live"
   },
   {
-    "name": "有道云笔记",
+    "key": "有道云笔记",
     "zh_name": "有道云笔记",
     "en_name": "YouDao Cloud Note"
   },
   {
-    "name": "全面K歌",
+    "key": "全面K歌",
     "zh_name": "全面K歌",
     "en_name": "Comprehensive K song"
   },
   {
-    "name": "EditPlus",
+    "key": "EditPlus",
     "zh_name": "EditPlus",
     "en_name": "EditPlus"
   },
   {
-    "name": "小米随身WiFi",
+    "key": "小米随身WiFi",
     "zh_name": "小米随身WiFi",
     "en_name": "Xiaomi Portable WiFi"
   },
   {
-    "name": "火狐",
+    "key": "火狐",
     "zh_name": "火狐",
     "en_name": "Firefox"
   },
   {
-    "name": "人人影视",
+    "key": "人人影视",
     "zh_name": "人人影视",
     "en_name": "Everyone Video"
   },
   {
-    "name": "火萤桌面",
+    "key": "火萤桌面",
     "zh_name": "火萤桌面",
     "en_name": "firefly desktop"
   },
   {
-    "name": "小米助手",
+    "key": "小米助手",
     "zh_name": "小米助手",
     "en_name": "Xiaomi Assistant"
   },
   {
-    "name": "winSCP下载文件SFTP",
+    "key": "winSCP下载文件SFTP",
     "zh_name": "winSCP下载文件SFTP",
     "en_name": "winSCP download file SFTP"
   },
   {
-    "name": "WINscp下载文件SCP",
+    "key": "WINscp下载文件SCP",
     "zh_name": "WINscp下载文件SCP",
     "en_name": "WINscp download file SCP"
   },
   {
-    "name": "百度文库下载文档数据包",
+    "key": "百度文库下载文档数据包",
     "zh_name": "百度文库下载文档数据包",
     "en_name": "Baidu document data package"
   },
   {
-    "name": "迅雷下载MSDNwin10镜像数据包",
+    "key": "迅雷下载MSDNwin10镜像数据包",
     "zh_name": "迅雷下载MSDNwin10镜像数据包",
     "en_name": "Thunder win10 data package"
   },
   {
-    "name": "ysyy",
+    "key": "ysyy",
     "zh_name": "ysyy",
     "en_name": "ysyy"
   },
   {
-    "name": "WiFi共享大师",
+    "key": "WiFi共享大师",
     "zh_name": "WiFi共享大师",
     "en_name": "WiFi Sharing Master"
   },
   {
-    "name": "TecentVideo",
+    "key": "TecentVideo",
     "zh_name": "TecentVideo",
     "en_name": "TecentVideo"
   },
   {
-    "name": "优酷视屏",
+    "key": "优酷视屏",
     "zh_name": "优酷视屏",
     "en_name": "Youku Video"
   },
   {
-    "name": "RDP",
+    "key": "RDP",
     "zh_name": "RDP",
     "en_name": "RDP"
   },
   {
-    "name": "虎牙直播直播数据包",
+    "key": "虎牙直播直播数据包",
     "zh_name": "虎牙直播直播数据包",
     "en_name": "Huya live broadcast data package"
   },
   {
-    "name": "飞火动态壁纸",
+    "key": "飞火动态壁纸",
     "zh_name": "飞火动态壁纸",
     "en_name": "Flying Fire Live Wallpaper"
   },
   {
-    "name": "光明网",
+    "key": "光明网",
     "zh_name": "光明网",
     "en_name": "Bright Net"
   },
   {
-    "name": "wegame",
+    "key": "wegame",
     "zh_name": "wegame",
     "en_name": "wegame"
   },
   {
-    "name": "qq邮箱上传文件数据包",
+    "key": "qq邮箱上传文件数据包",
     "zh_name": "qq邮箱上传文件数据包",
     "en_name": "QQ mailbox upload file data package"
   },
   {
-    "name": "风行播放器",
+    "key": "风行播放器",
     "zh_name": "风行播放器",
     "en_name": "popular player"
   },
   {
-    "name": "小智双核浏览器",
+    "key": "小智双核浏览器",
     "zh_name": "小智双核浏览器",
     "en_name": "Xiaozhi Dual Core Browser"
   },
   {
-    "name": "ftp",
+    "key": "ftp",
     "zh_name": "ftp",
     "en_name": "ftp"
   },
   {
-    "name": "简书网页",
+    "key": "简书网页",
     "zh_name": "简书网页",
     "en_name": "Jianshu webpage"
   },
   {
-    "name": "youtube",
+    "key": "youtube",
     "zh_name": "youtube",
     "en_name": "youtube"
   },
   {
-    "name": "wechat_kZQXz70",
+    "key": "wechat_kZQXz70",
     "zh_name": "wechat_kZQXz70",
     "en_name": "wechat_kZQXz70"
   },
   {
-    "name": "traffic",
+    "key": "traffic",
     "zh_name": "traffic",
     "en_name": "traffic"
   },
   {
-    "name": "盒子游戏大厅",
+    "key": "盒子游戏大厅",
     "zh_name": "盒子游戏大厅",
     "en_name": "box game hall"
   },
   {
-    "name": "暗黑大天使",
+    "key": "暗黑大天使",
     "zh_name": "暗黑大天使",
     "en_name": "Dark Archangel"
   },
   {
-    "name": "XT800_个人版",
+    "key": "XT800_个人版",
     "zh_name": "XT800_个人版",
     "en_name": "XT800_Personal Edition"
   },
   {
-    "name": "爱奇艺pps",
+    "key": "爱奇艺pps",
     "zh_name": "爱奇艺pps",
     "en_name": "iQIYI pps"
   },
   {
-    "name": "企业QQ",
+    "key": "企业QQ",
     "zh_name": "企业QQ",
     "en_name": "Enterprise QQ"
   },
   {
-    "name": "靠谱助手",
+    "key": "靠谱助手",
     "zh_name": "靠谱助手",
     "en_name": "Reliable assistant"
   },
   {
-    "name": "世界之窗",
+    "key": "世界之窗",
     "zh_name": "世界之窗",
     "en_name": "window of the world"
   },
   {
-    "name": "FirefoxPortable",
+    "key": "FirefoxPortable",
     "zh_name": "FirefoxPortable",
     "en_name": "FirefoxPortable"
   },
   {
-    "name": "酷狗直播",
+    "key": "酷狗直播",
     "zh_name": "酷狗直播",
     "en_name": "Kugou Live"
   },
   {
-    "name": "YY语音",
+    "key": "YY语音",
     "zh_name": "YY语音",
     "en_name": "YY voice"
   },
   {
-    "name": "QQ",
+    "key": "QQ",
     "zh_name": "QQ",
     "en_name": "QQ"
   },
   {
-    "name": "小度WiFi",
+    "key": "小度WiFi",
     "zh_name": "小度WiFi",
     "en_name": "Xiaodu WiFi"
   },
   {
-    "name": "dns",
+    "key": "dns",
     "zh_name": "dns",
     "en_name": "dns"
   },
   {
-    "name": "Internet_Download_Manager",
+    "key": "Internet_Download_Manager",
     "zh_name": "Internet_Download_Manager",
     "en_name": "Internet_Download_Manager"
   },
   {
-    "name": "搜狗音乐",
+    "key": "搜狗音乐",
     "zh_name": "搜狗音乐",
     "en_name": "Sogou Music"
   },
   {
-    "name": "比特精灵",
+    "key": "比特精灵",
     "zh_name": "比特精灵",
     "en_name": "Bit Genie"
   },
   {
-    "name": "广告拦截大师",
+    "key": "广告拦截大师",
     "zh_name": "广告拦截大师",
     "en_name": "Ad Blocker"
   },
   {
-    "name": "上证指数东方财富网",
+    "key": "上证指数东方财富网",
     "zh_name": "上证指数东方财富网",
     "en_name": "Shanghai Index Oriental Fortune Network"
   },
   {
-    "name": "WinSCP-SSHv2协议",
+    "key": "WinSCP-SSHv2协议",
     "zh_name": "WinSCP-SSHv2协议",
     "en_name": "WinSCP-SSHv2 protocol"
   },
   {
-    "name": "云橙图片压缩软件",
+    "key": "云橙图片压缩软件",
     "zh_name": "云橙图片压缩软件",
     "en_name": "Cloud Orange Image Compression Software"
   },
   {
-    "name": "腾讯网游加速器",
+    "key": "腾讯网游加速器",
     "zh_name": "腾讯网游加速器",
     "en_name": "Tencent Online Game Accelerator"
   },
   {
-    "name": "茄子快传",
+    "key": "茄子快传",
     "zh_name": "茄子快传",
     "en_name": "Eggplant Express"
   },
   {
-    "name": "iTOOLS",
+    "key": "iTOOLS",
     "zh_name": "iTOOLS",
     "en_name": "iTOOLS"
   },
   {
-    "name": "驱动精灵",
+    "key": "驱动精灵",
     "zh_name": "驱动精灵",
     "en_name": "drive wizard"
   },
   {
-    "name": "酷我游戏",
+    "key": "酷我游戏",
     "zh_name": "酷我游戏",
     "en_name": "cool me game"
   },
   {
-    "name": "PP视频",
+    "key": "PP视频",
     "zh_name": "PP视频",
     "en_name": "PP video"
   },
   {
-    "name": "腾讯软件管理下载安装包数据包",
+    "key": "腾讯软件管理下载安装包数据包",
     "zh_name": "腾讯软件管理下载安装包数据包",
     "en_name": "Tencent installation package data"
   },
   {
-    "name": "搜狗搜索",
+    "key": "搜狗搜索",
     "zh_name": "搜狗搜索",
     "en_name": "Sogou search"
   },
   {
-    "name": "金山打字通",
+    "key": "金山打字通",
     "zh_name": "金山打字通",
     "en_name": "Kingsoft Typing Pass"
   },
   {
-    "name": "看图啦",
+    "key": "看图啦",
     "zh_name": "看图啦",
     "en_name": "Look at the picture"
   },
   {
-    "name": "酷我K歌",
+    "key": "酷我K歌",
     "zh_name": "酷我K歌",
     "en_name": "Cool me K song"
   },
   {
-    "name": "芒果TV极速版",
+    "key": "芒果TV极速版",
     "zh_name": "芒果TV极速版",
     "en_name": "Mango TV Speed ​​Edition"
   },
   {
-    "name": "阿里旺旺",
+    "key": "阿里旺旺",
     "zh_name": "阿里旺旺",
     "en_name": "Ali Wangwang"
   },
   {
-    "name": "极光压缩",
+    "key": "极光压缩",
     "zh_name": "极光压缩",
     "en_name": "Aurora Compression"
   },
   {
-    "name": "千千音乐",
+    "key": "千千音乐",
     "zh_name": "千千音乐",
     "en_name": "Thousands of Music"
   },
   {
-    "name": "dingding",
+    "key": "dingding",
     "zh_name": "dingding",
     "en_name": "dingding"
   },
   {
-    "name": "网易uu加速器",
+    "key": "网易uu加速器",
     "zh_name": "网易uu加速器",
     "en_name": "Netease uu accelerator"
   },
   {
-    "name": "暴雪战网",
+    "key": "暴雪战网",
     "zh_name": "暴雪战网",
     "en_name": "Blizzard Battle.net"
   },
   {
-    "name": "2344游戏盒",
+    "key": "2344游戏盒",
     "zh_name": "2344游戏盒",
     "en_name": "2344 game box"
   },
   {
-    "name": "网易手游助手",
+    "key": "网易手游助手",
     "zh_name": "网易手游助手",
     "en_name": "Netease mobile game assistant"
   },
   {
-    "name": "奇游电竞加速器",
+    "key": "奇游电竞加速器",
     "zh_name": "奇游电竞加速器",
     "en_name": "Qiyou e-sports accelerator"
   },
   {
-    "name": "虎牙直播",
+    "key": "虎牙直播",
     "zh_name": "虎牙直播",
     "en_name": "Huya Live"
   },
   {
-    "name": "WinSCP-FTP协议_rBG7xDL",
+    "key": "WinSCP-FTP协议_rBG7xDL",
     "zh_name": "WinSCP-FTP协议_rBG7xDL",
     "en_name": "WinSCP-FTP protocol_rBG7xDL"
   },
   {
-    "name": "QQ影像",
+    "key": "QQ影像",
     "zh_name": "QQ影像",
     "en_name": "QQ image"
   },
   {
-    "name": "baidunetdisk",
+    "key": "baidunetdisk",
     "zh_name": "baidunetdisk",
     "en_name": "baidunetdisk"
   },
   {
-    "name": "steam",
+    "key": "steam",
     "zh_name": "steam",
     "en_name": "steam"
   },
   {
-    "name": "OBS_Studio",
+    "key": "OBS_Studio",
     "zh_name": "OBS_Studio",
     "en_name": "OBS_Studio"
   },
   {
-    "name": "爱拍",
+    "key": "爱拍",
     "zh_name": "爱拍",
     "en_name": "love to shoot"
   },
   {
-    "name": "iTunes",
+    "key": "iTunes",
     "zh_name": "iTunes",
     "en_name": "iTunes"
   },
   {
-    "name": "腾讯会议",
+    "key": "腾讯会议",
     "zh_name": "腾讯会议",
     "en_name": "Tencent Conference"
   },
   {
-    "name": "arp",
+    "key": "arp",
     "zh_name": "arp",
     "en_name": "arp"
   },
   {
-    "name": "37abc浏览器",
+    "key": "37abc浏览器",
     "zh_name": "37abc浏览器",
     "en_name": "37abc browser"
   },
   {
-    "name": "悦书PDF阅读器",
+    "key": "悦书PDF阅读器",
     "zh_name": "悦书PDF阅读器",
     "en_name": "Yueshu PDF Reader"
   },
   {
-    "name": "WinSCP-FTP协议",
+    "key": "WinSCP-FTP协议",
     "zh_name": "WinSCP-FTP协议",
     "en_name": "WinSCP-FTP Protocol"
   },
   {
-    "name": "vivo手机助手",
+    "key": "vivo手机助手",
     "zh_name": "vivo手机助手",
     "en_name": "vivo mobile phone assistant"
   },
   {
-    "name": "qq邮箱下载文件数据包",
+    "key": "qq邮箱下载文件数据包",
     "zh_name": "qq邮箱下载文件数据包",
     "en_name": "QQ mailbox download file data package"
   },
   {
-    "name": "WinSCP",
+    "key": "WinSCP",
     "zh_name": "WinSCP",
     "en_name": "WinSCP"
   },
   {
-    "name": "快手直播伴侣",
+    "key": "快手直播伴侣",
     "zh_name": "快手直播伴侣",
     "en_name": "Kuaishou Live Companion"
   },
   {
-    "name": "雷神NN加速器",
+    "key": "雷神NN加速器",
     "zh_name": "雷神NN加速器",
     "en_name": "Thor NN Accelerator"
   },
   {
-    "name": "失易得数据恢复6",
+    "key": "失易得数据恢复6",
     "zh_name": "失易得数据恢复6",
     "en_name": "Lost data recovery 6"
   },
   {
-    "name": "易信",
+    "key": "易信",
     "zh_name": "易信",
     "en_name": "Credulity"
   },
   {
-    "name": "搜索Everything",
+    "key": "搜索Everything",
     "zh_name": "搜索Everything",
     "en_name": "Search Everything"
   },
   {
-    "name": "花样直播",
+    "key": "花样直播",
     "zh_name": "花样直播",
     "en_name": "Live Streaming"
   },
   {
-    "name": "qq音乐",
+    "key": "qq音乐",
     "zh_name": "qq音乐",
     "en_name": "qq music"
   },
   {
-    "name": "猎豹轻桌面",
+    "key": "猎豹轻桌面",
     "zh_name": "猎豹轻桌面",
     "en_name": "Cheetah Light Desktop"
   },
   {
-    "name": "QQ音乐音乐播放数据包",
+    "key": "QQ音乐音乐播放数据包",
     "zh_name": "QQ音乐音乐播放数据包",
     "en_name": "QQ music music playback data package"
   },
   {
-    "name": "影音先锋",
+    "key": "影音先锋",
     "zh_name": "影音先锋",
     "en_name": "Audio and Video Pioneer"
   },
   {
-    "name": "YaHoo",
+    "key": "YaHoo",
     "zh_name": "YaHoo",
     "en_name": "YaHoo"
   },
   {
-    "name": "快玩游戏盒",
+    "key": "快玩游戏盒",
     "zh_name": "快玩游戏盒",
     "en_name": "Quick Play Game Box"
   },
   {
-    "name": "咕米视频",
+    "key": "咕米视频",
     "zh_name": "咕米视频",
     "en_name": "Gummy Video"
   },
   {
-    "name": "bd_g5JeKw0",
+    "key": "bd_g5JeKw0",
     "zh_name": "bd_g5JeKw0",
     "en_name": "bd_g5JeKw0"
   },
   {
-    "name": "redis",
+    "key": "redis",
     "zh_name": "redis",
     "en_name": "redis"
   },
   {
-    "name": "金山文档",
+    "key": "金山文档",
     "zh_name": "金山文档",
     "en_name": "Kingsoft Documentation"
   },
   {
-    "name": "FileZilla",
+    "key": "FileZilla",
     "zh_name": "FileZilla",
     "en_name": "FileZilla"
   },
   {
-    "name": "腾讯课堂",
+    "key": "腾讯课堂",
     "zh_name": "腾讯课堂",
     "en_name": "Tencent Classroom"
   },
   {
-    "name": "腾讯游戏盒子",
+    "key": "腾讯游戏盒子",
     "zh_name": "腾讯游戏盒子",
     "en_name": "Tencent game box"
   },
   {
-    "name": "潭州课堂",
+    "key": "潭州课堂",
     "zh_name": "潭州课堂",
     "en_name": "Tanzhou Classroom"
   },
   {
-    "name": "美团官网数据缓存数据包",
+    "key": "美团官网数据缓存数据包",
     "zh_name": "美团官网数据缓存数据包",
     "en_name": "Meituan official cache data package"
   },
   {
-    "name": "爱思助手",
+    "key": "爱思助手",
     "zh_name": "爱思助手",
     "en_name": "Aisi Assistant"
   },
   {
-    "name": "向日葵客户端",
+    "key": "向日葵客户端",
     "zh_name": "向日葵客户端",
     "en_name": "sunflower client"
   },
   {
-    "name": "腾讯视频",
+    "key": "腾讯视频",
     "zh_name": "腾讯视频",
     "en_name": "Tencent Video"
   },
   {
-    "name": "百度网盘_hXmS4Bm",
+    "key": "百度网盘_hXmS4Bm",
     "zh_name": "百度网盘_hXmS4Bm",
     "en_name": "Baidu network disk_hXmS4Bm"
   },
   {
-    "name": "Amazon",
+    "key": "Amazon",
     "zh_name": "Amazon",
     "en_name": "Amazon"
   },
   {
-    "name": "央视影音",
+    "key": "央视影音",
     "zh_name": "央视影音",
     "en_name": "CCTV audio and video"
   },
   {
-    "name": "2345加速浏览器",
+    "key": "2345加速浏览器",
     "zh_name": "2345加速浏览器",
     "en_name": "2345 accelerated browser"
   },
   {
-    "name": "网易云音乐",
+    "key": "网易云音乐",
     "zh_name": "网易云音乐",
     "en_name": "NetEase Cloud Music"
   },
   {
-    "name": "WINscp下载文件FTP",
+    "key": "WINscp下载文件FTP",
     "zh_name": "WINscp下载文件FTP",
     "en_name": "WINscp download file FTP"
   },
   {
-    "name": "腾讯会议_D1Ma1aw",
+    "key": "腾讯会议_D1Ma1aw",
     "zh_name": "腾讯会议_D1Ma1aw",
     "en_name": "Tencent Conference_D1Ma1aw"
   },
   {
-    "name": "小白一键重装系统",
+    "key": "小白一键重装系统",
     "zh_name": "小白一键重装系统",
     "en_name": "Xiaobai one-key reinstall system"
   },
   {
-    "name": "虾米音乐",
+    "key": "虾米音乐",
     "zh_name": "虾米音乐",
     "en_name": "Xiami Music"
   },
   {
-    "name": "twitter",
+    "key": "twitter",
     "zh_name": "twitter",
     "en_name": "twitter"
   },
   {
-    "name": "QQ浏览器",
+    "key": "QQ浏览器",
     "zh_name": "QQ浏览器",
     "en_name": "QQ browser"
   },
   {
-    "name": "GoLink",
+    "key": "GoLink",
     "zh_name": "GoLink",
     "en_name": "GoLink"
   },
   {
-    "name": "同城游",
+    "key": "同城游",
     "zh_name": "同城游",
     "en_name": "same city tour"
   },
   {
-    "name": "fakeCms3",
+    "key": "fakeCms3",
     "zh_name": "fakeCms3",
     "en_name": "fakeCms3"
   },
   {
-    "name": "realFlow",
+    "key": "realFlow",
     "zh_name": "realFlow",
     "en_name": "realFlow"
   },
   {
-    "name": "fakePWN1",
+    "key": "fakePWN1",
     "zh_name": "fakePWN1",
     "en_name": "fakePWN1"
   },
   {
-    "name": "fakePwn",
+    "key": "fakePwn",
     "zh_name": "fakePwn",
     "en_name": "fakePwn"
   },
   {
-    "name": "运维靶场自动化攻击",
+    "key": "运维靶场自动化攻击",
     "zh_name": "运维靶场自动化攻击",
     "en_name": "Cyber range automation attack"
   },
   {
-    "name": "fakeHTTP2",
+    "key": "fakeHTTP2",
     "zh_name": "fakeHTTP2",
     "en_name": "fakeHTTP2"
   },
   {
-    "name": "fakePwn2",
+    "key": "fakePwn2",
     "zh_name": "fakePwn2",
     "en_name": "fakePwn2"
   },
   {
-    "name": "fakeCmd1",
+    "key": "fakeCmd1",
     "zh_name": "fakeCmd1",
     "en_name": "fakeCmd1"
   },
   {
-    "name": "fakeXSS1",
+    "key": "fakeXSS1",
     "zh_name": "fakeXSS1",
     "en_name": "fakeXSS1"
   },
   {
-    "name": "fakeXSS",
+    "key": "fakeXSS",
     "zh_name": "fakeXSS",
     "en_name": "fakeXSS"
   },
   {
-    "name": "synflood",
+    "key": "synflood",
     "zh_name": "synflood",
     "en_name": "synflood"
   },
   {
-    "name": "fakeCMD",
+    "key": "fakeCMD",
     "zh_name": "fakeCMD",
     "en_name": "fakeCMD"
   },
   {
-    "name": "udpflood",
+    "key": "udpflood",
     "zh_name": "udpflood",
     "en_name": "udpflood"
   },
   {
-    "name": "fakeCSRF",
+    "key": "fakeCSRF",
     "zh_name": "fakeCSRF",
     "en_name": "fakeCSRF"
   }
