@@ -55,6 +55,26 @@ public class JsonMockService {
         return allDevices;
     }
 
+    /**
+     * 查询所有镜像
+     * @param categories
+     * @return
+     */
+    public List<Device> filterDevicesByCategories(List<Integer> categories) {
+        String content = getContent(IMAGES_JSON);
+        List<Device> allDevices = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(content)) {
+            allDevices = JSONObject.parseArray(content, Device.class);
+            if (CollectionUtil.isNotEmpty(categories)) {
+                List<Device> filteredDevices = allDevices.stream().filter(d -> categories.contains(d.getCategory())).collect(Collectors.toList());
+                return filteredDevices;
+            }
+        }
+
+        return allDevices;
+    }
+
 
     /**
      * 查询所有类型
