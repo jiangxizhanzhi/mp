@@ -151,8 +151,8 @@ mp:
     authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
     authenticate-jwt-expires: 604800
     authenticate-urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
-    authenticate-encoder-iterations:
-    authenticate-encoder-hash-width:
+    authenticate-encoder-iterations: 185000
+    authenticate-encoder-hash-width: 256
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true
