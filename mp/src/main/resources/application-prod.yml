@@ -153,7 +153,7 @@ mp:
     authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
     authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/aggr/**}
     authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public}
-    authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:185000}
+    authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   # mp-front-admin 模块
   frontadmin:
