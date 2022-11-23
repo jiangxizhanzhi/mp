@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
@@ -29,7 +30,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.StrBuilder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -172,79 +172,46 @@ public class TenantUserServiceImpl
     public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
 
-        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
-        Map<String, List<String>> userOrgMap = new HashMap<>(tenantUserModels.size());
-        Set<String> orgIds = new HashSet<>(tenantUserModels.size());
-        for (TenantUserModel model : tenantUserModels) {
-            String userId = model.getUser();
-            String orgId = model.getOrg();
-            List<String> orgs = Objects.isNull(userOrgMap.get(userId)) ? new ArrayList<>() : userOrgMap.get(userId);
-            orgs.add(orgId);
-            userOrgMap.put(userId, orgs);
-            orgIds.add(orgId);
+        HumanCondition humanCondition = new HumanCondition()
+                .link(OrgModel.class, TenantUserModel.class)
+                .filterLink(OrgModel.class, OrgModel::getId, TenantUserModel.class, TenantUserModel::getOrg)
+                .currentLink(TenantUserModel.class)
+                .filterNotEqual(TenantUserModel::getUser, "");
+        if (CollUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
         }
-        if (CollUtil.isEmpty(orgIds)) {
-            return new ArrayList<>();
-        }
-        HumanCondition orgCondition = new HumanCondition()
-                .filterIn(OrgModel::getId, orgIds.toArray())
-                .select(OrgModel::getId)
-                .select(OrgModel::getName)
-                .distinct();
-        List<OrgModel> orgModels = orgMapper.list(orgCondition);
-        Map<String, String> orgMap = new HashMap<>(orgModels.size());
-        orgModels.forEach(orgModel ->
-                orgMap.put(orgModel.getId(), orgModel.getName())
-        );
-
-        List<UserOrgMapBo> userOrgMapBos = new ArrayList<>(userOrgMap.size());
-        userOrgMap.forEach((userId, orgs) -> {
-            UserOrgMapBo userOrgMapBo = new UserOrgMapBo();
-            userOrgMapBo.setUserId(userId);
-            userOrgMapBo.setOrgIds(StringUtils.join(orgs, ','));
-            StrBuilder orgNames = new StrBuilder();
-            int i = 0;
-            for (String org : orgs) {
-                if (i > 0) {
-                    orgNames.append(",");
-                }
-                orgNames.append(orgMap.get(org));
-            }
-            userOrgMapBo.setOrgNames(orgNames.toString());
-            userOrgMapBos.add(userOrgMapBo);
-        });
-
-        return userOrgMapBos;
+        humanCondition.currentLink(TenantUserModel.class)
+                .selectAs(TenantUserModel::getUser, "userId")
+                .currentLink(OrgModel.class)
+                .selectAs(GroupConcat.f(OrgModel::getId).distinct(), "orgIds")
+                .selectAs(GroupConcat.f(OrgModel::getName).distinct(), "orgNames")
+                .currentLink(TenantUserModel.class)
+                .groupBy(TenantUserModel::getUser);
+        return getModelMapper().list(humanCondition, UserOrgMapBo.class);
     }
 
     @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
 
-        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
-        Map<String, String> orgUserMap = new HashMap<>(tenantUserModels.size());
-        List<String> orgIds = new ArrayList<>(tenantUserModels.size());
-        for (TenantUserModel model : tenantUserModels) {
-            orgUserMap.put(model.getOrg(), model.getUser());
-            orgIds.add(model.getOrg());
+        HumanCondition humanCondition = new HumanCondition()
+                .link(OrgModel.class, TenantUserModel.class)
+                .filterLink(OrgModel.class, OrgModel::getId, TenantUserModel.class, TenantUserModel::getOrg)
+                .currentLink(TenantUserModel.class)
+                .filterNotEqual(TenantUserModel::getUser, "");
+        if (CollUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
         }
-        if (CollUtil.isEmpty(orgIds)) {
-            return new ArrayList<>();
-        }
-        HumanCondition orgCondition = new HumanCondition()
-                .filterIn(OrgModel::getId, orgIds.toArray())
-                .distinct();
-        List<OrgModel> orgModels = orgMapper.list(orgCondition);
-        List<UserOrgBo> userOrgBos = new ArrayList<>(orgModels.size());
-        for (OrgModel orgModel : orgModels) {
-            UserOrgBo userOrgBo = new UserOrgBo();
-            BeanUtils.copyProperties(orgModel, userOrgBo);
-            userOrgBo.setUserId(orgUserMap.get(orgModel.getId()));
+        humanCondition.currentLink(OrgModel.class)
+                .select(OrgFields.allFields.getFields())
+                .distinct()
+                .currentLink(TenantUserModel.class)
+                .selectAs(TenantUserModel::getUser, "userId");
+        List<UserOrgBo> userOrgBos = getModelMapper().list(humanCondition, UserOrgBo.class);
+        for (UserOrgBo userOrgBo : userOrgBos) {
             String path = orgService.getPath(userOrgBo);
             userOrgBo.setPath(path);
-            userOrgBos.add(userOrgBo);
         }
-
         return userOrgBos;
     }
 
@@ -449,18 +416,6 @@ public class TenantUserServiceImpl
         humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
         List<UserModel> userModels = userMapper.list(humanCondition);
         return userModels;
-    }
-
-    private List<TenantUserModel> getTenantUserModelsByUserIds(List<String> userIds) {
-        HumanCondition tenantCondition = new HumanCondition()
-                .filterNotEqual(TenantUserModel::getUser, "");
-        if (CollUtil.isNotEmpty(userIds)) {
-            tenantCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
-        }
-        tenantCondition.select(TenantUserModel::getUser)
-                .select(TenantUserModel::getOrg)
-                .distinct();
-        return tenantUserMapper.list(tenantCondition);
     }
 
     public List<UserOrgRoleBo> listAllUsers(List<String> orgIds,
