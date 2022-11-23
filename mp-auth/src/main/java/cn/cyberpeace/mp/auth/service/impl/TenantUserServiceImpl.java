@@ -473,6 +473,9 @@ public class TenantUserServiceImpl
                                             LocalDateTime currentDateTime
     ) {
         HumanCondition humanCondition = genHumanCondition(orgIds, userIds, orders, userBo, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        if (Objects.isNull(humanCondition)) {
+            return new ArrayList<>();
+        }
         Map<String, String> userOrgMap = getUserOrgMap();
         Map<String, String> userRoleMap = getUserRoleMap();
         List<UserModel> userModels = userMapper.list(humanCondition);
@@ -499,6 +502,9 @@ public class TenantUserServiceImpl
                                          Integer pageSize
     ) {
         HumanCondition humanCondition = genHumanCondition(orgIds, userIds, orders, userBo, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        if (Objects.isNull(humanCondition)) {
+            return new PageInfo<>(new ArrayList<>(), 0);
+        }
         int total = userMapper.total(humanCondition);
         Map<String, String> userOrgMap = getUserOrgMap();
         Map<String, String> userRoleMap = getUserRoleMap();
@@ -538,9 +544,10 @@ public class TenantUserServiceImpl
                     .distinct();
             List<TenantUserModel> tenantUserModels = tenantUserMapper.list(orgCondition);
             List<String> ids = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
-            if (CollUtil.isNotEmpty(ids)) {
-                humanCondition.filterIn(UserModel::getId, ids.toArray());
+            if (CollUtil.isEmpty(ids)) {
+                return null;
             }
+            humanCondition.filterIn(UserModel::getId, ids.toArray());
         }
 
         if (CollUtil.isNotEmpty(userIds)) {
