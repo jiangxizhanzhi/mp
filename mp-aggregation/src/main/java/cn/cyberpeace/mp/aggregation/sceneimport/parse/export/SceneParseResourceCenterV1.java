@@ -267,6 +267,8 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                     result.setS(StringUtils.replaceOnce(c, "s:", "").trim());
                 } else if (c.startsWith("n:")) {
                     result.setN(StringUtils.replaceOnce(c, "n:", "").trim());
+                } else {
+                    return;
                 }
                 nodeElementParseResult.getInitCommands().add(result);
             });
