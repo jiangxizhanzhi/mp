@@ -18,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @LocalCallServer
-public class LocalResetPwdCallService {
+public class ResetPwdLocalCallService {
 
     @Autowired
     private UserService userService;
