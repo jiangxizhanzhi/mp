@@ -751,7 +751,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<TenantUserModel> tenantUserModels = new ArrayList<>();
         // 初始化默认头像信息
         for (ImportUserBo importUserBo : list) {
-            log.info("importUser:{}", importUserBo);
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUserBo);
             if (Objects.isNull(userModel)) {
@@ -774,12 +773,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 3. 保存组织-用户关系
             // http://10.10.10.10/biz/bug-view-4861.html
             if (CollectionUtil.isNotEmpty(importUserBo.getOrgIdList())) {
-                importUserBo.getOrgIdList().forEach(oid -> {
-                    TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(oid).build();
-                            var re = tenantUserService.create(tenantUserModel);
-                            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-                        }
-                );
                 List<TenantUserModel> orgUsers = importUserBo.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(orgUsers)) {
                     tenantUserModels.addAll(orgUsers);
@@ -787,6 +780,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
         }
 
+        log.info("{}, {}, {}", userModels.size(), userRoleModels.size(), tenantUserModels.size());
         userImportService.doImport(userModels, userRoleModels, tenantUserModels);
     }
 
@@ -1149,6 +1143,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         return userOrgRoleBos;
+    }
+
+
+    @Override
+    public List<String> listExistedUserNames(List<String> userNames, Integer limit) {
+        HumanCondition condition = new HumanCondition().filterIn(UserModel::getUsername, userNames.toArray());
+        condition.setLimit(limit);
+        List<UserModel> list = getModelMapper().list(condition);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 }
 

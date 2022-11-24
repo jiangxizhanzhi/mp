@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -11,10 +11,22 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 模板的读取类
@@ -92,6 +104,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
+        LocalDateTime start = LocalDateTime.now();
+        log.warn("save data");
         if (list.size() > authConfig.getMaxImportUserSize()) {
             log.error("size exceed the limit:{}！", list.size());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authConfig.getMaxImportUserSize().toString()));
@@ -99,8 +113,23 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
         // 校验字段是否合法
         checkImportUsers(list);
+        LocalDateTime end = LocalDateTime.now();
+        log.warn("after checkImportUsers cost:{}", Duration.between(start, end).toMillis());
+
         preProcessImportUsers(list);
+        start = end;
+        end = LocalDateTime.now();
+        log.warn("after preProcessImportUsers cost:{}", Duration.between(start, end).toMillis());
+
+        preProcessPwd(list);
+        start = end;
+        end = LocalDateTime.now();
+        log.warn("after preProcessPwd cost:{}", Duration.between(start, end).toMillis());
+
         userService.importUsers(list);
+        start = end;
+        end = LocalDateTime.now();
+        log.warn("after importUsers cost:{}", Duration.between(start, end).toMillis());
     }
 
 
@@ -110,40 +139,56 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
 
+        var duplicateElements = getDuplicateElements(users);
+        if (CollectionUtils.isNotEmpty(duplicateElements)) {
+            String duplicatedUserNames = duplicateElements.stream().map(Map.Entry::getKey).collect(Collectors.joining(","));
+            log.error("import error! username {} duplicated!", duplicatedUserNames);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_DUPLICATED.format(duplicatedUserNames));
+        }
+
+        Map<String, Integer> userName2IndexBoMap = new LinkedHashMap<>();
         for (int i = 0; i < users.size(); i++) {
             ImportUserBo user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
-                checkUserName(user.getUsername(), index);
+                userName2IndexBoMap.put(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
             }
         }
+        // 校验用户名
+        checkUserName(userName2IndexBoMap);
     }
 
 
     /**
      * 校验用户名
      *
-     * @param username
-     * @param index
+     * @param userName2IndexBoMap
      */
-    private void checkUserName(String username, int index) {
-        if (StringUtils.isBlank(username)) {
-            log.error("No {} row error! username {} should not be empty!", index, username);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
-        }
+    private void checkUserName(Map<String, Integer> userName2IndexBoMap) {
 
-        if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
-            log.error("No {} row error! username {} has illegal length!", index, username);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
-        }
+        userName2IndexBoMap.entrySet().stream().forEach(e -> {
+            String username = e.getKey();
+            Integer index = e.getValue();
+            if (StringUtils.isBlank(username)) {
+                log.error("No {} row error! username {} should not be empty!", index, username);
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
+            }
 
-        if (Objects.nonNull(userService.getByUserName(username))) {
-            log.error("No {} row error! username {} already existed!", index, username);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EXISTED.format(String.valueOf(index), username));
-        }
+            if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
+                log.error("No {} row error! username {} has illegal length!", index, username);
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
+            }
+        });
 
+        List<String> userNames = userName2IndexBoMap.keySet().stream().collect(Collectors.toList());
+        List<String> existedUserNames = userService.listExistedUserNames(userNames, 1);
+        if (CollectionUtils.isNotEmpty(existedUserNames)) {
+            String username = existedUserNames.get(0);
+            log.error("No {} row error! username {} already existed!", userName2IndexBoMap.get(username), username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EXISTED.format(String.valueOf(userName2IndexBoMap.get(username)), username));
+        }
     }
 
     /**
@@ -259,17 +304,36 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
 
     /**
-     * 导入excel暂时不用对密码进行预处理
+     * 导入excel对密码进行预处理
      * 预处理密码
      */
     private void preProcessPwd(List<ImportUserBo> users) {
-        Map<String, String> pwdMap = new HashMap<>();
-        for (ImportUserBo user : users) {
-            if (StringUtils.isEmpty(pwdMap.get(user.getPassword()))) {
-                pwdMap.put(user.getPassword(), PasswordUtils.encode(user.getPassword().trim()));
-            }
-            user.setPassword(pwdMap.get(user.getPassword()));
+        List<List<ImportUserBo>> parentList = Lists.partition(users, 20);
+        List<CompletableFuture<List<ImportUserBo>>> cfList = new ArrayList<>();
+
+        for (List<ImportUserBo> subList : parentList) {
+            CompletableFuture<List<ImportUserBo>> cf = CompletableFuture.supplyAsync(() -> enPwd(subList));
+            cfList.add(cf);
         }
+
+        List<ImportUserBo> finalList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(cfList)) {
+            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
+            CompletableFuture<List<List<ImportUserBo>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            List<List<ImportUserBo>> result = finalCF.join();
+            result.forEach(list -> finalList.addAll(list));
+        }
+    }
+
+
+
+    private List<ImportUserBo> enPwd(List<ImportUserBo> list) {
+        log.error("enPwd size:{}", list.size());
+        list.forEach(u -> {
+            u.setPassword(PasswordUtils.encode(u.getPassword()));
+        });
+        throw new MpRuntimeException(BaseErrorCode.ERROR);
+        //return list;
     }
 
 
@@ -333,6 +397,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             for (String roleName : roleNameArr) {
                 RoleModel roleModel = roleName2ModelMap.get(roleName.trim());
                 if (Objects.isNull(roleModel)) {
+                    // roleService.getByName方法有缓存
                     roleModel = roleService.getByName(roleName.trim());
                     roleName2ModelMap.put(roleName.trim(), roleModel);
                 }
@@ -346,6 +411,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
 
         opUserPermCheckService.checkByTargetRoleNames(allRoleNames);
+    }
+
+
+    public List<Map.Entry<String, Long>> getDuplicateElements(List<ImportUserBo> users) {
+        var list = users.stream().collect(Collectors.groupingBy(u -> u.getUsername(), Collectors.counting())).entrySet().stream().filter(entry -> entry.getValue() > 1).collect(Collectors.toList());
+        return list;
     }
 
 
