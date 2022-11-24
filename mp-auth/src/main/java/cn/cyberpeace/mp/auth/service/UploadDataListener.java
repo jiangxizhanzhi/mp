@@ -105,7 +105,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      */
     private void saveData() {
         LocalDateTime start = LocalDateTime.now();
-        log.warn("save data");
+        log.info("save data");
         if (list.size() > authConfig.getMaxImportUserSize()) {
             log.error("size exceed the limit:{}！", list.size());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authConfig.getMaxImportUserSize().toString()));
@@ -114,22 +114,22 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         // 校验字段是否合法
         checkImportUsers(list);
         LocalDateTime end = LocalDateTime.now();
-        log.warn("after checkImportUsers cost:{}", Duration.between(start, end).toMillis());
+        log.info("after checkImportUsers cost:{}", Duration.between(start, end).toMillis());
 
-        preProcessImportUsers(list);
+        preProcessOrgsAndRoles(list);
         start = end;
         end = LocalDateTime.now();
-        log.warn("after preProcessImportUsers cost:{}", Duration.between(start, end).toMillis());
+        log.info("after preProcessOrgsAndRoles cost:{}", Duration.between(start, end).toMillis());
 
         preProcessPwd(list);
         start = end;
         end = LocalDateTime.now();
-        log.warn("after preProcessPwd cost:{}", Duration.between(start, end).toMillis());
+        log.info("after preProcessPwd cost:{}", Duration.between(start, end).toMillis());
 
         userService.importUsers(list);
         start = end;
         end = LocalDateTime.now();
-        log.warn("after importUsers cost:{}", Duration.between(start, end).toMillis());
+        log.info("after importUsers cost:{}", Duration.between(start, end).toMillis());
     }
 
 
@@ -297,7 +297,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-    private void preProcessImportUsers(List<ImportUserBo> users) {
+    private void preProcessOrgsAndRoles(List<ImportUserBo> users) {
         preProcessOrgs(users);
         preProcessRoles(users);
     }
@@ -326,9 +326,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-
     private List<ImportUserBo> enPwd(List<ImportUserBo> list) {
-        log.error("enPwd size:{}", list.size());
         list.forEach(u -> {
             u.setPassword(PasswordUtils.encode(u.getPassword()));
         });
