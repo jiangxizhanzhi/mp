@@ -332,8 +332,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         list.forEach(u -> {
             u.setPassword(PasswordUtils.encode(u.getPassword()));
         });
-        throw new MpRuntimeException(BaseErrorCode.ERROR);
-        //return list;
+        return list;
     }
 
 
