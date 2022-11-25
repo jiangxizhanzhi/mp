@@ -29,10 +29,10 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: 10.100.0.101
-    port: 5673
-    username: guest
-    password: guest
+    host: 10.100.7.1
+    port: 9672
+    username: cpcloud
+    password: MzhhMzU4NDQzNzU
   web:
     resources:
       static-locations: file:${user.home}/img

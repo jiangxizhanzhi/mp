@@ -102,10 +102,12 @@ public class AuthConstant {
     public static final String ROUTING_KEY_ROLE_DELETE = AUTH_EXCHANGE_NAME + ".role.delete";
     public static final String ROUTING_KEY_ROLE_UPDATE = AUTH_EXCHANGE_NAME + ".role.update";
     public static final String ROUTING_KEY_ROLE_CREATE = AUTH_EXCHANGE_NAME + ".role.create";
+    public static final String ROUTING_KEY_ROLE_MODIFY = AUTH_EXCHANGE_NAME + ".role.modify";
 
     public static final String MSG_TYPE_USER_DELETE = "user_delete";
     public static final String MSG_TYPE_ORG_DELETE = "org_delete";
     public static final String MSG_TYPE_ROLE_DELETE = "role_delete";
+    public static final String MSG_TYPE_ROLE_MODIFY = "role_modify";
 
 
     private AuthConstant() {
