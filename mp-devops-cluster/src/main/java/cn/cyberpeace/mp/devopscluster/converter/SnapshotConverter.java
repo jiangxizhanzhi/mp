@@ -155,7 +155,8 @@ public class SnapshotConverter {
                 sceneNames.addAll(names);
             });
             if (CollectionUtils.isNotEmpty(sceneNames)) {
-                sceneName = sceneNames.get(0);
+                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                sceneName = StringUtils.join(names, ",");
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(sceneName));
         }
