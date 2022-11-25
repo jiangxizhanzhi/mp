@@ -142,7 +142,7 @@ mp:
     log-db: ${MP_DEVOPS_LOG_DB:es} #日志存储数据库可以配置：es、sql
   # mp-auth 模块配置
   auth:
-    max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
+    max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:1000}
     logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     default-user-avatar: ${MP_AUTH_DEFAULT_USER_AVATAR:/api/mp/avatar/1.png}
     mq-msg-timeout: ${MP_AUTH_MQ_MSG_TIMEOUT:3600000}
