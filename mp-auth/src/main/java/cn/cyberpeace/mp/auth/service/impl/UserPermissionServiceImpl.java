@@ -121,6 +121,7 @@ public class UserPermissionServiceImpl
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listMenusByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<TargetModel> targets = listTargetsByUserId(userId);
