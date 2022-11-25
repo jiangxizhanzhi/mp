@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
@@ -15,12 +16,15 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.validation.CloudScenePluginValidation;
+import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -91,7 +95,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 srcElement.setType(BaseSceneElementModel.Type.ROUTER);
             }
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
-        }  else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
             if (isForceCorrectElementType) {
                 // TODO 暂定 - 三层镜像网关就是仿真路由
                 srcElement.setType(BaseSceneElementModel.Type.ROUTER);
@@ -116,7 +120,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
             srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
-        }else if(role.equals(BaseCloudPluginSceneElementModel.Role.NPC)){
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         }
     }
@@ -156,7 +160,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             var ip = srcPort.getIp();
             if (!StringUtils.isEmpty(ip)) {
                 // TODO: 这里未初始化辅助网络，判断不准
-                var auxiliaryNetworkCloudElement =  handlerUtils.getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+                var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(srcPort.getId());
                 if (auxiliaryNetworkCloudElement != null) {
                     String cidr;
                     var role = auxiliaryNetworkCloudElement.getRole();
@@ -177,6 +181,23 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     throw new MpRuntimeException(CloudErrorCode.FIRE_RULES_DATA_TOO_LONG);
                 }
             });
+        }
+        // 是否有节点连接了外部网络 而且外部网络设置了平台的地址
+        var u = URLUtil.url(CloudSingleton.cloudAppConfig.getCpcloudServer());
+        for (var element : getSceneHandler().getElementMap().values()) {
+            if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                for (var port : element.getPorts()) {
+                    if (StringUtils.isNotEmpty(port.getIp()) && port.getIp().equals(u.getHost())) {
+                        var connectElement = getSceneHandler().getPortConnectedElement(port.getId());
+                        if (connectElement != null) {
+                            var cloudElement = getElement(connectElement.getId());
+                            if (cloudElement.getRole() != null && BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == cloudElement.getRole()) {
+                                throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_SERVER);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
