@@ -93,6 +93,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         var ret = super.delete(roleId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
+            userCacheService.evictAllTargetsCache();
             messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
         }
         return ret;
@@ -110,6 +111,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         var ret = super.bulkDelete(ids);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
+            userCacheService.evictAllTargetsCache();
             messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
         }
         return ret;
@@ -313,7 +315,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
+
         userCacheService.evictAllUserCache();
+        userCacheService.evictAllTargetsCache();
         messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
         return updateResult.getSource().getObj();
     }
