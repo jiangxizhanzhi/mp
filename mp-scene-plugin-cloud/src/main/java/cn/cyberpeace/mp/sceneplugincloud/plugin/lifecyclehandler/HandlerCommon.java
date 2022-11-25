@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -150,7 +151,11 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 
         String nodeName = element.getSrcElement().getName();
         CloudPluginSceneElementBO cloudElement = (CloudPluginSceneElementBO) element;
-        String[] params = new String[]{ nodeName, cloudElement.getImage() };
+        String ip = "";
+        if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+            ip = cloudElement.getSrcElement().getPorts().get(0).getIp();
+        }
+        String[] params = new String[]{nodeName, cloudElement.getImage(), ip};
         String convertMessage = CloudMessageConvertUtil.getMessage(message, params);
         if (convertMessage != null) {
             MpRuntimeException resultException = new MpRuntimeException(convertMessage);

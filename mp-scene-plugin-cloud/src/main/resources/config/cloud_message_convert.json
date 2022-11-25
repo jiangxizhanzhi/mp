@@ -448,5 +448,27 @@
         "relation": "regx"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "ip `{2}` has been used"
+      },
+      {
+        "locale": "zh",
+        "message": "ip`{2}`已被使用"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "ip address",
+        "relation": "contains"
+      },
+      {
+        "keyword": "already",
+        "relation": "contains"
+      }
+    ]
   }
 ]
