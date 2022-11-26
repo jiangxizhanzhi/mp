@@ -10,7 +10,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/${MP_DB_DATABASE:mp}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    url: jdbc:mysql://${MP_DB_IP:10.100.2.22}:${MP_DB_PORT:3306}/${MP_DB_DATABASE:mp}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${MP_DB_USERNAME:root}
     password: ${MP_DB_PASSWORD:root}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -136,7 +136,7 @@ mp:
     es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
     cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
     mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
-    log-db: ${MP_DEVOPS_LOG_DB:es}
+    log-db: ${MP_DEVOPS_LOG_DB:mysql}
   # mp-auth 模块配置
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
