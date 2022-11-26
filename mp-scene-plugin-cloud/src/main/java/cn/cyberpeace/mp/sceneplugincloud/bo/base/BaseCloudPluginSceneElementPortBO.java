@@ -75,6 +75,12 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "bgp组网下的对端端口所属AS")
     private String bgpPeerAs;
 
+    // rip 组网
+    @ApiModelProperty(value = "rip组网下的IP")
+    private String ripIp;
+    @ApiModelProperty(value = "ip下的邻居")
+    private String ripPear;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,

@@ -31,6 +31,7 @@ public class VyosNetworkCommandUtils {
         builderChains.add(new OSPFCmdBuilder());
         builderChains.add(new BGPCmdBuilder());
         builderChains.add(new RouterNameCmdBuilder());
+        builderChains.add(new RIPCmdBuilder());
     }
 
     public static List<String> genOpenDhcpCommands(int ethSize) {
@@ -196,6 +197,44 @@ public class VyosNetworkCommandUtils {
                             String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
                             String.format(SET_DECLARE_NET, defaultSelfAs, IpUtils.getFormatCidrIp(interfaceIp))
                     }));
+                }
+            });
+            return cmds;
+        }
+    }
+
+    private static class RIPCmdBuilder implements NetworkingCmdBuilder {
+
+        private String LOOKBACK = "set interfaces loopback address %s";
+        private String NETWORK = "set protocols rip network %s";
+        private String RIP_INTERFACE = "set protocols rip interface eth%s";
+        private String NEIGHBOOR = "set protocols rip neighbor %s";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
+                return new ArrayList<>();
+            }
+            var ripPorts = paramsWrapper.pluginPorts.stream()
+                    .filter(p -> StringUtils.isNotEmpty(p.getRipIp()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(ripPorts)) {
+                return new ArrayList<>();
+            }
+            List<String> cmds = new ArrayList<>();
+            if (StringUtils.isNotEmpty(paramsWrapper.element.getRipLookback())) {
+                cmds.add(String.format(LOOKBACK, paramsWrapper.element.getRipLookback()));
+            }
+            paramsWrapper.pluginPorts.forEach(p -> {
+                if (ripPorts.contains(p)) {
+                    // 端口有bgp配置 根据配置创建命令
+                    cmds.addAll(List.of(new String[]{
+                            String.format(NETWORK, p.getRipIp()),
+                            String.format(RIP_INTERFACE, p.getSrcPort().getOrder()),
+                            String.format(NEIGHBOOR, p.getRipPear())
+                    }));
+                } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
+                    // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
                 }
             });
             return cmds;

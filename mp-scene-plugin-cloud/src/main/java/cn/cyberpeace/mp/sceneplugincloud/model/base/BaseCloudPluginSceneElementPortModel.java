@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementPortModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -66,5 +67,10 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     private String bgpPeerAs;
     @DefaultStr
     private String connectMode;
+
+    @DefaultStr
+    private String ripIp;
+    @DefaultStr
+    private String ripPear;
 
 }
