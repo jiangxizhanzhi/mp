@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -31,9 +32,9 @@ public class JsonMockService {
 
     private static final String IMAGES_JSON = "config/images.json";
 
-    private static final String TYPE_JSON = "config/type.json";
-
     private static final String FLAVOR_JSON = "config/flavor.json";
+
+    private static final String EQUIPMENT_JSON = "config/equipment.json";
 
     /**
      * 查询所有镜像
@@ -80,9 +81,9 @@ public class JsonMockService {
      * 查询所有类型
      * @return
      */
-    public TypeAllVO getTypeAllVO() {
+    public TypeAllVO getTypeAllVO(String jsonFileName) {
         TypeAllVO typeAllVO = new TypeAllVO();
-        String content = getContent(TYPE_JSON);
+        String content = getContent(jsonFileName);
 
         if (StringUtils.isNotBlank(content)) {
             typeAllVO = JSONObject.parseObject(content, TypeAllVO.class);
@@ -90,7 +91,6 @@ public class JsonMockService {
 
         return typeAllVO;
     }
-
 
     /**
      * 查询flavor列表
@@ -119,6 +119,21 @@ public class JsonMockService {
         }
 
         return content;
+    }
+
+    public List<RealEquipmentPageVO> getEquipments() {
+        String content = getContent(EQUIPMENT_JSON);
+        List<RealEquipmentPageVO> equipments = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(content)) {
+            equipments = JSONObject.parseArray(content, RealEquipmentPageVO.class);
+//            if (CollectionUtil.isNotEmpty(equipments)) {
+//                List<Device> filteredDevices = allDevices.stream().filter(d -> categories.contains(d.getCategory())).collect(Collectors.toList());
+//                return filteredDevices;
+//            }
+        }
+
+        return equipments;
     }
 
 }

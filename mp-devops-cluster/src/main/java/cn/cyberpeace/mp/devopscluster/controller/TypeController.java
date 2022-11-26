@@ -43,6 +43,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class TypeController {
 
+    private static final String TYPE_JSON = "config/type.json";
+
+    private static final String CATEGORY_JSON = "config/category.json";
+
     private static final String CCM_1 = "CCM-1";
 
     private final TypeConverter typeConverter;
@@ -115,7 +119,7 @@ public class TypeController {
         allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
         */
 
-        TypeAllVO allResponse = jsonMockService.getTypeAllVO();
+        TypeAllVO allResponse = jsonMockService.getTypeAllVO(TYPE_JSON);
         return new Result<>(allResponse);
     }
 
@@ -127,13 +131,8 @@ public class TypeController {
     @ApiOperation("查询所有分类")
     @GetMapping("/categories")
     public Result<TypeAllVO> list(){
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        if (Objects.isNull(l1AndL2AndL3Type)){
-            return new Result<>();
-        }
-        TypeAllVO response = new TypeAllVO(l1AndL2AndL3Type.getFirstTypeList(),
-                l1AndL2AndL3Type.getSecondTypeList(),l1AndL2AndL3Type.getThirdTypeList());
-        return new Result<>(response);
+        TypeAllVO allResponse = jsonMockService.getTypeAllVO(CATEGORY_JSON);
+        return new Result<>(allResponse);
     }
 
     /**
