@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -781,8 +782,13 @@ public class AsyncPlatFlowTaskService {
                             log.info("flow execute success:[{}]", flowTaskModel.getId());
                             result = true;
                         } else {
+                            FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
                             // 运行失败，更新任务状态为已停止，调用失败回调方法
                             String errMsg = rows.getJSONObject(0).getString("result_detail");
+                            if (Objects.nonNull(flowInfoModel) && flowInfoModel.getResourceType() == ResourceTypeEnum.SCRIPT.toValue()) {
+                                // 脚本执行报错，添加前缀
+                                errMsg = MessageCommonUtil.convertMessage("scriptFlowError").concat(errMsg).replace("\\n\'", "");
+                            }
                             log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
                             jobStoppedCallback(flowTaskModel.getId(), errorCallback, errMsg);
                         }
