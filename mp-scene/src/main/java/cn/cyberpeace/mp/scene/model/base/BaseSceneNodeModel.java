@@ -20,8 +20,6 @@ public class BaseSceneNodeModel extends BaseModel {
     @DefaultStr
     private String icon3;
     @DefaultStr
-    private String modelUrl;
-    @DefaultStr
     private String position3;
     @DefaultStr
     private String name;
