@@ -45,8 +45,6 @@ public class TypeController {
 
     private static final String TYPE_JSON = "config/type.json";
 
-    private static final String CATEGORY_JSON = "config/category.json";
-
     private static final String CCM_1 = "CCM-1";
 
     private final TypeConverter typeConverter;
@@ -131,7 +129,7 @@ public class TypeController {
     @ApiOperation("查询所有分类")
     @GetMapping("/categories")
     public Result<TypeAllVO> list(){
-        TypeAllVO allResponse = jsonMockService.getTypeAllVO(CATEGORY_JSON);
+        TypeAllVO allResponse = jsonMockService.getTypeAllVO(TYPE_JSON);
         return new Result<>(allResponse);
     }
 

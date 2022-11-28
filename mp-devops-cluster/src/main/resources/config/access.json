@@ -1,0 +1,25 @@
+{
+  "firstTypeList": [],
+  "idIntegerModelList": [],
+  "idStringModelList": [
+    {
+      "id": "remote_address",
+      "name": "Remote Address"
+    },
+    {
+      "id": "device_port",
+      "name": "Device Port"
+    },
+    {
+      "id": "wireless",
+      "name": "Wireless"
+    },
+    {
+      "id": "mac_address",
+      "name": "Mac Address"
+    }
+  ],
+  "items": [],
+  "secondTypeList": [],
+  "thirdTypeList": []
+}

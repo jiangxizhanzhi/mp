@@ -26,10 +26,7 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageReques
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentByIdVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentDevopsDetailVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentNetworkCardPageVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentPageVO;
+import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -75,30 +72,97 @@ public class RealEquipmentController {
     @Autowired
     private JsonMockService jsonMockService;
 
+    private static final String TYPE_JSON = "config/type.json";
+    private static final String LANGUAGE_JSON = "config/language.json";
+    private static final String SYSTEM_JSON = "config/system.json";
+    private static final String ACCESS_JSON = "config/access.json";
+
     /**
      * 分页查询
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
-        List<RealEquipmentPageVO> allEquipments = jsonMockService.getEquipments();
-        Integer l1 = request.getCategory();
-        if (Objects.nonNull(l1)) {
-            allEquipments = allEquipments.stream().filter(equipment -> Objects.equals(equipment.getCategory(), l1)).collect(Collectors.toList());
+        BasePageBO<RealEquipmentBO> model = realEquipmentConverter.page(new ImagePageDTO(request));
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        Integer l2 = request.getSecondCategory();
-        if (Objects.nonNull(l2)) {
-            allEquipments = allEquipments.stream().filter(equipment -> Objects.equals(equipment.getSubCategory(), l2)).collect(Collectors.toList());
-        }
-        Integer l3 = request.getThirdCategory();
-        if (Objects.nonNull(l3)) {
-            allEquipments = allEquipments.stream().filter(equipment -> Objects.equals(equipment.getThirdCategory(), l3)).collect(Collectors.toList());
-        }
-        String name = request.getName();
-        if (Objects.nonNull(name)) {
-            allEquipments = allEquipments.stream().filter(equipment -> equipment.getName().contains(name)).collect(Collectors.toList());
-        }
-        return new PageResult<>(allEquipments,allEquipments.size());
+
+
+        TypeAllConvertModel l1AndL2AndL3Type = jsonMockService.getTypeAllConvertModel(TYPE_JSON);
+        TypeAllConvertModel language = jsonMockService.getTypeAllConvertModel(LANGUAGE_JSON);
+        TypeAllConvertModel systemArchitecure = jsonMockService.getTypeAllConvertModel(SYSTEM_JSON);
+        TypeAllConvertModel accessType = jsonMockService.getTypeAllConvertModel(ACCESS_JSON);
+
+        List<RealEquipmentPageVO> list = model.getList().stream().map(v -> {
+            ExtEntity extEntity = v.getExtEntity();
+            RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
+                    .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
+                    .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
+                    .inPosition(v.getInPosition()).build();
+            if (Objects.nonNull(l1AndL2AndL3Type)){
+                List<String> firstTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList()) ?
+                        null : l1AndL2AndL3Type.getFirstTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getMainCategory()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                response.setCategoryName(CollectionUtils.isEmpty(firstTypeList) ? null : firstTypeList.get(0));
+
+                List<String> secondTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getSecondTypeList()) ? null : l1AndL2AndL3Type.getSecondTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getSubCategory()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                response.setSubCategoryName(CollectionUtils.isEmpty(secondTypeList) ? null : secondTypeList.get(0));
+
+                List<String> thirdTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getThirdTypeList()) ? null : l1AndL2AndL3Type.getThirdTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getThirdCategory()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                response.setThirdCategoryName(CollectionUtils.isEmpty(thirdTypeList) ? null : thirdTypeList.get(0));
+            }
+            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+            if (Objects.nonNull(extSystemInfo)){
+                if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                    List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
+                            .map(TypeConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
+                }
+                if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
+                    List<String> languageTypeList = language.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
+                }
+
+                if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
+                    List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
+                }
+                response.setExtSystemInfo(extSystemInfo);
+            }
+
+            if (Objects.nonNull(extEntity)){
+                response.setModel(extEntity.getStyle());
+                response.setParams(extEntity.getParams());
+            }
+
+            List<ExtEntityAccess> extEntityAccess = v.getExtEntityAccess();
+            if (CollectionUtils.isNotEmpty(extEntityAccess)){
+                String accessType1 = Objects.isNull(extEntityAccess.get(0)) ? "" : extEntityAccess.get(0).getAccessType();
+                if (Objects.nonNull(accessType) && CollectionUtils.isNotEmpty(accessType.getIdStringModelList())){
+                    List<String> accessTypeeTypeList = accessType.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(accessType1))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    response.setEntityTypeName(CollectionUtils.isEmpty(accessTypeeTypeList) ? null : accessTypeeTypeList.get(0));
+                }
+                response.setEntityType(accessType1);
+
+                response.setEntityDetail(JSONArray.toJSONString(extEntityAccess));
+            }
+            return response;
+        }).collect(Collectors.toList());
+
+        return new PageResult<>(list,model.getTotal());
     }
 
     @ApiOperation("根据ID查询")

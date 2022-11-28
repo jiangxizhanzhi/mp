@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.hutool.core.collection.CollectionUtil;
@@ -136,4 +137,14 @@ public class JsonMockService {
         return equipments;
     }
 
+
+    public TypeAllConvertModel getTypeAllConvertModel(String fileName) {
+        String content = getContent(fileName);
+        TypeAllConvertModel l1AndL2AndL3Type = new TypeAllConvertModel();
+
+        if (StringUtils.isNotBlank(content)) {
+            l1AndL2AndL3Type = JSONObject.parseObject(content, TypeAllConvertModel.class);
+        }
+        return l1AndL2AndL3Type;
+    }
 }

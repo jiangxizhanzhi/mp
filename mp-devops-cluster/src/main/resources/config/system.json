@@ -1,0 +1,21 @@
+{
+  "firstTypeList": [],
+  "idIntegerModelList": [],
+  "idStringModelList": [
+    {
+      "id": "32",
+      "name": "32 bit"
+    },
+    {
+      "id": "64",
+      "name": "64 bit"
+    },
+    {
+      "id": "other",
+      "name": "Other"
+    }
+  ],
+  "items": [],
+  "secondTypeList": [],
+  "thirdTypeList": []
+}

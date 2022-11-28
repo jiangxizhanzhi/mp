@@ -24,12 +24,14 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +60,9 @@ public class RealEquipmentConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private final JsonMockService jsonMockService;
 
     /**
      * 获取实装总数
@@ -94,7 +99,10 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+        List<Device> devices = jsonMockService.filterDevicesByIds(ids);
+        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
+        model.setList(new ArrayList<>());
+        model.getList().addAll(devices);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             convertModel.setList(Lists.newArrayList());

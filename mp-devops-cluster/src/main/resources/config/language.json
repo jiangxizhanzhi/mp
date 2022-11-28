@@ -1,0 +1,49 @@
+{
+  "firstTypeList": [],
+  "idIntegerModelList": [],
+  "idStringModelList": [
+    {
+      "id": "cn",
+      "name": "中文（简体）"
+    },
+    {
+      "id": "tc",
+      "name": "中文（繁體）"
+    },
+    {
+      "id": "en",
+      "name": "English"
+    },
+    {
+      "id": "fr",
+      "name": "Français"
+    },
+    {
+      "id": "ru",
+      "name": "русский"
+    },
+    {
+      "id": "ja",
+      "name": "日本語"
+    },
+    {
+      "id": "ko",
+      "name": "한국어"
+    },
+    {
+      "id": "vi",
+      "name": "Tiếng Việt"
+    },
+    {
+      "id": "ar",
+      "name": "العربية"
+    },
+    {
+      "id": "other",
+      "name": "Other"
+    }
+  ],
+  "items": [],
+  "secondTypeList": [],
+  "thirdTypeList": []
+}
