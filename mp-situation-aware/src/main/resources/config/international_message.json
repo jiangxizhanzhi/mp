@@ -1284,5 +1284,10 @@
     "key": "fakeCSRF",
     "zh_name": "fakeCSRF",
     "en_name": "fakeCSRF"
+  },
+  {
+    "key": "scriptFlowError",
+    "zh_name": "脚本执行异常==>",
+    "en_name": "Script execute error==>"
   }
 ]
