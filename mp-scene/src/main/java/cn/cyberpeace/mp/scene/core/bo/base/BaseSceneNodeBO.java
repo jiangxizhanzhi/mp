@@ -15,6 +15,8 @@ public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends Ba
     private String icon2;
     @ApiModelProperty(value = "2d坐标")
     private String position2;
+    @ApiModelProperty(value = "自定义3d图标地址")
+    private String modelUrl;
     @ApiModelProperty(value = "3d图标地址")
     private String icon3;
     @ApiModelProperty(value = "3d坐标")
