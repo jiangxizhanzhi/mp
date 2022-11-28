@@ -8,12 +8,22 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.RolePermissionModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.AdminConfigService;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
@@ -39,7 +49,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +96,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private AuthStatusRabbitmqSender messageSender;
 
     @Autowired
+    private AdminConfigService adminConfigService;
+
+    @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -88,11 +108,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-        // todo 删除关联用户关系，权限关系
         deleteReleated(roleId);
         var ret = super.delete(roleId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
+            userCacheService.evictAllTargetsCache();
             messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
         }
         return ret;
@@ -101,8 +121,6 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
-        // todo 删除关联用户关系，权限关系
-
         for (String id : ids) {
             deleteReleated(id);
         }
@@ -110,6 +128,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         var ret = super.bulkDelete(ids);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
+            userCacheService.evictAllTargetsCache();
             messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ROLE_DELETE, AuthConstant.ROUTING_KEY_ROLE_DELETE, null);
         }
         return ret;
@@ -313,7 +332,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
+
         userCacheService.evictAllUserCache();
+        userCacheService.evictAllTargetsCache();
         messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
         return updateResult.getSource().getObj();
     }
@@ -383,11 +404,16 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 
+        // 在系统配置中设置了默认注册用户的角色不能删
+        if (Objects.equals(roleId, adminConfigService.getRegisterDefaultRoleId())) {
+            log.info("Register default role can not delete！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_FOR_REGISTER_DEFAULT);
+        }
+
         List<UserModel> users = userRoleService.listUsersByRoleIdNoRestrict(roleId);
         if (CollUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }
-
 
         boolean deleteRolePermissionSuccess = rolePermissionService.deleteByRoleId(roleId);
         boolean deleteUserRoleSuccess = userRoleService.deleteByRoleId(roleId);

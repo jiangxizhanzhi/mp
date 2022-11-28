@@ -47,6 +47,9 @@ public enum AuthErrorCode implements ErrorCode {
     FILE_ISNULL("MP-110028", "file_path_isnull"),
     ACCOUNT_LOCKED("MP-110029", "account_locked"),
 
+    REGISTER_NOT_AVAILABLE("MP-110030", "register_not_available"),
+    REGISTER_USER_DEFAULT_ROLE_NOT_EXISTED("MP-110031", "register_user_default_role_not_existed"),
+
 
 
 
@@ -84,11 +87,12 @@ public enum AuthErrorCode implements ErrorCode {
     ROLE_DELETE_ERROR("MP-110087", "role_delete_error"),
     ROLE_MODIFY_ERROR("MP-110088", "role_modify_error"),
     ROLE_NAME_EXISTED("MP-110089", "role_name_existed"),
+    ROLE_CANNOT_DELETE_FOR_REGISTER_DEFAULT("MP-110090", "role_cannot_delete_for_register_default"),
 
 
     // target
-    TARGET_NOT_EXISTED("MP-110090", "target_not_existed"),
-    TARGET_TYPE_NOT_SUPPORT("MP-110091", "target_type_not_support"),
+    TARGET_NOT_EXISTED("MP-110095", "target_not_existed"),
+    TARGET_TYPE_NOT_SUPPORT("MP-110096", "target_type_not_support"),
 
 
     // validation-api params
