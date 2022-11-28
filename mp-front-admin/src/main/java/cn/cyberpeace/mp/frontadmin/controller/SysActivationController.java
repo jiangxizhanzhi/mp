@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.controller;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
+import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationStatus;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
@@ -62,6 +63,12 @@ public class SysActivationController {
         String value = activationService.getValueByKey(key);
 
         return ResultCommon.success(value);
+    }
+
+    @ApiOperation("查询激活状态")
+    @GetMapping("/license_status")
+    public ServiceResult<ActivationStatus> licenseStatus() {
+        return ResultCommon.success();
     }
 
 
