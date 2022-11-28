@@ -144,7 +144,8 @@ public class TargetConverter{
                 sceneNames.addAll(names);
             });
             if (CollectionUtils.isNotEmpty(sceneNames)) {
-                sceneName = sceneNames.get(0);
+                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                sceneName = StringUtils.join(names, ",");
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
@@ -161,7 +162,8 @@ public class TargetConverter{
                 sceneNames.addAll(names);
             });
             if (CollectionUtils.isNotEmpty(sceneNames)) {
-                sceneName = sceneNames.get(0);
+                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                sceneName = StringUtils.join(names, ",");
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(sceneName));
         }

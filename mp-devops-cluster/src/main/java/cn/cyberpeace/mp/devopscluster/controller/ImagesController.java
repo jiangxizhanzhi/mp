@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devopscluster.converter.SnapshotConverter;
+import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
@@ -93,6 +94,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +143,9 @@ public class ImagesController {
 
     @NonNull
     private CsceneSpecialService csceneSpecialService;
+
+    @NonNull
+    private TargetConverter targetConverter;
 
     /**
      * 分页查询
@@ -410,6 +415,7 @@ public class ImagesController {
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
+        targetConverter.validTargetCanDelete(Arrays.asList(request.getUuid()));
         snapshotConverter.merge(request);
         return ResultCommon.success();
     }
