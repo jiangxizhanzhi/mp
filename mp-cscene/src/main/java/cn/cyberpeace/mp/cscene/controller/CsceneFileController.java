@@ -44,7 +44,7 @@ public class CsceneFileController {
     @ApiImplicitParam(name = "file", value = "附件", dataTypeClass = MultipartFile.class)
     @PostMapping("/attachment_upload")
     public ServiceResult<SceneFileUploadResponse> attachmentUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        String[] legalType = new String[]{"zip,fbx,FBX"};
+        String[] legalType = new String[]{"zip", "fbx", "FBX"};
         var fileName = file.getOriginalFilename();
         var inputStream = file.getInputStream();
         var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
