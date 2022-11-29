@@ -181,16 +181,9 @@ public class CsceneSpecialService {
      */
     public ListObjServiceResult<CsceneInstanceStat> listCsceneInstanceStats(CsceneInstanceStatQueryParams queryParams) {
         var humanCondition = new HumanCondition()
-                .link(CsceneInstanceModel.class, SceneModel.class, SceneElementModel.class,
-                        CloudPluginSceneElementModel.class)
+                .link(CsceneInstanceModel.class, SceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
                         SceneModel::getId)
-                .filterLink(SceneModel.class, SceneModel::getId, SceneElementModel.class,
-                        SceneElementModel::getScene)
-                .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class,
-                        CloudPluginSceneElementModel::getScene)
-                .filterLink(SceneElementModel.class, SceneElementModel::getNodeId, CloudPluginSceneElementModel.class,
-                        CloudPluginSceneElementModel::getSceneElement)
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
@@ -211,21 +204,7 @@ public class CsceneSpecialService {
                 .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
                 .selectAs(SceneModel::getProcessMessage, CsceneInstanceStat::getEventMessage)
-                .selectAs(SceneModel::getCreateConsumeSeconds, CsceneInstanceStat::getCreateConsumeSeconds)
-                .currentLink(SceneElementModel.class)
-                .selectAs(Sum.f(SceneElementModel::getCpu), CsceneInstanceStat::getCpu)
-                .selectAs(Sum.f(SceneElementModel::getRam), CsceneInstanceStat::getRam)
-                .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
-                .currentLink(CloudPluginSceneElementModel.class)
-                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
-                        CsceneInstanceStat::getVmCount)
-                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
-                        CsceneInstanceStat::getContainerCount)
-                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
-                        CsceneInstanceStat::getEntityCount);
+                .selectAs(SceneModel::getCreateConsumeSeconds, CsceneInstanceStat::getCreateConsumeSeconds);
 
         humanCondition.currentLink(CsceneInstanceModel.class);
         var ids = queryParams.getIds();
@@ -388,6 +367,65 @@ public class CsceneSpecialService {
         } catch (Exception e) {
             log.error("Service list error: {}", e.getMessage(), e);
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
+        }
+        if (CollectionUtils.isNotEmpty(data)) {
+            List<String> sceneIds = data.stream().map(d -> d.getId()).collect(Collectors.toList());
+
+            var humanCondition2 = new HumanCondition()
+                    .link(CsceneInstanceModel.class, SceneModel.class, SceneElementModel.class,
+                            CloudPluginSceneElementModel.class)
+                    .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
+                            SceneModel::getId)
+                    .filterLink(SceneModel.class, SceneModel::getId, SceneElementModel.class,
+                            SceneElementModel::getScene)
+                    .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class,
+                            CloudPluginSceneElementModel::getScene)
+                    .filterLink(SceneElementModel.class, SceneElementModel::getNodeId, CloudPluginSceneElementModel.class,
+                            CloudPluginSceneElementModel::getSceneElement)
+                    .currentLink(CsceneInstanceModel.class)
+                    .filterIn(CsceneInstanceModel::getId, sceneIds.toArray(new String[]{}))
+                    .groupBy(CsceneInstanceModel::getId)
+                    .selectAs("pk", "pk")
+                    .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
+                    .currentLink(SceneElementModel.class)
+                    .selectAs(Sum.f(SceneElementModel::getCpu), CsceneInstanceStat::getCpu)
+                    .selectAs(Sum.f(SceneElementModel::getRam), CsceneInstanceStat::getRam)
+                    .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
+                    .currentLink(CloudPluginSceneElementModel.class)
+                    .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                                    .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                            CsceneInstanceStat::getVmCount)
+                    .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                                    .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                            CsceneInstanceStat::getContainerCount)
+                    .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                                    .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                            CsceneInstanceStat::getEntityCount);
+            var dataInfos = csceneInstanceMapper.list(humanCondition2, CsceneInstanceStat.class);
+            if (CollectionUtils.isNotEmpty(dataInfos)) {
+                Map<String, CsceneInstanceStat> infos = new HashMap<>();
+                for (var dataInfo : dataInfos) {
+                    infos.put(dataInfo.getId(), dataInfo);
+                }
+                for (var d : data) {
+                    var info = infos.get(d.getId());
+                    if (info != null) {
+                        d.setCpu(info.getCpu());
+                        d.setRam(info.getRam());
+                        d.setDisk(info.getDisk());
+                        d.setVmCount(info.getVmCount());
+                        d.setContainerCount(info.getContainerCount());
+                        d.setEntityCount(info.getEntityCount());
+                    } else {
+                        d.setCpu(0);
+                        d.setRam(0);
+                        d.setDisk(0);
+                        d.setVmCount(0);
+                        d.setContainerCount(0);
+                        d.setEntityCount(0);
+                    }
+                }
+            }
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(data, total));
