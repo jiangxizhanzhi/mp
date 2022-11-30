@@ -24,7 +24,21 @@ public enum DefaultImgDirEnum  {
 
     COMMON_TARGET("/common-target", "default_img_common_target"),
 
+    SAFETY("/0_safety", "default_img_safety"),
+    SERVER("/1_server", "default_img_server"),
+    INDUSTRIAL_CONTROL("/2_Industrial_control", "default_img_Industrial_control"),
+    EXCHANGE_1("/3_exchange_1", "default_img_exchange_1"),
+    EXCHANGE_2("/4_exchange_2", "default_img_exchange_2"),
+    ROUTER_1("/5_router_1", "default_img_router_1"),
+    ROUTER_2("/6_router_2", "default_img_router_2"),
+    GATEWAY("/7_gateway", "default_img_gateway"),
+    WIRELESS("/8_wireless", "default_img_wireless"),
+    BIZ("/9_biz", "default_img_biz"),
+
     TARGET("", "default_img_target");
+
+
+
 
     private final String endPathName;
 

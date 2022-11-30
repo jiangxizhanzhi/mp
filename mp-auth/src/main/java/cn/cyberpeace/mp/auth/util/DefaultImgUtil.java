@@ -12,7 +12,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @Description: 默认图片工具类
@@ -107,7 +110,19 @@ public class DefaultImgUtil {
             if (DefaultImgDirEnum.TARGET.getGroup().equals(groupList.get(0))) {
                 groupList = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM.getGroup(),
                         DefaultImgDirEnum.NETWORK_EQUIPMENT.getGroup(),DefaultImgDirEnum.OPERATION_SYSTEM.getGroup(),
-                        DefaultImgDirEnum.SAFETY_EQUIPMENT.getGroup(), DefaultImgDirEnum.COMMON_TARGET.getGroup());
+                        DefaultImgDirEnum.SAFETY_EQUIPMENT.getGroup(), DefaultImgDirEnum.COMMON_TARGET.getGroup(),
+
+                        DefaultImgDirEnum.SAFETY.getGroup(),
+                        DefaultImgDirEnum.SERVER.getGroup(),
+                        DefaultImgDirEnum.INDUSTRIAL_CONTROL.getGroup(),
+                        DefaultImgDirEnum.EXCHANGE_1.getGroup(),
+                        DefaultImgDirEnum.EXCHANGE_2.getGroup(),
+                        DefaultImgDirEnum.ROUTER_1.getGroup(),
+                        DefaultImgDirEnum.ROUTER_2.getGroup(),
+                        DefaultImgDirEnum.GATEWAY.getGroup(),
+                        DefaultImgDirEnum.WIRELESS.getGroup(),
+                        DefaultImgDirEnum.BIZ.getGroup()
+                );
             }
 
             HumanCondition humanCondition = new HumanCondition();
