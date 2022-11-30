@@ -160,7 +160,7 @@ mp:
     license-dir: /home/mp/config/license
   # mp-front-business 模块配置
   frontbusiness:
-    url-ac-filter-enabled: true
+    url-ac-filter-enabled: false
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
