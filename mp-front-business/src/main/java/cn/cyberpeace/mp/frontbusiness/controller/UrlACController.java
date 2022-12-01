@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -15,7 +16,14 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +35,7 @@ import java.util.List;
  */
 @Api(value = "接口访问控制", tags = "接口访问控制")
 @RestController
-@RequestMapping("/front/auth" + "/urlac")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/urlac")
 public class UrlACController {
 
     @Autowired
