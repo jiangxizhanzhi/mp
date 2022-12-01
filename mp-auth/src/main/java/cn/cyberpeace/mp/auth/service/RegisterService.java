@@ -54,7 +54,7 @@ public class RegisterService {
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
-        // 查看系统设置，注册用户是否需要审核
+        // 查看系统设置，是否开放注册
         if (!adminConfigService.isPublicRegisterAvailable()) {
             log.info("public registration not available...");
             throw new MpRuntimeException(AuthErrorCode.REGISTER_NOT_AVAILABLE);
