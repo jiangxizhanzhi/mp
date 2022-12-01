@@ -85,7 +85,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
 
     // rip网络属性
     @DefaultStr
-    private String ripLookback;
+    private String ripLoopback;
 
     // 虚拟防火墙属性
     @DefaultStr

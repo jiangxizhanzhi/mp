@@ -205,7 +205,7 @@ public class VyosNetworkCommandUtils {
 
     private static class RIPCmdBuilder implements NetworkingCmdBuilder {
 
-        private String LOOKBACK = "set interfaces loopback address %s";
+        private String LOOPBACK = "set interfaces loopback address %s";
         private String NETWORK = "set protocols rip network %s";
         private String RIP_INTERFACE = "set protocols rip interface eth%s";
         private String NEIGHBOOR = "set protocols rip neighbor %s";
@@ -222,8 +222,8 @@ public class VyosNetworkCommandUtils {
                 return new ArrayList<>();
             }
             List<String> cmds = new ArrayList<>();
-            if (StringUtils.isNotEmpty(paramsWrapper.element.getRipLookback())) {
-                cmds.add(String.format(LOOKBACK, paramsWrapper.element.getRipLookback()));
+            if (StringUtils.isNotEmpty(paramsWrapper.element.getRipLoopback())) {
+                cmds.add(String.format(LOOPBACK, paramsWrapper.element.getRipLoopback()));
             }
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (ripPorts.contains(p)) {

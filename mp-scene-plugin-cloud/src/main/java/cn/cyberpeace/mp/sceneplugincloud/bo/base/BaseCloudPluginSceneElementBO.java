@@ -86,7 +86,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String ospfRouterId;
 
     @ApiModelProperty(value = "rip网络下的lookback")
-    private String ripLookback;
+    private String ripLoopback;
 
     // 虚拟防火墙属性
     @ApiModelProperty(value = "虚拟防火墙规则")
