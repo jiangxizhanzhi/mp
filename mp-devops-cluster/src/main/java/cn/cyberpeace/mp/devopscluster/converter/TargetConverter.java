@@ -169,6 +169,51 @@ public class TargetConverter{
         }
     }
 
+    public void validTargetCanMerge(List<String> uuids) {
+
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
+        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        //引用
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
+        Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
+
+        List<String> sceneNames = new ArrayList<>();
+        String sceneName = StringUtils.EMPTY;
+
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                sceneName = StringUtils.join(names, ",");
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
+        }
+        //使用
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
+
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateMap.forEach((k, v) -> {
+                var names = v.stream()
+                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
+                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
+                        .collect(Collectors.toList());
+                sceneNames.addAll(names);
+            });
+            if (CollectionUtils.isNotEmpty(sceneNames)) {
+                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                sceneName = StringUtils.join(names, ",");
+            }
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(sceneName));
+        }
+    }
+
 
     /**
      * 获取需同步的靶标ID集合
