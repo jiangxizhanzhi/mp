@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +37,8 @@ public class DefaultImgController {
     @Autowired
     private DefaultImgService defaultImgService;
 
+    public static final String DEFAULT_IMG_PATH = "/root/.mp/resources/default_img";
+
 
     /**
      * 获取默认图片
@@ -49,23 +48,23 @@ public class DefaultImgController {
      */
     @ApiOperation("获取默认图片")
     @GetMapping("/get-default-img")
-    public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
-        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+    public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request) {
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())) {
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
         List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
-        List<String> urlList =
-                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
-
+        List<String> urlList = modelList.stream().map(model ->
+           "/api/mp" + model.getLocalFile().substring(DEFAULT_IMG_PATH.length())).collect(Collectors.toList()
+        );
         return ResultCommon.success(urlList);
     }
 
     @ApiOperation("获取系统图片")
     @GetMapping("/get-sys-logo-img")
-    public ServiceResult<Map<String, String>> getSysLogoImg(){
-        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+    public ServiceResult<Map<String, String>> getSysLogoImg() {
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())) {
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         List<String> groupList = Collections.singletonList(DefaultImgDirEnum.SYS_LOGO.getGroup());
@@ -80,10 +79,11 @@ public class DefaultImgController {
 
     /**
      * 获取多个指定目录下的默认图片
+     *
      * @param defaultImgDirEnums
      * @return
      */
-    private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
+    private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums) {
         return defaultImgDirEnums.stream().map(v -> defaultImgService.getFileByDefaultImgDirEnum(v)).flatMap(List::stream).collect(Collectors.toList());
     }
 
