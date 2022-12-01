@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -12,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +61,7 @@ public class UrlACController {
     @ApiOperation(value = "新增URL访问控制", notes = "")
     @ApiImplicitParam(name = "addRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<String> add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
         String urlACId = urlACService.add(addRequest);
         urlACService.evictURLACCache();
@@ -69,6 +72,7 @@ public class UrlACController {
     @ApiOperation(value = "更新URL访问控制", notes = "")
     @ApiImplicitParam(name = "updateRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PatchMapping("/modify")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<String> modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
         String urlACId = urlACService.modify(updateRequest);
         urlACService.evictURLACCache();
