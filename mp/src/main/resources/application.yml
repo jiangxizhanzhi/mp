@@ -150,7 +150,7 @@ mp:
     authenticate-use-individual-token-secret: true
     authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
     authenticate-jwt-expires: 604800
-    authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**
+    authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/front/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public
     authenticate-encoder-iterations: 10000
     authenticate-encoder-hash-width: 256

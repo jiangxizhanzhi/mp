@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Api(value = "头像管理接口(业务)", tags = "AUTH-头像管理接口(业务)")
 @Slf4j
 @RestController("avatarFrontController")
-@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/avatar")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/avatar")
 public class AvatarController {
 
     @Autowired
