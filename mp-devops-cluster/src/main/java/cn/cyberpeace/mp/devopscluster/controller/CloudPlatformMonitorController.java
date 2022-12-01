@@ -352,7 +352,7 @@ public class CloudPlatformMonitorController {
                     downloadPercent = 0.01;
                 } else {
                     downloadPercent = decimal.doubleValue() * 100;
-                    downloadPercent = downloadPercent > 100 ? 100.00 : downloadPercent;
+                    downloadPercent = downloadPercent > 100 ? 100.00 : NumberUtil.round(downloadPercent, 2).doubleValue();
                 }
             }
 
@@ -366,7 +366,7 @@ public class CloudPlatformMonitorController {
                     uploadPercent = 0.01;
                 } else {
                     uploadPercent = decimal.doubleValue() * 100;
-                    uploadPercent = uploadPercent > 100 ? 100.00 : uploadPercent;
+                    uploadPercent = uploadPercent > 100 ? 100.00 : NumberUtil.round(uploadPercent, 2).doubleValue();
                 }
             }
 

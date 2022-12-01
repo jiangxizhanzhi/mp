@@ -451,6 +451,7 @@
     <!-- 虚拟靶标统计 -->
     <select id="countVmTarget" resultType="java.util.Map">
         SELECT
+            sum( CASE WHEN t.main_category = 0 THEN 1 ELSE 0 END ) AS '0',
             sum( CASE WHEN t.main_category = 1 THEN 1 ELSE 0 END ) AS '1',
             sum( CASE WHEN t.main_category = 2 THEN 1 ELSE 0 END ) AS '2',
             sum( CASE WHEN t.main_category = 3 THEN 1 ELSE 0 END ) AS '3',
