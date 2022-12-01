@@ -415,7 +415,7 @@ public class ImagesController {
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
-        targetConverter.validTargetCanDelete(Arrays.asList(request.getUuid()));
+        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
         snapshotConverter.merge(request);
         return ResultCommon.success();
     }
