@@ -205,10 +205,12 @@ public class VyosNetworkCommandUtils {
 
     private static class RIPCmdBuilder implements NetworkingCmdBuilder {
 
-        private String LOOPBACK = "set interfaces loopback address %s";
+        private String LOOPBACK = "set interfaces loopback lo address %s";
         private String NETWORK = "set protocols rip network %s";
-        private String RIP_INTERFACE = "set protocols rip interface eth%s";
+        //        private String RIP_INTERFACE = "set protocols rip interface eth%s";
         private String NEIGHBOOR = "set protocols rip neighbor %s";
+
+        private String REDISTRIBUTE = "set protocols rip redistribute connected";
 
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
@@ -228,15 +230,26 @@ public class VyosNetworkCommandUtils {
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (ripPorts.contains(p)) {
                     // 端口有bgp配置 根据配置创建命令
-                    cmds.addAll(List.of(new String[]{
-                            String.format(NETWORK, p.getRipIp()),
-                            String.format(RIP_INTERFACE, p.getSrcPort().getOrder()),
-                            String.format(NEIGHBOOR, p.getRipPear())
-                    }));
+                    if (StringUtils.isNotEmpty(p.getRipIp())) {
+                        var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                        String interfaceIp = null;
+                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+                        } else {
+                            interfaceIp = p.getSrcPort().getIp() + "/24";
+                        }
+
+                        interfaceIp = IpUtils.getFormatCidrIp(interfaceIp);
+                        cmds.add(String.format(NETWORK, interfaceIp));
+                    }
+//                    if (StringUtils.isNotEmpty(p.getRipPear())) {
+//                        cmds.add(String.format(NEIGHBOOR, p.getRipPear()));
+//                    }
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
                     // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
                 }
             });
+            cmds.add(REDISTRIBUTE);
             return cmds;
         }
     }
