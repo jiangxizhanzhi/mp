@@ -95,9 +95,12 @@ public class BaseSceneParseResourceCenter {
                 device.setImageUuid(node.getImageUuid());
                 device.setImage(node.getImage());
                 device.setAccessModes(new ArrayList<>());
-                device.setCpu(node.getSrcElement().getCpu());
-                device.setRam(node.getSrcElement().getRam());
-                device.setDisk(node.getSrcElement().getDisk());
+                // 虚拟机导出时才有自定义的flavor信息
+                if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())) {
+                    device.setCpu(node.getSrcElement().getCpu());
+                    device.setRam(node.getSrcElement().getRam());
+                    device.setDisk(node.getSrcElement().getDisk());
+                }
                 devices.add(device);
                 var element = sceneHandler.getElement(nodeId);
                 device.setLogo(element.getIcon2());
