@@ -11,6 +11,7 @@ public enum CloudErrorCode implements ErrorCode {
     NO_SPACE_RECORDING_ERROR("MP-110705", "no_space_recording_error"),
     IP_CONFLICT("MP-110706", "ip_conflict"),
     SNAPSHOT_BE_USED("MP-110707", "snapshot_be_used"),
+    UN_SUPPORT_MULTI_NET("MP-110708", "un_support_multi_net"),
 
     IP_CONFLICT_WITH_SERVER("MP-110708", "ip_conflict_with_server");
 

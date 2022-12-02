@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 @Api(value = "镜像导入导出相关接口", tags = "镜像导入导出相关接口")
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
+    @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
 public class ImageResourceController {
     @Resource
     private ImageResourceService imageResourceService;
