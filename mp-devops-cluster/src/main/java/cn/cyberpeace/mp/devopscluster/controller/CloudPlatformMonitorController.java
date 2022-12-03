@@ -342,8 +342,8 @@ public class CloudPlatformMonitorController {
             if (Objects.isNull(maxNetSpeed)) {
                 maxNetSpeed = Long.valueOf(1000);
             }
-            if (StringUtils.isNotBlank(hostState.getDownloadSpeed())) {
-                String downloadSpeed = hostState.getDownloadSpeed();
+            if (StringUtils.isNotBlank(hostState.getMaxDownloadSpeed())) {
+                String downloadSpeed = hostState.getMaxDownloadSpeed();
                 downloadSpeed = downloadSpeed.replace("KB/s", "");
                 double ds = Double.parseDouble(downloadSpeed);
                 BigDecimal decimal =  NumberUtil.round(ds * 8 / (maxNetSpeed * 1024), 2);
@@ -356,8 +356,8 @@ public class CloudPlatformMonitorController {
                 }
             }
 
-            if (StringUtils.isNotBlank(hostState.getUploadSpeed())) {
-                String uploadSpeed = hostState.getUploadSpeed();
+            if (StringUtils.isNotBlank(hostState.getMaxUploadSpeed())) {
+                String uploadSpeed = hostState.getMaxUploadSpeed();
                 uploadSpeed = uploadSpeed.replace("KB/s", "");
                 double us = Double.parseDouble(uploadSpeed);
                 BigDecimal decimal =  NumberUtil.round(us * 8 / (maxNetSpeed * 1024), 2);
@@ -379,7 +379,9 @@ public class CloudPlatformMonitorController {
                     .disk(hostState.getDiskSpace())
                     .diskPercent(Objects.isNull(hostState.getDiskPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getDiskPercent()))
                     .downloadSpeed(hostState.getDownloadSpeed())
+                    .maxDownloadSpeed(hostState.getMaxDownloadSpeed())
                     .uploadSpeed(hostState.getUploadSpeed())
+                    .maxUploadSpeed(hostState.getMaxUploadSpeed())
                     .diskReadBytes(hostState.getDiskReadBytes())
                     .diskWriteBytes(hostState.getDiskWriteBytes())
                     .diskIoPercent(hostState.getDiskIoPercent())

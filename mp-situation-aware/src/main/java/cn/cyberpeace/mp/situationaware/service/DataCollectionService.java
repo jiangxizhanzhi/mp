@@ -1522,10 +1522,22 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
         }
 
+        if (StringUtils.isBlank(output.getMaxDownloadSpeed())) {
+            wazuhHostStateModel.setMaxDownloadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setMaxDownloadSpeed(output.getMaxDownloadSpeed());
+        }
+
         if (StringUtils.isBlank(output.getUploadSpeed())) {
             wazuhHostStateModel.setUploadSpeed("0.00KB/s");
         } else {
             wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getMaxUploadSpeed())) {
+            wazuhHostStateModel.setMaxUploadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setMaxUploadSpeed(output.getMaxUploadSpeed());
         }
 
         // 网卡最大速率
