@@ -629,25 +629,7 @@ public class ImagesController {
             }
             // 禁止导出所有靶标
             if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
-                // 内置靶标不可导出
-                if (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal()))) {
-                    vo.setAllowExport(false);
-                } else if (v.getExtImageInfo() != null && StringUtils.isNotEmpty(v.getExtImageInfo().getBaseImageName())) {
-                    // 有基础镜像的 以基础镜像为准设置是否可导出
-                    ImagePageDTO pageDTO = new ImagePageDTO();
-                    pageDTO.setName(v.getExtImageInfo().getBaseImageName());
-                    pageDTO.setLikeName(false);
-                    var result = this.imagesConverter.page(pageDTO);
-                    var list = result.getList();
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        ImageConvertModel baseImage = list.get(0);
-                        if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
-                            vo.setAllowExport(false);
-                        }
-                    }
-                } else if (Boolean.FALSE.equals(v.getSupportExport())) {
-                    vo.setAllowExport(false);
-                }
+                vo.setAllowExport(Boolean.TRUE.equals(v.getSupportExport()));
             }
             return vo;
         }).collect(Collectors.toList());
