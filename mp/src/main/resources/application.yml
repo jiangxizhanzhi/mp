@@ -127,7 +127,7 @@ mp:
     probe-mgr-task-enable: false
     # wazuh es节点地址
     wazuh-es-nodes: 10.100.0.101:9205
-    wazuh-es-max-page-size: 1000000
+    wazuh-es-max-page-size: 10000
     # arkime es 地址
     arkime-es-nodes: 10.100.0.101:9205
     # es 日期格式
@@ -140,7 +140,7 @@ mp:
     cp-url: http://10.100.7.1:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
     log-db: sql #日志存储数据库可以配置：es、sql
-    wazuh-es-max-page-size: 1000000
+    es-max-page-size 10000
   # mp-auth 模块配置
   auth:
     max-import-user-size: 1000

@@ -136,4 +136,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private Integer referenceStatus;
 
+    /**
+     * 是否支持导出
+     */
+    private Boolean supportExport;
+
 }

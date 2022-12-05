@@ -41,7 +41,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
 
     @Override
     public SearchResponse search(OperationLogPageRequest request) {
-        if (request.getLimit() * request.getOffset() > logConfig.getWazuhEsMaxPageSize()) {
+        if (request.getLimit() * request.getOffset() > logConfig.getEsMaxPageSize()) {
             throw new MpRuntimeException("不支持深度分页查询！");
         }
 
