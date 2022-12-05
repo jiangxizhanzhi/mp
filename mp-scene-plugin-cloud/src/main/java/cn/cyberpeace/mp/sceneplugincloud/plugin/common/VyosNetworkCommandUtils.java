@@ -233,17 +233,27 @@ public class VyosNetworkCommandUtils {
                     if (StringUtils.isNotEmpty(p.getRipIp())) {
                         var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                         String interfaceIp = null;
+//                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+//                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+//                        } else {
+//                            interfaceIp = p.getSrcPort().getIp() + "/24";
+//                        }
+
                         if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
-                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+                            interfaceIp = p.getRipIp() + "/" + network.getCidr().split("/")[1];
                         } else {
-                            interfaceIp = p.getSrcPort().getIp() + "/24";
+                            interfaceIp = p.getRipIp() + "/24";
                         }
 
                         interfaceIp = IpUtils.getFormatCidrIp(interfaceIp);
                         cmds.add(String.format(NETWORK, interfaceIp));
                     }
                     if (StringUtils.isNotEmpty(p.getRipPear())) {
-                        cmds.add(String.format(NEIGHBOOR, p.getRipPear()));
+                        String ripPear = p.getRipPear();
+                        if (p.getRipPear().contains("/")) {
+                            ripPear = p.getRipPear().split("/")[0];
+                        }
+                        cmds.add(String.format(NEIGHBOOR, ripPear));
                     }
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
                     // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
