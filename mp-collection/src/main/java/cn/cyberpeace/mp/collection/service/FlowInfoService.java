@@ -817,6 +817,7 @@ public class FlowInfoService {
             sourceBuilder.size(pageSize);
             sourceBuilder.from((pageNum - 1) * pageSize);
         }
+        sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
