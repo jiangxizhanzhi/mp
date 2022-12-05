@@ -140,7 +140,7 @@ mp:
     cp-url: http://10.100.7.1:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
     log-db: sql #日志存储数据库可以配置：es、sql
-    es-max-page-size 10000
+    es-max-page-size: 10000
   # mp-auth 模块配置
   auth:
     max-import-user-size: 1000
