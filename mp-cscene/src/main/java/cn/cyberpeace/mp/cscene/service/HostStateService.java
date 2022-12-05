@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
@@ -84,7 +85,8 @@ public class HostStateService {
     @Autowired
     private CsceneAppConfig csceneAppConfig;
 
-
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
 
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -118,8 +120,8 @@ public class HostStateService {
         // 构建查询参数
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(1);
-        // todo 暂时最多取 10000 条
-        request.setPageSize(1);
+        // todo 设置最多读取最大条数
+        request.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
         request.setAgentNames(Arrays.asList(agentName));
         // 开始时间,默认为场景创建时间
         request.setStartTime(startTime);

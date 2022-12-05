@@ -45,4 +45,9 @@ public class LogConfig {
      * #日志存储数据库：es、mysql
      */
     private String logDb;
+
+    /**
+     * 分页最大总数 max_result_window
+     */
+    private Integer wazuhEsMaxPageSize;
 }
