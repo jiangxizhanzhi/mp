@@ -80,14 +80,14 @@ public class DevopsTargetService {
      */
     @Transactional
     public Integer insert(List<Device> deviceList) {
-        if (CollectionUtils.isEmpty(deviceList)){
+        if (CollectionUtils.isEmpty(deviceList)) {
             return 0;
         }
         for (var d : deviceList) {
             d.setSupportExport(this.getSupportExport(d));
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
-                .collect(Collectors.toList());
+                                                       .collect(Collectors.toList());
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
 
@@ -95,7 +95,7 @@ public class DevopsTargetService {
      * 靶标类型统计
      * @return
      */
-    public Map<String,Object> countTarget() {
+    public Map<String, Object> countTarget() {
         return deviceTargetMapper.countTarget();
     }
 
@@ -103,7 +103,7 @@ public class DevopsTargetService {
      * 虚拟靶标统计
      * @return
      */
-    public Map<String,Object> countVmTarget() {
+    public Map<String, Object> countVmTarget() {
         return deviceTargetMapper.countVmTarget();
     }
 
@@ -111,7 +111,7 @@ public class DevopsTargetService {
      * 实体靶标统计
      * @return
      */
-    public Map<String,Object> countEntityTarget() {
+    public Map<String, Object> countEntityTarget() {
         return deviceTargetMapper.countEntityTarget();
     }
 
@@ -134,7 +134,7 @@ public class DevopsTargetService {
         return deviceTargetMapper.delete(dto);
     }
 
-    protected DeviceTargetPO convertToTargetModel(Device device){
+    protected DeviceTargetPO convertToTargetModel(Device device) {
         DeviceTargetPO deviceTargetPO = convertDevice(device);
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
         deviceTargetPO.setUseStatus(StatusEnum.NO);
@@ -147,7 +147,7 @@ public class DevopsTargetService {
      * @param device
      * @return
      */
-    protected DeviceTargetPO convertDevice(Device device){
+    protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
         deviceTargetPO.setId(device.getId().toString());
         deviceTargetPO.setUuid(device.getUuid());
@@ -167,16 +167,15 @@ public class DevopsTargetService {
         deviceTargetPO.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
-        if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.VM.toValue()) && Objects.nonNull(extVm)){
+        if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.VM.toValue()) && Objects.nonNull(extVm)) {
             deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
             deviceTargetPO.setInitSupport(extVm.getInitSupport());
             deviceTargetPO.setInstanceState(extVm.getInstanceState());
-        }
-        else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)){
+        } else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)) {
             deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
             deviceTargetPO.setInitSupport(extDocker.getInitSupport());
             deviceTargetPO.setInstanceState(extDocker.getInstanceState());
-        }else{
+        } else {
             deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
@@ -184,19 +183,19 @@ public class DevopsTargetService {
         deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
         deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();
-        if (Objects.nonNull(extEntity)){
+        if (Objects.nonNull(extEntity)) {
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
 
         ExtImageInfo extImageInfo = device.getExtImageInfo();
-        if (Objects.nonNull(extImageInfo)){
+        if (Objects.nonNull(extImageInfo)) {
             deviceTargetPO.setImageStatus(extImageInfo.getImageStatus());
             deviceTargetPO.setImageSource(extImageInfo.getImageSource());
             deviceTargetPO.setBaseImageSupport(extImageInfo.getBaseImageSupport());
         }
 
         ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
-        if (Objects.nonNull(extSystemInfo)){
+        if (Objects.nonNull(extSystemInfo)) {
             deviceTargetPO.setParentSystemType(extSystemInfo.getParentSystemType());
             deviceTargetPO.setSystemType(extSystemInfo.getSystemType());
             deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
@@ -222,10 +221,12 @@ public class DevopsTargetService {
                 if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
                     return false;
                 }
+                if (Boolean.FALSE.equals(baseImage.getSupportExport())) {
+                    return false;
+                }
             }
         }
         return true;
     }
-
 
 }
