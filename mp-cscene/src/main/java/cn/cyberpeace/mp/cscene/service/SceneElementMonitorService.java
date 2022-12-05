@@ -419,7 +419,12 @@ public class SceneElementMonitorService {
             SceneElementBO ele = eidMap.get(file.getAgentId());
             bo.setNodeId(ele.getId());
             bo.setNodeName(ele.getName());
-            bo.setPath(file.getFilePath());
+            if (StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().endsWith("---file_not_exists---")) {
+                bo.setPath(StringUtils.replace(file.getFilePath(), "---file_not_exists---", ""));
+                bo.setDescription("-");
+            } else {
+                bo.setPath(file.getFilePath());
+            }
             bo.setTime(file.getUpdateTime());
             bos.add(bo);
             if (bos.size() == hostEventQueryParams.getPageSize()) {
