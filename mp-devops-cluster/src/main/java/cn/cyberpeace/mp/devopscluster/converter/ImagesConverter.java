@@ -83,6 +83,10 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+        deviceTargetPOS.stream().forEach(d -> {
+            supportExports.put(d.getUuid(), d);
+        });
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -113,6 +117,9 @@ public class ImagesConverter implements BaseConverter{
                     imageConvertModel.setIsPublic(targetMap.get(imageConvertModel.getUuid()));
                 }
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
+                if (supportExports.containsKey(imageConvertModel.getUuid())) {
+                    imageConvertModel.setSupportExport(supportExports.get(imageConvertModel.getUuid()).getSupportExport());
+                }
             }
         }
 

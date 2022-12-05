@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devopscluster.service;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
+import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 public class DevopsTargetService {
 
     private final DeviceTargetMapper deviceTargetMapper;
+
+    private final SupportExportConvert supportExportConvert;
 
     /**
      * 分页
@@ -78,6 +82,9 @@ public class DevopsTargetService {
     public Integer insert(List<Device> deviceList) {
         if (CollectionUtils.isEmpty(deviceList)){
             return 0;
+        }
+        for (var d : deviceList) {
+            d.setSupportExport(this.getSupportExport(d));
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
                 .collect(Collectors.toList());
@@ -153,6 +160,9 @@ public class DevopsTargetService {
         deviceTargetPO.setImageType(device.getImageType());
         deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
+        if (device.getSupportExport() != null) {
+            deviceTargetPO.setSupportExport(device.getSupportExport());
+        }
         String imageType = device.getImageType();
         deviceTargetPO.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();
@@ -195,4 +205,27 @@ public class DevopsTargetService {
 
         return deviceTargetPO;
     }
+
+    private Boolean getSupportExport(Device device) {
+        // 内置靶标不可导出
+        if (Boolean.TRUE.equals(device.getIsImport() || Boolean.TRUE.equals(device.getIsInit()) || Boolean.TRUE.equals(device.getIsInternal()))) {
+            return false;
+        } else if (device.getExtImageInfo() != null && StringUtils.isNotEmpty(device.getExtImageInfo().getBaseImageName())) {
+            // 有基础镜像的 以基础镜像为准设置是否可导出
+            ImagePageDTO pageDTO = new ImagePageDTO();
+            pageDTO.setName(device.getExtImageInfo().getBaseImageName());
+            pageDTO.setLikeName(false);
+            var result = this.supportExportConvert.page(pageDTO);
+            var list = result.getList();
+            if (CollectionUtils.isNotEmpty(list)) {
+                ImageConvertModel baseImage = list.get(0);
+                if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
 }

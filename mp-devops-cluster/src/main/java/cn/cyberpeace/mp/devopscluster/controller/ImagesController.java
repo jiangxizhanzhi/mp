@@ -645,6 +645,8 @@ public class ImagesController {
                             vo.setAllowExport(false);
                         }
                     }
+                } else if (Boolean.FALSE.equals(v.getSupportExport())) {
+                    vo.setAllowExport(false);
                 }
             }
             return vo;

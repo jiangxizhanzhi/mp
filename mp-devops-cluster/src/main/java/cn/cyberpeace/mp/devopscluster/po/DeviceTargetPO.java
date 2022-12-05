@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
@@ -145,4 +146,10 @@ public class DeviceTargetPO extends BaseModel {
      * 靶标实例创建用户
      */
     private String instanceCreateUser;
+
+    /**
+     * 是否支持导出
+     */
+    @DefaultBool
+    private Boolean supportExport ;
 }

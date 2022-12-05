@@ -13,6 +13,7 @@
         <result column="third_category" property="thirdCategory"/>
         <result column="image_type" property="imageType"/>
         <result column="is_public" property="isPublic" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="support_export" property="supportExport"/>
         <result column="quick_create_support" property="quickCreateSupport" />
         <result column="in_position" property="inPosition" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="reference_status" property="referenceStatus" />
@@ -204,7 +205,7 @@
 
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user
+        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user,i.support_export
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultType="java.lang.Integer">
@@ -420,7 +421,7 @@
         role, image_type,is_public, quick_create_support,
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
-        init_support,image_source,is_import,is_hide,is_init)
+        init_support,image_source,is_import,is_hide,is_init,support_export)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (
@@ -433,7 +434,7 @@
             #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
-            #{item.isHide},#{item.isInit}
+            #{item.isHide},#{item.isInit},#{item.supportExport}
             )
         </foreach>
     </insert>
