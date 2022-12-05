@@ -71,11 +71,11 @@ public class ScreenrecordController {
         return screenrecordService.querySpaceStatics();
     }
 
-    @ApiOperation("下载录屏文件")
+    @ApiOperation("获取截屏文件URL")
     @ApiImplicitParam(name = "fileName", value = "文件名", dataTypeClass = String.class)
     @GetMapping("/download")
-    public void download(@RequestParam String fileName, HttpServletResponse response) {
-        screenrecordService.download(fileName, response);
+    public ServiceResult<String> getScreenRecordUrl(@RequestParam String fileName) {
+        return screenrecordService.getScreenRecordUrl(fileName);
     }
 
 
