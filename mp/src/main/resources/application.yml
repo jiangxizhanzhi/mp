@@ -127,6 +127,7 @@ mp:
     probe-mgr-task-enable: false
     # wazuh es节点地址
     wazuh-es-nodes: 10.100.0.101:9205
+    wazuh-es-max-page-size: 1000000
     # arkime es 地址
     arkime-es-nodes: 10.100.0.101:9205
     # es 日期格式
