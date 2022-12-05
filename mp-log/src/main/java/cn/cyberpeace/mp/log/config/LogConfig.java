@@ -49,5 +49,5 @@ public class LogConfig {
     /**
      * 分页最大总数 max_result_window
      */
-    private Integer wazuhEsMaxPageSize;
+    private Integer esMaxPageSize;
 }
