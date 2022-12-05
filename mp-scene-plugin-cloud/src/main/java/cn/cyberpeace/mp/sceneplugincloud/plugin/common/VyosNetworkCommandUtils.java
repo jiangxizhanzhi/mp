@@ -242,9 +242,9 @@ public class VyosNetworkCommandUtils {
                         interfaceIp = IpUtils.getFormatCidrIp(interfaceIp);
                         cmds.add(String.format(NETWORK, interfaceIp));
                     }
-//                    if (StringUtils.isNotEmpty(p.getRipPear())) {
-//                        cmds.add(String.format(NEIGHBOOR, p.getRipPear()));
-//                    }
+                    if (StringUtils.isNotEmpty(p.getRipPear())) {
+                        cmds.add(String.format(NEIGHBOOR, p.getRipPear()));
+                    }
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
                     // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
                 }
