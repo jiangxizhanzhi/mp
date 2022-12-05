@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScreenRecordData;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordBatchDeleteRequest;
@@ -23,8 +25,8 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -250,18 +252,18 @@ public class ScreenrecordService extends BaseCpService {
     /**
      * 下载录屏文件
      * @param fileName
-     * @param response
      */
-    public void download(String fileName, HttpServletResponse response) {
+    public ServiceResult<String> getScreenRecordUrl(String fileName) {
         // 录屏文件名称校验
         if (StringUtils.isBlank(fileName) || !fileName.endsWith(".mp4") || fileName.contains("../")) {
             throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
         }
 
         BufferedInputStream bin = null;
-        OutputStream os = null;
+        OutputStream byteArrayOutputStream = null;
+        ScreenRecordData data = null;
         try {
-            URL url = new URL(devopsClusterConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
+            URL url = new URL(devopsClusterConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/download_record_file?recordfilename=" + fileName);
             // 建立连接
             URLConnection urlConnection = url.openConnection();
             // http的连接类
@@ -271,19 +273,25 @@ public class ScreenrecordService extends BaseCpService {
             // 打开到此 URL引用的资源的通信链接
             httpURLConnection.connect();
             bin = new BufferedInputStream(httpURLConnection.getInputStream());
-            os = response.getOutputStream();
+            byteArrayOutputStream = new ByteArrayOutputStream();
             int len = 0;
             byte[] buffer = new byte[1024 * 5];
             while ((len = bin.read(buffer)) > 0) {
-                os.write(buffer, 0, len);
+                byteArrayOutputStream.write(buffer, 0, len);
             }
-            os.flush();
+            String resStr = byteArrayOutputStream.toString();
+            data = JsonCommon.snakeParse(resStr, ScreenRecordData.class);
         } catch (Exception e) {
             log.error("download screenrecord error for fileName:{}", fileName, e);
         } finally {
             IOUtils.closeQuietly(bin);
-            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(byteArrayOutputStream);
         }
+        if (Objects.isNull(data) || !data.isSuccess()) {
+            log.error("failed to get screen record file url,{}", data);
+            throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
+        }
+        return ResultCommon.success(data.getUrl());
     }
 
 }
