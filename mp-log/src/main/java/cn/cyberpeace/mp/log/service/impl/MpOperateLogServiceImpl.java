@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.log.config.LogConfig;
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
@@ -12,6 +13,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -26,6 +28,9 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
 
     private static final String INDEX_MP_OPERATE_LOG = "mp_operate_log";
 
+    @Autowired
+    private LogConfig logConfig;
+
     @Override
     public IndexResponse create(OperationLogModel operationLogModel) {
         Map<String,Object> source = JSON.parseObject(JSON.toJSONString(operationLogModel), Map.class);
@@ -36,7 +41,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
 
     @Override
     public SearchResponse search(OperationLogPageRequest request) {
-        if (request.getLimit() * request.getOffset() > 10000) {
+        if (request.getLimit() * request.getOffset() > logConfig.getWazuhEsMaxPageSize()) {
             throw new MpRuntimeException("不支持深度分页查询！");
         }
 
