@@ -217,6 +217,7 @@ mp:
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
     enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
     cp-ip: ${CP_IP:10.100.7.1}
+    cp-port: ${CP_PORT:11111}
   scene:
     scene-pool-size: ${MP_SCENE_POOL_SIZE:100}
     scene-hold-size: ${MP_SCENE_HOLD_SIZE:10000}
