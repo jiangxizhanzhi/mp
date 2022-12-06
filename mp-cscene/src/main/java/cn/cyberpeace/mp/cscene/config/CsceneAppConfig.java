@@ -23,9 +23,10 @@ import java.util.Set;
 public class CsceneAppConfig {
 
     /**
-     * 云平台适配层接口地址
+     * 云平台适配层接口地址和端口
      */
     private String cpIp;
+    private String cpPort;
 
     @Autowired
     private SysActivationService sysActivationService;
