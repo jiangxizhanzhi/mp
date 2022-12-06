@@ -36,7 +36,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -151,12 +156,32 @@ public class SysActivationService {
             ACTIVATION_CONTENT = activationResponse;
         }
 
+
+        processSysUUIDNotMatch(ACTIVATION_CONTENT);
+
         log.info("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
 
         return ACTIVATION_CONTENT;
     }
 
+
+    private void processSysUUIDNotMatch(ActivationResponse content) {
+        if (Objects.isNull(content)) {
+            return;
+        }
+
+        // content not null
+        if(content.getMachineCode().substring() != dmidecode -s system-uuid) {
+            content.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
+            SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
+            SysActivCtlModel updateModel = new SysActivCtlModel();
+            updateModel.setId(validActivCtlModel.getId());
+            updateModel.setStatus(SysActivCtlModel.STATUS_INVALID);
+            sysActivCtlService.update(updateModel);
+        }
+
+    }
 
     public String getValueByKey(String key) {
         ActivationResponse activationResponse = status();
