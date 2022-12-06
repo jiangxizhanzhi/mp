@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
-import cn.cyberpeace.mp.cscene.config.CPCloudConfig;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -25,14 +24,11 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
-import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.http.HttpRequest;
@@ -193,6 +189,7 @@ public class HostStateService {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         List<String> agentNames = getAgentNames();
+        agentNames = agentNames.stream().filter(name -> name.contains("controller")).collect(Collectors.toList());
 
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
@@ -481,7 +478,14 @@ public class HostStateService {
     private List<String> getAgentNames() {
         String url = "http://" + csceneAppConfig.getCpIp() + ":" + csceneAppConfig.getCpPort() + "/v1/hypervisors";
         String result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
-        Map<String, Object> data = (Map<String, Object>) JsonCommon.parseMap(result).get("data");
+        if (StringUtils.isBlank(result)) {
+            return new ArrayList<>();
+        }
+        Map<String, Object> resultMap = JsonCommon.parseMap(result);
+        Map<String, Object> data = (Map<String, Object>)resultMap.get("data");
+        if (Objects.isNull(data) || !data.containsKey("list")) {
+            return new ArrayList<>();
+        }
         List<Map<String, String>> list = (List<Map<String, String>>) data.get("list");
         List<String> agentNames = list.stream().map(map -> map.get("hostname")).collect(Collectors.toList());
         return agentNames;
