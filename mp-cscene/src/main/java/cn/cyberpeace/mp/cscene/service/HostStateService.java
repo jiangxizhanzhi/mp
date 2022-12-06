@@ -188,9 +188,9 @@ public class HostStateService {
             log.error("cp cloud ip or port is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        List<String> agentNames = getAgentNames();
-        agentNames = agentNames.stream().filter(name -> name.contains("controller")).collect(Collectors.toList());
-
+        List<String> agentNames = getAgentNames().stream()
+                .filter(name -> Objects.nonNull(name) && name.contains("controller"))
+                .collect(Collectors.toList());
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
@@ -487,7 +487,7 @@ public class HostStateService {
             return new ArrayList<>();
         }
         List<Map<String, String>> list = (List<Map<String, String>>) data.get("list");
-        List<String> agentNames = list.stream().map(map -> map.get("hostname")).collect(Collectors.toList());
+        List<String> agentNames = list.stream().map(map -> map.getOrDefault("hostname", "")).collect(Collectors.toList());
         return agentNames;
     }
 
