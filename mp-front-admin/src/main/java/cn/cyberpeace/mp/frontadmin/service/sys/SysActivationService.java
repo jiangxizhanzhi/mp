@@ -172,13 +172,24 @@ public class SysActivationService {
         }
 
         // content not null
-        if(content.getMachineCode().substring() != dmidecode -s system-uuid) {
+        String uuid = "";
+        // If root privileges this will work
+        for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
+            if (StringUtils.isNotBlank(checkLine)) {
+                uuid = checkLine;
+                log.info("origin uuid is {}", uuid);
+            }
+        }
+        String machineCode = content.getMachineCode().substring(0, uuid.length());
+        if(!StringUtils.equals(machineCode, uuid)) {
             content.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
             SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
-            SysActivCtlModel updateModel = new SysActivCtlModel();
-            updateModel.setId(validActivCtlModel.getId());
-            updateModel.setStatus(SysActivCtlModel.STATUS_INVALID);
-            sysActivCtlService.update(updateModel);
+            if (Objects.nonNull(validActivCtlModel)) {
+                SysActivCtlModel updateModel = new SysActivCtlModel();
+                updateModel.setId(validActivCtlModel.getId());
+                updateModel.setStatus(SysActivCtlModel.STATUS_INVALID);
+                sysActivCtlService.update(updateModel);
+            }
         }
 
     }
