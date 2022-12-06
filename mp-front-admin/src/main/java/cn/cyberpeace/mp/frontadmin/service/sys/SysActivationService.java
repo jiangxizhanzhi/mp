@@ -36,7 +36,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -151,12 +156,43 @@ public class SysActivationService {
             ACTIVATION_CONTENT = activationResponse;
         }
 
+
+        processSysUUIDNotMatch(ACTIVATION_CONTENT);
+
         log.info("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
 
         return ACTIVATION_CONTENT;
     }
 
+
+    private void processSysUUIDNotMatch(ActivationResponse content) {
+        if (Objects.isNull(content)) {
+            return;
+        }
+
+        // content not null
+        String uuid = "";
+        // If root privileges this will work
+        for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
+            if (StringUtils.isNotBlank(checkLine)) {
+                uuid = checkLine;
+                log.info("origin uuid is {}", uuid);
+            }
+        }
+        String machineCode = content.getMachineCode().substring(0, uuid.length());
+        if(!StringUtils.equals(machineCode, uuid)) {
+            content.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
+            SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
+            if (Objects.nonNull(validActivCtlModel)) {
+                SysActivCtlModel updateModel = new SysActivCtlModel();
+                updateModel.setId(validActivCtlModel.getId());
+                updateModel.setStatus(SysActivCtlModel.STATUS_INVALID);
+                sysActivCtlService.update(updateModel);
+            }
+        }
+
+    }
 
     public String getValueByKey(String key) {
         ActivationResponse activationResponse = status();
