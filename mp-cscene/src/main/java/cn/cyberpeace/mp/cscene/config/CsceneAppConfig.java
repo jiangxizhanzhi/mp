@@ -30,6 +30,12 @@ public class CsceneAppConfig {
     @Autowired
     private SysConfigService sysConfigService;
 
+    /**
+     * 云平台适配层接口地址和端口
+     */
+    private String cpIp;
+    private String cpPort;
+
     @Value("${mp.cscene.scene-edit-node-limit-key:LCS-RES-CR-EDITNODES}")
     private String sceneEditNodeLimitKey;
 

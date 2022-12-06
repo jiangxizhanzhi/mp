@@ -246,6 +246,8 @@ mp:
     enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
+    cp-ip: ${CP_IP:10.100.7.1}
+    cp-port: ${CP_PORT:11111}
   scene:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
 

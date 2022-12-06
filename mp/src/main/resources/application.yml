@@ -190,6 +190,8 @@ mp:
           os-type: linux
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
+    cp-ip: 10.100.7.1
+    cp-port: 11111
 
   log:
     es-nodes: ${ip.es}:9205
