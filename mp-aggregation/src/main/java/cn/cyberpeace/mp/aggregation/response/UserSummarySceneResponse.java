@@ -24,6 +24,9 @@ public class UserSummarySceneResponse {
     @ApiModelProperty("场景数量")
     private Integer runningSceneCount;
 
+    @ApiModelProperty("场景模板总数")
+    private Integer sceneConfigCount;
+
     @ApiModelProperty("场景占比")
     private BigDecimal runningScenePercent;
 }
