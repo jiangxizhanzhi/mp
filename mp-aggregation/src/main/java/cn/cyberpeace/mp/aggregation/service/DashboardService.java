@@ -145,6 +145,7 @@ public class DashboardService {
 
         UserSummarySceneResponse response = new UserSummarySceneResponse();
         response.setRunningSceneCount(bo.getActivitySceneTotal());
+        response.setSceneConfigCount(csceneSpecialService.countSceneConfig());
         BigDecimal runningScenePercent = BigDecimal.ZERO;
         if (NumberUtils.INTEGER_ZERO.equals(bo.getTotal()) || Objects.isNull(bo.getActivitySceneTotal())) {
             runningScenePercent = BigDecimal.ZERO;
