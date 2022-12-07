@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
@@ -698,8 +699,8 @@ public class CollectionTemplateService {
      * @param dto
      */
     private void processProbeDtoInternational(ColTempCommonProbeDto dto) {
-        String name = MessageCommonUtil.convertMessage(dto.getName());
-        String description = MessageCommonUtil.convertMessage(dto.getDescription());
+        String name = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_NAME_PREFIX + dto.getId());
+        String description = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_DESCRIPTION_PREFIX + dto.getId());
         dto.setName(name);
         dto.setDescription(description);
     }
