@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,6 +154,16 @@ public class DashboardService {
             runningScenePercent = BigDecimal.valueOf(bo.getActivitySceneTotal()).divide(BigDecimal.valueOf(bo.getTotal()), 2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
         }
         response.setRunningScenePercent(runningScenePercent);
+
+        var instanceCount = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
+        if (CollectionUtils.isNotEmpty(instanceCount)) {
+            int total = 0;
+            for (var cnt : instanceCount) {
+                total += (cnt.getTotal() == null ? 0 : cnt.getTotal());
+            }
+            response.setRunningSceneCount(total);
+        }
+
         return response;
     }
 
