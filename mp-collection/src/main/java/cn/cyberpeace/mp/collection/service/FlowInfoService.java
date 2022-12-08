@@ -59,9 +59,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,7 +77,6 @@ public class FlowInfoService {
 
     /**
      * 根据条件筛选流量信息（不传条件默认查询全部）
-     *
      * @param pageFlowRequest
      * @return ListObjServiceResult<TeamFlowInfo>
      */
@@ -109,7 +110,6 @@ public class FlowInfoService {
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
         }
-
 
         for (int i = 0; i < flowFileRoots.size(); i++) {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
@@ -236,8 +236,8 @@ public class FlowInfoService {
     private void buildDeleteDocQuery(LocalDateTime startTime, LocalDateTime endTime, BoolQueryBuilder boolQueryBuilder) {
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-                    .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                                          .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                                          .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
         } else {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -246,7 +246,6 @@ public class FlowInfoService {
 
     /**
      * 转换为TeamFlowInfo类
-     *
      * @param flowFileRoot
      * @return TeamFlowInfo
      */
@@ -277,7 +276,6 @@ public class FlowInfoService {
 
     /**
      * 转换为FlowDetailInfo类
-     *
      * @param flowFileRoot
      * @return TeamFlowInfo
      */
@@ -309,7 +307,6 @@ public class FlowInfoService {
 
     /**
      * 分页
-     *
      * @param pageFlowRequest
      * @param indexArray
      * @param boolQueryBuilder
@@ -336,10 +333,8 @@ public class FlowInfoService {
 
     }
 
-
     /**
      * 根据时间创建索引
-     *
      * @param start
      * @param end
      * @return
@@ -364,7 +359,24 @@ public class FlowInfoService {
         indicesStatsRequest.indices(ARKIME_INDEX_PREFIX + "*");
         GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_INDEX_PREFIX + "*");
         GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-        return indices.getIndices();
+        var result = indices.getIndices();
+        List<String> finalRes = new ArrayList<>();
+        Set<String> excludes = new HashSet<>() {{
+            this.add("arkime_sessions3-221130");
+            this.add("arkime_sessions3-221201");
+            this.add("arkime_sessions3-221202");
+            this.add("arkime_sessions3-221203");
+            this.add("arkime_sessions3-221204");
+            this.add("arkime_sessions3-221205");
+            this.add("arkime_sessions3-221206");
+            this.add("arkime_sessions3-221207");
+        }};
+        for (String str : result) {
+            if (!excludes.contains(str)) {
+                finalRes.add(str);
+            }
+        }
+        return finalRes.toArray(new String[]{});
     }
 
     /**
@@ -381,7 +393,7 @@ public class FlowInfoService {
 
     /**
      * @param startTime startTime
-     * @param endTime   endTime
+     * @param endTime endTime
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
@@ -399,7 +411,6 @@ public class FlowInfoService {
 
     /**
      * 攻击次数与流量大小（战队 or 设备）
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -411,7 +422,7 @@ public class FlowInfoService {
         String sumTerm = "flow_sum";
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
-                .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
+                                                .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<AttackFlowBO> bos = Lists.newArrayList();
@@ -430,7 +441,6 @@ public class FlowInfoService {
 
     /**
      * 攻击类型占比top5（所有队伍）
-     *
      * @param topSize
      * @return
      */
@@ -456,7 +466,6 @@ public class FlowInfoService {
 
     /**
      * 攻击类型占比top5（指定队伍）
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -467,7 +476,7 @@ public class FlowInfoService {
         String ipTerm = "target_ip";
         String cateTerm = "cate";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<AttackFlowBO> bos = Lists.newArrayList();
@@ -493,7 +502,6 @@ public class FlowInfoService {
 
     /**
      * 总体攻击趋势
-     *
      * @return 12:00表示[12:00, 12:10)的数据
      */
     public List<CountBO> queryAttackTrend() {
@@ -506,8 +514,8 @@ public class FlowInfoService {
 
         String histogramTerm = "histogram";
         AggregationBuilder aggBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-                .fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
-                .format("HH:mm").timeZone(ZoneId.systemDefault());
+                                                .fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
+                                                .format("HH:mm").timeZone(ZoneId.systemDefault());
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
@@ -524,7 +532,6 @@ public class FlowInfoService {
 
     /**
      * 攻击告警级别趋势
-     *
      * @return
      */
     public Map<String, List<CountBO>> queryAttackLevel() {
@@ -538,10 +545,10 @@ public class FlowInfoService {
         String severityTerm = "severity";
         String histogramTerm = "histogram";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(severityTerm).field("suricata.severity")
-                .subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-                        .fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
-                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
-                        .timeZone(ZoneId.systemDefault()));
+                                                .subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+                                                                        .fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
+                                                                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+                                                                        .timeZone(ZoneId.systemDefault()));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> severityMap = Maps.newHashMap();
@@ -565,7 +572,6 @@ public class FlowInfoService {
 
     /**
      * 战队攻击趋势
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -581,10 +587,10 @@ public class FlowInfoService {
 
         String ipTerm = "target_ip", histoTerm = "histo";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
-                        .fixedInterval(DateHistogramInterval.minutes(5))
-                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
-                        .timeZone(ZoneId.systemDefault()));
+                                                .subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
+                                                                        .fixedInterval(DateHistogramInterval.minutes(5))
+                                                                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+                                                                        .timeZone(ZoneId.systemDefault()));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();
@@ -608,7 +614,6 @@ public class FlowInfoService {
 
     /**
      * 设备攻击协议TOP5
-     *
      * @param topSize
      * @return
      */
@@ -640,7 +645,6 @@ public class FlowInfoService {
 
     /**
      * 设备ip被攻击次数
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -666,7 +670,6 @@ public class FlowInfoService {
 
     /**
      * 总攻击次数
-     *
      * @return
      */
     public long attackTotalCount() {
@@ -676,7 +679,6 @@ public class FlowInfoService {
 
     /**
      * 攻击聚合（source + destination + category）
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -688,9 +690,9 @@ public class FlowInfoService {
         String desIpTerm = "des_ip";
         String cateTerm = "cate";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
-                .field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
-                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+                                                .field(esIpFieldBOS.get(0).getIPFieldName())
+                                                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
+                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
@@ -722,7 +724,6 @@ public class FlowInfoService {
 
     /**
      * 攻击聚合（source + destination）
-     *
      * @param esIpFieldBOS
      * @return
      */
@@ -732,8 +733,8 @@ public class FlowInfoService {
 
         String srcIpTerm = "src_ip", desIpTerm = "des_ip";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
-                .field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
+                                                .field(esIpFieldBOS.get(0).getIPFieldName())
+                                                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();
@@ -755,7 +756,6 @@ public class FlowInfoService {
 
     /**
      * 攻击流量列表
-     *
      * @param pageSize
      * @param pageNum
      * @return
@@ -776,7 +776,6 @@ public class FlowInfoService {
 
     /**
      * es 聚合查询
-     *
      * @param aggBuilder
      * @param queryBuilder
      * @return
@@ -802,7 +801,6 @@ public class FlowInfoService {
 
     /**
      * es 列表查询
-     *
      * @param pageSize
      * @param pageNum
      * @param queryBuilder
@@ -829,7 +827,6 @@ public class FlowInfoService {
 
     /**
      * 构建ip字段查询
-     *
      * @param esIpFieldBos
      * @param queryBuilder
      */
