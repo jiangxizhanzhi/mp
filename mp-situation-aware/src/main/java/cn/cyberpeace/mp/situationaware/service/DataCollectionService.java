@@ -10,14 +10,33 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.*;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSON;
@@ -49,6 +68,10 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
@@ -72,7 +95,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -148,7 +182,7 @@ public class DataCollectionService extends CollectionBaseService {
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
@@ -232,7 +266,7 @@ public class DataCollectionService extends CollectionBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
         }
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -291,10 +325,10 @@ public class DataCollectionService extends CollectionBaseService {
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         if (desc) {
             // 按时间降序
-            sourceBuilder.sort("timestamp", SortOrder.DESC);
+            sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         } else {
             // 按时间顺序
-            sourceBuilder.sort("timestamp", SortOrder.ASC);
+            sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.ASC);
         }
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         // 配置索引为空
@@ -409,7 +443,7 @@ public class DataCollectionService extends CollectionBaseService {
 //        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         sourceBuilder.from(0);
         sourceBuilder.size(NumberUtil.equals(agentSize, 0) ? 10 : agentSize * 2);
@@ -473,7 +507,7 @@ public class DataCollectionService extends CollectionBaseService {
 //        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         sourceBuilder.from(0);
         sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
@@ -713,7 +747,7 @@ public class DataCollectionService extends CollectionBaseService {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
         }
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         if (Objects.nonNull(wazuhMonitorEventsRequest.getPageNum()) && Objects.nonNull(wazuhMonitorEventsRequest.getPageSize())) {
             if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > situationAwareConfig.getWazuhEsMaxPageSize()) {
                 throw new MpRuntimeException("不支持深度分页查询！");
@@ -842,7 +876,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.aggregation(sumAggregationBuilder);
 
         // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         sourceBuilder.size(0);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -932,7 +966,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //构造事件条件
-            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+            boolQueryBuilder.must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                     .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
@@ -1044,6 +1078,55 @@ public class DataCollectionService extends CollectionBaseService {
             }
 
             return map;
+
+        } catch (IOException e) {
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+
+    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval) {
+        String aggregationName = "aggs_date_histogram";
+        Map<String, Long> resultMap = new LinkedHashMap<>();
+
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(0);
+
+        // build the aggregation
+        DateHistogramAggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(aggregationName)
+                .field(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
+                .fixedInterval(new DateHistogramInterval(interval))
+                .minDocCount(0)
+                .order(BucketOrder.key(false))
+                .format(DatePattern.NORM_DATETIME_PATTERN)
+                .timeZone(ZoneId.systemDefault());
+        sourceBuilder.aggregation(aggrBuilder);
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            if (Objects.nonNull(response.getAggregations())) {
+                Histogram histogram = response.getAggregations().get(aggregationName);
+                histogram.getBuckets().forEach(b -> {
+                    resultMap.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
+                });
+            }
+
+            return resultMap;
 
         } catch (IOException e) {
             log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
@@ -1262,6 +1345,11 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhEventRequest.setPageSize(100);
         }
 
+        if (wazuhEventRequest.getPageSize() > 10000) {
+            log.error("es page size too large! {}", wazuhEventRequest.getPageSize());
+            throw new MpRuntimeException("es page size too large! " + wazuhEventRequest.getPageSize());
+        }
+
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
         sourceBuilder.from(Math.min(offset, situationAwareConfig.getWazuhEsMaxPageSize()));
         if ((offset + wazuhEventRequest.getPageSize()) > situationAwareConfig.getWazuhEsMaxPageSize()) {
@@ -1333,7 +1421,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
-            boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            boolQueryBuilder.must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                     .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }

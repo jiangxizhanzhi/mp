@@ -6,16 +6,16 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -116,10 +117,17 @@ public class ElementMonitorController {
             @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/file_modify_histogram")
-    public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
+    public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer intervalMinutes,
+                                                                         @RequestParam(required = false) Integer bucketSize,
                                                                          ElementMonitorRequest pageRequest) {
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
-                segmentCount)).asResult();
+        if (Objects.isNull(intervalMinutes)) {
+            intervalMinutes = 15;
+        }
+        if (Objects.isNull(bucketSize)) {
+            bucketSize = 15;
+        }
+        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
+                intervalMinutes, bucketSize)).asResult();
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -138,10 +146,17 @@ public class ElementMonitorController {
             @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/registry_modify_histogram")
-    public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,
+    public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer intervalMinutes,
+                                                                             @RequestParam(required = false) Integer bucketSize,
                                                                              ElementMonitorRequest pageRequest) {
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
-                segmentCount)).asResult();
+        if (Objects.isNull(intervalMinutes)) {
+            intervalMinutes = 15;
+        }
+        if (Objects.isNull(bucketSize)) {
+            bucketSize = 15;
+        }
+        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
+                intervalMinutes, bucketSize)).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
