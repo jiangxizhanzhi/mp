@@ -3,17 +3,21 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,9 +69,11 @@ public class CsceneCommonService {
      */
     @Cacheable(value = "query_agentnames_by_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
-        List<String> sceneIds = CollectionUtil.toList(sceneId);
-        List<String> translatedSceneIds = translateSceneIds(sceneIds);
-        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
+        String translatedSceneId = translateSceneId(sceneId);
+        if (StringUtils.isBlank(translatedSceneId)) {
+            return Collections.emptyList();
+        }
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneId).getSource();
 
         List<String> agentNames = new ArrayList<>();
         if (CollectionUtil.isEmpty(elementIds)) {
@@ -77,6 +83,15 @@ public class CsceneCommonService {
         }
 
         return agentNames;
+    }
+
+    @Cacheable(value = "query_scene_create_time")
+    public LocalDateTime getSceneCreateTime(String sceneId) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        if (Objects.nonNull(sceneHandler.getScene())) {
+            return sceneHandler.getScene().getCreateTime();
+        }
+        return null;
     }
 
 

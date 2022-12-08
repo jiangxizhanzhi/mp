@@ -36,4 +36,6 @@ public class SituationalAwareConstant {
      * 后台系统管理-探针管理-自定义探针-类型
      */
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
+
+    public static final String ES_TIMESTAMP_FIELD = "timestamp";
 }
