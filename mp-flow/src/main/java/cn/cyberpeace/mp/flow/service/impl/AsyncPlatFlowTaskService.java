@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -76,6 +77,11 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowScriptParamService flowScriptParamService;
+
+    /**
+     * tgn代码目录
+     */
+    private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
     /**
      * 保存流量发生平台任务
@@ -508,8 +514,11 @@ public class AsyncPlatFlowTaskService {
 
                 String extNetId = externalNetId;
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
-                NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                String finalFixedIp = fixedIp;
+                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
+                        null, 0, () -> checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, extNetId)
+                        , () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
@@ -522,6 +531,27 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
     }
+
+    /**
+     * 校验trex服务状态
+     * @param fixedIp
+     * @param networkInfos
+     * @param flowActuatorModel
+     * @param extNetId
+     */
+    private void checkTrexServer(String fixedIp, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
+        String commands = "cd /opt/project_dirs; rm -rf traffic_generators; unzip traffic_generators.zip; rm -rf traffic_generators.zip; supervisorctl restart all ";
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(fixedIp);
+        serverInfo.setUser("root");
+        serverInfo.setPassword("111111");
+        SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
+
+        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
+                null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
+                        extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
+    }
+
 
 
     /**
