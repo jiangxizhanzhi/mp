@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 用户导入导出Excel管理接口
@@ -172,17 +173,25 @@ public class UserExcelController {
         BeanUtils.copyProperties(request, newReq);
         newReq.setOpType(1);
 
-        ListObjServiceResult<OperationLogPageResponse> logoutret = operateLogService.search(newReq);
+        //ListObjServiceResult<OperationLogPageResponse> logoutret = operateLogService.search(newReq);
 
         List<OperationLogPageResponse> loginList = loginret.getSource().getObjs();
-        List<OperationLogPageResponse> logoutList = logoutret.getSource().getObjs();
+        //List<OperationLogPageResponse> logoutList = logoutret.getSource().getObjs();
         List<OperationLogPageResponse> allList = new ArrayList<>();
         allList.addAll(loginList);
-        allList.addAll(logoutList);
+        //allList.addAll(logoutList);
 
         allList.sort(Comparator.comparing(OperationLogPageResponse::getOpTime).reversed());
 
-        List<ExportOperateLogBo> boList = operateLogService.toExportBOList(allList);
+        List<OperationLogPageResponse> finalList = new ArrayList<>();
+        Map<String, List<OperationLogPageResponse>> map1 = allList.stream().collect(Collectors.groupingBy(OperationLogPageResponse::getUserName));
+        map1.forEach((key, value) -> {
+            value.sort(Comparator.comparing(OperationLogPageResponse::getOpTime).reversed());
+            finalList.add(value.get(0));
+        });
+
+        finalList.sort(Comparator.comparing(OperationLogPageResponse::getOpTime).reversed());
+        List<ExportOperateLogBo> boList = operateLogService.toExportBOList(finalList);
 
         boList.forEach(bo -> {
             bo.setName(map.get(bo.getUsername()));
