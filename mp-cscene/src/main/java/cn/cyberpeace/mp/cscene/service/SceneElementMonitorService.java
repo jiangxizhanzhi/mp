@@ -408,7 +408,7 @@ public class SceneElementMonitorService {
         if (CollectionUtil.isNotEmpty(histogramInfos)) {
             time = TimeUtils.stringToLocalDateTime(histogramInfos.get(0).getTime());
         } else {
-            time = endTime.minusMinutes(intervalMinutes * (bucketSize + 1));
+            time = endTime.minusMinutes((long) intervalMinutes * (bucketSize + 1));
         }
 
         endTime = endTime.minusMinutes(intervalMinutes);
@@ -418,7 +418,7 @@ public class SceneElementMonitorService {
             finalList.add(info);
         }
 
-        finalList = finalList.stream().sorted(Comparator.comparing(ElementHistogramInfo::getTime).reversed()).collect(Collectors.toList());
+        finalList = finalList.stream().sorted(Comparator.comparing(ElementHistogramInfo::getTime)).collect(Collectors.toList());
         finalList.addAll(histogramInfos);
         return finalList.stream().limit(bucketSize).collect(Collectors.toList());
     }
