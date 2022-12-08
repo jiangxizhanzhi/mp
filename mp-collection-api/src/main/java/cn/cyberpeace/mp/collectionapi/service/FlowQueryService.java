@@ -24,13 +24,13 @@ import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.AttackCount;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
-import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
-import cn.cyberpeace.mp.collectionapi.vo.TrendVO.Count;
-import cn.hutool.core.date.DateUtil;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
+import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
+import cn.cyberpeace.mp.collectionapi.vo.TrendVO.Count;
+import cn.hutool.core.date.DateUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,26 +61,26 @@ public class FlowQueryService {
 
     /**
      * 总体攻击趋势
-     *
      * @return
      */
     public ServiceResult<TrendVO> queryAttackTrend() {
         List<CountBO> bos = flowInfoService.queryAttackTrend();
-        
+
         List<Count> counts = bos.stream().map(bo -> {
             Count c = new Count();
             c.setTime(bo.getKey());
             c.setNum(bo.getCount() * CollectionApiConstant.multiple);
             return c;
         }).collect(Collectors.toList());
-        
+
         TrendVO vo = new TrendVO();
         vo.setName("");
         vo.setCounts(counts);
-        
+
         // 填充空记录
         List<TrendVO> vos = Lists.newArrayList(vo);
-        List<String> lines = Lists.newArrayList("");;
+        List<String> lines = Lists.newArrayList("");
+        ;
         fillEmptyTrendVO(vos, lines, 7, 10);
 
         return new ServiceResult<>(vo);
@@ -87,7 +88,6 @@ public class FlowQueryService {
 
     /**
      * 攻击告警级别趋势
-     *
      * @return
      */
     public ListObjServiceResult<TrendVO> queryLevelTrend() {
@@ -101,7 +101,7 @@ public class FlowQueryService {
 
             mergeTrendData(vo, severityMap.get(String.valueOf(level)));
         }
-        
+
         // 填充空记录
         List<TrendVO> vos = Lists.newArrayList(resultMap.values());
         List<String> lines = resultMap.keySet().stream().collect(Collectors.toList());
@@ -117,12 +117,11 @@ public class FlowQueryService {
 
     /**
      * 战队攻击趋势
-     *
      * @return
      */
     public ListObjServiceResult<TrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-        if(CollectionUtils.isEmpty(esipFieldBos)) {
+        if (CollectionUtils.isEmpty(esipFieldBos)) {
             return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
         }
         Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTrend(esipFieldBos);
@@ -141,7 +140,7 @@ public class FlowQueryService {
         // 填充空记录
         List<String> lines = request.getSources().stream().map(IPField::getName).collect(Collectors.toList());
         fillEmptyTrendVO(vos, lines, 73, 5);
-        
+
         // 放大攻击次数
         vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
             c.setNum(c.getNum() * CollectionApiConstant.multiple);
@@ -149,25 +148,25 @@ public class FlowQueryService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
     }
-    
+
     /**
-     * 
      * @param vos
      * @param pointsNum 时间点
      * @param interval 时间间隔（分钟）
      */
     private void fillEmptyTrendVO(List<TrendVO> vos, List<String> lines, int pointsNum, int interval) {
         final char LAST_CHAR = (char) ((interval % 10) + '0');
-        List<String> timePoints = Lists.newArrayList();;
-        for(TrendVO vo : vos) {
-            if(CollectionUtils.isNotEmpty(vo.getCounts())) {
+        List<String> timePoints = Lists.newArrayList();
+        ;
+        for (TrendVO vo : vos) {
+            if (CollectionUtils.isNotEmpty(vo.getCounts())) {
                 timePoints = vo.getCounts().stream().map(Count::getTime).collect(Collectors.toList());
                 break;
             }
         }
-        if(CollectionUtils.isEmpty(timePoints)) {
+        if (CollectionUtils.isEmpty(timePoints)) {
             Calendar now = Calendar.getInstance();
-            for(int i = 0; i < pointsNum; i++) {
+            for (int i = 0; i < pointsNum; i++) {
                 now.add(Calendar.MINUTE, i > 0 ? -interval : 0);
                 String time = DateUtil.format(now.getTime(), "HH:mm");
                 char lastChar = time.charAt(time.length() - 1);
@@ -175,22 +174,22 @@ public class FlowQueryService {
                 timePoints.add(0, time.substring(0, time.length() - 1) + lastChar);
             }
         }
-        for(String lineName : lines) {
+        for (String lineName : lines) {
             TrendVO vo = vos.stream().filter(v -> v.getName().equals(lineName)).findFirst().orElse(null);
-            if(vo == null) {
+            if (vo == null) {
                 vo = new TrendVO();
                 vo.setName(lineName);
                 vos.add(vo);
             }
-            
-            if(CollectionUtils.isEmpty(vo.getCounts())) {
+
+            if (CollectionUtils.isEmpty(vo.getCounts())) {
                 List<Count> counts = timePoints.stream().map(t -> {
                     Count c = new Count();
                     c.setNum(0);
                     c.setTime(t);
                     return c;
                 }).collect(Collectors.toList());
-                
+
                 vo.setCounts(counts);
             }
         }
@@ -198,7 +197,6 @@ public class FlowQueryService {
 
     /**
      * 合并趋势数据点
-     *
      * @param vo
      * @param bos
      */
@@ -226,12 +224,11 @@ public class FlowQueryService {
 
     /**
      * 攻击次数与流量大小（战队 or 设备）
-     *
      * @return
      */
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(AttackFlowBaseRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-        if(CollectionUtils.isEmpty(esipFieldBos)) {
+        if (CollectionUtils.isEmpty(esipFieldBos)) {
             return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
         }
         List<AttackFlowBO> bos = flowInfoService.queryAttackFlow(esipFieldBos);
@@ -244,17 +241,56 @@ public class FlowQueryService {
 
             AggAttackFlowVO vo = new AggAttackFlowVO();
             vo.setName(getNameByIp(request, bo.getIp()));
+            if (vo.getName() == null) {
+                vo.setName(StringUtils.EMPTY);
+            }
             vo.setAttackCount(attackCount);
             vo.setFlowSize(flowSize);
             return vo;
         }).collect(Collectors.toList());
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
+        Map<String, AggAttackFlowVO> resMap = new HashMap<>();
+        for (var vo : vos) {
+            if (!resMap.containsKey(vo.getName())) {
+                AggAttackFlowVO res = new AggAttackFlowVO();
+                res.setName(vo.getName());
+                AttackCount attackCount = new AttackCount();
+                attackCount.setAttackCount(vo.getAttackCount().getAttackCount());
+                attackCount.setPercent(vo.getAttackCount().getPercent());
+                if (attackCount.getPercent() == null) {
+                    attackCount.setPercent(0.0);
+                }
+                vo.setAttackCount(attackCount);
+
+                FlowSize flowSize = new FlowSize();
+                flowSize.setSize(vo.getFlowSize().getSize());
+                flowSize.setPercent(vo.getFlowSize().getPercent());
+                if (flowSize.getPercent() == null) {
+                    flowSize.setPercent(0.0);
+                }
+                vo.setFlowSize(flowSize);
+
+                resMap.put(vo.getName(), vo);
+            } else {
+                AttackCount attackCount = resMap.get(vo.getName()).getAttackCount();
+                attackCount.setAttackCount(attackCount.getAttackCount() + vo.getAttackCount().getAttackCount());
+                if (vo.getAttackCount().getPercent() != null) {
+                    attackCount.setPercent(attackCount.getPercent() + vo.getAttackCount().getPercent());
+                }
+                FlowSize flowSize = resMap.get(vo.getName()).getFlowSize();
+                flowSize.setSize(flowSize.getSize() + vo.getFlowSize().getSize());
+                if (flowSize.getPercent() != null) {
+                    flowSize.setPercent(flowSize.getPercent() + vo.getFlowSize().getPercent());
+                }
+            }
+        }
+        var result = new ArrayList<>(resMap.values());
+
+        return new ListObjServiceResult<>(new ListObjResult<>(result, result.size()));
     }
 
     /**
      * 获取top数据
-     *
      * @param request
      * @return
      */
@@ -275,7 +311,6 @@ public class FlowQueryService {
 
     /**
      * 攻击次数top5
-     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryTeamAttackCountTop5(AttackAggTopRequest request) {
@@ -292,7 +327,6 @@ public class FlowQueryService {
 
     /**
      * 攻击手段占比top5（全部队伍）
-     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
@@ -307,7 +341,7 @@ public class FlowQueryService {
             vo.setPercent(bo.getCount() / total);
             return vo;
         }).collect(Collectors.toList());
-        
+
         // 排序取top
         vos = vos.stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
         if (request.getTopSize() != null) {
@@ -319,7 +353,6 @@ public class FlowQueryService {
 
     /**
      * 设备攻击协议TOP5
-     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
@@ -334,7 +367,7 @@ public class FlowQueryService {
             vo.setPercent(bo.getCount() / total);
             return vo;
         }).collect(Collectors.toList());
-        
+
         // 排序取top
         vos = vos.stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
         if (request.getTopSize() != null) {
@@ -346,7 +379,6 @@ public class FlowQueryService {
 
     /**
      * 设备类型被攻击占比TOP5
-     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
@@ -373,10 +405,9 @@ public class FlowQueryService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
     }
-    
+
     /**
      * 总攻击次数
-     *
      * @param multiple 放大倍数
      * @return
      */
@@ -386,13 +417,12 @@ public class FlowQueryService {
 
     /**
      * 战队攻击排名
-     *
      * @param request
      * @return
      */
     public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(AttackAggTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-        if(CollectionUtils.isEmpty(esipFieldBos)) {
+        if (CollectionUtils.isEmpty(esipFieldBos)) {
             return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
         }
         List<TeamAttackCountBO> bos = flowInfoService.queryTeamAttackAgg(esipFieldBos);
@@ -424,7 +454,6 @@ public class FlowQueryService {
 
     /**
      * 攻击流量列表
-     *
      * @param pageSize
      * @param pageNum
      * @return
@@ -445,12 +474,11 @@ public class FlowQueryService {
 
     /**
      * 获取攻击目标top数据
-     *
      * @param request
      * @return
      */
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
-        if(CollectionUtils.isEmpty(request.getSources())) {
+        if (CollectionUtils.isEmpty(request.getSources())) {
             return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
         }
         // 转换数据结构
@@ -461,7 +489,7 @@ public class FlowQueryService {
             return ipField;
         }).collect(Collectors.toList());
         List<IPField> targetFields = request.getSources().stream().map(Source::getTargets).flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                                             .collect(Collectors.toList());
 
         AttackFlowBaseRequest baseRequest = new AttackFlowBaseRequest();
         baseRequest.setSources(sourceFields);
@@ -482,11 +510,11 @@ public class FlowQueryService {
 
             for (CountBO bo : value) {
                 String targetName = getNameByIp(targetFields, bo.getKey());
-                if(StringUtils.isEmpty(targetName)) {
+                if (StringUtils.isEmpty(targetName)) {
                     continue;
                 }
                 TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
-                        .orElse(null);
+                                            .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
                     topEntry.setName(targetName);
@@ -502,7 +530,7 @@ public class FlowQueryService {
         vos.forEach(vo -> {
             List<TopEntry> entries = vo.getEntries();
             entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
-            if(topSize != null) {
+            if (topSize != null) {
                 entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
             vo.setEntries(entries);
@@ -518,12 +546,11 @@ public class FlowQueryService {
 
     /**
      * 攻击手段占比top5（指定队伍）
-     *
      * @return
      */
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
         List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-        if(CollectionUtils.isEmpty(esipFieldBos)) {
+        if (CollectionUtils.isEmpty(esipFieldBos)) {
             return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), 0));
         }
         List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
@@ -543,7 +570,7 @@ public class FlowQueryService {
             for (AttackTypeBO attackTypeBO : bo.getAttackTypes()) {
                 String attackTypeName = attackTypeBO.getEnName();
                 TopEntry topEntry = entries.stream().filter(t -> attackTypeName.equals(t.getName())).findFirst()
-                        .orElse(null);
+                                            .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
                     topEntry.setName(attackTypeName);
@@ -564,9 +591,9 @@ public class FlowQueryService {
                 entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
             vo.setEntries(entries);
-            
+
             entries.forEach(e -> {
-               e.setPercent(e.getCount() / total); 
+                e.setPercent(e.getCount() / total);
             });
         });
 
@@ -575,7 +602,6 @@ public class FlowQueryService {
 
     /**
      * 生成ip字段的搜索项
-     *
      * @param request
      * @return
      */
@@ -583,10 +609,10 @@ public class FlowQueryService {
         List<EsIpFieldBO> bos = Lists.newArrayList();
 
         EsIpFieldBO.Field ipField = CollectionUtils.isNotEmpty(request.getSources()) ? EsIpFieldBO.Field.SOURCE
-                : EsIpFieldBO.Field.DESTINATION;
+                                            : EsIpFieldBO.Field.DESTINATION;
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
-                : request.getTargets();
-        if(ipFields == null) {
+                                         : request.getTargets();
+        if (ipFields == null) {
             return bos;
         }
 
@@ -609,7 +635,6 @@ public class FlowQueryService {
 
     /**
      * cidr前缀
-     *
      * @param cidr
      * @return
      */
@@ -619,15 +644,14 @@ public class FlowQueryService {
 
     /**
      * 根据ip判断所属队伍
-     *
      * @param request
      * @param ip
      * @return
      */
     private String getNameByIp(AttackFlowBaseRequest request, String ip) {
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
-                : request.getTargets();
-        if(ipFields == null) {
+                                         : request.getTargets();
+        if (ipFields == null) {
             return "";
         }
         return getNameByIp(ipFields, ip);
@@ -635,7 +659,6 @@ public class FlowQueryService {
 
     /**
      * 根据ip判断所属队伍
-     *
      * @param ipFields
      * @param ip
      * @return
@@ -656,7 +679,6 @@ public class FlowQueryService {
 
     /**
      * 告警级别显示名称
-     *
      * @param severity
      * @return
      */
