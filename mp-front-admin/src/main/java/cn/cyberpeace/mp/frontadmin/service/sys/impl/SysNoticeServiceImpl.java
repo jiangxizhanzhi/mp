@@ -541,14 +541,17 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     public ListObjServiceResult listNoticeMessageByCurrentAdminUser(String userId, int page, int pageSize) {
         Set<String> noticeIds = new HashSet<>();
+        // 查询发给组织的noticeId
         HumanCondition orgNoticeCond = new HumanCondition()
                 .select(SysNoticeOrgModel::getNoticeId);
         List<SysNoticeOrgModel> orgNotices = noticeOrgMapper.list(orgNoticeCond);
         orgNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        // 查询发给角色的noticeId，不包括发给所有角色
         HumanCondition roleNoticeCond = new HumanCondition()
                 .select(SysNoticeRoleModel::getNoticeId);
         List<SysNoticeRoleModel> roleNotices = noticeRoleMapper.list(roleNoticeCond);
         roleNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
+        // 查询发给指定用户的noticeId
         HumanCondition userNoticeCond = new HumanCondition()
                 .filterEqual(SysNoticeUserModel::getUser, userId)
                 .select(SysNoticeUserModel::getNoticeId);
@@ -563,9 +566,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         HumanCondition noticeCond = new HumanCondition();
         if (CollUtil.isEmpty(noticeIds)) {
-            return new ListObjServiceResult<>();
+            noticeCond.filterEqual(SysNoticeModel::getIsPublic, 1);
+        } else {
+            noticeCond.filterOrStart()
+                    .orEqual(SysNoticeModel::getIsPublic, 1)
+                    .orIn(SysNoticeModel::getId, noticeIds.toArray())
+                    .filterOrEnd();
         }
-        noticeCond.filterIn(SysNoticeModel::getId, noticeIds.toArray());
         if (CollUtil.isNotEmpty(notPushNotices)) {
             noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
         }
@@ -614,9 +621,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<String> notPushNoticeIds = notPushNotices.stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toList());
         HumanCondition noticeCond = new HumanCondition();
         if (CollUtil.isEmpty(noticeIds)) {
-            return 0;
+            noticeCond.filterEqual(SysNoticeModel::getIsPublic, 1);
+        } else {
+            noticeCond.filterOrStart()
+                    .orEqual(SysNoticeModel::getIsPublic, 1)
+                    .orIn(SysNoticeModel::getId, noticeIds.toArray())
+                    .filterOrEnd();
         }
-        noticeCond.filterIn(SysNoticeModel::getId, noticeIds.toArray());
         if (CollUtil.isNotEmpty(notPushNoticeIds)) {
             noticeCond.filterNotIn(SysNoticeModel::getId, notPushNoticeIds.toArray());
         }

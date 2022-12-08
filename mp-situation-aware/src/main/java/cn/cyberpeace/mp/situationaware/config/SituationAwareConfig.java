@@ -19,6 +19,11 @@ public class SituationAwareConfig {
     private String wazuhEsNodes;
 
     /**
+     * 分页最大总数 max_result_window
+     */
+    private Integer wazuhEsMaxPageSize;
+
+    /**
      * MP新中台ES地址
      */
     private String arkimeEsNodes;

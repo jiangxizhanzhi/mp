@@ -11,27 +11,10 @@ import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.Launch;
+import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -89,21 +72,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
 
 /**
  * wazuh对接
@@ -118,6 +88,9 @@ public class DataCollectionService extends CollectionBaseService {
 
     @Autowired
     private WazuhRepository wazuhRepository;
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
@@ -503,7 +476,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         sourceBuilder.from(0);
-        sourceBuilder.size(ES_DOC_MAXCOUNT);
+        sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
@@ -742,14 +715,14 @@ public class DataCollectionService extends CollectionBaseService {
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         if (Objects.nonNull(wazuhMonitorEventsRequest.getPageNum()) && Objects.nonNull(wazuhMonitorEventsRequest.getPageSize())) {
-            if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > 10000) {
+            if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > situationAwareConfig.getWazuhEsMaxPageSize()) {
                 throw new MpRuntimeException("不支持深度分页查询！");
             }
             sourceBuilder.from(wazuhMonitorEventsRequest.getPageNum() - 1 > 0 ?
                     (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize() : 0);
             sourceBuilder.size(wazuhMonitorEventsRequest.getPageSize());
         } else {
-            sourceBuilder.size(ES_DOC_MAXCOUNT);
+            sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
         }
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -1290,17 +1263,14 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
-        sourceBuilder.from(Math.min(offset, 10000));
-        if ((offset + wazuhEventRequest.getPageSize()) > 10000) {
-            sourceBuilder.size(Math.max(10000 - offset, 0));
+        sourceBuilder.from(Math.min(offset, situationAwareConfig.getWazuhEsMaxPageSize()));
+        if ((offset + wazuhEventRequest.getPageSize()) > situationAwareConfig.getWazuhEsMaxPageSize()) {
+            sourceBuilder.size(Math.max(situationAwareConfig.getWazuhEsMaxPageSize() - offset, 0));
         } else {
             sourceBuilder.size(wazuhEventRequest.getPageSize());
         }
         int total = queryTotalCount(indexArray, boolQueryBuilder);
-        if (10000 < total) {
-            total = 10000;
-        }
-        return total;
+        return Math.min(situationAwareConfig.getWazuhEsMaxPageSize(), total);
     }
 
     /**
@@ -1522,10 +1492,22 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
         }
 
+        if (StringUtils.isBlank(output.getMaxDownloadSpeed())) {
+            wazuhHostStateModel.setMaxDownloadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setMaxDownloadSpeed(output.getMaxDownloadSpeed());
+        }
+
         if (StringUtils.isBlank(output.getUploadSpeed())) {
             wazuhHostStateModel.setUploadSpeed("0.00KB/s");
         } else {
             wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getMaxUploadSpeed())) {
+            wazuhHostStateModel.setMaxUploadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setMaxUploadSpeed(output.getMaxUploadSpeed());
         }
 
         // 网卡最大速率

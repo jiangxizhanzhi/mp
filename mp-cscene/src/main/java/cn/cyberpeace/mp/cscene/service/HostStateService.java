@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -20,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
@@ -32,8 +35,10 @@ import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.http.HttpRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,13 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +83,8 @@ public class HostStateService {
     @Autowired
     private CsceneAppConfig csceneAppConfig;
 
-
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
 
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -118,8 +118,8 @@ public class HostStateService {
         // 构建查询参数
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(1);
-        // todo 暂时最多取 10000 条
-        request.setPageSize(1);
+        // todo 设置最多读取最大条数
+        request.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
         request.setAgentNames(Arrays.asList(agentName));
         // 开始时间,默认为场景创建时间
         request.setStartTime(startTime);
@@ -195,15 +195,13 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
-        if (StringUtils.isBlank(csceneAppConfig.getCpIp())) {
-            log.error("cp cloud ip is null...");
+        if (StringUtils.isBlank(csceneAppConfig.getCpIp()) || StringUtils.isBlank(csceneAppConfig.getCpPort())) {
+            log.error("cp cloud ip or port is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        AgentRequest agentRequest = new AgentRequest();
-        agentRequest.setIp(csceneAppConfig.getCpIp());
-        List<Agent> agents = agentService.listAgents(agentRequest);
-        List<String> agentNames = agents.stream().map(Agent::getName).collect(Collectors.toList());
-
+        List<String> agentNames = getAgentNames().stream()
+                .filter(name -> Objects.nonNull(name) && name.contains("controller"))
+                .collect(Collectors.toList());
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
@@ -327,6 +325,8 @@ public class HostStateService {
 
             hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
             hs.setUploadSpeed(hostStateBO.getUploadSpeed());
+            hs.setMaxDownloadSpeed(hostStateBO.getMaxDownloadSpeed());
+            hs.setMaxUploadSpeed(hostStateBO.getMaxUploadSpeed());
             hs.setMaxNetSpeed(hostStateBO.getMaxNetSpeed());
             hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
             hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
@@ -488,7 +488,36 @@ public class HostStateService {
         if (CollectionUtil.isEmpty(nodeIds)) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.ELEMENT_LIST)));
         }
+    }
 
+    private List<String> getAgentNames() {
+        String url = "http://" + csceneAppConfig.getCpIp() + ":" + csceneAppConfig.getCpPort() + "/v1/hypervisors";
+        String result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (StringUtils.isBlank(result)) {
+            return new ArrayList<>();
+        }
+        Map<String, Object> resultMap = JsonCommon.parseMap(result);
+        Map<String, Object> data = (Map<String, Object>)resultMap.get("data");
+        if (Objects.isNull(data) || !data.containsKey("list")) {
+            return new ArrayList<>();
+        }
+        List<Map<String, String>> list = (List<Map<String, String>>) data.get("list");
+        List<String> agentNames = list.stream().map(map -> map.getOrDefault("hostname", "")).collect(Collectors.toList());
+        return agentNames;
+    }
+
+    /**
+     * 包装请求头信息
+     *
+     * @param headers
+     * @return
+     */
+    private Map<String, String> wrapperHeaders(Map<String, String> headers) {
+        if (MapUtils.isEmpty(headers)) {
+            headers = new HashMap<>();
+        }
+        headers.put("Accept-Language", ServletUtils.getAcceptLanguage());
+        return headers;
     }
 
 }

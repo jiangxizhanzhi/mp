@@ -129,11 +129,17 @@ public class HypervisorPageVO extends BaseVO {
     @ApiModelProperty("下载速度")
     private String downloadSpeed;
 
+    @ApiModelProperty("单个网卡最大下载速度")
+    private String maxDownloadSpeed;
+
     @ApiModelProperty("下行带宽/总带宽占比")
     private Double downloadPercent;
 
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("单个网卡最大上传速度")
+    private String maxUploadSpeed;
 
     @ApiModelProperty("上行带宽/总带宽占比")
     private Double uploadPercent;

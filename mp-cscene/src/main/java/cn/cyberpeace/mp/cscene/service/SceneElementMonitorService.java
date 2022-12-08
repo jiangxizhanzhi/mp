@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
@@ -97,6 +98,9 @@ public class SceneElementMonitorService {
 
     @Autowired
     private SceneMapper sceneMapper;
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     private Integer getWazuhVulnerabilityScanInterval() {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
@@ -363,8 +367,8 @@ public class SceneElementMonitorService {
         processRequest(pageRequest, sceneHandler);
         startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        // 最大支持查询10000条数据
-        pageRequest.setPageSize(10000);
+        // 根据配置设置查询的最大条数
+        pageRequest.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
         var result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();

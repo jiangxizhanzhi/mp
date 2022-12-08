@@ -415,7 +415,7 @@ public class ImagesController {
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
-        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
+//        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
         snapshotConverter.merge(request);
         return ResultCommon.success();
     }
@@ -643,8 +643,12 @@ public class ImagesController {
                         ImageConvertModel baseImage = list.get(0);
                         if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
                             vo.setAllowExport(false);
+                        } else if (Boolean.FALSE.equals(v.getSupportExport())) {
+                            vo.setAllowExport(false);
                         }
                     }
+                } else if (Boolean.FALSE.equals(v.getSupportExport())) {
+                    vo.setAllowExport(false);
                 }
             }
             return vo;

@@ -186,4 +186,6 @@ public class Device extends BaseCloudPlatformResult {
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
         return tmpImport || tmpInternal;
     }
+
+    private Boolean supportExport;
 }

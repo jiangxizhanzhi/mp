@@ -610,6 +610,10 @@ public class CsceneSpecialService {
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 
+    public int countSceneConfig() {
+        return csceneMapper.total(new HumanCondition().filterEqual(CsceneModel::getDeleted, false));
+    }
+
     /**
      * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
      * @param startTime
