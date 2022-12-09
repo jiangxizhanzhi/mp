@@ -540,17 +540,26 @@ public class AsyncPlatFlowTaskService {
      * @param extNetId
      */
     private void checkTrexServer(String fixedIp, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
-        String commands = "cd /opt/project_dirs; rm -rf traffic_generators; unzip traffic_generators.zip; rm -rf traffic_generators.zip; supervisorctl restart all ";
+        String commands = "./init.sh";
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
         serverInfo.setHost(fixedIp);
         serverInfo.setUser("root");
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
+        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
                 null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
     }
+
+//    public static void main(String[] args) {
+//        String commands = "./init.sh";
+//        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+//        serverInfo.setHost("10.100.7.192");
+//        serverInfo.setUser("root");
+//        serverInfo.setPassword("111111");
+//        SshUtil.refreshDir(serverInfo, commands, "/Users/qkjoe/Downloads/traffic_generators.zip", "/opt/project_dirs");
+//    }
 
 
 

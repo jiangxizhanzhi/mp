@@ -68,6 +68,7 @@ public class UserController {
     @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "批量删除用户", target = OpTargetEnums.USER)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         return userService.bulkDelete(ids).asResult();
     }
