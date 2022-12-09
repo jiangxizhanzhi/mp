@@ -1,16 +1,13 @@
 package cn.cyberpeace.mp.flow.util;
 
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.util.IOUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /**
@@ -34,7 +31,6 @@ public class SshUtil {
         JSch jsch = new JSch();
         Session session = null;
         ChannelSftp sftpChannel = null;
-        ByteArrayOutputStream outputStream = null;
         try {
             File file = new File(srcFilePath);
             if (!file.exists()) {
@@ -58,23 +54,18 @@ public class SshUtil {
             sftpChannel.put(srcFilePath, destFilePath + "/" + file.getName(), ChannelSftp.OVERWRITE);
             log.info("put file [{}] from [{}] to [{}] success", file.getName(), srcFilePath, destFilePath);
 
-            outputStream = new ByteArrayOutputStream();
+//            outputStream = new ByteArrayOutputStream();
             log.info("start exec shell script: {}", commands);
-            String execResult = JschUtil.exec(session, commands, CharsetUtil.CHARSET_UTF_8, outputStream);
+            String execResult = JschUtil.exec(session, commands, CharsetUtil.CHARSET_UTF_8, null);
 
             // 执行失败时execResult返回null
-            if (StrUtil.isEmpty(execResult)) {
-                log.info("exec shell script error:{}", outputStream.toString(CharsetUtil.CHARSET_UTF_8));
-            } else {
-                log.info("exec shell script success: {}", execResult);
-            }
+            log.info("exec shell script result: {}", execResult);
         } catch (Exception e) {
             //设置执行失败的响应内容
             log.error("refresh dir error", e);
         } finally {
             JschUtil.close(sftpChannel);
             JschUtil.close(session);
-            IOUtils.closeQuietly(outputStream);
         }
     }
 
