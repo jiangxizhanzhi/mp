@@ -1103,7 +1103,7 @@ public class DataCollectionService extends CollectionBaseService {
                 .fixedInterval(new DateHistogramInterval(interval))
                 .minDocCount(0)
                 .order(BucketOrder.key(false))
-                .format(DatePattern.NORM_DATETIME_PATTERN)
+                .format(DatePattern.NORM_DATETIME_MINUTE_PATTERN)
                 .timeZone(ZoneId.systemDefault());
         sourceBuilder.aggregation(aggrBuilder);
 

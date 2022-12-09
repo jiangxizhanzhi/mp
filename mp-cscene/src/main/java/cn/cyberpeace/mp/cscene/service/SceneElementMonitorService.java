@@ -60,6 +60,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -406,20 +407,32 @@ public class SceneElementMonitorService {
 
         LocalDateTime time = null;
         if (CollectionUtil.isNotEmpty(histogramInfos)) {
-            time = TimeUtils.stringToLocalDateTime(histogramInfos.get(0).getTime());
+            time = TimeUtils.yyyyMMddHHmm2LocalDate(histogramInfos.get(0).getTime());
         } else {
             time = endTime.minusMinutes((long) intervalMinutes * (bucketSize + 1));
         }
 
+        // 处理前置空值
         endTime = endTime.minusMinutes(intervalMinutes);
         while (!time.isAfter(endTime)) {
             time = time.plusMinutes(intervalMinutes);
-            ElementHistogramInfo info = ElementHistogramInfo.builder().count(0).time(TimeUtils.localDateTimeToString(time)).build();
+            ElementHistogramInfo info = ElementHistogramInfo.builder().count(0).time(TimeUtils.localTime2yyyyMMddHHmm(time)).build();
             finalList.add(info);
         }
 
         finalList = finalList.stream().sorted(Comparator.comparing(ElementHistogramInfo::getTime)).collect(Collectors.toList());
         finalList.addAll(histogramInfos);
+
+        // 处理后置空值
+        while (finalList.size() < bucketSize) {
+            var histogram = finalList.get(finalList.size() - 1);
+            LocalDateTime lastTime = TimeUtils.yyyyMMddHHmm2LocalDate(histogram.getTime());
+            lastTime = lastTime.minusMinutes(intervalMinutes);
+            ElementHistogramInfo info = ElementHistogramInfo.builder().count(0).time(TimeUtils.localTime2yyyyMMddHHmm(lastTime)).build();
+            finalList.add(info);
+        }
+
+        Collections.reverse(finalList);
         return finalList.stream().limit(bucketSize).collect(Collectors.toList());
     }
 
