@@ -128,7 +128,14 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean restart(String instanceId) {
-        return doAction(instanceId, new VirtualMachineRestartData());
+        try {
+            return doAction(instanceId, new VirtualMachineRestartData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     public boolean resume(String instanceId) {
