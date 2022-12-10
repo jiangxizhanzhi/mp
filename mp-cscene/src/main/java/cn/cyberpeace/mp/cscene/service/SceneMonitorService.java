@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,6 +173,7 @@ public class SceneMonitorService {
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
                 || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
+            return Collections.emptyList();
         }
 
         var topology = csceneInstanceBO.getScene().getTopology();
