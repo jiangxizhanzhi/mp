@@ -655,8 +655,8 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询20分钟
-        CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000, 1000 * 60 * 20,
+        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询24小时
+        CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000, 1000 * 60 * 60 * 24,
                 () -> refreshTaskStatusStopCheck(flowTaskModel.getId()), 1, () -> taskJobStoppedCallback(flowTaskModel.getId(), callback), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
     }
 
