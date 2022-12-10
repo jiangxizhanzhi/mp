@@ -72,6 +72,7 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
@@ -1097,12 +1098,15 @@ public class DataCollectionService extends CollectionBaseService {
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
+        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime());
+
         // build the aggregation
         DateHistogramAggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(aggregationName)
                 .field(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                 .fixedInterval(new DateHistogramInterval(interval))
-                .minDocCount(0)
                 .order(BucketOrder.key(false))
+                .minDocCount(0)
+                .extendedBounds(new LongBounds(null, maxBounds))
                 .format(DatePattern.NORM_DATETIME_MINUTE_PATTERN)
                 .timeZone(ZoneId.systemDefault());
         sourceBuilder.aggregation(aggrBuilder);

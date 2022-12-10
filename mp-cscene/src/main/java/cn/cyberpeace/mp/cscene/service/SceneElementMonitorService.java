@@ -374,99 +374,38 @@ public class SceneElementMonitorService {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        boolean emptyFlag = false;
-        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
+        var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
         if (CollectionUtil.isEmpty(agentNames)) {
-            emptyFlag = true;
+            return Collections.emptyList();
         }
 
-        List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
-        WazuhEventRequest wazuhEventRequest = null;
-        if (!emptyFlag) {
-            wazuhEventRequest = buildWazuhRequest(pageRequest);
-            wazuhEventRequest.setAgentNames(agentNames);
-            wazuhEventRequest.setRuleGroups(ruleGroups);
-            wazuhEventRequest.setLevels(pageRequest.getLevels());
-            wazuhEventRequest.setPageSize(0);
-            Map<String, Long> resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m");
+        List<ElementHistogramInfo> infos = new ArrayList<>();
+        var wazuhEventRequest = buildWazuhRequest(pageRequest);
+        wazuhEventRequest.setAgentNames(agentNames);
+        wazuhEventRequest.setRuleGroups(ruleGroups);
+        wazuhEventRequest.setLevels(pageRequest.getLevels());
+        wazuhEventRequest.setPageSize(0);
+        var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m");
+
+        if (CollectionUtil.isNotEmpty(resultMap)) {
             resultMap.forEach((key, value) -> {
-                ElementHistogramInfo info = ElementHistogramInfo.builder().count(value.intValue()).time(key).build();
-                histogramInfos.add(info);
+                infos.add(ElementHistogramInfo.builder().time(key).count(Objects.isNull(value) ? 0 : value.intValue()).build());
             });
         }
 
-        List<ElementHistogramInfo> finalList = new ArrayList<>();
-
-        LocalDateTime endTime = null;
-        if (Objects.nonNull(wazuhEventRequest) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-            endTime = wazuhEventRequest.getEndTime();
-        } else {
-            endTime = LocalDateTime.now();
-        }
-        endTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / 15 * 15));
-
-        LocalDateTime time = null;
-        if (CollectionUtil.isNotEmpty(histogramInfos)) {
-            time = TimeUtils.yyyyMMddHHmm2LocalDate(histogramInfos.get(0).getTime());
-        } else {
-            time = endTime.minusMinutes((long) intervalMinutes * (bucketSize + 1));
-        }
-
-        // 处理前置空值
-        endTime = endTime.minusMinutes(intervalMinutes);
-        while (!time.isAfter(endTime)) {
-            time = time.plusMinutes(intervalMinutes);
-            ElementHistogramInfo info = ElementHistogramInfo.builder().count(0).time(TimeUtils.localTime2yyyyMMddHHmm(time)).build();
-            finalList.add(info);
-        }
-
-        finalList = finalList.stream().sorted(Comparator.comparing(ElementHistogramInfo::getTime)).collect(Collectors.toList());
-        finalList.addAll(histogramInfos);
-
-        // 处理后置空值
-        while (finalList.size() < bucketSize) {
-            var histogram = finalList.get(finalList.size() - 1);
-            LocalDateTime lastTime = TimeUtils.yyyyMMddHHmm2LocalDate(histogram.getTime());
-            lastTime = lastTime.minusMinutes(intervalMinutes);
-            ElementHistogramInfo info = ElementHistogramInfo.builder().count(0).time(TimeUtils.localTime2yyyyMMddHHmm(lastTime)).build();
-            finalList.add(info);
-        }
-
+        //LocalDateTime endTime = null;
+        //if (Objects.nonNull(wazuhEventRequest) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
+        //    endTime = wazuhEventRequest.getEndTime();
+        //} else {
+        //    endTime = LocalDateTime.now();
+        //}
+        //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
+        List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
         Collections.reverse(finalList);
-        return finalList.stream().limit(bucketSize).collect(Collectors.toList());
+        return finalList;
     }
 
-
-    private WazuhEventRequest buildWazuhRequest(ElementMonitorRequest pageRequest) {
-        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
-        LocalDateTime startTime = null;
-        LocalDateTime endTime = null;
-        if (StringUtils.isNotBlank(pageRequest.getStartTime())) {
-            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
-        }
-
-        if (StringUtils.isNotBlank(pageRequest.getEndTime())) {
-            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        }
-
-        if (Objects.isNull(startTime)) {
-            String translatedScendId = csceneCommonService.translateSceneId(pageRequest.getSceneId());
-            startTime = csceneCommonService.getSceneCreateTime(translatedScendId);
-        }
-
-        if (Objects.isNull(startTime)) {
-            startTime = LocalDateTime.now().minusHours(24);
-        }
-
-        if (Objects.isNull(endTime)) {
-            endTime = LocalDateTime.now();
-        }
-
-        wazuhEventRequest.setStartTime(startTime);
-        wazuhEventRequest.setEndTime(endTime);
-        return wazuhEventRequest;
-    }
-
+    @Deprecated
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
@@ -477,7 +416,7 @@ public class SceneElementMonitorService {
         startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
         // 根据配置设置查询的最大条数
-        pageRequest.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
+        pageRequest.setPageSize(10000);
         var result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
@@ -845,6 +784,62 @@ public class SceneElementMonitorService {
         }
 
         return null;
+    }
+
+    private List<ElementHistogramInfo> processHistogramList(LocalDateTime endTime, int bucketSize, int invervalMinutes, Map<String, Long> resultMap) {
+        List<ElementHistogramInfo> infos = new ArrayList<>();
+        var calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
+
+        //int minutes = LocalDateTime.now().getMinute() / invervalMinutes * invervalMinutes;
+        //int hour = Long.valueOf(Duration.between(LocalDate.now().atTime(LocalTime.MIN), LocalDateTime.now()).getSeconds() / 3600).intValue();
+        //
+        //var currentTime = LocalTime.of(hour, minutes);
+
+        for (int i = 0; i < bucketSize; i++) {
+            String timeStr = TimeUtils.localTime2yyyyMMddHHmm(calculatedTime);
+            var info = new ElementHistogramInfo();
+            if (Objects.nonNull(resultMap) && Objects.nonNull(resultMap.get(timeStr))) {
+                info.setTime(timeStr);
+                info.setCount(resultMap.get(timeStr).intValue());
+            } else {
+                info.setTime(timeStr);
+                info.setCount(0);
+            }
+            infos.add(info);
+            calculatedTime = calculatedTime.minusMinutes(invervalMinutes);
+        }
+        return infos;
+    }
+
+
+    private WazuhEventRequest buildWazuhRequest(ElementMonitorRequest pageRequest) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+        if (StringUtils.isNotBlank(pageRequest.getStartTime())) {
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+
+        if (StringUtils.isNotBlank(pageRequest.getEndTime())) {
+            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        }
+
+        if (Objects.isNull(startTime)) {
+            String translatedScendId = csceneCommonService.translateSceneId(pageRequest.getSceneId());
+            startTime = csceneCommonService.getSceneCreateTime(translatedScendId);
+        }
+
+        if (Objects.isNull(startTime)) {
+            startTime = LocalDateTime.now().minusHours(24);
+        }
+
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        wazuhEventRequest.setStartTime(startTime);
+        wazuhEventRequest.setEndTime(endTime);
+        return wazuhEventRequest;
     }
 
 
