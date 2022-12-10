@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
@@ -146,6 +147,9 @@ public class ImagesController {
 
     @NonNull
     private TargetConverter targetConverter;
+
+    @NonNull
+    private CsceneSnapshotService csceneSnapshotService;
 
     /**
      * 分页查询
@@ -416,7 +420,13 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
 //        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
+        var res = snapshotConverter.list(request.getUuid());
         snapshotConverter.merge(request);
+        if (res != null && CollectionUtils.isNotEmpty(res.getList())) {
+            res.getList().stream().forEach(l -> {
+                csceneSnapshotService.deleteSnapshotRelativeInfoByResource(l.getUuid());
+            });
+        }
         return ResultCommon.success();
     }
 
