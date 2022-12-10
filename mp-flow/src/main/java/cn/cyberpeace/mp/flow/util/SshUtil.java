@@ -21,7 +21,7 @@ import java.io.File;
 @Slf4j
 public class SshUtil {
 
-    private static final int TIME_OUT = 10000;
+    private static final int TIME_OUT = 30000;
 
     /**
      * 刷新目录
