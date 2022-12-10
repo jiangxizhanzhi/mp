@@ -1087,7 +1087,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval) {
+    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval, String minBounds, String maxBounds) {
         String aggregationName = "aggs_date_histogram";
         Map<String, Long> resultMap = new LinkedHashMap<>();
 
@@ -1098,15 +1098,13 @@ public class DataCollectionService extends CollectionBaseService {
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
-        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime());
-
         // build the aggregation
         DateHistogramAggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(aggregationName)
                 .field(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                 .fixedInterval(new DateHistogramInterval(interval))
                 .order(BucketOrder.key(false))
                 .minDocCount(0)
-                .extendedBounds(new LongBounds(null, maxBounds))
+                .extendedBounds(new LongBounds(minBounds, maxBounds))
                 .format(DatePattern.NORM_DATETIME_MINUTE_PATTERN)
                 .timeZone(ZoneId.systemDefault());
         sourceBuilder.aggregation(aggrBuilder);

@@ -385,7 +385,11 @@ public class SceneElementMonitorService {
         wazuhEventRequest.setRuleGroups(ruleGroups);
         wazuhEventRequest.setLevels(pageRequest.getLevels());
         wazuhEventRequest.setPageSize(0);
-        var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m");
+
+        String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize - 1)));
+        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime());
+
+        var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
 
         if (CollectionUtil.isNotEmpty(resultMap)) {
             resultMap.forEach((key, value) -> {
@@ -400,9 +404,9 @@ public class SceneElementMonitorService {
         //    endTime = LocalDateTime.now();
         //}
         //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
-        List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
-        Collections.reverse(finalList);
-        return finalList;
+        //List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
+        Collections.reverse(infos);
+        return infos;
     }
 
     @Deprecated
