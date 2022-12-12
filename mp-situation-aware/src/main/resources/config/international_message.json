@@ -1,206 +1,1771 @@
 [
   {
-    "key": "主板序列号",
+    "key": "probe.ability.name.001001",
     "zh_name": "主板序列号",
     "en_name": "motherboard serial number"
   },
   {
-    "key": "CPU名称",
+    "key": "probe.ability.name.001002",
     "zh_name": "CPU名称",
     "en_name": "CPU name"
   },
   {
-    "key": "CPU核数",
+    "key": "probe.ability.name.001003",
     "zh_name": "CPU核数",
     "en_name": "number of CPU cores"
   },
   {
-    "key": "CPU使用率",
+    "key": "probe.ability.name.001004",
     "zh_name": "CPU使用率",
     "en_name": "CPU usage"
   },
   {
-    "key": "内存总大小",
+    "key": "probe.ability.name.001005",
     "zh_name": "内存总大小",
     "en_name": "total memory size"
   },
   {
-    "key": "内存使用率",
+    "key": "probe.ability.name.001006",
     "zh_name": "内存使用率",
     "en_name": "memory usage"
   },
   {
-    "key": "硬盘总大小",
+    "key": "probe.ability.name.001007",
     "zh_name": "硬盘总大小",
     "en_name": "total hard disk size"
   },
   {
-    "key": "硬盘使用率",
+    "key": "probe.ability.name.001008",
     "zh_name": "硬盘使用率",
     "en_name": "hard disk usage"
   },
   {
-    "key": "主机名",
+    "key": "probe.ability.name.002001",
     "zh_name": "主机名",
     "en_name": "hostname"
   },
   {
-    "key": "OS架构",
+    "key": "probe.ability.name.002002",
     "zh_name": "OS架构",
     "en_name": "OS Architecture"
   },
   {
-    "key": "系统名称",
+    "key": "probe.ability.name.002003",
     "zh_name": "系统名称",
     "en_name": "system name"
   },
   {
-    "key": "系统版本",
+    "key": "probe.ability.name.002004",
     "zh_name": "系统版本",
     "en_name": "system version"
   },
   {
-    "key": "平台",
+    "key": "probe.ability.name.002005",
     "zh_name": "平台",
     "en_name": "platform"
   },
   {
-    "key": "发布版本",
+    "key": "probe.ability.name.002006",
     "zh_name": "发布版本",
     "en_name": "release version"
   },
   {
-    "key": "接口名称",
+    "key": "probe.ability.name.003001",
     "zh_name": "接口名称",
     "en_name": "interface name"
   },
   {
-    "key": "适配器类型",
+    "key": "probe.ability.name.003002",
     "zh_name": "适配器类型",
     "en_name": "adapter type"
   },
   {
-    "key": "接口状态",
+    "key": "probe.ability.name.003003",
     "zh_name": "接口状态",
     "en_name": "interface status"
   },
   {
-    "key": "发包数",
+    "key": "probe.ability.name.003004",
+    "zh_name": "MTU",
+    "en_name": "MTU"
+  },
+  {
+    "key": "probe.ability.name.003005",
+    "zh_name": "MAC",
+    "en_name": "MAC"
+  },
+  {
+    "key": "probe.ability.name.003006",
     "zh_name": "发包数",
     "en_name": "number of packets sent"
   },
   {
-    "key": "收包数",
+    "key": "probe.ability.name.003007",
     "zh_name": "收包数",
     "en_name": "number of packages received"
   },
   {
-    "key": "发送字节数",
+    "key": "probe.ability.name.003008",
     "zh_name": "发送字节数",
     "en_name": "number of bytes sent"
   },
   {
-    "key": "接收字节数",
+    "key": "probe.ability.name.003009",
     "zh_name": "接收字节数",
     "en_name": "received bytes"
   },
   {
-    "key": "网络掩码",
+    "key": "probe.ability.name.003010",
+    "zh_name": "IP address",
+    "en_name": "IP address"
+  },
+  {
+    "key": "probe.ability.name.003011",
     "zh_name": "网络掩码",
     "en_name": "netmask"
   },
   {
-    "key": "本地IP",
+    "key": "probe.ability.name.004001",
     "zh_name": "本地IP",
     "en_name": "local IP"
   },
   {
-    "key": "本地端口",
+    "key": "probe.ability.name.004002",
     "zh_name": "本地端口",
     "en_name": "local port"
   },
   {
-    "key": "协议",
+    "key": "probe.ability.name.004003",
     "zh_name": "协议",
     "en_name": "protocol"
   },
   {
-    "key": "对端IP",
+    "key": "probe.ability.name.004004",
     "zh_name": "对端IP",
     "en_name": "peer IP"
   },
   {
-    "key": "对端端口",
+    "key": "probe.ability.name.004005",
     "zh_name": "对端端口",
     "en_name": "peer port"
   },
   {
-    "key": "端口的状态",
+    "key": "probe.ability.name.004006",
     "zh_name": "端口的状态",
     "en_name": "the state of the port"
   },
   {
-    "key": "进程名称",
+    "key": "probe.ability.name.005001",
+    "zh_name": "PID",
+    "en_name": "PID"
+  },
+  {
+    "key": "probe.ability.name.005002",
+    "zh_name": "SIZE",
+    "en_name": "SIZE"
+  },
+  {
+    "key": "probe.ability.name.005003",
     "zh_name": "进程名称",
     "en_name": "process name"
   },
   {
-    "key": "进程状态",
+    "key": "probe.ability.name.005004",
     "zh_name": "进程状态",
     "en_name": "process status"
   },
   {
-    "key": "size变更",
+    "key": "probe.ability.name.005005",
+    "zh_name": "PPID",
+    "en_name": "PPID"
+  },
+  {
+    "key": "probe.ability.name.005006",
+    "zh_name": "CMD",
+    "en_name": "CMD"
+  },
+  {
+    "key": "probe.ability.name.006001",
     "zh_name": "size变更",
     "en_name": "size change"
   },
   {
-    "key": "mtime变更",
+    "key": "probe.ability.name.006002",
     "zh_name": "mtime变更",
     "en_name": "mtime change"
   },
   {
-    "key": "uid变更",
+    "key": "probe.ability.name.006003",
     "zh_name": "uid变更",
     "en_name": "uid change"
   },
   {
-    "key": "inode变更",
+    "key": "probe.ability.name.006004",
     "zh_name": "inode变更",
     "en_name": "inode change"
   },
   {
-    "key": "hash md5变更",
+    "key": "probe.ability.name.006005",
     "zh_name": "hash md5变更",
     "en_name": "hash md5 change"
   },
   {
-    "key": "hash sha1变更",
+    "key": "probe.ability.name.006006",
     "zh_name": "hash sha1变更",
     "en_name": "hash sha1 change"
   },
   {
-    "key": "hash sha256变更",
+    "key": "probe.ability.name.006007",
     "zh_name": "hash sha256变更",
     "en_name": "hash sha256 change"
   },
   {
-    "key": "checksum变更",
+    "key": "probe.ability.name.006008",
     "zh_name": "checksum变更",
     "en_name": "checksum change"
   },
   {
-    "key": "owner变更",
+    "key": "probe.ability.name.007001",
+    "zh_name": "size变更",
+    "en_name": "size change"
+  },
+  {
+    "key": "probe.ability.name.007002",
+    "zh_name": "mtime变更",
+    "en_name": "mtime change"
+  },
+  {
+    "key": "probe.ability.name.007003",
     "zh_name": "owner变更",
     "en_name": "owner change"
   },
   {
-    "key": "value变更",
+    "key": "probe.ability.name.007004",
     "zh_name": "value变更",
     "en_name": "value change"
   },
   {
-    "key": "自定义添加日志路径或日志文件",
+    "key": "probe.ability.name.007005",
+    "zh_name": "hash md5变更",
+    "en_name": "hash md5 change"
+  },
+  {
+    "key": "probe.ability.name.007006",
+    "zh_name": "hash sha1变更",
+    "en_name": "hash sha1 change"
+  },
+  {
+    "key": "probe.ability.name.007007",
+    "zh_name": "hash sha256变更",
+    "en_name": "hash sha256 change"
+  },
+  {
+    "key": "probe.ability.name.007008",
+    "zh_name": "checksum变更",
+    "en_name": "checksum change"
+  },
+  {
+    "key": "probe.ability.name.008001",
+    "zh_name": "Windows",
+    "en_name": "Windows"
+  },
+  {
+    "key": "probe.ability.name.008002",
+    "zh_name": "Linux",
+    "en_name": "Linux"
+  },
+  {
+    "key": "probe.ability.name.008003",
+    "zh_name": "cisco-ios",
+    "en_name": "cisco-ios"
+  },
+  {
+    "key": "probe.ability.name.008004",
+    "zh_name": "HP",
+    "en_name": "HP"
+  },
+  {
+    "key": "probe.ability.name.008005",
+    "zh_name": "junos",
+    "en_name": "junos"
+  },
+  {
+    "key": "probe.ability.name.008006",
+    "zh_name": "openbsd",
+    "en_name": "openbsd"
+  },
+  {
+    "key": "probe.ability.name.009001",
+    "zh_name": "nginx",
+    "en_name": "nginx"
+  },
+  {
+    "key": "probe.ability.name.009002",
+    "zh_name": "apache",
+    "en_name": "apache"
+  },
+  {
+    "key": "probe.ability.name.009003",
+    "zh_name": "ms-se",
+    "en_name": "ms-se"
+  },
+  {
+    "key": "probe.ability.name.009004",
+    "zh_name": "win-sysmon",
+    "en_name": "win-sysmon"
+  },
+  {
+    "key": "probe.ability.name.009005",
+    "zh_name": "win-ms-se",
+    "en_name": "win-ms-se"
+  },
+  {
+    "key": "probe.ability.name.009006",
+    "zh_name": "win-generic",
+    "en_name": "win-generic"
+  },
+  {
+    "key": "probe.ability.name.009007",
+    "zh_name": "netscaler",
+    "en_name": "netscaler"
+  },
+  {
+    "key": "probe.ability.name.009008",
+    "zh_name": "mysql",
+    "en_name": "mysql"
+  },
+  {
+    "key": "probe.ability.name.009009",
+    "zh_name": "postgresql",
+    "en_name": "postgresql"
+  },
+  {
+    "key": "probe.ability.name.009010",
+    "zh_name": "ms_sqlserver",
+    "en_name": "ms_sqlserver"
+  },
+  {
+    "key": "probe.ability.name.009011",
+    "zh_name": "mongodb",
+    "en_name": "mongodb"
+  },
+  {
+    "key": "probe.ability.name.009012",
+    "zh_name": "mysql_audit",
+    "en_name": "mysql_audit"
+  },
+  {
+    "key": "probe.ability.name.009013",
+    "zh_name": "mariadb",
+    "en_name": "mariadb"
+  },
+  {
+    "key": "probe.ability.name.009014",
+    "zh_name": "redis",
+    "en_name": "redis"
+  },
+  {
+    "key": "probe.ability.name.009015",
+    "zh_name": "unbound",
+    "en_name": "unbound"
+  },
+  {
+    "key": "probe.ability.name.009016",
+    "zh_name": "named",
+    "en_name": "named"
+  },
+  {
+    "key": "probe.ability.name.009017",
+    "zh_name": "arpwatch",
+    "en_name": "arpwatch"
+  },
+  {
+    "key": "probe.ability.name.009018",
+    "zh_name": "vshell",
+    "en_name": "vshell"
+  },
+  {
+    "key": "probe.ability.name.009019",
+    "zh_name": "macos-sshd",
+    "en_name": "macos-sshd"
+  },
+  {
+    "key": "probe.ability.name.009020",
+    "zh_name": "dropbear",
+    "en_name": "dropbear"
+  },
+  {
+    "key": "probe.ability.name.009021",
+    "zh_name": "suricata",
+    "en_name": "suricata"
+  },
+  {
+    "key": "probe.ability.name.009022",
+    "zh_name": "squid",
+    "en_name": "squid"
+  },
+  {
+    "key": "probe.ability.name.009023",
+    "zh_name": "smbd",
+    "en_name": "smbd"
+  },
+  {
+    "key": "probe.ability.name.009024",
+    "zh_name": "serv-u",
+    "en_name": "serv-u"
+  },
+  {
+    "key": "probe.ability.name.009025",
+    "zh_name": "ftpd",
+    "en_name": "ftpd"
+  },
+  {
+    "key": "probe.ability.name.009026",
+    "zh_name": "proftpd",
+    "en_name": "proftpd"
+  },
+  {
+    "key": "probe.ability.name.009027",
+    "zh_name": "pure-ftpd",
+    "en_name": "pure-ftpd"
+  },
+  {
+    "key": "probe.ability.name.009028",
+    "zh_name": "vsftpd",
+    "en_name": "vsftpd"
+  },
+  {
+    "key": "probe.ability.name.009029",
+    "zh_name": "telnetd",
+    "en_name": "telnetd"
+  },
+  {
+    "key": "probe.ability.name.009030",
+    "zh_name": "sshd",
+    "en_name": "sshd"
+  },
+  {
+    "key": "probe.ability.name.009031",
+    "zh_name": "ms_ipsec",
+    "en_name": "ms_ipsec"
+  },
+  {
+    "key": "probe.ability.name.009032",
+    "zh_name": "ms_ftpd",
+    "en_name": "ms_ftpd"
+  },
+  {
+    "key": "probe.ability.name.009033",
+    "zh_name": "ms_dhcp",
+    "en_name": "ms_dhcp"
+  },
+  {
+    "key": "probe.ability.name.009034",
+    "zh_name": "docker",
+    "en_name": "docker"
+  },
+  {
+    "key": "probe.ability.name.009035",
+    "zh_name": "docker_integration",
+    "en_name": "docker_integration"
+  },
+  {
+    "key": "probe.ability.name.009036",
+    "zh_name": "jenkins",
+    "en_name": "jenkins"
+  },
+  {
+    "key": "probe.ability.name.009037",
+    "zh_name": "pam",
+    "en_name": "pam"
+  },
+  {
+    "key": "probe.ability.name.009038",
+    "zh_name": "php",
+    "en_name": "php"
+  },
+  {
+    "key": "probe.ability.name.009039",
+    "zh_name": "oscap",
+    "en_name": "oscap"
+  },
+  {
+    "key": "probe.ability.name.009040",
+    "zh_name": "vuls",
+    "en_name": "vuls"
+  },
+  {
+    "key": "probe.ability.name.009041",
+    "zh_name": "exim",
+    "en_name": "exim"
+  },
+  {
+    "key": "probe.ability.name.009042",
+    "zh_name": "auditd",
+    "en_name": "auditd"
+  },
+  {
+    "key": "probe.ability.name.009043",
+    "zh_name": "systemd",
+    "en_name": "systemd"
+  },
+  {
+    "key": "probe.ability.name.009044",
+    "zh_name": "apparmor",
+    "en_name": "apparmor"
+  },
+  {
+    "key": "probe.ability.name.009045",
+    "zh_name": "msauth",
+    "en_name": "msauth"
+  },
+  {
+    "key": "probe.ability.name.009046",
+    "zh_name": "win-application",
+    "en_name": "win-application"
+  },
+  {
+    "key": "probe.ability.name.009047",
+    "zh_name": "win-vipre",
+    "en_name": "win-vipre"
+  },
+  {
+    "key": "probe.ability.name.009048",
+    "zh_name": "ms_wdefender",
+    "en_name": "ms_wdefender"
+  },
+  {
+    "key": "probe.ability.name.009049",
+    "zh_name": "win-security",
+    "en_name": "win-security"
+  },
+  {
+    "key": "probe.ability.name.009050",
+    "zh_name": "win-mcafee",
+    "en_name": "win-mcafee"
+  },
+  {
+    "key": "probe.ability.name.009051",
+    "zh_name": "asterisk",
+    "en_name": "asterisk"
+  },
+  {
+    "key": "probe.ability.name.009052",
+    "zh_name": "solaris_bsm",
+    "en_name": "solaris_bsm"
+  },
+  {
+    "key": "probe.ability.name.009053",
+    "zh_name": "wordpress",
+    "en_name": "wordpress"
+  },
+  {
+    "key": "probe.ability.name.009054",
+    "zh_name": "cimserver",
+    "en_name": "cimserver"
+  },
+  {
+    "key": "probe.ability.name.009055",
+    "zh_name": "vmware",
+    "en_name": "vmware"
+  },
+  {
+    "key": "probe.ability.name.009056",
+    "zh_name": "zeus",
+    "en_name": "zeus"
+  },
+  {
+    "key": "probe.ability.name.009057",
+    "zh_name": "amazon",
+    "en_name": "amazon"
+  },
+  {
+    "key": "probe.ability.name.009058",
+    "zh_name": "proxmox-ve",
+    "en_name": "proxmox-ve"
+  },
+  {
+    "key": "probe.ability.name.009059",
+    "zh_name": "owncloud",
+    "en_name": "owncloud"
+  },
+  {
+    "key": "probe.ability.name.009060",
+    "zh_name": "openvas",
+    "en_name": "openvas"
+  },
+  {
+    "key": "probe.ability.name.009061",
+    "zh_name": "osquery",
+    "en_name": "osquery"
+  },
+  {
+    "key": "probe.ability.name.009062",
+    "zh_name": "azure",
+    "en_name": "azure"
+  },
+  {
+    "key": "probe.ability.name.009063",
+    "zh_name": "nextcloud",
+    "en_name": "nextcloud"
+  },
+  {
+    "key": "probe.ability.name.009064",
+    "zh_name": "owlh-zeek",
+    "en_name": "owlh-zeek"
+  },
+  {
+    "key": "probe.ability.name.009065",
+    "zh_name": "gcp",
+    "en_name": "gcp"
+  },
+  {
+    "key": "probe.ability.name.009066",
+    "zh_name": "puppet",
+    "en_name": "puppet"
+  },
+  {
+    "key": "probe.ability.name.009067",
+    "zh_name": "rsa-auth-manager",
+    "en_name": "rsa-auth-manager"
+  },
+  {
+    "key": "probe.ability.name.009068",
+    "zh_name": "qualysguard",
+    "en_name": "qualysguard"
+  },
+  {
+    "key": "probe.ability.name.009069",
+    "zh_name": "ciscat",
+    "en_name": "ciscat"
+  },
+  {
+    "key": "probe.ability.name.009070",
+    "zh_name": "sca",
+    "en_name": "sca"
+  },
+  {
+    "key": "probe.ability.name.009071",
+    "zh_name": "sysmon",
+    "en_name": "sysmon"
+  },
+  {
+    "key": "probe.ability.name.009072",
+    "zh_name": "spamd",
+    "en_name": "spamd"
+  },
+  {
+    "key": "probe.ability.name.009073",
+    "zh_name": "win-wdefender",
+    "en_name": "win-wdefender"
+  },
+  {
+    "key": "probe.ability.name.009074",
+    "zh_name": "win-wfirewall",
+    "en_name": "win-wfirewall"
+  },
+  {
+    "key": "probe.ability.name.009075",
+    "zh_name": "sendmail",
+    "en_name": "sendmail"
+  },
+  {
+    "key": "probe.ability.name.009076",
+    "zh_name": "postfix",
+    "en_name": "postfix"
+  },
+  {
+    "key": "probe.ability.name.009077",
+    "zh_name": "imapd",
+    "en_name": "imapd"
+  },
+  {
+    "key": "probe.ability.name.009078",
+    "zh_name": "ms-exchange",
+    "en_name": "ms-exchange"
+  },
+  {
+    "key": "probe.ability.name.009079",
+    "zh_name": "courier",
+    "en_name": "courier"
+  },
+  {
+    "key": "probe.ability.name.009080",
+    "zh_name": "hordeimp",
+    "en_name": "hordeimp"
+  },
+  {
+    "key": "probe.ability.name.009081",
+    "zh_name": "roundcube",
+    "en_name": "roundcube"
+  },
+  {
+    "key": "probe.ability.name.009082",
+    "zh_name": "dovecot",
+    "en_name": "dovecot"
+  },
+  {
+    "key": "probe.ability.name.009083",
+    "zh_name": "vmpop3d",
+    "en_name": "vmpop3d"
+  },
+  {
+    "key": "probe.ability.name.009084",
+    "zh_name": "vpopmail",
+    "en_name": "vpopmail"
+  },
+  {
+    "key": "probe.ability.name.009085",
+    "zh_name": "opensmtpd",
+    "en_name": "opensmtpd"
+  },
+  {
+    "key": "probe.ability.name.010001",
+    "zh_name": "mcafee_av",
+    "en_name": "mcafee_av"
+  },
+  {
+    "key": "probe.ability.name.010002",
+    "zh_name": "clam_av",
+    "en_name": "clam_av"
+  },
+  {
+    "key": "probe.ability.name.010003",
+    "zh_name": "cylance",
+    "en_name": "cylance"
+  },
+  {
+    "key": "probe.ability.name.010004",
+    "zh_name": "kaspersky",
+    "en_name": "kaspersky"
+  },
+  {
+    "key": "probe.ability.name.010005",
+    "zh_name": "mcafee_epo",
+    "en_name": "mcafee_epo"
+  },
+  {
+    "key": "probe.ability.name.010006",
+    "zh_name": "symantec-av",
+    "en_name": "symantec-av"
+  },
+  {
+    "key": "probe.ability.name.010007",
+    "zh_name": "cisco-asa",
+    "en_name": "cisco-asa"
+  },
+  {
+    "key": "probe.ability.name.010008",
+    "zh_name": "pix",
+    "en_name": "pix"
+  },
+  {
+    "key": "probe.ability.name.010009",
+    "zh_name": "netscreenfw",
+    "en_name": "netscreenfw"
+  },
+  {
+    "key": "probe.ability.name.010010",
+    "zh_name": "fortigate",
+    "en_name": "fortigate"
+  },
+  {
+    "key": "probe.ability.name.010011",
+    "zh_name": "pfsense",
+    "en_name": "pfsense"
+  },
+  {
+    "key": "probe.ability.name.010012",
+    "zh_name": "checkpoint-smart1",
+    "en_name": "checkpoint-smart1"
+  },
+  {
+    "key": "probe.ability.name.010013",
+    "zh_name": "paloalto",
+    "en_name": "paloalto"
+  },
+  {
+    "key": "probe.ability.name.010014",
+    "zh_name": "trend-osce",
+    "en_name": "trend-osce"
+  },
+  {
+    "key": "probe.ability.name.010015",
+    "zh_name": "sonicwall",
+    "en_name": "sonicwall"
+  },
+  {
+    "key": "probe.ability.name.010016",
+    "zh_name": "firewalld",
+    "en_name": "firewalld"
+  },
+  {
+    "key": "probe.ability.name.010017",
+    "zh_name": "sophos_fw",
+    "en_name": "sophos_fw"
+  },
+  {
+    "key": "probe.ability.name.010018",
+    "zh_name": "ossec",
+    "en_name": "ossec"
+  },
+  {
+    "key": "probe.ability.name.010019",
+    "zh_name": "panda-paps",
+    "en_name": "panda-paps"
+  },
+  {
+    "key": "probe.ability.name.010020",
+    "zh_name": "racoon",
+    "en_name": "racoon"
+  },
+  {
+    "key": "probe.ability.name.010021",
+    "zh_name": "vpn_concentrator",
+    "en_name": "vpn_concentrator"
+  },
+  {
+    "key": "probe.ability.name.010022",
+    "zh_name": "openvpn",
+    "en_name": "openvpn"
+  },
+  {
+    "key": "probe.ability.name.010023",
+    "zh_name": "web_appsec",
+    "en_name": "web_appsec"
+  },
+  {
+    "key": "probe.ability.name.010024",
+    "zh_name": "imperva",
+    "en_name": "imperva"
+  },
+  {
+    "key": "probe.ability.name.010025",
+    "zh_name": "symantec-ws",
+    "en_name": "symantec-ws"
+  },
+  {
+    "key": "probe.ability.name.010026",
+    "zh_name": "identity_guard",
+    "en_name": "identity_guard"
+  },
+  {
+    "key": "probe.ability.name.010027",
+    "zh_name": "mailscanner",
+    "en_name": "mailscanner"
+  },
+  {
+    "key": "probe.ability.name.010028",
+    "zh_name": "sophos",
+    "en_name": "sophos"
+  },
+  {
+    "key": "probe.ability.name.010029",
+    "zh_name": "virustotal",
+    "en_name": "virustotal"
+  },
+  {
+    "key": "probe.ability.name.010030",
+    "zh_name": "vulnerability-detector",
+    "en_name": "vulnerability-detector"
+  },
+  {
+    "key": "probe.ability.name.010031",
+    "zh_name": "freeipa",
+    "en_name": "freeipa"
+  },
+  {
+    "key": "probe.ability.name.010032",
+    "zh_name": "cisco-estreamer",
+    "en_name": "cisco-estreamer"
+  },
+  {
+    "key": "probe.ability.name.011001",
+    "zh_name": "自定义添加日志路径或日志文件",
+    "en_name": "add custom log path or log file"
+  },
+  {
+    "key": "probe.ability.description.001001",
+    "zh_name": "主板序列号",
+    "en_name": "motherboard serial number"
+  },
+  {
+    "key": "probe.ability.description.001002",
+    "zh_name": "CPU名称",
+    "en_name": "CPU name"
+  },
+  {
+    "key": "probe.ability.description.001003",
+    "zh_name": "CPU核数",
+    "en_name": "number of CPU cores"
+  },
+  {
+    "key": "probe.ability.description.001004",
+    "zh_name": "CPU使用率",
+    "en_name": "CPU usage"
+  },
+  {
+    "key": "probe.ability.description.001005",
+    "zh_name": "内存总大小",
+    "en_name": "total memory size"
+  },
+  {
+    "key": "probe.ability.description.001006",
+    "zh_name": "内存使用率",
+    "en_name": "memory usage"
+  },
+  {
+    "key": "probe.ability.description.001007",
+    "zh_name": "硬盘总大小",
+    "en_name": "total hard disk size"
+  },
+  {
+    "key": "probe.ability.description.001008",
+    "zh_name": "硬盘使用率",
+    "en_name": "hard disk usage"
+  },
+  {
+    "key": "probe.ability.description.002001",
+    "zh_name": "主机名",
+    "en_name": "hostname"
+  },
+  {
+    "key": "probe.ability.description.002002",
+    "zh_name": "OS架构",
+    "en_name": "OS Architecture"
+  },
+  {
+    "key": "probe.ability.description.002003",
+    "zh_name": "系统名称",
+    "en_name": "system name"
+  },
+  {
+    "key": "probe.ability.description.002004",
+    "zh_name": "系统版本",
+    "en_name": "system version"
+  },
+  {
+    "key": "probe.ability.description.002005",
+    "zh_name": "平台",
+    "en_name": "platform"
+  },
+  {
+    "key": "probe.ability.description.002006",
+    "zh_name": "发布版本",
+    "en_name": "release version"
+  },
+  {
+    "key": "probe.ability.description.003001",
+    "zh_name": "接口名称",
+    "en_name": "interface name"
+  },
+  {
+    "key": "probe.ability.description.003002",
+    "zh_name": "适配器类型",
+    "en_name": "adapter type"
+  },
+  {
+    "key": "probe.ability.description.003003",
+    "zh_name": "接口状态",
+    "en_name": "interface status"
+  },
+  {
+    "key": "probe.ability.description.003004",
+    "zh_name": "MTU",
+    "en_name": "MTU"
+  },
+  {
+    "key": "probe.ability.description.003005",
+    "zh_name": "MAC",
+    "en_name": "MAC"
+  },
+  {
+    "key": "probe.ability.description.003006",
+    "zh_name": "发包数",
+    "en_name": "number of packets sent"
+  },
+  {
+    "key": "probe.ability.description.003007",
+    "zh_name": "收包数",
+    "en_name": "number of packages received"
+  },
+  {
+    "key": "probe.ability.description.003008",
+    "zh_name": "发送字节数",
+    "en_name": "number of bytes sent"
+  },
+  {
+    "key": "probe.ability.description.003009",
+    "zh_name": "接收字节数",
+    "en_name": "received bytes"
+  },
+  {
+    "key": "probe.ability.description.003010",
+    "zh_name": "IP address",
+    "en_name": "IP address"
+  },
+  {
+    "key": "probe.ability.description.003011",
+    "zh_name": "网络掩码",
+    "en_name": "netmask"
+  },
+  {
+    "key": "probe.ability.description.004001",
+    "zh_name": "本地IP",
+    "en_name": "local IP"
+  },
+  {
+    "key": "probe.ability.description.004002",
+    "zh_name": "本地端口",
+    "en_name": "local port"
+  },
+  {
+    "key": "probe.ability.description.004003",
+    "zh_name": "协议",
+    "en_name": "protocol"
+  },
+  {
+    "key": "probe.ability.description.004004",
+    "zh_name": "对端IP",
+    "en_name": "peer IP"
+  },
+  {
+    "key": "probe.ability.description.004005",
+    "zh_name": "对端端口",
+    "en_name": "peer port"
+  },
+  {
+    "key": "probe.ability.description.004006",
+    "zh_name": "端口的状态",
+    "en_name": "the state of the port"
+  },
+  {
+    "key": "probe.ability.description.005001",
+    "zh_name": "PID",
+    "en_name": "PID"
+  },
+  {
+    "key": "probe.ability.description.005002",
+    "zh_name": "SIZE",
+    "en_name": "SIZE"
+  },
+  {
+    "key": "probe.ability.description.005003",
+    "zh_name": "进程名称",
+    "en_name": "process name"
+  },
+  {
+    "key": "probe.ability.description.005004",
+    "zh_name": "进程状态",
+    "en_name": "process status"
+  },
+  {
+    "key": "probe.ability.description.005005",
+    "zh_name": "PPID",
+    "en_name": "PPID"
+  },
+  {
+    "key": "probe.ability.description.005006",
+    "zh_name": "CMD",
+    "en_name": "CMD"
+  },
+  {
+    "key": "probe.ability.description.006001",
+    "zh_name": "size变更",
+    "en_name": "size change"
+  },
+  {
+    "key": "probe.ability.description.006002",
+    "zh_name": "mtime变更",
+    "en_name": "mtime change"
+  },
+  {
+    "key": "probe.ability.description.006003",
+    "zh_name": "uid变更",
+    "en_name": "uid change"
+  },
+  {
+    "key": "probe.ability.description.006004",
+    "zh_name": "inode变更",
+    "en_name": "inode change"
+  },
+  {
+    "key": "probe.ability.description.006005",
+    "zh_name": "hash md5变更",
+    "en_name": "hash md5 change"
+  },
+  {
+    "key": "probe.ability.description.006006",
+    "zh_name": "hash sha1变更",
+    "en_name": "hash sha1 change"
+  },
+  {
+    "key": "probe.ability.description.006007",
+    "zh_name": "hash sha256变更",
+    "en_name": "hash sha256 change"
+  },
+  {
+    "key": "probe.ability.description.006008",
+    "zh_name": "checksum变更",
+    "en_name": "checksum change"
+  },
+  {
+    "key": "probe.ability.description.007001",
+    "zh_name": "size变更",
+    "en_name": "size change"
+  },
+  {
+    "key": "probe.ability.description.007002",
+    "zh_name": "mtime变更",
+    "en_name": "mtime change"
+  },
+  {
+    "key": "probe.ability.description.007003",
+    "zh_name": "owner变更",
+    "en_name": "owner change"
+  },
+  {
+    "key": "probe.ability.description.007004",
+    "zh_name": "value变更",
+    "en_name": "value change"
+  },
+  {
+    "key": "probe.ability.description.007005",
+    "zh_name": "hash md5变更",
+    "en_name": "hash md5 change"
+  },
+  {
+    "key": "probe.ability.description.007006",
+    "zh_name": "hash sha1变更",
+    "en_name": "hash sha1 change"
+  },
+  {
+    "key": "probe.ability.description.007007",
+    "zh_name": "hash sha256变更",
+    "en_name": "hash sha256 change"
+  },
+  {
+    "key": "probe.ability.description.007008",
+    "zh_name": "checksum变更",
+    "en_name": "checksum change"
+  },
+  {
+    "key": "probe.ability.description.008001",
+    "zh_name": "Windows",
+    "en_name": "Windows"
+  },
+  {
+    "key": "probe.ability.description.008002",
+    "zh_name": "Linux",
+    "en_name": "Linux"
+  },
+  {
+    "key": "probe.ability.description.008003",
+    "zh_name": "cisco-ios",
+    "en_name": "cisco-ios"
+  },
+  {
+    "key": "probe.ability.description.008004",
+    "zh_name": "HP",
+    "en_name": "HP"
+  },
+  {
+    "key": "probe.ability.description.008005",
+    "zh_name": "junos",
+    "en_name": "junos"
+  },
+  {
+    "key": "probe.ability.description.008006",
+    "zh_name": "openbsd",
+    "en_name": "openbsd"
+  },
+  {
+    "key": "probe.ability.description.009001",
+    "zh_name": "nginx",
+    "en_name": "nginx"
+  },
+  {
+    "key": "probe.ability.description.009002",
+    "zh_name": "apache",
+    "en_name": "apache"
+  },
+  {
+    "key": "probe.ability.description.009003",
+    "zh_name": "ms-se",
+    "en_name": "ms-se"
+  },
+  {
+    "key": "probe.ability.description.009004",
+    "zh_name": "win-sysmon",
+    "en_name": "win-sysmon"
+  },
+  {
+    "key": "probe.ability.description.009005",
+    "zh_name": "win-ms-se",
+    "en_name": "win-ms-se"
+  },
+  {
+    "key": "probe.ability.description.009006",
+    "zh_name": "win-generic",
+    "en_name": "win-generic"
+  },
+  {
+    "key": "probe.ability.description.009007",
+    "zh_name": "netscaler",
+    "en_name": "netscaler"
+  },
+  {
+    "key": "probe.ability.description.009008",
+    "zh_name": "mysql",
+    "en_name": "mysql"
+  },
+  {
+    "key": "probe.ability.description.009009",
+    "zh_name": "postgresql",
+    "en_name": "postgresql"
+  },
+  {
+    "key": "probe.ability.description.009010",
+    "zh_name": "ms_sqlserver",
+    "en_name": "ms_sqlserver"
+  },
+  {
+    "key": "probe.ability.description.009011",
+    "zh_name": "mongodb",
+    "en_name": "mongodb"
+  },
+  {
+    "key": "probe.ability.description.009012",
+    "zh_name": "mysql_audit",
+    "en_name": "mysql_audit"
+  },
+  {
+    "key": "probe.ability.description.009013",
+    "zh_name": "mariadb",
+    "en_name": "mariadb"
+  },
+  {
+    "key": "probe.ability.description.009014",
+    "zh_name": "redis",
+    "en_name": "redis"
+  },
+  {
+    "key": "probe.ability.description.009015",
+    "zh_name": "unbound",
+    "en_name": "unbound"
+  },
+  {
+    "key": "probe.ability.description.009016",
+    "zh_name": "named",
+    "en_name": "named"
+  },
+  {
+    "key": "probe.ability.description.009017",
+    "zh_name": "arpwatch",
+    "en_name": "arpwatch"
+  },
+  {
+    "key": "probe.ability.description.009018",
+    "zh_name": "vshell",
+    "en_name": "vshell"
+  },
+  {
+    "key": "probe.ability.description.009019",
+    "zh_name": "macos-sshd",
+    "en_name": "macos-sshd"
+  },
+  {
+    "key": "probe.ability.description.009020",
+    "zh_name": "dropbear",
+    "en_name": "dropbear"
+  },
+  {
+    "key": "probe.ability.description.009021",
+    "zh_name": "suricata",
+    "en_name": "suricata"
+  },
+  {
+    "key": "probe.ability.description.009022",
+    "zh_name": "squid",
+    "en_name": "squid"
+  },
+  {
+    "key": "probe.ability.description.009023",
+    "zh_name": "smbd",
+    "en_name": "smbd"
+  },
+  {
+    "key": "probe.ability.description.009024",
+    "zh_name": "serv-u",
+    "en_name": "serv-u"
+  },
+  {
+    "key": "probe.ability.description.009025",
+    "zh_name": "ftpd",
+    "en_name": "ftpd"
+  },
+  {
+    "key": "probe.ability.description.009026",
+    "zh_name": "proftpd",
+    "en_name": "proftpd"
+  },
+  {
+    "key": "probe.ability.description.009027",
+    "zh_name": "pure-ftpd",
+    "en_name": "pure-ftpd"
+  },
+  {
+    "key": "probe.ability.description.009028",
+    "zh_name": "vsftpd",
+    "en_name": "vsftpd"
+  },
+  {
+    "key": "probe.ability.description.009029",
+    "zh_name": "telnetd",
+    "en_name": "telnetd"
+  },
+  {
+    "key": "probe.ability.description.009030",
+    "zh_name": "sshd",
+    "en_name": "sshd"
+  },
+  {
+    "key": "probe.ability.description.009031",
+    "zh_name": "ms_ipsec",
+    "en_name": "ms_ipsec"
+  },
+  {
+    "key": "probe.ability.description.009032",
+    "zh_name": "ms_ftpd",
+    "en_name": "ms_ftpd"
+  },
+  {
+    "key": "probe.ability.description.009033",
+    "zh_name": "ms_dhcp",
+    "en_name": "ms_dhcp"
+  },
+  {
+    "key": "probe.ability.description.009034",
+    "zh_name": "docker",
+    "en_name": "docker"
+  },
+  {
+    "key": "probe.ability.description.009035",
+    "zh_name": "docker_integration",
+    "en_name": "docker_integration"
+  },
+  {
+    "key": "probe.ability.description.009036",
+    "zh_name": "jenkins",
+    "en_name": "jenkins"
+  },
+  {
+    "key": "probe.ability.description.009037",
+    "zh_name": "pam",
+    "en_name": "pam"
+  },
+  {
+    "key": "probe.ability.description.009038",
+    "zh_name": "php",
+    "en_name": "php"
+  },
+  {
+    "key": "probe.ability.description.009039",
+    "zh_name": "oscap",
+    "en_name": "oscap"
+  },
+  {
+    "key": "probe.ability.description.009040",
+    "zh_name": "vuls",
+    "en_name": "vuls"
+  },
+  {
+    "key": "probe.ability.description.009041",
+    "zh_name": "exim",
+    "en_name": "exim"
+  },
+  {
+    "key": "probe.ability.description.009042",
+    "zh_name": "auditd",
+    "en_name": "auditd"
+  },
+  {
+    "key": "probe.ability.description.009043",
+    "zh_name": "systemd",
+    "en_name": "systemd"
+  },
+  {
+    "key": "probe.ability.description.009044",
+    "zh_name": "apparmor",
+    "en_name": "apparmor"
+  },
+  {
+    "key": "probe.ability.description.009045",
+    "zh_name": "msauth",
+    "en_name": "msauth"
+  },
+  {
+    "key": "probe.ability.description.009046",
+    "zh_name": "win-application",
+    "en_name": "win-application"
+  },
+  {
+    "key": "probe.ability.description.009047",
+    "zh_name": "win-vipre",
+    "en_name": "win-vipre"
+  },
+  {
+    "key": "probe.ability.description.009048",
+    "zh_name": "ms_wdefender",
+    "en_name": "ms_wdefender"
+  },
+  {
+    "key": "probe.ability.description.009049",
+    "zh_name": "win-security",
+    "en_name": "win-security"
+  },
+  {
+    "key": "probe.ability.description.009050",
+    "zh_name": "win-mcafee",
+    "en_name": "win-mcafee"
+  },
+  {
+    "key": "probe.ability.description.009051",
+    "zh_name": "asterisk",
+    "en_name": "asterisk"
+  },
+  {
+    "key": "probe.ability.description.009052",
+    "zh_name": "solaris_bsm",
+    "en_name": "solaris_bsm"
+  },
+  {
+    "key": "probe.ability.description.009053",
+    "zh_name": "wordpress",
+    "en_name": "wordpress"
+  },
+  {
+    "key": "probe.ability.description.009054",
+    "zh_name": "cimserver",
+    "en_name": "cimserver"
+  },
+  {
+    "key": "probe.ability.description.009055",
+    "zh_name": "vmware",
+    "en_name": "vmware"
+  },
+  {
+    "key": "probe.ability.description.009056",
+    "zh_name": "zeus",
+    "en_name": "zeus"
+  },
+  {
+    "key": "probe.ability.description.009057",
+    "zh_name": "amazon",
+    "en_name": "amazon"
+  },
+  {
+    "key": "probe.ability.description.009058",
+    "zh_name": "proxmox-ve",
+    "en_name": "proxmox-ve"
+  },
+  {
+    "key": "probe.ability.description.009059",
+    "zh_name": "owncloud",
+    "en_name": "owncloud"
+  },
+  {
+    "key": "probe.ability.description.009060",
+    "zh_name": "openvas",
+    "en_name": "openvas"
+  },
+  {
+    "key": "probe.ability.description.009061",
+    "zh_name": "osquery",
+    "en_name": "osquery"
+  },
+  {
+    "key": "probe.ability.description.009062",
+    "zh_name": "azure",
+    "en_name": "azure"
+  },
+  {
+    "key": "probe.ability.description.009063",
+    "zh_name": "nextcloud",
+    "en_name": "nextcloud"
+  },
+  {
+    "key": "probe.ability.description.009064",
+    "zh_name": "owlh-zeek",
+    "en_name": "owlh-zeek"
+  },
+  {
+    "key": "probe.ability.description.009065",
+    "zh_name": "gcp",
+    "en_name": "gcp"
+  },
+  {
+    "key": "probe.ability.description.009066",
+    "zh_name": "puppet",
+    "en_name": "puppet"
+  },
+  {
+    "key": "probe.ability.description.009067",
+    "zh_name": "rsa-auth-manager",
+    "en_name": "rsa-auth-manager"
+  },
+  {
+    "key": "probe.ability.description.009068",
+    "zh_name": "qualysguard",
+    "en_name": "qualysguard"
+  },
+  {
+    "key": "probe.ability.description.009069",
+    "zh_name": "ciscat",
+    "en_name": "ciscat"
+  },
+  {
+    "key": "probe.ability.description.009070",
+    "zh_name": "sca",
+    "en_name": "sca"
+  },
+  {
+    "key": "probe.ability.description.009071",
+    "zh_name": "sysmon",
+    "en_name": "sysmon"
+  },
+  {
+    "key": "probe.ability.description.009072",
+    "zh_name": "spamd",
+    "en_name": "spamd"
+  },
+  {
+    "key": "probe.ability.description.009073",
+    "zh_name": "win-wdefender",
+    "en_name": "win-wdefender"
+  },
+  {
+    "key": "probe.ability.description.009074",
+    "zh_name": "win-wfirewall",
+    "en_name": "win-wfirewall"
+  },
+  {
+    "key": "probe.ability.description.009075",
+    "zh_name": "sendmail",
+    "en_name": "sendmail"
+  },
+  {
+    "key": "probe.ability.description.009076",
+    "zh_name": "postfix",
+    "en_name": "postfix"
+  },
+  {
+    "key": "probe.ability.description.009077",
+    "zh_name": "imapd",
+    "en_name": "imapd"
+  },
+  {
+    "key": "probe.ability.description.009078",
+    "zh_name": "ms-exchange",
+    "en_name": "ms-exchange"
+  },
+  {
+    "key": "probe.ability.description.009079",
+    "zh_name": "courier",
+    "en_name": "courier"
+  },
+  {
+    "key": "probe.ability.description.009080",
+    "zh_name": "hordeimp",
+    "en_name": "hordeimp"
+  },
+  {
+    "key": "probe.ability.description.009081",
+    "zh_name": "roundcube",
+    "en_name": "roundcube"
+  },
+  {
+    "key": "probe.ability.description.009082",
+    "zh_name": "dovecot",
+    "en_name": "dovecot"
+  },
+  {
+    "key": "probe.ability.description.009083",
+    "zh_name": "vmpop3d",
+    "en_name": "vmpop3d"
+  },
+  {
+    "key": "probe.ability.description.009084",
+    "zh_name": "vpopmail",
+    "en_name": "vpopmail"
+  },
+  {
+    "key": "probe.ability.description.009085",
+    "zh_name": "opensmtpd",
+    "en_name": "opensmtpd"
+  },
+  {
+    "key": "probe.ability.description.010001",
+    "zh_name": "mcafee_av",
+    "en_name": "mcafee_av"
+  },
+  {
+    "key": "probe.ability.description.010002",
+    "zh_name": "clam_av",
+    "en_name": "clam_av"
+  },
+  {
+    "key": "probe.ability.description.010003",
+    "zh_name": "cylance",
+    "en_name": "cylance"
+  },
+  {
+    "key": "probe.ability.description.010004",
+    "zh_name": "kaspersky",
+    "en_name": "kaspersky"
+  },
+  {
+    "key": "probe.ability.description.010005",
+    "zh_name": "mcafee_epo",
+    "en_name": "mcafee_epo"
+  },
+  {
+    "key": "probe.ability.description.010006",
+    "zh_name": "symantec-av",
+    "en_name": "symantec-av"
+  },
+  {
+    "key": "probe.ability.description.010007",
+    "zh_name": "cisco-asa",
+    "en_name": "cisco-asa"
+  },
+  {
+    "key": "probe.ability.description.010008",
+    "zh_name": "pix",
+    "en_name": "pix"
+  },
+  {
+    "key": "probe.ability.description.010009",
+    "zh_name": "netscreenfw",
+    "en_name": "netscreenfw"
+  },
+  {
+    "key": "probe.ability.description.010010",
+    "zh_name": "fortigate",
+    "en_name": "fortigate"
+  },
+  {
+    "key": "probe.ability.description.010011",
+    "zh_name": "pfsense",
+    "en_name": "pfsense"
+  },
+  {
+    "key": "probe.ability.description.010012",
+    "zh_name": "checkpoint-smart1",
+    "en_name": "checkpoint-smart1"
+  },
+  {
+    "key": "probe.ability.description.010013",
+    "zh_name": "paloalto",
+    "en_name": "paloalto"
+  },
+  {
+    "key": "probe.ability.description.010014",
+    "zh_name": "trend-osce",
+    "en_name": "trend-osce"
+  },
+  {
+    "key": "probe.ability.description.010015",
+    "zh_name": "sonicwall",
+    "en_name": "sonicwall"
+  },
+  {
+    "key": "probe.ability.description.010016",
+    "zh_name": "firewalld",
+    "en_name": "firewalld"
+  },
+  {
+    "key": "probe.ability.description.010017",
+    "zh_name": "sophos_fw",
+    "en_name": "sophos_fw"
+  },
+  {
+    "key": "probe.ability.description.010018",
+    "zh_name": "ossec",
+    "en_name": "ossec"
+  },
+  {
+    "key": "probe.ability.description.010019",
+    "zh_name": "panda-paps",
+    "en_name": "panda-paps"
+  },
+  {
+    "key": "probe.ability.description.010020",
+    "zh_name": "racoon",
+    "en_name": "racoon"
+  },
+  {
+    "key": "probe.ability.description.010021",
+    "zh_name": "vpn_concentrator",
+    "en_name": "vpn_concentrator"
+  },
+  {
+    "key": "probe.ability.description.010022",
+    "zh_name": "openvpn",
+    "en_name": "openvpn"
+  },
+  {
+    "key": "probe.ability.description.010023",
+    "zh_name": "web_appsec",
+    "en_name": "web_appsec"
+  },
+  {
+    "key": "probe.ability.description.010024",
+    "zh_name": "imperva",
+    "en_name": "imperva"
+  },
+  {
+    "key": "probe.ability.description.010025",
+    "zh_name": "symantec-ws",
+    "en_name": "symantec-ws"
+  },
+  {
+    "key": "probe.ability.description.010026",
+    "zh_name": "identity_guard",
+    "en_name": "identity_guard"
+  },
+  {
+    "key": "probe.ability.description.010027",
+    "zh_name": "mailscanner",
+    "en_name": "mailscanner"
+  },
+  {
+    "key": "probe.ability.description.010028",
+    "zh_name": "sophos",
+    "en_name": "sophos"
+  },
+  {
+    "key": "probe.ability.description.010029",
+    "zh_name": "virustotal",
+    "en_name": "virustotal"
+  },
+  {
+    "key": "probe.ability.description.010030",
+    "zh_name": "vulnerability-detector",
+    "en_name": "vulnerability-detector"
+  },
+  {
+    "key": "probe.ability.description.010031",
+    "zh_name": "freeipa",
+    "en_name": "freeipa"
+  },
+  {
+    "key": "probe.ability.description.010032",
+    "zh_name": "cisco-estreamer",
+    "en_name": "cisco-estreamer"
+  },
+  {
+    "key": "probe.ability.description.011001",
     "zh_name": "自定义添加日志路径或日志文件",
     "en_name": "add custom log path or log file"
   },
