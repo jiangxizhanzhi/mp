@@ -17,6 +17,8 @@ public class TeamAttackCountBO {
 
     private long count;
 
+    private long size ;
+
     private List<CountBO> attackTargetIps;
 
     private List<CountBO> attackTypes;

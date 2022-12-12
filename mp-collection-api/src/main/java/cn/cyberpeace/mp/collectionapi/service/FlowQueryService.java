@@ -445,6 +445,7 @@ public class FlowQueryService {
             TeamAttackCountVO vo = name2CountMap.computeIfAbsent(team, key -> new TeamAttackCountVO());
             vo.setTeam(team);
             vo.setCount(bo.getCount() + vo.getCount());
+            vo.setSize(bo.getSize()+vo.getSize());
             vo.setAttackTargetIp(bo.getAttackTargetIps().stream().map(CountBO::getKey).collect(Collectors.toList()));
             vo.setAttackTypes(bo.getAttackTypes().stream().map(CountBO::getKey).collect(Collectors.toList()));
         }

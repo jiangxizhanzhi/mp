@@ -441,7 +441,6 @@ public class FlowInfoService {
 
     /**
      * 攻击类型占比top5（所有队伍）
-     * @param topSize
      * @return
      */
     public List<CountBO> queryAttackTypeAllTeams(List<EsIpFieldBO> esIpFieldBOS) {
@@ -689,14 +688,17 @@ public class FlowInfoService {
         String srcIpTerm = "src_ip";
         String desIpTerm = "des_ip";
         String cateTerm = "cate";
+        String flowSizeTerm = "flow_size";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
                                                 .field(esIpFieldBOS.get(0).getIPFieldName())
                                                 .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
-                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"))
+                                                .subAggregation(AggregationBuilders.sum(flowSizeTerm).field("network.bytes"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
         return parsedTermsIp.getBuckets().stream().map(bucketSrcIp -> {
+            TeamAttackCountBO teamCountBo = new TeamAttackCountBO();
             ParsedTerms parsedTermsDesIp = bucketSrcIp.getAggregations().get(desIpTerm);
             List<CountBO> attackTargetIps = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
                 CountBO bo = new CountBO();
@@ -713,7 +715,8 @@ public class FlowInfoService {
                 return bo;
             }).collect(Collectors.toList());
 
-            TeamAttackCountBO teamCountBo = new TeamAttackCountBO();
+            ParsedSum flowSizeTermsCate = bucketSrcIp.getAggregations().get(flowSizeTerm);
+            teamCountBo.setSize((long) flowSizeTermsCate.getValue());
             teamCountBo.setIp(bucketSrcIp.getKeyAsString());
             teamCountBo.setCount(bucketSrcIp.getDocCount());
             teamCountBo.setAttackTargetIps(attackTargetIps);
