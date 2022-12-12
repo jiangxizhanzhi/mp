@@ -24,6 +24,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +51,7 @@ public class RunTimeLogController {
 
     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ListObjServiceResult<RunTimeLogDTO> queryLogs(BasePageRequest basePageRequest) {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }
