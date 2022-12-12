@@ -404,9 +404,9 @@ public class SceneElementMonitorService {
         //    endTime = LocalDateTime.now();
         //}
         //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
-        //List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
-        Collections.reverse(infos);
-        return infos;
+        List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
+        Collections.reverse(finalList);
+        return finalList;
     }
 
     @Deprecated
