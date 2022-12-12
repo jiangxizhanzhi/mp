@@ -817,7 +817,10 @@ public class AsyncPlatFlowTaskService {
                     if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
                         // 判断任务是否运行成功
                         Integer isSuccess = rows.getJSONObject(0).getInteger("result");
-                        if (Objects.nonNull(isSuccess) && 0 == isSuccess) {
+                        if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
+                            log.info("flow execute success:[{}]", flowTaskModel.getId());
+                            result = true;
+                        } else {
                             FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
                             // 运行失败，更新任务状态为已停止，调用失败回调方法
                             String errMsg = rows.getJSONObject(0).getString("result_detail");
@@ -827,9 +830,6 @@ public class AsyncPlatFlowTaskService {
                             }
                             log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
                             jobStoppedCallback(flowTaskModel.getId(), errorCallback, errMsg);
-                        } else {
-                            log.info("flow execute success:[{}]", flowTaskModel.getId());
-                            result = true;
                         }
 
                     }
