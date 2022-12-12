@@ -947,6 +947,8 @@ public class InitiateHandler extends HandlerCommon {
     public void initiate() {
         this.prepareEventProcess();
 
+        getPluginHandler().getSceneHandler().addProgressPercentage(5);
+
         // 标记已设置的ip的端口
         if (getPluginHandler().getElementPortMap() != null) {
             getPluginHandler().getElementPortMap().values().forEach(p -> {
