@@ -96,7 +96,7 @@ public class FlowInfoService {
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
 
@@ -137,7 +137,7 @@ public class FlowInfoService {
 
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (response.getHits().getTotalHits().value < 1L) {
@@ -797,7 +797,7 @@ public class FlowInfoService {
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         return restHighLevelClient.search(searchRequest);
     }
@@ -823,7 +823,7 @@ public class FlowInfoService {
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         return restHighLevelClient.search(searchRequest);
     }
