@@ -15,18 +15,27 @@ public class Tool {
         // 设备方的ip
         File target = new File("/Users/maojun/dev/app/test/targetIps");
 
-        List<String> sourceIps = FileUtil.readLines(source, "utf8");
-        List<String> targetIps = FileUtil.readLines(target, "utf8");
+        List<String> teams = FileUtil.readLines(source, "utf8");
+        List<String> devices = FileUtil.readLines(target, "utf8");
         // 造的数据里面的时间戳 , 表示这个攻击的时间
         // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
         // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
+        // 到时候让周豪现场选择5个类型发下
         long time = System.currentTimeMillis();
-        for(int i = 0 ;i<1;i++){
-            for (String sourceIp : sourceIps) {
-                for (String targetIp : targetIps) {
-                    var result = result(time, sourceIp.trim(), targetIp.trim());
-                    HttpUtils.sendPost("http://10.10.100.7:9205/arkime_sessions3-221210/_doc", JSON.toJSONString(result));
-                    System.out.println(String.format("send for sourceIp:%s , targetIp:%s success", sourceIp, targetIp));
+        for (int i = 0; i < 1; i++) {
+            for (String team : teams) {
+                for (String device : devices) {
+
+                    List<String> teamIps = JSONObject.parseArray(team, String.class);
+                    List<String> deviceIps = JSONObject.parseArray(device, String.class);
+
+                    for (String teamIp : teamIps) {
+                        for (String deviceIp : deviceIps) {
+                            var result = result(time, teamIp.trim(), deviceIp.trim());
+                            HttpUtils.sendPost("http://10.10.100.7:9205/arkime_sessions3-221213/_doc", JSON.toJSONString(result));
+                            System.out.println(String.format("send for sourceIp:%s , targetIp:%s success", teamIp.trim(), deviceIp.trim()));
+                        }
+                    }
                 }
             }
         }
