@@ -18,7 +18,7 @@ public class Tool {
         List<String> sourceIps = FileUtil.readLines(source, "utf8");
         List<String> targetIps = FileUtil.readLines(target, "utf8");
         long time = System.currentTimeMillis();
-        for(int i = 0 ;i<10;i++){
+        for(int i = 0 ;i<1;i++){
             for (String sourceIp : sourceIps) {
                 for (String targetIp : targetIps) {
                     var result = result(time, sourceIp.trim(), targetIp.trim());
