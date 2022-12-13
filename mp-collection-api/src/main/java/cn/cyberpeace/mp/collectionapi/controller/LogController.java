@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -26,7 +27,9 @@ public class LogController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查询日志列表")
-    public ListObjServiceResult<LogVO> list(@RequestBody LogQueryPageRequest request) {
+    public ListObjServiceResult<LogVO> list(LogQueryPageRequest request, @RequestBody LogQueryPageRequest bodyParams) {
+        request.setAttackIps(bodyParams.getAttackIps());
+        request.setIps(bodyParams.getIps());
         return logQueryService.queryContestLog(request).asResult();
     }
 
