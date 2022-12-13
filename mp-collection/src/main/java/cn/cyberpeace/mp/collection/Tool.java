@@ -17,6 +17,9 @@ public class Tool {
 
         List<String> sourceIps = FileUtil.readLines(source, "utf8");
         List<String> targetIps = FileUtil.readLines(target, "utf8");
+        // 造的数据里面的时间戳 , 表示这个攻击的时间
+        // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
+        // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
         long time = System.currentTimeMillis();
         for(int i = 0 ;i<1;i++){
             for (String sourceIp : sourceIps) {
