@@ -26,7 +26,7 @@ public class LogController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查询日志列表")
-    public ListObjServiceResult<LogVO> list(LogQueryPageRequest request) {
+    public ListObjServiceResult<LogVO> list(@RequestBody LogQueryPageRequest request) {
         return logQueryService.queryContestLog(request).asResult();
     }
 
