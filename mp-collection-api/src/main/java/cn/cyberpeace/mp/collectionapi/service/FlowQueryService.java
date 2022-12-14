@@ -363,6 +363,7 @@ public class FlowQueryService {
             vo.setName(bo.getKey());
             vo.setCount(bo.getCount());
             vo.setPercent(bo.getCount() / total);
+            vo.setCount(CollectionApiConstant.multipleNum(vo.getCount()));
             return vo;
         }).collect(Collectors.toList());
 
