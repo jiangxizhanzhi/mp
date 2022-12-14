@@ -475,6 +475,7 @@ public class FlowInfoService {
         String ipTerm = "target_ip";
         String cateTerm = "cate";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
+                                                .size(1000)
                                                 .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
@@ -491,7 +492,7 @@ public class FlowInfoService {
             parsedTermsCate.getBuckets().forEach(bucketCate -> {
                 AttackTypeBO bo = new AttackTypeBO();
                 bo.setEnName(MessageCommonUtil.convertMessage(bucketCate.getKeyAsString()));
-                bo.setCount(bucketIp.getDocCount());
+                bo.setCount(bucketCate.getDocCount());
                 attackTypes.add(bo);
             });
         });
