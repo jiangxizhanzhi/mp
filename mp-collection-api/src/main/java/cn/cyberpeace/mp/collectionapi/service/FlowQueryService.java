@@ -252,29 +252,28 @@ public class FlowQueryService {
         }).collect(Collectors.toList());
 
         Map<String, AggAttackFlowVO> resMap = new HashMap<>();
-        long countBig = 0;
-        long flowSizeBig = 0;
-        for (var vo : vos) {
-            if (vo.getAttackCount() != null) {
-                countBig += vo.getAttackCount().getAttackCount();
-            }
-            if (vo.getFlowSize() != null) {
-                flowSizeBig += vo.getFlowSize().getSize();
-            }
-        }
-        BigDecimal totalCount = BigDecimal.valueOf(countBig);
-        BigDecimal totalSize = BigDecimal.valueOf(flowSizeBig);
-        for (var vo : vos) {
-            if (vo.getAttackCount() != null) {
-                BigDecimal count = BigDecimal.valueOf(vo.getAttackCount().getAttackCount());
-                vo.getAttackCount().setPercent(count.divide(totalCount, 4, RoundingMode.HALF_DOWN).doubleValue());
-            }
-            if (vo.getFlowSize() != null) {
-                BigDecimal size = BigDecimal.valueOf(vo.getFlowSize().getSize());
-                vo.getFlowSize().setPercent(size.divide(totalSize, 4, RoundingMode.HALF_DOWN).doubleValue());
-            }
-        }
-
+//        long countBig = 0;
+//        long flowSizeBig = 0;
+//        for (var vo : vos) {
+//            if (vo.getAttackCount() != null) {
+//                countBig += vo.getAttackCount().getAttackCount();
+//            }
+//            if (vo.getFlowSize() != null) {
+//                flowSizeBig += vo.getFlowSize().getSize();
+//            }
+//        }
+//        BigDecimal totalCount = BigDecimal.valueOf(countBig);
+//        BigDecimal totalSize = BigDecimal.valueOf(flowSizeBig);
+//        for (var vo : vos) {
+//            if (vo.getAttackCount() != null) {
+//                BigDecimal count = BigDecimal.valueOf(vo.getAttackCount().getAttackCount());
+//                vo.getAttackCount().setPercent(count.divide(totalCount, 4, RoundingMode.HALF_DOWN).doubleValue());
+//            }
+//            if (vo.getFlowSize() != null) {
+//                BigDecimal size = BigDecimal.valueOf(vo.getFlowSize().getSize());
+//                vo.getFlowSize().setPercent(size.divide(totalSize, 4, RoundingMode.HALF_DOWN).doubleValue());
+//            }
+//        }
         for (var vo : vos) {
             if (!resMap.containsKey(vo.getName())) {
                 AggAttackFlowVO res = new AggAttackFlowVO();
