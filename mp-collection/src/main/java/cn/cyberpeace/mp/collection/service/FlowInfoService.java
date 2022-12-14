@@ -691,6 +691,7 @@ public class FlowInfoService {
         String flowSizeTerm = "flow_size";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
                                                 .field(esIpFieldBOS.get(0).getIPFieldName())
+                                                .size(1000)
                                                 .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
                                                 .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"))
                                                 .subAggregation(AggregationBuilders.sum(flowSizeTerm).field("network.bytes"));
