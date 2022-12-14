@@ -1516,7 +1516,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        LocalDate startDate = startTime.toLocalDate();
+        LocalDate startDate = startTime.toLocalDate().minusDays(1);
         LocalDate endDate = endTime.toLocalDate();
         List<String> dayList = new ArrayList<>();
         while (true) {
