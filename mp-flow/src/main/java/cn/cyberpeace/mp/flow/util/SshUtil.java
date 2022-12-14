@@ -12,6 +12,7 @@ import org.apache.poi.util.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.concurrent.*;
 
 /**
  * @Description: ssh工具类
@@ -60,13 +61,31 @@ public class SshUtil {
 
             outputStream = new ByteArrayOutputStream();
             log.info("start exec shell script: {}", commands);
-            String execResult = JschUtil.exec(session, commands, CharsetUtil.CHARSET_UTF_8, outputStream);
+            String execResult = null;
+            Session finalSession = session;
+            ByteArrayOutputStream finalOutputStream = outputStream;
+            Callable<String> task = () -> JschUtil.exec(finalSession, commands, CharsetUtil.CHARSET_UTF_8, finalOutputStream);
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            try {
+                Future<String> future = executorService.submit(task);
+                execResult = future.get(1000 * 5, TimeUnit.MILLISECONDS); //任务处理超时时间设为 5 秒
+                log.info("exec shell task result: {}", execResult);
+            } catch (TimeoutException ex) {
+                log.error("exec shell task timeout", ex);
+            } catch (Exception e) {
+                log.error("exec shell task failed", e);
+            } finally {
+                log.info("exec shell end and close thread pool");
+                executorService.shutdown();
+                JschUtil.close(finalSession);
+                IOUtils.closeQuietly(finalOutputStream);
+            }
 
             // 执行失败时execResult返回null
             if (StrUtil.isEmpty(execResult)) {
                 log.info("exec shell script error:{}", outputStream.toString(CharsetUtil.CHARSET_UTF_8));
             } else {
-                log.info("exec shell script success: {}", execResult);
+                log.info("exec shell script success");
             }
         } catch (Exception e) {
             //设置执行失败的响应内容
