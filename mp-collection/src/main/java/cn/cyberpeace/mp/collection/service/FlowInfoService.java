@@ -734,8 +734,17 @@ public class FlowInfoService {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
+        int size = 0;
+        if (esIpFieldBOS != null && esIpFieldBOS.size() > 0) {
+            for (var es : esIpFieldBOS) {
+                if (es.getIps() != null) {
+                    size += es.getIps().size();
+                }
+            }
+        }
+        size = Math.max(10, size);
         String srcIpTerm = "src_ip", desIpTerm = "des_ip";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm).size(size)
                                                 .field(esIpFieldBOS.get(0).getIPFieldName())
                                                 .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
