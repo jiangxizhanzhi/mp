@@ -71,7 +71,7 @@ public class FlowQueryService {
         List<Count> counts = bos.stream().map(bo -> {
             Count c = new Count();
             c.setTime(bo.getKey());
-            c.setNum(bo.getCount() * CollectionApiConstant.multiple);
+            c.setNum(CollectionApiConstant.multipleNum(c.getNum()));
             return c;
         }).collect(Collectors.toList());
 
@@ -111,7 +111,7 @@ public class FlowQueryService {
 
         // 放大攻击次数
         vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
-            c.setNum(c.getNum() * CollectionApiConstant.multiple);
+            c.setNum(CollectionApiConstant.multipleNum(c.getNum()));
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
@@ -145,7 +145,7 @@ public class FlowQueryService {
 
         // 放大攻击次数
         vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
-            c.setNum(c.getNum() * CollectionApiConstant.multiple);
+            c.setNum(CollectionApiConstant.multipleNum(c.getNum()));
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
@@ -237,9 +237,9 @@ public class FlowQueryService {
 
         List<AggAttackFlowVO> vos = bos.stream().map(bo -> {
             AttackCount attackCount = new AttackCount();
-            attackCount.setAttackCount(bo.getCount() * CollectionApiConstant.multiple);
+            attackCount.setAttackCount(CollectionApiConstant.multipleNum(bo.getCount()));
             FlowSize flowSize = new FlowSize();
-            flowSize.setSize(bo.getSize());
+            flowSize.setSize(CollectionApiConstant.multipleNum(bo.getSize()));
 
             AggAttackFlowVO vo = new AggAttackFlowVO();
             vo.setName(getNameByIp(request, bo.getIp()));
@@ -343,7 +343,7 @@ public class FlowQueryService {
         List<AttackFlowTopVO> topVOs = vos.stream().map(vo -> {
             AttackFlowTopVO topVO = new AttackFlowTopVO();
             topVO.setName(vo.getTeam());
-            topVO.setCount(vo.getCount() * CollectionApiConstant.multiple);
+            topVO.setCount(CollectionApiConstant.multipleNum(vo.getCount()));
             return topVO;
         }).collect(Collectors.toList());
 
@@ -388,7 +388,7 @@ public class FlowQueryService {
         List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
             AttackFlowTopVO vo = new AttackFlowTopVO();
             vo.setName(bo.getKey());
-            vo.setCount(bo.getCount() * CollectionApiConstant.multiple);
+            vo.setCount(CollectionApiConstant.multipleNum(bo.getCount()));
             vo.setPercent(bo.getCount() / total);
             return vo;
         }).collect(Collectors.toList());
@@ -433,11 +433,10 @@ public class FlowQueryService {
 
     /**
      * 总攻击次数
-     * @param multiple 放大倍数
      * @return
      */
     public ServiceResult<Long> getAttackTotalCount() {
-        return new ServiceResult<>(flowInfoService.attackTotalCount() * CollectionApiConstant.multiple);
+        return new ServiceResult<>(CollectionApiConstant.multipleNum(flowInfoService.attackTotalCount() ));
     }
 
     /**
@@ -472,7 +471,8 @@ public class FlowQueryService {
 
         // 放大攻击次数
         vos.forEach(vo -> {
-            vo.setCount(vo.getCount() * CollectionApiConstant.multiple);
+            vo.setCount(CollectionApiConstant.multipleNum(vo.getCount()));
+            vo.setSize(CollectionApiConstant.multipleNum(vo.getSize()));
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
@@ -564,7 +564,7 @@ public class FlowQueryService {
 
         // 放大攻击次数
         vos.stream().map(TeamTopVO::getEntries).flatMap(Collection::stream).forEach(c -> {
-            c.setCount(c.getCount() * CollectionApiConstant.multiple);
+            c.setCount(CollectionApiConstant.multipleNum(c.getCount() ));
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));

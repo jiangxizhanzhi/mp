@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collectionapi.constant.CollectionApiConstant;
@@ -14,8 +15,10 @@ import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
+import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/flow")
@@ -32,6 +37,9 @@ public class FlowController {
 
     @Resource
     private FlowQueryService flowQueryService;
+
+    @Resource
+    private BaseAppConfig baseAppConfig;
 
     @GetMapping("/attack_trend")
     @ApiOperation(value = "总体攻击趋势(统计十分钟内的攻击次数)")
@@ -99,8 +107,22 @@ public class FlowController {
 
     @PostMapping("/update_multiple")
     @ApiOperation(value = "更新攻击次数放大倍数")
-    public ServiceResult<Boolean> updateMultiple(@RequestParam Integer multiple) {
-        CollectionApiConstant.multiple = multiple;
+    public ServiceResult<Boolean> updateMultiple(@RequestParam String multiple) {
+        CollectionApiConstant.multiple = BigDecimal.valueOf(Double.valueOf(multiple));
+        String logDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getHomeDir(), "multiple");
+        File file = new File(logDir);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        {
+            // 先删除旧的
+            File valueFile = new File(logDir + FileUtil.FILE_SEPARATOR + "value");
+            if (valueFile.exists()) {
+                valueFile.delete();
+            }
+        }
+        File valueFile = new File(logDir + FileUtil.FILE_SEPARATOR + "value");
+        FileUtil.writeBytes(multiple.getBytes(), valueFile);
         return new ServiceResult<>(true).asResult();
     }
 }
