@@ -90,6 +90,9 @@ public class CloudSceneConnectionCommon {
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, userId)
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .reverseOrderBy(CloudPluginSceneConnectionModel::getCreateTime));
+        if (sceneConnection != null && StringUtils.isNotEmpty(sceneConnection.getConnectionId())) {
+            sceneConnection = null;
+        }
 
         // console信息可能会变，获取最新的console信息
         var resourceId = param.getResourceId();
