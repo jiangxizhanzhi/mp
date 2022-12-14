@@ -1,15 +1,22 @@
 package cn.cyberpeace.mp.collection;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
 
 public class Tool {
     public static void main(String[] args) throws Exception {
+        ((LoggerContext) LoggerFactory.getILoggerFactory())
+                .getLoggerList()
+                .forEach(logger -> logger.setLevel(Level.ERROR));
+
         // 选手的ip
         File source = new File("/Users/maojun/dev/app/test/sourceIps");
         // 设备方的ip
@@ -22,7 +29,9 @@ public class Tool {
         // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
         // 到时候让周豪现场选择5个类型发下
         long time = System.currentTimeMillis();
-        for (int i = 0; i < 1; i++) {
+        String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221214/_doc";
+        long index = 1;
+        for (int i = 0; i < 100; i++) {
             for (String team : teams) {
                 for (String device : devices) {
 
@@ -32,13 +41,14 @@ public class Tool {
                     for (String teamIp : teamIps) {
                         for (String deviceIp : deviceIps) {
                             var result = result(time, teamIp.trim(), deviceIp.trim());
-                            HttpUtils.sendPost("http://10.10.100.7:9205/arkime_sessions3-221213/_doc", JSON.toJSONString(result));
-                            System.out.println(String.format("send for sourceIp:%s , targetIp:%s success", teamIp.trim(), deviceIp.trim()));
+                            HttpUtils.sendPost(esUrl, JSON.toJSONString(result));
+                            System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", index++, teamIp.trim(), deviceIp.trim()));
                         }
                     }
                 }
             }
         }
+        System.out.println("耗时:" + (System.currentTimeMillis() - time));
     }
 
     public static Object result(long time, String sourceIp, String targetIp) {
