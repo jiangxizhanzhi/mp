@@ -673,7 +673,8 @@ public class FlowInfoService {
      * @return
      */
     public long attackTotalCount() {
-        SearchResponse response = esAggQuery(QueryBuilders.boolQuery(), null);
+        var query = QueryBuilders.boolQuery().mustNot(QueryBuilders.termsQuery("source.ip", "10.50.19.29"));
+        SearchResponse response = esAggQuery(query, null);
         return response.getHits().getTotalHits().value;
     }
 

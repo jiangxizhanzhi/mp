@@ -438,7 +438,7 @@ public class FlowQueryService {
      */
     public ServiceResult<Long> getAttackTotalCount() {
 //        7531894 77019
-        long result = CollectionApiConstant.multipleNum(flowInfoService.attackTotalCount() - 7454875);
+        long result = CollectionApiConstant.multipleNum(flowInfoService.attackTotalCount());
         return new ServiceResult<>(result);
     }
 
