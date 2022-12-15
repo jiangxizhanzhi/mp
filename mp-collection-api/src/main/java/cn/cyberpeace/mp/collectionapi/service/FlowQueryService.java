@@ -71,7 +71,7 @@ public class FlowQueryService {
         List<Count> counts = bos.stream().map(bo -> {
             Count c = new Count();
             c.setTime(bo.getKey());
-            c.setNum(CollectionApiConstant.multipleNum(c.getNum()));
+            c.setNum(CollectionApiConstant.multipleNum(bo.getCount()));
             return c;
         }).collect(Collectors.toList());
 
