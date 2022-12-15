@@ -421,7 +421,7 @@ public class FlowInfoService {
         String ipTerm = "target_ip";
         String sumTerm = "flow_sum";
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField).size(1000)
                                                 .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
