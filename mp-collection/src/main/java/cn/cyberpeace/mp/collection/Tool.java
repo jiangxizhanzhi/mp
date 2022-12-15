@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Tool {
     public static void main(String[] args) throws Exception {
@@ -29,9 +33,12 @@ public class Tool {
         // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
         // 到时候让周豪现场选择5个类型发下
         long time = System.currentTimeMillis();
-        String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221214/_doc";
+        String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221215/_doc";
         long index = 1;
-        for (int i = 0; i < 100; i++) {
+
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 10, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+
+        for (int i = 0; i < 1; i++) {
             for (String team : teams) {
                 for (String device : devices) {
 
@@ -40,13 +47,39 @@ public class Tool {
 
                     for (String teamIp : teamIps) {
                         for (String deviceIp : deviceIps) {
-                            var result = result(time, teamIp.trim(), deviceIp.trim());
-                            HttpUtils.sendPost(esUrl, JSON.toJSONString(result));
-                            System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", index++, teamIp.trim(), deviceIp.trim()));
+                            long finalIndex = index++;
+
+                            while (true) {
+                                if (threadPoolExecutor.getQueue().size() < 10000) {
+                                    threadPoolExecutor.submit(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            var result = result(time, teamIp.trim(), deviceIp.trim());
+                                            try {
+                                                HttpUtils.sendPost(esUrl, JSON.toJSONString(result));
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                            if (finalIndex % 1000 == 0) {
+                                                System.out.println(threadPoolExecutor.getQueue().size());
+                                                System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, teamIp.trim(), deviceIp.trim()));
+                                            }
+                                        }
+                                    });
+                                    break;
+                                }
+                            }
+
                         }
                     }
                 }
             }
+        }
+        while (true) {
+            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().size() == 0) {
+                break;
+            }
+            Thread.sleep(1000);
         }
         System.out.println("耗时:" + (System.currentTimeMillis() - time));
     }
@@ -163,7 +196,7 @@ public class Tool {
                        "        ],\n" +
                        "        \"categoryCnt\": 1,\n" +
                        "        \"category\": [\n" +
-                       "            \"Generic Protocol Command Decode\"\n" +
+                       "            \"Denial of Service\"\n" +
                        "        ],\n" +
                        "        \"flowIdCnt\": 1,\n" +
                        "        \"flowId\": [\n" +
