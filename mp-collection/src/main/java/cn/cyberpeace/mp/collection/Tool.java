@@ -21,71 +21,89 @@ public class Tool {
                 .getLoggerList()
                 .forEach(logger -> logger.setLevel(Level.ERROR));
 
-        // 选手的ip
-        File source = new File("/Users/maojun/dev/app/test/sourceIps");
-        // 设备方的ip
-        File target = new File("/Users/maojun/dev/app/test/targetIps");
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
 
-        List<String> teams = FileUtil.readLines(source, "utf8");
-        List<String> devices = FileUtil.readLines(target, "utf8");
-        // 造的数据里面的时间戳 , 表示这个攻击的时间
-        // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
-        // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
-        // 到时候让周豪现场选择5个类型发下
-        long time = System.currentTimeMillis();
-        String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221215/_doc";
-        long index = 1;
+        while (true) {
 
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 10, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+            // 发送的数据内容
+            File dataFile = new File("/Users/maojun/dev/app/test/data");
+            String dataContent = FileUtil.readLines(dataFile, "utf8").get(0);
+            // 选手的ip
+            File source = new File("/Users/maojun/dev/app/test/sourceIps");
+            // 设备方的ip
+            File target = new File("/Users/maojun/dev/app/test/targetIps");
 
-        for (int i = 0; i < 1; i++) {
-            for (String team : teams) {
-                for (String device : devices) {
+            List<String> teams = FileUtil.readLines(source, "utf8");
+            List<String> devices = FileUtil.readLines(target, "utf8");
+            // 造的数据里面的时间戳 , 表示这个攻击的时间
+            // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
+            // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
+            // 到时候让周豪现场选择5个类型发下
+            String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221215/_doc";
+            long index = 1;
 
-                    List<String> teamIps = JSONObject.parseArray(team, String.class);
-                    List<String> deviceIps = JSONObject.parseArray(device, String.class);
+            long time = System.currentTimeMillis();
+            for (int i = 0; i < 1; i++) {
+                for (String team : teams) {
+                    for (String device : devices) {
 
-                    for (String teamIp : teamIps) {
-                        for (String deviceIp : deviceIps) {
-                            long finalIndex = index++;
+                        List<String> teamIps = JSONObject.parseArray(team, String.class);
+                        List<String> deviceIps = JSONObject.parseArray(device, String.class);
 
-                            while (true) {
-                                if (threadPoolExecutor.getQueue().size() < 10000) {
-                                    threadPoolExecutor.submit(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            var result = result(time, teamIp.trim(), deviceIp.trim());
-                                            try {
-                                                HttpUtils.sendPost(esUrl, JSON.toJSONString(result));
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
+                        for (String teamIp : teamIps) {
+                            for (String deviceIp : deviceIps) {
+                                long finalIndex = index++;
+
+                                while (true) {
+                                    if (threadPoolExecutor.getQueue().size() < 10000) {
+                                        threadPoolExecutor.submit(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                var result = result(time, teamIp.trim(), deviceIp.trim(),dataContent);
+                                                String sendData =  JSON.toJSONString(result);
+                                                try {
+                                                    HttpUtils.sendPost(esUrl, sendData);
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                                if (finalIndex % 1000 == 0) {
+                                                    System.out.println(threadPoolExecutor.getQueue().size());
+                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, teamIp.trim(), deviceIp.trim()));
+                                                }
                                             }
-                                            if (finalIndex % 1000 == 0) {
-                                                System.out.println(threadPoolExecutor.getQueue().size());
-                                                System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, teamIp.trim(), deviceIp.trim()));
-                                            }
-                                        }
-                                    });
-                                    break;
+                                        });
+                                        break;
+                                    }
                                 }
-                            }
 
+                            }
                         }
                     }
                 }
             }
-        }
-        while (true) {
-            if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().size() == 0) {
-                break;
+            while (true) {
+                if (threadPoolExecutor.getActiveCount() == 0 && threadPoolExecutor.getQueue().size() == 0) {
+                    break;
+                }
+                Thread.sleep(1000);
             }
-            Thread.sleep(1000);
+            long useTime = (System.currentTimeMillis() - time);
+            System.out.println("耗时:" + useTime);
+            long sleepTime = (10 * 60 * 1000 - useTime);
+            while (sleepTime > 0) {
+                System.out.println("下次执行:" + sleepTime / 1000 + "秒后");
+                Thread.sleep(10000);
+                sleepTime = sleepTime - 10000;
+            }
         }
-        System.out.println("耗时:" + (System.currentTimeMillis() - time));
     }
 
-    public static Object result(long time, String sourceIp, String targetIp) {
-        JSONObject result = (JSONObject) JSON.parse(data());
+    public static void main1(String[] args) {
+
+    }
+
+    public static Object result(long time, String sourceIp, String targetIp,String data) {
+        JSONObject result = (JSONObject) JSON.parse(data);
         {
             result.put("@timestamp", time);
         }
@@ -196,7 +214,7 @@ public class Tool {
                        "        ],\n" +
                        "        \"categoryCnt\": 1,\n" +
                        "        \"category\": [\n" +
-                       "            \"Denial of Service\"\n" +
+                       "            \"Generic Protocol Command Decode\"\n" +
                        "        ],\n" +
                        "        \"flowIdCnt\": 1,\n" +
                        "        \"flowId\": [\n" +
