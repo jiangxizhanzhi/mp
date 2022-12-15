@@ -2,14 +2,23 @@ package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -46,8 +55,8 @@ public class HttpUtils {
     }
 
     private static String doPost(String url, String content, HttpClient client) throws IOException {
-        log.info("请求地址================>{}", url);
-        log.info("请求参数================>{}", content);
+        //log.info("请求地址================>{}", url);
+        //log.info("请求参数================>{}", content);
         HttpPost httpPost = new HttpPost(url);
 
         // 解决中文乱码问题

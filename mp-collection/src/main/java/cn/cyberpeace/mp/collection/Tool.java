@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,9 +21,9 @@ public class Tool {
                 .forEach(logger -> logger.setLevel(Level.ERROR));
 
         // 选手的ip
-        File source = new File("/Users/maojun/dev/app/test/sourceIps");
+        File source = new File("/Users/sternberg/work/nitai/mock/sourceIps");
         // 设备方的ip
-        File target = new File("/Users/maojun/dev/app/test/targetIps");
+        File target = new File("/Users/sternberg/work/nitai/mock/targetIps");
 
         List<String> teams = FileUtil.readLines(source, "utf8");
         List<String> devices = FileUtil.readLines(target, "utf8");
@@ -36,9 +35,9 @@ public class Tool {
         String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221215/_doc";
         long index = 1;
 
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 10, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 100; i++) {
             for (String team : teams) {
                 for (String device : devices) {
 
@@ -196,7 +195,7 @@ public class Tool {
                        "        ],\n" +
                        "        \"categoryCnt\": 1,\n" +
                        "        \"category\": [\n" +
-                       "            \"Denial of Service\"\n" +
+                       "            \"Generic Protocol Command Decode\"\n" +
                        "        ],\n" +
                        "        \"flowIdCnt\": 1,\n" +
                        "        \"flowId\": [\n" +
