@@ -586,7 +586,7 @@ public class FlowInfoService {
         buildSeverityQuery(queryBuilder);
 
         String ipTerm = "target_ip", histoTerm = "histo";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName()).size(1000)
                                                 .subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
                                                                         .fixedInterval(DateHistogramInterval.minutes(5))
                                                                         .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
