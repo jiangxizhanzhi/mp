@@ -859,7 +859,7 @@ public class FlowInfoService {
             }
             if (bo.getFilterType() == EsIpFieldBO.FilterType.LIST) {
                 if (ipField.equals("destination.ip")) {
-                    ipQueryBuilder.must(QueryBuilders.termsQuery("source.ip", "10.50.19.29"));
+                    ipQueryBuilder.mustNot(QueryBuilders.termsQuery("source.ip", "10.50.19.29"));
                 }
                 ipQueryBuilder.should(QueryBuilders.termsQuery(ipField, bo.getIps()));
             } else {
