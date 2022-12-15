@@ -39,7 +39,6 @@ import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
@@ -421,7 +420,7 @@ public class FlowInfoService {
         String ipTerm = "target_ip";
         String sumTerm = "flow_sum";
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField).size(1000)
                                                 .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
