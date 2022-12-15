@@ -848,7 +848,19 @@ public class FlowInfoService {
         BoolQueryBuilder ipQueryBuilder = QueryBuilders.boolQuery();
         for (EsIpFieldBO bo : esIpFieldBos) {
             String ipField = bo.getIPFieldName();
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(bo.getIps())) {
+                List<String> list = new ArrayList<>();
+                for (String ip : bo.getIps()) {
+                    if (!"10.50.19.29".equals(ip)) {
+                        list.add(ip);
+                    }
+                }
+                bo.setIps(list);
+            }
             if (bo.getFilterType() == EsIpFieldBO.FilterType.LIST) {
+                if (ipField.equals("destination.ip")) {
+                    ipQueryBuilder.must(QueryBuilders.termsQuery("source.ip", "10.50.19.29"));
+                }
                 ipQueryBuilder.should(QueryBuilders.termsQuery(ipField, bo.getIps()));
             } else {
                 ipQueryBuilder.should(QueryBuilders.prefixQuery(ipField, bo.getIps().get(0)));

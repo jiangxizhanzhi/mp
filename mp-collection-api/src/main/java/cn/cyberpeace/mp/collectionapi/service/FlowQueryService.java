@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -436,7 +437,9 @@ public class FlowQueryService {
      * @return
      */
     public ServiceResult<Long> getAttackTotalCount() {
-        return new ServiceResult<>(CollectionApiConstant.multipleNum(flowInfoService.attackTotalCount() ));
+//        7531894 77019
+        long result = CollectionApiConstant.multipleNum(flowInfoService.attackTotalCount() - 7454875);
+        return new ServiceResult<>(result);
     }
 
     /**
@@ -653,6 +656,15 @@ public class FlowQueryService {
             } else {
                 bo.setFilterType(EsIpFieldBO.FilterType.PREFIX);
                 bo.setIps(Lists.newArrayList(getIpPrefixByCidr(field.getCidr())));
+            }
+            if (CollectionUtils.isNotEmpty(bo.getIps())) {
+                List<String> list = new ArrayList<>();
+                for (String ip : bo.getIps()) {
+                    if (!"10.50.19.29".equals(ip)) {
+                        list.add(ip);
+                    }
+                }
+                bo.setIps(list);
             }
         }
 
