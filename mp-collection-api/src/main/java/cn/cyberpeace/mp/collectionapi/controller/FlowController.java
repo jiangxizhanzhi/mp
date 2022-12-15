@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collectionapi.constant.CollectionApiConstant;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/flow")
@@ -40,6 +42,8 @@ public class FlowController {
 
     @Resource
     private BaseAppConfig baseAppConfig;
+
+    public static int start = 1;
 
     @GetMapping("/attack_trend")
     @ApiOperation(value = "总体攻击趋势(统计十分钟内的攻击次数)")
@@ -64,6 +68,9 @@ public class FlowController {
     @GetMapping("/attack_total_count")
     @ApiOperation(value = "总攻击次数")
     public ServiceResult<Long> attackTotalCount() {
+        if (start != 1) {
+            return new ServiceResult<>(0L).asResult();
+        }
         return flowQueryService.getAttackTotalCount().asResult();
     }
 
@@ -72,6 +79,9 @@ public class FlowController {
     public ListObjServiceResult<FlowVO> attackFlowList(
             @RequestParam(required = false, defaultValue = "1") Integer pageNum,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
+        if (start != 1) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
+        }
         return flowQueryService.attackFlowList(pageNum, pageSize).asResult();
     }
 
@@ -124,5 +134,12 @@ public class FlowController {
         File valueFile = new File(logDir + FileUtil.FILE_SEPARATOR + "value");
         FileUtil.writeBytes(multiple.getBytes(), valueFile);
         return new ServiceResult<>(true).asResult();
+    }
+
+    @PostMapping("/update_start")
+    @ApiOperation(value = "开始")
+    public ServiceResult<Integer> updateStart(@RequestParam Integer start) {
+        FlowController.start = start;
+        return new ServiceResult<>(FlowController.start).asResult();
     }
 }
