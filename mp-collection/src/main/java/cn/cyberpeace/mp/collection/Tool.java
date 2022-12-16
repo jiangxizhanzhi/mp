@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -20,22 +20,32 @@ public class Tool {
 
     public static int[] SEVERITY = new int[]{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,1} ;
 
+    public static String[] CATEGORIES = new String[]{
+        "Generic Protocol Command Decode",
+        "Attempted Information Leak",
+        "Potentially Bad Traffic",
+        "Denial of Service",
+        "Web Application Attack",
+        "Unsuccessful User Privilege Gain"
+    };
+
     public static void main(String[] args) throws Exception {
         ((LoggerContext) LoggerFactory.getILoggerFactory())
                 .getLoggerList()
                 .forEach(logger -> logger.setLevel(Level.ERROR));
 
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 2, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
 
         while (true) {
-
+            int randomNum = NumberUtil.generateRandomNumber(0, 6, 1)[0];
+            String category = CATEGORIES[randomNum];
             // 发送的数据内容
-            File dataFile = new File("/Users/maojun/dev/app/test/data");
+            File dataFile = new File("/Users/sternberg/work/nitai/mock/data");
             String dataContent = FileUtil.readLines(dataFile, "utf8").get(0);
             // 选手的ip
-            File source = new File("/Users/maojun/dev/app/test/sourceIps");
+            File source = new File("/Users/sternberg/work/nitai/mock/sourceIps_1");
             // 设备方的ip
-            File target = new File("/Users/maojun/dev/app/test/targetIps");
+            File target = new File("/Users/sternberg/work/nitai/mock/targetIps_1");
 
             List<String> teams = FileUtil.readLines(source, "utf8");
             List<String> devices = FileUtil.readLines(target, "utf8");
@@ -67,6 +77,7 @@ public class Tool {
                                             @Override
                                             public void run() {
                                                 String finalDataContent = StringUtils.replace(dataContent,"$severity", String.valueOf(severite));
+                                                finalDataContent = StringUtils.replace(dataContent,"$category", String.valueOf(category));
                                                 var result = result(time, teamIp.trim(), deviceIp.trim(),finalDataContent);
                                                 String sendData =  JSON.toJSONString(result);
                                                 try {
@@ -74,9 +85,9 @@ public class Tool {
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
                                                 }
-                                                if (finalIndex % 1000 == 0) {
+                                                if (finalIndex % 500 == 0) {
                                                     System.out.println(threadPoolExecutor.getQueue().size());
-                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, teamIp.trim(), deviceIp.trim()));
+                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s, severite:%s, category:%s, success", finalIndex, teamIp.trim(), deviceIp.trim(), severite, category));
                                                 }
                                             }
                                         });
@@ -97,7 +108,7 @@ public class Tool {
             }
             long useTime = (System.currentTimeMillis() - time);
             System.out.println("耗时:" + useTime);
-            long sleepTime = (5 * 60 * 1000 - useTime);
+            long sleepTime = (10 * 1000 - useTime);
             while (sleepTime > 0) {
                 System.out.println("下次执行:" + sleepTime / 1000 + "秒后");
                 Thread.sleep(10000);
