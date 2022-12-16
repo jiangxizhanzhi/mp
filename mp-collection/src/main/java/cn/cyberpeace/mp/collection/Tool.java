@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -16,12 +17,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Tool {
+
+    public static int[] SEVERITY = new int[]{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,1} ;
+
     public static void main(String[] args) throws Exception {
         ((LoggerContext) LoggerFactory.getILoggerFactory())
                 .getLoggerList()
                 .forEach(logger -> logger.setLevel(Level.ERROR));
 
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 2, 2, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
 
         while (true) {
 
@@ -39,10 +43,11 @@ public class Tool {
             // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
             // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
             // 到时候让周豪现场选择5个类型发下
-            String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221215/_doc";
+            String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221216/_doc";
             long index = 1;
 
             long time = System.currentTimeMillis();
+            int severiteIndex = 0 ;
             for (int i = 0; i < 1; i++) {
                 for (String team : teams) {
                     for (String device : devices) {
@@ -53,13 +58,16 @@ public class Tool {
                         for (String teamIp : teamIps) {
                             for (String deviceIp : deviceIps) {
                                 long finalIndex = index++;
+                                int severite = SEVERITY[severiteIndex];
+                                severiteIndex = (severiteIndex + 1) % SEVERITY.length;
 
                                 while (true) {
                                     if (threadPoolExecutor.getQueue().size() < 10000) {
                                         threadPoolExecutor.submit(new Runnable() {
                                             @Override
                                             public void run() {
-                                                var result = result(time, teamIp.trim(), deviceIp.trim(),dataContent);
+                                                String finalDataContent = StringUtils.replace(dataContent,"$severity", String.valueOf(severite));
+                                                var result = result(time, teamIp.trim(), deviceIp.trim(),finalDataContent);
                                                 String sendData =  JSON.toJSONString(result);
                                                 try {
                                                     HttpUtils.sendPost(esUrl, sendData);
@@ -89,7 +97,7 @@ public class Tool {
             }
             long useTime = (System.currentTimeMillis() - time);
             System.out.println("耗时:" + useTime);
-            long sleepTime = (10 * 60 * 1000 - useTime);
+            long sleepTime = (5 * 60 * 1000 - useTime);
             while (sleepTime > 0) {
                 System.out.println("下次执行:" + sleepTime / 1000 + "秒后");
                 Thread.sleep(10000);
