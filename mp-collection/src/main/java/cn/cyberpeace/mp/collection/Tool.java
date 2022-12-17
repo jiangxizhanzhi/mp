@@ -29,6 +29,15 @@ public class Tool {
         "Unsuccessful User Privilege Gain"
     };
 
+    public static String[] PROTOCOLS = new String[] {
+            "icmp",
+            "ssh",
+            "http",
+            "ftp",
+            "tls",
+            "tcp"
+    };
+
     public static void main(String[] args) throws Exception {
         ((LoggerContext) LoggerFactory.getILoggerFactory())
                 .getLoggerList()
@@ -39,13 +48,14 @@ public class Tool {
         while (true) {
             int randomNum = NumberUtil.generateRandomNumber(0, 6, 1)[0];
             String category = CATEGORIES[randomNum];
+            String protocol = PROTOCOLS[randomNum];
             // 发送的数据内容
-            File dataFile = new File("/Users/sternberg/work/nitai/mock/data");
+            File dataFile = new File("/Users/sternberg/work/nitai/mock/data_0");
             String dataContent = FileUtil.readLines(dataFile, "utf8").get(0);
             // 选手的ip
             File source = new File("/Users/sternberg/work/nitai/mock/sourceIps_1");
             // 设备方的ip
-            File target = new File("/Users/sternberg/work/nitai/mock/targetIps_1");
+            File target = new File("/Users/sternberg/work/nitai/mock/targetIps");
 
             List<String> teams = FileUtil.readLines(source, "utf8");
             List<String> devices = FileUtil.readLines(target, "utf8");
@@ -77,7 +87,8 @@ public class Tool {
                                             @Override
                                             public void run() {
                                                 String finalDataContent = StringUtils.replace(dataContent,"$severity", String.valueOf(severite));
-                                                finalDataContent = StringUtils.replace(dataContent,"$category", String.valueOf(category));
+                                                finalDataContent = StringUtils.replace(finalDataContent,"$category", String.valueOf(category));
+                                                finalDataContent = StringUtils.replace(finalDataContent,"$protocol", String.valueOf(protocol));
                                                 var result = result(time, teamIp.trim(), deviceIp.trim(),finalDataContent);
                                                 String sendData =  JSON.toJSONString(result);
                                                 try {
@@ -85,9 +96,9 @@ public class Tool {
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
                                                 }
-                                                if (finalIndex % 500 == 0) {
+                                                if (finalIndex % 1000 == 0) {
                                                     System.out.println(threadPoolExecutor.getQueue().size());
-                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s, severite:%s, category:%s, success", finalIndex, teamIp.trim(), deviceIp.trim(), severite, category));
+                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s, severite:%s, category:%s, protocol:%s, success", finalIndex, teamIp.trim(), deviceIp.trim(), severite, category, protocol));
                                                 }
                                             }
                                         });
@@ -108,7 +119,7 @@ public class Tool {
             }
             long useTime = (System.currentTimeMillis() - time);
             System.out.println("耗时:" + useTime);
-            long sleepTime = (10 * 1000 - useTime);
+            long sleepTime = (10 * 60 * 1000 - useTime);
             while (sleepTime > 0) {
                 System.out.println("下次执行:" + sleepTime / 1000 + "秒后");
                 Thread.sleep(10000);
