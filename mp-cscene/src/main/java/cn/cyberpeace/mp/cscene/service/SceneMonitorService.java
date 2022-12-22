@@ -5,9 +5,10 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -182,17 +184,49 @@ public class SceneMonitorService {
         List<String> nodeIds = topologyElements.stream().map(SceneElementBO::getId).collect(Collectors.toList());
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
+        List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
-            ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
-            basicInfo.setSceneId(sceneId);
-            elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
-            if (isSupportedVirtualType(basicInfo.getVirtualType())) {
-                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
-                basicInfos.add(basicInfo);
+            var finalFetchRealTimeHostState = fetchRealTimeHostState;
+            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, finalFetchRealTimeHostState));
+            cfList.add(cf);
+        }
+
+        if (CollectionUtil.isNotEmpty(cfList)) {
+            var cfArray = cfList.toArray(new CompletableFuture[0]);
+            CompletableFuture<List<ElementMonitorBasicInfo>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            basicInfos = finalCF.join();
+
+            if (CollectionUtil.isNotEmpty(basicInfos)) {
+                basicInfos = basicInfos.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                Collections.sort(basicInfos, (o1, o2) -> {
+                    int o1i = 0;
+                    int o2i = 0;
+                    for (int i = 0; i < nodeIds.size(); i++) {
+                        if (Objects.equals(nodeIds.get(i), o1.getId())) {
+                            o1i = i;
+                        }
+                        if (Objects.equals(nodeIds.get(i), o2.getId())) {
+                            o2i = i;
+                        }
+                    }
+                    return o1i - o2i;
+                });
             }
+
         }
 
         return basicInfos;
+    }
+
+    private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId, boolean fetchRealTimeHostState) {
+        ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
+        basicInfo.setSceneId(sceneId);
+        elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
+        if (isSupportedVirtualType(basicInfo.getVirtualType())) {
+            elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
+            return basicInfo;
+        }
+        return null;
     }
 
 
