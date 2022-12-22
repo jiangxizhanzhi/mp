@@ -86,6 +86,7 @@ public class ActivMenuService {
         log.info("reImportMenus...");
         String s = readJsonStrFromMultipartFile(jsonFile);
         List<ActivMenuDTO> menus = JSON.parseArray(s, ActivMenuDTO.class);
+
         List<TargetModel> targetModels = new ArrayList<>();
         List<MenuExtraInfoModel> menuExtraInfoModels = new ArrayList<>();
 
@@ -96,17 +97,38 @@ public class ActivMenuService {
             recursion(targetModels, menuExtraInfoModels, menu, "");
         }
 
-        // todo 根据系统激活与否，激活项目，版本，决定visible属性
+        check(targetModels);
+
+        // 根据系统激活与否，激活项目，版本，决定visible属性
         ActivationResponse content = activationService.status();
-//        ActivationResponse content = mockActivationContent();
+        // ActivationResponse content = mockActivationContent();
         if (Objects.nonNull(content)) {
             // 系统已激活，暂时忽略激活状态过期的场景
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-        boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+
+        boolean success = false;
+        //boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
         evictCache();
         return success;
+    }
+
+
+    private void check(List<TargetModel> targetModels) {
+        var notEqualList = targetModels.stream().filter(t -> !Objects.equals(t.getId(), t.getIdentifier())).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(notEqualList)) {
+            log.error("json file error! value not equals with authority:{}", notEqualList.get(0).getId());
+            throw new MpRuntimeException("json file error! value not equals with authority:" + notEqualList.get(0).getId());
+        }
+
+        // 检查是否有重复
+        Map<String, Long> map = targetModels.stream().collect(Collectors.groupingBy(t -> t.getId(), Collectors.counting()));
+        Map.Entry<String, Long> entry = map.entrySet().stream().filter(e -> e.getValue() > 1).findFirst().orElse(null);
+        if (Objects.nonNull(entry)) {
+            log.error("json file has duplicated:{}", entry.getKey());
+            throw new MpRuntimeException("json file error! duplicated:" + entry.getKey());
+        }
     }
 
 
