@@ -47,6 +47,7 @@ import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
+import cn.cyberpeace.mp.devopscluster.service.CpDeviceService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
@@ -57,6 +58,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,6 +97,9 @@ public class ImagesConverter implements BaseConverter{
 
     private final JsonMockService jsonMockService;
 
+    @Autowired
+    private final CpDeviceService cpDeviceService;
+
     /**
      * 分页查询镜像列表
      * @param dto
@@ -117,8 +122,7 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
-        //List<Device> deviceList = this.findByIds(ids);
-        List<Device> deviceList = jsonMockService.filterDevicesByIds(ids);
+        List<Device> deviceList = cpDeviceService.findDeviceByIds(ids);
         POLogoUtils.changeLogoPathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){
@@ -278,7 +282,6 @@ public class ImagesConverter implements BaseConverter{
                 devopsTargetAuthService.bulkCreate(authModelList);
             });
         }
-
     }
 
     /**
