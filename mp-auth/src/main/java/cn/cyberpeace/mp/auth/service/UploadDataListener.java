@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
@@ -154,6 +155,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 userName2IndexBoMap.put(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
+                checkExpiredTime(user.getExpiredTime(), index);
             }
         }
         // 校验用户名
@@ -222,6 +224,24 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
             log.error("No {} row error! password {} has illegal strength!", index, password);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index), password));
+        }
+    }
+
+    /**
+     * 校验过期日期格式
+     *
+     * @param expiredTime
+     * @param index
+     */
+    private void checkExpiredTime(String expiredTime, int index) {
+        // 过期时间格式是否合法
+        if (StringUtils.isNotBlank(expiredTime)) {
+            try {
+                TimeUtils.yyyyMMddHHmm2LocalDate(expiredTime);
+            } catch (Exception e) {
+                log.error("No.{0} row error! expired time [{1}] format not correct!", index, expiredTime);
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_EXPIRED_TIME_INVALID.format(String.valueOf(index), expiredTime));
+            }
         }
     }
 

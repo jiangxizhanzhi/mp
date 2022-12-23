@@ -33,6 +33,8 @@ public class ImportUserBo {
     // 角色 名称，多个用逗号隔开
     private String roles;
 
+    private String expiredTime;
+
     // 角色ID，Excel中不存在，留待后端绑定用
     private List<String> roleIdList;
 

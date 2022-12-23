@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -1024,6 +1025,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUserBo.getPassword())
                         .build();
+        if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
+            userModel.setExpiredTime(TimeUtils.yyyyMMddHHmm2LocalDate(importUserBo.getExpiredTime()));
+        }
         return userModel;
     }
 

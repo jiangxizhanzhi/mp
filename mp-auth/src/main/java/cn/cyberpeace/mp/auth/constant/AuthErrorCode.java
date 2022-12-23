@@ -117,9 +117,10 @@ public enum AuthErrorCode implements ErrorCode {
     EXCEL_LIST_ORG_NOT_EXISTED("MP-110131", "excel_list_org_not_existed"),
     EXCEL_LIST_USERNAME_DUPLICATED("MP-110132", "excel_list_username_duplicated"),
     EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110133", "excel_template_download_error"),
+    EXCEL_LIST_EXPIRED_TIME_INVALID("MP-110134", "excel_list_expired_time_invalid"),
 
-    COPY_FILE_ERROR("MP-110134", "copy_file_error"),
-    FILE_NAME_ISNULL_ERROR("MP-110135", "file_name_isnull_error"),
+    COPY_FILE_ERROR("MP-110135", "copy_file_error"),
+    FILE_NAME_ISNULL_ERROR("MP-110136", "file_name_isnull_error"),
 
     PERMISSION_DENIED("MP-110140", "permission_denied"),
 
