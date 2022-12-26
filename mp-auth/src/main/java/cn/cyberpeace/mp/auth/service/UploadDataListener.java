@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -237,7 +238,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         // 过期时间格式是否合法
         if (StringUtils.isNotBlank(expiredTime)) {
             try {
-                TimeUtils.yyyyMMddHHmm2LocalDate(expiredTime);
+                TimeUtils.stringToLocalDate(expiredTime);
             } catch (Exception e) {
                 log.error("No.{0} row error! expired time [{1}] format not correct!", index, expiredTime);
                 throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_EXPIRED_TIME_INVALID.format(String.valueOf(index), expiredTime));

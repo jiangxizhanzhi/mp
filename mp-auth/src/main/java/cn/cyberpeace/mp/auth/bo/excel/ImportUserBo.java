@@ -35,6 +35,8 @@ public class ImportUserBo {
 
     private String expiredTime;
 
+    private String description;
+
     // 角色ID，Excel中不存在，留待后端绑定用
     private List<String> roleIdList;
 

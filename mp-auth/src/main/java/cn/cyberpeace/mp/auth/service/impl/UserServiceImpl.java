@@ -53,11 +53,13 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -73,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1026,7 +1029,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(importUserBo.getPassword())
                         .build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
-            userModel.setExpiredTime(TimeUtils.yyyyMMddHHmm2LocalDate(importUserBo.getExpiredTime()));
+            var expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
+            userModel.setExpiredTime(expDate.atTime(23, 59, 59));
+        }
+        if (StringUtils.isNotBlank(importUserBo.getDescription())) {
+            userModel.setDescription(importUserBo.getDescription());
         }
         return userModel;
     }
