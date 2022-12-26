@@ -3,7 +3,7 @@ ip:
   mariadb: 10.100.1.12        # MP新中台mariadb数据库地址
   fdfs: 10.100.1.26             # FastDFS地址
   cp: 10.100.7.1                # 云平台适配层接口地址
-  moloch: 10.100.0.101          # moloch的IP地址
+  moloch: 10.4.1.20          # moloch的IP地址
   wazuh: 10.100.7.1           # wazuh的IP地址
   es: 10.100.0.101                 # MP新中台ES地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
@@ -70,7 +70,7 @@ springfox:
 mp:
   situationaware:
     #moloch es节点地址
-    es-node: ${ip.moloch}:9205
+    es-node: ${ip.moloch}:9208
     wazuh:
       #wazuh 开放接口地址
       base-url: http://${ip.wazuh}:15500

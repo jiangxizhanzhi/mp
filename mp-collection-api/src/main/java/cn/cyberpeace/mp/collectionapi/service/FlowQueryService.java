@@ -31,19 +31,20 @@ import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
 import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TrendVO.Count;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,7 @@ public class FlowQueryService {
 
     /**
      * 总体攻击趋势
+     *
      * @return
      */
     public ServiceResult<TrendVO> queryAttackTrend() {
@@ -91,6 +93,7 @@ public class FlowQueryService {
 
     /**
      * 攻击告警级别趋势
+     *
      * @return
      */
     public ListObjServiceResult<TrendVO> queryLevelTrend() {
@@ -120,6 +123,7 @@ public class FlowQueryService {
 
     /**
      * 战队攻击趋势
+     *
      * @return
      */
     public ListObjServiceResult<TrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
@@ -155,7 +159,7 @@ public class FlowQueryService {
     /**
      * @param vos
      * @param pointsNum 时间点
-     * @param interval 时间间隔（分钟）
+     * @param interval  时间间隔（分钟）
      */
     private void fillEmptyTrendVO(List<TrendVO> vos, List<String> lines, int pointsNum, int interval) {
         final char LAST_CHAR = (char) ((interval % 10) + '0');
@@ -200,6 +204,7 @@ public class FlowQueryService {
 
     /**
      * 合并趋势数据点
+     *
      * @param vo
      * @param bos
      */
@@ -227,6 +232,7 @@ public class FlowQueryService {
 
     /**
      * 攻击次数与流量大小（战队 or 设备）
+     *
      * @return
      */
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(AttackFlowBaseRequest request) {
@@ -243,10 +249,12 @@ public class FlowQueryService {
             flowSize.setSize(CollectionApiConstant.multipleNum(bo.getSize()));
 
             AggAttackFlowVO vo = new AggAttackFlowVO();
+            vo.setAttackTypeBOMap(new HashMap<>());
             vo.setName(getNameByIp(request, bo.getIp()));
             if (vo.getName() == null) {
                 vo.setName(StringUtils.EMPTY);
             }
+            vo.setAttackTypeBOS(bo.getAttackTypes());
             vo.setAttackCount(attackCount);
             vo.setFlowSize(flowSize);
             return vo;
@@ -295,6 +303,20 @@ public class FlowQueryService {
                 }
                 vo.setFlowSize(flowSize);
 
+                if (CollectionUtils.isNotEmpty(vo.getAttackTypeBOS())) {
+                    vo.getAttackTypeBOS().forEach(t -> {
+                        if (!vo.getAttackTypeBOMap().containsKey(t.getZhName())) {
+                            AttackTypeBO attackTypeBO = new AttackTypeBO();
+                            attackTypeBO.setZhName(t.getZhName());
+                            attackTypeBO.setCount(t.getCount());
+                            vo.getAttackTypeBOMap().put(t.getZhName(), attackTypeBO);
+                        } else {
+                            var x = vo.getAttackTypeBOMap().get(t.getZhName());
+                            x.setCount(x.getCount() + t.getCount());
+                        }
+                    });
+                }
+
                 resMap.put(vo.getName(), vo);
             } else {
                 AttackCount attackCount = resMap.get(vo.getName()).getAttackCount();
@@ -307,8 +329,57 @@ public class FlowQueryService {
                 if (vo.getFlowSize().getPercent() != null) {
                     flowSize.setPercent(flowSize.getPercent() + vo.getFlowSize().getPercent());
                 }
+
+                if (CollectionUtils.isNotEmpty(vo.getAttackTypeBOS())) {
+                    vo.getAttackTypeBOS().forEach(t -> {
+                        if (!vo.getAttackTypeBOMap().containsKey(t.getZhName())) {
+                            AttackTypeBO attackTypeBO = new AttackTypeBO();
+                            attackTypeBO.setZhName(t.getZhName());
+                            attackTypeBO.setCount(t.getCount());
+                            vo.getAttackTypeBOMap().put(t.getZhName(), attackTypeBO);
+                        } else {
+                            var x = vo.getAttackTypeBOMap().get(t.getZhName());
+                            x.setCount(x.getCount() + t.getCount());
+                        }
+                    });
+                }
+
             }
         }
+
+        resMap.values().forEach(v -> {
+            v.setAttackTypeBOS(new ArrayList<>(v.getAttackTypeBOMap().values()));
+            Collections.sort(v.getAttackTypeBOS(), (v1, v2) -> {
+                return (int) (v2.getCount() - v1.getCount());
+            });
+            v.setAttackTypeBOMap(null);
+        });
+
+        var rrMap = rrMap();
+        var resArray = new ArrayList<>(resMap.values());
+        Collections.sort(resArray, (r1, r2) -> {
+            return r1.getName().compareTo(r2.getName());
+        });
+        for (var res : resArray) {
+            System.out.println();
+            boolean wr = false;
+            for (var bo : res.getAttackTypeBOS()) {
+                System.out.println();
+                if (!wr) {
+                    System.out.print(rrMap.get(res.getName()).hezi + "\t");
+                    System.out.print(rrMap.get(res.getName()).saidao + "\t");
+                    System.out.print(rrMap.get(res.getName()).shebei + "\t");
+                    System.out.print(res.getAttackCount().getAttackCount() + "\t");
+                    wr = true;
+                } else {
+                    System.out.print("\t\t\t\t");
+                }
+                System.out.print(bo.getZhName() + "\t");
+                System.out.print(bo.getCount() + "\t");
+            }
+        }
+
+
         var result = new ArrayList<>(resMap.values());
 
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size()));
@@ -316,6 +387,7 @@ public class FlowQueryService {
 
     /**
      * 获取top数据
+     *
      * @param request
      * @return
      */
@@ -336,6 +408,7 @@ public class FlowQueryService {
 
     /**
      * 攻击次数top5
+     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryTeamAttackCountTop5(AttackAggTopRequest request) {
@@ -352,6 +425,7 @@ public class FlowQueryService {
 
     /**
      * 攻击手段占比top5（全部队伍）
+     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
@@ -379,6 +453,7 @@ public class FlowQueryService {
 
     /**
      * 设备攻击协议TOP5
+     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
@@ -405,6 +480,7 @@ public class FlowQueryService {
 
     /**
      * 设备类型被攻击占比TOP5
+     *
      * @return
      */
     private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
@@ -434,6 +510,7 @@ public class FlowQueryService {
 
     /**
      * 总攻击次数
+     *
      * @return
      */
     public ServiceResult<Long> getAttackTotalCount() {
@@ -444,6 +521,7 @@ public class FlowQueryService {
 
     /**
      * 战队攻击排名
+     *
      * @param request
      * @return
      */
@@ -483,6 +561,7 @@ public class FlowQueryService {
 
     /**
      * 攻击流量列表
+     *
      * @param pageSize
      * @param pageNum
      * @return
@@ -503,6 +582,7 @@ public class FlowQueryService {
 
     /**
      * 获取攻击目标top数据
+     *
      * @param request
      * @return
      */
@@ -518,7 +598,7 @@ public class FlowQueryService {
             return ipField;
         }).collect(Collectors.toList());
         List<IPField> targetFields = request.getSources().stream().map(Source::getTargets).flatMap(Collection::stream)
-                                             .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
         AttackFlowBaseRequest baseRequest = new AttackFlowBaseRequest();
         baseRequest.setSources(sourceFields);
@@ -543,7 +623,7 @@ public class FlowQueryService {
                     continue;
                 }
                 TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
-                                            .orElse(null);
+                        .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
                     topEntry.setName(targetName);
@@ -567,7 +647,7 @@ public class FlowQueryService {
 
         // 放大攻击次数
         vos.stream().map(TeamTopVO::getEntries).flatMap(Collection::stream).forEach(c -> {
-            c.setCount(CollectionApiConstant.multipleNum(c.getCount() ));
+            c.setCount(CollectionApiConstant.multipleNum(c.getCount()));
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
@@ -575,6 +655,7 @@ public class FlowQueryService {
 
     /**
      * 攻击手段占比top5（指定队伍）
+     *
      * @return
      */
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
@@ -599,7 +680,7 @@ public class FlowQueryService {
             for (AttackTypeBO attackTypeBO : bo.getAttackTypes()) {
                 String attackTypeName = attackTypeBO.getEnName();
                 TopEntry topEntry = entries.stream().filter(t -> attackTypeName.equals(t.getName())).findFirst()
-                                            .orElse(null);
+                        .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
                     topEntry.setName(attackTypeName);
@@ -631,6 +712,7 @@ public class FlowQueryService {
 
     /**
      * 生成ip字段的搜索项
+     *
      * @param request
      * @return
      */
@@ -638,9 +720,9 @@ public class FlowQueryService {
         List<EsIpFieldBO> bos = Lists.newArrayList();
 
         EsIpFieldBO.Field ipField = CollectionUtils.isNotEmpty(request.getSources()) ? EsIpFieldBO.Field.SOURCE
-                                            : EsIpFieldBO.Field.DESTINATION;
+                : EsIpFieldBO.Field.DESTINATION;
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
-                                         : request.getTargets();
+                : request.getTargets();
         if (ipFields == null) {
             return bos;
         }
@@ -673,6 +755,7 @@ public class FlowQueryService {
 
     /**
      * cidr前缀
+     *
      * @param cidr
      * @return
      */
@@ -682,13 +765,14 @@ public class FlowQueryService {
 
     /**
      * 根据ip判断所属队伍
+     *
      * @param request
      * @param ip
      * @return
      */
     private String getNameByIp(AttackFlowBaseRequest request, String ip) {
         List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
-                                         : request.getTargets();
+                : request.getTargets();
         if (ipFields == null) {
             return "";
         }
@@ -697,6 +781,7 @@ public class FlowQueryService {
 
     /**
      * 根据ip判断所属队伍
+     *
      * @param ipFields
      * @param ip
      * @return
@@ -717,6 +802,7 @@ public class FlowQueryService {
 
     /**
      * 告警级别显示名称
+     *
      * @param severity
      * @return
      */
@@ -730,5 +816,516 @@ public class FlowQueryService {
         }
 
         return "";
+    }
+
+
+    public static Map<String, RR> rrMap() {
+        String res = res();
+        Map<String, RR> rrMap = new HashMap<>();
+        JSONObject t1 = JSON.parseObject(res);
+        for (String key : t1.keySet()) {
+            JSONObject saidao = t1.getJSONObject(key);
+            for (String saidaokey : saidao.keySet()) {
+                JSONObject shebei = saidao.getJSONObject(saidaokey);
+                for (String shebeiKey : shebei.keySet()) {
+                    RR rr = new RR();
+                    rr.hezi = key;
+                    rr.saidao = saidaokey;
+                    rr.shebei = shebeiKey;
+                    rr.ip = new ArrayList<>();
+                    rrMap.put(rr.shebei, rr);
+                    JSONArray ip = shebei.getJSONArray(shebeiKey);
+                    for (String ipa : ip.toArray(new String[]{})) {
+                        rr.ip.add(ipa);
+                    }
+                }
+            }
+        }
+        return rrMap;
+    }
+
+    public static class RR {
+        String hezi;
+        String saidao;
+        String shebei;
+        List<String> ip;
+    }
+
+    public static String res() {
+        return "{\n" +
+                "    \"black\": {\n" +
+                "        \"互联网赛道\": {\n" +
+                "            \"商用路由器-1\": [\n" +
+                "                \"172.29.202.10\"\n" +
+                "            ],\n" +
+                "            \"商用路由器-2\": [\n" +
+                "                \"172.29.251.20\"\n" +
+                "            ],\n" +
+                "            \"商用路由器-3\": [\n" +
+                "                \"172.29.252.30\"\n" +
+                "            ],\n" +
+                "            \"商用路由器-4\": [\n" +
+                "                \"172.29.250.40\"\n" +
+                "            ],\n" +
+                "            \"商用路由器-5\": [\n" +
+                "                \"172.29.235.50\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态路由器\": [\n" +
+                "                \"172.29.201.116\"\n" +
+                "            ],\n" +
+                "            \"商用存储-1\": [\n" +
+                "                \"172.29.116.200\"\n" +
+                "            ],\n" +
+                "            \"商用存储-2\": [\n" +
+                "                \"172.29.203.200\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态存储\": [\n" +
+                "                \"172.29.6.101\"\n" +
+                "            ],\n" +
+                "            \"商用DNS\": [\n" +
+                "                \"172.29.221.11\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态DNS\": [\n" +
+                "                \"172.29.4.9\"\n" +
+                "            ],\n" +
+                "            \"商用交换机-1\": [\n" +
+                "                \"172.29.217.200\"\n" +
+                "            ],\n" +
+                "            \"商用交换机-2\": [\n" +
+                "                \"172.29.244.200\"\n" +
+                "            ],\n" +
+                "            \"商用交换机-3\": [\n" +
+                "                \"172.29.246.200\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态交换机\": [\n" +
+                "                \"172.29.243.240\"\n" +
+                "            ],\n" +
+                "            \"商用云\": [\n" +
+                "                \"172.29.126.100\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态云\": [\n" +
+                "                \"172.29.248.100\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态WEB\": [\n" +
+                "                \"172.29.215.60\"\n" +
+                "            ],\n" +
+                "            \"商用WEB-1\": [\n" +
+                "                \"172.29.216.11\",\n" +
+                "                \"172.29.216.12\",\n" +
+                "                \"172.29.216.13\",\n" +
+                "                \"172.29.216.14\",\n" +
+                "                \"172.29.216.15\",\n" +
+                "                \"172.29.216.16\",\n" +
+                "                \"172.29.216.17\",\n" +
+                "                \"172.29.216.18\",\n" +
+                "                \"172.29.216.19\",\n" +
+                "                \"172.29.216.20\",\n" +
+                "                \"172.29.216.21\",\n" +
+                "                \"172.29.216.22\",\n" +
+                "                \"172.29.216.23\",\n" +
+                "                \"172.29.216.24\",\n" +
+                "                \"172.29.216.25\",\n" +
+                "                \"172.29.216.26\",\n" +
+                "                \"172.29.216.27\",\n" +
+                "                \"172.29.216.28\",\n" +
+                "                \"172.29.216.29\",\n" +
+                "                \"172.29.216.30\",\n" +
+                "                \"172.29.216.31\",\n" +
+                "                \"172.29.216.32\",\n" +
+                "                \"172.29.216.33\",\n" +
+                "                \"172.29.216.34\",\n" +
+                "                \"172.29.216.35\",\n" +
+                "                \"172.29.216.36\",\n" +
+                "                \"172.29.216.37\",\n" +
+                "                \"172.29.216.38\",\n" +
+                "                \"172.29.216.39\",\n" +
+                "                \"172.29.216.40\",\n" +
+                "                \"172.29.216.41\",\n" +
+                "                \"172.29.216.42\",\n" +
+                "                \"172.29.216.43\",\n" +
+                "                \"172.29.216.44\",\n" +
+                "                \"172.29.216.45\",\n" +
+                "                \"172.29.216.46\",\n" +
+                "                \"172.29.216.47\",\n" +
+                "                \"172.29.216.48\",\n" +
+                "                \"172.29.216.49\",\n" +
+                "                \"172.29.216.50\",\n" +
+                "                \"172.29.216.51\",\n" +
+                "                \"172.29.216.52\",\n" +
+                "                \"172.29.216.53\",\n" +
+                "                \"172.29.216.54\",\n" +
+                "                \"172.29.216.55\",\n" +
+                "                \"172.29.216.56\",\n" +
+                "                \"172.29.216.57\",\n" +
+                "                \"172.29.216.58\",\n" +
+                "                \"172.29.216.59\",\n" +
+                "                \"172.29.216.60\",\n" +
+                "                \"172.29.216.61\",\n" +
+                "                \"172.29.216.62\",\n" +
+                "                \"172.29.216.63\",\n" +
+                "                \"172.29.216.64\",\n" +
+                "                \"172.29.216.65\",\n" +
+                "                \"172.29.216.66\",\n" +
+                "                \"172.29.216.67\",\n" +
+                "                \"172.29.216.68\",\n" +
+                "                \"172.29.216.69\"\n" +
+                "            ],\n" +
+                "            \"商用WEB-2\": [\n" +
+                "                \"172.29.227.11\",\n" +
+                "                \"172.29.227.12\",\n" +
+                "                \"172.29.227.13\",\n" +
+                "                \"172.29.227.14\",\n" +
+                "                \"172.29.227.15\",\n" +
+                "                \"172.29.227.16\",\n" +
+                "                \"172.29.227.17\",\n" +
+                "                \"172.29.227.18\",\n" +
+                "                \"172.29.227.19\",\n" +
+                "                \"172.29.227.20\",\n" +
+                "                \"172.29.227.21\",\n" +
+                "                \"172.29.227.22\",\n" +
+                "                \"172.29.227.23\",\n" +
+                "                \"172.29.227.24\",\n" +
+                "                \"172.29.227.25\",\n" +
+                "                \"172.29.227.26\",\n" +
+                "                \"172.29.227.27\",\n" +
+                "                \"172.29.227.28\",\n" +
+                "                \"172.29.227.29\",\n" +
+                "                \"172.29.227.30\",\n" +
+                "                \"172.29.227.31\",\n" +
+                "                \"172.29.227.32\",\n" +
+                "                \"172.29.227.33\",\n" +
+                "                \"172.29.227.34\",\n" +
+                "                \"172.29.227.35\",\n" +
+                "                \"172.29.227.36\",\n" +
+                "                \"172.29.227.37\",\n" +
+                "                \"172.29.227.38\",\n" +
+                "                \"172.29.227.39\",\n" +
+                "                \"172.29.227.40\",\n" +
+                "                \"172.29.227.41\",\n" +
+                "                \"172.29.227.42\",\n" +
+                "                \"172.29.227.43\",\n" +
+                "                \"172.29.227.44\",\n" +
+                "                \"172.29.227.45\",\n" +
+                "                \"172.29.227.46\",\n" +
+                "                \"172.29.227.47\",\n" +
+                "                \"172.29.227.48\",\n" +
+                "                \"172.29.227.49\",\n" +
+                "                \"172.29.227.50\",\n" +
+                "                \"172.29.227.51\",\n" +
+                "                \"172.29.227.52\",\n" +
+                "                \"172.29.227.53\",\n" +
+                "                \"172.29.227.54\",\n" +
+                "                \"172.29.227.55\",\n" +
+                "                \"172.29.227.56\",\n" +
+                "                \"172.29.227.57\",\n" +
+                "                \"172.29.227.58\",\n" +
+                "                \"172.29.227.59\",\n" +
+                "                \"172.29.227.60\",\n" +
+                "                \"172.29.227.61\",\n" +
+                "                \"172.29.227.62\",\n" +
+                "                \"172.29.227.63\",\n" +
+                "                \"172.29.227.64\",\n" +
+                "                \"172.29.227.65\",\n" +
+                "                \"172.29.227.66\",\n" +
+                "                \"172.29.227.67\",\n" +
+                "                \"172.29.227.68\",\n" +
+                "                \"172.29.227.69\"\n" +
+                "            ],\n" +
+                "            \"商用WEB-3\": [\n" +
+                "                \"172.29.233.11\",\n" +
+                "                \"172.29.233.12\",\n" +
+                "                \"172.29.233.13\",\n" +
+                "                \"172.29.233.14\",\n" +
+                "                \"172.29.233.15\",\n" +
+                "                \"172.29.233.16\",\n" +
+                "                \"172.29.233.17\",\n" +
+                "                \"172.29.233.18\",\n" +
+                "                \"172.29.233.19\",\n" +
+                "                \"172.29.233.20\",\n" +
+                "                \"172.29.233.21\",\n" +
+                "                \"172.29.233.22\",\n" +
+                "                \"172.29.233.23\",\n" +
+                "                \"172.29.233.24\",\n" +
+                "                \"172.29.233.25\",\n" +
+                "                \"172.29.233.26\",\n" +
+                "                \"172.29.233.27\",\n" +
+                "                \"172.29.233.28\",\n" +
+                "                \"172.29.233.29\",\n" +
+                "                \"172.29.233.30\",\n" +
+                "                \"172.29.233.31\",\n" +
+                "                \"172.29.233.32\",\n" +
+                "                \"172.29.233.33\",\n" +
+                "                \"172.29.233.34\",\n" +
+                "                \"172.29.233.35\",\n" +
+                "                \"172.29.233.36\",\n" +
+                "                \"172.29.233.37\",\n" +
+                "                \"172.29.233.38\",\n" +
+                "                \"172.29.233.39\",\n" +
+                "                \"172.29.233.40\",\n" +
+                "                \"172.29.233.41\",\n" +
+                "                \"172.29.233.42\",\n" +
+                "                \"172.29.233.43\",\n" +
+                "                \"172.29.233.44\",\n" +
+                "                \"172.29.233.45\",\n" +
+                "                \"172.29.233.46\",\n" +
+                "                \"172.29.233.47\",\n" +
+                "                \"172.29.233.48\",\n" +
+                "                \"172.29.233.49\",\n" +
+                "                \"172.29.233.50\",\n" +
+                "                \"172.29.233.51\",\n" +
+                "                \"172.29.233.52\",\n" +
+                "                \"172.29.233.53\",\n" +
+                "                \"172.29.233.54\",\n" +
+                "                \"172.29.233.55\",\n" +
+                "                \"172.29.233.56\",\n" +
+                "                \"172.29.233.57\",\n" +
+                "                \"172.29.233.58\",\n" +
+                "                \"172.29.233.59\",\n" +
+                "                \"172.29.233.60\",\n" +
+                "                \"172.29.233.61\",\n" +
+                "                \"172.29.233.62\",\n" +
+                "                \"172.29.233.63\",\n" +
+                "                \"172.29.233.64\",\n" +
+                "                \"172.29.233.65\",\n" +
+                "                \"172.29.233.66\",\n" +
+                "                \"172.29.233.67\",\n" +
+                "                \"172.29.233.68\",\n" +
+                "                \"172.29.233.69\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"电信网赛道\": {\n" +
+                "            \"商用5G UDM\": [\n" +
+                "                \"172.29.228.60\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态5G UDM\": [\n" +
+                "                \"172.29.238.52\"\n" +
+                "            ],\n" +
+                "            \"商用IMS HSS\": [\n" +
+                "                \"172.29.245.129\",\n" +
+                "                \"172.29.245.10\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态IMS HSS\": [\n" +
+                "                \"172.29.207.4\",\n" +
+                "                \"172.29.214.4\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"密码机赛道\": {\n" +
+                "            \"商用密码机A-1\": [\n" +
+                "                \"172.29.210.222\"\n" +
+                "            ],\n" +
+                "            \"商用密码机A-2\": [\n" +
+                "                \"172.29.209.20\"\n" +
+                "            ],\n" +
+                "            \"商用密码机A-3\": [\n" +
+                "                \"172.29.230.245\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态密码机A\": [\n" +
+                "                \"172.29.234.21\"\n" +
+                "            ],\n" +
+                "            \"商用密码机B\": [\n" +
+                "                \"172.29.240.100\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态密码机B\": [\n" +
+                "                \"172.29.247.110\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"车联网赛道\": {\n" +
+                "            \"T-BOX-1\": [\n" +
+                "                \"172.29.192.6\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-2\": [\n" +
+                "                \"172.29.195.6\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-3\": [\n" +
+                "                \"172.29.195.16\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-4\": [\n" +
+                "                \"172.29.206.6\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-5\": [\n" +
+                "                \"172.29.206.16\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-6\": [\n" +
+                "                \"172.29.192.16\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-7\": [\n" +
+                "                \"172.29.200.6\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-8\": [\n" +
+                "                \"172.29.200.16\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-9\": [\n" +
+                "                \"172.29.198.6\"\n" +
+                "            ],\n" +
+                "            \"T-BOX-10\": [\n" +
+                "                \"172.29.199.6\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态T-BOX\": [\n" +
+                "                \"172.29.205.2\"\n" +
+                "            ],\n" +
+                "            \"ADAS-1\": [\n" +
+                "                \"192.168.1.250\"\n" +
+                "            ],\n" +
+                "            \"ADAS-2\": [\n" +
+                "                \"172.29.223.11\"\n" +
+                "            ],\n" +
+                "            \"ADAS-3\": [\n" +
+                "                \"192.168.0.233\"\n" +
+                "            ],\n" +
+                "            \"ADAS-4\": [\n" +
+                "                \"172.29.225.35\"\n" +
+                "            ],\n" +
+                "            \"ADAS-5\": [\n" +
+                "                \"172.29.224.28\"\n" +
+                "            ],\n" +
+                "            \"ADAS-6\": [\n" +
+                "                \"172.29.226.43\"\n" +
+                "            ],\n" +
+                "            \"ADAS-7\": [\n" +
+                "                \"172.29.218.59\"\n" +
+                "            ],\n" +
+                "            \"ADAS-8\": [\n" +
+                "                \"172.29.220.33\"\n" +
+                "            ],\n" +
+                "            \"ADAS-9\": [\n" +
+                "                \"172.29.220.23\"\n" +
+                "            ],\n" +
+                "            \"ADAS-10\": [\n" +
+                "                \"172.29.219.66\"\n" +
+                "            ],\n" +
+                "            \"黑盒拟态ADAS\": [\n" +
+                "                \"172.29.211.21\"\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"white\": {\n" +
+                "        \"互联网赛道\": {\n" +
+                "            \"白盒拟态路由器-1\": [\n" +
+                "                \"172.29.121.220\",\n" +
+                "                \"172.29.121.220\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态路由器-2\": [\n" +
+                "                \"172.29.110.216\",\n" +
+                "                \"172.29.110.216\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态路由器-3\": [\n" +
+                "                \"172.29.191.249\",\n" +
+                "                \"172.29.191.249\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态存储-1\": [\n" +
+                "                \"172.29.208.101\",\n" +
+                "                \"172.29.208.8\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态存储-2\": [\n" +
+                "                \"172.29.236.101\",\n" +
+                "                \"172.29.236.8\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态DNS-1\": [\n" +
+                "                \"172.29.40.9\",\n" +
+                "                \"172.29.40.15\",\n" +
+                "                \"172.29.40.14\",\n" +
+                "                \"172.29.40.13\",\n" +
+                "                \"172.29.40.12\",\n" +
+                "                \"172.29.40.11\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态DNS-2\": [\n" +
+                "                \"172.29.30.9\",\n" +
+                "                \"172.29.30.15\",\n" +
+                "                \"172.29.30.14\",\n" +
+                "                \"172.29.30.13\",\n" +
+                "                \"172.29.30.12\",\n" +
+                "                \"172.29.30.11\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态交换机-1\": [\n" +
+                "                \"172.29.157.39\",\n" +
+                "                \"172.29.157.39\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态交换机-2\": [\n" +
+                "                \"172.29.164.39\",\n" +
+                "                \"172.29.164.39\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态交换机-3\": [\n" +
+                "                \"172.29.183.39\",\n" +
+                "                \"172.29.183.39\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态云\": [\n" +
+                "                \"172.29.181.100\",\n" +
+                "                \"172.29.181.110\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态WEB-2\": [\n" +
+                "                \"172.29.117.60\",\n" +
+                "                \"172.29.117.65\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态WEB-3\": [\n" +
+                "                \"172.29.165.60\",\n" +
+                "                \"172.29.165.65\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态WEB-1\": [\n" +
+                "                \"172.29.113.60\",\n" +
+                "                \"172.29.113.65\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"电信网赛道\": {\n" +
+                "            \"白盒拟态5G UDM-1\": [\n" +
+                "                \"172.29.12.101\",\n" +
+                "                \"172.29.12.110\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态5G UDM-2\": [\n" +
+                "                \"172.29.24.159\",\n" +
+                "                \"172.29.24.153\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态IMS HSS-1\": [\n" +
+                "                \"172.29.17.4\",\n" +
+                "                \"172.29.19.4\",\n" +
+                "                \"172.29.17.15\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态IMS HSS-2\": [\n" +
+                "                \"172.29.10.6\",\n" +
+                "                \"172.29.18.6\",\n" +
+                "                \"172.29.10.17\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"密码机赛道\": {\n" +
+                "            \"白盒拟态密码机A-1\": [\n" +
+                "                \"172.29.88.41\",\n" +
+                "                \"172.29.88.42\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态密码机A-2\": [\n" +
+                "                \"172.29.92.51\",\n" +
+                "                \"172.29.92.52\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态密码机A-3\": [\n" +
+                "                \"172.29.103.61\",\n" +
+                "                \"172.29.103.62\"\n" +
+                "            ]\n" +
+                "        },\n" +
+                "        \"车联网赛道\": {\n" +
+                "            \"白盒拟态T-BOX-1\": [\n" +
+                "                \"172.29.131.2\",\n" +
+                "                \"172.29.131.2\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态T-BOX-2\": [\n" +
+                "                \"172.29.136.2\",\n" +
+                "                \"172.29.136.2\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态T-BOX-3\": [\n" +
+                "                \"172.29.142.2\",\n" +
+                "                \"172.29.142.2\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态ADAS-1\": [\n" +
+                "                \"172.29.182.11\",\n" +
+                "                \"172.29.182.11\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态ADAS-2\": [\n" +
+                "                \"172.29.173.12\",\n" +
+                "                \"172.29.173.12\"\n" +
+                "            ],\n" +
+                "            \"白盒拟态ADAS-3\": [\n" +
+                "                \"172.29.177.13\",\n" +
+                "                \"172.29.177.13\"\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
     }
 }

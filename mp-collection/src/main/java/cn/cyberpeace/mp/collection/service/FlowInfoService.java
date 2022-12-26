@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -77,6 +79,7 @@ public class FlowInfoService {
 
     /**
      * 根据条件筛选流量信息（不传条件默认查询全部）
+     *
      * @param pageFlowRequest
      * @return ListObjServiceResult<TeamFlowInfo>
      */
@@ -236,8 +239,8 @@ public class FlowInfoService {
     private void buildDeleteDocQuery(LocalDateTime startTime, LocalDateTime endTime, BoolQueryBuilder boolQueryBuilder) {
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                                          .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-                                          .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                    .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
         } else {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -246,6 +249,7 @@ public class FlowInfoService {
 
     /**
      * 转换为TeamFlowInfo类
+     *
      * @param flowFileRoot
      * @return TeamFlowInfo
      */
@@ -276,6 +280,7 @@ public class FlowInfoService {
 
     /**
      * 转换为FlowDetailInfo类
+     *
      * @param flowFileRoot
      * @return TeamFlowInfo
      */
@@ -307,6 +312,7 @@ public class FlowInfoService {
 
     /**
      * 分页
+     *
      * @param pageFlowRequest
      * @param indexArray
      * @param boolQueryBuilder
@@ -335,6 +341,7 @@ public class FlowInfoService {
 
     /**
      * 根据时间创建索引
+     *
      * @param start
      * @param end
      * @return
@@ -393,7 +400,7 @@ public class FlowInfoService {
 
     /**
      * @param startTime startTime
-     * @param endTime endTime
+     * @param endTime   endTime
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
@@ -411,6 +418,7 @@ public class FlowInfoService {
 
     /**
      * 攻击次数与流量大小（战队 or 设备）
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -420,9 +428,13 @@ public class FlowInfoService {
 
         String ipTerm = "target_ip";
         String sumTerm = "flow_sum";
+        String cateTerm = "cate";
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField).size(1000)
-                                                .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
+                .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"))
+                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+
+
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<AttackFlowBO> bos = Lists.newArrayList();
@@ -433,6 +445,19 @@ public class FlowInfoService {
             bo.setIp(bucketIp.getKeyAsString());
             bo.setSize((long) sum.getValue());
             bo.setCount(bucketIp.getDocCount());
+            bo.setAttackTypes(new ArrayList<>());
+
+            ParsedTerms cate = bucketIp.getAggregations().get(cateTerm);
+            cate.getBuckets().forEach(cateTermAAA -> {
+                AttackTypeBO attackTypeBO = new AttackTypeBO();
+                attackTypeBO.setCount(cateTermAAA.getDocCount());
+                attackTypeBO.setZhName(MessageCommonUtil.convertMessage(cateTermAAA.getKeyAsString()));
+                if (attackTypeBO.getZhName().equals("$category")) {
+                    attackTypeBO.setZhName("其他攻击");
+                }
+                bo.getAttackTypes().add(attackTypeBO);
+            });
+
             bos.add(bo);
         });
 
@@ -441,6 +466,7 @@ public class FlowInfoService {
 
     /**
      * 攻击类型占比top5（所有队伍）
+     *
      * @return
      */
     public List<CountBO> queryAttackTypeAllTeams(List<EsIpFieldBO> esIpFieldBOS) {
@@ -465,6 +491,7 @@ public class FlowInfoService {
 
     /**
      * 攻击类型占比top5（指定队伍）
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -475,8 +502,8 @@ public class FlowInfoService {
         String ipTerm = "target_ip";
         String cateTerm = "cate";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
-                                                .size(1000)
-                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+                .size(1000)
+                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<AttackFlowBO> bos = Lists.newArrayList();
@@ -502,6 +529,7 @@ public class FlowInfoService {
 
     /**
      * 总体攻击趋势
+     *
      * @return 12:00表示[12:00, 12:10)的数据
      */
     public List<CountBO> queryAttackTrend() {
@@ -514,8 +542,8 @@ public class FlowInfoService {
 
         String histogramTerm = "histogram";
         AggregationBuilder aggBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-                                                .fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
-                                                .format("HH:mm").timeZone(ZoneId.systemDefault());
+                .fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
+                .format("HH:mm").timeZone(ZoneId.systemDefault());
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
@@ -532,6 +560,7 @@ public class FlowInfoService {
 
     /**
      * 攻击告警级别趋势
+     *
      * @return
      */
     public Map<String, List<CountBO>> queryAttackLevel() {
@@ -545,10 +574,10 @@ public class FlowInfoService {
         String severityTerm = "severity";
         String histogramTerm = "histogram";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(severityTerm).field("suricata.severity")
-                                                .subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-                                                                        .fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
-                                                                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
-                                                                        .timeZone(ZoneId.systemDefault()));
+                .subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+                        .fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
+                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+                        .timeZone(ZoneId.systemDefault()));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> severityMap = Maps.newHashMap();
@@ -572,6 +601,7 @@ public class FlowInfoService {
 
     /**
      * 战队攻击趋势
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -587,10 +617,10 @@ public class FlowInfoService {
 
         String ipTerm = "target_ip", histoTerm = "histo";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName()).size(1000)
-                                                .subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
-                                                                        .fixedInterval(DateHistogramInterval.minutes(5))
-                                                                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
-                                                                        .timeZone(ZoneId.systemDefault()));
+                .subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
+                        .fixedInterval(DateHistogramInterval.minutes(5))
+                        .extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+                        .timeZone(ZoneId.systemDefault()));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();
@@ -614,7 +644,7 @@ public class FlowInfoService {
 
     /**
      * 设备攻击协议TOP5
-     * @param topSize
+     *
      * @return
      */
     public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS) {
@@ -645,6 +675,7 @@ public class FlowInfoService {
 
     /**
      * 设备ip被攻击次数
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -670,6 +701,7 @@ public class FlowInfoService {
 
     /**
      * 总攻击次数
+     *
      * @return
      */
     public long attackTotalCount() {
@@ -680,6 +712,7 @@ public class FlowInfoService {
 
     /**
      * 攻击聚合（source + destination + category）
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -692,11 +725,11 @@ public class FlowInfoService {
         String cateTerm = "cate";
         String flowSizeTerm = "flow_size";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
-                                                .field(esIpFieldBOS.get(0).getIPFieldName())
-                                                .size(1000)
-                                                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
-                                                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"))
-                                                .subAggregation(AggregationBuilders.sum(flowSizeTerm).field("network.bytes"));
+                .field(esIpFieldBOS.get(0).getIPFieldName())
+                .size(1000)
+                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
+                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"))
+                .subAggregation(AggregationBuilders.sum(flowSizeTerm).field("network.bytes"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
@@ -730,6 +763,7 @@ public class FlowInfoService {
 
     /**
      * 攻击聚合（source + destination）
+     *
      * @param esIpFieldBOS
      * @return
      */
@@ -748,8 +782,8 @@ public class FlowInfoService {
         size = Math.max(10, size);
         String srcIpTerm = "src_ip", desIpTerm = "des_ip";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm).size(size)
-                                                .field(esIpFieldBOS.get(0).getIPFieldName())
-                                                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
+                .field(esIpFieldBOS.get(0).getIPFieldName())
+                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();
@@ -771,6 +805,7 @@ public class FlowInfoService {
 
     /**
      * 攻击流量列表
+     *
      * @param pageSize
      * @param pageNum
      * @return
@@ -791,6 +826,7 @@ public class FlowInfoService {
 
     /**
      * es 聚合查询
+     *
      * @param aggBuilder
      * @param queryBuilder
      * @return
@@ -816,6 +852,7 @@ public class FlowInfoService {
 
     /**
      * es 列表查询
+     *
      * @param pageSize
      * @param pageNum
      * @param queryBuilder
@@ -842,6 +879,7 @@ public class FlowInfoService {
 
     /**
      * 构建ip字段查询
+     *
      * @param esIpFieldBos
      * @param queryBuilder
      */

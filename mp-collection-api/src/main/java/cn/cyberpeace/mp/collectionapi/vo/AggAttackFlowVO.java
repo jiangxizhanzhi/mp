@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.collectionapi.vo;
 
+import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
 public class AggAttackFlowVO {
@@ -11,6 +15,10 @@ public class AggAttackFlowVO {
     private FlowSize flowSize;
 
     private AttackCount attackCount;
+
+    private Map<String, AttackTypeBO> attackTypeBOMap;
+
+    private List<AttackTypeBO> attackTypeBOS ;
 
     @Data
     public static class FlowSize {
