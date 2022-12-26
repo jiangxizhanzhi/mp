@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
@@ -18,6 +17,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +33,8 @@ import java.util.stream.Collectors;
 public class DevopsTargetService {
 
     private final DeviceTargetMapper deviceTargetMapper;
+
+    private static final DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * 分页
@@ -154,25 +157,25 @@ public class DevopsTargetService {
         deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
         String imageType = device.getImageType();
-        deviceTargetPO.setIsImport(device.getIsImport());
+        deviceTargetPO.setIsImport(Objects.nonNull(device.getIsImport()) ? device.getIsImport() : Boolean.FALSE);
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
         if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.VM.toValue()) && Objects.nonNull(extVm)){
             deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
-            deviceTargetPO.setInitSupport(extVm.getInitSupport());
+            deviceTargetPO.setInitSupport(Objects.nonNull(extVm.getInitSupport()) ? extVm.getInitSupport() : Boolean.FALSE);
             deviceTargetPO.setInstanceState(extVm.getInstanceState());
         }
         else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)){
             deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
-            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
+            deviceTargetPO.setInitSupport(Objects.nonNull(extDocker.getInitSupport()) ? extDocker.getInitSupport() : Boolean.FALSE);
             deviceTargetPO.setInstanceState(extDocker.getInstanceState());
         }else{
             deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
-        deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
+        deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);

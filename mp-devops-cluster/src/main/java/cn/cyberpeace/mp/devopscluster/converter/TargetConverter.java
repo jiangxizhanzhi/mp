@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -127,6 +128,9 @@ public class TargetConverter{
     public void validTargetCanDelete(List<String> uuids){
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
+        if (CollUtil.isEmpty(deviceTargetPOS)) {
+            return;
+        }
         deviceTargetPOS.forEach(deviceTargetPO -> {
             if (Boolean.TRUE.equals(deviceTargetPO.getIsInit())) {
                 throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(deviceTargetPO.getName()));

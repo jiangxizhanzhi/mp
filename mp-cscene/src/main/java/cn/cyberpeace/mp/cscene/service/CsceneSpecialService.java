@@ -454,7 +454,7 @@ public class CsceneSpecialService {
                 .currentLink(CloudPluginSceneConfigElementModel.class);
         var orCondition = deviceReferCondition.filterOrStart();
         for (String snapUuid : snapUuids) {
-            orCondition.orStartsWith(CloudPluginSceneConfigElementModel::getImage, snapUuid);
+            orCondition.orIStartsWith(CloudPluginSceneConfigElementModel::getImage, snapUuid);
         }
         orCondition.filterOrEnd();
         deviceReferCondition.selectAs(CloudPluginSceneConfigElementModel::getImage, DeviceReferCsceneStat::getReferenceImage)
@@ -542,7 +542,7 @@ public class CsceneSpecialService {
                 .currentLink(CloudPluginSceneElementModel.class);
         var orCondition = deviceReferCondition.filterOrStart();
         for (String snapUuid : snapUuids) {
-            orCondition.orStartsWith(CloudPluginSceneElementModel::getImage, snapUuid);
+            orCondition.orIStartsWith(CloudPluginSceneElementModel::getImage, snapUuid);
         }
         orCondition.filterOrEnd();
         deviceReferCondition.selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)

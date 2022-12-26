@@ -95,8 +95,6 @@ public class ImagesConverter implements BaseConverter{
 
     private final SnapshotConverter snapshotConverter;
 
-    private final JsonMockService jsonMockService;
-
     @Autowired
     private final CpDeviceService cpDeviceService;
 
@@ -161,7 +159,8 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public void add(ImageRequest request) {
-        Device device = imagesService.add(convertRequest(request));
+        Device device = convertRequest(request);
+        device = cpDeviceService.add(device);
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
         return;
@@ -197,9 +196,10 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    @Transactional
+
     public void update(ImageRequest request) {
-        Device device = imagesService.update(request.getUuid(),convertRequest(request));
+//        Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        Device device = cpDeviceService.update(request.getUuid(), convertRequest(request));
         devopsTargetService.updateById(device);
         return;
     }
@@ -234,9 +234,10 @@ public class ImagesConverter implements BaseConverter{
     public void delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
         snapshotConverter.validSnapshot(request.getImageIds());
-        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
+//        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
+        Boolean result = cpDeviceService.deleteByIds(request.getImageIds());
 
-        if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
+        if (CollectionUtils.isNotEmpty(request.getImageIds()) && result){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
             deviceTargetMapper.delete(dto);
