@@ -161,6 +161,9 @@ public class SceneExporter {
                     for (var m : device.getAccessModes()) {
                         AccessModeExportResult accessModeParseResult = new AccessModeExportResult();
                         accessModeParseResult.setDesc(m.getDesc());
+                        if (StringUtils.isNotEmpty(m.getPath())) {
+                            accessModeParseResult.setPath(m.getPath());
+                        }
                         accessModeParseResult.setProtocol(m.getProtocol());
                         accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
                         //下载密钥文件
