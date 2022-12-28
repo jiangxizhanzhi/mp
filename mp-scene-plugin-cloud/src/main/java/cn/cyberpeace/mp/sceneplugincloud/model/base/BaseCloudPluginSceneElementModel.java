@@ -83,6 +83,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String ospfRouterId;
 
+    // rip网络属性
+    @DefaultStr
+    private String ripLoopback;
+
     // 虚拟防火墙属性
     @DefaultStr
     private String firewallRules;

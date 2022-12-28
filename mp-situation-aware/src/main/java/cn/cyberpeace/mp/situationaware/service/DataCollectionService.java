@@ -66,6 +66,8 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.Scroll;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
@@ -213,6 +215,66 @@ public class DataCollectionService extends CollectionBaseService {
                 total = response.getHits().getTotalHits().value;
             }
             return new ListObjResult(fileEventModelList, BigDecimal.valueOf(total).intValue());
+        } catch (IOException e) {
+            log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 文件 or 注册表变动事件
+     *
+     * @param wazuhEventRequest
+     * @return
+     */
+    public ListObjResult<FileEventModel> queryFileOrRegisterEvents(WazuhEventRequest wazuhEventRequest) {
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
+
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        sourceBuilder.trackTotalHits(true);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        try {
+            String agentNameTerm = "agent_name", sicLaunchIdTerm = "sic_launch_id";
+            AggregationBuilder aggBuilder = AggregationBuilders.terms(agentNameTerm).field("agent.name")
+                    .subAggregation(AggregationBuilders.terms(sicLaunchIdTerm).field("data.sic_launch_time").order(BucketOrder.key(true)).size(1));
+            sourceBuilder.aggregation(aggBuilder);
+
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<FileEventModel> fileEventModels = Lists.newArrayList();
+            for(SearchHit hit : response.getHits().getHits()) {
+                JSONObject json = JSONObject.parseObject(hit.getSourceAsString());
+                String rawOutput = Optional.of(json.getJSONObject("data")).map(j -> j.getJSONObject("sic_launch_output")).map(j -> j.getString("raw_output")).orElse(null);
+                if(rawOutput == null) {
+                    continue;
+                }
+
+                String agentName = json.getJSONObject("agent").getString("name");
+                LocalDateTime time = TimeUtils.stringToLocalDateTime(json.getJSONObject("data").getString("sic_launch_time"), TimeUtils.tz6MillsDateTimeFormatter);
+                JSONArray files = JSONArray.parseArray(rawOutput);
+                for(Object f : files.toArray()) {
+                    FileEventModel m = new FileEventModel();
+                    m.setFilePath((String) f);
+                    m.setAgentId(agentName);
+                    m.setUpdateTime(time);
+                    fileEventModels.add(m);
+                }
+            }
+
+            return new ListObjResult<FileEventModel>(fileEventModels, fileEventModels.size());
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -1420,6 +1482,11 @@ public class DataCollectionService extends CollectionBaseService {
             buildPathQuery(wazuhEventRequest.getPath(), boolQueryBuilder);
         }
 
+        // sicLaunchId
+        if (StringUtils.isNotEmpty(wazuhEventRequest.getSicLaunchId())) {
+            buildSicLaunchIdQuery(wazuhEventRequest.getSicLaunchId(), boolQueryBuilder);
+        }
+
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
@@ -1456,6 +1523,10 @@ public class DataCollectionService extends CollectionBaseService {
 
     private void buildPathQuery(String path, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + QueryParserUtil.escape(path) + "*"));
+    }
+
+    private void buildSicLaunchIdQuery(String sicLaunchId, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_id", sicLaunchId));
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
