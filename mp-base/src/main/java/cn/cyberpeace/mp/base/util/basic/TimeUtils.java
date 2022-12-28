@@ -22,6 +22,8 @@ public class TimeUtils {
 
     public static final DateTimeFormatter tzMillsDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+    public static final DateTimeFormatter tz6MillsDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+
     public static final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
 
     public static final ZoneId utcZoneId = utcTimeZone.toZoneId();
