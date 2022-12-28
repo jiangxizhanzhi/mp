@@ -339,6 +339,23 @@ public class TenantUserServiceImpl
         return pageInfo;
     }
 
+
+    public List<UserBo> listByUserIds(List<String> ids) {
+        UserModel selfUser = UserUtils.getLoginUser();
+        String selfUserId = null;
+        if (Objects.nonNull(selfUser)) {
+            selfUserId = selfUser.getId();
+        }
+
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
+        List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        PageInfo<UserBo> pageInfo = listPageUsers(null, ids, null, null, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime, 1, ids.size());
+        return pageInfo.getList();
+
+    }
+
     @Override
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
