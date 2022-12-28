@@ -225,6 +225,21 @@ mp:
     scene-process-save-realtime: true
     element-process-save-realtime: true
 
+# for kaptcha
+kaptcha:
+  border:
+    enabled: true
+    color: '200,200,200'
+    thickness: 1
+  image:
+    width: 200
+    height: 60
+  text-producer:
+    impl:
+    character:
+      string: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      length: 4
+      space: 10
 
 ---
 spring:

@@ -35,4 +35,7 @@ public class RegisterRequest {
     @ApiModelProperty(value = "邮箱", example = "")
     private String email;
 
+    @ApiModelProperty(value = "验证码", example = "")
+    private String verifyCode;
+
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config.security;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationFailureHandler;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthentica
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -24,6 +26,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.annotation.Resource;
 
 /**
  * @Description: Security配置化类
@@ -49,6 +53,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AuthConfig authConfig;
+
+    @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
+    private Cache<String, Integer> loginFailureCache;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -117,6 +124,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         customUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
         customUsernamePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_PATH);
+        customUsernamePasswordAuthenticationFilter.setLoginFailureCache(loginFailureCache);
         http.addFilterAt(customUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
