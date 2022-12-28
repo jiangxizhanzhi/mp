@@ -434,8 +434,14 @@ public class SceneElementMonitorService {
                 bo.setDescription("-");
             }else if(StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().contains("---file_size---")){
                 String[] fileSize = file.getFilePath().split("---file_size---");
-                bo.setPath(fileSize[0]);
-                bo.setFileSize(fileSize[1]);
+                if (fileSize.length > 0) {
+                    bo.setPath(fileSize[0]);
+                }
+                if (fileSize.length > 1) {
+                    if (NumberUtil.isNumber(fileSize[1])) {
+                        bo.setFileSize(fileSize[1]);
+                    }
+                }
                 bo.setDescription(StringUtils.EMPTY);
             } else {
                 bo.setPath(file.getFilePath());
