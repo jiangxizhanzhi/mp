@@ -72,6 +72,8 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
 
     PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req);
 
+    List<UserBo> listByUserIds(List<String> ids);
+
     // 清除用户所有组织
     boolean deleteByUserId(String userId);
 
