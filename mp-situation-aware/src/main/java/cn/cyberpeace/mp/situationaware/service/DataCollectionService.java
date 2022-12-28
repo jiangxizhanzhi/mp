@@ -1482,6 +1482,11 @@ public class DataCollectionService extends CollectionBaseService {
             buildPathQuery(wazuhEventRequest.getPath(), boolQueryBuilder);
         }
 
+        // sicLaunchId
+        if (StringUtils.isNotEmpty(wazuhEventRequest.getSicLaunchId())) {
+            buildSicLaunchIdQuery(wazuhEventRequest.getSicLaunchId(), boolQueryBuilder);
+        }
+
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
@@ -1518,6 +1523,10 @@ public class DataCollectionService extends CollectionBaseService {
 
     private void buildPathQuery(String path, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + QueryParserUtil.escape(path) + "*"));
+    }
+
+    private void buildSicLaunchIdQuery(String sicLaunchId, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_id", sicLaunchId));
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
