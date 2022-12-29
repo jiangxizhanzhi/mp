@@ -197,6 +197,9 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         }
         if (StringUtils.isNotBlank(model.getExtVm())) {
             ExtVm extVm = JsonCommon.parse(model.getExtVm(), ExtVm.class);
+            if (Objects.isNull(extVm.getQuickCreateParams())) {
+                extVm.setQuickCreateParams(new ArrayList<>());
+            }
             device.setExtVm(extVm);
         }
         if (StringUtils.isNotBlank(model.getExtImageInfo())) {
