@@ -68,7 +68,7 @@ public class NetworkTrafficGroupService {
         //查询groupId对应的实例镜像
         String result = null;
         try {
-            result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/containers");
+            result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/containers?name=" + groupId);
         } catch (IOException e) {
             log.error("query cloud containers error, {}", ExceptionUtils.getStackTrace(e));
         }
