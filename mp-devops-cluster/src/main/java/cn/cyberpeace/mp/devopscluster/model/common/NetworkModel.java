@@ -87,6 +87,22 @@ public final class NetworkModel implements Serializable {
      */
     private String project;
 
+
+    /**
+     * 节点数
+     */
+    private Integer nodeNum;
+
+    /**
+     * 网络下行带宽 (Kbps)
+     */
+    private Long inBps;
+
+    /**
+     * 网络上行带宽 (Kbps)
+     */
+    private Long outBps;
+
     /**
      * 创建时间
      */
@@ -95,6 +111,8 @@ public final class NetworkModel implements Serializable {
      * 更新时间
      */
     private String updatedAt;
+
+
 
     @Data
     @NoArgsConstructor
@@ -139,6 +157,16 @@ public final class NetworkModel implements Serializable {
          * 主机路由
          */
         private List<Object> hostRoutes;
+
+        /**
+         * 已使用IP数
+         */
+        private Integer usedIps;
+
+        /**
+         * 未使用IP数
+         */
+        private Integer freeIps;
 
         @Data
         @NoArgsConstructor
