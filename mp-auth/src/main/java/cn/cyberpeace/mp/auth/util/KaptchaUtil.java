@@ -22,22 +22,25 @@ import java.util.Objects;
 public class KaptchaUtil {
 
     public static ServiceResult<Object> checkKaptcha(String code) {
+        ServiceResult<Object> result = null;
         HttpServletRequest request = ServletUtils.getRequest();
         HttpSession session = request.getSession();
         String kaptcha = (String) session.getAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         Long kaptchaDate = (Long) session.getAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
         if (StringUtils.isBlank(code)) {
-            return ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_EMPTY).build();
+            result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_EMPTY).build();
+        } else if (StringUtils.isBlank(kaptcha) || Objects.isNull(kaptchaDate) || System.currentTimeMillis() - kaptchaDate > AuthConstant.VALID_MILLIS_TIME) {
+            result = ServiceResult.builder().source(Boolean.FALSE).serviceCode(AuthErrorCode.VERIFY_CODE_EXPIRE).build();
+        } else if (!kaptcha.equalsIgnoreCase(code)) {
+            result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
         }
-        if (StringUtils.isBlank(kaptcha) || Objects.isNull(kaptchaDate) || System.currentTimeMillis() - kaptchaDate > AuthConstant.VALID_MILLIS_TIME) {
-            return ServiceResult.builder().source(Boolean.FALSE).serviceCode(AuthErrorCode.VERIFY_CODE_EXPIRE).build();
-        }
-        if (!kaptcha.equalsIgnoreCase(code)) {
-            return ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
+        // 验证码校验成功
+        if (Objects.isNull(result)) {
+            result = ServiceResult.builder().source(true).build();
         }
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
-        return ServiceResult.builder().source(true).build();
+        return result;
     }
 
     public static void checkFail(HttpServletResponse response, ServiceResult<Object> result) throws IOException {

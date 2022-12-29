@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,6 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         if (!Objects.equals(request.getMethod(), "POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
-
         if (Objects.equals(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
             Map<String, String> loginData = new HashMap<>();
             try {
@@ -52,14 +52,11 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 log.error("Parse login data from request error: {}", e.getMessage());
             }
             String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
-            Integer failureCount = loginFailureCache.getIfPresent(username);
             request.setAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME, username);
-            if (loginData.containsKey(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE) || (Objects.nonNull(failureCount) && failureCount >= 3)) {
-                ServiceResult<Object> result = KaptchaUtil.checkKaptcha(loginData.getOrDefault(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE, StringUtils.EMPTY));
-                if (Boolean.FALSE.equals(result.getSource())) {
-                    KaptchaUtil.checkFail(response, result);
-                    return null;
-                }
+            String verifyCode = loginData.getOrDefault(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE, StringUtils.EMPTY);
+            boolean valid = checkVerifyCode(verifyCode, username, request, response);
+            if (!valid) {
+                return null;
             }
             String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
             String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
@@ -70,16 +67,29 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             return getAuthenticationManager().authenticate(authRequest);
         } else {
             String verifyCode = request.getParameter(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE);
-            String username = request.getParameter("username");
-            Integer failureCount = loginFailureCache.getIfPresent(username);
-            if (StringUtils.isNotBlank(verifyCode) || (Objects.nonNull(failureCount) && failureCount >= 3)) {
-                ServiceResult<Object> result = KaptchaUtil.checkKaptcha(verifyCode);
-                if (Boolean.FALSE.equals(result.getSource())) {
-                    KaptchaUtil.checkFail(response, result);
-                    return null;
-                }
+            String username = request.getParameter(AuthConstant.REQUEST_PARAMETER_USERNAME);
+            boolean valid = checkVerifyCode(verifyCode, username, request, response);
+            if (!valid) {
+                return null;
             }
             return super.attemptAuthentication(request, response);
         }
+    }
+
+    private boolean checkVerifyCode(String verifyCode, String username, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        Boolean flag = (Boolean) session.getAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username);
+        if (Objects.nonNull(flag) && Boolean.TRUE.equals(flag)) { // 需要校验验证码
+            ServiceResult<Object> result = KaptchaUtil.checkKaptcha(verifyCode);
+            if (Boolean.FALSE.equals(result.getSource())) { // 验证码校验不通过
+                session.setAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username, true);
+                session.setMaxInactiveInterval(AuthConstant.NEED_VERIFY_CODE_EXPIRE_TIME);
+                KaptchaUtil.checkFail(response, result);
+                return false;
+            }
+            // 验证码校验通过，移除需要验证码标记
+            session.removeAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username);
+        }
+        return true;
     }
 }

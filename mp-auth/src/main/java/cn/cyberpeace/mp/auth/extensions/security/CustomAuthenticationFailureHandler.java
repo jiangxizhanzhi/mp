@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -49,6 +50,9 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             String username = getUserName(request);
             Integer count = loginFailureCache.getIfPresent(username);
             if (Objects.nonNull(count) && count >= 2) {
+                HttpSession session = request.getSession();
+                session.setAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username, true);
+                session.setMaxInactiveInterval(AuthConstant.NEED_VERIFY_CODE_EXPIRE_TIME);
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.NEED_VERIFY_CODE).build().asResult();
             } else {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
