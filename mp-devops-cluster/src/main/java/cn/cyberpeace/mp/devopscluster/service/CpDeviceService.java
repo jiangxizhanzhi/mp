@@ -24,4 +24,5 @@ public interface CpDeviceService extends BaseModelService<DeviceModel, QueryPara
 
     Device findByUuid(String uuid);
 
+    List<Device> findDevicesByCategories(List<Integer> categories);
 }

@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devopscluster.service.CpDeviceService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.service.upload.TargetIconUploadService;
@@ -78,7 +79,7 @@ public class DevopsTargetController {
 
     private final DevopsTargetService devopsTargetService;
 
-    private final JsonMockService jsonMockService;
+    private final CpDeviceService cpDeviceService;
 
     /**
      * 查询FTP信息
@@ -160,7 +161,7 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
-        List<Device> devices = jsonMockService.filterDevicesByCategories(Arrays.asList(request.getCategory()));
+        List<Device> devices = cpDeviceService.findDevicesByCategories(Arrays.asList(request.getCategory()));
         return new Result(new ListResult<>(devices));
     }
 

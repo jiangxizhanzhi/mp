@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceMapper;
 import cn.cyberpeace.mp.devopscluster.service.fields.DeviceFields;
+import cn.hutool.core.collection.CollUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -153,6 +154,16 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         HumanCondition cond = new HumanCondition().filterEqual(DeviceModel::getUuid, uuid);
         DeviceModel model = getModelMapper().first(cond);
         return convert(model);
+    }
+
+    @Override
+    public List<Device> findDevicesByCategories(List<Integer> categories) {
+        HumanCondition cond = new HumanCondition();
+        if (CollUtil.isNotEmpty(categories)) {
+            cond.filterIn(DeviceModel::getCategory, categories.toArray());
+        }
+        List<DeviceModel> list = getModelMapper().list(cond);
+        return convert(list);
     }
 
     private Device convert(DeviceModel model) {
