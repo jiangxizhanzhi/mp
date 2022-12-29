@@ -20,4 +20,15 @@ public class NetworkSubnetBO {
      * 网关ip
      */
     private String gatewayIp;
+
+
+    /**
+     * 剩余IP数
+     */
+    private Integer freeIps;
+
+    /**
+     * 已使用IP数
+     */
+    private Integer usedIps;
 }

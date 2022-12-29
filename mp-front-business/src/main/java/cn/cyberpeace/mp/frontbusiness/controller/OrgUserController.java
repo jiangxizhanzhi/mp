@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
@@ -46,6 +47,13 @@ public class OrgUserController {
         PageInfo pageInfo = tenantUserService.pageUsersByOrg(req);
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "根据userId列表查询用户信息", notes = "")
+    @PostMapping("/list_by_ids")
+    public ServiceResult<List<UserBo>> listByUserIds(@RequestBody List<String> ids) {
+        List<UserBo> list = tenantUserService.listByUserIds(ids);
+        return ResultCommon.success(list);
     }
 
 

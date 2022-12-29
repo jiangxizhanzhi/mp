@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.HttpData;
 import cn.cyberpeace.mp.base.util.http.HttpParam;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
@@ -64,6 +65,10 @@ public abstract class CloudClient {
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param,
                                             TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
+    }
+
+    public HttpResult cloudDownload(String url, HttpParam param) {
+        return httpClient.cloudDownload(url, param);
     }
 
     protected boolean excludeDeleteException(Exception runtimeException) {

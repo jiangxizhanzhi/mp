@@ -67,4 +67,9 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String connectMode;
 
+    @DefaultStr
+    private String ripIp;
+    @DefaultStr
+    private String ripPear;
+
 }

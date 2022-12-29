@@ -31,6 +31,7 @@ public class VyosNetworkCommandUtils {
         builderChains.add(new OSPFCmdBuilder());
         builderChains.add(new BGPCmdBuilder());
         builderChains.add(new RouterNameCmdBuilder());
+        builderChains.add(new RIPCmdBuilder());
     }
 
     public static List<String> genOpenDhcpCommands(int ethSize) {
@@ -198,6 +199,67 @@ public class VyosNetworkCommandUtils {
                     }));
                 }
             });
+            return cmds;
+        }
+    }
+
+    private static class RIPCmdBuilder implements NetworkingCmdBuilder {
+
+        private String LOOPBACK = "set interfaces loopback lo address %s";
+        private String NETWORK = "set protocols rip network %s";
+        //        private String RIP_INTERFACE = "set protocols rip interface eth%s";
+        private String NEIGHBOOR = "set protocols rip neighbor %s";
+
+        private String REDISTRIBUTE = "set protocols rip redistribute connected";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
+                return new ArrayList<>();
+            }
+            var ripPorts = paramsWrapper.pluginPorts.stream()
+                    .filter(p -> StringUtils.isNotEmpty(p.getRipIp()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(ripPorts)) {
+                return new ArrayList<>();
+            }
+            List<String> cmds = new ArrayList<>();
+            if (StringUtils.isNotEmpty(paramsWrapper.element.getRipLoopback())) {
+                cmds.add(String.format(LOOPBACK, paramsWrapper.element.getRipLoopback()));
+            }
+            paramsWrapper.pluginPorts.forEach(p -> {
+                if (ripPorts.contains(p)) {
+                    // 端口有bgp配置 根据配置创建命令
+                    if (StringUtils.isNotEmpty(p.getRipIp())) {
+                        var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                        String interfaceIp = null;
+//                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+//                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+//                        } else {
+//                            interfaceIp = p.getSrcPort().getIp() + "/24";
+//                        }
+
+                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+                            interfaceIp = p.getRipIp() + "/" + network.getCidr().split("/")[1];
+                        } else {
+                            interfaceIp = p.getRipIp() + "/24";
+                        }
+
+                        interfaceIp = IpUtils.getFormatCidrIp(interfaceIp);
+                        cmds.add(String.format(NETWORK, interfaceIp));
+                    }
+                    if (StringUtils.isNotEmpty(p.getRipPear())) {
+                        String ripPear = p.getRipPear();
+                        if (p.getRipPear().contains("/")) {
+                            ripPear = p.getRipPear().split("/")[0];
+                        }
+                        cmds.add(String.format(NEIGHBOOR, ripPear));
+                    }
+                } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
+                    // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
+                }
+            });
+            cmds.add(REDISTRIBUTE);
             return cmds;
         }
     }

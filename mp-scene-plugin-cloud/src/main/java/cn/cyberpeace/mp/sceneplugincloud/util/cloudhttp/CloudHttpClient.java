@@ -146,6 +146,10 @@ public class CloudHttpClient {
         return cloudResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
     }
 
+    public HttpResult cloudDownload(String url, HttpParam param) {
+        return httpClient.streamGet(url, param, this.getHeaders(), null);
+    }
+
     public <T> T get(String url, HttpParam param, Class<T> valueType) {
 
         return resultBean(httpClient.get(url, param, this.getHeaders(), null), valueType, "get", url, null, param);

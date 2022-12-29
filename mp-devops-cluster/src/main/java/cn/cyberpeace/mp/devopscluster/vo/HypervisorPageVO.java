@@ -153,6 +153,25 @@ public class HypervisorPageVO extends BaseVO {
     @ApiModelProperty("磁盘IO利用率 百分比")
     private Double diskIoPercent;
 
+    @ApiModelProperty("辅助存储 百分比")
+    private Double secondaryStoragePercent;
+
+    @ApiModelProperty("辅助存储总量")
+    private Long secondaryStorageTotal;
+
+    @ApiModelProperty("VLAN 百分比")
+    private Double vlanPercent;
+
+    @ApiModelProperty("VLAN总量")
+    private Long vlanTotal;
+
+    @ApiModelProperty("存量IP 百分比")
+    private Double freeIpPercent;
+
+    @ApiModelProperty("IP总量")
+    private Long ipTotal;
+
+
 
     public BigDecimal getRamPercent() {
         if (Objects.isNull(ramPercent)) {

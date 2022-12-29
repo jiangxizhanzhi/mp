@@ -211,6 +211,7 @@ class ImageInfoConverter implements IConverter {
         accessMode.setDesc(result.getDesc());
         accessMode.setPath(result.getPath());
         accessMode.setProxy(result.getIsproxy() == null ? true : Boolean.valueOf(result.getIsproxy()));
+        accessMode.setPath(result.getPath());
         if (StringUtils.isNotEmpty(result.getPrivateKey())) {
             if (FileUtil.exist(result.getPrivateKeyPath())) {
                 String fdfsPath = FsCommon.upload(result.getPrivateKeyPath());

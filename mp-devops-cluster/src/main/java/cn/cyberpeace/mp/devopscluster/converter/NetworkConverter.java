@@ -1,13 +1,17 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkSubnetBO;
+import cn.cyberpeace.mp.devopscluster.converter.bo.VlanIpStockBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkModel;
+import cn.cyberpeace.mp.devopscluster.model.common.VlanIpStockModel;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,16 +47,32 @@ public class NetworkConverter implements BaseConverter{
             NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkSubnetBO> subnets = Lists.newArrayList();
             if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp()));
+                subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps()));
             }
-            return  NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+            return NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
                     .status(networkModel.getStatus())
-                    .subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
+                    .subnets(subnets).createdAt(networkModel.getCreatedAt())
+                    .downloadSpeed(networkModel.getInBps())
+                    .uploadSpeed(networkModel.getOutBps())
+                    .nodeNum(networkModel.getNodeNum())
+                    .build();
         }).collect(Collectors.toList());
         BasePageBO<NetworkBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    /**
+     * 查询vlanstock信息
+     * @return
+     */
+    public VlanIpStockBO vlanIpStock() {
+        CloudPlatformResult<VlanIpStockModel> result = networkService.vlanIpStock("");
+        VlanIpStockModel model = result.getData();
+        VlanIpStockBO vlanIpStockBO = new VlanIpStockBO();
+        BeanUtils.copyProperties(model, vlanIpStockBO);
+        return vlanIpStockBO;
     }
 
 
