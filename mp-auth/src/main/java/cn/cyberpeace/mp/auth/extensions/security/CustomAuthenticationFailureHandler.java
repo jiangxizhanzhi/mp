@@ -44,11 +44,12 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
-        ServiceResult result = null;
-        if(exception instanceof BadCredentialsException) {
+        ServiceResult<Object> result = null;
+        if (exception instanceof BadCredentialsException) {
             response.setStatus(HttpServletResponse.SC_OK);
             String username = getUserName(request);
-            Integer count = loginFailureCache.getIfPresent(username);
+            String sessionId = request.getSession().getId();
+            Integer count = loginFailureCache.getIfPresent(sessionId + ":" + username);
             if (Objects.nonNull(count) && count >= 2) {
                 HttpSession session = request.getSession();
                 session.setAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username, true);
@@ -57,31 +58,31 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             } else {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
             }
-            loginFailureCache.put(username, Objects.isNull(count) ? 1 : count + 1);
+            loginFailureCache.put(sessionId + ":" + username, Objects.isNull(count) ? 1 : count + 1);
         }
 
-        if(exception instanceof UsernameNotFoundException) {
+        if (exception instanceof UsernameNotFoundException) {
             response.setStatus(HttpServletResponse.SC_OK);
             result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
         }
 
         // 弃用，因为无法控制异常状态顺序：状态优先级 禁用 > 过期 > 待审核
-        if(exception instanceof AccountStatusException) {
+        if (exception instanceof AccountStatusException) {
             response.setStatus(HttpServletResponse.SC_OK);
 
-            if(exception instanceof DisabledException) {
+            if (exception instanceof DisabledException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_DISABLED).build().asResult();
             }
 
-            if(exception instanceof AccountExpiredException) {
+            if (exception instanceof AccountExpiredException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_CREDENTIALS_EXPIRED).build().asResult();
             }
 
-            if(exception instanceof CredentialsExpiredException) {
+            if (exception instanceof CredentialsExpiredException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_EXPIRED).build().asResult();
             }
 
-            if(exception instanceof LockedException) {
+            if (exception instanceof LockedException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_NOT_AUDITED).build().asResult();
             }
         }
