@@ -140,6 +140,7 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         return convert(Collections.singletonList(model)).get(0);
     }
 
+    @Override
     public Boolean deleteByIds(List<String> uuids) {
         HumanCondition cond = new HumanCondition()
                 .filterIn(DeviceModel::getUuid, uuids.toArray());
@@ -147,48 +148,59 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         return i > 0;
     }
 
+    @Override
+    public Device findByUuid(String uuid) {
+        HumanCondition cond = new HumanCondition().filterEqual(DeviceModel::getUuid, uuid);
+        DeviceModel model = getModelMapper().first(cond);
+        return convert(model);
+    }
+
+    private Device convert(DeviceModel model) {
+        Device device = new Device();
+        device.setId(Integer.parseInt(model.getId()));
+        device.setUuid(model.getUuid());
+        device.setUpdatedAt(model.getUpdatedAt());
+        device.setDeleted(model.getDeleted());
+        device.setCreatedAt(model.getCreatedAt());
+        device.setDeletedAt(model.getDeletedAt());
+        device.setName(model.getName());
+        device.setImage(model.getImage());
+        device.setDescription(model.getDescription());
+        device.setLogo(model.getLogo());
+        device.setImageType(model.getImageType());
+        device.setMaintype(model.getMainType());
+        device.setRole(model.getRole());
+        device.setCategory(model.getCategory());
+        device.setSecondCategory(model.getSecondCategory());
+        device.setL3Category(model.getL3Category());
+        device.setIsImport(model.getIsImport());
+        device.setIsInternal(model.getIsInternal());
+        device.setIsInit(model.getIsInit());
+        if (StringUtils.isNotBlank(model.getExtEntity())) {
+            ExtEntity entity = JsonCommon.parse(model.getExtEntity(), ExtEntity.class);
+            device.setExtEntity(entity);
+        }
+        if (StringUtils.isNotBlank(model.getExtSystemInfo())) {
+            ExtSystemInfo systemInfo = JsonCommon.parse(model.getExtSystemInfo(), ExtSystemInfo.class);
+            device.setExtSystemInfo(systemInfo);
+        }
+        if (StringUtils.isNotBlank(model.getExtVm())) {
+            ExtVm extVm = JsonCommon.parse(model.getExtVm(), ExtVm.class);
+            device.setExtVm(extVm);
+        }
+        if (StringUtils.isNotBlank(model.getExtImageInfo())) {
+            ExtImageInfo extImageInfo = JsonCommon.parse(model.getExtImageInfo(), ExtImageInfo.class);
+            device.setExtImageInfo(extImageInfo);
+        }
+        device.setDefaultLaunchImageName(model.getDefaultLaunchImageName());
+        device.setSuccess(true);
+        return device;
+    }
+
     private List<Device> convert(List<DeviceModel> models) {
         List<Device> list = new ArrayList<>(models.size());
         for (DeviceModel model : models) {
-            Device device = new Device();
-            device.setId(Integer.parseInt(model.getId()));
-            device.setUuid(model.getUuid());
-            device.setUpdatedAt(model.getUpdatedAt());
-            device.setDeleted(model.getDeleted());
-            device.setCreatedAt(model.getCreatedAt());
-            device.setDeletedAt(model.getDeletedAt());
-            device.setName(model.getName());
-            device.setImage(model.getImage());
-            device.setDescription(model.getDescription());
-            device.setLogo(model.getLogo());
-            device.setImageType(model.getImageType());
-            device.setMaintype(model.getMainType());
-            device.setRole(model.getRole());
-            device.setCategory(model.getCategory());
-            device.setSecondCategory(model.getSecondCategory());
-            device.setL3Category(model.getL3Category());
-            device.setIsImport(model.getIsImport());
-            device.setIsInternal(model.getIsInternal());
-            device.setIsInit(model.getIsInit());
-            if (StringUtils.isNotBlank(model.getExtEntity())) {
-                ExtEntity entity = JsonCommon.parse(model.getExtEntity(), ExtEntity.class);
-                device.setExtEntity(entity);
-            }
-            if (StringUtils.isNotBlank(model.getExtSystemInfo())) {
-                ExtSystemInfo systemInfo = JsonCommon.parse(model.getExtSystemInfo(), ExtSystemInfo.class);
-                device.setExtSystemInfo(systemInfo);
-            }
-            if (StringUtils.isNotBlank(model.getExtVm())) {
-                ExtVm extVm = JsonCommon.parse(model.getExtVm(), ExtVm.class);
-                device.setExtVm(extVm);
-            }
-            if (StringUtils.isNotBlank(model.getExtImageInfo())) {
-                ExtImageInfo extImageInfo = JsonCommon.parse(model.getExtImageInfo(), ExtImageInfo.class);
-                device.setExtImageInfo(extImageInfo);
-            }
-            device.setDefaultLaunchImageName(model.getDefaultLaunchImageName());
-            device.setSuccess(true);
-            list.add(device);
+            list.add(convert(model));
         }
         return list;
     }
