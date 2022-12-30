@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devopscluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devopscluster.vo.NetworkPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.VlanIpStockVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -79,13 +80,15 @@ public class NetworkController {
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(networkNames);
         Map<String, CsceneNodeInfoBO> map = serviceResult.getSource();
 
-        networkList.forEach(net -> {
-            if (Objects.nonNull(map.get(net.getName()))) {
-                var csceneNodeInfoBO = map.get(net.getName());
-                net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
-                net.setReferenceType(csceneNodeInfoBO.getReferenceType());
-            }
-        });
+        if (CollectionUtil.isNotEmpty(map)) {
+            networkList.forEach(net -> {
+                if (Objects.nonNull(map.get(net.getName()))) {
+                    var csceneNodeInfoBO = map.get(net.getName());
+                    net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
+                    net.setReferenceType(csceneNodeInfoBO.getReferenceType());
+                }
+            });
+        }
 
         return new PageResult<>(networkList,model.getTotal());
     }
