@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceMapper;
 import cn.cyberpeace.mp.devopscluster.service.fields.DeviceFields;
 import cn.hutool.core.collection.CollUtil;
@@ -42,9 +43,9 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
 
     @Override
     public Device add(Device device) {
-        int total = getModelMapper().total(new HumanCondition());
         DeviceModel model = new DeviceModel();
-        model.setId("" + (total + 401));
+        long id = System.currentTimeMillis() / 1000 - DevopsClusterConstant.TIME_STAMP_20221230;
+        model.setId(Long.toString(id));
         UUID uuid = UUID.randomUUID();
         model.setUuid(uuid.toString());
         LocalDateTime now = LocalDateTime.now();
