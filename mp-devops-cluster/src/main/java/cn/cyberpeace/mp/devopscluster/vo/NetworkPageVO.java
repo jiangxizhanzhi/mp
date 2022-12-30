@@ -59,6 +59,16 @@ public class NetworkPageVO extends BaseVO {
     @ApiModelProperty("创建时间")
     private String createdAt;
 
+    /**
+     * 场景名称
+     */
+    @ApiModelProperty("场景名称")
+    private String sceneName;
+
+
+    @ApiModelProperty(value = "引用类型")
+    private Integer referenceType;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
