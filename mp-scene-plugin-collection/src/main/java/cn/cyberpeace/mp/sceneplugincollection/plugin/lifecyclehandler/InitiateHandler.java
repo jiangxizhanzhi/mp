@@ -2,8 +2,13 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -14,10 +19,13 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertFileParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertLogParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertRegistryParams;
@@ -32,12 +40,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
+import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.REGISTRY;
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
 
     private static WazuhLogProbeLocationConfig locationConfig;
+
+    private static WazuhModifyEventConfig wazuhModifyEventConfig;
 
     private static Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap;
 
@@ -226,10 +240,16 @@ public class InitiateHandler extends HandlerCommon {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
+                if (Boolean.FALSE.equals(probe.getDisabled())) {
+                    customProbeParams.add(getModifyProbeParam(agentName, probe.getCollectPath(), REGISTRY));
+                }
             } else if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
+                if (Boolean.FALSE.equals(probe.getDisabled())) {
+                    customProbeParams.add(getModifyProbeParam(agentName, probe.getCollectPath(), FILE));
+                }
             } else if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
                 // 日志采集类型，新增日志参数
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
@@ -278,5 +298,50 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
         return locationMap;
+    }
+
+    /**
+     * 获取变更事件初始数据脚本
+     * @param agentName
+     * @param collectPath
+     * @param type
+     * @return
+     */
+    private WazuhControl.ControlProbeParam getModifyProbeParam(String agentName, List<String> collectPath, Integer type) {
+        if (wazuhModifyEventConfig == null) {
+            wazuhModifyEventConfig = BeanCommon.getBean(WazuhModifyEventConfig.class);
+        }
+        WazuhControl.ControlProbeParam probeParam = new WazuhControl.ControlProbeParam();
+        var modifyProbe = wazuhModifyEventConfig.getModifyProbe();
+        if (Objects.isNull(modifyProbe)) {
+            return probeParam;
+        }
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
+        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
+                LocalFileMappingModel::getRemoteFile));
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        WazuhProbeConfig.DefaultProbe.NewProbe probe;
+        if (type == FILE) {
+            probe = modifyProbe.getFileProbe();
+        } else {
+            probe = modifyProbe.getRegistryProbe();
+        }
+        String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                nameFileMap.getOrDefault(probe.getProbeName(), StringUtils.EMPTY));
+        probeParam.setId(probe.getId());
+        probeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+        probeParam.setGroup(agentName);
+        probeParam.setScriptUrl(url);
+        if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_BAT)) {
+            probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+        } else if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_PY)) {
+            probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+        } else if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_SH)) {
+            probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+        }
+        probeParam.setOutputFormat(probe.getOutputFormat());
+        probeParam.setInterval(probe.getInterval());
+        probeParam.setScriptParam(StringUtils.join(collectPath, ","));
+        return probeParam;
     }
 }

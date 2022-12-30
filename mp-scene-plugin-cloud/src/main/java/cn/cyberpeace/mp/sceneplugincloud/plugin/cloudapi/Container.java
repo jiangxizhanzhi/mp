@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerNewDelet
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRetrieveParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStopData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
@@ -26,10 +28,12 @@ import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class Container extends CloudClient {
@@ -176,6 +180,47 @@ public class Container extends CloudClient {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 根据容器名称获取容器id
+     *
+     * @param name
+     * @return
+     */
+    public String getContainerIdByName(String name) {
+        NameQueryParam param = new NameQueryParam();
+        param.setName(name);
+        param.setOffset(1);
+        param.setLimit(1);
+        CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param,
+                new TypeReference<>() {
+                }, true);
+        List<ContainerGetData> datas = Optional.of(result).map(CloudResponse::getData).map(CloudListData::getList).orElse(null);
+        if (CollectionUtils.isEmpty(datas)) {
+            log.error("find no resource by name {}", name);
+        } else if (datas.size() == 1) {
+            return datas.get(0).getId();
+        } else {
+            log.error("find more than one resource by name {} , resources is {}", name, JsonCommon.stringify(result.getData().getList()));
+        }
+
+        return null;
+    }
+
+    /**
+     * 从容器中copy出文件
+     *
+     * @param containerId
+     * @param filepath
+     * @return
+     */
+    public HttpResult retrieveFile(String containerId, String filepath) {
+        var data = new ContainerRetrieveParam();
+        data.setContainerPath(filepath);
+        var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
+
+        return cloudDownload(requestUrl, data);
     }
 
 }
