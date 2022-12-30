@@ -40,8 +40,9 @@ public class ElasticIpController {
     @GetMapping("/page")
     public PageResult<ElasticIpVO> page(ElasticIpPageRequest request){
         BasePageBO<ElasticIpBO> model = elasticIpConverter.page(new ElasticIpPageDTO(request));
-        List<ElasticIpVO> list = convertBOToPageVO(model);
-        return new PageResult<>(list, model.getTotal());
+        List<ElasticIpVO> elasticIpList = convertBOToPageVO(model);
+
+        return new PageResult<>(elasticIpList, model.getTotal());
     }
 
     /**

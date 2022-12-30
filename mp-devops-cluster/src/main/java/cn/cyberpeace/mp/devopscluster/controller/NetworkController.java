@@ -4,20 +4,18 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
-import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
-import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkSubnetBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.VlanIpStockBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.request.NetworkPageRequest;
+import cn.cyberpeace.mp.devopscluster.service.SceneInfoService;
 import cn.cyberpeace.mp.devopscluster.vo.NetworkPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.VlanIpStockVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +45,7 @@ public class NetworkController {
 
     private final NetworkConverter networkConverter;
 
-    private final CsceneSpecialService csceneSpecialService;
+    private final SceneInfoService sceneInfoService;
 
     /**
      * 分页查询网络信息
@@ -75,23 +74,24 @@ public class NetworkController {
                 }
         ).collect(Collectors.toList());
 
-        // 添加场景信息
+        // 处理场景信息
         List<String> networkNames = networkList.stream().map(NetworkPageVO::getName).collect(Collectors.toList());
-        ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(networkNames);
-        Map<String, CsceneNodeInfoBO> map = serviceResult.getSource();
-
-        if (CollectionUtil.isNotEmpty(map)) {
+        Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             networkList.forEach(net -> {
-                if (Objects.nonNull(map.get(net.getName()))) {
-                    var csceneNodeInfoBO = map.get(net.getName());
+                var csceneNodeInfoBO = map.get(net.getName());
+                if (Objects.nonNull(csceneNodeInfoBO)) {
                     net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     net.setReferenceType(csceneNodeInfoBO.getReferenceType());
                 }
             });
-        }
+        };
+
+        sceneInfoService.processSceneInfo(networkNames, consumer);
 
         return new PageResult<>(networkList,model.getTotal());
     }
+
+
 
 
     /**

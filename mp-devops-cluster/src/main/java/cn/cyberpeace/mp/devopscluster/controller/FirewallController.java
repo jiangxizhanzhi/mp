@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devopscluster.service.SceneInfoService;
 import cn.cyberpeace.mp.devopscluster.vo.FirewallPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import io.swagger.annotations.Api;
@@ -18,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +36,8 @@ import java.util.stream.Collectors;
 public class FirewallController {
 
     private final FirewallConverter firewallConverter;
+
+    private final SceneInfoService sceneInfoService;
 
     /**
      * 分页查询
@@ -48,6 +54,20 @@ public class FirewallController {
         int total = list.size();
         int skip = (request.getPage() - 1) * request.getPerPage();
         List<FirewallPageVO> firewallList = list.stream().skip(skip).limit(request.getPerPage()).collect(Collectors.toList());
+
+        // 处理场景信息
+        List<String> resourceNames = firewallList.stream().map(FirewallPageVO::getName).collect(Collectors.toList());
+        Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
+            firewallList.forEach(firewall -> {
+                var csceneNodeInfoBO = map.get(firewall.getName());
+                if (Objects.nonNull(csceneNodeInfoBO)) {
+                    firewall.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
+                    firewall.setReferenceType(csceneNodeInfoBO.getReferenceType());
+                }
+            });
+        };
+
+        sceneInfoService.processSceneInfo(resourceNames, consumer);
 
         return new PageResult<>(firewallList, total);
     }
