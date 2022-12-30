@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -29,6 +30,9 @@ public class AuthCacheConfig {
 
     // default 6h
     public static final String CACHE_MANAGER_6H = "authCacheManager_6H";
+
+    // default 5min
+    public static final String LOGIN_FAILURE = "login_failure";
 
     @Autowired
     private AuthConfig authConfig;
@@ -72,6 +76,14 @@ public class AuthCacheConfig {
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
+    }
+
+    @Bean(name = LOGIN_FAILURE)
+    public Cache<String, Integer> loginFailureCache() {
+        return Caffeine.newBuilder()
+                // 设置最后一次写入或访问后经过固定时间过期
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build();
     }
 
 }

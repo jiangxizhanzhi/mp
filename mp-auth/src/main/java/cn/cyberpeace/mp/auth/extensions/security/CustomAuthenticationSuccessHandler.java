@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
@@ -23,6 +24,7 @@ import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -30,6 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,6 +61,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Autowired
     private OperateLogService operateLogService;
+
+    @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
+    private Cache<String, Integer> loginFailureCache;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -123,8 +129,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
-
+                loginFailureCache.invalidate(user.getUsername());
                 log.info("Login success! {}", user.getUsername());
+
             }
         }
 

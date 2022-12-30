@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.auth.util.KaptchaUtil;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -50,6 +51,10 @@ public class RegisterController {
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> register(@RequestBody @Validated RegisterRequest req) {
+        ServiceResult<Object> checkResult = KaptchaUtil.checkKaptcha(req.getVerifyCode());
+        if (Boolean.FALSE.equals(checkResult.getSource())) {
+            throw new MpRuntimeException(checkResult.getServiceCode(), checkResult.getDetail());
+        }
         String encryptedPwd = req.getPassword();
         req.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
         ObjServiceResult<UserModel> result = registerService.register(req);

@@ -12,6 +12,7 @@ public enum AuthErrorCode implements ErrorCode {
     NOT_CERTIFIED("MP-110001", "not_certified"),
     AUTHENTICATION_FAILED("MP-110002", "authentication_failed"),
     BAD_CREDENTIALS("MP-110003", "bad_credentials"),
+    NEED_VERIFY_CODE("MP-110004", "need_verify_code"),
 
     // verify token jwt error
     ALGORITHM_MISMATCH("MP-110110", "token_algorithm_mismatch"),
@@ -126,7 +127,11 @@ public enum AuthErrorCode implements ErrorCode {
 
     FILE_OVERSIZE_ERROR("MP-110150", "file_oversize_error"),
     FILE_SUFFIX_TYPE_ERROR("MP-110151", "file_suffix_type_error"),
-    FILE_MAGIC_HEADER_ERROR("MP-110152", "file_magic_header_error");
+    FILE_MAGIC_HEADER_ERROR("MP-110152", "file_magic_header_error"),
+
+    VERIFY_CODE_INCORRECT("MP-110160", "verify_code_incorrect"),
+    VERIFY_CODE_EXPIRE("MP-110161", "verify_code_expire"),
+    VERIFY_CODE_EMPTY("MP-110161", "verify_code_empty");
 
 
     AuthErrorCode(String code, String message) {
