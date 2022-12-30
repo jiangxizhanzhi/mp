@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.resourcename;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.hutool.core.util.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,9 @@ public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNamePa
         if (StringUtils.isEmpty(name) || !name.startsWith(this.getPrefix())) {
             return new ResourceParseWrapper<>();
         }
+        if (name.endsWith("collection")) {
+            return new ResourceParseWrapper<>();
+        }
         String sceneInfo = name.replace(this.getPrefix() + "_", "");
         String[] sp = sceneInfo.split("_");
         if (sp.length == 0) {
@@ -33,7 +37,9 @@ public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNamePa
         var result = new RsourceNameParams();
         result.setNodeId(sp[0]);
         if (sp.length > 1) {
-            result.setIndex(Integer.parseInt(sp[1]));
+            if (NumberUtil.isNumber(sp[1])) {
+                result.setIndex(Integer.parseInt(sp[1]));
+            }
         }
         return new ResourceParseWrapper<>(result);
     }
