@@ -131,7 +131,7 @@ public enum AuthErrorCode implements ErrorCode {
 
     VERIFY_CODE_INCORRECT("MP-110160", "verify_code_incorrect"),
     VERIFY_CODE_EXPIRE("MP-110161", "verify_code_expire"),
-    VERIFY_CODE_EMPTY("MP-110161", "verify_code_empty");
+    VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty");
 
 
     AuthErrorCode(String code, String message) {
