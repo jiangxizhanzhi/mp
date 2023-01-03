@@ -57,36 +57,6 @@
       "l1_parent_id": 1
     },
     {
-      "id": 6,
-      "name": "PLC-A",
-      "l2_parent_id": 5,
-      "l1_parent_id": 1
-    },
-    {
-      "id": 7,
-      "name": "PLC-B",
-      "l2_parent_id": 5,
-      "l1_parent_id": 1
-    },
-    {
-      "id": 8,
-      "name": "PLC-C",
-      "l2_parent_id": 5,
-      "l1_parent_id": 1
-    },
-    {
-      "id": 9,
-      "name": "PLC-D",
-      "l2_parent_id": 5,
-      "l1_parent_id": 1
-    },
-    {
-      "id": 10,
-      "name": "BGA",
-      "l2_parent_id": 5,
-      "l1_parent_id": 1
-    },
-    {
       "id": 30,
       "name": "网络服务",
       "l2_parent_id": null,
@@ -515,6 +485,36 @@
       "l1_parent_id": 3
     },
     {
+      "id": 6,
+      "name": "PLC-A",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 7,
+      "name": "PLC-B",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 8,
+      "name": "PLC-C",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 9,
+      "name": "PLC-D",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 10,
+      "name": "BGA",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
       "id": 35102,
       "name": "5G核心网设备",
       "l2_parent_id": 51,
@@ -560,6 +560,18 @@
         {
           "id": 23,
           "name": "防火墙",
+          "parent_id": 6,
+          "child": null
+        },
+        {
+          "id": 24,
+          "name": "OPC-Server",
+          "parent_id": 6,
+          "child": null
+        },
+        {
+          "id": 25,
+          "name": "OPC-Client",
           "parent_id": 6,
           "child": null
         }
