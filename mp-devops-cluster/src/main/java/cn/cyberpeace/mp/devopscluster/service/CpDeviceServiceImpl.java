@@ -113,8 +113,17 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         model.setMainType(device.getMaintype());
         model.setRole(device.getRole());
         model.setCategory(device.getCategory());
+        if (Objects.isNull(model.getCategory())) {
+            model.setCategory(0);
+        }
         model.setSecondCategory(device.getSecondCategory());
+        if (Objects.isNull(model.getSecondCategory())) {
+            model.setSecondCategory(0);
+        }
         model.setL3Category(device.getL3Category());
+        if (Objects.isNull(model.getL3Category())) {
+            model.setL3Category(0);
+        }
         model.setIsImport(device.getIsImport());
         model.setIsInternal(device.getIsInternal());
         model.setIsInit(device.getIsInit());
@@ -182,9 +191,10 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         device.setImageType(model.getImageType());
         device.setMaintype(model.getMainType());
         device.setRole(model.getRole());
-        device.setCategory(model.getCategory());
-        device.setSecondCategory(model.getSecondCategory());
-        device.setL3Category(model.getL3Category());
+        // 类别为0说明这一级别没有类别，设为null返回
+        device.setCategory(model.getCategory() == 0 ? null : model.getCategory());
+        device.setSecondCategory(model.getSecondCategory() == 0 ? null : model.getSecondCategory());
+        device.setL3Category(model.getL3Category() == 0 ? null : model.getL3Category());
         device.setIsImport(model.getIsImport());
         device.setIsInternal(model.getIsInternal());
         device.setIsInit(model.getIsInit());
