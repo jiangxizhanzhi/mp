@@ -59,31 +59,31 @@
     {
       "id": 6,
       "name": "PLC-A",
-      "l2_parent_id": null,
+      "l2_parent_id": 5,
       "l1_parent_id": 1
     },
     {
       "id": 7,
       "name": "PLC-B",
-      "l2_parent_id": null,
+      "l2_parent_id": 5,
       "l1_parent_id": 1
     },
     {
       "id": 8,
       "name": "PLC-C",
-      "l2_parent_id": null,
+      "l2_parent_id": 5,
       "l1_parent_id": 1
     },
     {
       "id": 9,
       "name": "PLC-D",
-      "l2_parent_id": null,
+      "l2_parent_id": 5,
       "l1_parent_id": 1
     },
     {
       "id": 10,
       "name": "BGA",
-      "l2_parent_id": null,
+      "l2_parent_id": 5,
       "l1_parent_id": 1
     },
     {
@@ -495,6 +495,36 @@
       "name": "MacOS",
       "l2_parent_id": 5,
       "l1_parent_id": 1
+    },
+    {
+      "id": 403,
+      "name": "智能摄像头",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 404,
+      "name": "一体化基站",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 35101,
+      "name": "OLT设备",
+      "l2_parent_id": 51,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 35102,
+      "name": "5G核心网设备",
+      "l2_parent_id": 51,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 35001,
+      "name": "ONU/ONT设备",
+      "l2_parent_id": 50,
+      "l1_parent_id": 3
     }
   ],
   "role": [
