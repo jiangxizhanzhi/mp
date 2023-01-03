@@ -1054,6 +1054,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 再创建终端
         var createTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
                     getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
