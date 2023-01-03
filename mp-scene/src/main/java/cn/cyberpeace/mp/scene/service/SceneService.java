@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -49,7 +48,7 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart) {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
@@ -66,6 +65,7 @@ public class SceneService {
         SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
+            sceneHandler.prepare(partialStart);
             if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
@@ -82,7 +82,7 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
                                                             SceneContextBO context) {
-        return create(sceneConfigDataBO.exportToScene(), context);
+        return create(sceneConfigDataBO.exportToScene(), context, false);
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
@@ -228,6 +228,16 @@ public class SceneService {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
         ElementTaskPool.getInstance().executeTask(() -> sceneHandler.restartElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> createElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> {
+            sceneHandler.initiateElement(nodeId);
+            sceneHandler.createElement(nodeId);
+        });
         return new ServiceResult<>(true);
     }
 

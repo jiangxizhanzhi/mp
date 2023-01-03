@@ -20,6 +20,8 @@ public class BaseCsceneModel extends BaseModel {
     private Boolean deleted;
     @DefaultStr
     private String name;
+    @DefaultBool
+    private Boolean supportPartialStart;
 
     @Override
     public boolean hasDeleted() {

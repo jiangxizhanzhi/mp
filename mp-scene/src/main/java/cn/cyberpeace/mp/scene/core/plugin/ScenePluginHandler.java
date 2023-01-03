@@ -80,6 +80,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     public void initiate() throws Exception {
     }
 
+    public void prepare(boolean partialStart) {
+
+    }
+
     public void create() throws Exception {
 
     }
@@ -144,6 +148,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void restartElement(String nodeId) {
+
+    }
+
+    public void initiateElement(String nodeId) {
+
+    }
+
+    public void createElement(String nodeId) {
 
     }
 

@@ -88,7 +88,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext()).getSource());
+        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource());
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
@@ -190,6 +190,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
         return this.sceneService.restartElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean createElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.createElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     public boolean recreateElement(String nodeId) {

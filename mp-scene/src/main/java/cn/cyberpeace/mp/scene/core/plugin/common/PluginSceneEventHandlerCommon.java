@@ -36,7 +36,9 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         List<EventProcess> elementEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(
                 elementProcessClass, EventProcess.class).values());
         getPluginHandler().getElementMap().keySet().forEach(nodeId -> {
-            getPluginHandler().prepareElementProcess(nodeId, event, elementEventProcesses);
+            if (getPluginHandler().getSceneHandler().isHandleNode(nodeId)) {
+                getPluginHandler().prepareElementProcess(nodeId, event, elementEventProcesses);
+            }
         });
     }
 

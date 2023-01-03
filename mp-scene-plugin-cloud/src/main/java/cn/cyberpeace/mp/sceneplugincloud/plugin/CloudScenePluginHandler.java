@@ -26,9 +26,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementCreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementInitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PrepareHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
@@ -77,6 +80,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
     private ModifyHandler modifyHandler;
+    private PrepareHandler prepareHandler;
 
     private volatile boolean networksCreated = false;
 
@@ -121,6 +125,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
+        prepareHandler = new PrepareHandler(this);
     }
 
     @Override
@@ -250,6 +255,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
+    public void prepare(boolean partialStart) {
+        prepareHandler.prepare(partialStart);
+    }
+
+    @Override
     public void create() {
         createHandler.create();
     }
@@ -277,6 +287,24 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void resume() {
         new ResumeHandler(this, SceneModel.Event.RESUME).resume();
+    }
+
+    @Override
+    public void initiateElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new ElementInitiateHandler(this, getSceneHandler().getScene().getEvent()).initiateElement(element);
+    }
+
+    @Override
+    public void createElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
     }
 
     @Override

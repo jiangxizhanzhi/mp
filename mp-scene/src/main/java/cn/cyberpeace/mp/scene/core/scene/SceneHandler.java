@@ -127,6 +127,16 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
+    public final Set<String> excludeHandleNodes = new HashSet<>();
+
+    public boolean isHandleNode(String nodeId) {
+        return !excludeHandleNodes.contains(nodeId);
+    }
+
+    public void addExcludeHandleNode(String nodeId) {
+        excludeHandleNodes.add(nodeId);
+    }
+
     private final StatusReporter<CollectedSceneStatusBO> sceneStatusReporter = (StatusReporter) BeanCommon.getBean("sceneStatusReporter");
 
     private final StatusReporter<CollectedElementStatusBO> elementStatusReporter = (StatusReporter) BeanCommon.getBean("elementStatusReporter");
@@ -148,7 +158,9 @@ public class SceneHandler extends BaseSceneHandler<
     private void prepareAllEvent(int sceneEvent, int elementEvent) {
         prepareSceneEvent(sceneEvent);
         for (var element : getElementMap().values()) {
-            prepareElementEvent(element, elementEvent);
+            if (isHandleNode(element.getId())) {
+                prepareElementEvent(element, elementEvent);
+            }
         }
     }
 
@@ -226,13 +238,17 @@ public class SceneHandler extends BaseSceneHandler<
     private void startAllEvent(int sceneEvent, int elementEvent) {
         startSceneEvent(sceneEvent);
         for (var element : getElementMap().values()) {
-            startElementEvent(element.getId(), elementEvent);
+            if (isHandleNode(element.getId())) {
+                startElementEvent(element.getId(), elementEvent);
+            }
         }
     }
 
     private void overAllEvent(int sceneEvent, int elementEvent) {
         for (var element : getElementMap().values()) {
-            overElementEvent(element.getId(), elementEvent);
+            if (isHandleNode(element.getId())) {
+                overElementEvent(element.getId(), elementEvent);
+            }
         }
         overSceneEvent(sceneEvent);
     }
@@ -484,6 +500,13 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    public boolean prepare(boolean partialStart) {
+        for (var plugin : getPlugins()) {
+            plugin.prepare(partialStart);
+        }
+        return true;
+    }
+
     public boolean create() {
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
@@ -649,7 +672,40 @@ public class SceneHandler extends BaseSceneHandler<
     public void modify() {
     }
 
-    public void startElement(String nodeId) {
+    public void initiateElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.INITIATE);
+        startElementEvent(nodeId, SceneElementModel.Event.INITIATE);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.initiateElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.INITIATE, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.INITIATE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
+    public void createElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.CREATE);
+        startElementEvent(nodeId, SceneElementModel.Event.CREATE);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.createElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.CREATE, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.CREATE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void stopElement(String nodeId) {
