@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "路由分页返回信息")
-public class RouterPageVO extends BaseVO {
+public class RouterPageVO extends SceneInfoVO {
 
     /**
      * 网络名称

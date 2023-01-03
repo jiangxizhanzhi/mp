@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "防火墙分页返回信息")
-public class FirewallPageVO extends BaseVO {
+public class FirewallPageVO extends SceneInfoVO {
 
     /**
      * 名称

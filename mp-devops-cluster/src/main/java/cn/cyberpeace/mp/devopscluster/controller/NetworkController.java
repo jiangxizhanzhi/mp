@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.NetworkBO;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.VlanIpStockBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devopscluster.request.NetworkPageRequest;
+import cn.cyberpeace.mp.devopscluster.service.SceneInfoService;
 import cn.cyberpeace.mp.devopscluster.vo.NetworkPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.VlanIpStockVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
@@ -20,11 +22,15 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +45,8 @@ public class NetworkController {
 
     private final NetworkConverter networkConverter;
 
+    private final SceneInfoService sceneInfoService;
+
     /**
      * 分页查询网络信息
      * @param request
@@ -49,7 +57,7 @@ public class NetworkController {
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
         BasePageBO<NetworkBO> model = networkConverter.page(new NetworkPageDTO(request));
         List<NetworkBO> networks = model.getList();
-        List<NetworkPageVO> list = networks.stream().map(networkModel -> {
+        List<NetworkPageVO> networkList = networks.stream().map(networkModel -> {
             List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
             List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
             if (CollectionUtils.isNotEmpty(subnetList)) {
@@ -65,8 +73,25 @@ public class NetworkController {
                     .build();
                 }
         ).collect(Collectors.toList());
-        return new PageResult<>(list,model.getTotal());
+
+        // 处理场景信息
+        List<String> networkNames = networkList.stream().map(NetworkPageVO::getName).collect(Collectors.toList());
+        Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
+            networkList.forEach(net -> {
+                var csceneNodeInfoBO = map.get(net.getName());
+                if (Objects.nonNull(csceneNodeInfoBO)) {
+                    net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
+                    net.setReferenceType(csceneNodeInfoBO.getReferenceType());
+                }
+            });
+        };
+
+        sceneInfoService.processSceneInfo(networkNames, consumer);
+
+        return new PageResult<>(networkList,model.getTotal());
     }
+
+
 
 
     /**
