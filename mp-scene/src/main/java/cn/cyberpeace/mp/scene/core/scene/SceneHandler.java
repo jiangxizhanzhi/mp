@@ -519,6 +519,11 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        for (var nodeId : getElementMap().keySet()) {
+            if (!isHandleNode(nodeId)) {
+                asyncAckElementChanged(nodeId, false, false);
+            }
+        }
         save();
         return true;
     }
