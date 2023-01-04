@@ -661,6 +661,7 @@ public class ImagesController {
                     vo.setAllowExport(false);
                 }
             }
+            vo.setCreateUserName(v.getCreateUserName());
             return vo;
         }).collect(Collectors.toList());
     }
