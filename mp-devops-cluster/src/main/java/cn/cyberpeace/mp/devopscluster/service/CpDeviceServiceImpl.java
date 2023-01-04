@@ -103,6 +103,7 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         }
         DeviceModel model = new DeviceModel();
         LocalDateTime now = LocalDateTime.now();
+        model.setCreateTime(now);
         String time = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         model.setUpdatedAt(time);
         model.setName(device.getName());
