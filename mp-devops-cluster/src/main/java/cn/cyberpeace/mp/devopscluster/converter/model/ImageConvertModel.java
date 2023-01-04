@@ -141,4 +141,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private Boolean supportExport;
 
+    /**
+     * 靶标创建用户名称
+     */
+    private String createUserName;
+
 }

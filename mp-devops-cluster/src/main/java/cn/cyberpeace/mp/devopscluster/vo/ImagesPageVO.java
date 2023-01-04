@@ -135,4 +135,6 @@ public class ImagesPageVO extends BaseVO {
     @ApiModelProperty("是否允许导出")
     private Boolean allowExport;
 
+    @ApiModelProperty("靶标创建用户名称")
+    private String createUserName;
 }
