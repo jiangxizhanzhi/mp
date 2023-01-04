@@ -136,4 +136,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private Integer referenceStatus;
 
+    /**
+     * 靶标创建用户名称
+     */
+    private String createUserName;
+
 }

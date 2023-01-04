@@ -132,4 +132,6 @@ public class ImagesPageVO extends BaseVO {
     @ApiModelProperty("容器信息")
     private ExtDocker extDocker;
 
+    @ApiModelProperty("靶标创建用户名称")
+    private String createUserName;
 }

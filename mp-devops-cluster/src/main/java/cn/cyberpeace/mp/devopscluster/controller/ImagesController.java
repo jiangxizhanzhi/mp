@@ -575,6 +575,7 @@ public class ImagesController {
                     }
                 }
             }
+            vo.setCreateUserName(v.getCreateUserName());
             return vo;
         }).collect(Collectors.toList());
     }

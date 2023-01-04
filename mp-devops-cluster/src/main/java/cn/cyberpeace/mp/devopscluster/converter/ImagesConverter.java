@@ -105,12 +105,17 @@ public class ImagesConverter implements BaseConverter{
 
         Map<String, PublicEnum> targetMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getIsPublic));
 
+        Map<String, DeviceTargetPO> deviceTargetPOMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, (d) -> d));
+
         List<ImageConvertModel> modelList = deviceList.stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (ImageConvertModel imageConvertModel : modelList) {
                 if (MapUtils.isNotEmpty(targetMap)) {
                     imageConvertModel.setIsPublic(targetMap.get(imageConvertModel.getUuid()));
+                }
+                if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
+                    imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
                 }
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
             }
