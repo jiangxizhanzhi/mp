@@ -153,6 +153,11 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer parentSystemType;
 
+    /**
+     * 靶标创建用户名称
+     */
+    private String createUserName ;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -186,6 +191,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setLikeName(request.getLikeName());
         this.setIsHide(Boolean.FALSE);
         this.setVmStarted(request.getVmStarted());
+        this.setCreateUserName(request.getCreateUserName());
     }
 
     /**

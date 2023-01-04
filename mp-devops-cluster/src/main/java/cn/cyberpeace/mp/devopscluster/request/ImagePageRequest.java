@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
+
 /**
  * 镜像分页请求信息
  */
@@ -94,6 +95,9 @@ public class ImagePageRequest extends BasePageRequest {
 
     @ApiModelProperty("已启动镜像")
     private Boolean vmStarted;
+
+    @ApiModelProperty("靶标创建用户名称")
+    private String createUserName;
 
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
