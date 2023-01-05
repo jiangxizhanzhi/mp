@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
@@ -89,6 +90,13 @@ public class CsceneSpecialService {
     private ScenePluginCloudSceneService cloudSceneService;
 
     @Data
+    public static class CsceneElementVirtualStat {
+        private String csceneId;
+        private Integer virtualType;
+        private Integer virtualTypeCount;
+    }
+
+    @Data
     public static class CsceneElementStat {
         private String csceneId;
         private Integer elementType;
@@ -119,7 +127,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -149,6 +157,28 @@ public class CsceneSpecialService {
                 stat.setTerminalCount(elementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
                 stat.setNpcCount(elementStat.getElementTypeCount());
+            }
+        });
+
+
+        var virtualStatCondition = new HumanCondition()
+                .link(CsceneModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterIn(CsceneModel::getId, ids)
+                .groupBy(CsceneModel::getId)
+                .selectAs(CsceneModel::getId, CsceneElementStat::getCsceneId)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .groupBy(CloudPluginSceneConfigElementModel::getVirtualType)
+                .selectAs(CloudPluginSceneConfigElementModel::getVirtualType, CsceneElementVirtualStat::getVirtualType)
+                .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType), CsceneElementVirtualStat::getVirtualTypeCount);
+        List<CsceneElementVirtualStat> csceneElementVirtualStats = csceneMapper.list(virtualStatCondition, CsceneElementVirtualStat.class);
+        csceneElementVirtualStats.forEach(elementStat -> {
+            var stat = statMap.get(elementStat.getCsceneId());
+            var virtualType = elementStat.getVirtualType();
+            if (NodeLimitUtils.isLimitedNode(virtualType)) {
+                stat.setResourceOccupiedNums(stat.getResourceOccupiedNums() + elementStat.getVirtualTypeCount());
             }
         });
 
