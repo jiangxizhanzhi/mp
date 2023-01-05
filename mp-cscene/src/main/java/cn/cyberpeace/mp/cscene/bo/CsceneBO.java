@@ -35,6 +35,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private List<CsceneInstanceBO> appScenes;
     @ApiModelProperty(value = "场景上下文属性")
     private CsceneContextBO context;
+    @ApiModelProperty(value = "资源占用节点数")
+    private Integer resourceOccupiedNums;
 
     @Override
     public CsceneModel createModel() {

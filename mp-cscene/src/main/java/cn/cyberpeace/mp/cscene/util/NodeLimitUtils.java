@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Getter;
 import lombok.Setter;
@@ -138,5 +140,27 @@ public final class NodeLimitUtils {
         private int limitNode;
         private int currentNode;
         private int existNode;
+    }
+
+    public static int calLimitedNodesNum(CsceneBO cscene) {
+        int elementCount = 0;
+        if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getPlugins() != null
+                && cscene.getSceneConfig().getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
+            var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+            if (pluginElements != null) {
+                for (var e : pluginElements.values()) {
+                    var virtualType = e.get("virtual_type");
+                    if (virtualType != null) {
+                        if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                                Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                                Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
+                        ) {
+                            elementCount++;
+                        }
+                    }
+                }
+            }
+        }
+        return elementCount;
     }
 }

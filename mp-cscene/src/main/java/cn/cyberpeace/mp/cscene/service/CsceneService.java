@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -366,7 +367,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
-        return new ServiceResult<>(csceneHandler.toData(withInstance));
+        var cscene = csceneHandler.toData(withInstance);
+        cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
+        return new ServiceResult<>(cscene);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
