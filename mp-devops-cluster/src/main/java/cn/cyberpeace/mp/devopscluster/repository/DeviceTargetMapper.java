@@ -106,4 +106,6 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    List<String> getCreateUserNames();
 }

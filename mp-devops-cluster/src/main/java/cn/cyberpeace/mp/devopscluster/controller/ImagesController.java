@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
@@ -114,6 +115,20 @@ public class ImagesController {
         List<ImagesPageVO> list = convertBOToPageVO(model);
 
         return new PageResult<>(list,model.getTotal());
+    }
+
+    /**
+     * 分页查询
+     */
+    @ApiOperation("分页查询")
+    @GetMapping("/get_create_user_names")
+    public ServiceResult<List<String>> createUserNames(ImagePageRequest request) {
+        var mapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        var list = mapper.getCreateUserNames();
+        if (CollectionUtils.isNotEmpty(list)) {
+            list = list.stream().filter(m -> StringUtils.isNotEmpty(m)).collect(Collectors.toList());
+        }
+        return new ServiceResult<>(list).asResult();
     }
 
     /**
