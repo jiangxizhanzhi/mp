@@ -129,8 +129,7 @@ public class ElementMonitorController {
         }
         var result = sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
                 intervalMinutes, bucketSize);
-        if ("f5f8a55ee9274f72b7141b4f416cf21b".equals(pageRequest.getSceneId())) {
-
+        if ("f5f8a55ee9274f72b7141b4f416cf21b".equals(pageRequest.getSceneId()) || "2a73e9c50370424689da402decf962c2".equals(pageRequest.getSceneId())) {
             int[] s = new int[]{2, 0, 0, 0, 5, 1, 2, 0, 3, 1,0,2,1,3,0};
             for (int i = 0; i < result.size(); i++) {
                 int count = s[i % s.length];
