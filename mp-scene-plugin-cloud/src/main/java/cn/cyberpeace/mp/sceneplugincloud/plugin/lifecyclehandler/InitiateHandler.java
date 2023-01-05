@@ -784,6 +784,8 @@ public class InitiateHandler extends HandlerCommon {
                         p.setIp(pluginPort.getOspfIp().split("/")[0]);
                     } else if (StringUtils.isNotEmpty(pluginPort.getBgpIp())) {
                         p.setIp(pluginPort.getBgpIp().split("/")[0]);
+                    } else if (StringUtils.isNotEmpty(pluginPort.getRipIp())) {
+                        p.setIp(pluginPort.getRipIp().split("/")[0]);
                     }
                 });
             }

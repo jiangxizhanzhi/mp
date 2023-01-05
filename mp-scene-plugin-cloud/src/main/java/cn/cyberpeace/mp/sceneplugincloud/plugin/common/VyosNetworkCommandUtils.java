@@ -137,11 +137,20 @@ public class VyosNetworkCommandUtils {
             List<String> setAreas = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (StringUtils.isNotEmpty(p.getOspfIp()) && StringUtils.isNotEmpty(p.getOspfArea())) {
+                    String ospfIp = p.getOspfIp();
+                    if (!ospfIp.contains("/")) {
+                        var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                        if (net != null && StringUtils.isNotEmpty(net.getCidr()) && net.getCidr().contains("/")) {
+                            ospfIp = ospfIp + net.getCidr().substring(net.getCidr().indexOf("/"));
+                        } else {
+                            ospfIp = ospfIp + "/24";
+                        }
+                    }
                     result.add(
-                            String.format(SET_INTERFACES, p.getSrcPort().getOrder(), p.getOspfIp())
+                            String.format(SET_INTERFACES, p.getSrcPort().getOrder(), ospfIp)
                     );
                     setAreas.add(
-                            String.format(SET_AREA, p.getOspfArea(), IpUtils.getFormatCidrIp(p.getOspfIp()))
+                            String.format(SET_AREA, p.getOspfArea(), IpUtils.getFormatCidrIp(ospfIp))
                     );
                 }
             });
@@ -175,12 +184,18 @@ public class VyosNetworkCommandUtils {
             List<String> cmds = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (bgpPorts.contains(p)) {
-                    // 端口有bgp配置 根据配置创建命令
-                    String interfaceIp = p.getSrcPort().getIp() + "/" + p.getBgpIp().split("/")[1];
+                    // 端口有bgp配置 根据配置创建命
+                    String interfaceIp = null;
+                    var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                    if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+                        interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+                    } else {
+                        interfaceIp = p.getSrcPort().getIp() + "/24";
+                    }
                     cmds.addAll(List.of(new String[]{
                             String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
                             String.format(SET_PEER, p.getBgpPeer()),
-                            String.format(SET_DECLARE_NET, p.getBgpAs(), IpUtils.getFormatCidrIp(p.getBgpIp())),
+                            String.format(SET_DECLARE_NET, p.getBgpAs(), IpUtils.getFormatCidrIp(interfaceIp)),
                             String.format(SET_NEIGHBOR_BFD, p.getBgpAs(), p.getBgpPeer()),
                             String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs())
                     }));
