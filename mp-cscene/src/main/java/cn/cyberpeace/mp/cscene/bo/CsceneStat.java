@@ -23,4 +23,6 @@ public class CsceneStat {
     private Integer npcCount;
     @ApiModelProperty(value = "测试场景数量")
     private Integer testSceneCount;
+    @ApiModelProperty(value = "占用节点资源数")
+    private Integer resourceOccupiedNums;
 }

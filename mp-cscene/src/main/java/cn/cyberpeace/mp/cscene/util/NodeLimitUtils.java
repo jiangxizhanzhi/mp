@@ -151,10 +151,7 @@ public final class NodeLimitUtils {
                 for (var e : pluginElements.values()) {
                     var virtualType = e.get("virtual_type");
                     if (virtualType != null) {
-                        if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                                Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
-                                Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
-                        ) {
+                        if (isLimitedNode(Integer.parseInt(virtualType.toString()))) {
                             elementCount++;
                         }
                     }
@@ -162,5 +159,17 @@ public final class NodeLimitUtils {
             }
         }
         return elementCount;
+    }
+
+    public static boolean isLimitedNode(Integer virtualType) {
+        if (virtualType == null) {
+            return false;
+        }
+        if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
+            return true;
+        }
+        return false;
     }
 }
