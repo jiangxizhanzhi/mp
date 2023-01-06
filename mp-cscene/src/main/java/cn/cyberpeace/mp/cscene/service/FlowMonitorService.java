@@ -6,11 +6,8 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
@@ -18,17 +15,23 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
@@ -50,7 +53,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -91,7 +99,6 @@ public class FlowMonitorService {
     private SceneElementMonitorService elementMonitorService;
 
 
-
     /**
      * 查询单个节点机器流量趋势
      *
@@ -123,6 +130,7 @@ public class FlowMonitorService {
 
     /**
      * 模拟流量
+     *
      * @param request
      * @return
      */
@@ -232,6 +240,7 @@ public class FlowMonitorService {
 
     /**
      * 合并同一节点的多IP数据
+     *
      * @param boList
      * @param batchSceneHandler
      * @return
@@ -330,7 +339,7 @@ public class FlowMonitorService {
 
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(),baseRequest.getTopSize());
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(), baseRequest.getTopSize());
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTypeCount> result = new ArrayList<>();
         if (map != null && !map.isEmpty()) {
@@ -601,5 +610,90 @@ public class FlowMonitorService {
         return flowTrendMap.get(closestTime);
     }
 
+    /**
+     * 导出全部流量文件
+     *
+     * @param csceneId
+     * @param response
+     */
+    public void export(String csceneId, HttpServletResponse response) {
+        // csceneId -> sceneId
+        String sceneId = csceneCommonService.translateSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            log.error("find no sceneId by csceneId {}", sceneId);
+            return;
+        }
+
+        // sceneId -> container name
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isEmpty(flowCollectors)) {
+            log.error("find no flowCollectors by sceneId {}", sceneId);
+            return;
+        }
+        String containName = flowCollectors.get(0);
+
+        // containerName -> containerId
+        Container container = new Container();
+        String containerId = container.getContainerIdByName(containName);
+        if (containerId == null) {
+            log.error("find no containerId by containName {}", containName);
+            return;
+        }
+
+        // execute cmd
+        String zipFilePath = "/opt/arkime/flow.zip";
+        ContainerExecuteResult result = container.executeCommand(containerId,
+                String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
+        if (result.getExitCode() != 0) {
+            log.error("exec zip cmd fail, exit code {}, msg {}", result.getExitCode(), result.getOutput());
+            return;
+        }
+
+        HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+        if (httpResult.getException() != null) {
+            return;
+        }
+
+        try {
+            transferStream(zipFilePath.substring(zipFilePath.lastIndexOf('/') + 1),
+                    httpResult.getResponse().getEntity().getContent(), response);
+        } catch (IOException e) {
+            log.error("export flow file {} fail, error: {}", zipFilePath, e);
+        }
+    }
+
+    /**
+     * 把输入流以文件的方式传输到前端
+     *
+     * @param fileName
+     * @param inputStream
+     * @param response
+     */
+    private void transferStream(String fileName, InputStream inputStream, HttpServletResponse response) {
+        // 以流的形式下载文件。
+        OutputStream outputStream = null;
+        try {
+            // 清空response
+            response.reset();
+
+            // 设置返回
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+            outputStream = response.getOutputStream();
+            StreamUtils.copy(inputStream, outputStream);
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("setResponse error:", e);
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                log.error("setResponse error:", e);
+            }
+        }
+    }
 
 }

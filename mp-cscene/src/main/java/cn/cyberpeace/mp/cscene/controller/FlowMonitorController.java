@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -218,5 +219,10 @@ public class FlowMonitorController {
         return ResultCommon.success(responseList);
     }
 
+    @ApiOperation(value = "导出全部流量文件")
+    @GetMapping("/export")
+    public void export(String sceneId, HttpServletResponse response) {
+        flowMonitorService.export(sceneId, response);
+    }
 
 }
