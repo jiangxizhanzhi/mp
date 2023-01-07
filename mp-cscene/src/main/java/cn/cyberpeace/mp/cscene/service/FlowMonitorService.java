@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
@@ -45,20 +46,21 @@ import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StreamUtils;
 
-import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -97,6 +99,9 @@ public class FlowMonitorService {
 
     @Autowired
     private SceneElementMonitorService elementMonitorService;
+
+    @Autowired
+    private CsceneFileService csceneFileService;
 
 
     /**
@@ -614,14 +619,13 @@ public class FlowMonitorService {
      * 导出全部流量文件
      *
      * @param csceneId
-     * @param response
      */
-    public void export(String csceneId, HttpServletResponse response) {
+    public String export(String csceneId) {
         // csceneId -> sceneId
         String sceneId = csceneCommonService.translateSceneId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {
             log.error("find no sceneId by csceneId {}", sceneId);
-            return;
+            return StringUtils.EMPTY;
         }
 
         // sceneId -> container name
@@ -629,7 +633,7 @@ public class FlowMonitorService {
         List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
         if (CollectionUtils.isEmpty(flowCollectors)) {
             log.error("find no flowCollectors by sceneId {}", sceneId);
-            return;
+            return StringUtils.EMPTY;
         }
         String containName = flowCollectors.get(0);
 
@@ -638,62 +642,43 @@ public class FlowMonitorService {
         String containerId = container.getContainerIdByName(containName);
         if (containerId == null) {
             log.error("find no containerId by containName {}", containName);
-            return;
+            return StringUtils.EMPTY;
         }
 
         // execute cmd
         String zipFilePath = "/opt/arkime/flow.zip";
         ContainerExecuteResult result = container.executeCommand(containerId,
-                String.format("zip -q -r -u %s /opt/arkime/raw/*", zipFilePath));
+                String.format("cd /opt/arkime/raw && zip -q -r -u %s *", zipFilePath));
         if (result.getExitCode() != 0) {
             log.error("exec zip cmd fail, exit code {}, msg {}", result.getExitCode(), result.getOutput());
-            return;
+            return StringUtils.EMPTY;
         }
 
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
         if (httpResult.getException() != null) {
-            return;
+            return StringUtils.EMPTY;
         }
 
+        String fileName = TextUtils.uuid() + ".zip";
+        File file = new File(fileName);
+        InputStream inputStream = null;
         try {
-            transferStream(zipFilePath.substring(zipFilePath.lastIndexOf('/') + 1),
-                    httpResult.getResponse().getEntity().getContent(), response);
+            FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
+            inputStream = new FileInputStream(file);
+            var uploadResult = csceneFileService.sceneUpload(inputStream, "zip").getSource();
+            return uploadResult.getInnerHttpUrl();
         } catch (IOException e) {
-            log.error("export flow file {} fail, error: {}", zipFilePath, e);
-        }
-    }
-
-    /**
-     * 把输入流以文件的方式传输到前端
-     *
-     * @param fileName
-     * @param inputStream
-     * @param response
-     */
-    private void transferStream(String fileName, InputStream inputStream, HttpServletResponse response) {
-        // 以流的形式下载文件。
-        OutputStream outputStream = null;
-        try {
-            // 清空response
-            response.reset();
-
-            // 设置返回
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + fileName);
-            outputStream = response.getOutputStream();
-            StreamUtils.copy(inputStream, outputStream);
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error("setResponse error:", e);
+            throw new RuntimeException(e);
         } finally {
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
+            file.deleteOnExit();
+            if (inputStream != null) {
+                try {
+                    IOUtils.close(inputStream);
+                } catch (IOException e) {
+
                 }
-            } catch (IOException e) {
-                log.error("setResponse error:", e);
             }
+            container.executeCommand(containerId, "rm -rf /opt/arkime/flow.zip");
         }
     }
-
 }
