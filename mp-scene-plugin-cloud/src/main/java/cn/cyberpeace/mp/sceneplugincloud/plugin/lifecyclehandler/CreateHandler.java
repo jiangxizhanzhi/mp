@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.NS3;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -51,8 +52,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Create
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.N;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,9 +79,13 @@ public class CreateHandler extends HandlerCommon {
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
+    private final NS3 ns3Client = new NS3();
     private final VmRouter vmRouter = new VmRouter();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+
+    private Map<String, List<NpcInfo>> network2InfoNs3 = new ConcurrentHashMap<>();
+    private Map<String, Integer> network2VlanIdNs3 = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
@@ -237,6 +245,9 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
+
+            network2VlanIdNs3.put(virtualSwitch.getId(), virtualSwitch.getSegmentationId());
+
             cloudElement.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
@@ -981,25 +992,58 @@ public class CreateHandler extends HandlerCommon {
 
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        synchronized (network2Info) {
-            cloudElement.getAccessNetworks().forEach(net -> {
-                String networkId = net.network.getResourceId();
-                if (!network2Info.containsKey(networkId)) {
-                    network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-                }
-                net.getFromPorts().forEach(port -> {
-                    network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+        if ("64ea7191-717c-4bad-8ddb-a01ae145e85b".equals(cloudElement.getImageUuid())) {
+            synchronized (network2InfoNs3){
+                cloudElement.getAccessNetworks().forEach(net -> {
+                    String networkId = net.network.getResourceId();
+                    if (!network2InfoNs3.containsKey(networkId)) {
+                        network2InfoNs3.put(networkId, new ArrayList<>());
+                    }
+                    net.getFromPorts().forEach(port -> {
+                        NpcInfo npcInfo = new NpcInfo();
+                        npcInfo.setIp(port.getIp());
+                        npcInfo.setName(npcName);
+                        npcInfo.setNetworkId(networkId);
+                        npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                        network2InfoNs3.get(networkId).add(npcInfo);
+                    });
                 });
-            });
-            cloudElement.getDeriveNetworks().forEach(net -> {
-                String networkId = net.network.getResourceId();
-                if (!network2Info.containsKey(networkId)) {
-                    network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-                }
-                net.getFromPorts().forEach(port -> {
-                    network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                cloudElement.getDeriveNetworks().forEach(net -> {
+                    String networkId = net.network.getResourceId();
+                    if (!network2InfoNs3.containsKey(networkId)) {
+                        network2InfoNs3.put(networkId, new ArrayList<>());
+                    }
+                    net.getFromPorts().forEach(port -> {
+                        NpcInfo npcInfo = new NpcInfo();
+                        npcInfo.setIp(port.getIp());
+                        npcInfo.setName(npcName);
+                        npcInfo.setNetworkId(networkId);
+                        npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                        network2InfoNs3.get(networkId).add(npcInfo);
+                    });
                 });
-            });
+            }
+        }else{
+            synchronized (network2Info) {
+                cloudElement.getAccessNetworks().forEach(net -> {
+                    String networkId = net.network.getResourceId();
+                    if (!network2Info.containsKey(networkId)) {
+                        network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                    }
+                    net.getFromPorts().forEach(port -> {
+                        network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                    });
+                });
+                cloudElement.getDeriveNetworks().forEach(net -> {
+                    String networkId = net.network.getResourceId();
+                    if (!network2Info.containsKey(networkId)) {
+                        network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                    }
+                    net.getFromPorts().forEach(port -> {
+                        network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                    });
+                });
+            }
         }
     }
 
@@ -1065,6 +1109,12 @@ public class CreateHandler extends HandlerCommon {
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
+
+        // 批量创建NPC节点
+        if (network2InfoNs3.values().size() > 0) {
+            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElementsNs3(network2InfoNs3));
+        }
+
     }
 
     protected void prepareEventProcess() {
@@ -1081,6 +1131,35 @@ public class CreateHandler extends HandlerCommon {
                 e.setResourceId(HandlerUtils.genResourceName(e.getSrcElement().getEid()));
             }
         }
+    }
+
+    public void createNpcElementsNs3(Map<String, List<NpcInfo>> npcInfos) {
+        for (var npcInfo : npcInfos.entrySet()) {
+            Integer vlanId = network2VlanIdNs3.get(npcInfo.getKey());
+            if (vlanId != null && !npcInfo.getValue().isEmpty()) {
+                String gateway = null;
+                List<String> ips = new ArrayList<>();
+                for (var n : npcInfo.getValue()) {
+                    if (Boolean.TRUE.equals(n.getAuxiliary())) {
+                        gateway = n.getIp();
+                    } else {
+                        ips.add(getNPCIP(n.getIp()));
+                    }
+                }
+                try {
+                    ns3Client.createNs3(gateway, ips, String.valueOf(vlanId), "tap_" + npcInfo.getKey().substring(0, 7));
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static String getNPCIP(String ip) {
+        if (ip.equals("192.168.1.11")) {
+            return "192.168.1.11:tcp:80:172.17.0.1:80";
+        }
+        return ip;
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
@@ -1213,5 +1292,14 @@ public class CreateHandler extends HandlerCommon {
             accessMode.setPublicNetProxyIp(null);
             accessMode.setPublicNetProxyPort(null);
         }
+    }
+
+    @Getter
+    @Setter
+    private static class NpcInfo {
+        private String networkId;
+        private String ip;
+        private String name;
+        private Boolean auxiliary;
     }
 }

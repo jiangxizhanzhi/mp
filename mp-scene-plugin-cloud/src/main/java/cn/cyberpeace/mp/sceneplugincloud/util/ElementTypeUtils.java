@@ -21,6 +21,27 @@ public class ElementTypeUtils {
         return CORE_ROUTER_IMAGE_NAME.equals(image);
     }
 
+    public static boolean isNs3(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC
+                && "64ea7191-717c-4bad-8ddb-a01ae145e85b".equals(element.getImageUuid());
+    }
+
+    public static boolean isNpc(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC;
+    }
+
+    public static boolean isVirtualMachine(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+    }
+
+    public static boolean isContainer(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+    }
+
+    public static boolean isVirtualTerminal(CloudPluginSceneElementBO element) {
+        return isNs3(element) || isNpc(element) || isContainer(element) || isVirtualMachine(element);
+    }
+
     /**
      * 是否核心路由器
      * @param element

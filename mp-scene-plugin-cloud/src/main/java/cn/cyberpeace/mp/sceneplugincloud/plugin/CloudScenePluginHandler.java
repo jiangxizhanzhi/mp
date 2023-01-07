@@ -402,6 +402,38 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 topoReformUtils.addConnect(switchPort.getScenePort(), coreRouterPort.getScenePort());
             });
         }
+
+        var ns3Nodes = getElementMap().values().stream()
+                .filter(e -> ElementTypeUtils.isNs3(e))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(ns3Nodes)) {
+            // 存在ns3节点 需要为每组ns3节点新增一个隐藏ns3作为网关,接入到同一个节点的ns3视为同一组
+            List<CloudPluginSceneElementBO> ns3ConnectTargets = new ArrayList<>();
+            Set<String> targetIds = new HashSet<>();
+            for (CloudPluginSceneElementBO ns3Element : ns3Nodes) {
+                var connectElements = getHandlerUtils().getPluginHandler()
+                        .getElementConnectedSrcElements(ns3Element.getSrcElement().getId());
+                if (CollectionUtils.isNotEmpty(connectElements)) {
+                    for (var connectElement : connectElements) {
+                        var connectCloudElement = getHandlerUtils().getPluginHandler().getElement(connectElement.getId());
+                        if (connectCloudElement != null && !targetIds.contains(connectCloudElement.getSrcElement().getId())) {
+                            targetIds.add(connectCloudElement.getSrcElement().getId());
+                            ns3ConnectTargets.add(connectCloudElement);
+                        }
+                    }
+                }
+            }
+            for (CloudPluginSceneElementBO ns3ConnectTarget : ns3ConnectTargets) {
+                // 新增ns3和ns3端口
+                var hiddenNs3 = topoReformUtils.addAuxiliaryNs3Node();
+                var hiddenNs3Port = topoReformUtils.addAuxiliaryPort(hiddenNs3.getPluginElement());
+                // 新增网关的端口
+                var hiddenPort = topoReformUtils.addAuxiliaryPort(ns3ConnectTarget);
+                // 新增一根连线
+                topoReformUtils.addConnect(hiddenNs3Port.getScenePort(), hiddenPort.getScenePort());
+            }
+        }
+
     }
 
     /**
@@ -416,6 +448,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         getElementMap().put(nodeId, pluginElement);
         this.getSceneHandler().getElementMap().put(nodeId, pluginElement.getSrcElement());
         this.getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(pluginElement));
+        if (ElementTypeUtils.isVirtualTerminal(pluginElement)) {
+            this.getTerminalElementMap().put(nodeId, pluginElement);
+        }
     }
 
     /**

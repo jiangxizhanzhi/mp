@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -37,6 +38,15 @@ public class TopoReformUtils {
      */
     public ElementWrapper addAuxiliarySwitchNode() {
         ElementWrapper wrapper = createAuxiliarySwitchNode();
+        String nodeId = wrapper.getSceneElement().getId();
+        var element = wrapper.getSceneElement();
+        var pluginElement = wrapper.getPluginElement();
+        this.pluginHandler.addElementAndSrcElement(nodeId, pluginElement, element);
+        return wrapper;
+    }
+
+    public ElementWrapper addAuxiliaryNs3Node() {
+        ElementWrapper wrapper = createAuxiliaryNs3Node();
         String nodeId = wrapper.getSceneElement().getId();
         var element = wrapper.getSceneElement();
         var pluginElement = wrapper.getPluginElement();
@@ -114,6 +124,25 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setDhcp(true);
         cloudPluginSceneElementBO.setSrcElement(sceneElementBO);
         cloudPluginSceneElementBO.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+        return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
+    }
+
+    private static ElementWrapper createAuxiliaryNs3Node() {
+        SceneElementBO sceneElementBO = new SceneElementBO();
+        sceneElementBO.setPorts(new ArrayList<>());
+        sceneElementBO.setId(TextUtils.uuid());
+        sceneElementBO.setEvent(SceneElementModel.Event.DEFAULT);
+        sceneElementBO.setEventStatus(EventStatus.INITIAL);
+        sceneElementBO.setProcess(StringUtils.EMPTY);
+        sceneElementBO.setProcessStatus(ProcessStatus.INITIAL);
+        sceneElementBO.setType(BaseSceneElementModel.Type.TERMINAL);
+        sceneElementBO.setIsAuxiliary(true);
+        CloudPluginSceneElementBO cloudPluginSceneElementBO = new CloudPluginSceneElementBO();
+        cloudPluginSceneElementBO.setRole(BaseCloudPluginSceneElementModel.Role.NPC);
+        cloudPluginSceneElementBO.setDhcp(true);
+        cloudPluginSceneElementBO.setSrcElement(sceneElementBO);
+        cloudPluginSceneElementBO.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+        cloudPluginSceneElementBO.setImageUuid("64ea7191-717c-4bad-8ddb-a01ae145e85b");
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }
 

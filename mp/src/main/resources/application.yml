@@ -10,7 +10,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://10.100.7.1:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    url: jdbc:mysql://10.8.100.10:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: root
     password: cyberpeace@2020
     driver-class-name: org.mariadb.jdbc.Driver
@@ -29,7 +29,7 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: 10.100.7.1
+    host: 10.8.100.10
     port: 9672
     username: cpcloud
     password: MzhhMzU4NDQzNzU
@@ -61,7 +61,7 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
 management:
   endpoints:
@@ -85,17 +85,17 @@ mp:
 
   # mp-devops-cluster 配置
   devopscluster:
-    # cp-url: http://10.100.7.1:111 #云平台地址
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    # cp-url: http://10.8.100.10:111 #云平台地址
+    cp-url: http://10.8.100.10:11111 #云平台地址
     public-net-proxy: false #公网开关
-    public-net-proxy-ip: 10.100.7.1 #公网ip
+    public-net-proxy-ip: 10.8.100.10 #公网ip
     public-net-proxy-port: 11111 #公网端口
     public-net-proxy-server: false
     public-net-proxy-exclude-protocols: console,vnc,ssh,telnet,rdp
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
     disk-alarm-percent: 80 # 磁盘空间告警阈值
-    cp-ip: 10.100.7.1                # 云平台适配层接口地址
+    cp-ip: 10.8.100.10                # 云平台适配层接口地址
     mp-ip: 10.100.1.12:8001          # MP中台地址
     allow-export: false
   # mp-situationaware 模块配置
@@ -108,36 +108,36 @@ mp:
     monitor-cp-cloud-restart-restrict:
     monitor-business-restart-restrict:
     # arkime
-    arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
-    arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1
-    arkime-es-host: 10.100.7.1
+    arkime-cpcloud-container-create-url: http://10.8.100.10:11111/v1
+    arkime-cpcloud-network-mirror-url: http://10.8.100.10:11111/cpcloud/sdn_app/v1
+    arkime-es-host: 10.8.100.10
     arkime-es-port: 9205
     arkime-image-name: centos-arkime_arkime:v2
     arkime-username: api
     arkime-password: api
     #wazuh 开放接口地址开放接口用户名密码
-    wazuh-base-url: http://10.100.7.1:15500
+    wazuh-base-url: http://10.8.100.10:15500
     wazuh-username: wazuh
     wazuh-password: Abcd123#
-    wazuh-flow-table-url: http://10.100.7.1:9999/knapsack/probe/v1
+    wazuh-flow-table-url: http://10.8.100.10:9999/knapsack/probe/v1
     # wazuh-probe-manager
     probe-mgr-url: http://10.100.0.111:8002
     probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
     probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
     probe-mgr-task-enable: false
     # wazuh es节点地址
-    wazuh-es-nodes: 10.100.7.1:9205
+    wazuh-es-nodes: 10.8.100.10:9205
     wazuh-es-max-page-size: 10000
     # arkime es 地址
-    arkime-es-nodes: 10.100.7.1:9205
+    arkime-es-nodes: 10.8.100.10:9205
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   # mp-log 模块配置
   log:
     exclude-urls: /login
     exclude-methods: OPTIONS
-    es-nodes: 10.100.7.1:9205
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    es-nodes: 10.8.100.10:9205
+    cp-url: http://10.8.100.10:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
     log-db: sql #日志存储数据库可以配置：es、sql
     es-max-page-size: 10000
@@ -170,9 +170,9 @@ mp:
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    cp-url: http://10.8.100.10:11111 #云平台地址
   sceneplugincloud:
-    cpcloud-server: http://10.100.7.1:11111
+    cpcloud-server: http://10.8.100.10:11111
     delete-retry-times: 2
     default-core-router-name: Router
     enable-reallocate-ip-ports: false
@@ -196,15 +196,15 @@ mp:
     scene-create-install-unzip-apk: true
     dhcp-ip_allocate: true
   sceneplugincollection:
-    wazuh-server-host: 10.100.7.1
-    wazuh-api-server: http://10.100.7.1:15500
+    wazuh-server-host: 10.8.100.10
+    wazuh-api-server: http://10.8.100.10:15500
     wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://10.100.7.1:9205
-    wazuh-godfs-server: http://10.100.7.1:11888
+    wazuh-es-server: http://10.8.100.10:9205
+    wazuh-godfs-server: http://10.8.100.10:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
-    gns3-server: http://10.100.7.1:8088
+    gns3-server: http://10.8.100.10:8088
   cscene:
     has-own-recording-set: 213,214,236
     scene-error-creating-seconds: 3600
@@ -214,7 +214,7 @@ mp:
     enable-command-change: false
     cron-job-expression: 0 0/15 * * * ?
     enable-node-limit-db-check: true
-    cp-ip: 10.100.7.1
+    cp-ip: 10.8.100.10
     cp-port: 11111
   scene:
     scene-pool-size: 100
