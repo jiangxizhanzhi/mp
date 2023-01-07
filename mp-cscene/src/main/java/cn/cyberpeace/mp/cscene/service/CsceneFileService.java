@@ -38,4 +38,14 @@ public class CsceneFileService extends BaseRemoteFileServiceImpl {
         }
     }
 
+    public ServiceResult<SceneFileUploadResponse> sceneUpload(InputStream is,String filename) {
+        var uploadResult = super.upload(is,filename);
+        if (!uploadResult.judgeSuccess()) {
+            return new ServiceResult<>(null, uploadResult.getServiceCode(), uploadResult.getDetail());
+        } else {
+            SceneFileUploadResponse response = new SceneFileUploadResponse(uploadResult.getSource(), filename);
+            return new ServiceResult<>(response);
+        }
+    }
+
 }

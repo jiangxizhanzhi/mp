@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -224,8 +225,13 @@ public class FlowMonitorController {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @GetMapping("/export")
-    public void export(String id, HttpServletResponse response) {
-        flowMonitorService.export(id, response);
+    public ServiceResult<FlowPcapFileInfo> export(String id) {
+        FlowPcapFileInfo pcapFileInfo = new FlowPcapFileInfo();
+        String url = flowMonitorService.export(id);
+        if (StringUtils.isNotEmpty(url)) {
+            pcapFileInfo.setDownloadUrl(url);
+        }
+        return new ServiceResult<>(pcapFileInfo).asResult();
     }
 
 }
