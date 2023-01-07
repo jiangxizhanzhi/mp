@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +35,22 @@ public class NS3 extends CloudClient {
         super();
     }
 
-    public void createNs3(String gateway, List<String> ips, String tag,String tapName) {
+    public void createNs3(String gateway, List<String> ips, String tag, String tapName) {
+
+        List<String> npcIps = new ArrayList<>();
+        for (String i : ips) {
+            npcIps.add(getNPCIP(i));
+        }
+
         String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", tapName);
         cmd = StringUtils.replace(cmd, "${Tag}", tag);
-        cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(ips, ","));
+        cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(npcIps, ","));
         cmd = StringUtils.replace(cmd, "${gateway}", gateway);
+
+        for (String i : ips) {
+            cmd = cmd + " && sh /root/ns3/run.sh exec " + tapName + " " + i + " start";
+        }
+
         CreateNs3Data createData = new CreateNs3Data();
         createData.setCmd(cmd);
         createData.setHostname("controller");
@@ -49,7 +61,14 @@ public class NS3 extends CloudClient {
         System.out.println(result.isSuccess());
     }
 
-    public void deleteNs3(String gateway, List<String> ips, String tag,String tagName) {
+    public static String getNPCIP(String ip) {
+        if (ip.equals("192.168.1.11")) {
+            return "192.168.1.11:tcp:22:192.168.1.10:22";
+        }
+        return ip;
+    }
+
+    public void deleteNs3(String gateway, List<String> ips, String tag, String tagName) {
         String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", tagName);
         cmd = StringUtils.replace(cmd, "${Tag}", tag);
         cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(ips, ","));

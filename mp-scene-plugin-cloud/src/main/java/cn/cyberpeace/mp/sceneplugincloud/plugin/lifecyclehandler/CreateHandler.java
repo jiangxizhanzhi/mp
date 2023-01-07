@@ -1143,7 +1143,7 @@ public class CreateHandler extends HandlerCommon {
                     if (Boolean.TRUE.equals(n.getAuxiliary())) {
                         gateway = n.getIp();
                     } else {
-                        ips.add(getNPCIP(n.getIp()));
+                        ips.add(n.getIp());
                     }
                 }
                 try {
@@ -1153,13 +1153,6 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
-    }
-
-    public static String getNPCIP(String ip) {
-        if (ip.equals("192.168.1.11")) {
-            return "192.168.1.11:tcp:80:172.17.0.1:80";
-        }
-        return ip;
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
