@@ -220,9 +220,12 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "导出全部流量文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
     @GetMapping("/export")
-    public void export(String sceneId, HttpServletResponse response) {
-        flowMonitorService.export(sceneId, response);
+    public void export(String id, HttpServletResponse response) {
+        flowMonitorService.export(id, response);
     }
 
 }
