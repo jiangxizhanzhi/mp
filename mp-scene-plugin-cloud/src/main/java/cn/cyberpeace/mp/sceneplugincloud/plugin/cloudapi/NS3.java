@@ -64,6 +64,8 @@ public class NS3 extends CloudClient {
     public static String getNPCIP(String ip) {
         if (ip.equals("192.168.1.11")) {
             return "192.168.1.11:tcp:22:192.168.1.10:22";
+        } else if (ip.equals("192.168.2.11")) {
+            return "192.168.2.11:tcp:22:192.168.2.10:22";
         }
         return ip;
     }
