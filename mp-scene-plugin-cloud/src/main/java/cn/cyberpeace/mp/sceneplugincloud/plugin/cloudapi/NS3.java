@@ -65,7 +65,7 @@ public class NS3 extends CloudClient {
         if (ip.equals("192.168.1.11")) {
             return "192.168.1.11:tcp:22:192.168.1.10:22";
         } else if (ip.equals("192.168.2.11")) {
-            return "192.168.2.11:tcp:22:192.168.2.10:22";
+            return "192.168.2.11:tcp:212:10.8.100.160:212";
         }
         return ip;
     }
