@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,7 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pathToFdfsUrl(String path) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
+        /*if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
             if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
                 path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
             }
@@ -49,7 +48,7 @@ public class DefaultImgUtil {
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                 path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
-        }
+        }*/
 
         return path;
     }
@@ -85,7 +84,7 @@ public class DefaultImgUtil {
      * @return
      */
     public static String fdfsUrlToPath(String url) {
-        if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
+        /*if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
             String tmpUrl = url.substring(6);
 
             HumanCondition humanCondition = new HumanCondition();
@@ -94,7 +93,7 @@ public class DefaultImgUtil {
             if (CollectionUtils.isNotEmpty(mappingModels)) {
                 url = getPathByGroup(mappingModels.get(0).getGroup()).concat(FileUtil.FILE_SEPARATOR).concat(mappingModels.get(0).getName());
             }
-        }
+        }*/
 
         return url;
     }
