@@ -309,10 +309,12 @@ public class FlowQueryService {
                             AttackTypeBO attackTypeBO = new AttackTypeBO();
                             attackTypeBO.setZhName(t.getZhName());
                             attackTypeBO.setCount(t.getCount());
+                            attackTypeBO.setFlowSize(t.getFlowSize());
                             vo.getAttackTypeBOMap().put(t.getZhName(), attackTypeBO);
                         } else {
                             var x = vo.getAttackTypeBOMap().get(t.getZhName());
                             x.setCount(x.getCount() + t.getCount());
+                            x.setFlowSize(x.getFlowSize() + t.getFlowSize());
                         }
                     });
                 }
@@ -336,10 +338,12 @@ public class FlowQueryService {
                             AttackTypeBO attackTypeBO = new AttackTypeBO();
                             attackTypeBO.setZhName(t.getZhName());
                             attackTypeBO.setCount(t.getCount());
+                            attackTypeBO.setFlowSize(t.getFlowSize());
                             vo.getAttackTypeBOMap().put(t.getZhName(), attackTypeBO);
                         } else {
                             var x = vo.getAttackTypeBOMap().get(t.getZhName());
                             x.setCount(x.getCount() + t.getCount());
+                            x.setFlowSize(x.getFlowSize() + t.getFlowSize());
                         }
                     });
                 }
@@ -370,12 +374,14 @@ public class FlowQueryService {
                     System.out.print(rrMap.get(res.getName()).saidao + "\t");
                     System.out.print(rrMap.get(res.getName()).shebei + "\t");
                     System.out.print(res.getAttackCount().getAttackCount() + "\t");
+                    System.out.print(res.getFlowSize().getSize() + "\t");
                     wr = true;
                 } else {
-                    System.out.print("\t\t\t\t");
+                    System.out.print("\t\t\t\t\t");
                 }
                 System.out.print(bo.getZhName() + "\t");
                 System.out.print(bo.getCount() + "\t");
+                System.out.print(bo.getFlowSize() + "\t");
             }
         }
 

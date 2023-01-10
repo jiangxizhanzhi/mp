@@ -10,5 +10,7 @@ public class AttackTypeBO {
 
     private long count;
 
+    private long flowSize ;
+
     private double percent;
 }

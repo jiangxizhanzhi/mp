@@ -54,6 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -432,7 +433,10 @@ public class FlowInfoService {
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
         AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField).size(1000)
                 .subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"))
-                .subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+                .subAggregation(
+                        AggregationBuilders.terms(cateTerm).field("suricata.category").size(100)
+                                .subAggregation(AggregationBuilders.sum("type_flow_sum").field("network.bytes"))
+                );
 
 
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
@@ -455,6 +459,8 @@ public class FlowInfoService {
                 if (attackTypeBO.getZhName().equals("$category")) {
                     attackTypeBO.setZhName("其他攻击");
                 }
+                ParsedSum sumasd = cateTermAAA.getAggregations().get("type_flow_sum");
+                attackTypeBO.setFlowSize((long) sumasd.getValue());
                 bo.getAttackTypes().add(attackTypeBO);
             });
 
@@ -845,7 +851,7 @@ public class FlowInfoService {
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         return restHighLevelClient.search(searchRequest);
     }
