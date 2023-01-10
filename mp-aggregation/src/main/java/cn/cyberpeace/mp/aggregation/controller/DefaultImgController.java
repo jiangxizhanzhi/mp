@@ -80,7 +80,11 @@ public class DefaultImgController {
         }else{
             fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
         }
-        return ResultCommon.success(fileNameList);
+
+        List<String> urlList = fileNameList.stream().map(name ->
+                "/api/mp/" + name).collect(Collectors.toList()
+        );
+        return ResultCommon.success(urlList);
     }
 
     @ApiOperation("获取系统图片")
