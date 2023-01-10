@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
@@ -67,6 +72,7 @@ public class DevopsTargetService {
         if (Objects.nonNull(oldDeviceTargetPO)) {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            deviceTargetPO.setUpdateTime(LocalDateTime.now());
             return deviceTargetMapper.updateById(deviceTargetPO);
         }
         return 0;
@@ -174,8 +180,12 @@ public class DevopsTargetService {
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
-        deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
+        if (StringUtils.isNotBlank(device.getCreatedAt())) {
+            deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
+        }
+        if (StringUtils.isNotBlank(device.getUpdatedAt())) {
+            deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
+        }
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);

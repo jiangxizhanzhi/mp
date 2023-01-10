@@ -7,7 +7,11 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceMapper;
 import cn.cyberpeace.mp.devopscluster.service.fields.DeviceFields;
@@ -18,7 +22,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @Description
@@ -106,6 +114,7 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         model.setCreateTime(now);
         String time = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         model.setUpdatedAt(time);
+        model.setUuid(uuid);
         model.setName(device.getName());
         model.setImage(device.getImage());
         model.setDescription(device.getDescription());
