@@ -28,6 +28,12 @@ public class InstancePageVO extends BaseVO {
     private String name;
 
     /**
+     * 场景id
+     */
+    @ApiModelProperty("场景id")
+    private String sceneId;
+
+    /**
      * 场景名称
      */
     @ApiModelProperty("场景名称")

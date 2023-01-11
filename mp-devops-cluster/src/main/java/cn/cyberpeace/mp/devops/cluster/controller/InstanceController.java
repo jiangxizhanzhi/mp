@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.FlavorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
@@ -21,7 +24,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -59,6 +64,11 @@ public class InstanceController {
         }
         List<InstanceConvertModel.Model> instances = model.getModelList();
 
+        var csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
+        List<String> instanceNames = new ArrayList<>();
+        instances.forEach(i -> instanceNames.add(i.getName()));
+        Map<String, CsceneNodeInfoBO> source = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames).getSource();
+
         List<InstancePageVO> list = instances.stream().map(instanceModel ->
                 {
                     InstancePageVO response = InstancePageVO.builder().name(instanceModel.getName()).node(instanceModel.getNode())
@@ -66,6 +76,11 @@ public class InstanceController {
                             .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
                     FlavorConvertModel flavorConvertModel = flavorConverter.getById(instanceModel.getFlavor());
                     response.setFlavor(buildFlavorVO(flavorConvertModel));
+                    CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
+                    if (Objects.nonNull(source.get(instanceModel.getName()))) {
+                        csceneNodeInfoBO = source.get(instanceModel.getName());
+                    }
+                    response.setSceneId(csceneNodeInfoBO.getCsceneId());
                     return response;
                 }
 
