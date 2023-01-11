@@ -107,9 +107,7 @@ public class ActivMenuService {
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-
-        boolean success = false;
-        //boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+        boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
         evictCache();
         return success;
     }
