@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.extensions.security;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -129,7 +130,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
-                loginFailureCache.invalidate(user.getUsername());
+                String pwdErrorCountCacheKey = AuthConstant.PASSWORD_ERROR_COUNT_KEY + ":" + user.getUsername();
+                loginFailureCache.invalidate(pwdErrorCountCacheKey);
                 log.info("Login success! {}", user.getUsername());
 
             }

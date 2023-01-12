@@ -177,18 +177,23 @@ public class SceneInstanceLinkCacheUtil {
                                     LinkStatusParams params = new LinkStatusParams();
                                     params.setInstanceId(n.getResourceId());
                                     params.setNetworkId(p.getNetworkId());
-                                    if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                        var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
-                                        }, true);
-                                        if (result.isSuccess()) {
-                                            n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
-                                            p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? ONLINE : OFFLINE);
-                                        } else {
-                                            log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
-                                        }
+                                    if (StringUtils.isEmpty(params.getInstanceId())) {
+                                        n.setStatus(OFFLINE);
+                                        p.setStatus(OFFLINE);
                                     } else {
-                                        n.setStatus(ONLINE);
-                                        p.setStatus(ONLINE);
+                                        if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
+                                            var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                            }, true);
+                                            if (result.isSuccess()) {
+                                                n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
+                                                p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? ONLINE : OFFLINE);
+                                            } else {
+                                                log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                                            }
+                                        } else {
+                                            n.setStatus(ONLINE);
+                                            p.setStatus(ONLINE);
+                                        }
                                     }
                                 } finally {
                                     existsNodeTask.remove(taskKey);

@@ -9,7 +9,12 @@ import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AccountStatusException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -18,7 +23,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -48,17 +52,16 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         if (exception instanceof BadCredentialsException) {
             response.setStatus(HttpServletResponse.SC_OK);
             String username = getUserName(request);
-            String sessionId = request.getSession().getId();
-            Integer count = loginFailureCache.getIfPresent(sessionId + ":" + username);
+            String pwdErrorCountCacheKey = AuthConstant.PASSWORD_ERROR_COUNT_KEY + ":" + username;
+            String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
+            Integer count = loginFailureCache.getIfPresent(pwdErrorCountCacheKey);
             if (Objects.nonNull(count) && count >= 2) {
-                HttpSession session = request.getSession();
-                session.setAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username, true);
-                session.setMaxInactiveInterval(AuthConstant.NEED_VERIFY_CODE_EXPIRE_TIME);
+                loginFailureCache.put(needVerifyCode, 1);
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.NEED_VERIFY_CODE).build().asResult();
             } else {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
             }
-            loginFailureCache.put(sessionId + ":" + username, Objects.isNull(count) ? 1 : count + 1);
+            loginFailureCache.put(pwdErrorCountCacheKey, Objects.isNull(count) ? 1 : count + 1);
         }
 
         if (exception instanceof UsernameNotFoundException) {

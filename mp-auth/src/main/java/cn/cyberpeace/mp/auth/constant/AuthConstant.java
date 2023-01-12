@@ -115,12 +115,11 @@ public class AuthConstant {
     //public static final Long VALID_MILLIS_TIME  = 5 * 60 * 1000L;
     public static final Long VALID_MILLIS_TIME  = 10 * 1000L;
 
-    public static final String NEED_VERIFY_CODE_FLAG_PREFIX = "need_verify_code:";
-    // second
-    public static final Integer NEED_VERIFY_CODE_EXPIRE_TIME = 5 * 60;
-
     public static final String REQUEST_PARAMETER_VERIFY_CODE = "verify_code";
     public static final String REQUEST_PARAMETER_USERNAME = "username";
+
+    public static final String PASSWORD_ERROR_COUNT_KEY = "password_error_count";
+    public static final String LOGIN_NEED_VERIFY_CODE = "login_need_verify_code";
 
     private AuthConstant() {
     }

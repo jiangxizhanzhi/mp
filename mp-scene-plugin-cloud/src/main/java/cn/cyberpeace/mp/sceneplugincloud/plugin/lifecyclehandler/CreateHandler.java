@@ -260,7 +260,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network) {
+    protected void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network) {
         if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
             return;
         }
@@ -1018,6 +1018,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
                 .map(cloudElement -> (Runnable) () -> {
                     createAuxiliaryNetworkProcess(cloudElement);
@@ -1032,6 +1033,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 再创建网关
         var createGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
                     if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
@@ -1044,6 +1046,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 再创建防火墙
         var createFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
                     getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);

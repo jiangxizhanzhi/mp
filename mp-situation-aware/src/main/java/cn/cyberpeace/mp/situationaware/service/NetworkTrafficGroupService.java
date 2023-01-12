@@ -123,6 +123,7 @@ public class NetworkTrafficGroupService {
         paramObject.put("image", situationAwareConfig.getArkimeImageName());
         paramObject.put("cpu", 4);
         paramObject.put("ram", 4096);
+        paramObject.put("disk", situationAwareConfig.getArkimeDisk());
 
         //设置网络
         JSONArray networks = new JSONArray();
