@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -64,6 +65,7 @@ public class ElementCreateHandler extends HandlerCommon {
         getPluginHandler().updateElementNetworks(element.getSrcElement().getId());
         this.createHandler.createElementProcess(element);
         getPluginHandler().updateElements(element.getSrcElement().getId());
+        SceneInstanceLinkCacheUtil.refresh(getPluginHandler().getSourceSceneId());
     }
 
     protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement, List<ConnectedNetworkBO> networks) {
