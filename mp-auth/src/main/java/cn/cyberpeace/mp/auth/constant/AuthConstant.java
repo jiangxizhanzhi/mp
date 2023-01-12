@@ -112,7 +112,8 @@ public class AuthConstant {
     public static final String KAPTCHA_SESSION_KEY = "kaptchaKey";
     public static final String KAPTCHA_SESSION_DATE = "kaptchaDate";
     // ms
-    public static final Long VALID_MILLIS_TIME  = 5 * 60 * 1000L;
+    //public static final Long VALID_MILLIS_TIME  = 5 * 60 * 1000L;
+    public static final Long VALID_MILLIS_TIME  = 10 * 1000L;
 
     public static final String NEED_VERIFY_CODE_FLAG_PREFIX = "need_verify_code:";
     // second

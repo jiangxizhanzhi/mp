@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.util.KaptchaUtil;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -11,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +63,29 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 return null;
             }
             String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
-            String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
+            ServiceResult<Object> result = null;
+            if (StringUtils.isBlank(decryptedPwd)) {
+                result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_EMPTY).build().asResult();
+            }
+
+            String originPwd = "";
+            if (Objects.isNull(result)) {
+                try {
+                    originPwd = PasswordUtils.desDecrypt(decryptedPwd);
+                } catch (Exception e) {
+                    result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
+                }
+            }
+
+            if (Objects.nonNull(result)) {
+                PrintWriter writer = response.getWriter();
+                response.setContentType("application/json;charset=UTF-8");
+                MappingJackson2HttpMessageConverter converter = BeanCommon.getBean(MappingJackson2HttpMessageConverter.class);
+                converter.getObjectMapper().writeValue(writer, result);
+                writer.flush();
+                return null;
+            }
+
             username = username.trim();
             var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
             setDetails(request, authRequest);
