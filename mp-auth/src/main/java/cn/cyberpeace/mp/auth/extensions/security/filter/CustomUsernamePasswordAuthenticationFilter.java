@@ -44,6 +44,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
         if (!Objects.equals(request.getMethod(), "POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
@@ -53,55 +54,17 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 loginData = new ObjectMapper().readValue(request.getInputStream(), Map.class);
             } catch (IOException e) {
                 log.error("Parse login data from request error: {}", e.getMessage());
-            }
-            String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
-            request.setAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME, username);
-            String verifyCode = loginData.getOrDefault(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE, StringUtils.EMPTY);
-            boolean valid = checkVerifyCode(verifyCode, username, request, response);
-            if (!valid) {
                 return null;
             }
-            String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
-            ServiceResult<Object> result = null;
-            if (StringUtils.isBlank(decryptedPwd)) {
-                result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_EMPTY).build().asResult();
-            }
-
-            String originPwd = "";
-            if (Objects.isNull(result)) {
-                try {
-                    originPwd = PasswordUtils.desDecrypt(decryptedPwd);
-                } catch (Exception e) {
-                    result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
-                }
-            }
-
-            if (Objects.nonNull(result)) {
-                PrintWriter writer = response.getWriter();
-                response.setContentType("application/json;charset=UTF-8");
-                MappingJackson2HttpMessageConverter converter = BeanCommon.getBean(MappingJackson2HttpMessageConverter.class);
-                converter.getObjectMapper().writeValue(writer, result);
-                writer.flush();
-                return null;
-            }
-
-            username = username.trim();
-            var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
-            setDetails(request, authRequest);
+            var authRequest = processAuthRequest(loginData, request, response);
             // 认证
             return getAuthenticationManager().authenticate(authRequest);
         } else {
-            String verifyCode = request.getParameter(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE);
-            String username = request.getParameter(AuthConstant.REQUEST_PARAMETER_USERNAME);
-            boolean valid = checkVerifyCode(verifyCode, username, request, response);
-            if (!valid) {
-                return null;
-            }
             return super.attemptAuthentication(request, response);
         }
     }
 
-    private boolean checkVerifyCode(String verifyCode, String username, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
         String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
         Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
         if (Objects.nonNull(flag)) { // 需要校验验证码
@@ -115,4 +78,53 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         }
         return true;
     }
+
+
+    private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
+        String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+
+        if (StringUtils.isNotBlank(username)) {
+            request.setAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME, username);
+            String verifyCode = loginData.getOrDefault(AuthConstant.REQUEST_PARAMETER_VERIFY_CODE, StringUtils.EMPTY);
+            boolean valid = checkVerifyCode(verifyCode, username, response);
+            if (!valid) {
+                return null;
+            }
+        }
+
+        ServiceResult<Object> result = null;
+        if (StringUtils.isBlank(username)) {
+            result = ServiceResult.builder().serviceCode(AuthErrorCode.USERNAME_EMPTY).build().asResult();
+        }
+
+        if (Objects.isNull(result)) {
+            if (StringUtils.isBlank(decryptedPwd)) {
+                result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_EMPTY).build().asResult();
+            }
+        }
+
+        String originPwd = "";
+        if (Objects.isNull(result)) {
+            try {
+                originPwd = PasswordUtils.desDecrypt(decryptedPwd);
+            } catch (Exception e) {
+                result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_DECODE_ERROR).build().asResult();
+            }
+        }
+
+        if (Objects.nonNull(result)) {
+            PrintWriter writer = response.getWriter();
+            MappingJackson2HttpMessageConverter converter = BeanCommon.getBean(MappingJackson2HttpMessageConverter.class);
+            converter.getObjectMapper().writeValue(writer, result);
+            writer.flush();
+            return null;
+        }
+
+        username = username.trim();
+        var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
+        setDetails(request, authRequest);
+        return authRequest;
+    }
+
 }

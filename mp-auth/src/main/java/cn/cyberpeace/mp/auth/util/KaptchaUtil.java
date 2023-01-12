@@ -47,7 +47,7 @@ public class KaptchaUtil {
         }
 
         // 3. 过期，返回错误
-        boolean expired = Objects.nonNull(kaptchaDate) && System.currentTimeMillis() - kaptchaDate > AuthConstant.VALID_MILLIS_TIME;
+        boolean expired = Objects.nonNull(kaptchaDate) && System.currentTimeMillis() - kaptchaDate > AuthConstant.VERIFY_CODE_LIFE_TIME;
         if (expired) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
             return result;

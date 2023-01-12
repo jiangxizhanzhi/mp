@@ -63,7 +63,9 @@ public enum AuthErrorCode implements ErrorCode {
     MOBILE_INVALID("MP-110046", "mobile_invalid"),
     INCORRECT_OLD_CREDENTIALS("MP-110047", "incorrect_old_credentials"),
     TOKEN_EMPTY_ERROR("MP-110048", "token_empty_error"),
-    PASSWORD_EMPTY("MP-110049", "password_empty"),
+    USERNAME_EMPTY("MP-110049", "username_empty"),
+    PASSWORD_EMPTY("MP-110050", "password_empty"),
+    PASSWORD_DECODE_ERROR("MP-110051", "password_decode_error"),
 
 
     // org

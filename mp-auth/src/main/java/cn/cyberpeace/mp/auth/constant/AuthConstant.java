@@ -111,9 +111,8 @@ public class AuthConstant {
 
     public static final String KAPTCHA_SESSION_KEY = "kaptchaKey";
     public static final String KAPTCHA_SESSION_DATE = "kaptchaDate";
-    // ms
-    //public static final Long VALID_MILLIS_TIME  = 5 * 60 * 1000L;
-    public static final Long VALID_MILLIS_TIME  = 10 * 1000L;
+
+    public static final Long VERIFY_CODE_LIFE_TIME = 5 * 60 * 1000L;
 
     public static final String REQUEST_PARAMETER_VERIFY_CODE = "verify_code";
     public static final String REQUEST_PARAMETER_USERNAME = "username";
