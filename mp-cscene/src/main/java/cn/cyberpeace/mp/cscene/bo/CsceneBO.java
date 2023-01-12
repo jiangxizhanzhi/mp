@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @ApiModel(description = "场景模板数据")
@@ -37,6 +38,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private CsceneContextBO context;
     @ApiModelProperty(value = "资源占用节点数")
     private Integer resourceOccupiedNums;
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 
     @Override
     public CsceneModel createModel() {
