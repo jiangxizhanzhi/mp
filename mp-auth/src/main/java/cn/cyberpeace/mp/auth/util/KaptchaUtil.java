@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,11 @@ public class KaptchaUtil {
     public static ServiceResult<Object> checkKaptcha(String code) {
         ServiceResult<Object> result = null;
         HttpServletRequest request = ServletUtils.getRequest();
+        if (Objects.isNull(request) || Objects.isNull(request.getSession())) {
+            result = ServiceResult.builder().source(false).serviceCode(BaseErrorCode.ERROR).build();
+            return result;
+        }
+
         HttpSession session = request.getSession();
         String kaptcha = (String) session.getAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         Long kaptchaDate = (Long) session.getAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
@@ -47,10 +53,8 @@ public class KaptchaUtil {
             return result;
         }
 
-        // 验证码校验成功
-        if (Objects.isNull(result)) {
-            result = ServiceResult.builder().source(true).build();
-        }
+        // 验证码校验成功，删除session中的相关记录
+        result = ServiceResult.builder().source(true).build();
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
         return result;
