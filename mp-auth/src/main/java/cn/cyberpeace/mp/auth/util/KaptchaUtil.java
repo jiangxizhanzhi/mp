@@ -2,10 +2,11 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
-import com.alibaba.excel.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,20 +25,36 @@ public class KaptchaUtil {
     public static ServiceResult<Object> checkKaptcha(String code) {
         ServiceResult<Object> result = null;
         HttpServletRequest request = ServletUtils.getRequest();
+        if (Objects.isNull(request) || Objects.isNull(request.getSession())) {
+            result = ServiceResult.builder().source(false).serviceCode(BaseErrorCode.ERROR).build();
+            return result;
+        }
+
         HttpSession session = request.getSession();
         String kaptcha = (String) session.getAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         Long kaptchaDate = (Long) session.getAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
+
+        // 1. 为空，返回不能为空
         if (StringUtils.isBlank(code)) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_EMPTY).build();
-        } else if (StringUtils.isBlank(kaptcha) || Objects.isNull(kaptchaDate) || System.currentTimeMillis() - kaptchaDate > AuthConstant.VALID_MILLIS_TIME) {
-            result = ServiceResult.builder().source(Boolean.FALSE).serviceCode(AuthErrorCode.VERIFY_CODE_EXPIRE).build();
-        } else if (!kaptcha.equalsIgnoreCase(code)) {
+            return result;
+        }
+
+        // 2. 不为空，错误 返回错误
+        if (StringUtils.isBlank(kaptcha) || !kaptcha.equalsIgnoreCase(code)) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
+            return result;
         }
-        // 验证码校验成功
-        if (Objects.isNull(result)) {
-            result = ServiceResult.builder().source(true).build();
+
+        // 3. 过期，返回错误
+        boolean expired = Objects.nonNull(kaptchaDate) && System.currentTimeMillis() - kaptchaDate > AuthConstant.VALID_MILLIS_TIME;
+        if (expired) {
+            result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
+            return result;
         }
+
+        // 验证码校验成功，删除session中的相关记录
+        result = ServiceResult.builder().source(true).build();
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
         return result;

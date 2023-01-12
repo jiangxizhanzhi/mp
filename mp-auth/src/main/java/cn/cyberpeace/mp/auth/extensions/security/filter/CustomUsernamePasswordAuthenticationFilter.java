@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,18 +76,16 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     }
 
     private boolean checkVerifyCode(String verifyCode, String username, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession();
-        Boolean flag = (Boolean) session.getAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username);
-        if (Objects.nonNull(flag) && Boolean.TRUE.equals(flag)) { // 需要校验验证码
+        String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
+        Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
+        if (Objects.nonNull(flag)) { // 需要校验验证码
             ServiceResult<Object> result = KaptchaUtil.checkKaptcha(verifyCode);
             if (Boolean.FALSE.equals(result.getSource())) { // 验证码校验不通过
-                session.setAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username, true);
-                session.setMaxInactiveInterval(AuthConstant.NEED_VERIFY_CODE_EXPIRE_TIME);
                 KaptchaUtil.checkFail(response, result);
                 return false;
             }
             // 验证码校验通过，移除需要验证码标记
-            session.removeAttribute(AuthConstant.NEED_VERIFY_CODE_FLAG_PREFIX + username);
+            loginFailureCache.invalidate(needVerifyCode);
         }
         return true;
     }
