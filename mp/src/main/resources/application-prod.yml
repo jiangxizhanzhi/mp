@@ -242,7 +242,7 @@ kaptcha:
   text-producer:
     impl:
     character:
-      string: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      string: '123456789abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ'
       length: 4
       space: 10
 ---
