@@ -113,6 +113,7 @@ mp:
     arkime-es-host: 10.100.7.1
     arkime-es-port: 9205
     arkime-image-name: centos-arkime_arkime:v2
+    arkime-disk: 50
     arkime-username: api
     arkime-password: api
     #wazuh 开放接口地址开放接口用户名密码
