@@ -3,7 +3,14 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowTemplateBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
@@ -66,7 +73,14 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -857,8 +871,8 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
                 && request.getStartDateTime().isBefore(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
-            rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()));
-            rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()));
+            rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             boolQueryBuilder.must(rangeQueryBuilder);
         }
 
