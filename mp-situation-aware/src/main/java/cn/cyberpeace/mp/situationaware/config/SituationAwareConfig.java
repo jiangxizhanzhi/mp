@@ -51,7 +51,7 @@ public class SituationAwareConfig {
     private String arkimeEsHost;
     private String arkimeEsPort;
     private String arkimeImageName;
-    private String arkimeDisk;
+    private Integer arkimeDisk;
     private String arkimeUsername;
     private String arkimePassword;
 
