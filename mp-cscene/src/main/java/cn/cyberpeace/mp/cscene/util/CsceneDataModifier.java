@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
@@ -119,6 +120,61 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void handleAccessModePath(CsceneBO csceneBO) {
+        try {
+            if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
+                return;
+            }
+            if (CollectionUtils.isEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+                return;
+            }
+            for (var e : csceneBO.getSceneConfig().getTopology().getElements()) {
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    for (var p : e.getPorts()) {
+                        if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                            for (var a : p.getAccessModes()) {
+                                if (AccessMode.Protocol.HTTP.equals(a.getProtocol()) || AccessMode.Protocol.HTTPS.equals(a.getProtocol())) {
+                                    if (StringUtils.isEmpty(a.getPath()) && StringUtils.isNotEmpty(a.getDesc()) && a.getDesc().startsWith("/")) {
+                                        a.setPath(a.getDesc());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (csceneBO.getSceneConfig().getPlugins() == null || !csceneBO.getSceneConfig().getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
+                return;
+            }
+            var plugin = csceneBO.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY);
+            if (plugin.getElementPorts() == null) {
+                return;
+            }
+            for (var portMap : plugin.getElementPorts().values()) {
+                if (portMap.get("access_modes") != null) {
+                    List<Map> accessModes = (List<Map>) portMap.get("access_modes");
+                    accessModes.forEach(accessMode -> {
+                        if (accessMode.containsKey("protocol")) {
+                            String protocol = (String) accessMode.get("protocol");
+                            if (AccessMode.Protocol.HTTP.equals(protocol) || AccessMode.Protocol.HTTPS.equals(protocol)) {
+                                if (accessMode.get("desc") != null) {
+                                    String desc = (String) accessMode.get("desc");
+                                    if (accessMode.get("path") == null || StringUtils.isEmpty(accessMode.get("path").toString())) {
+                                        if (StringUtils.isNotEmpty(desc) && desc.startsWith("/")) {
+                                            accessMode.put("path", desc);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            // 忽略错误
+        }
+    }
+
     public static void supplyProtocolForCoreRouter(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
         if (cloudPlugin == null) {
@@ -195,6 +251,7 @@ public class CsceneDataModifier {
 
     /**
      * 创建时去除多余的eid
+     *
      * @param csceneBO
      */
     public static void removeEidWhenCreate(CsceneBO csceneBO) {
@@ -240,6 +297,7 @@ public class CsceneDataModifier {
 
     /**
      * 纠正创建和更新场景模板时fdfs的地址,移除前缀
+     *
      * @param csceneBO
      */
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
@@ -451,6 +509,7 @@ public class CsceneDataModifier {
 
     /**
      * 处理需要隐藏的节点
+     *
      * @param sceneDataBO
      */
     public static void handlerHiddenElement(SceneDataBO sceneDataBO) {
@@ -610,6 +669,7 @@ public class CsceneDataModifier {
 
     /**
      * 纠正返回场景模板时fdfs的地址,增加前缀
+     *
      * @param baseSceneDataBO
      */
     private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
