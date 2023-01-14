@@ -50,7 +50,9 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,10 +66,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -139,7 +143,6 @@ public class SceneElementMonitorService {
     }
 
 
-
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
@@ -168,6 +171,7 @@ public class SceneElementMonitorService {
 
     /**
      * 查询操作系统信息
+     *
      * @param baseRequest
      * @return
      */
@@ -209,6 +213,7 @@ public class SceneElementMonitorService {
 
     /**
      * 获取节点实时数据
+     *
      * @param baseRequest
      * @return
      */
@@ -380,7 +385,7 @@ public class SceneElementMonitorService {
     private void mergeModifyData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
                                  HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         // 无分页标识忽略
-        if(hostEventQueryParams.getPage() == null) {
+        if (hostEventQueryParams.getPage() == null) {
             return;
         }
 
@@ -403,6 +408,17 @@ public class SceneElementMonitorService {
         Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
                 .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
         ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
+        if (CollectionUtils.isNotEmpty(fileEventModels.getObjs())) {
+            List<FileEventModel> list = new ArrayList<>();
+            Set<String> exist = new HashSet<>();
+            for (var x : fileEventModels.getObjs()) {
+                if (!exist.contains(x.getAgentId() + x.getFilePath())) {
+                    list.add(x);
+                    exist.add(x.getAgentId() + x.getFilePath());
+                }
+            }
+            fileEventModels = new ListObjResult<>(list, list.size());
+        }
 
         // 设置total
         int alreadyHasNum = hostEventsBos.getSource().getTotal();
@@ -433,7 +449,7 @@ public class SceneElementMonitorService {
             if (StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().endsWith("---file_not_exists---")) {
                 bo.setPath(StringUtils.replace(file.getFilePath(), "---file_not_exists---", ""));
                 bo.setDescription("-");
-            }else if(StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().contains("---file_size---")){
+            } else if (StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().contains("---file_size---")) {
                 String[] fileSize = file.getFilePath().split("---file_size---");
                 if (fileSize.length > 0) {
                     bo.setPath(fileSize[0]);
@@ -457,6 +473,7 @@ public class SceneElementMonitorService {
 
     /**
      * 按时间分桶查询事件数
+     *
      * @param pageRequest
      * @param ruleGroups
      * @param intervalMinutes
@@ -776,6 +793,7 @@ public class SceneElementMonitorService {
 
     /**
      * 处理节点实时信息，用户，进程，端口，网络连接
+     *
      * @param baseRequest
      * @return
      */
@@ -823,7 +841,7 @@ public class SceneElementMonitorService {
         ListObjServiceResult<CollectionHostEventBO> fileResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
         if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
             // 文件数量包含其他所有类型，所以这里不会剔除注册表数量
-           rtInfo.setFileOpCount(fileResult.getSource().getTotal());
+            rtInfo.setFileOpCount(fileResult.getSource().getTotal());
         }
 
         // 注册表
@@ -844,6 +862,7 @@ public class SceneElementMonitorService {
 
     /**
      * 统计节点当前登录用户数量
+     *
      * @param baseSceneElementRequest
      * @return
      */
@@ -938,7 +957,6 @@ public class SceneElementMonitorService {
         wazuhEventRequest.setEndTime(endTime);
         return wazuhEventRequest;
     }
-
 
 
 }
