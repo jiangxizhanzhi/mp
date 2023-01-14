@@ -432,6 +432,7 @@ public class SceneElementMonitorService {
             if (StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().endsWith("---file_not_exists---")) {
                 bo.setPath(StringUtils.replace(file.getFilePath(), "---file_not_exists---", ""));
                 bo.setDescription("-");
+                bo.setLevel(-1);
             }else if(StringUtils.isNotEmpty(file.getFilePath()) && file.getFilePath().contains("---file_size---")){
                 String[] fileSize = file.getFilePath().split("---file_size---");
                 if (fileSize.length > 0) {
