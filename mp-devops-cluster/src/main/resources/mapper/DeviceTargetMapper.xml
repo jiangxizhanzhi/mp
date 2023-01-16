@@ -477,8 +477,4 @@
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
         from mp_devops_target t where t.is_hide = 0
     </select>
-
-    <select id="getCreateUserNames" resultType="java.lang.String">
-        select create_user_name from mp_devops_target group by create_user_name ;
-    </select>
 </mapper>
