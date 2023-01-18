@@ -497,49 +497,50 @@ public class SysActivationService {
      * @return
      */
     public List<ModuleInfoResponse> getModuleInfoList() {
-        var content = status();
+        //var content = status();
+        var content = mockActivationContent();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
         if (Objects.isNull(content)) {
             return moduleInfoList;
         }
         var items = content.getItems();
         // 竞赛
-        ModuleInfoResponse adModule = new ModuleInfoResponse();
-        adModule.setModuleName(ModuleEnums.AD.getCode());
-        adModule.setActivated(Boolean.FALSE);
+        ModuleInfoResponse ad = new ModuleInfoResponse();
+        ad.setModuleName(ModuleEnums.AD.getCode());
+        ad.setIsActived(0);
 
         // 实训
-        ModuleInfoResponse ojModule = new ModuleInfoResponse();
-        ojModule.setModuleName(ModuleEnums.OJ.getCode());
-        ojModule.setActivated(Boolean.FALSE);
+        ModuleInfoResponse oj = new ModuleInfoResponse();
+        oj.setModuleName(ModuleEnums.OJ.getCode());
+        oj.setIsActived(0);
 
         // 靶场
-        ModuleInfoResponse crModule = new ModuleInfoResponse();
-        crModule.setModuleName(ModuleEnums.CR.getCode());
-        crModule.setActivated(Boolean.FALSE);
+        ModuleInfoResponse cr = new ModuleInfoResponse();
+        cr.setModuleName(ModuleEnums.CR.getCode());
+        cr.setIsActived(0);
 
-        moduleInfoList.add(adModule);
-        moduleInfoList.add(ojModule);
-        moduleInfoList.add(crModule);
+        moduleInfoList.add(ad);
+        moduleInfoList.add(oj);
+        moduleInfoList.add(cr);
 
         Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
 
         // 任意一项激活项勾选，则该模块被激活
         for (String key : AD_MODULE_KEYS) {
             if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
-                adModule.setActivated(Boolean.TRUE);
+                ad.setIsActived(1);
             }
         }
 
         for (String key : OJ_MODULE_KEYS) {
             if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
-                ojModule.setActivated(Boolean.TRUE);
+                oj.setIsActived(1);
             }
         }
 
         for (String key : CR_MODULE_KEYS) {
             if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
-                crModule.setActivated(Boolean.TRUE);
+                cr.setIsActived(1);
             }
         }
 

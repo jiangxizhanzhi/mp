@@ -14,7 +14,7 @@ public class ModuleInfoResponse {
     @ApiModelProperty(value = "模块名")
     private String moduleName;
 
-    @ApiModelProperty(value = "是否激活")
-    private boolean isActivated;
+    @ApiModelProperty(value = "模块是否激活 1:是 0:否")
+    private Integer isActived;
 
 }
