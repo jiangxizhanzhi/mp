@@ -17,8 +17,8 @@ import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
+import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
-import cn.cyberpeace.mp.frontadmin.response.activation.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -497,49 +497,37 @@ public class SysActivationService {
      * @return
      */
     public List<ModuleInfoResponse> getModuleInfoList() {
-        //var content = status();
-        var content = mockActivationContent();
+        var content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
-        if (Objects.isNull(content)) {
+        if (Objects.isNull(content) || CollectionUtil.isEmpty(content.getItems())) {
             return moduleInfoList;
         }
         var items = content.getItems();
         // 竞赛
-        ModuleInfoResponse ad = new ModuleInfoResponse();
-        ad.setModuleName(ModuleEnums.AD.getCode());
-        ad.setIsActived(0);
-
+        ModuleInfoResponse ad = ModuleInfoResponse.builder().moduleName(ModuleEnums.AD.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         // 实训
-        ModuleInfoResponse oj = new ModuleInfoResponse();
-        oj.setModuleName(ModuleEnums.OJ.getCode());
-        oj.setIsActived(0);
-
+        ModuleInfoResponse oj = ModuleInfoResponse.builder().moduleName(ModuleEnums.OJ.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         // 靶场
-        ModuleInfoResponse cr = new ModuleInfoResponse();
-        cr.setModuleName(ModuleEnums.CR.getCode());
-        cr.setIsActived(0);
-
-        moduleInfoList.add(ad);
-        moduleInfoList.add(oj);
-        moduleInfoList.add(cr);
+        ModuleInfoResponse cr = ModuleInfoResponse.builder().moduleName(ModuleEnums.CR.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
+        moduleInfoList.addAll(Arrays.asList(ad, oj, cr));
 
         Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
 
         // 任意一项激活项勾选，则该模块被激活
         for (String key : AD_MODULE_KEYS) {
-            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
                 ad.setIsActived(1);
             }
         }
 
         for (String key : OJ_MODULE_KEYS) {
-            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
                 oj.setIsActived(1);
             }
         }
 
         for (String key : CR_MODULE_KEYS) {
-            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
                 cr.setIsActived(1);
             }
         }
@@ -608,7 +596,7 @@ public class SysActivationService {
 
         ActivationItem item9 = new ActivationItem();
         item9.setKey("LCS-FUNC-CR-CEPING");
-        item9.setValue("0");
+        item9.setValue("1");
         item9.setType(1);
         list.add(item9);
 

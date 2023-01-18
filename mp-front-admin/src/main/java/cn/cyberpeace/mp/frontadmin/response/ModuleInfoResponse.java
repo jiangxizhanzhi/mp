@@ -1,7 +1,10 @@
-package cn.cyberpeace.mp.frontadmin.response.activation;
+package cn.cyberpeace.mp.frontadmin.response;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Description:
@@ -9,6 +12,9 @@ import lombok.Data;
  * @Date：2023/1/17 16:55
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ModuleInfoResponse {
 
     @ApiModelProperty(value = "模块名")
