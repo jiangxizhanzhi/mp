@@ -13,9 +13,12 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationModuleItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
+import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
+import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
+import cn.cyberpeace.mp.frontadmin.response.activation.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -38,11 +41,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 系统激活相关service
@@ -58,6 +64,13 @@ public class SysActivationService {
     public static final String ACTIVATION_FILE = "activation";
 
     private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    // 竞赛相关激活项目
+    private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
+    // 实训相关激活项
+    private static List<String> OJ_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.SHIXUN.getCode());
+    // 靶场相关激活项
+    private static List<String> CR_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.HUOTILOUDONG.getCode(),ActivationItemKeyEnums.ZHISHIKU.getCode(),ActivationItemKeyEnums.ZONGHEXUNLIAN.getCode(),ActivationItemKeyEnums.HONGLANDUIKANG.getCode(),ActivationItemKeyEnums.CEPING.getCode());
 
     @Autowired
     private LicenseService licenseService;
@@ -165,6 +178,7 @@ public class SysActivationService {
 
         return ACTIVATION_CONTENT;
     }
+
 
 
     public String getValueByKey(String key) {
@@ -478,8 +492,63 @@ public class SysActivationService {
     }
 
 
+    /**
+     * 查询模块激活信息
+     * @return
+     */
+    public List<ModuleInfoResponse> getModuleInfoList() {
+        var content = status();
+        List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
+        if (Objects.isNull(content)) {
+            return moduleInfoList;
+        }
+        var items = content.getItems();
+        // 竞赛
+        ModuleInfoResponse adModule = new ModuleInfoResponse();
+        adModule.setModuleName(ModuleEnums.AD.getCode());
+        adModule.setActivated(Boolean.FALSE);
+
+        // 实训
+        ModuleInfoResponse ojModule = new ModuleInfoResponse();
+        ojModule.setModuleName(ModuleEnums.OJ.getCode());
+        ojModule.setActivated(Boolean.FALSE);
+
+        // 靶场
+        ModuleInfoResponse crModule = new ModuleInfoResponse();
+        crModule.setModuleName(ModuleEnums.CR.getCode());
+        crModule.setActivated(Boolean.FALSE);
+
+        moduleInfoList.add(adModule);
+        moduleInfoList.add(ojModule);
+        moduleInfoList.add(crModule);
+
+        Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
+
+        // 任意一项激活项勾选，则该模块被激活
+        for (String key : AD_MODULE_KEYS) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+                adModule.setActivated(Boolean.TRUE);
+            }
+        }
+
+        for (String key : OJ_MODULE_KEYS) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+                ojModule.setActivated(Boolean.TRUE);
+            }
+        }
+
+        for (String key : CR_MODULE_KEYS) {
+            if (Objects.equals(key2ItemMap.get(key).getValue(), "1")) {
+                crModule.setActivated(Boolean.TRUE);
+            }
+        }
+
+        return moduleInfoList;
+    }
 
 
+
+    @Deprecated
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setExpiredDate("2022-05-26");
@@ -496,49 +565,49 @@ public class SysActivationService {
 
         ActivationItem item2 = new ActivationItem();
         item2.setKey("LCS-FUNC-CR-JINGSAI");
-        item2.setValue("1");
+        item2.setValue("0");
         item2.setType(1);
         list.add(item2);
 
         ActivationItem item3 = new ActivationItem();
         item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
-        item3.setValue("1");
+        item3.setValue("0");
         item3.setType(1);
         list.add(item3);
 
         ActivationItem item4 = new ActivationItem();
         item4.setKey("LCS-FUNC-CR-ZHISHIKU");
-        item4.setValue("1");
+        item4.setValue("0");
         item4.setType(1);
         list.add(item4);
 
         ActivationItem item5 = new ActivationItem();
         item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
-        item5.setValue("1");
+        item5.setValue("0");
         item5.setType(1);
         list.add(item5);
 
         ActivationItem item6 = new ActivationItem();
         item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
-        item6.setValue("1");
+        item6.setValue("0");
         item6.setType(1);
         list.add(item6);
 
         ActivationItem item7 = new ActivationItem();
         item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
-        item7.setValue("1");
+        item7.setValue("0");
         item7.setType(1);
         list.add(item7);
 
         ActivationItem item8 = new ActivationItem();
         item8.setKey("LCS-FUNC-CR-YUNWEISAI");
-        item8.setValue("1");
+        item8.setValue("0");
         item8.setType(1);
         list.add(item8);
 
         ActivationItem item9 = new ActivationItem();
         item9.setKey("LCS-FUNC-CR-CEPING");
-        item9.setValue("1");
+        item9.setValue("0");
         item9.setType(1);
         list.add(item9);
 
