@@ -646,14 +646,31 @@ public class FlowMonitorService {
         }
 
         // execute cmd
-        String zipFilePath = "/opt/arkime/flow.zip";
-        ContainerExecuteResult result = container.executeCommand(containerId,
-                String.format("cd /opt/arkime/raw && zip -q -r -u %s *", zipFilePath));
+        ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
         if (result.getExitCode() != 0) {
-            log.error("exec zip cmd fail, exit code {}, msg {}", result.getExitCode(), result.getOutput());
+            log.error("exec ls cmd fail,sceneId is {}, exit code {}, msg {}", sceneId, result.getExitCode(), result.getOutput());
             return StringUtils.EMPTY;
         }
 
+        if (StringUtils.isEmpty(result.getOutput())) {
+            log.error("exec ls cmd fail, sceneId is {}, exit code {}, result is empty", sceneId, result.getExitCode());
+            return StringUtils.EMPTY;
+        }
+
+        String zipFilePath = "/opt/arkime/flow.zip";
+
+        String[] files = StringUtils.split(result.getOutput(), "\n");
+        for (int i = 0; i < files.length; i++) {
+            String pcapFile = files[i];
+            String newFile = (i + 1) + ".pcap";
+            String command = new StringBuilder()
+                    .append(String.format("cd /opt/arkime/raw "))
+                    .append(String.format(" && cp %s %s ", pcapFile, newFile))
+                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", zipFilePath, newFile))
+                    .append(String.format(" && rm -rf %s ", newFile))
+                    .toString();
+            container.executeCommand(containerId, command);
+        }
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
         if (httpResult.getException() != null) {
             return StringUtils.EMPTY;
@@ -678,7 +695,7 @@ public class FlowMonitorService {
 
                 }
             }
-            container.executeCommand(containerId, "rm -rf /opt/arkime/flow.zip");
+            container.executeCommand(containerId, "rm -rf " + zipFilePath);
         }
     }
 }
