@@ -166,8 +166,7 @@ public final class NodeLimitUtils {
             return false;
         }
         if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
-                virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
             return true;
         }
         return false;
