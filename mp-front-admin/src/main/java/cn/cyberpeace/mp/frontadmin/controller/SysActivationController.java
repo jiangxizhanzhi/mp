@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationStatus;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
+import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import io.swagger.annotations.Api;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -54,6 +56,14 @@ public class SysActivationController {
 
         return ResultCommon.success(content);
     }
+
+    @ApiOperation("查询模块激活信息，包括竞赛模块，实训模块，靶场模块")
+    @GetMapping("/module_infos")
+    public ServiceResult<List<ModuleInfoResponse>> moduleInfos() {
+        var moduleInfoList = activationService.getModuleInfoList();
+        return ResultCommon.success(moduleInfoList);
+    }
+
 
     @ApiOperation("查询激活状态")
     @GetMapping("/license_status")

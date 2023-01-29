@@ -25,12 +25,12 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertFileParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertLogParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertRegistryParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertScriptParams;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -240,15 +240,17 @@ public class InitiateHandler extends HandlerCommon {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
-                if (Boolean.FALSE.equals(probe.getDisabled())) {
-                    customProbeParams.add(getModifyProbeParam(agentName, probe.getCollectPath(), REGISTRY));
+                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
+                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
             } else if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
-                if (Boolean.FALSE.equals(probe.getDisabled())) {
-                    customProbeParams.add(getModifyProbeParam(agentName, probe.getCollectPath(), FILE));
+                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
+                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
             } else if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
                 // 日志采集类型，新增日志参数
@@ -341,7 +343,7 @@ public class InitiateHandler extends HandlerCommon {
         }
         probeParam.setOutputFormat(probe.getOutputFormat());
         probeParam.setInterval(probe.getInterval());
-        probeParam.setScriptParam(StringUtils.join(collectPath, ","));
+        probeParam.setScriptParam("\"" + StringUtils.join(collectPath, ",") + "\"");
         return probeParam;
     }
 }

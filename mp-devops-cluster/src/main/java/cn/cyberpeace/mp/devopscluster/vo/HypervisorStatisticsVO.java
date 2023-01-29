@@ -185,18 +185,18 @@ public class HypervisorStatisticsVO extends BaseVO {
     }
 
     public BigDecimal getRamPercent() {
-        return Objects.isNull(this.memoryMb) || Objects.isNull(this.memoryMbUsed) ?
+        return Objects.isNull(this.memoryMb) || memoryMb == 0 || Objects.isNull(this.memoryMbUsed) ?
                 BigDecimal.ZERO : BigDecimal.valueOf(this.memoryMbUsed).divide(BigDecimal.valueOf(this.memoryMb),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
 
     }
 
     public BigDecimal getCpuPercent() {
-        return  Objects.isNull(this.cpus) || Objects.isNull(this.cpusUsed) ?
+        return  Objects.isNull(this.cpus) || cpus == 0 || Objects.isNull(this.cpusUsed) ?
                 BigDecimal.ZERO : BigDecimal.valueOf(this.cpusUsed).divide(BigDecimal.valueOf(this.cpus),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getDiskPercent() {
-        return  Objects.isNull(this.localGb) || Objects.isNull(this.localGbUsed) ?
+        return  Objects.isNull(this.localGb) || localGb == 0 || Objects.isNull(this.localGbUsed) ?
                 BigDecimal.ZERO : BigDecimal.valueOf(this.localGbUsed).divide(BigDecimal.valueOf(this.localGb),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 }
