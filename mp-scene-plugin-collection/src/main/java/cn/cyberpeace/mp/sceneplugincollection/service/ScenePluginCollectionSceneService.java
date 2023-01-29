@@ -298,6 +298,7 @@ public class ScenePluginCollectionSceneService {
             hostState.setDiskIoPercent(srcHostState.getDiskIoPercent());
             hostState.setMaxDownloadSpeed(srcHostState.getMaxDownloadSpeed());
             hostState.setMaxUploadSpeed(srcHostState.getMaxUploadSpeed());
+            hostState.setMaxNetSpeed(srcHostState.getMaxNetSpeed());
             // todo 进程，端口，网络连接，磁盘使用率
             if (CollectionUtil.isNotEmpty(agentName2Element)) {
                 var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
