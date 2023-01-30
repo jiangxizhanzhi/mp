@@ -125,6 +125,7 @@ public enum AuthErrorCode implements ErrorCode {
 
     COPY_FILE_ERROR("MP-110135", "copy_file_error"),
     FILE_NAME_ISNULL_ERROR("MP-110136", "file_name_isnull_error"),
+    EXCEL_LIST_DESC_ILLEGAL_LENGTH("MP-110137", "excel_list_desc_illegal_length"),
 
     PERMISSION_DENIED("MP-110140", "permission_denied"),
 
