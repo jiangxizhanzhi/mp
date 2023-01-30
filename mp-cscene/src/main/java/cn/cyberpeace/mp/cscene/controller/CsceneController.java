@@ -151,7 +151,7 @@ public class CsceneController implements BaseModelListControllerBase {
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null, true).asResult();
-        if (csceneBO.getType() == null || csceneBO.getType() != CsceneModel.Type.TEMPLATE) {
+        if (csceneBO.getType() != null && csceneBO.getType() != CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
             } else {
@@ -169,7 +169,7 @@ public class CsceneController implements BaseModelListControllerBase {
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null, false).asResult();
-        if (csceneBO.getType() == null || csceneBO.getType() != CsceneModel.Type.TEMPLATE) {
+        if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
             } else {
