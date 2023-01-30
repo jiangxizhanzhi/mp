@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -157,10 +156,24 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
                 checkExpiredTime(user.getExpiredTime(), index);
+                checkDescription(user.getDescription(), index);
             }
         }
         // 校验用户名
         checkUserName(userName2IndexBoMap);
+    }
+
+    /**
+     * 校验简介是否合法
+     * @param description
+     * @param index
+     */
+    private void checkDescription(String description, int index) {
+        if (StringUtils.isNotBlank(description) && StringUtils.length(description) > 1000) {
+            String shortDesc = description.substring(0, 20) + "...";
+            log.error("No {} row error! description {} has illegal length!", index, shortDesc);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_DESC_ILLEGAL_LENGTH.format(String.valueOf(index), shortDesc));
+        }
     }
 
 
