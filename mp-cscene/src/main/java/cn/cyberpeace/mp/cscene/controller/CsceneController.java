@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -150,10 +151,12 @@ public class CsceneController implements BaseModelListControllerBase {
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null, true).asResult();
-        if (isUpdate) {
-            CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
-        } else {
-            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+        if (csceneBO.getType() == null || csceneBO.getType() != CsceneModel.Type.TEMPLATE) {
+            if (isUpdate) {
+                CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
+            } else {
+                CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+            }
         }
         return result;
     }
@@ -166,10 +169,12 @@ public class CsceneController implements BaseModelListControllerBase {
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null, false).asResult();
-        if (isUpdate) {
-            CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
-        } else {
-            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+        if (csceneBO.getType() == null || csceneBO.getType() != CsceneModel.Type.TEMPLATE) {
+            if (isUpdate) {
+                CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
+            } else {
+                CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+            }
         }
         return result;
     }
