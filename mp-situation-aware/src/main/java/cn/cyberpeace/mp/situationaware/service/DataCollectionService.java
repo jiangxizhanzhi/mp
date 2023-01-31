@@ -263,7 +263,9 @@ public class DataCollectionService extends CollectionBaseService {
                 }
 
                 String agentName = json.getJSONObject("agent").getString("name");
-                LocalDateTime time = TimeUtils.stringToLocalDateTime(json.getJSONObject("data").getString("sic_launch_time"), TimeUtils.tz6MillsDateTimeFormatter);
+                String utcTime = json.getJSONObject("data").getString("sic_launch_time");
+                utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+                LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
                 JSONArray files = JSONArray.parseArray(rawOutput);
                 for(Object f : files.toArray()) {
                     FileEventModel m = new FileEventModel();
@@ -274,7 +276,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
             }
 
-            return new ListObjResult<FileEventModel>(fileEventModels, fileEventModels.size());
+            return new ListObjResult<>(fileEventModels, fileEventModels.size());
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
