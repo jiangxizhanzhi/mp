@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.enums.LaunchStatusEnum;
 import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
@@ -61,6 +62,7 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
@@ -327,6 +329,7 @@ public class DataCollectionService extends CollectionBaseService {
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         if (CollUtil.isNotEmpty(probeIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
+            addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
         // 按时间降序
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
@@ -808,6 +811,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         if (StringUtils.isNotBlank(launchId)) {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
+            addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
         // 按时间降序
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
@@ -834,7 +838,6 @@ public class DataCollectionService extends CollectionBaseService {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
-
 
 
     /**
@@ -924,8 +927,8 @@ public class DataCollectionService extends CollectionBaseService {
 
         if (StringUtils.isNotBlank(launchId)) {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
+            addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
-
 
         BoolQueryBuilder nestedBoolQueryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("data.sic_launch_output.changed_count").gt(0L));
         boolQueryBuilder.must(QueryBuilders.nestedQuery("data.sic_launch_output", nestedBoolQueryBuilder, ScoreMode.None));
@@ -989,13 +992,9 @@ public class DataCollectionService extends CollectionBaseService {
     private int buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-//        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_HOST_STATE));
+        addLaunchOutputSuccessCondition(boolQueryBuilder);
         int agentSize = 0;
-
-//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-//            agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-//        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
@@ -1526,7 +1525,8 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
     private void buildSicLaunchIdQuery(String sicLaunchId, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_id", sicLaunchId));
+        boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, sicLaunchId));
+        addLaunchOutputSuccessCondition(boolQueryBuilder);
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
@@ -1716,24 +1716,15 @@ public class DataCollectionService extends CollectionBaseService {
         return longVal;
     }
 
-    /**
-     * 剔除null
-     * @param agentNames
-     * @return
-     */
-    /*
-    private List<String> agentNamesExcludeNullValue(List<String> agentNames) {
-        List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        return nullExcludedAgentNames;
-    }
 
-    private boolean isAgentNamesEmpty(List<String> agentNames) {
-        List processedAgentNames = agentNamesExcludeNullValue(agentNames);
-        boolean isEmpty = CollectionUtil.isEmpty(processedAgentNames);
-        if(isEmpty) {
-            log.warn("agentNames is empty:{}", agentNames);
-        }
-        return isEmpty;
-    }*/
+    /**
+     * 添加output字段存在，且status为success条件
+     * @param boolQueryBuilder
+     */
+    private void addLaunchOutputSuccessCondition(BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_STATUS, LaunchStatusEnum.SUCCESS.getValue()));
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT);
+        boolQueryBuilder.filter(QueryBuilders.nestedQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT, existsQuery, ScoreMode.None));
+    }
 
 }
