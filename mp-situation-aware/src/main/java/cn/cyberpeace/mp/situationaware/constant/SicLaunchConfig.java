@@ -7,6 +7,8 @@ package cn.cyberpeace.mp.situationaware.constant;
  */
 public class SicLaunchConfig {
 
+    public static final String SIC_LAUNCH_STATUS = "data.sic_launch_status";
+
     // 主机状态
     public static final String LAUNCH_ID_HOST_STATE = "eda72998ba654c8d8625f61eaa918eb3";
 
