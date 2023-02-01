@@ -28,8 +28,16 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.enums.NoticeTopTypeEnum;
-import cn.cyberpeace.mp.frontadmin.model.*;
-import cn.cyberpeace.mp.frontadmin.repository.*;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeReadMapper;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeReadService;
@@ -49,7 +57,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -563,6 +576,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
                 .filterEqual(SysNoticeReadModel::getIsNeedPush, 0)
                 .select(SysNoticeReadModel::getNoticeId);
         List<SysNoticeReadModel> notPushNotices = noticeReadMapper.list(readNoticeCond);
+        List<String> notPushNoticeIds = notPushNotices.stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toList());
 
         HumanCondition noticeCond = new HumanCondition();
         if (CollUtil.isEmpty(noticeIds)) {
@@ -573,8 +587,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
                     .orIn(SysNoticeModel::getId, noticeIds.toArray())
                     .filterOrEnd();
         }
-        if (CollUtil.isNotEmpty(notPushNotices)) {
-            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
+        if (CollUtil.isNotEmpty(notPushNoticeIds)) {
+            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNoticeIds.toArray());
         }
         noticeCond.pagination(page, pageSize)
                 .orderBy(SysNoticeModel::getTop, true)
