@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.log.service.impl;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.log.config.LogConfig;
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.log.model.OperationLogModel;
@@ -47,7 +46,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
             boolean exist = getRestHighLevelClient().indices().exists(getIndexRequest, RequestOptions.DEFAULT);
             if (!exist) {
                 CreateIndexRequest createIndexRequest = new CreateIndexRequest(INDEX_MP_OPERATE_LOG);
-                createIndexRequest.settings(Settings.builder().put("max_result_window", logConfig.getEsMaxPageSize()));
+                createIndexRequest.settings(Settings.builder().put("max_result_window", Integer.MAX_VALUE));
                 getRestHighLevelClient().indices().create(createIndexRequest, RequestOptions.DEFAULT);
             }
         } catch (IOException e) {
@@ -65,9 +64,6 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
 
     @Override
     public SearchResponse search(OperationLogPageRequest request) {
-        if (request.getLimit() * request.getOffset() > logConfig.getEsMaxPageSize()) {
-            throw new MpRuntimeException("不支持深度分页查询！");
-        }
 
         SearchRequest searchRequest = new SearchRequest(INDEX_MP_OPERATE_LOG);
         SearchSourceBuilder sourceBuilder = request.buildSearchSourceBuilder();
