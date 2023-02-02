@@ -1584,8 +1584,6 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<String> exportFlowPcap(String sceneId) {
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
-            String key = URLUtil.url(model.getFlowFile()).getPath();
-            fdfsRemoteFileService.delete(key);
             return new ServiceResult<>(model.getFlowFile());
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
