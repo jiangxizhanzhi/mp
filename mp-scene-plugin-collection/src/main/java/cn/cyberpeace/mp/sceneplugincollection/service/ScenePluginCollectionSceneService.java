@@ -1,19 +1,26 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -25,11 +32,13 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeRelationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
@@ -69,16 +78,22 @@ import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -137,6 +152,12 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private CollectionAppConfig collectionAppConfig;
+
+    @Autowired
+    private CollectionPluginSceneMapper collectionPluginSceneMapper ;
+
+    @Autowired
+    private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
 
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
@@ -1429,6 +1450,11 @@ public class ScenePluginCollectionSceneService {
             List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
             if (CollectionUtils.isNotEmpty(flowCollectors)) {
                 flowAnalysisService.delete(flowCollectors);
+                var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+                if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
+                    String key = URLUtil.url(model.getFlowFile()).getPath();
+                    fdfsRemoteFileService.delete(key);
+                }
             }
 
             // 删除采集的数据
@@ -1553,6 +1579,107 @@ public class ScenePluginCollectionSceneService {
         }
         List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
+    }
+
+    public ServiceResult<String> exportFlowPcap(String sceneId) {
+        var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
+            String key = URLUtil.url(model.getFlowFile()).getPath();
+            fdfsRemoteFileService.delete(key);
+            return new ServiceResult<>(model.getFlowFile());
+        }
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isEmpty(flowCollectors)) {
+            log.error("find no flowCollectors by sceneId {}", sceneId);
+            return new ServiceResult<>(StringUtils.EMPTY);
+        }
+        String containName = flowCollectors.get(0);
+        return this.exportFlowPcap(sceneId, containName);
+    }
+
+    public ServiceResult<Boolean> saveFlowPcap(String sceneId, String containName) {
+        try {
+            String url = this.exportFlowPcap(sceneId, containName).getSource();
+            if (StringUtils.isNotEmpty(url)) {
+                CollectionPluginSceneModel model = new CollectionPluginSceneModel();
+                model.setFlowFile(url);
+                this.collectionPluginSceneMapper.filterUpdate(model, new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+            }
+            return new ServiceResult<>(true);
+        } catch (Exception e) {
+            log.error("faild to save flow pcap", e);
+            return new ServiceResult<>(false);
+        }
+    }
+
+    public ServiceResult<String> exportFlowPcap(String sceneId, String containName) {
+        // containerName -> containerId
+        Container container = new Container();
+        String containerId = container.getContainerIdByName(containName);
+        if (containerId == null) {
+            log.error("find no containerId by containName {}", containName);
+            return new ServiceResult<>(StringUtils.EMPTY);
+        }
+
+        // execute cmd
+        ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
+        if (result.getExitCode() != 0) {
+            log.error("exec ls cmd fail,sceneId is {}, exit code {}, msg {}", sceneId, result.getExitCode(), result.getOutput());
+            return new ServiceResult<>(StringUtils.EMPTY);
+        }
+
+        if (StringUtils.isEmpty(result.getOutput())) {
+            log.error("exec ls cmd fail, sceneId is {}, exit code {}, result is empty", sceneId, result.getExitCode());
+            return new ServiceResult<>(StringUtils.EMPTY);
+        }
+
+        String zipFilePath = "/opt/arkime/flow.zip";
+
+        String[] files = StringUtils.split(result.getOutput(), "\n");
+        for (int i = 0; i < files.length; i++) {
+            String pcapFile = files[i];
+            String newFile = (i + 1) + ".pcap";
+            String command = new StringBuilder()
+                    .append(String.format("cd /opt/arkime/raw "))
+                    .append(String.format(" && cp %s %s ", pcapFile, newFile))
+                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", zipFilePath, newFile))
+                    .append(String.format(" && rm -rf %s ", newFile))
+                    .toString();
+            container.executeCommand(containerId, command);
+        }
+        HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+        if (httpResult.getException() != null) {
+            return new ServiceResult<>(StringUtils.EMPTY);
+        }
+
+        String fileName = TextUtils.uuid() + ".zip";
+        File file = new File(fileName);
+        InputStream inputStream = null;
+        try {
+            FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
+            inputStream = new FileInputStream(file);
+            var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
+            var uploadResult = fileupload.upload(inputStream, "zip");
+            if (!uploadResult.judgeSuccess()) {
+                return new ServiceResult<>(StringUtils.EMPTY);
+            }
+            FsFileUploadResponse response = new FsFileUploadResponse();
+            String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
+            return new ServiceResult<>(url);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            file.deleteOnExit();
+            if (inputStream != null) {
+                try {
+                    IOUtils.close(inputStream);
+                } catch (IOException e) {
+
+                }
+            }
+            container.executeCommand(containerId, "rm -rf " + zipFilePath);
+        }
     }
 
     /**

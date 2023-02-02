@@ -20,4 +20,7 @@ public class CollectionPluginSceneModel extends BaseCollectionPluginSceneModel {
 
     @DefaultStr
     private String probeRouter;
+
+    @DefaultStr
+    private String flowFile;
 }
