@@ -7,15 +7,23 @@ import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.service.BasEsLogService;
 import cn.cyberpeace.mp.log.service.MpOperateLogService;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -30,6 +38,22 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
 
     @Autowired
     private LogConfig logConfig;
+
+    @PostConstruct
+    public void init() {
+        try {
+            GetIndexRequest getIndexRequest = new GetIndexRequest();
+            getIndexRequest.indices(INDEX_MP_OPERATE_LOG);
+            boolean exist = getRestHighLevelClient().indices().exists(getIndexRequest, RequestOptions.DEFAULT);
+            if (!exist) {
+                CreateIndexRequest createIndexRequest = new CreateIndexRequest(INDEX_MP_OPERATE_LOG);
+                createIndexRequest.settings(Settings.builder().put("max_result_window", logConfig.getEsMaxPageSize()));
+                getRestHighLevelClient().indices().create(createIndexRequest, RequestOptions.DEFAULT);
+            }
+        } catch (IOException e) {
+            log.error("es getIndexRequest error! {}", ExceptionUtil.stacktraceToString(e));
+        }
+    }
 
     @Override
     public IndexResponse create(OperationLogModel operationLogModel) {
@@ -46,7 +70,9 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
         }
 
         SearchRequest searchRequest = new SearchRequest(INDEX_MP_OPERATE_LOG);
-        searchRequest.source(request.buildSearchSourceBuilder());
+        SearchSourceBuilder sourceBuilder = request.buildSearchSourceBuilder();
+        sourceBuilder.trackTotalHits(true);
+        searchRequest.source(sourceBuilder);
         log.info("query ES DSL:\n{}", searchRequest.source().toString());
         return super.search(searchRequest);
     }

@@ -53,4 +53,8 @@ public abstract class BasEsLogService {
         }
     }
 
+    protected RestHighLevelClient getRestHighLevelClient() {
+        return restHighLevelClient;
+    }
+
 }
