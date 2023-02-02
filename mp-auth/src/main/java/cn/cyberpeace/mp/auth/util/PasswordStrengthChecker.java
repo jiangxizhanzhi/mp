@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Description:
@@ -12,6 +14,9 @@ import java.util.Objects;
  * @Date：2021/8/31 11:13
  */
 public class PasswordStrengthChecker {
+
+    //密码长度为6位以上,必须包含大小写字母和数字
+    private static String regEx = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(.{6,})$";
 
     private final static int[] SIZE_TABLE = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999,
             Integer.MAX_VALUE};
@@ -76,9 +81,6 @@ public class PasswordStrengthChecker {
      * @return strength level
      */
     public static int checkPasswordStrength(String passwd) {
-//        if (StringUtils.isBlank(passwd)) {
-//            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.USER_PASSWORD)));
-//        }
         ParamCheck.notEmpty(passwd, AuthBasei18nCode.USER_PASSWORD);
 
         int len = passwd.length();
@@ -291,5 +293,19 @@ public class PasswordStrengthChecker {
         return str.replace(str.charAt(0), ' ').trim().length() == 0;
     }
 
+
+    /**
+     * 密码中必须包含大小写字母、数字、至少6个字符
+     * @param password
+     * @return
+     */
+    public static boolean isValidPassword(String password){
+        Pattern Password_Pattern = Pattern.compile(regEx);
+        Matcher matcher = Password_Pattern.matcher(password);
+        if (matcher.matches()) {
+            return true;
+        }
+        return false;
+    }
 
 }

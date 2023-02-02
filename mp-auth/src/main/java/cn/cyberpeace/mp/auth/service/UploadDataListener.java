@@ -235,9 +235,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      */
     private void checkPwd(String password, int index) {
         // 密码是否合法
-        if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
-            log.error("No {} row error! password {} has illegal strength!", index, password);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index), password));
+        if (PasswordUtils.isPasswordInvalid(password)) {
+            log.error("No {} row error! password has illegal strength!", index);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index)));
         }
     }
 
@@ -441,7 +441,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             }
         }
 
-        opUserPermCheckService.checkByTargetRoleNames(allRoleNames);
+        try {
+            opUserPermCheckService.checkByTargetRoleNames(allRoleNames);
+        } catch (MpRuntimeException mpe) {
+            if (Objects.nonNull(mpe.getServiceCode()) && Objects.equals(mpe.getServiceCode().getCode(), AuthErrorCode.PERMISSION_DENIED.getCode())) {
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_IMPORT_ROLE_LIMIT);
+            }
+        }
     }
 
 
