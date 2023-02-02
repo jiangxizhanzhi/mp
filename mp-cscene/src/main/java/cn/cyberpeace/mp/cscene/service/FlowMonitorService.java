@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -31,6 +32,7 @@ import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
@@ -48,6 +50,7 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.URLUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -683,7 +686,15 @@ public class FlowMonitorService {
             FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
             inputStream = new FileInputStream(file);
             var uploadResult = csceneFileService.sceneUpload(inputStream, "zip").getSource();
-            return uploadResult.getInnerHttpUrl();
+            String url = uploadResult.getInnerHttpUrl();
+            CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+            if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                    var u = URLUtil.url(url);
+                    url = StringUtils.replaceOnce(url, u.getHost(), config.getPublicNetProxyIp());
+                }
+            }
+            return url;
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
