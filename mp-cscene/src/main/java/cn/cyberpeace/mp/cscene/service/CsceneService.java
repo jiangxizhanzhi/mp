@@ -583,6 +583,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
+    public List<CsceneInstanceModel> getRunningCscenes() {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getDeleted, false);
+        List<CsceneInstanceModel> models = csceneInstanceMapper.list(humanCondition);
+        return models;
+    }
+
     private boolean need2UseSystemEnableRecording(int testType, Integer referenceType) {
         // 使用数据库模板配置的, 根据其他字段判断是否需要使用系统的录屏开关
         if (CsceneInstanceModel.Type.TEST == testType) {

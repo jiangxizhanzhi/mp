@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.init;
 
 import cn.cyberpeace.mp.cscene.init.jobs.SceneNodeNumInitJob;
 import cn.cyberpeace.mp.cscene.init.jobs.SceneUpdateStatusJob;
+import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -28,6 +29,7 @@ public class CsceneInit implements ApplicationRunner {
         try {
             sceneNodeNumInitJob.executed();
             sceneUpdateStatusJob.executed();
+            LogFileUtil.init();
         } catch (Exception e) {
             log.error("failed to execute job : {}", sceneNodeNumInitJob.getClass().getName(), e);
         }

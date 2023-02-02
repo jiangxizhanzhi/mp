@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,7 +49,7 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart,Runnable callback) {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
@@ -75,6 +76,9 @@ public class SceneService {
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler.updateScene();
+            if (callback != null) {
+                callback.run();
+            }
         });
 
         return new ServiceResult<>(sceneHandler.toData());
@@ -82,7 +86,7 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
                                                             SceneContextBO context) {
-        return create(sceneConfigDataBO.exportToScene(), context, false);
+        return create(sceneConfigDataBO.exportToScene(), context, false, null);
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
