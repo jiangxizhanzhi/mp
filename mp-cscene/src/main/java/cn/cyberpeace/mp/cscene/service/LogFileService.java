@@ -2,22 +2,27 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
-import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
+import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -37,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +71,12 @@ public class LogFileService {
     @Autowired
     private CollectionAppConfig collectionAppConfig;
 
+    @Autowired
+    private CollectionPluginSceneMapper collectionPluginSceneMapper;
+
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
+
     /**
      * 分页查询日志文件列表
      * （假分页）
@@ -82,29 +94,19 @@ public class LogFileService {
                 return new ListObjServiceResult(new ListObjResult()).asResult();
             }
         }
-
+        Map<String, List<LogFileVO>> elementId2LogFile = LogFileUtil.getLogFile(pageRequest.getSceneId());
+        if (elementId2LogFile == null || elementId2LogFile.isEmpty()) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
         List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
         Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(pageRequest.getSceneId(), pageRequest.getElementIds());
 
-        List<CompletableFuture<List<LogFileVO>>> cfList = new ArrayList<>();
+        List<LogFileVO> allLogFileVOs = new ArrayList<>();
         agentNames2ElementIdMap.forEach((agentName, elementId) -> {
-            ElementMonitorBasicInfo ebasicInfo = allElements.stream().filter(element -> element.getId().equals(elementId)).findFirst().orElse(null);
-            if (Objects.nonNull(ebasicInfo)) {
-                String systemType = ebasicInfo.getSystemType();
-                CompletableFuture<List<LogFileVO>> cf = CompletableFuture.supplyAsync(() -> queryLogCollectFiles(agentName, elementId, systemType));
-                cfList.add(cf);
+            if (elementId2LogFile.containsKey(elementId)) {
+                allLogFileVOs.addAll(elementId2LogFile.get(elementId));
             }
         });
-
-
-        List<LogFileVO> allLogFileVOs = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(cfList)) {
-            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
-            CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
-            List<List<LogFileVO>> result = finalCF.join();
-            result.forEach(list -> allLogFileVOs.addAll(list));
-        }
-
         if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -129,6 +131,47 @@ public class LogFileService {
         pageInfo.setTotal(allLogFileVOs.size());
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
+        var cscene = csceneInstanceMapper.get(csceneId);
+        if(cscene == null){
+            return new ConcurrentHashMap<>();
+        }
+        String sceneId = cscene.getScene();
+        var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        if (model == null || StringUtils.isEmpty(model.getProbeCollector())) {
+            return new ConcurrentHashMap<>();
+        }
+        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(csceneId, false);
+        if (allElements == null || allElements.isEmpty()) {
+            return new ConcurrentHashMap<>();
+        }
+        Map<String, List<LogFileVO>> result = new ConcurrentHashMap<>();
+        List<CompletableFuture<List<LogFileVO>>> cfList = new ArrayList<>();
+        List<String> elementIds = new ArrayList<>();
+        allElements.forEach(e -> elementIds.add(e.getId()));
+
+        Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(csceneId, elementIds);
+        agentNames2ElementIdMap.forEach((agentName, elementId) -> {
+            ElementMonitorBasicInfo ebasicInfo = allElements.stream().filter(element -> element.getId().equals(elementId)).findFirst().orElse(null);
+            if (Objects.nonNull(ebasicInfo)) {
+                String systemType = ebasicInfo.getSystemType();
+                CompletableFuture<List<LogFileVO>> cf = CompletableFuture.supplyAsync(() -> {
+                    var files = queryLogCollectFiles(agentName, elementId, systemType);
+                    result.put(elementId, files);
+                    return files;
+                });
+                cfList.add(cf);
+            }
+        });
+        if (CollectionUtil.isEmpty(cfList)) {
+            return new ConcurrentHashMap<>();
+        }
+        CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
+        CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+        finalCF.join();
+        return result;
     }
 
 
