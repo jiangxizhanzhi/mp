@@ -79,6 +79,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -154,6 +155,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private CollectionPluginSceneMapper collectionPluginSceneMapper ;
+
+    @Autowired
+    private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
 
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
@@ -1446,6 +1450,11 @@ public class ScenePluginCollectionSceneService {
             List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
             if (CollectionUtils.isNotEmpty(flowCollectors)) {
                 flowAnalysisService.delete(flowCollectors);
+                var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+                if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
+                    String key = URLUtil.url(model.getFlowFile()).getPath();
+                    fdfsRemoteFileService.delete(key);
+                }
             }
 
             // 删除采集的数据
@@ -1575,6 +1584,8 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<String> exportFlowPcap(String sceneId) {
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
+            String key = URLUtil.url(model.getFlowFile()).getPath();
+            fdfsRemoteFileService.delete(key);
             return new ServiceResult<>(model.getFlowFile());
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
