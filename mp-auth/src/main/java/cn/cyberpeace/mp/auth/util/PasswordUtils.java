@@ -62,11 +62,8 @@ public class PasswordUtils {
     }
 
 
-    public static boolean isPasswordStrengthLowLevel(String password) {
-        int score = PasswordStrengthChecker.checkPasswordStrength(password);
-        var level = PasswordStrengthChecker.getPasswordLevel(password);
-        boolean isLowLevel = score < 3;
-        return isLowLevel;
+    public static boolean isPasswordInvalid(String password) {
+        return !PasswordStrengthChecker.isValidPassword(password);
     }
 
     public static String desEncrypt(String password) {

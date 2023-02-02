@@ -29,7 +29,7 @@ public class UserCreateCheckService implements UserCheckService {
         ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);
 
         // 密码是否合法
-        if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
+        if (PasswordUtils.isPasswordInvalid(user.getPassword())) {
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
 
