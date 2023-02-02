@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDele
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -67,6 +69,8 @@ public class DeleteHandler extends HandlerCommon {
         var scene = getPluginHandler().getScene();
         var flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
+            // 先保存流量数据
+            BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
             List<String> flowCollectMacAddrs = new ArrayList<>();
             getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
                 if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {

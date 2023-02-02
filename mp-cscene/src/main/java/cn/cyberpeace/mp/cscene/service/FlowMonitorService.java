@@ -630,63 +630,8 @@ public class FlowMonitorService {
             log.error("find no sceneId by csceneId {}", sceneId);
             return StringUtils.EMPTY;
         }
-
-        // sceneId -> container name
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
-        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
-        if (CollectionUtils.isEmpty(flowCollectors)) {
-            log.error("find no flowCollectors by sceneId {}", sceneId);
-            return StringUtils.EMPTY;
-        }
-        String containName = flowCollectors.get(0);
-
-        // containerName -> containerId
-        Container container = new Container();
-        String containerId = container.getContainerIdByName(containName);
-        if (containerId == null) {
-            log.error("find no containerId by containName {}", containName);
-            return StringUtils.EMPTY;
-        }
-
-        // execute cmd
-        ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
-        if (result.getExitCode() != 0) {
-            log.error("exec ls cmd fail,sceneId is {}, exit code {}, msg {}", sceneId, result.getExitCode(), result.getOutput());
-            return StringUtils.EMPTY;
-        }
-
-        if (StringUtils.isEmpty(result.getOutput())) {
-            log.error("exec ls cmd fail, sceneId is {}, exit code {}, result is empty", sceneId, result.getExitCode());
-            return StringUtils.EMPTY;
-        }
-
-        String zipFilePath = "/opt/arkime/flow.zip";
-
-        String[] files = StringUtils.split(result.getOutput(), "\n");
-        for (int i = 0; i < files.length; i++) {
-            String pcapFile = files[i];
-            String newFile = (i + 1) + ".pcap";
-            String command = new StringBuilder()
-                    .append(String.format("cd /opt/arkime/raw "))
-                    .append(String.format(" && cp %s %s ", pcapFile, newFile))
-                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", zipFilePath, newFile))
-                    .append(String.format(" && rm -rf %s ", newFile))
-                    .toString();
-            container.executeCommand(containerId, command);
-        }
-        HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
-        if (httpResult.getException() != null) {
-            return StringUtils.EMPTY;
-        }
-
-        String fileName = TextUtils.uuid() + ".zip";
-        File file = new File(fileName);
-        InputStream inputStream = null;
-        try {
-            FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
-            inputStream = new FileInputStream(file);
-            var uploadResult = csceneFileService.sceneUpload(inputStream, "zip").getSource();
-            String url = uploadResult.getInnerHttpUrl();
+        String url = scenePluginCollectionSceneService.exportFlowPcap(sceneId).getSource();
+        if (StringUtils.isNotEmpty(url)) {
             CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
             if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
@@ -694,19 +639,7 @@ public class FlowMonitorService {
                     url = StringUtils.replaceOnce(url, u.getHost(), config.getPublicNetProxyIp());
                 }
             }
-            return url;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            file.deleteOnExit();
-            if (inputStream != null) {
-                try {
-                    IOUtils.close(inputStream);
-                } catch (IOException e) {
-
-                }
-            }
-            container.executeCommand(containerId, "rm -rf " + zipFilePath);
         }
+        return url;
     }
 }
