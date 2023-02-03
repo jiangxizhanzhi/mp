@@ -31,7 +31,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -182,6 +187,9 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
 
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale){
         SearchResponse searchResponse = this.search(request);
+        if (Objects.isNull(searchResponse)) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
         SearchHits searchHits = searchResponse.getHits();
         List<OperationLogPageResponse> list = new ArrayList<>(searchHits.getHits().length);
         for (SearchHit hit : searchHits.getHits()) {
