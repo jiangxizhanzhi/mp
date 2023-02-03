@@ -61,6 +61,14 @@ public class WazuhControl {
 
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
 
+    public void controlConfigOld(String agentName, String osType, ControlConfigParam controlConfigParam) {
+        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        runCommandItem.setAgentName(agentName);
+        runCommandItem.setOsType(osType);
+        runCommandItem.setCommand(genControlConfigCommandOld(osType, controlConfigParam, true));
+        wazuhLauncher.runCommand(List.of(runCommandItem));
+    }
+
     // TODO 需要和 genControlConfigCommand 整合
     public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommandOld(osType, controlConfigParam, false);
