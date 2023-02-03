@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.remotefile.GodfsClient;
@@ -101,11 +102,14 @@ public class WazuhControl {
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
         }
+        // 把参数上传到文件服务器
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
+        String result = FdfsCommon.uploadContent(scriptParamsStr);
+        result = "http://169.254.169.254/file/" + result;
         if (restart) {
-            return String.format("%s \"%s\" -r", controlScriptPath, scriptParamsStr);
+            return String.format("%s \"%s\" -r", controlScriptPath, result);
         } else {
-            return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
+            return String.format("%s \"%s\"", controlScriptPath, result);
         }
     }
 
