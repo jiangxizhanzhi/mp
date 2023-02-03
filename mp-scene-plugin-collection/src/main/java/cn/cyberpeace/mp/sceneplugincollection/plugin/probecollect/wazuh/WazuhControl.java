@@ -61,6 +61,57 @@ public class WazuhControl {
 
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
 
+    // TODO 需要和 genControlConfigCommand 整合
+    public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam) {
+        return genControlConfigCommandOld(osType, controlConfigParam, false);
+    }
+
+    public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam, boolean restart) {
+        String controlScriptPath;
+        if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
+            controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
+        } else {
+            controlScriptPath = LINUX_CONTROL_SCRIPT_PATH;
+        }
+        List<Map<String, Object>> scriptParams = new ArrayList<>();
+        if (controlConfigParam.getProbeParams() != null) {
+            for (var probeParam : controlConfigParam.getProbeParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
+            }
+        }
+        if (controlConfigParam.getLogCollectParams() != null) {
+            for (var logCollectParam : controlConfigParam.getLogCollectParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
+            }
+        }
+        if (controlConfigParam.getSyscheckParam() != null) {
+            scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscheckParam()));
+        }
+        if (controlConfigParam.getFileModifyParams() != null) {
+            for (var fileModifyParam : controlConfigParam.getFileModifyParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
+            }
+        }
+        if (controlConfigParam.getRegistryModifyParams() != null) {
+            for (var registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
+            }
+        }
+        if (controlConfigParam.getSyscollectorParam() != null) {
+            scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscollectorParam()));
+        }
+        if (scriptParams.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+        // 把参数上传到文件服务器
+        String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
+        if (restart) {
+            return String.format("%s \"%s\" -r", controlScriptPath, scriptParamsStr);
+        } else {
+            return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
+        }
+    }
+
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommand(osType, controlConfigParam, false);
     }
