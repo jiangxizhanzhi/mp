@@ -30,7 +30,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_guacamole_server:http://127.0.0.1:9999}")
     private String cpcloudGuacamoleServer;
 
-    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600000}")
+    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:3000000}")
     private Integer cpcloudServerTimeout;
 
     @Value("${mp.sceneplugincloud.cpcloud_resource_group:MP_SCENE}")
