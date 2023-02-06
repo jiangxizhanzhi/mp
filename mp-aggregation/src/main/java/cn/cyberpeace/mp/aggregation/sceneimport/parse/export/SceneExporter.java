@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -31,6 +32,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,8 +121,8 @@ public class SceneExporter {
                 }
                 var image = JsonCommon.mapToBean(imageMap, Image.class);
                 if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
-                    String flavor = String.format("mx.%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
-                    image.set实例大小(flavor);
+                    String flavor = String.format("%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
+                    image.set实例大小(formatFlavor(flavor));
                 }
 
                 // 下载图片
@@ -192,6 +194,22 @@ public class SceneExporter {
                     }
                 }
 
+                // 设置发布时间
+                if (StringUtils.isEmpty(image.get发布时间())) {
+                    String time = TimeUtils.localDateToString(LocalDate.now());
+                    time = StringUtils.replace(time, "-", "timeFormatSplit");
+                    image.set发布时间(time);
+                }
+                if (StringUtils.isEmpty(image.get系统服务())) {
+                    image.set系统服务(Boolean.TRUE.equals(image.getCloudInit()) ? "CloudInit" : "hasNoSystemServer");
+                }
+                if (StringUtils.isEmpty(image.get安装软件())) {
+                    image.set安装软件("");
+                }
+                if (StringUtils.isEmpty(image.get授权类型())) {
+                    image.set授权类型("无需授权");
+                }
+
                 ServerYml serverYml = new ServerYml();
                 Server server = new Server();
                 server.setMpYmlImageNameToChange(image);
@@ -204,6 +222,8 @@ public class SceneExporter {
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber+device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
                 content = StringUtils.replace(content, "privateKey", "private-key");
+                content = StringUtils.replace(content, "hasNoSystemServer", "");
+                content = StringUtils.replace(content, "timeFormatSplit", "-");
                 this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
@@ -393,5 +413,21 @@ public class SceneExporter {
         private Boolean cloudInit;
         private List<AccessModeExportResult> 接入方式;
         private List<AccessModeExportResult> 管理接入;
+    }
+
+    private static String formatFlavor(String flavor) {
+        String[] formatStrs = new String[]{
+                "m2.1c-1g-10g", "m2.2c-2g-10g", "m3.1c-2g-20g", "m3.2c-4g-20g",
+                "m3.4c-4g-20g", "m4.2c-2g-40g", "m4.2c-4g-40g", "m4.4c-4g-40g",
+                "m5.4c-4g-80g", "m6.4c-4g-120g", "m4.1c-1g-40g", "m4.2c-2g-60g",
+                "m4.4c-8g-40g", "m3.2c-4g-50g", "m5.4c-8g-60g", "m3.1c-2g-50g",
+                "m5.4c-8g-80g", "m3.1c-1g-20g", "m4.2c-4g-60g", "m3.4c-4g-50g"
+        };
+        for (String f : formatStrs) {
+            if (f.endsWith(flavor)) {
+                return f;
+            }
+        }
+        return "mx." + flavor;
     }
 }
