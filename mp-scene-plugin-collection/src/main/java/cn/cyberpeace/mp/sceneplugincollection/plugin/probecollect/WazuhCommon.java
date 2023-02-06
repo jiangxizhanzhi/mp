@@ -47,7 +47,9 @@ public class WazuhCommon {
     public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
     public static final String WINDOWS_ORIGIN_CONFIG_FILE = "C:\\ossec-agent\\ossec.conf.st";
+    public static final String WINDOWS_ORIGIN_CLIENT_KEY_FILE = "C:\\ossec-agent\\client.keys";
     public static final String LINUX_ORIGIN_CONFIG_FILE = "/var/ossec/etc/ossec.conf.st";
+    public static final String LINUX_ORIGIN_CLIENT_KEY_FILE = "/var/ossec/etc/client.keys";
 
     public static String agentLinuxLocalFilepath = null;
 
@@ -98,6 +100,7 @@ public class WazuhCommon {
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             "del/f/s/q " + WINDOWS_ORIGIN_CONFIG_FILE,
+                            "del/f/s/q " + WINDOWS_ORIGIN_CLIENT_KEY_FILE,
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
@@ -120,6 +123,7 @@ public class WazuhCommon {
                             "rm -rf agent-installer",
                             "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
                             "rm -rf " + LINUX_ORIGIN_CONFIG_FILE,
+                            "rm -rf " + LINUX_ORIGIN_CLIENT_KEY_FILE,
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
