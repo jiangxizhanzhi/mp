@@ -265,7 +265,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
 
                 String agentName = json.getJSONObject("agent").getString("name");
-                String utcTime = json.getJSONObject("data").getString("sic_launch_time");
+                String utcTime = json.getString("timestamp");
                 utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
                 LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
                 JSONArray files = JSONArray.parseArray(rawOutput);
