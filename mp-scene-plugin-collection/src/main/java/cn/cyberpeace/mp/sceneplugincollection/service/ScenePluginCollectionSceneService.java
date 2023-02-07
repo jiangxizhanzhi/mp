@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
+import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
@@ -222,6 +223,9 @@ public class ScenePluginCollectionSceneService {
         ListObjResult<FlowLogBO> flowLogBOSResult = flowAnalysisService.flowLogWithTotal(request);
         if (CollectionUtils.isEmpty(flowLogBOSResult.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        if (flowLogBOSResult.getTotal() != null && flowLogBOSResult.getTotal() > 10000) {
+            EsHttpUtil.updateDataMaxQueryNum(batchSceneHandler.getFlowCollectors().get(0), flowLogBOSResult.getTotal());
         }
 
         List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(),batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
@@ -1632,16 +1636,21 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
 
-        String zipFilePath = "/opt/arkime/flow.zip";
-
+        String dirName = TextUtils.uuid();
+        String dir = "/opt/arkime/" + dirName;
+        String zipFilePath = dir + "/flow.zip";
+        // 建立本次使用的目录
+        container.executeCommand(containerId, "mkdir -p " + dir);
         String[] files = StringUtils.split(result.getOutput(), "\n");
         for (int i = 0; i < files.length; i++) {
             String pcapFile = files[i];
-            String newFile = (i + 1) + ".pcap";
+            String newFileName = (i + 1) + ".pcap";
+            String newFile = dir + "/" + newFileName;
             String command = new StringBuilder()
                     .append(String.format("cd /opt/arkime/raw "))
                     .append(String.format(" && cp %s %s ", pcapFile, newFile))
-                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", zipFilePath, newFile))
+                    .append(String.format(" && cd " + dir))
+                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", "flow.zip", newFileName))
                     .append(String.format(" && rm -rf %s ", newFile))
                     .toString();
             container.executeCommand(containerId, command);
@@ -1676,7 +1685,7 @@ public class ScenePluginCollectionSceneService {
 
                 }
             }
-            container.executeCommand(containerId, "rm -rf " + zipFilePath);
+            container.executeCommand(containerId, "rm -rf " + dir);
         }
     }
 
