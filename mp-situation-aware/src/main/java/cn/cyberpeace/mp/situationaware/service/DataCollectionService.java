@@ -183,7 +183,6 @@ public class DataCollectionService extends CollectionBaseService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
@@ -572,7 +571,6 @@ public class DataCollectionService extends CollectionBaseService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
@@ -1018,12 +1016,6 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildMonitorEventsBuilderTimeRange(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-//        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-
-//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-//            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-//        }
-
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
@@ -1352,11 +1344,6 @@ public class DataCollectionService extends CollectionBaseService {
             }
         }
 
-//        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
-//            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
-//                    .agentName(wazuhFileRoot.getAgent().getName())
-//                    .agentId(wazuhFileRoot.getAgent().getId());
-//        }
         builder.agentName(wazuhFileRoot.getAgent().getName()).agentId(wazuhFileRoot.getAgent().getId());
 
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
@@ -1444,8 +1431,6 @@ public class DataCollectionService extends CollectionBaseService {
                                                 BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleGroups())) {
-//            boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray())));
-//            boolQueryBuilder.must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray()));
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
@@ -1453,11 +1438,6 @@ public class DataCollectionService extends CollectionBaseService {
         if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
             buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
         }
-
-//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-//            //构造agentId
-//            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-//        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);

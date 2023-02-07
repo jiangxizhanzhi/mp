@@ -17,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -105,8 +103,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        LocalDateTime start = LocalDateTime.now();
-        log.info("save data");
         if (list.size() > authConfig.getMaxImportUserSize()) {
             log.error("size exceed the limit:{}！", list.size());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authConfig.getMaxImportUserSize().toString()));
@@ -114,23 +110,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
         // 校验字段是否合法
         checkImportUsers(list);
-        LocalDateTime end = LocalDateTime.now();
-        log.info("after checkImportUsers cost:{}", Duration.between(start, end).toMillis());
-
         preProcessOrgsAndRoles(list);
-        start = end;
-        end = LocalDateTime.now();
-        log.info("after preProcessOrgsAndRoles cost:{}", Duration.between(start, end).toMillis());
-
         preProcessPwd(list);
-        start = end;
-        end = LocalDateTime.now();
-        log.info("after preProcessPwd cost:{}", Duration.between(start, end).toMillis());
-
         userService.importUsers(list);
-        start = end;
-        end = LocalDateTime.now();
-        log.info("after importUsers cost:{}", Duration.between(start, end).toMillis());
     }
 
 
@@ -204,21 +186,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * @param userName2IndexBoMap
      */
     private void checkUserNameFromDB(Map<String, Integer> userName2IndexBoMap) {
-
-        /*userName2IndexBoMap.entrySet().stream().forEach(e -> {
-            String username = e.getKey();
-            Integer index = e.getValue();
-            if (StringUtils.isBlank(username)) {
-                log.error("No {} row error! username {} should not be empty!", index, username);
-                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
-            }
-
-            if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
-                log.error("No {} row error! username {} has illegal length!", index, username);
-                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
-            }
-        });*/
-
         List<String> userNames = userName2IndexBoMap.keySet().stream().collect(Collectors.toList());
         List<String> existedUserNames = userService.listExistedUserNames(userNames, 1);
         if (CollectionUtils.isNotEmpty(existedUserNames)) {
