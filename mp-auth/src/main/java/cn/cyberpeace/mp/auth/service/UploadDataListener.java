@@ -140,6 +140,21 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
 
+        Map<String, Integer> userName2IndexBoMap = new LinkedHashMap<>();
+        for (int i = 0; i < users.size(); i++) {
+            ImportUserBo user = users.get(i);
+            int index = i + 1;
+            if (Objects.nonNull(user)) {
+                userName2IndexBoMap.put(user.getUsername(), index);
+                checkUserName(user.getUsername(), index);
+                checkName(user.getName(), index);
+                checkPwd(user.getPassword(), index);
+                checkExpiredTime(user.getExpiredTime(), index);
+                checkDescription(user.getDescription(), index);
+            }
+        }
+
+        // 表格内用户名重复内容校验
         var duplicateElements = getDuplicateElements(users);
         if (CollectionUtils.isNotEmpty(duplicateElements)) {
             String duplicatedUserNames = duplicateElements.stream().map(Map.Entry::getKey).collect(Collectors.joining(","));
@@ -147,20 +162,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_DUPLICATED.format(duplicatedUserNames));
         }
 
-        Map<String, Integer> userName2IndexBoMap = new LinkedHashMap<>();
-        for (int i = 0; i < users.size(); i++) {
-            ImportUserBo user = users.get(i);
-            int index = i + 1;
-            if (Objects.nonNull(user)) {
-                userName2IndexBoMap.put(user.getUsername(), index);
-                checkName(user.getName(), index);
-                checkPwd(user.getPassword(), index);
-                checkExpiredTime(user.getExpiredTime(), index);
-                checkDescription(user.getDescription(), index);
-            }
-        }
         // 校验用户名
-        checkUserName(userName2IndexBoMap);
+        checkUserNameFromDB(userName2IndexBoMap);
     }
 
     /**
@@ -177,14 +180,32 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
+
+    /**
+     * 校验用户名
+     *
+     * @param
+     */
+    private void checkUserName(String username, int index) {
+        if (StringUtils.isBlank(username)) {
+            log.error("No {} row error! username {} should not be empty!", index, username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
+        }
+
+        if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
+            log.error("No {} row error! username {} has illegal length!", index, username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
+        }
+    }
+
     /**
      * 校验用户名
      *
      * @param userName2IndexBoMap
      */
-    private void checkUserName(Map<String, Integer> userName2IndexBoMap) {
+    private void checkUserNameFromDB(Map<String, Integer> userName2IndexBoMap) {
 
-        userName2IndexBoMap.entrySet().stream().forEach(e -> {
+        /*userName2IndexBoMap.entrySet().stream().forEach(e -> {
             String username = e.getKey();
             Integer index = e.getValue();
             if (StringUtils.isBlank(username)) {
@@ -196,7 +217,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 log.error("No {} row error! username {} has illegal length!", index, username);
                 throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
             }
-        });
+        });*/
 
         List<String> userNames = userName2IndexBoMap.keySet().stream().collect(Collectors.toList());
         List<String> existedUserNames = userService.listExistedUserNames(userNames, 1);
@@ -234,6 +255,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * @param index
      */
     private void checkPwd(String password, int index) {
+        if (StringUtils.isBlank(password)) {
+            log.error("No {} row error! name {} should not be empty!", index, password);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_EMPTY.format(String.valueOf(index)));
+        }
         // 密码是否合法
         if (PasswordUtils.isPasswordInvalid(password)) {
             log.error("No {} row error! password has illegal strength!", index);
