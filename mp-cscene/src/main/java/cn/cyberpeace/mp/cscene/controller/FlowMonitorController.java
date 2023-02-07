@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
@@ -18,6 +20,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -30,14 +33,12 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +74,7 @@ public class FlowMonitorController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
+     *
      * @return
      */
     @ApiOperation(value = "场景流量趋势图")
@@ -86,6 +88,7 @@ public class FlowMonitorController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
+     *
      * @return
      */
     @ApiOperation(value = "场景受攻击端口")
@@ -99,6 +102,7 @@ public class FlowMonitorController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
+     *
      * @return
      */
     @ApiOperation(value = "场景主机状态")
@@ -112,6 +116,7 @@ public class FlowMonitorController {
 
     /**
      * elementIds若为多值，则只取第一个值
+     *
      * @return
      */
     @ApiOperation(value = "节点流量趋势图")
@@ -221,17 +226,28 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "导出全部流量文件")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/export")
     public ServiceResult<FlowPcapFileInfo> export(String id) {
         FlowPcapFileInfo pcapFileInfo = new FlowPcapFileInfo();
-        String url = flowMonitorService.export(id);
-        if (StringUtils.isNotEmpty(url)) {
-            pcapFileInfo.setDownloadUrl(url);
-        }
+        String taskId = TextUtils.uuid();
+        FlowPcapExportUtil.initProcess(taskId);
+        TaskCommon.executeTask(new Runnable() {
+            @Override
+            public void run() {
+                flowMonitorService.export(taskId, id);
+            }
+        });
+        pcapFileInfo.setTaskId(taskId);
         return new ServiceResult<>(pcapFileInfo).asResult();
+    }
+
+
+    @ApiOperation(value = "流量导出进度")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "任务id", dataTypeClass = String.class),})
+    @GetMapping("/export/process")
+    public ServiceResult<FlowPcapExportUtil.FlowPcapExportProcess> process(String id) {
+        return new ServiceResult<>(FlowPcapExportUtil.getProcess(id)).asResult();
     }
 
 }
