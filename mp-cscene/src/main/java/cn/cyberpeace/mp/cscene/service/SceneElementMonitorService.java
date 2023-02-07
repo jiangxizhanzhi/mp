@@ -50,7 +50,6 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -405,6 +404,11 @@ public class SceneElementMonitorService {
         request.setSicLaunchId(sicLaunchId);
         request.setRuleGroups(null);
 
+        // path -> null
+        if (StringUtils.isNotBlank(hostEventQueryParams.getPath())) {
+            request.setPath(null);
+        }
+
         Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
                 .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
         ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
@@ -413,8 +417,13 @@ public class SceneElementMonitorService {
             Set<String> exist = new HashSet<>();
             for (var x : fileEventModels.getObjs()) {
                 if (!exist.contains(x.getAgentId() + x.getFilePath())) {
-                    list.add(x);
-                    exist.add(x.getAgentId() + x.getFilePath());
+                    if (StringUtils.isBlank(hostEventQueryParams.getPath())) {
+                        list.add(x);
+                        exist.add(x.getAgentId() + x.getFilePath());
+                    } else if (StringUtils.contains(x.getFilePath(), hostEventQueryParams.getPath())) {
+                        list.add(x);
+                        exist.add(x.getAgentId() + x.getFilePath());
+                    }
                 }
             }
             fileEventModels = new ListObjResult<>(list, list.size());
