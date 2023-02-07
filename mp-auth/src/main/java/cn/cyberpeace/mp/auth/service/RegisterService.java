@@ -61,6 +61,7 @@ public class RegisterService {
         }
 
         String userId = TextUtils.uuid();
+        // 注册的用户默认为域用户
         UserModel user = UserModel.builder()
                 .id(userId)
                 .username(req.getUsername())
@@ -68,6 +69,7 @@ public class RegisterService {
                 .email(req.getEmail())
                 .nickname(req.getNickname())
                 .name(req.getName())
+                .type(UserModel.USER_TYPE_AD)
                 .avatar(req.getAvatar()).build();
 
         createCheckService.check(user);

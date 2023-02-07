@@ -1018,9 +1018,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(importUserBo)) {
             return null;
         }
+        // Excel导入的默认为域账号
         UserModel userModel =
                 UserModel.builder().username(importUserBo.getUsername())
                         .name(importUserBo.getName())
+                        .type(UserModel.USER_TYPE_AD)
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUserBo.getPassword())
                         .build();

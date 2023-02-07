@@ -35,6 +35,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_PATH = ControllerConstant.BASE_API_PATH + "/login";
+    private static final String LOGIN_LDAP_PATH = ControllerConstant.BASE_API_PATH + "/login/ldap";
     private static final String LOGIN_MOBILE_PATH = ControllerConstant.BASE_API_PATH + "/login/mobile";
     private static final String LOGOUT_PATH = ControllerConstant.BASE_API_PATH + "/logout";
 
