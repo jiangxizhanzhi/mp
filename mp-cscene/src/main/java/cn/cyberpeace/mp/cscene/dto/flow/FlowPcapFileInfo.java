@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FlowPcapFileInfo {
-    @ApiModelProperty("文件下载地址")
-    private String downloadUrl ;
+    @ApiModelProperty("文件生成任务id")
+    private String taskId ;
 }

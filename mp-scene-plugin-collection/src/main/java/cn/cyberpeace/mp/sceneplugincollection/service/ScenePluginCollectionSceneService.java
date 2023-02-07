@@ -51,6 +51,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
+import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
@@ -1586,9 +1587,10 @@ public class ScenePluginCollectionSceneService {
         return getRuleId2FileByIds(ruleIds);
     }
 
-    public ServiceResult<String> exportFlowPcap(String sceneId) {
+    public ServiceResult<String> exportFlowPcap(String sceneId,String taskId) {
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
+            FlowPcapExportUtil.finalProcess(taskId, model.getFlowFile());
             return new ServiceResult<>(model.getFlowFile());
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
@@ -1598,7 +1600,7 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containName = flowCollectors.get(0);
-        var result = this.exportFlowPcap(sceneId, containName);
+        var result = this.exportFlowPcap(sceneId, containName,taskId);
         return result;
     }
 
@@ -1617,7 +1619,7 @@ public class ScenePluginCollectionSceneService {
         }
     }
 
-    public ServiceResult<String> exportFlowPcap(String sceneId, String containName) {
+    public ServiceResult<String> exportFlowPcap(String sceneId, String containName,String taskId) {
         // containerName -> containerId
         Container container = new Container();
         String containerId = container.getContainerIdByName(containName);
@@ -1637,6 +1639,8 @@ public class ScenePluginCollectionSceneService {
             log.error("exec ls cmd fail, sceneId is {}, exit code {}, result is empty", sceneId, result.getExitCode());
             return new ServiceResult<>(StringUtils.EMPTY);
         }
+
+        FlowPcapExportUtil.updateProcess(taskId, 5);
 
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
@@ -1663,13 +1667,22 @@ public class ScenePluginCollectionSceneService {
         CompletableFuture<Void> finalCF = CompletableFuture.allOf(cfArray);
         finalCF.join();
 
+        FlowPcapExportUtil.updateProcess(taskId, 10);
+
+        int step = 40 / files.length;
         for (int i = 0; i < files.length; i++) {
             String newFileName = (i + 1) + ".pcap";
             String command = String.format("cd %s && zip %s %s %s && rm -rf %s", dir, i == 0 ? "" : "-g", "flow.zip", newFileName, newFileName);
             container.executeCommand(containerId, command);
+
+            FlowPcapExportUtil.updateProcess(taskId, step);
+
         }
 
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+
+        FlowPcapExportUtil.updateProcess(taskId, 15);
+
         if (httpResult.getException() != null) {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
@@ -1679,14 +1692,23 @@ public class ScenePluginCollectionSceneService {
         InputStream inputStream = null;
         try {
             FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
+
+            FlowPcapExportUtil.updateProcess(taskId, 15);
+
             inputStream = new FileInputStream(file);
             var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
             var uploadResult = fileupload.upload(inputStream, "zip");
+
+            FlowPcapExportUtil.updateProcess(taskId, 15);
+
             if (!uploadResult.judgeSuccess()) {
                 return new ServiceResult<>(StringUtils.EMPTY);
             }
             FsFileUploadResponse response = new FsFileUploadResponse();
             String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
+
+            FlowPcapExportUtil.finalProcess(taskId, url);
+
             return new ServiceResult<>(url);
         } catch (IOException e) {
             throw new RuntimeException(e);

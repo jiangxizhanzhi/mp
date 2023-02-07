@@ -621,16 +621,15 @@ public class FlowMonitorService {
     /**
      * 导出全部流量文件
      *
-     * @param csceneId
      */
-    public String export(String csceneId) {
+    public String export(String taskId, String csceneId) {
         // csceneId -> sceneId
         String sceneId = csceneCommonService.translateSceneId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {
             log.error("find no sceneId by csceneId {}", sceneId);
             return StringUtils.EMPTY;
         }
-        String url = scenePluginCollectionSceneService.exportFlowPcap(sceneId).getSource();
+        String url = scenePluginCollectionSceneService.exportFlowPcap(sceneId, taskId).getSource();
         if (StringUtils.isNotEmpty(url)) {
             CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
             if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
