@@ -153,11 +153,20 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
 
     @Override
-    public List<RoleModel> listAll() {
+    public List<RoleModel> listAll(RolePageRequest rolePageRequest) {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         HumanCondition humanCondition = new HumanCondition();
         if (CollUtil.isNotEmpty(excludeRoleIds)) {
             humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+        }
+
+        if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
+            var orders = CollUtil.newArrayList(rolePageRequest.getOrders());
+            if (CollUtil.isNotEmpty(orders)) {
+                for (String order : orders) {
+                    humanCondition.orderBy(order);
+                }
+            }
         }
         List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;

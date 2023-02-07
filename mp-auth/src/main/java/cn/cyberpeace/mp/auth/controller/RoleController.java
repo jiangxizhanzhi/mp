@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -116,10 +117,11 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
-    @ApiOperation(value = "查询所有角色", notes = "")
+    @ApiOperation(value = "查询所有角色，不分页，仅查询角色信息", notes = "")
     @GetMapping("/all")
-    public ServiceResult<List<RoleModel>> listAll() {
-        List<RoleModel> roles = roleService.listAll();
+    public ServiceResult<List<RoleModel>> listAll(RolePageRequest rolePageRequest) {
+        rolePageRequest.ensure();
+        List<RoleModel> roles = roleService.listAll(rolePageRequest);
         return ResultCommon.success(roles);
     }
 
