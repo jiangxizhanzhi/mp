@@ -110,6 +110,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1597,7 +1598,8 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containName = flowCollectors.get(0);
-        return this.exportFlowPcap(sceneId, containName);
+        var result = this.exportFlowPcap(sceneId, containName);
+        return result;
     }
 
     public ServiceResult<Boolean> saveFlowPcap(String sceneId, String containName) {
@@ -1642,6 +1644,7 @@ public class ScenePluginCollectionSceneService {
         // 建立本次使用的目录
         container.executeCommand(containerId, "mkdir -p " + dir);
         String[] files = StringUtils.split(result.getOutput(), "\n");
+        List<CompletableFuture<Boolean>> cfList = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
             String pcapFile = files[i];
             String newFileName = (i + 1) + ".pcap";
@@ -1649,12 +1652,23 @@ public class ScenePluginCollectionSceneService {
             String command = new StringBuilder()
                     .append(String.format("cd /opt/arkime/raw "))
                     .append(String.format(" && cp %s %s ", pcapFile, newFile))
-                    .append(String.format(" && cd " + dir))
-                    .append(String.format(" && zip %s %s %s ", i == 0 ? "" : "-g", "flow.zip", newFileName))
-                    .append(String.format(" && rm -rf %s ", newFile))
                     .toString();
+            var cf = CompletableFuture.supplyAsync(() -> {
+                container.executeCommand(containerId, command);
+                return true;
+            });
+            cfList.add(cf);
+        }
+        var cfArray = cfList.toArray(new CompletableFuture[0]);
+        CompletableFuture<Void> finalCF = CompletableFuture.allOf(cfArray);
+        finalCF.join();
+
+        for (int i = 0; i < files.length; i++) {
+            String newFileName = (i + 1) + ".pcap";
+            String command = String.format("cd %s && zip %s %s %s && rm -rf %s", dir, i == 0 ? "" : "-g", "flow.zip", newFileName, newFileName);
             container.executeCommand(containerId, command);
         }
+
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
         if (httpResult.getException() != null) {
             return new ServiceResult<>(StringUtils.EMPTY);
