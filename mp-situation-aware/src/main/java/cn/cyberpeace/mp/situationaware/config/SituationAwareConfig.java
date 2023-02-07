@@ -48,6 +48,7 @@ public class SituationAwareConfig {
      */
     private String arkimeCpcloudContainerCreateUrl;
     private String arkimeCpcloudNetworkMirrorUrl;
+    private String arkimeEsProtocol;
     private String arkimeEsHost;
     private String arkimeEsPort;
     private String arkimeImageName;
