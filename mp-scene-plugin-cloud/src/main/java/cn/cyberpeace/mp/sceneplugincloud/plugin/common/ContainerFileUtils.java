@@ -28,6 +28,14 @@ public class ContainerFileUtils {
 
     public static final String CONTAINER_COPY_FILE_PREFIX = "container_copy_file:";
 
+    public static final String VERSION_TEST_COMMAND = "if ! command -v unzip &> /dev/null;then if ! command -v apk &> /dev/null;" +
+            "then if [ -e /etc/system-release ];then       cat /etc/system-release;" +
+            "elif [ -e /etc/redhat-release ];then cat /etc/redhat-release;else " +
+            "echo no_system_release;" +
+            "fi else echo apk_exist;" +
+            "fi else echo unzip_exist;" +
+            "fi";
+
     public static String unzipLocalFilepath = null;
 
     public static String apkUnzipLocalFilepath = null;
@@ -78,21 +86,30 @@ public class ContainerFileUtils {
 
 
     public static boolean prepareUnzip(Container containerClient, String containerId) {
-        var result = containerClient.executeCommand(containerId, "cat /etc/system-release");
-        if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("CentOS release 6")) {
-            return prepareCentos6Unzip(containerClient, containerId);
-        }
-        result = containerClient.executeCommand(containerId, "cat /etc/redhat-release");
-        if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("release 5")) {
-            return prepareCentos5Unzip(containerClient, containerId);
-        }
-        var unzipLocalFilepath = getUnzipLocalFilepath();
-        if (StringUtils.isEmpty(unzipLocalFilepath)) {
+        var result = containerClient.executeCommand(containerId, VERSION_TEST_COMMAND);
+        if (result.getExitCode() == null || result.getExitCode() != 0 || StringUtils.isEmpty(result.getOutput())) {
             return false;
         }
-        var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
-        containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
-        return flag;
+        String output = result.getOutput();
+        if (output.contains("unzip_exist")) {
+            return true;
+        } else if (output.contains("apk_exist")) {
+            // 安装apk的unzip包
+            return prepareApkUnzip(containerClient, containerId);
+        } else if (output.contains("CentOS release 6")) {
+            // 安装centos6的unzip包
+            return prepareCentos6Unzip(containerClient, containerId);
+        } else if (output.contains("release 5")) {
+            return prepareCentos5Unzip(containerClient, containerId);
+        } else {
+            var unzipLocalFilepath = getUnzipLocalFilepath();
+            if (StringUtils.isEmpty(unzipLocalFilepath)) {
+                return false;
+            }
+            var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
+            containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
+            return flag;
+        }
     }
 
     public static boolean prepareApkUnzip(Container containerClient, String containerId) {
