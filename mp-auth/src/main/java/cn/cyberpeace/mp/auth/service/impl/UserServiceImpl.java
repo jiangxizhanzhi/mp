@@ -467,6 +467,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
         return userModel;
     }
 

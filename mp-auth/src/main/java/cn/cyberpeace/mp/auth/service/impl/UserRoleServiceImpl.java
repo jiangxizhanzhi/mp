@@ -16,8 +16,13 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
+import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -38,7 +43,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +85,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Autowired
     private TenantUserMapper tenantUserMapper;
+
+    @Autowired
+    private AuthStatusRabbitmqSender messageSender;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -216,6 +229,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         });
 
         userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
 
         return true;
     }
