@@ -1590,7 +1590,6 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<String> exportFlowPcap(String sceneId,String taskId) {
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
-            FlowPcapExportUtil.finalProcess(taskId, model.getFlowFile());
             return new ServiceResult<>(model.getFlowFile());
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
@@ -1706,8 +1705,6 @@ public class ScenePluginCollectionSceneService {
             }
             FsFileUploadResponse response = new FsFileUploadResponse();
             String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
-
-            FlowPcapExportUtil.finalProcess(taskId, url);
 
             return new ServiceResult<>(url);
         } catch (IOException e) {
