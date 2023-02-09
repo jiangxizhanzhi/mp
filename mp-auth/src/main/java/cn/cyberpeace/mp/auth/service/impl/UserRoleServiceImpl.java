@@ -200,6 +200,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         });
 
         userCacheService.evictAllUserCache();
+        messageSender.send(roleIds, AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
         return true;
     }
 
@@ -230,7 +231,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         userCacheService.evictAllUserCache();
         messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
-
         return true;
     }
 
@@ -256,6 +256,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .filterEqual(UserRoleModel::getRole, roleId);
         getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
         return true;
     }
 
@@ -313,6 +314,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         getModelMapper().filterDelete(humanCondition);
 
         userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
         return true;
     }
 
