@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -308,6 +309,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * 预处理密码
      */
     private void preProcessPwd(List<ImportUserBo> users) {
+        // loop users and set default password
+        users.forEach(user -> {
+            user.setPassword(AuthConstant.LDAP_USER_DEFAULT_PWD);
+        });
         List<List<ImportUserBo>> parentList = Lists.partition(users, 20);
         List<CompletableFuture<List<ImportUserBo>>> cfList = new ArrayList<>();
 

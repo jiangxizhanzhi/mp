@@ -38,6 +38,7 @@ spring:
       static-locations: file:/root/.mp/resources/default_img
 
 
+
 logging:
   config: classpath:logback-spring-prod.xml
   level:
@@ -157,6 +158,8 @@ mp:
     authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
+    ldap-url: ${MP_AUTH_LDAP_URL:ldap://192.168.5.168:389}
+    ldap-base-dn: ${MP_AUTH_LDAP_BASE_DN:cn=mp,dc=cyberpeace,dc=cn}
   # mp-front-admin 模块
   frontadmin:
     activ-enable: true

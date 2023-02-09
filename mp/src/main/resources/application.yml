@@ -156,6 +156,8 @@ mp:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public
     authenticate-encoder-iterations: 10000
     authenticate-encoder-hash-width: 256
+    ldap-url: ${MP_AUTH_LDAP_URL:ldap://192.168.5.168:389}
+    ldap-base-dn: ${MP_AUTH_LDAP_BASE_DN:cn=mp,dc=cyberpeace,dc=cn}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

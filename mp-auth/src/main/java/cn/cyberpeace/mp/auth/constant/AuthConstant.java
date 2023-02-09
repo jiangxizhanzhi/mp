@@ -47,6 +47,8 @@ public class AuthConstant {
 
     public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
 
+    public static final String LDAP_USER_DEFAULT_PWD = "Xctfoj01";
+
     /**
      * 逗号
      */

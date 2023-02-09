@@ -51,4 +51,8 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    private String ldapUrl;
+
+    private String ldapBaseDn;
 }

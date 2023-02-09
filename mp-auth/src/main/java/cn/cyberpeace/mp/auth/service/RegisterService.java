@@ -65,7 +65,7 @@ public class RegisterService {
         UserModel user = UserModel.builder()
                 .id(userId)
                 .username(req.getUsername())
-                .password(req.getPassword())
+                .password(AuthConstant.LDAP_USER_DEFAULT_PWD)
                 .email(req.getEmail())
                 .nickname(req.getNickname())
                 .name(req.getName())
