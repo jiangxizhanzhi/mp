@@ -300,6 +300,11 @@ public class DevopsTargetController {
         if (Objects.nonNull(request.getRole())) {
             deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
         }
+        for (var d : deviceVOList) {
+            if (StringUtils.isNotEmpty(d.getLogo()) && !d.getLogo().contains("api/mp")) {
+                d.setLogo("/api/mp" + d.getLogo());
+            }
+        }
         return new Result(new ListResult(deviceVOList));
     }
 
