@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.common.HandlerUtils;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -107,10 +109,14 @@ public class CreateHandler extends HandlerCommon {
         Set<String> containerInstanceIds = new HashSet<>();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
+        boolean creatFlowCollector = false;
+        for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
+            var portId = entry.getKey();
+            var collectionPort = entry.getValue();
             if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                 return;
             }
+            creatFlowCollector = true;
             var srcPort = collectionPort.getSrcPort();
             var srcElement = srcPort.getElement();
             var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
@@ -122,7 +128,7 @@ public class CreateHandler extends HandlerCommon {
                     containerInstanceIds.add(cloudElement.getResourceId());
                 }
             }
-        });
+        }
         if (!vmInstanceIds.isEmpty() || !containerInstanceIds.isEmpty()) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
@@ -136,6 +142,12 @@ public class CreateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds),
                         new ArrayList<>(containerInstanceIds));
+            });
+        } else if (creatFlowCollector) {
+            // 只创建流量采集器
+            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
+                var flowCollectorId = getFlowCollector().createCollector();
+                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
 
