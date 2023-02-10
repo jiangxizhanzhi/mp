@@ -339,9 +339,10 @@ public class CloudPlatformMonitorController {
             Double downloadPercent = 0.00;
             Double uploadPercent = 0.00;
             Long maxNetSpeed = hostState.getMaxNetSpeed();
-            if (Objects.isNull(maxNetSpeed)) {
-                maxNetSpeed = Long.valueOf(1000);
+            if (Objects.isNull(maxNetSpeed) || maxNetSpeed.intValue() == 0) {
+                maxNetSpeed = Long.valueOf(10000);
             }
+
             if (StringUtils.isNotBlank(hostState.getMaxDownloadSpeed())) {
                 String downloadSpeed = hostState.getMaxDownloadSpeed();
                 downloadSpeed = downloadSpeed.replace("KB/s", "");
