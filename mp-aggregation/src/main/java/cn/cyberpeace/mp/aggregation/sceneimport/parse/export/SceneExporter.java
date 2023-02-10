@@ -210,7 +210,7 @@ public class SceneExporter {
                     image.set授权类型("无需授权");
                 }
                 if (StringUtils.isEmpty(image.get系统语言())) {
-                    image.set系统语言("");
+                    image.set系统语言("hasNoSystemServer");
                 }
 
                 ServerYml serverYml = new ServerYml();
