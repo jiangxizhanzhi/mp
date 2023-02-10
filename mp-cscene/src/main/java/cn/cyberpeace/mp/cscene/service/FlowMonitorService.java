@@ -542,17 +542,21 @@ public class FlowMonitorService {
                 .groupList(batchSceneHandler.getFlowCollectors())
                 .startDateTime(timeRangeRequest.getStartTime())
                 .endDateTime(timeRangeRequest.getEndTime()).build();
+        Double totalFlowBytes = 0.0;
+        Double totalAttackFlowBytes = 0.0;
+        Long attackCount = 0L;
+        if (flowAnalysisRequest.getGroupList() != null && flowAnalysisRequest.getGroupList().size() > 0) {
+            // 总流量
+            totalFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
 
-        // 总流量
-        Double totalFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
+            // 攻击流量
+            flowAnalysisRequest.setSeverityEnum(SeverityEnum.ALL);
+            totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
 
-        // 攻击流量
-        flowAnalysisRequest.setSeverityEnum(SeverityEnum.ALL);
-        Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
-
-        // 攻击事件
-        FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
-        Long attackCount = (long) (riskCount.getHighCount() + riskCount.getMediumCount() + riskCount.getLowCount());
+            // 攻击事件
+            FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
+            attackCount = (long) (riskCount.getHighCount() + riskCount.getMediumCount() + riskCount.getLowCount());
+        }
 
         // 网络连接
         Integer netConnSize = 0;
