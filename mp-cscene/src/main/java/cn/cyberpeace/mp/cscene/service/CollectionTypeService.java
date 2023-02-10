@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
-import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -232,7 +232,6 @@ public class CollectionTypeService {
         CollectionType fw = CollectionType.builder().name("FW").code(code + "02").type(type).build();
         CollectionType idsIps = CollectionType.builder().name("IDS/IPS").code(code + "03").type(type).build();
         CollectionType vpn = CollectionType.builder().name("VPN").code(code + "04").type(type).build();
-        CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
 
         CollectionType accessControl = CollectionType.builder().name("接入控制").code(code + "06").type(type).build();
         CollectionType errors = CollectionType.builder().name("错误").code(code + "07").type(type).build();
@@ -242,6 +241,7 @@ public class CollectionTypeService {
         CollectionType attack = CollectionType.builder().name("攻击").code(code + "11").type(type).build();
         CollectionType windowsSecurity = CollectionType.builder().name("windows安全事件").code(code + "12").type(type).build();
 
+        CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
         List<CollectionType> secSubTypes = Arrays.asList(av, fw, idsIps, vpn, other,
                 accessControl,errors,auth,remote,sca,attack,windowsSecurity);
         secSysType.setChildren(secSubTypes);
