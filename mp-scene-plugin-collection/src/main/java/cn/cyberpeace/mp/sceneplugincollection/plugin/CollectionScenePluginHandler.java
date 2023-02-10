@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -10,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPor
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.ElementCreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import lombok.Data;
@@ -33,6 +36,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
+    private ElementCreateHandler elementCreateHandler ;
 
     @Override
     public void correctData() {
@@ -115,5 +119,14 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     @Override
     public void delete() {
         deleteHandler.delete();
+    }
+
+    @Override
+    public void createElement(String nodeId) {
+        CollectionPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
     }
 }
