@@ -86,6 +86,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -98,6 +99,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -111,7 +113,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1641,41 +1642,86 @@ public class ScenePluginCollectionSceneService {
 
         FlowPcapExportUtil.updateProcess(taskId, 5);
 
+        // 建立本次下载的临时目录 所有的临时文件都放在该目录下
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
         String zipFilePath = dir + "/flow.zip";
-        // 建立本次使用的目录
         container.executeCommand(containerId, "mkdir -p " + dir);
+        // 创建生成zip文件需要的命令
+        List<String> commands = new ArrayList<>();
+
         String[] files = StringUtils.split(result.getOutput(), "\n");
-        List<CompletableFuture<Boolean>> cfList = new ArrayList<>();
+        int step = Math.max(65 / files.length / 3, 1);
+        int stepEcho = 0;
+        String stepFile = dir + "/step";
         for (int i = 0; i < files.length; i++) {
             String pcapFile = files[i];
             String newFileName = (i + 1) + ".pcap";
             String newFile = dir + "/" + newFileName;
-            String command = new StringBuilder()
-                    .append(String.format("cd /opt/arkime/raw "))
-                    .append(String.format(" && cp %s %s ", pcapFile, newFile))
-                    .toString();
-            var cf = CompletableFuture.supplyAsync(() -> {
-                container.executeCommand(containerId, command);
-                return true;
-            });
-            cfList.add(cf);
+            // 复制文件
+            commands.add(String.format("cd /opt/arkime/raw && cp %s %s ", pcapFile, newFile));
+            stepEcho = stepEcho + step;
+            commands.add(String.format("echo %s >> %s", stepEcho, stepFile));
+            // 压缩文件
+            commands.add(String.format("cd %s && zip %s flow.zip %s ", dir, i == 0 ? "" : "-g", newFileName));
+            stepEcho = stepEcho + step * 2;
+            commands.add(String.format("echo %s >> %s", stepEcho, stepFile));
+            // 删除临时文件避免空间占用
+            commands.add(String.format("rm -rf %s ", newFileName));
         }
-        var cfArray = cfList.toArray(new CompletableFuture[0]);
-        CompletableFuture<Void> finalCF = CompletableFuture.allOf(cfArray);
-        finalCF.join();
+        commands.add(String.format("echo 100 >> %s", stepFile));
+        // 将命令组成脚本文件
+        File zipSh = null;
+        try {
+            zipSh = new File(dirName + ".sh");
+            FileUtils.writeStringToFile(zipSh, StringUtils.join(commands, "&&"), Charset.defaultCharset());
+            container.copyFile(containerId, zipSh.getPath(), dir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (zipSh != null) {
+                zipSh.deleteOnExit();
+            }
+        }
+        // 执行命令脚本
+        TaskCommon.executeTask(() -> {
+            try {
+                container.executeCommand(containerId, String.format("sh %s/%s.sh", dir, dirName));
+            } catch (Exception e) {
+                log.error("failed to get command result , container id is ", containerId);
+            }
+        });
+        // 轮询查询进度
+        int times = 0;
+        int maxTimes = 180;
+        int lastStep = -1;
+        while (times < maxTimes) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                var stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
+                if (stepResult != null && stepResult.getExitCode() != null && stepResult.getOutput() != null) {
+                    if (stepResult.getOutput().contains("100")) {
+                        break;
+                    } else {
+                        String[] steps = stepResult.getOutput().split("\n");
+                        if (steps != null && steps.length > 0) {
+                            int currentStep = Integer.parseInt(steps[steps.length - 1]);
+                            if (currentStep != lastStep) {
+                                lastStep = currentStep;
+                                times = 0;
+                                FlowPcapExportUtil.updateProcess(taskId, currentStep);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
 
-        FlowPcapExportUtil.updateProcess(taskId, 10);
-
-        int step = 40 / files.length;
-        for (int i = 0; i < files.length; i++) {
-            String newFileName = (i + 1) + ".pcap";
-            String command = String.format("cd %s && zip %s %s %s && rm -rf %s", dir, i == 0 ? "" : "-g", "flow.zip", newFileName, newFileName);
-            container.executeCommand(containerId, command);
-
-            FlowPcapExportUtil.updateProcess(taskId, step);
-
+            }
+            times++;
         }
 
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);

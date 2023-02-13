@@ -21,10 +21,13 @@ public class FlowPcapExportUtil {
                 }
             });
 
-    public static void initProcess(String taskId) {
-        var result = new FlowPcapExportProcess();
-        result.setProcess(0);
-        cache.put(taskId, result);
+    public static synchronized boolean initProcess(String csceneId) {
+        if (!cache.asMap().containsKey(csceneId)) {
+            cache.getUnchecked(csceneId);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static void updateProcess(String taskId, int process) {

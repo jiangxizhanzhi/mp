@@ -230,14 +230,15 @@ public class FlowMonitorController {
     @GetMapping("/export")
     public ServiceResult<FlowPcapFileInfo> export(String id) {
         FlowPcapFileInfo pcapFileInfo = new FlowPcapFileInfo();
-        String taskId = TextUtils.uuid();
-        FlowPcapExportUtil.initProcess(taskId);
-        TaskCommon.executeTask(new Runnable() {
-            @Override
-            public void run() {
-                flowMonitorService.export(taskId, id);
-            }
-        });
+        String taskId = id;
+        if (FlowPcapExportUtil.initProcess(taskId)) {
+            TaskCommon.executeTask(new Runnable() {
+                @Override
+                public void run() {
+                    flowMonitorService.export(taskId, id);
+                }
+            });
+        }
         pcapFileInfo.setTaskId(taskId);
         return new ServiceResult<>(pcapFileInfo).asResult();
     }
