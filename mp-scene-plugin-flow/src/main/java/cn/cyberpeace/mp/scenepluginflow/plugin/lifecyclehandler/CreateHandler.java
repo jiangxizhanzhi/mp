@@ -95,8 +95,8 @@ public class CreateHandler extends HandlerCommon {
                                         networkInfos.add(flowNetworkInfo);
                                         existIp.add(ip);
                                     }
-                                    log.info("======networkInfos:{}", networkInfos);
                                 }
+                                log.info("======networkInfos:{}", networkInfos);
                             });
                         }
                     });
