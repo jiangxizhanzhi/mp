@@ -64,6 +64,7 @@ public class CreateHandler extends HandlerCommon {
                                     var flowNetworkInfo = new FlowNetworkInfo();
                                     flowNetworkInfo.setIp(ip);
                                     flowNetworkInfo.setNetworkId(network.getResourceId());
+                                    flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
                                     networkInfos.add(flowNetworkInfo);
                                     existIp.add(ip);
                                 } else if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network == null && CollectionUtils.isNotEmpty(networkBOS)) {
@@ -86,6 +87,7 @@ public class CreateHandler extends HandlerCommon {
                                         var flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setIp(ip);
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
+                                        flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
                                         networkInfos.add(flowNetworkInfo);
                                         existIp.add(ip);
                                     }
