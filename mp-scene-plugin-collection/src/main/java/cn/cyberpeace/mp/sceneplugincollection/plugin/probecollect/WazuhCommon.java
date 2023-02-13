@@ -89,6 +89,7 @@ public class WazuhCommon {
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
                             "net stop Wazuh",
                             "call C:\\wazuha\\uninstall.bat",
+                            "timeout /t 20",
                             String.format("unzip -o -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
@@ -102,7 +103,9 @@ public class WazuhCommon {
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
                             "cd C:\\wazuha",
                             "call config.bat",
+                            "timeout /t 20",
                             "call " + probeCommand,
+                            "timeout /t 20",
                             "call start.bat"
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
@@ -112,6 +115,7 @@ public class WazuhCommon {
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "systemctl stop wazuh-agent",
                             "sh /opt/wazuha/uninstall.sh",
+                            "sleep 20",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
@@ -124,7 +128,9 @@ public class WazuhCommon {
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             "cd /opt/wazuha",
                             "sh config.sh",
+                            "sleep 20",
                             probeCommand,
+                            "sleep 20",
                             "sh start.sh"
                     ));
         }
