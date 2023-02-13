@@ -60,7 +60,7 @@ public class CreateHandler extends HandlerCommon {
                             element.getSrcElement().getPorts().forEach(port -> {
                                 var network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);
                                 var ip = port.getIp();
-                                log.info("======ip:{}, networkBOS:{}", ip, networkBOS);
+
                                 if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network != null) {
                                     var flowNetworkInfo = new FlowNetworkInfo();
                                     flowNetworkInfo.setIp(ip);
@@ -69,6 +69,7 @@ public class CreateHandler extends HandlerCommon {
                                     networkInfos.add(flowNetworkInfo);
                                     existIp.add(ip);
                                 } else if (StringUtils.isEmpty(ip) && CollectionUtils.isNotEmpty(networkBOS)) {
+                                    log.info("======ip:{}, networkBOS:{}", ip, networkBOS.toString());
                                     CloudPluginSceneElementNetworkBO net = null;
                                     for (var cpNet : networkBOS) {
                                         List<SceneElementPortBO> list = new ArrayList<>();
@@ -84,6 +85,7 @@ public class CreateHandler extends HandlerCommon {
                                             }
                                         }
                                     }
+                                    log.info("======net:{}", net);
                                     if (net != null) {
                                         var flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setIp(ip);
