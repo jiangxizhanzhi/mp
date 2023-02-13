@@ -67,7 +67,7 @@ public class CreateHandler extends HandlerCommon {
                                     flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
                                     networkInfos.add(flowNetworkInfo);
                                     existIp.add(ip);
-                                } else if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network == null && CollectionUtils.isNotEmpty(networkBOS)) {
+                                } else if (StringUtils.isEmpty(ip) && CollectionUtils.isNotEmpty(networkBOS)) {
                                     CloudPluginSceneElementNetworkBO net = null;
                                     for (var cpNet : networkBOS) {
                                         List<SceneElementPortBO> list = new ArrayList<>();
