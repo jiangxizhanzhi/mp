@@ -60,6 +60,7 @@ public class CreateHandler extends HandlerCommon {
                             element.getSrcElement().getPorts().forEach(port -> {
                                 var network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);
                                 var ip = port.getIp();
+                                log.info("======ip:{}, networkBOS:{}", ip, networkBOS);
                                 if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network != null) {
                                     var flowNetworkInfo = new FlowNetworkInfo();
                                     flowNetworkInfo.setIp(ip);
