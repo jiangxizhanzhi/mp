@@ -96,10 +96,10 @@ public class CreateHandler extends HandlerCommon {
                                         existIp.add(ip);
                                     }
                                 }
-                                log.info("======networkInfos:{}", networkInfos);
                             });
                         }
                     });
+                    log.info("======networkInfos:{}", networkInfos);
                 }
             }
             var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
