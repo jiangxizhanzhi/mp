@@ -85,8 +85,9 @@ public class CreateHandler extends HandlerCommon {
                                             }
                                         }
                                     }
-                                    log.info("======net:{}", net);
+
                                     if (net != null) {
+                                        log.info("======net:{}", net.toString());
                                         var flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setIp(ip);
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
@@ -94,6 +95,7 @@ public class CreateHandler extends HandlerCommon {
                                         networkInfos.add(flowNetworkInfo);
                                         existIp.add(ip);
                                     }
+                                    log.info("======networkInfos:{}", networkInfos);
                                 }
                             });
                         }
