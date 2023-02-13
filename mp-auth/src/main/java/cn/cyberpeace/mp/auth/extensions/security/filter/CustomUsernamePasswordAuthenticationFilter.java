@@ -92,7 +92,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             log.info("ldapAuthenticate success! DN:{}", DN);
             return true;
         } catch (Exception ex) {
-            log.error("ldapAuthenticate failed! DN: {}\nex:{}", DN, ex);
+            log.error("ldapAuthenticate failed! DN: {}, url:{}\nex:{}", DN, authConfig.getLdapUrl(), ex);
             return false;
         }
 
