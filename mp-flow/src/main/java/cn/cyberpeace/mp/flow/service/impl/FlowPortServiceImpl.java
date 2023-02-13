@@ -17,8 +17,10 @@ import cn.cyberpeace.mp.flow.util.CommonUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,8 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
     @Autowired
     private FlowConfig flowConfig;
 
+    @Value("${mp.devopscluster.cp-ip:}")
+    private String cpIp;
 
     public FlowPortServiceImpl(FlowPortMapper stuMapper, FlowPortFields stuFields) {
         setModelFields(stuFields);
@@ -126,7 +130,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
 
         // 批量新增网口信息
         getModelMapper().bulkCreate(flowPortModels);
-
+        String outIp = cpIp.substring(0, cpIp.lastIndexOf(".")).concat(".254");
         // 流量发生器初始化网口信息
         networkInfos.forEach(networkInfo -> {
             createNetworkinfos.forEach(createNetworkinfo -> {
@@ -134,6 +138,10 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                     networkInfo.setMac(createNetworkinfo.getMac());
                 }
             });
+
+            if (StringUtils.isBlank(networkInfo.getIp())) {
+                networkInfo.setIp(outIp);
+            }
         });
         JSONObject taskInitObj = new JSONObject();
         taskInitObj.put("network_infos", networkInfos);
