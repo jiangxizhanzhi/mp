@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincollection.util;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Data
@@ -36,7 +38,11 @@ public class FlowPcapExportUtil {
     }
 
     public static FlowPcapExportProcess getProcess(String taskId) {
-        return cache.getUnchecked(taskId);
+        FlowPcapExportProcess result = cache.getUnchecked(taskId);
+        if (result.getProcess() == 100) {
+            new ScheduledThreadPoolExecutor(1).schedule(() -> cache.invalidate(taskId), 5, TimeUnit.SECONDS);
+        }
+        return result;
     }
 
     public static FlowPcapExportProcess finalProcess(String taskId, String url) {
