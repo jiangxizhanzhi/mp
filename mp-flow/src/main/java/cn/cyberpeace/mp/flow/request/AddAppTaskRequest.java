@@ -72,6 +72,7 @@ public class AddAppTaskRequest {
         private String ip;
         private String port;
         private String defaultGw;
+        private String nodeName;
     }
 
     @Data
@@ -79,6 +80,7 @@ public class AddAppTaskRequest {
         private String ip;
         private String port;
         private String defaultGw;
+        private String nodeName;
     }
 
     public AddAppTaskRequest(FlowTaskModel flowTaskModel, FlowPortModel flowPortModel) {
@@ -118,12 +120,14 @@ public class AddAppTaskRequest {
         client.setPort(flowPortModel.getClientMac());
         // 目标ip作为客户端网关
         client.setDefaultGw(targetIp);
+        client.setNodeName(flowTaskModel.getNodeId());
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
         // 目标ip作为服务端网关
         server.setDefaultGw(targetIp);
+        server.setNodeName(flowTaskModel.getNodeId());
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
         networkConfig.setClient(Collections.singletonList(client));
