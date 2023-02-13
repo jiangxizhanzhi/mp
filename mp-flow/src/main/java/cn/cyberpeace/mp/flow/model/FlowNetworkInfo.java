@@ -31,4 +31,10 @@ public class FlowNetworkInfo {
     @ApiModelProperty("mac")
     private String mac;
 
+    /**
+     * 节点名称
+     */
+    @ApiModelProperty("节点名称")
+    private String nodeName;
+
 }
