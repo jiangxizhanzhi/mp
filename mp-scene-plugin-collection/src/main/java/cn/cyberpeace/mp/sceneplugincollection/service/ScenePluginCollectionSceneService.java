@@ -1669,7 +1669,7 @@ public class ScenePluginCollectionSceneService {
             // 删除临时文件避免空间占用
             commands.add(String.format("rm -rf %s ", newFileName));
         }
-        commands.add(String.format("echo 100 >> %s", stepFile));
+        commands.add(String.format("echo success >> %s", stepFile));
         // 将命令组成脚本文件
         File zipSh = null;
         try {
@@ -1704,7 +1704,7 @@ public class ScenePluginCollectionSceneService {
             try {
                 var stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
                 if (stepResult != null && stepResult.getExitCode() != null && stepResult.getOutput() != null) {
-                    if (stepResult.getOutput().contains("100")) {
+                    if (stepResult.getOutput().contains("success")) {
                         break;
                     } else {
                         String[] steps = stepResult.getOutput().split("\n");
