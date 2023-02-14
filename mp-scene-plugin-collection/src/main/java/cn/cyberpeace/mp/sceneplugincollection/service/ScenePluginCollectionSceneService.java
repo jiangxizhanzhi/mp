@@ -1680,7 +1680,7 @@ public class ScenePluginCollectionSceneService {
             e.printStackTrace();
         } finally {
             if (zipSh != null) {
-                zipSh.deleteOnExit();
+                zipSh.delete();
             }
         }
         // 执行命令脚本
@@ -1734,7 +1734,7 @@ public class ScenePluginCollectionSceneService {
 
         String fileName = TextUtils.uuid() + ".zip";
         File file = new File(fileName);
-        InputStream inputStream = null;
+        FileInputStream inputStream = null;
         try {
             FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
 
@@ -1742,7 +1742,7 @@ public class ScenePluginCollectionSceneService {
 
             inputStream = new FileInputStream(file);
             var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
-            var uploadResult = fileupload.upload(inputStream, "zip");
+            var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
 
             FlowPcapExportUtil.updateProcess(taskId, 15);
 
@@ -1756,7 +1756,6 @@ public class ScenePluginCollectionSceneService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            file.deleteOnExit();
             if (inputStream != null) {
                 try {
                     IOUtils.close(inputStream);
@@ -1764,6 +1763,7 @@ public class ScenePluginCollectionSceneService {
 
                 }
             }
+            file.delete();
             container.executeCommand(containerId, "rm -rf " + dir);
         }
     }
