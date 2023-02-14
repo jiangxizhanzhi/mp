@@ -86,7 +86,6 @@ public class CreateHandler extends HandlerCommon {
                                     }
 
                                     if (net != null) {
-                                        log.info("======net:{}", net.toString());
                                         var flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setIp(ip);
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
@@ -95,7 +94,6 @@ public class CreateHandler extends HandlerCommon {
                                         existIp.add(ip);
                                     }
                                 } else if (StringUtils.isEmpty(ip) && CollectionUtils.isNotEmpty(networkBOS)) {
-                                    log.info("======ip:{}, networkBOS:{}", ip, networkBOS.toString());
                                     CloudPluginSceneElementNetworkBO net = null;
                                     for (var cpNet : networkBOS) {
                                         List<SceneElementPortBO> list = new ArrayList<>();
@@ -113,7 +111,6 @@ public class CreateHandler extends HandlerCommon {
                                     }
 
                                     if (net != null) {
-                                        log.info("======net:{}", net.toString());
                                         var flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
                                         flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
@@ -124,7 +121,6 @@ public class CreateHandler extends HandlerCommon {
                             });
                         }
                     });
-                    log.info("======networkInfos:{}", networkInfos);
                 }
             }
             var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
