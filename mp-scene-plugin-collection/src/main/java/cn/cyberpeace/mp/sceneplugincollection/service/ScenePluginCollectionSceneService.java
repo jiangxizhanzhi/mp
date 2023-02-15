@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
@@ -87,16 +85,13 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
@@ -143,7 +138,7 @@ public class ScenePluginCollectionSceneService {
     private SysCollectorService sysCollectorService;
 
     @Autowired
-    private ProbeService probeService ;
+    private ProbeService probeService;
 
     @Autowired
     private CollectionPluginWazuhRuleTypeMapper collectionPluginWazuhRuleTypeMapper;
@@ -158,7 +153,7 @@ public class ScenePluginCollectionSceneService {
     private CollectionAppConfig collectionAppConfig;
 
     @Autowired
-    private CollectionPluginSceneMapper collectionPluginSceneMapper ;
+    private CollectionPluginSceneMapper collectionPluginSceneMapper;
 
     @Autowired
     private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
@@ -177,13 +172,13 @@ public class ScenePluginCollectionSceneService {
 
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())){
+        if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())) {
             request.setSourceIps(queryParams.getSourceIps());
-        }else {
+        } else {
 //            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
 
-        if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())){
+        if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())) {
             request.setDestinationIps(queryParams.getTargetIps());
         } else {
             request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
@@ -231,7 +226,7 @@ public class ScenePluginCollectionSceneService {
             EsHttpUtil.updateDataMaxQueryNum(batchSceneHandler.getFlowCollectors().get(0), flowLogBOSResult.getTotal());
         }
 
-        List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(),batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
+        List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
@@ -343,6 +338,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 事件列表
+     *
      * @param sceneId
      * @param queryParams
      * @return
@@ -494,6 +490,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 滚动分页列表
+     *
      * @param scrollId
      * @return
      */
@@ -560,37 +557,40 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 安全等级分组查询采集流量的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime,null,null);
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime, null, null);
     }
 
     /**
      * 安全类型分组查询采集流量的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByType(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps, Integer topSize) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime,sourceIps,topSize);
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime, sourceIps, topSize);
     }
 
 
     /**
      * 事件类型分组查询主机事件的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<事件类型, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountHostEventByEventType(
@@ -600,10 +600,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 节点名称分组查询主机事件的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<节点名称, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(
@@ -613,10 +614,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 时间区间统计流量次数
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 聚合统计结果
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalCountFlow(
@@ -626,16 +628,17 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 时间区间统计流量大小
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     *
+     * @param sceneIds        场景id列表，不传默认为全部
+     * @param nodeIds         节点id列表，不传默认为全部
+     * @param startTime       开始时间
+     * @param endTime         结束时间
      * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
      * @return 聚合统计结果
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalSeconds,List<String> sourceIps,Integer type) {
+            int intervalSeconds, List<String> sourceIps, Integer type) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
@@ -650,7 +653,7 @@ public class ScenePluginCollectionSceneService {
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
 //            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
-        }else{
+        } else {
             request.setSourceIps(sourceIps);
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
@@ -662,7 +665,7 @@ public class ScenePluginCollectionSceneService {
         List<AttackDateHistogramNetworkBytesBO> bos;
         if (Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type)) {
             bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
-        }else{
+        } else {
             bos = flowAnalysisService.countByDateHistogramTimestamp(request);
         }
 
@@ -685,10 +688,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 模拟流量
+     *
      * @param params
      * @return
      */
-    public ServiceResult simulation(FlowSimulationParams params){
+    public ServiceResult simulation(FlowSimulationParams params) {
         List<String> sceneIds = params.getSceneIds();
 
         List<String> nodeIds = params.getNodeIds();
@@ -714,15 +718,15 @@ public class ScenePluginCollectionSceneService {
         FlowSimulationRequest request = new FlowSimulationRequest();
         request.setGroup(flowCollectors.get(0));
         request.setSourceIp(sourceIp);
-        if (CollectionUtils.isEmpty(sourceMacs) && StringUtils.isNotBlank(sourceIp)){
+        if (CollectionUtils.isEmpty(sourceMacs) && StringUtils.isNotBlank(sourceIp)) {
             request.setSourceMacs(Arrays.asList(batchSceneHandler.getMacByIp(sourceIp)));
-        }else{
+        } else {
             request.setSourceMacs(sourceMacs);
         }
         request.setDestinationIp(destinationIp);
-        if (CollectionUtils.isEmpty(destinationMacs) && StringUtils.isNotBlank(destinationIp)){
+        if (CollectionUtils.isEmpty(destinationMacs) && StringUtils.isNotBlank(destinationIp)) {
             request.setDestinationMacs(Arrays.asList(batchSceneHandler.getMacByIp(destinationIp)));
-        }else{
+        } else {
             request.setDestinationMacs(destinationMacs);
         }
         request.setNetworkBytes(params.getNetworkBytes());
@@ -732,7 +736,7 @@ public class ScenePluginCollectionSceneService {
         try {
             flowAnalysisService.addSimulationFlow(request);
         } catch (IOException e) {
-            log.error("simulation flow error : {}",e.getMessage(),e);
+            log.error("simulation flow error : {}", e.getMessage(), e);
         }
 
         return new ServiceResult<>();
@@ -740,10 +744,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 统计受攻击端口信息
+     *
      * @param params
      * @return
      */
-    public ServiceResult<List<FlowGroupPortWithProtocolBO>> groupByDestinationPortWithProtocol(FlowGroupByDestinationPortParams params){
+    public ServiceResult<List<FlowGroupPortWithProtocolBO>> groupByDestinationPortWithProtocol(FlowGroupByDestinationPortParams params) {
         List<String> sceneIds = params.getSceneIds();
 
         List<String> nodeIds = params.getNodeIds();
@@ -768,7 +773,7 @@ public class ScenePluginCollectionSceneService {
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
 //            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
-        }else{
+        } else {
             request.setSourceIps(sourceIps);
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
@@ -792,10 +797,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 统计主机状态
+     *
      * @param params
      * @return
      */
-    public ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> groupByDestinationIpAndSeverity(FlowGroupByDestinationPortParams params){
+    public ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> groupByDestinationIpAndSeverity(FlowGroupByDestinationPortParams params) {
         List<String> sceneIds = params.getSceneIds();
 
         List<String> nodeIds = params.getNodeIds();
@@ -852,10 +858,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 时间区间统计主机cpu占用平均值
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     *
+     * @param sceneIds        场景id列表，不传默认为全部
+     * @param nodeIds         节点id列表，不传默认为全部
+     * @param startTime       开始时间
+     * @param endTime         结束时间
      * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
      * @return 聚合统计结果
      */
@@ -868,10 +875,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 时间区间统计主机内存占用平均值
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     *
+     * @param sceneIds       场景id列表，不传默认为全部
+     * @param nodeIds        节点id列表，不传默认为全部
+     * @param startTime      开始时间
+     * @param endTime        结束时间
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
@@ -884,10 +892,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 时间区间统计主机磁盘占用平均值
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     *
+     * @param sceneIds       场景id列表，不传默认为全部
+     * @param nodeIds        节点id列表，不传默认为全部
+     * @param startTime      开始时间
+     * @param endTime        结束时间
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
@@ -901,6 +910,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 根据agentNames查询资源使用率
+     *
      * @param agentNames
      * @param startTime
      * @param endTime
@@ -909,18 +919,18 @@ public class ScenePluginCollectionSceneService {
      * @return
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgPercentByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
+                                                                                                         int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgByAgentNames(agentNames, startTime, endTime, intervalNumber, execCal);
         return new ServiceResult<>(result);
     }
 
     /**
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param sceneIds        场景id列表，不传默认为全部
+     * @param nodeIds         节点id列表，不传默认为全部
+     * @param startTime       开始时间
+     * @param endTime         结束时间
      * @param intervalSeconds 间隔数量
-     * @param execCal 查询使用的数据
+     * @param execCal         查询使用的数据
      * @return
      */
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
@@ -938,7 +948,7 @@ public class ScenePluginCollectionSceneService {
 
 
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
+                                                                                   int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
         //todo 暂时先支持一个场景的查询
         HostStateQueryParams params = new HostStateQueryParams();
         // 为计算平均值,往前多取一个周期的数据
@@ -1018,7 +1028,7 @@ public class ScenePluginCollectionSceneService {
             flowBO.setSourceIp(ip);
             flowBO.setSourcePort(String.valueOf(flowLogBO.getSource().getPort()));
             flowBO.setSourceMac(flowLogBO.getSource().getMac());
-            if(ipElementMap.containsKey(ip)){
+            if (ipElementMap.containsKey(ip)) {
                 flowBO.setSourceNodeId(ipElementMap.get(ip).getId());
                 flowBO.setSourceNodeName(ipElementMap.get(ip).getName());
                 flowBO.setSceneId(mac2SceneId.get(ip));
@@ -1090,12 +1100,13 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * TODO 分组查询主机事件的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds   场景id列表，不传默认为全部
+     * @param nodeIds    节点id列表，不传默认为全部
      * @param groupField 分组聚合字段类型
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param <T> 分组聚合字段的值类型
+     * @param startTime  开始时间
+     * @param endTime    结束时间
+     * @param <T>        分组聚合字段的值类型
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountHostEvent(
@@ -1105,10 +1116,11 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * TODO 分组查询采集流量的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
@@ -1410,6 +1422,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 查询场景中所有启动探针的节点列表
+     *
      * @param sceneId
      * @return
      */
@@ -1447,6 +1460,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 清楚探针采集和流量采集的数据
+     *
      * @param sceneId
      */
     public void asyncCleanProbeData(String sceneId) {
@@ -1588,7 +1602,7 @@ public class ScenePluginCollectionSceneService {
         return getRuleId2FileByIds(ruleIds);
     }
 
-    public ServiceResult<String> exportFlowPcap(String sceneId,String taskId) {
+    public ServiceResult<String> exportFlowPcap(String sceneId, String taskId) {
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
             return new ServiceResult<>(model.getFlowFile());
@@ -1600,7 +1614,7 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containName = flowCollectors.get(0);
-        var result = this.exportFlowPcap(sceneId, containName,taskId);
+        var result = this.exportFlowPcap(sceneId, containName, taskId);
         return result;
     }
 
@@ -1619,7 +1633,7 @@ public class ScenePluginCollectionSceneService {
         }
     }
 
-    public ServiceResult<String> exportFlowPcap(String sceneId, String containName,String taskId) {
+    public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
         // containerName -> containerId
         Container container = new Container();
         String containerId = container.getContainerIdByName(containName);
@@ -1645,7 +1659,6 @@ public class ScenePluginCollectionSceneService {
         // 建立本次下载的临时目录 所有的临时文件都放在该目录下
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
-        String zipFilePath = dir + "/flow.zip";
         container.executeCommand(containerId, "mkdir -p " + dir);
         // 创建生成zip文件需要的命令
         List<String> commands = new ArrayList<>();
@@ -1669,6 +1682,7 @@ public class ScenePluginCollectionSceneService {
             // 删除临时文件避免空间占用
             commands.add(String.format("rm -rf %s ", newFileName));
         }
+        commands.add(" zip flow.zip --out flow_new.zip -s 1024m ");
         commands.add(String.format("echo success >> %s", stepFile));
         // 将命令组成脚本文件
         File zipSh = null;
@@ -1724,52 +1738,52 @@ public class ScenePluginCollectionSceneService {
             times++;
         }
 
-        log.info("start to retrieveFile from {},path {}", containerId, zipFilePath);
-        HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+        var lsResult = container.executeCommand(containerId, String.format("cd %s && ls flow_new.z* | wc -l", dir));
+        if (lsResult != null && lsResult.getExitCode() != null && lsResult.getOutput() != null) {
+            String num = lsResult.getOutput();
+            num.trim();
+            num = StringUtils.replace(num, "\n", "");
+            num = StringUtils.replace(num, "\r", "");
+            int fileNum = Integer.parseInt(num);
 
-        FlowPcapExportUtil.updateProcess(taskId, 15);
-
-        if (httpResult.getException() != null) {
-            return new ServiceResult<>(StringUtils.EMPTY);
-        }
-
-        String fileName = TextUtils.uuid() + ".zip";
-        File file = new File(fileName);
-        FileInputStream inputStream = null;
-        try {
-            log.info("start to write file", containerId, zipFilePath);
-            FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
-
-            FlowPcapExportUtil.updateProcess(taskId, 15);
-
-            inputStream = new FileInputStream(file);
-            var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
-
-            log.info("start to upload file", containerId, zipFilePath);
-            var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
-
-            FlowPcapExportUtil.updateProcess(taskId, 15);
-
-            if (!uploadResult.judgeSuccess()) {
-                return new ServiceResult<>(StringUtils.EMPTY);
-            }
-            FsFileUploadResponse response = new FsFileUploadResponse();
-            String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
-
-            return new ServiceResult<>(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    IOUtils.close(inputStream);
-                } catch (IOException e) {
-
+            try {
+                String localDir = TextUtils.uuid();
+                File localFile = new File(localDir);
+                localFile.mkdir();
+                for (int i = 1; i <= fileNum; i++) {
+                    String zipFileName = "flow_new.z" + (i < 10 ? "0" : "") + i;
+                    if (i == fileNum) {
+                        zipFileName = "flow_new.zip";
+                    }
+                    String zipFilePath = dir + "/" + zipFileName;
+                    HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
+                    if (httpResult.getException() != null) {
+                        return new ServiceResult<>(StringUtils.EMPTY);
+                    }
+                    log.info("start to write file", containerId, zipFilePath);
+                    File zipFile = new File(localDir + "/" + zipFileName);
+                    FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
                 }
+                Runtime.getRuntime().exec(String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getPath()));
+                // 轮询查询进度
+                times = 0;
+                maxTimes = 100;
+                while (times < maxTimes) {
+                    Thread.sleep(3000);
+                    File file = new File(localFile.getPath() + "/success");
+                    if (file.exists()) {
+                        break;
+                    } else {
+                        times++;
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+
             }
-            file.delete();
-            container.executeCommand(containerId, "rm -rf " + dir);
         }
+        return new ServiceResult<>(null);
     }
 
     /**
