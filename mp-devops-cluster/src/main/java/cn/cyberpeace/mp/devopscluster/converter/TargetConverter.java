@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
@@ -25,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +76,10 @@ public class TargetConverter{
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
+        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+        deviceTargetPOS.stream().forEach(d -> {
+            supportExports.put(d.getUuid(), d);
+        });
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
 
@@ -88,6 +94,13 @@ public class TargetConverter{
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
+        }
+        for (var d : model.getList()) {
+            if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
+                if (d.getExtDocker() != null) {
+                    d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
+                }
+            }
         }
         POLogoUtils.changeLogoPathToUrl(model.getList());
         sceneConvertModel.setList(model.getList());
