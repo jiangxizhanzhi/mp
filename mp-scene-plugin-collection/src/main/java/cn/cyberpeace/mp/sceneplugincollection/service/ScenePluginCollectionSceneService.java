@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
@@ -85,12 +87,14 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -1746,6 +1750,7 @@ public class ScenePluginCollectionSceneService {
             num = StringUtils.replace(num, "\n", "");
             num = StringUtils.replace(num, "\r", "");
             int fileNum = Integer.parseInt(num);
+            FileInputStream inputStream = null;
 
             try {
                 String localDir = TextUtils.uuid();
@@ -1781,10 +1786,26 @@ public class ScenePluginCollectionSceneService {
                         times++;
                     }
                 }
+                inputStream = new FileInputStream(localFile.getAbsolutePath() + "/flow.zip");
+                var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
+                var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
+                if (!uploadResult.judgeSuccess()) {
+                    return new ServiceResult<>(StringUtils.EMPTY);
+                }
+                FsFileUploadResponse response = new FsFileUploadResponse();
+                String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
+                return new ServiceResult<>(url);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
+                if (inputStream != null) {
+                    try {
+                        IOUtils.close(inputStream);
+                    } catch (IOException e) {
 
+                    }
+                }
+                container.executeCommand(containerId, "rm -rf " + dir);
             }
         }
         return new ServiceResult<>(null);
