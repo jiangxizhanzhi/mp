@@ -1764,7 +1764,10 @@ public class ScenePluginCollectionSceneService {
                     File zipFile = new File(localDir + "/" + zipFileName);
                     FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
                 }
-                Runtime.getRuntime().exec(String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getPath()));
+                String cmd = String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getPath());
+                log.info("cmd is " + cmd);
+                java.lang.Process process = Runtime.getRuntime().exec(cmd);
+                process.waitFor();
                 // 轮询查询进度
                 times = 0;
                 maxTimes = 100;
