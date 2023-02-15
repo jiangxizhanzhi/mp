@@ -17,10 +17,13 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.model.SceneInstanceStartHisModel;
+import cn.cyberpeace.mp.scene.repository.SceneInstanceStartHisMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -88,7 +91,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext()).getSource());
+        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), new Consumer<String>() {
+            @Override
+            public void accept(String s) {
+                addStartHis(s);
+            }
+        }).getSource());
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
@@ -253,5 +261,15 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             csceneInstanceBO.getScene().getTopology().getScene().setProcessMessage(newMessage);
         }
         return csceneInstanceBO;
+    }
+
+    private void addStartHis(String instanceId){
+        SceneInstanceStartHisMapper hisMapper = BeanCommon.getBean(SceneInstanceStartHisMapper.class);
+        SceneInstanceStartHisModel model = new SceneInstanceStartHisModel();
+        model.setName(getCscene().getName());
+        model.setReferenceType(getCscene().getReferenceType());
+        model.setSourceSceneId(getCscene().getCscene());
+        model.setInstanceId(instanceId);
+        hisMapper.save(model);
     }
 }

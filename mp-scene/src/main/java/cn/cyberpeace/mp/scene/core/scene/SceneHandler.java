@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -31,6 +32,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneInstanceStartHisModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.ScenePieceModel;
 import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
@@ -38,6 +40,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneInstanceStartHisMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
@@ -475,6 +478,7 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.INITIATE, e.getMessage());
+            this.updateStartHis(getSceneId(), SceneModel.Event.INITIATE, EventStatus.ABNORMAL, StringUtils.EMPTY);
             return false;
         }
         overAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
@@ -493,9 +497,11 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.CREATE, e.getMessage());
+            this.updateStartHis(getSceneId(), SceneModel.Event.CREATE, EventStatus.ABNORMAL, e.getMessage());
             return false;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        this.updateStartHis(getSceneId(), SceneModel.Event.CREATE, EventStatus.OVER, StringUtils.EMPTY);
         save();
         return true;
     }
@@ -868,5 +874,14 @@ public class SceneHandler extends BaseSceneHandler<
         bo.setProcessStatus(element.getProcessStatus());
         bo.setProcessMessage(element.getProcessMessage());
         return bo;
+    }
+
+    private void updateStartHis(String instanceId, int event, int eventStatus, String message) {
+        SceneInstanceStartHisMapper hisMapper = BeanCommon.getBean(SceneInstanceStartHisMapper.class);
+        SceneInstanceStartHisModel model = new SceneInstanceStartHisModel();
+        model.setEvent(event);
+        model.setEventStatus(eventStatus);
+        model.setProcessMessage(message);
+        hisMapper.filterUpdate(model, new HumanCondition().filterEqual(SceneInstanceStartHisModel::getInstanceId, instanceId));
     }
 }
