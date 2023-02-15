@@ -1737,12 +1737,15 @@ public class ScenePluginCollectionSceneService {
         File file = new File(fileName);
         FileInputStream inputStream = null;
         try {
+            log.info("start to write file", containerId, zipFilePath);
             FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), file);
 
             FlowPcapExportUtil.updateProcess(taskId, 15);
 
             inputStream = new FileInputStream(file);
             var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
+
+            log.info("start to upload file", containerId, zipFilePath);
             var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
 
             FlowPcapExportUtil.updateProcess(taskId, 15);
