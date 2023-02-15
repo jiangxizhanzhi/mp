@@ -46,6 +46,10 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
+    public static final String WINDOWS_INSTALL_DIR = "C:\\ossec-agent";
+
+    public static final String LINUS_INSTALL_DIR = "/var/ossec";
+
     public static String agentLinuxLocalFilepath = null;
 
     public static String getAgentLinuxLocalFilepath() {
@@ -92,7 +96,7 @@ public class WazuhCommon {
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
-                            String.format("if not exist %s (", "C:\\ossec-agent\\bin\\tools"),
+                            String.format("if not exist %s%s (", WINDOWS_INSTALL_DIR, "\\bin\\tools"),
                             String.format("unzip -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
@@ -101,9 +105,9 @@ public class WazuhCommon {
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             ") else (",
-                            " del/f/s/q C:\\ossec-agent\\client.keys",
-                            " del/f/s/q C:\\ossec-agent\\ossec.conf",
-                            " del/f/s/q C:\\ossec-agent\\ossec.conf.st",
+                            String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\client.keys"),
+                            String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\ossec.conf"),
+                            String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\ossec.conf.st"),
                             ")",
                             "cd C:\\wazuha",
                             "call config.bat",
@@ -116,23 +120,20 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "systemctl stop wazuh-agent",
-                            "sleep 20",
                             "sh /opt/wazuha/uninstall.sh",
-                            "sleep 20",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
-                            "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
+                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
-                            "sleep 20",
                             "sh start.sh"
                     ));
         }
