@@ -87,6 +87,7 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
+                            "net stop Wazuh",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
@@ -99,7 +100,7 @@ public class WazuhCommon {
                             String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
-                            ")  else (",
+                            ") else (",
                             " del/f/s/q C:\\ossec-agent\\client.keys",
                             " del/f/s/q C:\\ossec-agent\\ossec.conf",
                             " del/f/s/q C:\\ossec-agent\\ossec.conf.st",
@@ -122,9 +123,9 @@ public class WazuhCommon {
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "sh install.sh",
-                            //String.format("cd %s", linuxInstallDir),
-                            //"rm -rf agent-installer",
-                            //"rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
+                            String.format("cd %s", linuxInstallDir),
+                            "rm -rf agent-installer",
+                            "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
