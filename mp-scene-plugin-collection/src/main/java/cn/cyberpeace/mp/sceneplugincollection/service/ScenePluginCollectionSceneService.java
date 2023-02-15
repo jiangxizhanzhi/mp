@@ -108,6 +108,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1764,10 +1765,10 @@ public class ScenePluginCollectionSceneService {
                     File zipFile = new File(localDir + "/" + zipFileName);
                     FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
                 }
-                String cmd = String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getAbsolutePath());
+                String cmd = String.format(" zip %s/flow_new.zip -s=0 --out %s/flow.zip && touch success", localFile.getAbsolutePath(), localFile.getAbsolutePath());
                 log.info("cmd is " + cmd);
                 java.lang.Process process = Runtime.getRuntime().exec(cmd);
-                process.waitFor();
+                process.waitFor(10, TimeUnit.SECONDS);
                 // 轮询查询进度
                 times = 0;
                 maxTimes = 100;
