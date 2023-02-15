@@ -120,6 +120,7 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "sh /opt/wazuha/stop.sh",
+                            "sh /opt/wazuha/uninstall.sh",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
