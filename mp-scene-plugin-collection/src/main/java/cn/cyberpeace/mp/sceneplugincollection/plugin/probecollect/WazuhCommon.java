@@ -91,7 +91,7 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            "net stop Wazuh",
+                            "call c:\\wazuha\\stop.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
@@ -119,7 +119,7 @@ public class WazuhCommon {
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            "sh /opt/wazuha/uninstall.sh",
+                            "sh /opt/wazuha/stop.sh",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
