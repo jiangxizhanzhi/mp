@@ -1764,7 +1764,7 @@ public class ScenePluginCollectionSceneService {
                     File zipFile = new File(localDir + "/" + zipFileName);
                     FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
                 }
-                String cmd = String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getPath());
+                String cmd = String.format("cd %s && zip flow_new.zip -s=0 --out flow.zip && touch success", localFile.getAbsolutePath());
                 log.info("cmd is " + cmd);
                 java.lang.Process process = Runtime.getRuntime().exec(cmd);
                 process.waitFor();
