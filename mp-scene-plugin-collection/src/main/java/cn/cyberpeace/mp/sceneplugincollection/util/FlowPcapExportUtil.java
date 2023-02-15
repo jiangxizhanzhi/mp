@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 @Data
 public class FlowPcapExportUtil {
     private static LoadingCache<String, FlowPcapExportProcess> cache = CacheBuilder.newBuilder().maximumSize(500)
-            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .expireAfterAccess(150, TimeUnit.MINUTES)
             .build(new CacheLoader<String, FlowPcapExportProcess>() {
                 @Override
                 public FlowPcapExportProcess load(String key) {

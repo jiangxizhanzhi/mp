@@ -1724,6 +1724,7 @@ public class ScenePluginCollectionSceneService {
             times++;
         }
 
+        log.info("start to retrieveFile from {},path {}", containerId, zipFilePath);
         HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
 
         FlowPcapExportUtil.updateProcess(taskId, 15);
