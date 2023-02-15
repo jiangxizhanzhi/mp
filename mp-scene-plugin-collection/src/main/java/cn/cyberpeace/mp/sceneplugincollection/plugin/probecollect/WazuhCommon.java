@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.hutool.core.collection.CollectionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
@@ -48,7 +50,7 @@ public class WazuhCommon {
 
     public static final String WINDOWS_INSTALL_DIR = "C:\\ossec-agent";
 
-    public static final String LINUS_INSTALL_DIR = "/var/ossec";
+    public static final String LINUX_INSTALL_DIR = "/var/ossec";
 
     public static String agentLinuxLocalFilepath = null;
 
@@ -120,17 +122,23 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "sh /opt/wazuha/stop.sh",
-                            "sh /opt/wazuha/uninstall.sh",
+                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/bin/tools"),
+                            //"sh /opt/wazuha/uninstall.sh",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
-                            //"rm -rf agent-installer",
-                            //String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
-                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            "rm -rf agent-installer",
+                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+                            "else",
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/client.keys"),
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf.st"),
+                            "fi",
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
@@ -178,6 +186,7 @@ public class WazuhCommon {
             }
             result.add(addCommandIndex, addCommand);
         }
+        log.info("generated Install Command: {}", result);
         return result;
     }
 
