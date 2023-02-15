@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -168,7 +169,11 @@ public class NetworkTrafficGroupService {
         paramObject.put("scene_id", networkTrafficMirrorRequest.getSceneId());
         paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
         paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
-        paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
+        List<String> dstNodes = networkTrafficMirrorRequest.getArkimeInstanceNames();
+        if (Boolean.TRUE.equals(situationAwareConfig.getEntityDst())) {
+            dstNodes = List.of(situationAwareConfig.getEntityDstNode());
+        }
+        paramObject.put("dst_node", dstNodes);
         try {
             String res = HttpUtils.sendPost(url, paramObject.toJSONString());
             log.info("dobind Network traffic mirror message {}", res);
@@ -189,7 +194,11 @@ public class NetworkTrafficGroupService {
 
         paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
         paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
-        paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
+        List<String> dstNodes = networkTrafficMirrorRequest.getArkimeInstanceNames();
+        if (Boolean.TRUE.equals(situationAwareConfig.getEntityDst())) {
+            dstNodes = List.of(situationAwareConfig.getEntityDstNode());
+        }
+        paramObject.put("dst_node", dstNodes);
         try {
             String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
             log.info("delete Network traffic mirror message {}", res);
