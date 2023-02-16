@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserCheckService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -22,13 +21,16 @@ import java.util.Objects;
  * @Date：2021/8/31 11:13
  */
 @Service
-public class UserUpdateCheckService implements UserCheckService {
+public class UserUpdateCheckService extends UserBaseCheckService {
 
     @Autowired
     private UserService userService;
 
     public void check(UserModel user) {
         ParamCheck.notBlank(user.getId(), AuthBasei18nCode.USER_ID);
+
+        super.check(user);
+
         ObjServiceResult<UserModel> result = userService.get(user.getId());
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
