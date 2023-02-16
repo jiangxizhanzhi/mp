@@ -1751,11 +1751,10 @@ public class ScenePluginCollectionSceneService {
             num = StringUtils.replace(num, "\r", "");
             int fileNum = Integer.parseInt(num);
             FileInputStream inputStream = null;
-
+            String localDir = TextUtils.uuid();
+            File localFile = new File(localDir);
+            localFile.mkdir();
             try {
-                String localDir = TextUtils.uuid();
-                File localFile = new File(localDir);
-                localFile.mkdir();
                 for (int i = 1; i <= fileNum; i++) {
                     String zipFileName = "flow_new.z" + (i < 10 ? "0" : "") + i;
                     if (i == fileNum) {
@@ -1770,22 +1769,10 @@ public class ScenePluginCollectionSceneService {
                     File zipFile = new File(localDir + "/" + zipFileName);
                     FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
                 }
-                String cmd = String.format(" zip %s/flow_new.zip -s=0 --out %s/flow.zip && touch success", localFile.getAbsolutePath(), localFile.getAbsolutePath());
+                String cmd = String.format(" zip %s/flow_new.zip -s=0 --out %s/flow.zip ", localFile.getAbsolutePath(), localFile.getAbsolutePath());
                 log.info("cmd is " + cmd);
                 java.lang.Process process = Runtime.getRuntime().exec(cmd);
-                process.waitFor(10, TimeUnit.SECONDS);
-                // 轮询查询进度
-                times = 0;
-                maxTimes = 100;
-                while (times < maxTimes) {
-                    Thread.sleep(3000);
-                    File file = new File(localFile.getPath() + "/success");
-                    if (file.exists()) {
-                        break;
-                    } else {
-                        times++;
-                    }
-                }
+                process.waitFor(10, TimeUnit.MINUTES);
                 inputStream = new FileInputStream(localFile.getAbsolutePath() + "/flow.zip");
                 var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
                 var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
@@ -1805,6 +1792,10 @@ public class ScenePluginCollectionSceneService {
 
                     }
                 }
+                for (var f : localFile.listFiles()) {
+                    f.delete();
+                }
+                localFile.delete();
                 container.executeCommand(containerId, "rm -rf " + dir);
             }
         }
