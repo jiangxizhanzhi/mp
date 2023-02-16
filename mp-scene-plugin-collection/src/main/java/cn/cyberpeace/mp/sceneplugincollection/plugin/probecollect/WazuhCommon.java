@@ -125,6 +125,7 @@ public class WazuhCommon {
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            "restart_again=false;",
                             String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/bin/tools"),
                             //"sh /opt/wazuha/uninstall.sh",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
@@ -135,6 +136,7 @@ public class WazuhCommon {
                             "rm -rf agent-installer",
                             String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
                             "else",
+                            "restart_again=true;",
                             String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/client.keys"),
                             String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
                             String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf.st"),
@@ -142,7 +144,11 @@ public class WazuhCommon {
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
-                            "sh start.sh"
+                            "sh start.sh",
+                            "if [ restart_again ]; then",
+                            "sleep 30",
+                            "sh start.sh",
+                            "fi"
                     ));
         }
         List<String> result = resource == null ? new ArrayList<>() :
