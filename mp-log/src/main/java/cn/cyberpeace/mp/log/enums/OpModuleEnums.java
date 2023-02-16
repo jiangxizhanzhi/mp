@@ -59,6 +59,8 @@ public enum OpModuleEnums {
     PENETRATION("penetration"),
     // 25:战队"
     TEAM("team"),
+    // 26:场景管理
+    SCENEMANAGE("scene_manage"),
 
     DEFAULT("");
 
