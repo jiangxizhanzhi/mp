@@ -6,7 +6,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
  * @Date 2022/3/10
  */
 public enum CoreType {
-    NETWORK, NETWORK_L2, ROUTER, ROUTER_L2, FIREWALL, TERMINAL;
+    NETWORK_0, NETWORK, NETWORK_L2, ROUTER, ROUTER_L2, FIREWALL, TERMINAL;
 
     public static boolean isNetwork(CoreType coreType) {
         if (coreType == null) {
