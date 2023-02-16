@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.scene.repository.SceneInstanceStartHisMapper">
+
+    <select id="selectSceneStat" resultType="cn.cyberpeace.mp.scene.core.bo.SceneExportBO"
+            parameterType="cn.cyberpeace.mp.scene.core.bo.SceneExportConditionBO">
+        SELECT
+            DATE_FORMAT(create_time, '%Y%m%d') AS date,
+            SUM(CASE WHEN event = 2 and event_status = 4 THEN 1 ELSE 0 END) AS successCount,
+            SUM(CASE WHEN event = 2 and event_status = 5 THEN 1 ELSE 0 END) AS failCount
+        FROM
+            mp_scene_instance_start_his
+        <where>
+            <if test="startTime != null">
+                AND #{startTime} &lt;= create_time
+            </if>
+            <if test="endTime != null">
+                AND #{endTime} &gt;= create_time
+            </if>
+        </where>
+        GROUP BY
+            DATE_FORMAT(create_time, '%Y%m%d')
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectFailSceneDetail" resultType="cn.cyberpeace.mp.scene.core.bo.FailSceneExportBO"
+            parameterType="cn.cyberpeace.mp.scene.core.bo.SceneExportConditionBO">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') AS date,
+            name,
+            reference_type as referenceType,
+            process_message as processMessage
+        FROM
+            mp_scene_instance_start_his
+        <where>
+            event = 2 and event_status = 5
+            <if test="startTime != null">
+                AND #{startTime} &lt;= create_time
+            </if>
+            <if test="endTime != null">
+                AND #{endTime} &gt;= create_time
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

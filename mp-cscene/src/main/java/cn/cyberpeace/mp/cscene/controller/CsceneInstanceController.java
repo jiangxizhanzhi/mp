@@ -1,15 +1,18 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -24,6 +27,8 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.service.SceneInstanceStartHisService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -34,6 +39,9 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -43,14 +51,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -64,6 +73,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private CsceneFileService csceneFileService;
+
+    private SceneInstanceStartHisService sceneInstanceStartHisService;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
@@ -169,11 +180,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @Autowired
     public CsceneInstanceController(CsceneInstanceService csceneInstanceService,
                                     CsceneSpecialService csceneSpecialService,
-                                    CsceneFileService csceneFileService
+                                    CsceneFileService csceneFileService,
+                                    SceneInstanceStartHisService sceneInstanceStartHisService
     ) {
         setModelService(csceneInstanceService);
         setCsceneSpecialService(csceneSpecialService);
         setCsceneFileService(csceneFileService);
+        setSceneInstanceStartHisService(sceneInstanceStartHisService);
     }
 
     @ApiOperation("获取分页数据")
@@ -763,4 +776,55 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
     }
+
+    @ApiOperation(value = "导出场景实例数据excel")
+    @PostMapping("/excel/export")
+    public void exportExcel(HttpServletResponse response, @RequestBody SceneExportConditionBO sceneExportConditionBO) throws IOException {
+        Locale locale = LocaleContextHolder.getLocale();
+        String sheetStatName = MessageCommon.get(CsceneBasei18nCode.SCENE_STAT);
+        String sheetFailName = MessageCommon.get(CsceneBasei18nCode.SCENE_FAIL_DETAIL);
+        String fname = MessageCommon.get(CsceneBasei18nCode.SCENE_EXPORT_EXCEL);
+        Class sceneExportClz;
+        Class failSceneExportClz;
+
+        if (Objects.equals(locale, Locale.US)) {
+            sceneExportClz = SceneExportEnBO.class;
+            failSceneExportClz = FailSceneExportEnBO.class;
+        } else {
+            sceneExportClz = SceneExportBO.class;
+            failSceneExportClz = FailSceneExportBO.class;
+        }
+
+        // 查询场景统计数据
+        List<SceneExportBO> sceneStatList = sceneInstanceStartHisService.selectSceneExportStatistics(sceneExportConditionBO);
+
+        // 查询失败场景详情数据
+        List<FailSceneExportBO> failSceneList = sceneInstanceStartHisService.selectFailSceneDetail(sceneExportConditionBO);
+        if (CollectionUtils.isNotEmpty(failSceneList)) {
+            // 封装场景归属信息
+            List<OptionModel> optionModelList =
+                    optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+            failSceneList.forEach(failScene -> optionModelList.stream()
+                    .filter(optionModel -> failScene.getReferenceType().equals(optionModel.getCode()))
+                    .findFirst().ifPresent(optionModel ->
+                            failScene.setReferenceName(locale == Locale.US ? optionModel.getEnName() :
+                                    optionModel.getZhName())));
+        }
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(fname, "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+
+        // 场景统计sheet
+        ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
+        WriteSheet sceneSheet = EasyExcel.writerSheet(0, sheetStatName).head(sceneExportClz).build();
+        excelWriter.write(sceneStatList, sceneSheet);
+
+        // 失败场景详情sheet
+        WriteSheet failDetailSheet = EasyExcel.writerSheet(1, sheetFailName).head(failSceneExportClz).build();
+        excelWriter.write(failSceneList, failDetailSheet);
+        excelWriter.finish();
+    }
+
 }
