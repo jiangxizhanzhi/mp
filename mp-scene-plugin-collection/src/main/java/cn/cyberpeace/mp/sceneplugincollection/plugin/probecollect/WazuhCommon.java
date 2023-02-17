@@ -146,7 +146,7 @@ public class WazuhCommon {
                             probeCommand,
                             "sh start.sh",
                             "if [ restart_again ]; then",
-                            "sleep 30",
+                            "sleep 150",
                             "sh start.sh",
                             "fi"
                     ));
