@@ -144,9 +144,10 @@ public class WazuhCommon {
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
+                            "sleep 10",
                             "sh start.sh",
                             "if [ restart_again ]; then",
-                            "sleep 150",
+                            "sleep 100",
                             "sh start.sh",
                             "fi"
                     ));
