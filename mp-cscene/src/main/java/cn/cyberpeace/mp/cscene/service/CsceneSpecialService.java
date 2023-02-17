@@ -119,7 +119,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -170,6 +170,53 @@ public class CsceneSpecialService {
             var stat = statMap.get(testInstanceStat.getCsceneId());
             stat.setTestSceneCount(testInstanceStat.getTestInstanceCount());
         });
+
+        var humanCondition2 = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, SceneConfigElementModel.class,
+                        CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig, SceneConfigModel.class,
+                        SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId, SceneConfigElementModel.class,
+                        SceneConfigElementModel::getScene)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId, CloudPluginSceneConfigElementModel.class,
+                        CloudPluginSceneConfigElementModel::getScene)
+                .filterLink(SceneConfigElementModel.class, SceneConfigElementModel::getNodeId, CloudPluginSceneConfigElementModel.class,
+                        CloudPluginSceneConfigElementModel::getSceneElement)
+                .currentLink(CsceneModel.class)
+                .filterIn(CsceneModel::getId, ids)
+                .groupBy(CsceneModel::getId)
+                .selectAs("pk", "pk")
+                .selectAs(CsceneModel::getId, CsceneInstanceStat::getId)
+                .currentLink(SceneConfigElementModel.class)
+                .selectAs(Sum.f(SceneConfigElementModel::getCpu), CsceneInstanceStat::getCpu)
+                .selectAs(Sum.f(SceneConfigElementModel::getRam), CsceneInstanceStat::getRam)
+                .selectAs(Sum.f(SceneConfigElementModel::getDisk), CsceneInstanceStat::getDisk)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType)
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                        CsceneInstanceStat::getVmCount)
+                .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType)
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                        CsceneInstanceStat::getContainerCount)
+                .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType)
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                        CsceneInstanceStat::getEntityCount);
+        var dataInfos = csceneInstanceMapper.list(humanCondition2, CsceneInstanceStat.class);
+        if (CollectionUtils.isNotEmpty(dataInfos)) {
+            for (var d : dataInfos) {
+                if (statMap.containsKey(d.getId())) {
+                    var info = statMap.get(d.getId());
+                    info.setCpu(d.getCpu());
+                    info.setRam(d.getRam());
+                    info.setDisk(d.getDisk());
+                    if (d.getContainerCount() != null && d.getContainerCount() > 0) {
+                        info.setCpu(info.getCpu() + d.getContainerCount());
+                        info.setRam(info.getRam() + d.getContainerCount() * 512);
+                        info.setDisk(info.getDisk() + d.getContainerCount() * 10);
+                    }
+                }
+            }
+        }
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
     }
@@ -416,6 +463,11 @@ public class CsceneSpecialService {
                         d.setVmCount(info.getVmCount());
                         d.setContainerCount(info.getContainerCount());
                         d.setEntityCount(info.getEntityCount());
+                        if (info.getContainerCount() != null) {
+                            d.setCpu(d.getCpu() + info.getContainerCount());
+                            d.setRam(d.getRam() + info.getContainerCount() * 512);
+                            d.setDisk(d.getDisk() + info.getContainerCount() * 10);
+                        }
                     } else {
                         d.setCpu(0);
                         d.setRam(0);

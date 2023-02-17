@@ -23,4 +23,10 @@ public class CsceneStat {
     private Integer npcCount;
     @ApiModelProperty(value = "测试场景数量")
     private Integer testSceneCount;
+    @ApiModelProperty(value = "cpu数量")
+    private Integer cpu;
+    @ApiModelProperty(value = "内存大小")
+    private Integer ram;
+    @ApiModelProperty(value = "磁盘大小")
+    private Integer disk;
 }
