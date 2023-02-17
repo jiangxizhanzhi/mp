@@ -124,6 +124,11 @@ public class ImagesConverter implements BaseConverter{
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
                 if (supportExports.containsKey(imageConvertModel.getUuid())) {
                     imageConvertModel.setSupportExport(supportExports.get(imageConvertModel.getUuid()).getSupportExport());
+                    if (ImageTypeEnum.CONTAINER.toValue().equals(imageConvertModel.getImageType())) {
+                        if (imageConvertModel.getExtDocker() != null) {
+                            imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
+                        }
+                    }
                 }
             }
         }

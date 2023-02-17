@@ -1,17 +1,19 @@
 package cn.cyberpeace.mp.sceneplugincollection.util;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Data
 public class FlowPcapExportUtil {
     private static LoadingCache<String, FlowPcapExportProcess> cache = CacheBuilder.newBuilder().maximumSize(500)
-            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .expireAfterAccess(150, TimeUnit.MINUTES)
             .build(new CacheLoader<String, FlowPcapExportProcess>() {
                 @Override
                 public FlowPcapExportProcess load(String key) {
@@ -21,10 +23,13 @@ public class FlowPcapExportUtil {
                 }
             });
 
-    public static void initProcess(String taskId) {
-        var result = new FlowPcapExportProcess();
-        result.setProcess(0);
-        cache.put(taskId, result);
+    public static synchronized boolean initProcess(String csceneId) {
+        if (!cache.asMap().containsKey(csceneId)) {
+            cache.getUnchecked(csceneId);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static void updateProcess(String taskId, int process) {
@@ -33,7 +38,11 @@ public class FlowPcapExportUtil {
     }
 
     public static FlowPcapExportProcess getProcess(String taskId) {
-        return cache.getUnchecked(taskId);
+        FlowPcapExportProcess result = cache.getUnchecked(taskId);
+        if (result.getProcess() == 100) {
+            new ScheduledThreadPoolExecutor(1).schedule(() -> cache.invalidate(taskId), 5, TimeUnit.SECONDS);
+        }
+        return result;
     }
 
     public static FlowPcapExportProcess finalProcess(String taskId, String url) {

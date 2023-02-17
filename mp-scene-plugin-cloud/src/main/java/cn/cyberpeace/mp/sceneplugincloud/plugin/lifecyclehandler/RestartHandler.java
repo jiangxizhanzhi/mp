@@ -52,6 +52,7 @@ public class RestartHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_CONTAINER, () -> {
                 closeAccessModes(element);
                 container.restart(instanceId);
+                container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
                 checkAccessModes(element);
             });
         }

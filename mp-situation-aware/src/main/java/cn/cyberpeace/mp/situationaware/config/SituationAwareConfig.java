@@ -56,6 +56,9 @@ public class SituationAwareConfig {
     private String arkimeUsername;
     private String arkimePassword;
 
+    private Boolean entityDst;
+    private String entityDstNode;
+
     /**
      * wazuh
      */

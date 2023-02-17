@@ -292,6 +292,8 @@ public class InitiateHandler extends HandlerCommon {
                 var routerOn = true;
                 if (this.isGateway(cloudElement.getCoreType(), cloudElement.getVirtualType(), cloudElement.getSrcElement().getType())) {
                     routerOn = false;
+                } else if (ElementTypeUtils.isEntityGateway(cloudElement)) {
+                    routerOn = false;
                 } else {
                     for (var p : connectNetwork.getFromPorts()) {
                         var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
@@ -360,7 +362,7 @@ public class InitiateHandler extends HandlerCommon {
                 String gatewayIp = null;
                 if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                         || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
-                        || ElementTypeUtils.isCoreRouter(element)) {
+                        || ElementTypeUtils.isCoreRouter(element) || ElementTypeUtils.isEntityGateway(element)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
                             gatewayIp = p.getIp();
@@ -922,19 +924,27 @@ public class InitiateHandler extends HandlerCommon {
             ) {
                 coreType = CoreType.NETWORK;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.NETWORK;
                 } else {
                     coreType = CoreType.NETWORK_L2;
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
                     coreType = CoreType.ROUTER;
                 } else {
                     coreType = CoreType.ROUTER_L2;
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
-                coreType = CoreType.FIREWALL;
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else {
+                    coreType = CoreType.FIREWALL;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
                 coreType = CoreType.TERMINAL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {

@@ -31,6 +31,8 @@ public interface BaseRemoteFileService {
         return upload(is, null);
     }
 
+    ServiceResult<String> upload(InputStream is, long fileSize, String fileSuffix);
+
     ServiceResult<String> upload(InputStream is, String fileSuffix);
 
     void download(String remoteFileKey, OutputStream os);

@@ -45,4 +45,16 @@ public class ElementTypeUtils {
             return false;
         }
     }
+
+    public static boolean isEntityGateway(CloudPluginSceneElementBO cloudElement) {
+        var entityType = BaseCloudPluginSceneElementModel.ImageType.ENTITY;
+        var routerRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER;
+        var switchRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH;
+        var firewallRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL;
+        var role = cloudElement.getRole();
+        if (entityType.equals(cloudElement.getImageType()) && role != null && (role == routerRole || role == switchRole || role == firewallRole)) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -120,4 +120,20 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(result);
     }
 
+    @Override
+    public ServiceResult<String> upload(InputStream is, long fileSize, String fileSuffix) {
+        var validateResult = validateUploadInput(is, fileSuffix);
+        if (!Boolean.TRUE.equals(validateResult.getSource())) {
+            return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
+        }
+
+        String remoteFileKey;
+        try {
+            remoteFileKey = fileClient.upload(is, fileSize, fileSuffix);
+        } catch (Exception e) {
+            log.error("Service upload file input stream with suffix {} error: {}", fileSuffix, e.getMessage());
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
+        }
+        return new ServiceResult<>(remoteFileKey);
+    }
 }
