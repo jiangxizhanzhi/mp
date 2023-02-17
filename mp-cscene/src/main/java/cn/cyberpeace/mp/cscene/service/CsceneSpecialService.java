@@ -446,6 +446,11 @@ public class CsceneSpecialService {
                         d.setVmCount(info.getVmCount());
                         d.setContainerCount(info.getContainerCount());
                         d.setEntityCount(info.getEntityCount());
+                        if (info.getContainerCount() != null) {
+                            d.setCpu(d.getCpu() + info.getContainerCount());
+                            d.setRam(d.getRam() + info.getContainerCount() * 512);
+                            d.setDisk(d.getDisk() + info.getContainerCount() * 10);
+                        }
                     } else {
                         d.setCpu(0);
                         d.setRam(0);

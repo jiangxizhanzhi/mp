@@ -125,7 +125,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     public void createElement(String nodeId) {
         CollectionPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
-            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+            return;
         }
         new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
     }

@@ -128,7 +128,10 @@ public class DashboardService {
     public ResourceStatisticsResponse resourceStatistics() {
         ResourceStatisticsResponse response = new ResourceStatisticsResponse();
         Map<String, Map<String, Object>> targetStatics = new HashMap<>();
-        targetStatics.put("all",devopsTargetService.countTarget());
+        var all = devopsTargetService.countTarget();
+        // npc暂时只有1个
+        all.put("npc", 1);
+        targetStatics.put("all", all);
         targetStatics.put("entity",devopsTargetService.countEntityTarget());
         targetStatics.put("virtual",devopsTargetService.countVmTarget());
         response.setTargetStatics(targetStatics);

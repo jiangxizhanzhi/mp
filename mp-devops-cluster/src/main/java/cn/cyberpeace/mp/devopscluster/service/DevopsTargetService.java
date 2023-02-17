@@ -179,7 +179,9 @@ public class DevopsTargetService {
             deviceTargetPO.setInstanceState(extVm.getInstanceState());
         } else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)) {
             deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
-            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
+//            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
+            // 容器默认支持
+            deviceTargetPO.setInitSupport(true);
             deviceTargetPO.setInstanceState(extDocker.getInstanceState());
         } else {
             deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
