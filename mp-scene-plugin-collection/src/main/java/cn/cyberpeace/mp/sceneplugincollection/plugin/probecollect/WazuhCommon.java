@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
@@ -193,7 +192,6 @@ public class WazuhCommon {
             }
             result.add(addCommandIndex, addCommand);
         }
-        log.info("generated Install Command: {}", result);
         return result;
     }
 
