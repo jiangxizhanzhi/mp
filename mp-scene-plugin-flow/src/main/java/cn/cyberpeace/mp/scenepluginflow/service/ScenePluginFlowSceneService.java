@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
@@ -12,6 +15,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +31,10 @@ public class ScenePluginFlowSceneService {
 
     public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        if (cloudPluginHandler != null && cloudPluginHandler.getElement(nodeId) != null && StringUtils.isEmpty(cloudPluginHandler.getElement(nodeId).getResourceId())) {
+            throw new MpRuntimeException(FlowErrorCode.NODE_NOT_START);
+        }
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var result = pluginHandler.startFlow(nodeId, flowId, sourceIp, true);
         return new ServiceResult<>(result);
@@ -56,6 +64,12 @@ public class ScenePluginFlowSceneService {
     public ServiceResult<Boolean> startFlows(String sceneId, String nodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
                                              SceneContextBO context, int runType) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
+
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        if (cloudPluginHandler != null && cloudPluginHandler.getElement(nodeId) != null && StringUtils.isEmpty(cloudPluginHandler.getElement(nodeId).getResourceId())) {
+            throw new MpRuntimeException(FlowErrorCode.NODE_NOT_START);
+        }
+
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
             return new ServiceResult<>(true);
