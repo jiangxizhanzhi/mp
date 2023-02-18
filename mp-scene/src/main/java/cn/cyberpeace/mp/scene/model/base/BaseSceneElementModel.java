@@ -29,6 +29,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private Integer maxPortNumber;
     @DefaultBool
     private Boolean isAuxiliary;
+    @DefaultInt
+    private Integer bizRole;
 
     public static class Type {
         public static final int OTHER = 0;
