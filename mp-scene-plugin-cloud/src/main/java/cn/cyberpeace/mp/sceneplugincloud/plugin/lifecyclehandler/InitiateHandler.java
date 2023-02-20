@@ -1308,6 +1308,7 @@ public class InitiateHandler extends HandlerCommon {
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
         network.setDhcp(element.getDhcp());
+        network.setNetMode(element.getNetMode());
     }
 
     private void reallocateIpPorts(List<CloudPluginSceneElementBO> networkElements) {

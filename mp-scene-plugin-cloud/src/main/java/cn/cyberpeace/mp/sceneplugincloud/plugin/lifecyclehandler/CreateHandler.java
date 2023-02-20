@@ -236,27 +236,29 @@ public class CreateHandler extends HandlerCommon {
             }
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
-            var virtualSwitch = vsClient.create(createData);
-            cloudElement.setVlanId(virtualSwitch.getSegmentationId());
-            connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
-            connectedNetwork.network.setResourceId(virtualSwitch.getId());
-            if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
-                cloudElement.setResourceId(virtualSwitch.getId());
+            if (connectedNetwork.network.getNetMode() == null || BaseCloudPluginSceneElementModel.NetMode.NORMAL.equals(connectedNetwork.network.getNetMode())) {
+                var virtualSwitch = vsClient.create(createData);
+                cloudElement.setVlanId(virtualSwitch.getSegmentationId());
+                connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
+                connectedNetwork.network.setResourceId(virtualSwitch.getId());
+                if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                    cloudElement.setResourceId(virtualSwitch.getId());
+                }
+                // 向端口回写网络id
+                connectedNetwork.getFromPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                    }
+                });
+                connectedNetwork.getToPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                    }
+                });
+                createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
             }
-            // 向端口回写网络id
-            connectedNetwork.getFromPorts().forEach(p -> {
-                var pluginPort = getPluginHandler().getPort(p.getId());
-                if (pluginPort != null) {
-                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                }
-            });
-            connectedNetwork.getToPorts().forEach(p -> {
-                var pluginPort = getPluginHandler().getPort(p.getId());
-                if (pluginPort != null) {
-                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                }
-            });
-            createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         }
     }
 

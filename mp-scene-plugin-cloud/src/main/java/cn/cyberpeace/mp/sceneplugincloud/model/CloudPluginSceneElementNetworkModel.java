@@ -45,4 +45,6 @@ public class CloudPluginSceneElementNetworkModel extends BasePluginSceneElementM
     private String auxiliaryNetworkRouterResourceId;
     @DefaultStr
     private String auxiliaryNetworkRouterIp;
+    @DefaultInt
+    private Integer netMode;
 }
