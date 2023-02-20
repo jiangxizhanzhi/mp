@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -100,6 +102,24 @@ public class UserController {
         }
 
         return new ObjServiceResult(null).asResult();
+    }
+
+    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="body", value="数据ids",dataTypeClass = List.class)
+    })
+    @GetMapping("/no_restrict/by_ids")
+    public ServiceResult<List<UserSimpleBo>> get(@RequestBody List<String> ids) {
+        var userModels = userService.getUserModelNoRestrictByUserIds(ids);
+
+        List<UserSimpleBo> userSimpleBos = new ArrayList<>();
+        userModels.forEach(userModel -> {
+            UserSimpleBo userSimpleBo = new UserSimpleBo();
+            BeanUtils.copyProperties(userModel, userSimpleBo);
+            userSimpleBos.add(userSimpleBo);
+        });
+
+        return ResultCommon.success(userSimpleBos);
     }
 
 

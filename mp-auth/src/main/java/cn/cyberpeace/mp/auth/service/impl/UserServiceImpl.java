@@ -181,6 +181,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userBo;
     }
 
+
+    @Override
+    public List<UserModel> getUserModelNoRestrictByUserIds(List<String> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(UserModel::getId, ids.toArray());
+        List<UserModel> userModels = getModelMapper().list(condition);
+        userModels.forEach(this::setDefaultIfNoAvatar);
+        return userModels;
+    }
+
     /**
      * 判断是否有头像，没有则设置为默认头像
      * @param userModel
