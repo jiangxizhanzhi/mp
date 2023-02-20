@@ -104,9 +104,9 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
-    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="body", value="数据ids",dataTypeClass = List.class)
+            @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
     })
     @GetMapping("/no_restrict/by_ids")
     public ServiceResult<List<UserSimpleBo>> get(@RequestBody List<String> ids) {
