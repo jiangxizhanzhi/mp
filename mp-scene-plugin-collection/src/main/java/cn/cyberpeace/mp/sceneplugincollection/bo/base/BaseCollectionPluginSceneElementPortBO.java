@@ -12,4 +12,6 @@ public abstract class BaseCollectionPluginSceneElementPortBO<M extends BaseColle
         extends BasePluginSceneElementPortBO<M, T, S> {
     @ApiModelProperty(value = "是否开启流量采集")
     private Boolean enableFlowCollect;
+    @ApiModelProperty(value = "是否开启流量镜像")
+    private Boolean enableFlowMirror;
 }

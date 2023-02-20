@@ -87,28 +87,27 @@ public class DeleteHandler extends HandlerCommon {
 
 
             // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
-            Set<String> vmInstanceIds = new HashSet<>();
-            Set<String> containerInstanceIds = new HashSet<>();
+            Set<String> collectorVmInstanceIds = new HashSet<>();
+            Set<String> collectorContainerInstanceIds = new HashSet<>();
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
-                if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                    return;
-                }
-                var srcPort = collectionPort.getSrcPort();
-                var srcElement = srcPort.getElement();
-                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null
-                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                        vmInstanceIds.add(cloudElement.getResourceId());
-                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                        containerInstanceIds.add(cloudElement.getResourceId());
+                if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect()) || Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
+                    var srcPort = collectionPort.getSrcPort();
+                    var srcElement = srcPort.getElement();
+                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    if (cloudElement != null && cloudElement.getVirtualType() != null
+                            && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                        if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                            collectorVmInstanceIds.add(cloudElement.getResourceId());
+                        } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                            collectorContainerInstanceIds.add(cloudElement.getResourceId());
+                        }
                     }
                 }
             });
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTOR, () -> {
-                getFlowCollector().deleteCollector(flowCollectorId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds));
+                getFlowCollector().deleteCollector(flowCollectorId, new ArrayList<>(collectorVmInstanceIds), new ArrayList<>(collectorContainerInstanceIds));
             });
         }
 
