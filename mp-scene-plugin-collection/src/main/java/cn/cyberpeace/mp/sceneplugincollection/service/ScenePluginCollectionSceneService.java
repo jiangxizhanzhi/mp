@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -1641,11 +1642,13 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
         // containerName -> containerId
         Container container = new Container();
-        String containerId = container.getContainerIdByName(containName);
-        if (containerId == null) {
+        var containerResult = container.getContainerByName(containName);
+        if (containerResult == null) {
             log.error("find no containerId by containName {}", containName);
             return new ServiceResult<>(StringUtils.EMPTY);
         }
+        String containerId = containerResult.getId();
+        String host = containerResult.getHost();
 
         // execute cmd
         ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
@@ -1687,7 +1690,6 @@ public class ScenePluginCollectionSceneService {
             // 删除临时文件避免空间占用
             commands.add(String.format("rm -rf %s ", newFileName));
         }
-        commands.add(" zip flow.zip --out flow_new.zip -s 1024m ");
         commands.add(String.format("echo success >> %s", stepFile));
         // 将命令组成脚本文件
         File zipSh = null;
@@ -1695,109 +1697,60 @@ public class ScenePluginCollectionSceneService {
             zipSh = new File(dirName + ".sh");
             FileUtils.writeStringToFile(zipSh, StringUtils.join(commands, "&&"), Charset.defaultCharset());
             container.copyFile(containerId, zipSh.getPath(), dir);
+            // 执行命令脚本
+            TaskCommon.executeTask(() -> {
+                try {
+                    container.executeCommand(containerId, String.format("sh %s/%s.sh", dir, dirName));
+                } catch (Exception e) {
+                    log.error("failed to get command result , container id is ", containerId);
+                }
+            });
+            // 轮询查询进度
+            int times = 0;
+            int maxTimes = 180;
+            int lastStep = -1;
+            while (times < maxTimes) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    var stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
+                    if (stepResult != null && stepResult.getExitCode() != null && stepResult.getOutput() != null) {
+                        if (stepResult.getOutput().contains("success")) {
+                            break;
+                        } else {
+                            String[] steps = stepResult.getOutput().split("\n");
+                            if (steps != null && steps.length > 0) {
+                                int currentStep = Integer.parseInt(steps[steps.length - 1]);
+                                if (currentStep != lastStep) {
+                                    lastStep = currentStep;
+                                    times = 0;
+                                    FlowPcapExportUtil.updateProcess(taskId, currentStep);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+                times++;
+            }
+
+            ContainerFileGetData fileGetData = new ContainerFileGetData();
+            fileGetData.setFilePath(dir + "/flow.zip");
+            fileGetData.setHostname(host);
+            fileGetData.setZunContainerId(containerId);
+            var object = container.retrieveFile(fileGetData);
+            return new ServiceResult<>(object.getUrl());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (zipSh != null) {
                 zipSh.delete();
             }
-        }
-        // 执行命令脚本
-        TaskCommon.executeTask(() -> {
-            try {
-                container.executeCommand(containerId, String.format("sh %s/%s.sh", dir, dirName));
-            } catch (Exception e) {
-                log.error("failed to get command result , container id is ", containerId);
-            }
-        });
-        // 轮询查询进度
-        int times = 0;
-        int maxTimes = 180;
-        int lastStep = -1;
-        while (times < maxTimes) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                var stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
-                if (stepResult != null && stepResult.getExitCode() != null && stepResult.getOutput() != null) {
-                    if (stepResult.getOutput().contains("success")) {
-                        break;
-                    } else {
-                        String[] steps = stepResult.getOutput().split("\n");
-                        if (steps != null && steps.length > 0) {
-                            int currentStep = Integer.parseInt(steps[steps.length - 1]);
-                            if (currentStep != lastStep) {
-                                lastStep = currentStep;
-                                times = 0;
-                                FlowPcapExportUtil.updateProcess(taskId, currentStep);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-
-            }
-            times++;
-        }
-
-        var lsResult = container.executeCommand(containerId, String.format("cd %s && ls flow_new.z* | wc -l", dir));
-        if (lsResult != null && lsResult.getExitCode() != null && lsResult.getOutput() != null) {
-            String num = lsResult.getOutput();
-            num.trim();
-            num = StringUtils.replace(num, "\n", "");
-            num = StringUtils.replace(num, "\r", "");
-            int fileNum = Integer.parseInt(num);
-            FileInputStream inputStream = null;
-            String localDir = TextUtils.uuid();
-            File localFile = new File(localDir);
-            localFile.mkdir();
-            try {
-                for (int i = 1; i <= fileNum; i++) {
-                    String zipFileName = "flow_new.z" + (i < 10 ? "0" : "") + i;
-                    if (i == fileNum) {
-                        zipFileName = "flow_new.zip";
-                    }
-                    String zipFilePath = dir + "/" + zipFileName;
-                    HttpResult httpResult = container.retrieveFile(containerId, zipFilePath);
-                    if (httpResult.getException() != null) {
-                        return new ServiceResult<>(StringUtils.EMPTY);
-                    }
-                    log.info("start to write file", containerId, zipFilePath);
-                    File zipFile = new File(localDir + "/" + zipFileName);
-                    FileUtil.writeFromStream(httpResult.getResponse().getEntity().getContent(), zipFile);
-                }
-                String cmd = String.format(" zip %s/flow_new.zip -s=0 --out %s/flow.zip ", localFile.getAbsolutePath(), localFile.getAbsolutePath());
-                log.info("cmd is " + cmd);
-                java.lang.Process process = Runtime.getRuntime().exec(cmd);
-                process.waitFor(10, TimeUnit.MINUTES);
-                inputStream = new FileInputStream(localFile.getAbsolutePath() + "/flow.zip");
-                var fileupload = BeanCommon.getBean(FdfsRemoteFileServiceImpl.class);
-                var uploadResult = fileupload.upload(inputStream, inputStream.getChannel().size(), "zip");
-                if (!uploadResult.judgeSuccess()) {
-                    return new ServiceResult<>(StringUtils.EMPTY);
-                }
-                FsFileUploadResponse response = new FsFileUploadResponse();
-                String url = response.genInnerHttpUrlFromId(uploadResult.getSource());
-                return new ServiceResult<>(url);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        IOUtils.close(inputStream);
-                    } catch (IOException e) {
-
-                    }
-                }
-                for (var f : localFile.listFiles()) {
-                    f.delete();
-                }
-                localFile.delete();
-                container.executeCommand(containerId, "rm -rf " + dir);
-            }
+            container.executeCommand(containerId, "rm -rf " + dir);
         }
         return new ServiceResult<>(null);
     }
