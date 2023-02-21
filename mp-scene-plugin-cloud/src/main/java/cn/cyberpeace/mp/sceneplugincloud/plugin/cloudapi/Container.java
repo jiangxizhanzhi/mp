@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateDa
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerNewDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
@@ -189,7 +191,7 @@ public class Container extends CloudClient {
      * @param name
      * @return
      */
-    public String getContainerIdByName(String name) {
+    public ContainerGetData getContainerByName(String name) {
         NameQueryParam param = new NameQueryParam();
         param.setName(name);
         param.setOffset(1);
@@ -201,7 +203,7 @@ public class Container extends CloudClient {
         if (CollectionUtils.isEmpty(datas)) {
             log.error("find no resource by name {}", name);
         } else if (datas.size() == 1) {
-            return datas.get(0).getId();
+            return datas.get(0);
         } else {
             log.error("find more than one resource by name {} , resources is {}", name, JsonCommon.stringify(result.getData().getList()));
         }
@@ -222,6 +224,13 @@ public class Container extends CloudClient {
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
 
         return cloudDownload(requestUrl, data);
+    }
+
+    public ContainerFileGetResult retrieveFile(ContainerFileGetData data) {
+        CloudResponse<ContainerFileGetResult> result = cloudPost(CloudUrlConstant.DOWNLOAD_CONTAINER_FILE, data, null,
+                new TypeReference<CloudResponse<ContainerFileGetResult>>() {
+                }, true);
+        return result.getData();
     }
 
     public MacvlanContainerCreateData createMacvlanContainer(MacvlanContainerCreateData createData) {
