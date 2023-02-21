@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
 public class CloudUrlConstant {
+    public static final String MACVLAN_CONTAINER_CREATE_URL = "/v1/scenarios/macvlan_container";
     public static final String CONTAINER_CREATE_URL = "/v1/scenarios/container";
     public static final String CONTAINER_DELETE_URL = "/v1/scenarios/container";
     public static final String CONTAINER_GET_URL = "/v1/scenarios/container/%s";

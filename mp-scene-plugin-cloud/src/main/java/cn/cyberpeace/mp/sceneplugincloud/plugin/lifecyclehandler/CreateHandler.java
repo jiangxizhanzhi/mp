@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -33,6 +34,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
@@ -61,6 +63,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -109,8 +112,8 @@ public class CreateHandler extends HandlerCommon {
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
                     // 如果未设置端口 则使用一个null的元素,使用统一的一个循环
-                    List<String> sourcePorts = Arrays.asList(new String[]{ null });
-                    List<String> desPorts = Arrays.asList(new String[]{ null });
+                    List<String> sourcePorts = Arrays.asList(new String[]{null});
+                    List<String> desPorts = Arrays.asList(new String[]{null});
                     if (StringUtils.isNotEmpty(srcRule.getSourcePort())) {
                         String[] portsArray = srcRule.getSourcePort().split(",");
                         if (portsArray != null && portsArray.length > 0) {
@@ -198,6 +201,8 @@ public class CreateHandler extends HandlerCommon {
                         pluginPort.setAuxiliaryNetworkId(connectedNetwork.network.getResourceId());
                     }
                 });
+                continue;
+            } else if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(cloudElement.getNetMode())) {
                 continue;
             }
             var srcElement = cloudElement.getSrcElement();
@@ -923,6 +928,16 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
+        List<ConnectedNetworkBO> allNets = new ArrayList<>();
+        allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
+        allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
+        CloudPluginSceneElementNetworkBO macvlanNet = null;
+        for(var net:allNets){
+            if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.network.getNetMode())) {
+                macvlanNet = net.network;
+                break;
+            }
+        }
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
@@ -946,18 +961,32 @@ public class CreateHandler extends HandlerCommon {
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
 //        }
-        createData.setNetworks(CollectionUtils.emptyNull(
-                this.genVirutalNics(cloudElement)
-        ));
-        var container = containerClient.create(createData);
-        cloudElement.setResourceId(container.getId());
-        cloudElement.setHost(container.getHost());
+        if (macvlanNet != null) {
+            MacvlanContainerCreateData macvlanContainerCreateData = new MacvlanContainerCreateData();
+            BeanUtils.copyProperties(createData, macvlanContainerCreateData);
+            macvlanContainerCreateData.setIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
+            macvlanContainerCreateData.setMacvlanId(macvlanNet.getVlanId());
+            macvlanContainerCreateData.setGatewayIp(macvlanNet.getGateway());
+            macvlanContainerCreateData.setCidr(macvlanNet.getCidr());
+            var container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
+            cloudElement.setResourceId(container.getId());
+            cloudElement.setHost(container.getHost());
+            execContainerInitCommand(cloudElement);
+            checkAccessModes(cloudElement);
+        } else {
+            createData.setNetworks(CollectionUtils.emptyNull(
+                    this.genVirutalNics(cloudElement)
+            ));
+            var container = containerClient.create(createData);
+            cloudElement.setResourceId(container.getId());
+            cloudElement.setHost(container.getHost());
 
-        receiveVirtualPortInfo(cloudElement, container.getNetworks());
+            receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-        execContainerInitCommand(cloudElement);
+            execContainerInitCommand(cloudElement);
 
-        checkAccessModes(cloudElement);
+            checkAccessModes(cloudElement);
+        }
     }
 
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
