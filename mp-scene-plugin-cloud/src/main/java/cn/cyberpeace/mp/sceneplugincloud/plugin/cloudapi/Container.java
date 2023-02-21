@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStartDat
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStopData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
@@ -221,6 +222,15 @@ public class Container extends CloudClient {
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
 
         return cloudDownload(requestUrl, data);
+    }
+
+    public MacvlanContainerCreateData createMacvlanContainer(MacvlanContainerCreateData createData) {
+        heavyConcurrentWait();
+
+        CloudResponse<MacvlanContainerCreateData> result = cloudPost(CloudUrlConstant.MACVLAN_CONTAINER_CREATE_URL, createData, null,
+                new TypeReference<CloudResponse<MacvlanContainerCreateData>>() {
+                }, true);
+        return result.getData();
     }
 
 }
