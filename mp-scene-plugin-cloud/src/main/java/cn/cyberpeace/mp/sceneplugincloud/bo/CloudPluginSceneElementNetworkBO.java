@@ -62,6 +62,8 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private String auxiliaryNetworkRouterResourceId;
     @ApiModelProperty(value = "辅助网络辅助路由ip", hidden = true)
     private String auxiliaryNetworkRouterIp;
+    @ApiModelProperty(value = "网络创建模式,0或空表示默认OpenStack网络,1表示macvlan网络")
+    private Integer netMode;
 
     private List<String> ipPool = new ArrayList<>();
     private Set<String> excloudIps = new HashSet<>();

@@ -29,6 +29,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean transparent;
     @ApiModelProperty(value = "是否云平台內置靶標")
     private Boolean isBuildIn;
+    @ApiModelProperty(value = "网络创建模式,0或空表示默认OpenStack网络,1表示macvlan网络")
+    private Integer netMode;
 
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;

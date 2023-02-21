@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -19,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -87,28 +89,53 @@ public class DeleteHandler extends HandlerCommon {
 
 
             // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
-            Set<String> vmInstanceIds = new HashSet<>();
-            Set<String> containerInstanceIds = new HashSet<>();
+            Set<String> collectorVmInstanceIds = new HashSet<>();
+            Set<String> collectorContainerInstanceIds = new HashSet<>();
+            Set<String> mirrorVmInstanceIds = new HashSet<>();
+            Set<String> mirrorContainerInstanceIds = new HashSet<>();
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-            getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
-                if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                    return;
-                }
-                var srcPort = collectionPort.getSrcPort();
-                var srcElement = srcPort.getElement();
-                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null
-                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                        vmInstanceIds.add(cloudElement.getResourceId());
-                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                        containerInstanceIds.add(cloudElement.getResourceId());
+            boolean enableFlowCollect = false;
+            boolean enableFlowMirror = false;
+            for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
+                String portId = entry.getKey();
+                CollectionPluginSceneElementPortBO collectionPort = entry.getValue();
+                if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
+                    enableFlowCollect = true;
+                    var srcPort = collectionPort.getSrcPort();
+                    var srcElement = srcPort.getElement();
+                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    if (cloudElement != null && cloudElement.getVirtualType() != null
+                            && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                        if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                            collectorVmInstanceIds.add(cloudElement.getResourceId());
+                        } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                            collectorContainerInstanceIds.add(cloudElement.getResourceId());
+                        }
                     }
                 }
-            });
+                if (Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
+                    enableFlowMirror = true;
+                    var srcPort = collectionPort.getSrcPort();
+                    var srcElement = srcPort.getElement();
+                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                        if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                            mirrorVmInstanceIds.add(cloudElement.getResourceId());
+                        } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                            mirrorContainerInstanceIds.add(cloudElement.getResourceId());
+                        }
+                    }
+                }
+            }
+            boolean finalEnableFlowCollect = enableFlowCollect;
+            boolean finalEnableFlowMirror = enableFlowMirror;
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTOR, () -> {
-                getFlowCollector().deleteCollector(flowCollectorId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds));
+                if (finalEnableFlowCollect) {
+                    getFlowCollector().deleteCollector(flowCollectorId, new ArrayList<>(collectorVmInstanceIds), new ArrayList<>(collectorContainerInstanceIds));
+                } else if (finalEnableFlowMirror) {
+                    getFlowCollector().deleteEntityMirror(new ArrayList<>(mirrorVmInstanceIds), new ArrayList<>(mirrorContainerInstanceIds));
+                }
             });
         }
 

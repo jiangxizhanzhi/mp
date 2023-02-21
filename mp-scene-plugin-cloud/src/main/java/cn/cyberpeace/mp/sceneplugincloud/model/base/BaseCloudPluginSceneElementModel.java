@@ -22,6 +22,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean transparent;
     @DefaultBool
     private Boolean isBuildIn;
+    @DefaultInt
+    private Integer netMode;
 
     /**
      * 云平台资源id
@@ -189,6 +191,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String ENTITY = "entity";
 
         private ImageType() {}
+    }
+
+    public static class NetMode {
+        public static final Integer NORMAL = 0;
+        public static final Integer MACVLAN = 1;
+
+        private NetMode() {
+        }
     }
 
     // 用于设备连接的辅助网络

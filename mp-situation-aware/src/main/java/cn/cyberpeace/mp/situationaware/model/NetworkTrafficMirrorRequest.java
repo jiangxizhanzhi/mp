@@ -40,4 +40,6 @@ public class NetworkTrafficMirrorRequest {
      * 场景ID
      */
     private String sceneId;
+
+    private Boolean entity;
 }
