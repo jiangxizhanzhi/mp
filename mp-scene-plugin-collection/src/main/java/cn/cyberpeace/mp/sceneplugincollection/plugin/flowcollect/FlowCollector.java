@@ -30,12 +30,30 @@ public class FlowCollector {
         return networkTrafficGroupService.addArkimeImageInstance(null);
     }
 
+    public void bindEntityNetworkPorts(String sceneId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
+        var request = new NetworkTrafficMirrorRequest();
+        request.setVmInstanceIds(vmInstanceIds);
+        request.setContainerInstanceIds(containerInstanceIds);
+        request.setSceneId(sceneId);
+        networkTrafficGroupService.doBindingEntityNetworkTrafficMirror(request);
+    }
+
     public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
         var request = new NetworkTrafficMirrorRequest();
         request.setArkimeInstanceNames(List.of(collectorId));
         request.setVmInstanceIds(vmInstanceIds);
         request.setContainerInstanceIds(containerInstanceIds);
         request.setSceneId(sceneId);
+        networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
+    }
+
+    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds,boolean entity) {
+        var request = new NetworkTrafficMirrorRequest();
+        request.setArkimeInstanceNames(List.of(collectorId));
+        request.setVmInstanceIds(vmInstanceIds);
+        request.setContainerInstanceIds(containerInstanceIds);
+        request.setSceneId(sceneId);
+        request.setEntity(entity);
         networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
     }
 
@@ -48,6 +66,14 @@ public class FlowCollector {
         // 删除镜像
         var request = new NetworkTrafficMirrorRequest();
         request.setArkimeInstanceNames(List.of(collectorId));
+        request.setVmInstanceIds(vmInstanceIds);
+        request.setContainerInstanceIds(containerInstanceIds);
+        networkTrafficGroupService.deleteNetworkTrafficMirror(request);
+    }
+
+    public void deleteEntityMirror(List<String> vmInstanceIds, List<String> containerInstanceIds) {
+        // 删除镜像
+        var request = new NetworkTrafficMirrorRequest();
         request.setVmInstanceIds(vmInstanceIds);
         request.setContainerInstanceIds(containerInstanceIds);
         networkTrafficGroupService.deleteNetworkTrafficMirror(request);

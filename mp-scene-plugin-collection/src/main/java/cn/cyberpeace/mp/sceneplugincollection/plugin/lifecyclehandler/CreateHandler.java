@@ -144,7 +144,7 @@ public class CreateHandler extends HandlerCommon {
             }
         }
         boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
-        boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || mirrorContainerInstanceIds.isEmpty();
+        boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
         if (enableCollector) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
@@ -156,14 +156,15 @@ public class CreateHandler extends HandlerCommon {
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
                 // 绑定网络端口到流量采集器
-                if (enableMirror) {
-                    // 加个参数
-                }
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
-                        new ArrayList<>(collectorContainerInstanceIds));
+                        new ArrayList<>(collectorContainerInstanceIds), enableMirror);
             });
         } else if (enableMirror) {
             // 镜像流量
+            var sceneId = getPluginHandler().getSrcScene().getEid();
+            // 绑定网络端口到流量采集器
+            getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(collectorVmInstanceIds),
+                    new ArrayList<>(collectorContainerInstanceIds));
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
