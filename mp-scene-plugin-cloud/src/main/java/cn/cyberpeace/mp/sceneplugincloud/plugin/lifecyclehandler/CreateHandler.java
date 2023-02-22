@@ -641,7 +641,7 @@ public class CreateHandler extends HandlerCommon {
         String elementUnzipDir = null;
         if (!StringUtils.isEmpty(elementFileUrl)) {
             elementUnzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
-            extraCommands.add(CommandUtils.linuxMkDir(elementFileUrl));
+            extraCommands.add(CommandUtils.linuxMkDir(elementUnzipDir));
         }
 
         // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
@@ -670,10 +670,10 @@ public class CreateHandler extends HandlerCommon {
             });
         }
 
-        boolean executeOnce = false;
+        boolean executeOnce = true;
         for (var command : commands) {
             if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
-                executeOnce = true;
+                executeOnce = false;
                 break;
             }
         }
