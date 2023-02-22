@@ -56,6 +56,7 @@ import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.StackLocatorUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -648,7 +649,7 @@ public class CreateHandler extends HandlerCommon {
         try {
             ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
         } catch (Exception e) {
-            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
+            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
         }
 
         if (!StringUtils.isEmpty(sceneFileUrl)) {
@@ -677,9 +678,9 @@ public class CreateHandler extends HandlerCommon {
                 break;
             }
         }
-        if(executeOnce){
+        if (executeOnce) {
             containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
-        }else {
+        } else {
             for (var command : commands) {
                 if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
                     String[] path = command.split(StringUtils.SPACE);
@@ -691,6 +692,22 @@ public class CreateHandler extends HandlerCommon {
                     continue;
                 }
                 containerClient.executeCommand(containerId, command);
+            }
+        }
+    }
+
+    private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement) {
+        String ip = cloudElement.getSrcElement().getPorts().get(0).getIp();
+        var ports = getPluginHandler().getPorts(cloudElement);
+        if (ports != null) {
+            for (var port : ports) {
+                if (port.getAccessModes() != null) {
+                    for (var access : port.getAccessModes()) {
+                        access.setAccessIp(ip);
+                        access.setAccessPort(access.getPort());
+                        access.setAvailable(true);
+                    }
+                }
             }
         }
     }
@@ -953,7 +970,7 @@ public class CreateHandler extends HandlerCommon {
         allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
         allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
         CloudPluginSceneElementNetworkBO macvlanNet = null;
-        for(var net:allNets){
+        for (var net : allNets) {
             if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.network.getNetMode())) {
                 macvlanNet = net.network;
                 break;
@@ -993,7 +1010,7 @@ public class CreateHandler extends HandlerCommon {
             cloudElement.setResourceId(container.getId());
             cloudElement.setHost(container.getHost());
             execContainerInitCommand(cloudElement);
-            checkAccessModes(cloudElement);
+            receiveVirtualPortInfo(cloudElement);
         } else {
             createData.setNetworks(CollectionUtils.emptyNull(
                     this.genVirutalNics(cloudElement)
@@ -1175,6 +1192,7 @@ public class CreateHandler extends HandlerCommon {
 
     /**
      * 配置vyos网络
+     *
      * @param elementBO
      */
     private void configVyosNetwork(CloudPluginSceneElementBO elementBO) {

@@ -11,6 +11,7 @@ import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -88,7 +89,8 @@ public class ContainerFileUtils {
 
 
     public static boolean prepareUnzip(Container containerClient, String containerId, List<String> extraCommands) {
-        List<String> commands = List.of(VERSION_TEST_COMMAND);
+        List<String> commands = new ArrayList<>();
+        commands.add(VERSION_TEST_COMMAND);
         commands.addAll(extraCommands);
         var result = containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
         if (result.getExitCode() == null || result.getExitCode() != 0 || StringUtils.isEmpty(result.getOutput())) {
