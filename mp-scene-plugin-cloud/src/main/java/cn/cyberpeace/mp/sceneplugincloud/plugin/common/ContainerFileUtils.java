@@ -11,6 +11,8 @@ import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 @Slf4j
 public class ContainerFileUtils {
 
@@ -85,8 +87,10 @@ public class ContainerFileUtils {
     }
 
 
-    public static boolean prepareUnzip(Container containerClient, String containerId) {
-        var result = containerClient.executeCommand(containerId, VERSION_TEST_COMMAND);
+    public static boolean prepareUnzip(Container containerClient, String containerId, List<String> extraCommands) {
+        List<String> commands = List.of(VERSION_TEST_COMMAND);
+        commands.addAll(extraCommands);
+        var result = containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
         if (result.getExitCode() == null || result.getExitCode() != 0 || StringUtils.isEmpty(result.getOutput())) {
             return false;
         }
@@ -160,6 +164,24 @@ public class ContainerFileUtils {
         }
         containerClient.executeCommand(containerId, CommandUtils.linuxUnzipFile(toPath, unzipDir));
         containerClient.executeCommand(containerId, String.format("chmod +x %s/*", unzipDir));
+        return true;
+    }
+
+    public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir,boolean unzipDirExists) {
+        var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
+        if (!unzipDirExists) {
+            containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
+        }
+        var filename = FileUtil.getName(toPath);
+        var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
+        var toDir = toPath.substring(0, toPath.length() - filename.length());
+        try {
+            containerClient.copyFile(containerId, tmpZipFilepath, toDir);
+        } finally {
+            FileUtil.del(tmpZipFilepath);
+        }
+        String commands = StringUtils.joinWith(" && ", CommandUtils.linuxUnzipFile(toPath, unzipDir), String.format("chmod +x %s/*", unzipDir));
+        containerClient.executeCommand(containerId, commands);
         return true;
     }
 

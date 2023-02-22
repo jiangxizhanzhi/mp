@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
@@ -629,23 +630,32 @@ public class CreateHandler extends HandlerCommon {
         var srcScene = getPluginHandler().getSrcScene();
         var sceneId = srcScene.getEid();
 
+        List<String> extraCommands = new ArrayList<>();
+        var sceneFileUrl = srcScene.getFile();
+        String sceneUnzipDir = null;
+        if (!StringUtils.isEmpty(sceneFileUrl)) {
+            sceneUnzipDir = SceneFileUtils.getSceneFileUnzipDir(standardSystemType, sceneId);
+            extraCommands.add(CommandUtils.linuxMkDir(sceneUnzipDir));
+        }
+        var elementFileUrl = srcElement.getFile();
+        String elementUnzipDir = null;
+        if (!StringUtils.isEmpty(elementFileUrl)) {
+            elementUnzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
+            extraCommands.add(CommandUtils.linuxMkDir(elementUnzipDir));
+        }
+
         // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
         try {
-            ContainerFileUtils.prepareUnzip(containerClient, containerId);
+            ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
         } catch (Exception e) {
             log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
         }
 
-        var sceneFileUrl = srcScene.getFile();
         if (!StringUtils.isEmpty(sceneFileUrl)) {
-            var unzipDir = SceneFileUtils.getSceneFileUnzipDir(standardSystemType, sceneId);
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, unzipDir);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, sceneUnzipDir, true);
         }
-
-        var elementFileUrl = srcElement.getFile();
         if (!StringUtils.isEmpty(elementFileUrl)) {
-            var unzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, unzipDir);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, elementUnzipDir, true);
         }
 
         List<String> commands = new ArrayList<>();
@@ -660,17 +670,28 @@ public class CreateHandler extends HandlerCommon {
             });
         }
 
+        boolean executeOnce = true;
         for (var command : commands) {
             if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
-                String[] path = command.split(StringUtils.SPACE);
-                try {
-                    ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
-                } catch (Exception e) {
-                    log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
-                }
-                continue;
+                executeOnce = false;
+                break;
             }
-            containerClient.executeCommand(containerId, command);
+        }
+        if(executeOnce){
+            containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
+        }else {
+            for (var command : commands) {
+                if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
+                    String[] path = command.split(StringUtils.SPACE);
+                    try {
+                        ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                    } catch (Exception e) {
+                        log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                    }
+                    continue;
+                }
+                containerClient.executeCommand(containerId, command);
+            }
         }
     }
 
