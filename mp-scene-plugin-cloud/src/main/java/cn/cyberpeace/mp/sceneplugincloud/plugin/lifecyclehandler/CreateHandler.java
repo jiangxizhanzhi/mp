@@ -653,10 +653,10 @@ public class CreateHandler extends HandlerCommon {
         }
 
         if (!StringUtils.isEmpty(sceneFileUrl)) {
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl,standardSystemType, sceneUnzipDir, true);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, standardSystemType, sceneUnzipDir, true);
         }
         if (!StringUtils.isEmpty(elementFileUrl)) {
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl,standardSystemType, elementUnzipDir, true);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
         List<String> commands = new ArrayList<>();
@@ -679,8 +679,19 @@ public class CreateHandler extends HandlerCommon {
             }
         }
         if (executeOnce) {
+            List<String> finnalCommands = new ArrayList<>();
+            for (var command : commands) {
+                if (StringUtils.isNotEmpty(command)) {
+                    String c = command.trim();
+                    if (c.endsWith(";")) {
+                        finnalCommands.add(c.substring(0, c.length() - 1));
+                    } else {
+                        finnalCommands.add(c);
+                    }
+                }
+            }
             containerClient.executeCommand(containerId, SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
-                    commands.toArray(new String[0])));
+                    finnalCommands.toArray(new String[0])));
         } else {
             for (var command : commands) {
                 if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
