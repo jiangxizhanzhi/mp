@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.URLUtil;
@@ -169,7 +170,7 @@ public class ContainerFileUtils {
         return true;
     }
 
-    public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir,boolean unzipDirExists) {
+    public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl,String standardSystemType, String unzipDir,boolean unzipDirExists) {
         var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         if (!unzipDirExists) {
             containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
@@ -182,7 +183,7 @@ public class ContainerFileUtils {
         } finally {
             FileUtil.del(tmpZipFilepath);
         }
-        String commands = StringUtils.joinWith(" && ", CommandUtils.linuxUnzipFile(toPath, unzipDir), String.format("chmod +x %s/*", unzipDir));
+        String commands = SystemTypeCommandUtils.inlineJoinCommands(standardSystemType, List.of(CommandUtils.linuxUnzipFile(toPath, unzipDir), String.format("chmod +x %s/*", unzipDir)).toArray(new String[0]));
         containerClient.executeCommand(containerId, commands);
         return true;
     }
