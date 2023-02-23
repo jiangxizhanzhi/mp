@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerAddRouteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerArchiveData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
@@ -231,6 +232,14 @@ public class Container extends CloudClient {
                 new TypeReference<CloudResponse<ContainerFileGetResult>>() {
                 }, true);
         return result.getData();
+    }
+
+    public void addRoute(String containerId) {
+        ContainerAddRouteData data = new ContainerAddRouteData();
+        data.setContainerUuid(containerId);
+        CloudResponse<Object> result = cloudPost(CloudUrlConstant.CONTAINER_ADD_ROUTE, data, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
     }
 
     public MacvlanContainerCreateData createMacvlanContainer(MacvlanContainerCreateData createData) {

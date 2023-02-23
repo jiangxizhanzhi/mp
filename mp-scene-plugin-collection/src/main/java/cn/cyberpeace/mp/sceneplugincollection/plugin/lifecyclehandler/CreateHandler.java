@@ -163,8 +163,8 @@ public class CreateHandler extends HandlerCommon {
             // 镜像流量
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 绑定网络端口到流量采集器
-            getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(collectorVmInstanceIds),
-                    new ArrayList<>(collectorContainerInstanceIds));
+            getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
+                    new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {

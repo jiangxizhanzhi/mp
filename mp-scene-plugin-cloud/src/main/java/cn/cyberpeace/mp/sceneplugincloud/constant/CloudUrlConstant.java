@@ -72,6 +72,7 @@ public class CloudUrlConstant {
 
     public static final String VLAN_RANGE = "/cpcloud/info/v1/vlan_range";
     public static final String DOWNLOAD_CONTAINER_FILE = "/cpcloud/info/v1/download_pcap";
+    public static final String CONTAINER_ADD_ROUTE = "/cpcloud/info/v1/container_add_route";
 
     public static final String LINK_STATUS = "/cpcloud/instance_control/v1/link_status";
     public static final String SCP_FILE = "/cpcloud/instance_control/v1/scpfile";
