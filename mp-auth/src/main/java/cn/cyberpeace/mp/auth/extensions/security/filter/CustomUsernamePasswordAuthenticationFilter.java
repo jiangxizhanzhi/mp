@@ -80,7 +80,8 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
     public static boolean ldapAuthenticate(String userName, String password) {
         var authConfig = BeanCommon.getBean(AuthConfig.class);
-        String DN = "cn=" + userName + "," +  authConfig.getLdapBaseDn();
+        //String DN = "cn=" + userName + "," +  authConfig.getLdapBaseDn();
+        String DN = userName + "@" +  authConfig.getLdapBaseDn();
         Properties props = new Properties();
         props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         props.put(Context.SECURITY_AUTHENTICATION, "simple"); // use simple
