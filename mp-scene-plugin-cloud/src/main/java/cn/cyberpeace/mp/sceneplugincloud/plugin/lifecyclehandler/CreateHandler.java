@@ -1036,9 +1036,9 @@ public class CreateHandler extends HandlerCommon {
             execContainerInitCommand(cloudElement);
 
             checkAccessModes(cloudElement);
-        }
-        if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
-            containerClient.addRoute(cloudElement.getResourceId());
+            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
+                containerClient.addRoute(cloudElement.getResourceId());
+            }
         }
     }
 
