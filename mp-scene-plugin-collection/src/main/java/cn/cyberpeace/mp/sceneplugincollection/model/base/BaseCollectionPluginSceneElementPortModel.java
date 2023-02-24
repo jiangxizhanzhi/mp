@@ -8,4 +8,6 @@ import lombok.Data;
 public class BaseCollectionPluginSceneElementPortModel extends BasePluginSceneElementPortModel {
     @DefaultBool
     private Boolean enableFlowCollect;
+    @DefaultBool
+    private Boolean enableFlowMirror;
 }
