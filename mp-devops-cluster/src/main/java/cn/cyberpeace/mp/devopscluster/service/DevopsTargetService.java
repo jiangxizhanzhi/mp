@@ -21,6 +21,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,6 +96,24 @@ public class DevopsTargetService {
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
         });
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
+    }
+
+    public void updateInPosition(List<Device> deviceList) {
+        if (deviceList == null) {
+            return;
+        }
+        List<DeviceTargetPO> update = new ArrayList<>();
+        for (var l : deviceList) {
+            if (l.getExtEntity() != null) {
+                DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+                deviceTargetPO.setUuid(l.getUuid());
+                deviceTargetPO.setInPosition(Boolean.TRUE.equals(l.getExtEntity().getEntityStatus()) ? StatusEnum.YES : StatusEnum.NO);
+                update.add(deviceTargetPO);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(update)) {
+            deviceTargetMapper.batchUpdateInPosition(update);
+        }
     }
 
     /**

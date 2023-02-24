@@ -76,6 +76,8 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      */
     Integer updateBatch(@Param("list") List<DeviceTargetPO> list);
 
+    Integer batchUpdateInPosition(@Param("list") List<DeviceTargetPO> list);
+
     /**
      * 新增
      * @param list
