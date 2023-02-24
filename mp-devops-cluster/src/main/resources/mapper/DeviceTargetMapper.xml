@@ -403,6 +403,19 @@
         </foreach>
     </update>
 
+    <update id="batchUpdateInPosition" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update mp_devops_target
+            <set>
+                <if test="item.inPosition != null">
+                    in_position =
+                    #{item.inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                </if>
+            </set>
+            where uuid = #{item.uuid}
+        </foreach>
+    </update>
+
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO">
         delete from mp_devops_target
