@@ -12,6 +12,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 /**
@@ -35,6 +37,17 @@ public class OperateLogServiceImpl implements OperateLogService {
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
         ListObjServiceResult<OperationLogPageResponse> result = operateLogDbService.search(request, locale);
+        var logList = result.getSource().getObjs();
+        LocalDateTime now = LocalDateTime.now();
+        logList.forEach(
+                log -> {
+                    LocalDateTime opTime = log.getOpTime();
+                    var seconds = Duration.between(opTime, now).getSeconds();
+                    seconds = seconds < 0 ? 1 : seconds;
+                    var millSeconds = seconds * 1000;
+                    log.setOpMillSecondsBefore(millSeconds);
+                }
+        );
         return result;
     }
 

@@ -84,6 +84,12 @@ public class OperationLogPageResponse {
     private LocalDateTime opTime;
 
     /**
+     * 多少秒之前操作的
+     */
+    @ApiModelProperty(value = "多少秒之前操作的")
+    private Long opMillSecondsBefore;
+
+    /**
      * 操作人IP
      */
     @ApiModelProperty(value = "操作人IP")
