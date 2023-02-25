@@ -43,7 +43,7 @@ public class OperateLogServiceImpl implements OperateLogService {
                 log -> {
                     LocalDateTime opTime = log.getOpTime();
                     var seconds = Duration.between(opTime, now).getSeconds();
-                    seconds = seconds < 0 ? 1 : seconds;
+                    seconds = seconds <= 0 ? 1 : seconds;
                     var millSeconds = seconds * 1000;
                     log.setOpMillSecondsBefore(millSeconds);
                 }
