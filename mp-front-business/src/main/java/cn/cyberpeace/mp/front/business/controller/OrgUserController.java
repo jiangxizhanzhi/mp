@@ -8,8 +8,10 @@ import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.dto.org.ListIdsByUserIdRequest;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -25,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,6 +46,9 @@ public class OrgUserController {
     @Autowired
     private OrgUserService orgUserService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
     @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
             "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
@@ -60,7 +66,8 @@ public class OrgUserController {
     public ListObjServiceResult<Object> getPageByOrgCurrent(OrgUserPageRequest req) {
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
-            throw new MpRuntimeException("get login user failed");
+            log.error("byorg get login user failed");
+            throw new MpRuntimeException("byorg get login user failed");
         }
 
         // 是否admin用户
@@ -70,7 +77,8 @@ public class OrgUserController {
             // 非admin用户，根据组织id查询组织信息
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
             if (CollectionUtils.isEmpty(orgs)) {
-                throw new MpRuntimeException("[" + loginUser.getId() + "] user orgs is empty");
+                log.error("byorg [" + loginUser.getId() + "] user orgs is empty");
+                throw new MpRuntimeException("byorg [" + loginUser.getId() + "] user orgs is empty");
             }
             req.setOrg(orgs.get(0).getId());
         }
@@ -86,6 +94,7 @@ public class OrgUserController {
     public ServiceResult<List<String>> listByUserId(ListIdsByUserIdRequest request) {
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
+            log.error("byUserId get login user failed");
             throw new MpRuntimeException("get login user failed");
         }
 
@@ -95,10 +104,20 @@ public class OrgUserController {
         boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
 
         if (!isSuperUser) {
+            List<RoleModel> roles = userRoleService.listByUserId(loginUser.getId());
+            // 是否管理员
+            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+            if (!isAdmin) {
+                // 非管理员用户，直接返回自己的id
+                log.warn("byUserId current user not a manager");
+                return ServiceResult.success(Collections.singletonList(loginUser.getId()));
+            }
+
             // 非admin用户，根据组织id查询组织信息
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
             if (CollectionUtils.isEmpty(orgs)) {
-                throw new MpRuntimeException("[" + loginUser.getId() + "] user orgs is empty");
+                log.error("byUserId [" + loginUser.getId() + "] user orgs is empty");
+                throw new MpRuntimeException("byUserId [" + loginUser.getId() + "] user orgs is empty");
             }
             users = orgUserService.listUsersByOrgIdExcludeManager(orgs.get(0).getId(), loginUser.getId(), request.getUsername());
         } else {

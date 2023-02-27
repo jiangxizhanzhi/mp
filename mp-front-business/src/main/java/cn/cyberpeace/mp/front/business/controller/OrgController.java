@@ -63,7 +63,8 @@ public class OrgController {
     public ServiceResult getOrgTreeCurrent() {
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
-            return ServiceResult.fail("get login user failed");
+            log.error("tree get login user failed");
+            return ServiceResult.fail("tree get login user failed");
         }
 
         String orgId = StringUtils.EMPTY;
@@ -73,6 +74,7 @@ public class OrgController {
             // 非admin用户，根据组织id查询组织信息
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
             if (CollectionUtils.isEmpty(orgs)) {
+                log.error("tree [" + loginUser.getId() + "] user orgs is empty");
                 return ServiceResult.fail("[" + loginUser.getId() + "] user orgs is empty");
             }
             orgId = orgs.get(0).getId();
