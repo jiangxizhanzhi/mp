@@ -139,6 +139,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             // 非测试模式,核心路由器需要加上console登录协议
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
+        //检查相关节点，vlan_id是否被占用
         this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
@@ -147,8 +148,10 @@ public class CsceneHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
+        //创建实例
         instanceHandler.create();
         var result = instanceHandler.toData();
+        //创建后默认进度为5%
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {
             result.getScene().getTopology().getScene().setProgressPercentage(5);
         }

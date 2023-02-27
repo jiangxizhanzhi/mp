@@ -58,22 +58,26 @@ public class SceneService {
                 sceneHandler.getScene().setCreateTime(null);
             }
             sceneHandler.reformTopo();
+            //保存当前场景数据
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
-
+        //创建场景处理代理类
         SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        //调用线程池实例执行创建任务
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
             sceneHandler.prepare(partialStart);
             if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
+            //创建场景
             sceneHandlerProxy.create();
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
+            //设置处理时间
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler.updateScene();
             if (callback != null) {

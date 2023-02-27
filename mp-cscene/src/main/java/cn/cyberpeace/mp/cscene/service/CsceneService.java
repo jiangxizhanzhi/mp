@@ -383,6 +383,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return sync(csceneHandler.toDataWithoutCorrectCsceneData(false).export(), context, false);
     }
 
+    /**
+     * @description: 保存场景
+     * @param csceneBO 场景保存入参对象
+     * @param context 场景上下文对象
+     * @param check 是否进行场景最大可编辑节点数校验
+     * @throws
+     * @return ServiceResult<CsceneBO>
+     */
     @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context, boolean check) {
         if (check) {
@@ -400,6 +408,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
             if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
                 CsceneBO result = new CsceneBO();
+                //由数据库后端响应对象转换为前端响应对象
                 result.fromModel(serviceResult.getSource().getObj());
                 result.setEnableRecording(csceneBO.getEnableRecording());
                 return new ServiceResult<>(result);
@@ -477,36 +486,46 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneInstanceCreateContextBO createContext) {
+        //实例创建上下文
         if (createContext == null) {
             return createTestInstance(csceneId, unique, new CsceneContextBO());
         }
+        //场景节点限制检查
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
-
+        //综合场景处理基类
         var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
+        //场景模板数据是否为空，创建场景实例数据对象
         if (cscene == null) {
             csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
+        //是否需要启用系统录屏功能
         if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
             this.correctEnableRecording(csceneInstance);
         }
+        //设置场景属性
         if (createContext.getSceneAttr() != null) {
             csceneInstance.setSceneAttr(createContext.getSceneAttr());
         }
+        //场景存活时间
         if (createContext.getSceneTtl() != null) {
             csceneInstance.setSceneTtl(createContext.getSceneTtl());
         }
+        //设置透传字段
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
+        //设置场景模板引用类型
         if (createContext.getReferenceType() != null) {
             csceneInstance.setReferenceType(createContext.getReferenceType());
         }
+        //设置综合场景实例引用元数据
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+            //对应修改名称
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));

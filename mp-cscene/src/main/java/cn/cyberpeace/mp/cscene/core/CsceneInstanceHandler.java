@@ -86,6 +86,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     public void create() {
+        //获取综合场景业务数据
         var cscene = getCscene();
         // 先保存设置id
         save();

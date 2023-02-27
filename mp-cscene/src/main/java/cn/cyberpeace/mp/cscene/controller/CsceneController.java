@@ -72,17 +72,29 @@ public class CsceneController implements BaseModelListControllerBase {
         if (csceneBO == null) {
             return;
         }
+        //创建去除初始eid
         CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        //纠正创建和更新场景模板时fdfs的地址,移除前缀
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
+        //初始化命令相关处理
         CsceneDataModifier.assembleInitCommands(csceneBO);
+        //处理是否录屏设置
         CsceneDataModifier.handlerInputEnableRecording(csceneBO);
+        //检查云平台流量数
         CsceneDataModifier.checkFlowNum(csceneBO);
+        //检查vlan_id
         CsceneDataModifier.checkVlanId(csceneBO);
+        //用户输入的场景名称和描述的字符长度限制
         CsceneDataModifier.check(csceneBO);
+        //网元端口相关参数设置(上行带宽，下行带宽，延迟，丢包)
         CsceneDataModifier.checkIngressAndEgress(csceneBO);
+        //cploud下快速构建参数
         CsceneDataModifier.correctQuickCreateSupport(csceneBO);
+        //防火墙规则数限制
         CsceneDataModifier.checkFirewallRules(csceneBO);
+        //场景gns3仿真虚拟路由
         CsceneDataModifier.handlerGns3Router(csceneBO);
+        //接入方式处理
         CsceneDataModifier.handleAccessModePath(csceneBO);
     }
 
@@ -148,9 +160,13 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        //根据对象及场景id判断是否为更新
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
+        //对场景模板保存入参进行校验
         correctRequestCsceneParamsForSync(csceneBO);
+        //执行保存
         var result = modelService.sync(csceneBO, null, true).asResult();
+        //场景类型为模板时记录日志
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
@@ -227,8 +243,11 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> createTestInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
+        //请求参数包装
         request = formatCreateInstanceRequest(request, id);
+        //请求参数校验
         correctRequestCsceneParamsForAppInstance(request.getCscene());
+        //创建测试实例
         var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;

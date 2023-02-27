@@ -12,6 +12,7 @@ public class EventProcess {
     private String process;
     private String processName;
 
+    //获取下一个过程名称
     public String getProcessNameText() {
         return MessageCommon.get(processName);
     }

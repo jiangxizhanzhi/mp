@@ -236,7 +236,9 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private void startAllEvent(int sceneEvent, int elementEvent) {
+        //开始场景事件
         startSceneEvent(sceneEvent);
+        //所有网元节点集合事件开始
         for (var element : getElementMap().values()) {
             if (isHandleNode(element.getId())) {
                 startElementEvent(element.getId(), elementEvent);
@@ -507,8 +509,15 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    /**
+     * @description: 场景创建方法
+     * @throws
+     * @return boolean
+     */
     public boolean create() {
+        //Event准备
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        //Event开始
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         try {
             for (var plugin : getPlugins()) {
@@ -518,6 +527,7 @@ public class SceneHandler extends BaseSceneHandler<
             errorScene(SceneModel.Event.CREATE, e.getMessage());
             return false;
         }
+        //Event结束
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         for (var nodeId : getElementMap().keySet()) {
             if (!isHandleNode(nodeId)) {

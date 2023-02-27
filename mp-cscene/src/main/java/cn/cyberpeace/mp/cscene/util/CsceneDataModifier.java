@@ -255,15 +255,22 @@ public class CsceneDataModifier {
      * @param csceneBO
      */
     public static void removeEidWhenCreate(CsceneBO csceneBO) {
+        //创建入参核心为topology(拓扑数据)，所以必须不为空
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             SceneConfigBO sceneConfigBO = csceneBO.getSceneConfig().getTopology().getScene();
             if (sceneConfigBO != null && sceneConfigBO.getEid() == null) {
                 // 属于新增 需要去除多余的eid
+                //所有Elements内容(组网中相关设备元数据--网元数据)
                 List<SceneConfigElementBO> elementBOS = csceneBO.getSceneConfig().getTopology().getElements();
+                //Connections（组网中连接数据）
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
+                //areas（区域数据）
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
+                //pieces（碎片数据）
                 List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                //角色信息
                 List<CsceneRoleBO> roles = csceneBO.getRoles();
+                //服务器id（eid）设置为null
                 if (CollectionUtils.isNotEmpty(elementBOS)) {
                     elementBOS.forEach(bo -> {
                         bo.setEid(null);
@@ -301,6 +308,7 @@ public class CsceneDataModifier {
      * @param csceneBO
      */
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
+        //Base模块配置获取类
         BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
         // 纠正fdfs的地址
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
@@ -761,6 +769,7 @@ public class CsceneDataModifier {
                 elements.values().forEach(e -> {
                     if (e.containsKey("flows")) {
                         Object flows = e.get("flows");
+                        //网络层最大可以接收65535个字节
                         if (JsonCommon.stringify(flows).getBytes(StandardCharsets.UTF_8).length > 65535) {
                             throw new MpRuntimeException(CsceneErrorCode.PARAMS_FLOWS_DATA_TOO_LONG);
                         }

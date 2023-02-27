@@ -19,7 +19,7 @@ public class VirtualSwitch extends CloudClient {
 
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
         heavyConcurrentWait();
-
+        //请求接口响应
         CloudResponse<VirtualSwitchCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_SWITCH_CREATE_URL, createData,
                 null, new TypeReference<>() {
                 }, true);

@@ -29,7 +29,9 @@ public class CsceneInstanceModel extends BaseCsceneModel {
     private String passThrough;
 
     public static class Type {
+        //场景测试
         public static final int TEST = 1;
+        //实例应用
         public static final int APP = 2;
 
         private Type() {}

@@ -35,7 +35,7 @@ public final class NodeLimitUtils {
     private static CsceneAppConfig csceneAppConfig;
 
     /**
-     * 增加被限制的节点数量
+     * 计算，增加被限制的节点数量
      * @param instance
      * @return
      */
