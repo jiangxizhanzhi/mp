@@ -15,6 +15,9 @@
         WHERE is_enabled = 1
           and is_audited = 1
           and expired_time > now()
+        <if test="userName != null and userName != ''">
+            AND username like CONCAT('%', #{userName}, '%')
+        </if>
         order by user.username
     </select>
 
@@ -25,11 +28,18 @@
         INNER JOIN mp_auth_user_role user_role ON user.id = user_role.user
         INNER JOIN mp_auth_role role ON user_role.role = role.id
                                      AND role.identifier <![CDATA[ <> ]]> 'ADMIN' OR user.id = #{userId}
-        WHERE org_user.org = #{orgId}
-            and is_enabled = 1
+        WHERE
+            is_enabled = 1
             and is_audited = 1
             and expired_time > now()
             and user.id <![CDATA[ <> ]]> '3f655d87112f4ae094bbaf70830e20aa'
+            AND org_user.org in
+            <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
+                #{orgId}
+            </foreach>
+        <if test="userName != null and userName != ''">
+            AND username like CONCAT('%', #{userName}, '%')
+        </if>
         order by user.username
     </select>
 

@@ -78,16 +78,24 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
-    public List<UserModel> listUsersByOrgIdExcludeManager(String orgId, String userId) {
+    public List<UserModel> listUsersByOrgIdExcludeManager(String orgId, String userId, String userName) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<UserModel> users = getModelMapper().listUsersByOrgIdExcludeManager(orgId, userId);
+
+        List<String> orgIds = new ArrayList<>();
+        // 添加父级org（把自己先加进去）
+        orgIds.add(orgId);
+        List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(orgId);
+        if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+            orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        }
+        List<UserModel> users = getModelMapper().listUsersByOrgIdExcludeManager(orgIds, userId, userName);
 
         return users;
     }
 
     @Override
-    public List<UserModel> listAllEnabledUsers() {
-        List<UserModel> users = getModelMapper().listAllEnabledUsers();
+    public List<UserModel> listAllEnabledUsers(String userName) {
+        List<UserModel> users = getModelMapper().listAllEnabledUsers(userName);
         return users;
     }
 
@@ -226,6 +234,29 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         pageInfo.setList(userDtos);
         return pageInfo;
+    }
+
+    @Override
+    public List<UserModel> listUsersByOrg(String orgId) {
+        OrgUserPageRequest req = new OrgUserPageRequest();
+        req.setOrg(orgId);
+        List<String> orgIds = new ArrayList<>();
+        // 添加父级org（把自己先加进去）
+        orgIds.add(req.getOrg());
+        List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
+        if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+            orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        }
+
+        log.info("listUsersByOrg orgIds: {}", orgIds);
+
+        UserDto userCondition = new UserDto();
+        userCondition.setIsEnabled(1);
+        userCondition.setIsAudited(1);
+        userCondition.setIsExpired(0);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, null, null, userCondition);
+
+        return users;
     }
 
     @Override

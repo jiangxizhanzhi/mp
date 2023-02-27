@@ -30,15 +30,17 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
      * 查询组织下所有非管理员用户
      * @param orgId
      * @param userId
+     * @param userName
      * @return
      */
-    List<UserModel> listUsersByOrgIdExcludeManager(String orgId, String userId);
+    List<UserModel> listUsersByOrgIdExcludeManager(String orgId, String userId, String userName);
 
     /**
      * 查询所有正常状态用户
+     * @param userName
      * @return
      */
-    List<UserModel> listAllEnabledUsers();
+    List<UserModel> listAllEnabledUsers(String userName);
 
     List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds);
 
@@ -62,6 +64,13 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     Integer getUserCnt(String orgId);
 
     PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
+
+    /**
+     * 查询组织下的所有用户信息
+     * @param orgId
+     * @return
+     */
+    List<UserModel> listUsersByOrg(String orgId);
 
     // 清除用户所有组织
     boolean deleteByUserId(String userId);

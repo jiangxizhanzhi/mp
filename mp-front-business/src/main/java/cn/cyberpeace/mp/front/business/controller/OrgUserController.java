@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
+import cn.cyberpeace.mp.auth.dto.org.ListIdsByUserIdRequest;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -82,7 +83,7 @@ public class OrgUserController {
 
     @ApiOperation(value = "查询当前用户组织下的所有用户id")
     @GetMapping("/list/byUserId")
-    public ServiceResult<List<String>> listByUserId() {
+    public ServiceResult<List<String>> listByUserId(ListIdsByUserIdRequest request) {
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
             throw new MpRuntimeException("get login user failed");
@@ -99,10 +100,10 @@ public class OrgUserController {
             if (CollectionUtils.isEmpty(orgs)) {
                 throw new MpRuntimeException("[" + loginUser.getId() + "] user orgs is empty");
             }
-            users = orgUserService.listUsersByOrgIdExcludeManager(orgs.get(0).getId(), loginUser.getId());
+            users = orgUserService.listUsersByOrgIdExcludeManager(orgs.get(0).getId(), loginUser.getId(), request.getUsername());
         } else {
             // 查询所有正常状态用户
-            users = orgUserService.listAllEnabledUsers();
+            users = orgUserService.listAllEnabledUsers(request.getUsername());
         }
 
         if (!CollectionUtils.isEmpty(users)) {
