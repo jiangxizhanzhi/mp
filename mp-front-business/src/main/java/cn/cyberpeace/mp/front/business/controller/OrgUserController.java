@@ -23,8 +23,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 组织用户管理接口
@@ -60,6 +62,7 @@ public class OrgUserController {
             throw new MpRuntimeException("get login user failed");
         }
 
+        // 是否admin用户
         boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
 
         if (!isSuperUser) {
@@ -76,6 +79,39 @@ public class OrgUserController {
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
+
+    @ApiOperation(value = "查询当前用户组织下的所有用户id")
+    @GetMapping("/list/byUserId")
+    public ServiceResult<List<String>> listByUserId() {
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (Objects.isNull(loginUser)) {
+            throw new MpRuntimeException("get login user failed");
+        }
+
+        List<UserModel> users;
+        List<String> idList = new ArrayList<>();
+        // 是否admin用户
+        boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
+
+        if (!isSuperUser) {
+            // 非admin用户，根据组织id查询组织信息
+            List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
+            if (CollectionUtils.isEmpty(orgs)) {
+                throw new MpRuntimeException("[" + loginUser.getId() + "] user orgs is empty");
+            }
+            users = orgUserService.listUsersByOrgIdExcludeManager(orgs.get(0).getId(), loginUser.getId());
+        } else {
+            // 查询所有正常状态用户
+            users = orgUserService.listAllEnabledUsers();
+        }
+
+        if (!CollectionUtils.isEmpty(users)) {
+            idList = users.stream().map(UserModel::getId).collect(Collectors.toList());
+        }
+
+        return ServiceResult.success(idList);
+    }
+
 
 
     @ApiOperation(value = "查询组织下所有用户信息", notes = "")

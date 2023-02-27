@@ -24,6 +24,20 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
     List<UserModel> listUsersByOrgId(@Param("orgId") String orgId);
 
+    /**
+     * 查询组织下的非管理员用户
+     * @param orgId
+     * @param userId
+     * @return
+     */
+    List<UserModel> listUsersByOrgIdExcludeManager(@Param("orgId") String orgId, @Param("userId") String userId);
+
+    /**
+     * 查询所有正常状态用户
+     * @return
+     */
+    List<UserModel> listAllEnabledUsers();
+
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
     /**

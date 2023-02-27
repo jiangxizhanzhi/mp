@@ -78,6 +78,20 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    public List<UserModel> listUsersByOrgIdExcludeManager(String orgId, String userId) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+        List<UserModel> users = getModelMapper().listUsersByOrgIdExcludeManager(orgId, userId);
+
+        return users;
+    }
+
+    @Override
+    public List<UserModel> listAllEnabledUsers() {
+        List<UserModel> users = getModelMapper().listAllEnabledUsers();
+        return users;
+    }
+
+    @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
         log.info("orgId:{}, uname:{}", orgId, uname);
 
