@@ -1,13 +1,16 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,15 +19,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 组织用户管理接口
@@ -44,6 +44,33 @@ public class OrgUserController {
             "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
+        req.ensure();
+        PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
+
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+
+    @ApiOperation(value = "分页查询当前用户的组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
+            "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
+    @GetMapping("/page/byorg/current")
+    public ListObjServiceResult<Object> getPageByOrgCurrent(OrgUserPageRequest req) {
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (Objects.isNull(loginUser)) {
+            throw new MpRuntimeException("get login user failed");
+        }
+
+        boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
+
+        if (!isSuperUser) {
+            // 非admin用户，根据组织id查询组织信息
+            List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
+            if (CollectionUtils.isEmpty(orgs)) {
+                throw new MpRuntimeException("[" + loginUser.getId() + "] user orgs is empty");
+            }
+            req.setOrg(orgs.get(0).getId());
+        }
+
         req.ensure();
         PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
 
