@@ -21,6 +21,7 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -70,18 +71,20 @@ public class OrgUserController {
             throw new MpRuntimeException("byorg get login user failed");
         }
 
-        // 是否admin用户
-        boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
-
-        if (!isSuperUser) {
-            // 非admin用户，根据组织id查询组织信息
-            List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
-            if (CollectionUtils.isEmpty(orgs)) {
-                log.error("byorg [" + loginUser.getId() + "] user orgs is empty");
-                throw new MpRuntimeException("byorg [" + loginUser.getId() + "] user orgs is empty");
+        if (StringUtils.isBlank(req.getOrg())) {
+            // 是否admin用户
+            boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
+            if (!isSuperUser) {
+                // 非admin用户，根据组织id查询组织信息
+                List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
+                if (CollectionUtils.isEmpty(orgs)) {
+                    log.error("byorg [" + loginUser.getId() + "] user orgs is empty");
+                    throw new MpRuntimeException("byorg [" + loginUser.getId() + "] user orgs is empty");
+                }
+                req.setOrg(orgs.get(0).getId());
             }
-            req.setOrg(orgs.get(0).getId());
         }
+
 
         req.ensure();
         PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
