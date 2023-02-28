@@ -88,7 +88,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         if (CollectionUtil.isNotEmpty(childOrgDtos)) {
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
-        List<UserModel> users = getModelMapper().listUsersByOrgIdExcludeManager(orgIds, userId, userName);
+        String likeUname = SQLUtils.escapeLike(userName);
+        List<UserModel> users = getModelMapper().listUsersByOrgIdExcludeManager(orgIds, userId, likeUname);
 
         return users;
     }
