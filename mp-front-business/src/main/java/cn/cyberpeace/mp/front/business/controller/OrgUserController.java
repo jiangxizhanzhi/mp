@@ -72,7 +72,7 @@ public class OrgUserController {
         }
 
         req.ensure();
-        PageInfo pageInfo = null;
+        PageInfo pageInfo;
 
         // 是否admin用户
         boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
@@ -92,6 +92,9 @@ public class OrgUserController {
                 // 不相等，查询的是下级组织，直接查询所有
                 pageInfo = orgUserService.pageUsersByOrg(req);
             }
+        } else {
+            // admin查询所有用户
+            pageInfo = orgUserService.pageUsersByOrg(req);
         }
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
