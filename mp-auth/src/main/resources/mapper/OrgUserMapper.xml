@@ -21,6 +21,22 @@
         order by user.username
     </select>
 
+    <select id="listUsersByOrgIdWithManager" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select distinct * from mp_auth_user
+        where
+        is_enabled = 1
+        and is_audited = 1
+        and expired_time > now()
+        and id in (select user from mp_auth_org_user where org in
+        <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>)
+        <if test="userName != null and userName != ''">
+            AND username like CONCAT('%', #{userName}, '%')
+        </if>
+        order by username
+    </select>
+
     <select id="listUsersByOrgIdExcludeManager" resultType="cn.cyberpeace.mp.auth.model.UserModel">
         SELECT distinct user.*
         FROM mp_auth_user user

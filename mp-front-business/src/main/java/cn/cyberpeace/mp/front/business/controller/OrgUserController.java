@@ -120,7 +120,7 @@ public class OrgUserController {
                 log.error("byUserId [" + loginUser.getId() + "] user orgs is empty");
                 throw new MpRuntimeException("byUserId [" + loginUser.getId() + "] user orgs is empty");
             }
-            users = orgUserService.listUsersByOrgIdExcludeManager(orgs.get(0).getId(), loginUser.getId(), request.getUsername());
+            users = orgUserService.listUsersByOrgIdWithManager(orgs.get(0).getId(), loginUser.getId(), request.getUsername());
         } else {
             // 查询所有正常状态用户
             users = orgUserService.listAllEnabledUsers(request.getUsername());

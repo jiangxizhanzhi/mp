@@ -95,6 +95,23 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    public List<UserModel> listUsersByOrgIdWithManager(String orgId, String userId, String userName) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+
+        List<String> orgIds = new ArrayList<>();
+        // 添加父级org（把自己先加进去）
+        orgIds.add(orgId);
+        List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(orgId);
+        if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+            orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        }
+        String likeUname = SQLUtils.escapeLike(userName);
+        List<UserModel> users = getModelMapper().listUsersByOrgIdWithManager(orgIds, userId, likeUname);
+
+        return users;
+    }
+
+    @Override
     public List<UserModel> listAllEnabledUsers(String userName) {
         String likeUname = SQLUtils.escapeLike(userName);
         List<UserModel> users = getModelMapper().listAllEnabledUsers(likeUname);
