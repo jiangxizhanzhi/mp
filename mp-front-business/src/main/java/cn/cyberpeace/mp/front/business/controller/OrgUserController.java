@@ -71,32 +71,22 @@ public class OrgUserController {
             throw new MpRuntimeException("byorg get login user failed");
         }
 
-        req.ensure();
-        PageInfo pageInfo;
-
-        // 是否admin用户
-        boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
-        if (!isSuperUser) {
-            // 非admin用户，根据组织id查询组织信息
-            List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
-            if (CollectionUtils.isEmpty(orgs)) {
-                log.error("byorg [" + loginUser.getId() + "] user orgs is empty");
-                throw new MpRuntimeException("byorg [" + loginUser.getId() + "] user orgs is empty");
-            }
-
-            if (StringUtils.isBlank(req.getOrg()) || req.getOrg().equals(orgs.get(0).getId())) {
-                // 查询下级所有用户以及同级非管理员用户
+        if (StringUtils.isBlank(req.getOrg())) {
+            // 是否admin用户
+            boolean isSuperUser = loginUser.getId().equals(AuthConstant.ROOT_USER_ID);
+            if (!isSuperUser) {
+                // 非admin用户，根据组织id查询组织信息
+                List<OrgModel> orgs = orgUserService.listOrgsByUserId(loginUser.getId());
+                if (CollectionUtils.isEmpty(orgs)) {
+                    log.error("byorg [" + loginUser.getId() + "] user orgs is empty");
+                    throw new MpRuntimeException("byorg [" + loginUser.getId() + "] user orgs is empty");
+                }
                 req.setOrg(orgs.get(0).getId());
-                pageInfo = orgUserService.pageUsersByOrgExcludeManager(req, loginUser.getId());
-            } else {
-                // 不相等，查询的是下级组织，直接查询所有
-                pageInfo = orgUserService.pageUsersByOrg(req);
             }
-        } else {
-            // admin查询所有用户
-            pageInfo = orgUserService.pageUsersByOrg(req);
         }
 
+        req.ensure();
+        PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
