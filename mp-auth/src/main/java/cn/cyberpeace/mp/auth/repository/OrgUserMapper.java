@@ -54,6 +54,21 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
                               @Param("userCondition") UserDto userDto
     );
 
+    /**
+     * 查询同组织下的用户(不包括同级别的管理员)
+     * @param orgIds
+     * @param userIds
+     * @param orders
+     * @param userDto
+     * @return
+     */
+    List<UserModel> listUsersExcludeManager(@Param("orgIds") List<String> orgIds,
+                                            @Param("userIds") List<String> userIds,
+                                            @Param("orders") List<String> orders,
+                                            @Param("userCondition") UserDto userDto,
+                                            @Param("curUserId") String curUserId);
+
+
     Integer selectUserCnt(@Param("orgId") String orgId);
 
     void deleteByUserId(@Param("userId") String userId);

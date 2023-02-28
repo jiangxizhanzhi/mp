@@ -237,6 +237,52 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    public PageInfo<UserDto> pageUsersByOrgExcludeManager(OrgUserPageRequest req, String curUserId) {
+
+        List<String> idsList = null;
+        if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
+            idsList = Arrays.asList(req.getIds());
+        }
+
+        List<String> orgIds = new ArrayList<>();
+        if (StringUtils.isNotBlank(req.getOrg())) {
+            if (req.isShowAllUnderLevel()) {
+                List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
+                if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+                    orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+                }
+            }
+        }
+
+        log.info("orgIds: {}", orgIds);
+
+        ArrayList<String> orders = null;
+        if (req.getOrders() != null && req.getOrders().length > 0) {
+            orders = CollectionUtil.newArrayList(req.getOrders());
+        }
+
+        String likeUsername = SQLUtils.escapeLike(req.getUsername());
+        UserDto userCondition = new UserDto();
+        userCondition.setUsername(likeUsername);
+        userCondition.setIsEnabled(req.getIsEnabled());
+        userCondition.setIsAudited(req.getIsAudited());
+        userCondition.setIsExpired(req.getIsExpired());
+        userCondition.setCurOrgId(req.getOrg());
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserModel> users = getModelMapper().listUsersExcludeManager(orgIds, idsList, orders, userCondition, curUserId);
+        PageInfo pageInfo = new PageInfo(users);
+
+        List<UserDto> userDtos = users.stream().map(u -> {
+            UserDto userDto = userService.userModel2UserDto(u);
+            return userDto;
+        }).collect(Collectors.toList());
+
+        pageInfo.setList(userDtos);
+        return pageInfo;
+    }
+
+    @Override
     public List<UserModel> listUsersByOrg(String orgId) {
         OrgUserPageRequest req = new OrgUserPageRequest();
         req.setOrg(orgId);

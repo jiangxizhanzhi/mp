@@ -90,6 +90,87 @@
         </if>
     </select>
 
+    <select id="listUsersExcludeManager" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        (select distinct * from mp_auth_user
+        <where>
+            <if test="orgIds != null and orgIds.size() > 0">
+                AND id in (select user from mp_auth_org_user where org in
+                <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
+                    #{orgId}
+                </foreach>
+                )
+            </if>
+            <if test="orgIds == null or orgIds.size() == 0">
+                AND 4 = 5
+            </if>
+            <if test="userIds != null and userIds.size() > 0">
+                AND id in
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="userCondition.isEnabled != null">
+                AND is_enabled = #{userCondition.isEnabled}
+            </if>
+            <if test="userCondition.isAudited != null">
+                AND is_audited = #{userCondition.isAudited}
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired == 0">
+                AND expired_time > now()
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired != 0">
+                AND expired_time &lt;= now()
+            </if>
+            <if test="userCondition.username != null and userCondition.username != ''">
+                AND ( username like CONCAT('%', #{userCondition.username}, '%') or name like CONCAT('%',
+                #{userCondition.username}, '%'))
+            </if>
+        </where>)
+
+        union
+
+        (select distinct * from mp_auth_user
+        <where>
+            <if test="userCondition.curOrgId != null and userCondition.curOrgId != ''">
+                AND id in (select DISTINCT org_user.user from mp_auth_org_user org_user
+                INNER JOIN mp_auth_user_role user_role ON user_role.user = org_user.user
+                INNER JOIN mp_auth_role role ON role.id = user_role.role
+                        AND role.identifier  <![CDATA[ <> ]]> 'ADMIN' OR org_user.user = #{curUserId}
+                where org_user.org = #{userCondition.curOrgId}
+                )
+            </if>
+            <if test="userIds != null and userIds.size() > 0">
+                AND id in
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="userCondition.isEnabled != null">
+                AND is_enabled = #{userCondition.isEnabled}
+            </if>
+            <if test="userCondition.isAudited != null">
+                AND is_audited = #{userCondition.isAudited}
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired == 0">
+                AND expired_time > now()
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired != 0">
+                AND expired_time &lt;= now()
+            </if>
+            <if test="userCondition.username != null and userCondition.username != ''">
+                AND ( username like CONCAT('%', #{userCondition.username}, '%') or name like CONCAT('%',
+                #{userCondition.username}, '%'))
+            </if>
+        </where>)
+
+        <if test="orders != null and orders.size() > 0">
+            ORDER BY
+            <foreach item="order" index="index" collection="orders"
+                     open="" separator="," close="">${order}
+            </foreach>
+        </if>
+    </select>
+
     <select id="selectUserCnt" resultType="integer">
         select count(*)
         from mp_auth_org_user

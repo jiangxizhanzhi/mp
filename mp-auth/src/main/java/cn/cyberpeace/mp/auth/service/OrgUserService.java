@@ -65,6 +65,8 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
 
     PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
 
+    PageInfo<UserDto> pageUsersByOrgExcludeManager(OrgUserPageRequest req, String curUserId);
+
     /**
      * 查询组织下的所有用户信息
      * @param orgId

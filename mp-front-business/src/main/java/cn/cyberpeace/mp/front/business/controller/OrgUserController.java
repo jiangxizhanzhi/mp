@@ -87,7 +87,7 @@ public class OrgUserController {
 
 
         req.ensure();
-        PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
+        PageInfo pageInfo = orgUserService.pageUsersByOrgExcludeManager(req, loginUser.getId());
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }

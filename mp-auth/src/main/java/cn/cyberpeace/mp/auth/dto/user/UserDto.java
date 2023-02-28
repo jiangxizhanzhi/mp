@@ -40,4 +40,7 @@ public class UserDto extends UserModel {
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
 
+    @ApiModelProperty(value = "当前用户组织id")
+    private String curOrgId;
+
 }
