@@ -338,7 +338,13 @@ public class SceneElementMonitorService {
 
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
-        basicInfo.setImageName(cpSceneElementBO.getImage());
+        String imageName = null;
+        if(StringUtils.contains(cpSceneElementBO.getImage(), cpSceneElementBO.getImageUuid())) {
+            imageName = cpSceneElementBO.getImage().replaceFirst(cpSceneElementBO.getImageUuid(), "");
+        } else {
+            imageName = cpSceneElementBO.getImage();
+        }
+        basicInfo.setImageName(imageName);
 
         // 物理节点
         basicInfo.setHost(cpSceneElementBO.getHost());
