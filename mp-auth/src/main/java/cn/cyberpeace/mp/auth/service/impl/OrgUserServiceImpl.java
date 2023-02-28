@@ -96,7 +96,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public List<UserModel> listAllEnabledUsers(String userName) {
-        List<UserModel> users = getModelMapper().listAllEnabledUsers(userName);
+        String likeUname = SQLUtils.escapeLike(userName);
+        List<UserModel> users = getModelMapper().listAllEnabledUsers(likeUname);
         return users;
     }
 
