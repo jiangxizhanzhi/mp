@@ -215,7 +215,7 @@ public class WazuhCommon {
                     CommandUtils.LINUX_LINE_BREAK,
                     "sleep 10",
                     CommandUtils.LINUX_LINE_BREAK,
-                    String.format("rd /s/q %s", LINUX_INSTALL_DIR)
+                    String.format("rm -rf %s", LINUX_INSTALL_DIR)
             );
         } else if (SystemTypeCommandUtils.isWindows(systemType)) {
             osType = WazuhLauncher.OS_TYPE_WINDOWS;
