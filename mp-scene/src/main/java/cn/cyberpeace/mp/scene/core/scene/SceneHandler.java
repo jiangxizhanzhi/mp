@@ -838,8 +838,8 @@ public class SceneHandler extends BaseSceneHandler<
         prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
         startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
         try {
-            for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.snapshotElement(nodeId, snapshotId, snapshotName, description);
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).snapshotElement(nodeId, snapshotId, snapshotName, description);
             }
         } catch (Exception e) {
             errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
