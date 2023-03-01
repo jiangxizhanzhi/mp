@@ -320,7 +320,8 @@ public class SceneElementMonitorService {
         // 参考SystemTypeUtils
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
             basicInfo.setSystemType(sceneElementBO.getSystemType());
-            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType()));
+            var item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
+            basicInfo.setSystemTypeName(item.getName());
         }
 
         // ip, 用户名，登录方式

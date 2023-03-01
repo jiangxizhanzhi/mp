@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
@@ -15,7 +13,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -81,21 +78,18 @@ import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.URLUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -113,7 +107,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -436,7 +429,8 @@ public class ScenePluginCollectionSceneService {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
                 hostEvent.setSystemType(srcElement.getSystemType());
-                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+                var item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
+                hostEvent.setSystemTypeName(item.getName());
                 if (cloudScenePluginHandler != null) {
                     var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
                     if (cloudElement != null) {
@@ -546,7 +540,8 @@ public class ScenePluginCollectionSceneService {
                     hostEvent.setNodeId(srcElement.getId());
                     hostEvent.setNodeName(srcElement.getName());
                     hostEvent.setSystemType(srcElement.getSystemType());
-                    hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+                    var item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
+                    hostEvent.setSystemTypeName(item.getName());
                     if (cloudScenePluginHandler != null) {
                         var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
                         if (cloudElement != null) {
