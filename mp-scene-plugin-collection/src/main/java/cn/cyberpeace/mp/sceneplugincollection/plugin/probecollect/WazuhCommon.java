@@ -13,8 +13,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.hutool.core.collection.CollectionUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,8 +49,14 @@ public class WazuhCommon {
     public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
     public static final String WINDOWS_INSTALL_DIR = "C:\\ossec-agent";
+    public static final String WINDOWS_WAZUHA_DIR = "C:\\wazuha";
+    public static final String WINDOWS_STOP_SCRIPT = WINDOWS_WAZUHA_DIR + "\\stop.bat";
+    public static final String WINDOWS_UNINSTALL_SCRIPT = WINDOWS_WAZUHA_DIR + "\\uninstall.bat";
 
     public static final String LINUX_INSTALL_DIR = "/var/ossec";
+    public static final String LINUX_WAZUHA_DIR = "/opt/wazuha";
+    public static final String LINUX_STOP_SCRIPT = LINUX_WAZUHA_DIR + "/stop.sh";
+    public static final String LINUX_UNINSTALL_SCRIPT = LINUX_WAZUHA_DIR + "/uninstall.sh";
 
     public static String agentLinuxLocalFilepath = null;
 
@@ -193,6 +200,44 @@ public class WazuhCommon {
             result.add(addCommandIndex, addCommand);
         }
         return result;
+    }
+
+    public static void uninstallAgent(String agentName, String systemType) {
+        String cmd = null;
+        String osType = null;
+        if (SystemTypeCommandUtils.isLinux(systemType)) {
+            osType = WazuhLauncher.OS_TYPE_LINUX;
+            cmd = StringUtils.joinWith(
+                    CommandUtils.LINUX_LINE_BREAK,
+                    String.format("sh %s", LINUX_STOP_SCRIPT),
+                    CommandUtils.LINUX_LINE_BREAK,
+                    String.format("sh %s", LINUX_UNINSTALL_SCRIPT),
+                    CommandUtils.LINUX_LINE_BREAK,
+                    "sleep 10",
+                    CommandUtils.LINUX_LINE_BREAK,
+                    String.format("rd /s/q %s", LINUX_INSTALL_DIR)
+            );
+        } else if (SystemTypeCommandUtils.isWindows(systemType)) {
+            osType = WazuhLauncher.OS_TYPE_WINDOWS;
+            cmd = StringUtils.joinWith(
+                    CommandUtils.WINDOWS_LINE_BREAK,
+                    String.format("call %s", WINDOWS_STOP_SCRIPT),
+                    CommandUtils.WINDOWS_LINE_BREAK,
+                    String.format("call %s", WINDOWS_UNINSTALL_SCRIPT),
+                    CommandUtils.WINDOWS_LINE_BREAK,
+                    "timeout /t 10 /nobreak > NUL",
+                    CommandUtils.WINDOWS_LINE_BREAK,
+                    String.format("rd /s/q %s", WINDOWS_INSTALL_DIR)
+            );
+        }
+
+        if (StringUtils.isNotEmpty(cmd)) {
+            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setAgentName(agentName);
+            runCommandItem.setOsType(osType);
+            runCommandItem.setCommand(cmd);
+            var result = WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+        }
     }
 
     /**
