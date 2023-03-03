@@ -533,10 +533,21 @@ public class FlowMonitorService {
      * @param timeRangeRequest
      */
     public FlowAnalysisSummary getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
-        BaseRequestUtil.processDefaultTimeRange(timeRangeRequest);
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.isNull(timeRangeRequest.getEndTime())) {
+            timeRangeRequest.setEndTime(now);
+        }
 
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, timeRangeRequest.getElementIds());
+        if (timeRangeRequest.getStartTime() == null) {
+            if (batchSceneHandler.getEarliestStartTime() != null) {
+                timeRangeRequest.setStartTime(batchSceneHandler.getEarliestStartTime().minusHours(24));
+            } else {
+                timeRangeRequest.setStartTime(timeRangeRequest.getEndTime().minusDays(10));
+            }
+        }
+        timeRangeRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
 
         FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()
                 .groupList(batchSceneHandler.getFlowCollectors())
