@@ -547,7 +547,6 @@ public class FlowMonitorService {
                 timeRangeRequest.setStartTime(timeRangeRequest.getEndTime().minusDays(10));
             }
         }
-        timeRangeRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
 
         FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()
                 .groupList(batchSceneHandler.getFlowCollectors())
