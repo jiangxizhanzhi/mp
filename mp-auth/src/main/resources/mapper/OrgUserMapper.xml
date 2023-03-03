@@ -16,7 +16,7 @@
           and is_audited = 1
           and expired_time > now()
         <if test="userName != null and userName != ''">
-            AND username like CONCAT('%', #{userName}, '%')
+            AND ( username like CONCAT('%', #{userName}, '%') or name like CONCAT('%',#{userName}, '%'))
         </if>
         order by user.username
     </select>
@@ -32,7 +32,7 @@
             #{orgId}
         </foreach>)
         <if test="userName != null and userName != ''">
-            AND username like CONCAT('%', #{userName}, '%')
+            AND ( username like CONCAT('%', #{userName}, '%') or name like CONCAT('%',#{userName}, '%'))
         </if>
         order by username
     </select>
@@ -54,7 +54,7 @@
                 #{orgId}
             </foreach>
         <if test="userName != null and userName != ''">
-            AND username like CONCAT('%', #{userName}, '%')
+            AND ( username like CONCAT('%', #{userName}, '%') or name like CONCAT('%',#{userName}, '%'))
         </if>
         order by user.username
     </select>
