@@ -243,30 +243,27 @@ public class CreateHandler extends HandlerCommon {
             }
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
-            if (connectedNetwork.network.getNetMode() == null || BaseCloudPluginSceneElementModel.NetMode.NORMAL.equals(connectedNetwork.network.getNetMode())) {
-                //调用云平台创建接口
-                var virtualSwitch = vsClient.create(createData);
-                cloudElement.setVlanId(virtualSwitch.getSegmentationId());
-                connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
-                connectedNetwork.network.setResourceId(virtualSwitch.getId());
-                if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
-                    cloudElement.setResourceId(virtualSwitch.getId());
-                }
-                // 向端口回写网络id
-                connectedNetwork.getFromPorts().forEach(p -> {
-                    var pluginPort = getPluginHandler().getPort(p.getId());
-                    if (pluginPort != null) {
-                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                    }
-                });
-                connectedNetwork.getToPorts().forEach(p -> {
-                    var pluginPort = getPluginHandler().getPort(p.getId());
-                    if (pluginPort != null) {
-                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                    }
-                });
-                createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
+            var virtualSwitch = vsClient.create(createData);
+            cloudElement.setVlanId(virtualSwitch.getSegmentationId());
+            connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
+            connectedNetwork.network.setResourceId(virtualSwitch.getId());
+            if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                cloudElement.setResourceId(virtualSwitch.getId());
             }
+            // 向端口回写网络id
+            connectedNetwork.getFromPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
+            connectedNetwork.getToPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
+            createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         }
     }
 
@@ -1090,15 +1087,11 @@ public class CreateHandler extends HandlerCommon {
 
     public void create() {
         this.prepareEventProcess();
-        //网络任务
+
         long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
-        //网关任务
         long gatewayTasks = getPluginHandler().getGatewayElementMap().values().size();
-        //防火墙任务
         long firewallTasks = getPluginHandler().getFirewallElementMap().values().size();
-        //终端任务
         long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
-        //进度百分比
         int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
 
         // 先创建辅助网络(包含虚拟交换机)
@@ -1106,16 +1099,12 @@ public class CreateHandler extends HandlerCommon {
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
                 .map(cloudElement -> (Runnable) () -> {
-                    //创建辅助网络(包含虚拟交换机)
                     createAuxiliaryNetworkProcess(cloudElement);
-                    //角色不存在或者不是虚拟外部网络
                     if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
-                        //则将当前进度直接加到最新的进度百分比中
                         getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                     }
                 })
                 .collect(Collectors.toList());
-        //创建辅助网络未完成任务添加运行
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
         }
