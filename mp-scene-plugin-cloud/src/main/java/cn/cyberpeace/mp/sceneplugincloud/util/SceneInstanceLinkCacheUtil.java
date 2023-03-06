@@ -67,10 +67,19 @@ public class SceneInstanceLinkCacheUtil {
             CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
             int cacheSeconds = config.getLinkStatusCacheSeconds();
             log.info("init link status cache , cache times is {} seconds", cacheSeconds);
+            //guava本地缓存创建
             cache = CacheBuilder.newBuilder()
+                    //设置缓存
                     .maximumSize(300)
+                    //对象多久不读就删除
                     .expireAfterWrite(cacheSeconds, TimeUnit.SECONDS)
                     .build(new CacheLoader<>() {
+                        /**
+                         * @description: 首次加载缓存（get不到对应的value时调用重写的load方法）
+                         * @param sceneId
+                         * @throws
+                         * @return List<NodeLinkStatusBO>
+                         */
                         @Override
                         public List<NodeLinkStatusBO> load(String sceneId) {
                             var nodeLinkStatusList = getNodeLinkStatusList(sceneId);
@@ -82,6 +91,12 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * @description: 清除缓存
+     * @param sceneId
+     * @throws
+     * @return void
+     */
     public static void clear(String sceneId) {
         try {
             cache.invalidate(sceneId);
@@ -90,10 +105,22 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * @description: 查询缓存
+     * @param sceneId
+     * @throws
+     * @return List<NodeLinkStatusBO>
+     */
     public static List<NodeLinkStatusBO> getCached(String sceneId) {
         return cache.getUnchecked(sceneId);
     }
 
+    /**
+     * @description: 刷新缓存
+     * @param sceneId
+     * @throws
+     * @return void
+     */
     public static void refresh(String sceneId) {
         cache.refresh(sceneId);
         // 10s之后再刷一次缓存 避免并发刷新时刷到旧的数据
@@ -102,9 +129,17 @@ public class SceneInstanceLinkCacheUtil {
         }, 10, TimeUnit.SECONDS);
     }
 
+    /**
+     * @description: 尝试开始刷新缓存任务
+     *
+     * @throws
+     * @return void
+     */
     public static void tryStartCronRefresh() {
+        //是否开始刷新缓存
         if (!startCronRefresh) {
             var config = BeanCommon.getBean(CloudAppConfig.class);
+            //刷新时间间隔
             int linkStatusRefreshPeriod = config.getLinkStatusRefreshPeriod();
             log.info("init link status cache , cache times is {} seconds", linkStatusRefreshPeriod);
             try {
@@ -116,6 +151,12 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * @description: 通过场景id或者对应所有节点的状态
+     * @param sceneId 场景id
+     * @throws
+     * @return List<NodeLinkStatusBO>
+     */
     private static List<NodeLinkStatusBO> getNodeLinkStatusList(String sceneId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -161,6 +202,13 @@ public class SceneInstanceLinkCacheUtil {
         return nodeLinkStatusList;
     }
 
+    /**
+     * @description: 加载场景和节点状态信息关系
+     * @param sceneId 场景id
+     * @param nodeLinkStatusList 节点状态列表
+     * @throws
+     * @return void
+     */
     private static void loadStatus(String sceneId, List<NodeLinkStatusBO> nodeLinkStatusList) {
         try {
             List<Runnable> tasks = new ArrayList<>();
@@ -240,6 +288,12 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * @description: 获取定时刷新任务
+     *
+     * @throws
+     * @return Runnable
+     */
     private static Runnable getCronRefreshTask() {
         return () -> {
             cache.asMap().entrySet().forEach(e -> {
@@ -248,6 +302,13 @@ public class SceneInstanceLinkCacheUtil {
         };
     }
 
+    /**
+     * @description: 通过资源id和网络id获得key
+     * @param resourceId
+     * @param networkId
+     * @throws
+     * @return String
+     */
     private static String getKey(String resourceId, String networkId) {
         return StringUtils.joinWith("_", resourceId, networkId);
     }
@@ -259,6 +320,7 @@ public class SceneInstanceLinkCacheUtil {
         private LinkStatusTaskPool() {
             super(CloudSingleton.cloudAppConfig.getLinkStatusPoolSize(),
                     CloudSingleton.cloudAppConfig.getLinkStatusHoldSize(), 60L);
+            //链接状态的任务太多即可考虑丢弃
             executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
         }
 

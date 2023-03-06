@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description
+ * @Description 初始化任务
  * @Author maojun
  * @Date 2022/8/5
  */
@@ -22,15 +22,27 @@ import java.util.List;
 @Component
 public class CronInit {
 
+    /**
+     * 初始化场景链路状态的线程池和更新周期
+     */
     @Resource
     private CloudInstanceLinkInitJob cloudInstanceLinkInitJob;
 
+    /**
+     * 初始化云平台错误码转换的配置
+     */
     @Resource
     private CloudMessageConvertInitJob cloudMessageConvertInitJob;
 
+    /**
+     * 云平台本地文件映射初始化任务
+     */
     @Resource
     private CloudLocalFileMappingInitJob cloudLocalFileMappingInitJob;
 
+    /**
+     * 初始化场景使用的节点数量
+     */
     @Resource
     private SceneNodeNumInitJob sceneNodeNumInitJob;
 

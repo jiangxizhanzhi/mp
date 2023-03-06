@@ -279,6 +279,12 @@ public class SceneHandler extends BaseSceneHandler<
         plugin.setSceneHandler(this);
     }
 
+    /**
+     * @description: 获取场景相关业务信息
+     *
+     * @throws
+     * @return CollectedSceneBO
+     */
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
         collectedSceneBO.setScene(getScene());
@@ -439,7 +445,9 @@ public class SceneHandler extends BaseSceneHandler<
 
     public int progressSceneProcess(int event, String process) {
         var flag = getSceneEventHandler(event).progressProcess(process);
+        //是否触发事件成功
         if (isTriggerEventSuccess(flag)) {
+            //成功则异步通知场景状态变化
             asyncAckSceneChanged(false, false);
         }
         return flag;

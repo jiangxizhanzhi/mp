@@ -41,6 +41,7 @@ public class SystemTypeUtils {
             new SystemTypeItem("106", "Windows10", BaseSceneElementModel.SystemType.WINDOWS_10),
             new SystemTypeItem("107", "Windows7", BaseSceneElementModel.SystemType.WINDOWS_7),
             new SystemTypeItem("108", "Windows-Server2000", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000),
+            new SystemTypeItem("109", "Windows11", BaseSceneElementModel.SystemType.WINDOWS_11),
 
             new SystemTypeItem("201", "FreeBSD", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("202", "OpenBSD", BaseSceneElementModel.SystemType.LINUX),
@@ -62,7 +63,8 @@ public class SystemTypeUtils {
             new SystemTypeItem("313", "SUSE", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER),
 
-            new SystemTypeItem("401", "IOS", BaseSceneElementModel.SystemType.LINUX)
+            new SystemTypeItem("401", "IOS", BaseSceneElementModel.SystemType.OTHER),
+            new SystemTypeItem("402", "MacOS", BaseSceneElementModel.SystemType.OTHER)
     ));
 
     private static Map<String, SystemTypeItem> genKeySystemTypeMap(List<SystemTypeItem> systemTypeItems) {

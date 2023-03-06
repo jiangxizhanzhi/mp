@@ -262,8 +262,16 @@ public abstract class BaseCsceneHandler<
         this.csceneId = csceneId;
     }
 
+    /**
+     * @description: 初始化Base场景类加载
+     *
+     * @throws
+     * @return void
+     */
     public void initBase() {
+        //手动加载类属性
         ClassUtils.loadClassFields(this);
+        //手动加载bean属性
         BeanCommon.loadBeanFields(this);
     }
 

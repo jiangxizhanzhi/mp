@@ -108,7 +108,7 @@ public class UserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
     })
-    @GetMapping("/no_restrict/by_ids")
+    @PostMapping("/no_restrict/by_ids")
     public ServiceResult<List<UserSimpleBo>> get(@RequestBody List<String> ids) {
         var userModels = userService.getUserModelNoRestrictByUserIds(ids);
 

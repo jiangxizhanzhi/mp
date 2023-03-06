@@ -548,11 +548,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
                                                              CsceneInstanceCreateContextBO createContext) {
+        ////实例请求上下文
         if (createContext == null) {
             return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
+        //场景节点限制检查
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
-
+        //综合场景处理基类
         var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;

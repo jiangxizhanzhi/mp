@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
@@ -33,6 +35,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
@@ -53,6 +56,7 @@ import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.StackLocatorUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -109,8 +114,8 @@ public class CreateHandler extends HandlerCommon {
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
                     // 如果未设置端口 则使用一个null的元素,使用统一的一个循环
-                    List<String> sourcePorts = Arrays.asList(new String[]{ null });
-                    List<String> desPorts = Arrays.asList(new String[]{ null });
+                    List<String> sourcePorts = Arrays.asList(new String[]{null});
+                    List<String> desPorts = Arrays.asList(new String[]{null});
                     if (StringUtils.isNotEmpty(srcRule.getSourcePort())) {
                         String[] portsArray = srcRule.getSourcePort().split(",");
                         if (portsArray != null && portsArray.length > 0) {
@@ -199,6 +204,8 @@ public class CreateHandler extends HandlerCommon {
                     }
                 });
                 continue;
+            } else if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(cloudElement.getNetMode())) {
+                continue;
             }
             var srcElement = cloudElement.getSrcElement();
             var createData = new VirtualSwitchCreateData();
@@ -236,29 +243,30 @@ public class CreateHandler extends HandlerCommon {
             }
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
-            //调用云平台创建接口
-            var virtualSwitch = vsClient.create(createData);
-            //响应数据设置
-            cloudElement.setVlanId(virtualSwitch.getSegmentationId());
-            connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
-            connectedNetwork.network.setResourceId(virtualSwitch.getId());
-            if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
-                cloudElement.setResourceId(virtualSwitch.getId());
+            if (connectedNetwork.network.getNetMode() == null || BaseCloudPluginSceneElementModel.NetMode.NORMAL.equals(connectedNetwork.network.getNetMode())) {
+                //调用云平台创建接口
+                var virtualSwitch = vsClient.create(createData);
+                cloudElement.setVlanId(virtualSwitch.getSegmentationId());
+                connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
+                connectedNetwork.network.setResourceId(virtualSwitch.getId());
+                if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                    cloudElement.setResourceId(virtualSwitch.getId());
+                }
+                // 向端口回写网络id
+                connectedNetwork.getFromPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                    }
+                });
+                connectedNetwork.getToPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                    }
+                });
+                createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
             }
-            // 向端口回写网络id
-            connectedNetwork.getFromPorts().forEach(p -> {
-                var pluginPort = getPluginHandler().getPort(p.getId());
-                if (pluginPort != null) {
-                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                }
-            });
-            connectedNetwork.getToPorts().forEach(p -> {
-                var pluginPort = getPluginHandler().getPort(p.getId());
-                if (pluginPort != null) {
-                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                }
-            });
-            createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         }
     }
 
@@ -624,23 +632,32 @@ public class CreateHandler extends HandlerCommon {
         var srcScene = getPluginHandler().getSrcScene();
         var sceneId = srcScene.getEid();
 
+        List<String> extraCommands = new ArrayList<>();
+        var sceneFileUrl = srcScene.getFile();
+        String sceneUnzipDir = null;
+        if (!StringUtils.isEmpty(sceneFileUrl)) {
+            sceneUnzipDir = SceneFileUtils.getSceneFileUnzipDir(standardSystemType, sceneId);
+            extraCommands.add(CommandUtils.linuxMkDir(sceneUnzipDir));
+        }
+        var elementFileUrl = srcElement.getFile();
+        String elementUnzipDir = null;
+        if (!StringUtils.isEmpty(elementFileUrl)) {
+            elementUnzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
+            extraCommands.add(CommandUtils.linuxMkDir(elementUnzipDir));
+        }
+
         // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
         try {
-            ContainerFileUtils.prepareUnzip(containerClient, containerId);
+            ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
         } catch (Exception e) {
-            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
+            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
         }
 
-        var sceneFileUrl = srcScene.getFile();
         if (!StringUtils.isEmpty(sceneFileUrl)) {
-            var unzipDir = SceneFileUtils.getSceneFileUnzipDir(standardSystemType, sceneId);
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, unzipDir);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, standardSystemType, sceneUnzipDir, true);
         }
-
-        var elementFileUrl = srcElement.getFile();
         if (!StringUtils.isEmpty(elementFileUrl)) {
-            var unzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, unzipDir);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
         List<String> commands = new ArrayList<>();
@@ -655,17 +672,56 @@ public class CreateHandler extends HandlerCommon {
             });
         }
 
+        boolean executeOnce = true;
         for (var command : commands) {
             if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
-                String[] path = command.split(StringUtils.SPACE);
-                try {
-                    ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
-                } catch (Exception e) {
-                    log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
-                }
-                continue;
+                executeOnce = false;
+                break;
             }
-            containerClient.executeCommand(containerId, command);
+        }
+        if (executeOnce) {
+            List<String> finnalCommands = new ArrayList<>();
+            for (var command : commands) {
+                if (StringUtils.isNotEmpty(command)) {
+                    String c = command.trim();
+                    if (c.endsWith(";")) {
+                        finnalCommands.add(c.substring(0, c.length() - 1));
+                    } else {
+                        finnalCommands.add(c);
+                    }
+                }
+            }
+            containerClient.executeCommand(containerId, SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
+                    finnalCommands.toArray(new String[0])));
+        } else {
+            for (var command : commands) {
+                if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
+                    String[] path = command.split(StringUtils.SPACE);
+                    try {
+                        ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                    } catch (Exception e) {
+                        log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                    }
+                    continue;
+                }
+                containerClient.executeCommand(containerId, command);
+            }
+        }
+    }
+
+    private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement) {
+        String ip = cloudElement.getSrcElement().getPorts().get(0).getIp();
+        var ports = getPluginHandler().getPorts(cloudElement);
+        if (ports != null) {
+            for (var port : ports) {
+                if (port.getAccessModes() != null) {
+                    for (var access : port.getAccessModes()) {
+                        access.setAccessIp(ip);
+                        access.setAccessPort(access.getPort());
+                        access.setAvailable(true);
+                    }
+                }
+            }
         }
     }
 
@@ -750,6 +806,9 @@ public class CreateHandler extends HandlerCommon {
                         } else {
                             accessMode.setAccessIp(accessModeData.getIpAddress());
                             accessMode.setAccessPort(accessModeData.getPort());
+                        }
+                        if (StringUtils.isEmpty(accessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
+                            accessMode.setAccessIp(cloudPort.getSrcPort().getIp());
                         }
                         if (Boolean.TRUE.equals(accessMode.getProxy()) && CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
                             this.trySetPublicNetProxy(accessMode);
@@ -923,6 +982,16 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
+        List<ConnectedNetworkBO> allNets = new ArrayList<>();
+        allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
+        allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
+        CloudPluginSceneElementNetworkBO macvlanNet = null;
+        for (var net : allNets) {
+            if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.network.getNetMode())) {
+                macvlanNet = net.network;
+                break;
+            }
+        }
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
@@ -946,18 +1015,35 @@ public class CreateHandler extends HandlerCommon {
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
 //        }
-        createData.setNetworks(CollectionUtils.emptyNull(
-                this.genVirutalNics(cloudElement)
-        ));
-        var container = containerClient.create(createData);
-        cloudElement.setResourceId(container.getId());
-        cloudElement.setHost(container.getHost());
+        if (macvlanNet != null) {
+            MacvlanContainerCreateData macvlanContainerCreateData = new MacvlanContainerCreateData();
+            BeanUtils.copyProperties(createData, macvlanContainerCreateData);
+            macvlanContainerCreateData.setIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
+            macvlanContainerCreateData.setMacvlanId(macvlanNet.getVlanId());
+            macvlanContainerCreateData.setGatewayIp(macvlanNet.getGateway());
+            macvlanContainerCreateData.setCidr(macvlanNet.getCidr());
+            var container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
+            cloudElement.setResourceId(container.getId());
+            cloudElement.setHost(container.getHost());
+            execContainerInitCommand(cloudElement);
+            receiveVirtualPortInfo(cloudElement);
+        } else {
+            createData.setNetworks(CollectionUtils.emptyNull(
+                    this.genVirutalNics(cloudElement)
+            ));
+            var container = containerClient.create(createData);
+            cloudElement.setResourceId(container.getId());
+            cloudElement.setHost(container.getHost());
 
-        receiveVirtualPortInfo(cloudElement, container.getNetworks());
+            receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-        execContainerInitCommand(cloudElement);
+            execContainerInitCommand(cloudElement);
 
-        checkAccessModes(cloudElement);
+            checkAccessModes(cloudElement);
+            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
+                containerClient.addRoute(cloudElement.getResourceId());
+            }
+        }
     }
 
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
@@ -1133,6 +1219,7 @@ public class CreateHandler extends HandlerCommon {
 
     /**
      * 配置vyos网络
+     *
      * @param elementBO
      */
     private void configVyosNetwork(CloudPluginSceneElementBO elementBO) {

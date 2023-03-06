@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.log.service;
 
 import cn.cyberpeace.mp.log.LogApplcation;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
   *@Desciption
@@ -13,7 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
   *@Date 9/13/21 10:55 上午
 **/
 @SpringBootTest(classes = LogApplcation.class)
-@RunWith(SpringRunner.class)
 public class RuntimeLogServiceTest {
 
     @Autowired

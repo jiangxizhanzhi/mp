@@ -34,8 +34,7 @@ public class ElementCreateHandler extends HandlerCommon {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             if (cloudPluginHandler != null) {
                 var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null
-                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                         vmInstanceIds.add(cloudElement.getResourceId());
                     } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
@@ -43,7 +42,25 @@ public class ElementCreateHandler extends HandlerCommon {
                     }
                 }
                 if (!vmInstanceIds.isEmpty() || !containerInstanceIds.isEmpty()) {
-                    getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds));
+                    getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds), Boolean.TRUE.equals(getPluginHandler().getScene().getEnableFlowMirror()));
+                }
+            }
+        } else if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableFlowMirror())) {
+            CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            if (cloudPluginHandler != null) {
+                var sceneId = getPluginHandler().getSrcScene().getEid();
+                Set<String> vmInstanceIds = new HashSet<>();
+                Set<String> containerInstanceIds = new HashSet<>();
+                var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
+                if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                        vmInstanceIds.add(cloudElement.getResourceId());
+                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                        containerInstanceIds.add(cloudElement.getResourceId());
+                    }
+                }
+                if (!vmInstanceIds.isEmpty() || !containerInstanceIds.isEmpty()) {
+                    getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds));
                 }
             }
         }

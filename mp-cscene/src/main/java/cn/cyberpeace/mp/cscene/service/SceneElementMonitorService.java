@@ -320,7 +320,8 @@ public class SceneElementMonitorService {
         // 参考SystemTypeUtils
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
             basicInfo.setSystemType(sceneElementBO.getSystemType());
-            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType()));
+            var item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
+            basicInfo.setSystemTypeName(item.getName());
         }
 
         // ip, 用户名，登录方式
@@ -338,7 +339,13 @@ public class SceneElementMonitorService {
 
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
-        basicInfo.setImageName(cpSceneElementBO.getImage());
+        String imageName = null;
+        if(StringUtils.contains(cpSceneElementBO.getImage(), cpSceneElementBO.getImageUuid())) {
+            imageName = cpSceneElementBO.getImage().replaceFirst(cpSceneElementBO.getImageUuid(), "");
+        } else {
+            imageName = cpSceneElementBO.getImage();
+        }
+        basicInfo.setImageName(imageName);
 
         // 物理节点
         basicInfo.setHost(cpSceneElementBO.getHost());

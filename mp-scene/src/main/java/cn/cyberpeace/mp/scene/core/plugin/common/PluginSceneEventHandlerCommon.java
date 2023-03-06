@@ -51,9 +51,19 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         }
     }
 
+    /**
+     * @description: 运行场景过程
+     * @param eventProcess 事件过程
+     * @param runner 线程任务
+     * @throws 
+     * @return void
+     */
     public void runSceneProgress(EventProcess eventProcess, Runnable runner) {
+        //执行场景处理过程
         getPluginHandler().progressSceneProcess(event, eventProcess.getProcess());
+        //执行过程
         runner.run();
+        //场景过程结束处理
         getPluginHandler().overSceneProcess(event);
     }
 

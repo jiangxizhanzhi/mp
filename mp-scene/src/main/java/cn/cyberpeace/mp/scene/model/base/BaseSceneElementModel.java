@@ -43,6 +43,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
 
     public static class SystemType {
         public static final String OTHER = "other";
+        public static final String WINDOWS_11 = "windows11";
         public static final String WINDOWS_10 = "windows10";
         public static final String WINDOWS_8 = "windows8";
         public static final String WINDOWS_7 = "windows7";

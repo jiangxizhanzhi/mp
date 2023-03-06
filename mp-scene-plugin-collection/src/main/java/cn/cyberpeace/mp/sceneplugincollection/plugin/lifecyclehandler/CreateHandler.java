@@ -105,31 +105,47 @@ public class CreateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
-        Set<String> vmInstanceIds = new HashSet<>();
-        Set<String> containerInstanceIds = new HashSet<>();
+        Set<String> collectorVmInstanceIds = new HashSet<>();
+        Set<String> collectorContainerInstanceIds = new HashSet<>();
+        Set<String> mirrorVmInstanceIds = new HashSet<>();
+        Set<String> mirrorContainerInstanceIds = new HashSet<>();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
             var portId = entry.getKey();
             var collectionPort = entry.getValue();
-            if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                return;
+            if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
+                creatFlowCollector = true;
+                var srcPort = collectionPort.getSrcPort();
+                var srcElement = srcPort.getElement();
+                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                if (cloudElement != null && cloudElement.getVirtualType() != null
+                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                        collectorVmInstanceIds.add(cloudElement.getResourceId());
+                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                        collectorContainerInstanceIds.add(cloudElement.getResourceId());
+                    }
+                }
             }
-            creatFlowCollector = true;
-            var srcPort = collectionPort.getSrcPort();
-            var srcElement = srcPort.getElement();
-            var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-            if (cloudElement != null && cloudElement.getVirtualType() != null
-                    && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                    vmInstanceIds.add(cloudElement.getResourceId());
-                } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                    containerInstanceIds.add(cloudElement.getResourceId());
+            if (Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
+                var srcPort = collectionPort.getSrcPort();
+                var srcElement = srcPort.getElement();
+                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                if (cloudElement != null && cloudElement.getVirtualType() != null
+                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
+                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                        mirrorVmInstanceIds.add(cloudElement.getResourceId());
+                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                        mirrorContainerInstanceIds.add(cloudElement.getResourceId());
+                    }
                 }
             }
         }
-        if (!vmInstanceIds.isEmpty() || !containerInstanceIds.isEmpty()) {
+        boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
+        boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
+        if (enableCollector) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
@@ -137,12 +153,18 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
 
-            // 绑定网络端口到流量采集器
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
-                getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds),
-                        new ArrayList<>(containerInstanceIds));
+                // 绑定网络端口到流量采集器
+                getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
+                        new ArrayList<>(collectorContainerInstanceIds), enableMirror);
             });
+        } else if (enableMirror) {
+            // 镜像流量
+            var sceneId = getPluginHandler().getSrcScene().getEid();
+            // 绑定网络端口到流量采集器
+            getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
+                    new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
@@ -173,5 +195,4 @@ public class CreateHandler extends HandlerCommon {
         runElementProgress(collectionElement.getSrcElement().getId(), ElementProcess.BIND_PROBE_COLLECT_AGENT,
                 () -> bindProbeCollectAgent(collectionElement, probeCollectorId));
     }
-
 }

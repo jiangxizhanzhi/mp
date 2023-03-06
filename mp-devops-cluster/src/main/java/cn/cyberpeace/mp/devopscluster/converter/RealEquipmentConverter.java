@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.RealEquipmentBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +48,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RealEquipmentConverter implements BaseConverter{
+    private static long IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
+
+    private static ReentrantLock IN_POSITION_UPDATE_TIME_LOCK = new ReentrantLock();
 
     private final RealEquipmentService realEquipmentService;
 
@@ -76,6 +81,7 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
+        this.refreshIfNecessary();
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
@@ -242,6 +248,32 @@ public class RealEquipmentConverter implements BaseConverter{
         }
         if (StringUtils.isNotEmpty(request.getDescription()) && request.getDescription().length() > 1000) {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH);
+        }
+    }
+
+    private void refreshIfNecessary() {
+        // 20秒没更新 尝试更新
+        if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {
+            //  拿到锁就更新下,没拿到就使用旧的数据
+            if (IN_POSITION_UPDATE_TIME_LOCK.tryLock()) {
+                try {
+                    // 刷新一下在位状态
+                    ImagePageDTO refreshDto = new ImagePageDTO();
+                    refreshDto.setLimit(50);
+                    refreshDto.setImageType(ImageTypeEnum.ENTITY.toValue());
+                    List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(refreshDto);
+                    List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(ids)) {
+                        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+                        if (model != null && CollectionUtils.isNotEmpty(model.getList())) {
+                            devopsTargetService.updateInPosition(model.getList());
+                        }
+                    }
+                    IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
+                } finally {
+                    IN_POSITION_UPDATE_TIME_LOCK.unlock();
+                }
+            }
         }
     }
 }

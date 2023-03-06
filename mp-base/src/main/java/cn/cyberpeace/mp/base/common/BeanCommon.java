@@ -10,9 +10,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.base.common
+ * @CreateTime: 2023/3/1 11:04
+ * @Description: Bean通用类    实现ApplicationContextAware，在该bean初始化后，执行BeanProcessor前
+ * @Version: 1.0
+ */
 @Component
 public class BeanCommon implements ApplicationContextAware {
 
+    /**
+     * Spring上下文容器
+     */
     private static ApplicationContext context;
 
     @Override

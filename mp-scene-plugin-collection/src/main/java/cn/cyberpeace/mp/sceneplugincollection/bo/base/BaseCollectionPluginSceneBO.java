@@ -14,4 +14,6 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
     private Boolean enableFlowCollect;
     @ApiModelProperty(value = "是否开启探针采集")
     private Boolean enableProbeCollect;
+    @ApiModelProperty(value = "是否开启流量镜像")
+    private Boolean enableFlowMirror;
 }

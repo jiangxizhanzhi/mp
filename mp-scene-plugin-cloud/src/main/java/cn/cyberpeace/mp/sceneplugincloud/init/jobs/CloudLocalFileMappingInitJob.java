@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * @Description
+ * @Description 云平台本地文件映射初始化任务
  * @Author maojun
  * @Date 2022/8/5
  */

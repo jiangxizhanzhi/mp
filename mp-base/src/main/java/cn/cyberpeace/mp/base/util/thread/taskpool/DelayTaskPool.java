@@ -18,8 +18,14 @@ public class DelayTaskPool {
 
     public static final Integer DEFAULT_POOL_SIZE = 10;
 
+    /**
+     * 任务池
+     */
     private final TaskPool taskPool;
 
+    /**
+     * 任务执行池
+     */
     private final TaskPool runPool;
 
     /**
@@ -57,7 +63,9 @@ public class DelayTaskPool {
      * @param task 任务
      */
     public void add(String key, Runnable task) {
+        //返回格式化任务
         Runnable formatTask = ThreadUtils.format(task);
+        //同步将任务放到队列map中
         synchronized (taskMap) {
             taskMap.put(key, formatTask);
         }
@@ -70,6 +78,7 @@ public class DelayTaskPool {
      */
     public void execute(String key, Runnable task) {
         add(key, task);
+        //执行任务
         runPool.executeTask(this::run);
     }
 

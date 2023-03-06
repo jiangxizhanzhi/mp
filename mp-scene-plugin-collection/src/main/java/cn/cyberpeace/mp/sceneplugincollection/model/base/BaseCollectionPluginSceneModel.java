@@ -10,4 +10,6 @@ public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     private Boolean enableFlowCollect;
     @DefaultBool
     private Boolean enableProbeCollect;
+    @DefaultBool
+    private Boolean enableFlowMirror;
 }
