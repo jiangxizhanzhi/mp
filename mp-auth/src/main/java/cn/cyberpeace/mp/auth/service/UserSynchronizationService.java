@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,8 +21,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description:
@@ -43,6 +50,9 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
     @Value("${mp.hld.users-url}")
     private String hldUsersUrl;
 
+    @Value("${mp.hld.roles}")
+    private String roles;
+
     public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
 
     public static final String defaultRole = "5827ff7847504ffd806e0a85c417228d";
@@ -60,6 +70,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
 
     @Scheduled(initialDelay = REFRESH_RATE * REFRESH_MINUTE, fixedRate = REFRESH_RATE * REFRESH_MINUTE)
     public void scheduleUser() {
+         Map<String, String> roleConvert = this.hldRoles(roles);
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
@@ -98,12 +109,18 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
                 return;
             }
             UserDto user = userService.getUserDtoNoRestrict(userId);
-            boolean needUpdate = this.checkUpdate(user, in);
+            boolean needUpdate = this.checkUpdate(user, in, roleConvert);
             if (user == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in, true);
+                if (in.getIsAdministrator() != null && roleConvert.containsKey(in.getIsAdministrator().toString())) {
+                    createRequest.setRoleIds(Arrays.asList(roleConvert.get(in.getIsAdministrator().toString())));
+                }
                 userService.add(createRequest);
             } else if (needUpdate) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in, false);
+                if (in.getIsAdministrator() != null && roleConvert.containsKey(in.getIsAdministrator().toString())) {
+                    modifyRequest.setRoleIds(Arrays.asList(roleConvert.get(in.getIsAdministrator().toString())));
+                }
                 userService.modify(modifyRequest);
             }
         });
@@ -115,6 +132,24 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
                 userService.delete(user.getId());
             }
         });
+    }
+
+    private Map<String, String> hldRoles(String input) {
+        if (StringUtils.isEmpty(input)) {
+            return new HashMap<>();
+        }
+        String[] roles = StringUtils.split(input, ",");
+        if (roles == null || roles.length == 0) {
+            return new HashMap<>();
+        }
+        Map<String, String> map = new HashMap<>();
+        for (String role : roles) {
+            String[] s = StringUtils.split(role, ":");
+            if (s != null && s.length == 2) {
+                map.put(s[0], s[1]);
+            }
+        }
+        return map;
     }
 
     /**
@@ -161,7 +196,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         return userRequest;
     }
 
-    private boolean checkUpdate(UserDto userDto, HLDUserDto hldUserDto) {
+    private boolean checkUpdate(UserDto userDto, HLDUserDto hldUserDto,Map<String,String> roleConvert) {
         if (userDto == null) {
             return false;
         }
@@ -179,6 +214,21 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         }
         if (hldUserDto.getMhDescribe() != null && !hldUserDto.getMhDescribe().equals(userDto.getDescription())) {
             return true;
+        }
+        if (hldUserDto.getIsAdministrator() != null) {
+            if (userDto.getRoles() == null || userDto.getRoles().size() == 0) {
+                return true;
+            } else {
+                String currentRole = userDto.getRoles().size() > 0 ? userDto.getRoles().get(0).getId() : "";
+                String hldRole = roleConvert.get(hldUserDto.getIsAdministrator().toString());
+                if (currentRole != null && hldRole != null && currentRole.equals(hldRole)) {
+                    // 角色相同不用更新
+                    return false;
+                } else {
+                    return true;
+                }
+
+            }
         }
         return false;
     }

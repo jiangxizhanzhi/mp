@@ -170,6 +170,7 @@ mp:
     users-url: http://${ip.hld-users}:${port.hld-port}
     login-url: http://${ip.hld-login}:${port.hld-port}
     log-api-url: http://${ip.hld-log}:${port.hld-log-port}
+    roles: ${HLD_USERS_ROLES:1:5827ff7847504ffd806e0a85c417228d}
     logout:
       reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:

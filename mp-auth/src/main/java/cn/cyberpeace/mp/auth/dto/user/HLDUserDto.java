@@ -48,4 +48,7 @@ public class HLDUserDto {
 
     @ApiModelProperty(value = "更新时间")
     private String userUpdateTime;
+
+    @ApiModelProperty(value = "角色,1:管理用户,0:普通用户")
+    private Integer isAdministrator;
 }
