@@ -61,10 +61,12 @@ public class SystemTypeUtils {
             new SystemTypeItem("311", "Android", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("312", "Redhat", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("313", "SUSE", BaseSceneElementModel.SystemType.LINUX),
-            new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER),
 
             new SystemTypeItem("401", "IOS", BaseSceneElementModel.SystemType.OTHER),
-            new SystemTypeItem("402", "MacOS", BaseSceneElementModel.SystemType.OTHER)
+            new SystemTypeItem("402", "MacOS", BaseSceneElementModel.SystemType.OTHER),
+
+            // 这个Other要放在枚举的最后
+            new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER)
     ));
 
     private static Map<String, SystemTypeItem> genKeySystemTypeMap(List<SystemTypeItem> systemTypeItems) {
