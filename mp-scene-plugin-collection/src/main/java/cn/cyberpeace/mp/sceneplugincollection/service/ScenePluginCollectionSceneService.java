@@ -1603,18 +1603,32 @@ public class ScenePluginCollectionSceneService {
         return getRuleId2FileByIds(ruleIds);
     }
 
+    /**
+     * @description: 导出流量pcap文件
+     * @param sceneId 场景id
+     * @param taskId 任务id
+     * @throws
+     * @return ServiceResult<String>
+     */
     public ServiceResult<String> exportFlowPcap(String sceneId, String taskId) {
+        //通过场景id查询第一个符合条件的插件场景信息结果（mp_sceneplugincollection_scene 场景实例数据采集插件信息表）
         var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        //如果流量采集pcap文件地址不为空，则直接返回文件地址
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
             return new ServiceResult<>(model.getFlowFile());
         }
+        //构建批量场景处理类
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
+        //获取多个流量采集器id
         List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
         if (CollectionUtils.isEmpty(flowCollectors)) {
+            //没有流量采集器则响应为空
             log.error("find no flowCollectors by sceneId {}", sceneId);
             return new ServiceResult<>(StringUtils.EMPTY);
         }
+        //流量采集器id
         String containName = flowCollectors.get(0);
+        //导出
         var result = this.exportFlowPcap(sceneId, containName, taskId);
         return result;
     }
@@ -1634,38 +1648,51 @@ public class ScenePluginCollectionSceneService {
         }
     }
 
+    /**
+     * @description: 实际执行导出流量pcap文件
+     * @param sceneId 场景id
+     * @param containName mp流量采集器id（对应云平台上的容器名称）
+     * @param taskId 任务id
+     * @throws
+     * @return ServiceResult<String>
+     */
     public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
         // containerName -> containerId
         Container container = new Container();
+        //根据容器名称获取容器
         var containerResult = container.getContainerByName(containName);
         if (containerResult == null) {
             log.error("find no containerId by containName {}", containName);
             return new ServiceResult<>(StringUtils.EMPTY);
         }
+        //获取云平台容器id
         String containerId = containerResult.getId();
+        //云平台容器host
         String host = containerResult.getHost();
 
-        // execute cmd
+        // execute cmd  （对应容器执行命令，此命令为查看arkime采集目录下的文件结果）
         ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
+        //执行失败，打印错误信息
         if (result.getExitCode() != 0) {
             log.error("exec ls cmd fail,sceneId is {}, exit code {}, msg {}", sceneId, result.getExitCode(), result.getOutput());
             return new ServiceResult<>(StringUtils.EMPTY);
         }
-
+        //输出结果为空也认为执行失败
         if (StringUtils.isEmpty(result.getOutput())) {
             log.error("exec ls cmd fail, sceneId is {}, exit code {}, result is empty", sceneId, result.getExitCode());
             return new ServiceResult<>(StringUtils.EMPTY);
         }
-
+        //更新任务进度
         FlowPcapExportUtil.updateProcess(taskId, 5);
 
         // 建立本次下载的临时目录 所有的临时文件都放在该目录下
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
+        //执行建立临时目录命令
         container.executeCommand(containerId, "mkdir -p " + dir);
         // 创建生成zip文件需要的命令
         List<String> commands = new ArrayList<>();
-
+        //获取所有生产的pcap文件
         String[] files = StringUtils.split(result.getOutput(), "\n");
         int step = Math.max(65 / files.length / 3, 1);
         int stepEcho = 0;
@@ -1737,6 +1764,7 @@ public class ScenePluginCollectionSceneService {
             fileGetData.setFilePath(dir + "/flow.zip");
             fileGetData.setHostname(host);
             fileGetData.setZunContainerId(containerId);
+            //执行下载
             var object = container.retrieveFile(fileGetData);
             return new ServiceResult<>(object.getUrl());
         } catch (Exception e) {

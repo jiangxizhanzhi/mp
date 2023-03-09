@@ -187,7 +187,7 @@ public class Container extends CloudClient {
     }
 
     /**
-     * 根据容器名称获取容器id
+     * 根据容器名称获取容器信息
      *
      * @param name
      * @return

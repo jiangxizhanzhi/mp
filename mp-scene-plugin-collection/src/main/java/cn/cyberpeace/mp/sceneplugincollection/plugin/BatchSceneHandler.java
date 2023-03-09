@@ -179,20 +179,28 @@ public class BatchSceneHandler {
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            //获得多个场景中最早的创建时间
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
             }
+            //流量采集插件处理类
             CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            //云平台插件处理类
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            //场景存在流量采集插件
             if (pluginHandler != null && pluginHandler.getScene() != null) {
+                //收集所有流量采集器id
                 if (StringUtils.isNotEmpty(pluginHandler.getScene().getFlowCollector())) {
                     this.flowCollectors.add(pluginHandler.getScene().getFlowCollector());
                 }
+                //探针数据收集器id
                 if (StringUtils.isNotEmpty(pluginHandler.getScene().getProbeCollector())) {
                     this.probeCollectors.add(pluginHandler.getScene().getProbeCollector());
                 }
             }
+            //通过场景处理器和节点获取场景元素业务信息
             List<SceneElementBO> srcElements = getSrcElements(sceneHandler, nodeIds);
+            //封装单场景的信息到批量处理属性中
             this.handlerElement(sceneId, srcElements, pluginHandler, cloudPlugin);
             if (sceneHandler.getElementMap() != null) {
                 sceneHandler.getElementMap().values().forEach(srcElement -> {
@@ -215,8 +223,18 @@ public class BatchSceneHandler {
         }
     }
 
+    /**
+     * @description: 处理场景中元素节点的数据，将数据给批量场景处理类的属性
+     * @param sceneId  场景id
+     * @param srcElements 相关节点信息
+     * @param pluginHandler 流量采集插件处理
+     * @param cloudPlugin 云平台插件处理
+     * @throws 
+     * @return void
+     */
     private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler, CloudScenePluginHandler cloudPlugin) {
         srcElements.forEach(srcElement -> {
+            //所有eid到节点的Map
             this.allEid2ElementMap.put(srcElement.getEid(), srcElement);
             var srcPorts = srcElement.getPorts();
             if (srcPorts == null) {
@@ -225,8 +243,10 @@ public class BatchSceneHandler {
             if (pluginHandler != null && pluginHandler.getElementMap() != null && pluginHandler.getElementMap().get(srcElement.getId()) != null
                     && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect() != null &&
                     pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
+                //探针数据采集节点 ，eid的映射
                 this.probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
             }
+            //节点id和节点名称的映射
             this.nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
             srcPorts.forEach(srcPort -> {
                 String macAddr = srcPort.getMacAddr();
@@ -239,6 +259,7 @@ public class BatchSceneHandler {
                     this.allMac2SceneIdMap.put(macAddr, sceneId);
                     this.allMac2ElementMap.put(macAddr, srcElement);
                     if (flowCollectedEnabled) {
+                        //所有流量采集可用mac
                         this.flowCollectEnabledMacAddrs.add(macAddr);
                     }
                 }
@@ -247,8 +268,10 @@ public class BatchSceneHandler {
                     this.allIp2ElementMap.put(ipAddr, srcElement);
                     List<String> ips = this.nodeId2Ips.getOrDefault(ipAddr, new ArrayList<>());
                     ips.add(ipAddr);
+                    //节点和节点ip映射
                     this.nodeId2Ips.put(srcElement.getId(), ips);
                     if (flowCollectedEnabled) {
+                        //所有流量采集可用ip
                         this.flowCollectEnabledIpAddrs.add(ipAddr);
                     }
                 }
@@ -258,6 +281,7 @@ public class BatchSceneHandler {
                 if (!category2CountInfo.containsKey(category)) {
                     category2CountInfo.put(category, new CategoryGroupBO(category));
                 }
+                //靶标分类和场景靶标节点信息
                 category2CountInfo.get(category).getElements().add(srcElement);
             }
         });
