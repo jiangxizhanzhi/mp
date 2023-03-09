@@ -100,7 +100,7 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
                             "call c:\\wazuha\\uninstall.bat",
-                            String.format("rd /s/q %s", WINDOWS_INSTALL_DIR),
+                            //String.format("rd /s/q %s", WINDOWS_INSTALL_DIR),
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
@@ -128,8 +128,9 @@ public class WazuhCommon {
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                            "sh /opt/wazuha/stop.sh",
                             "sh /opt/wazuha/uninstall.sh",
-                            String.format("rm -rf %s", LINUX_INSTALL_DIR),
+                            //String.format("rm -rf %s", LINUX_INSTALL_DIR),
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
@@ -211,6 +212,7 @@ public class WazuhCommon {
             osType = WazuhLauncher.OS_TYPE_LINUX;
             cmd = StringUtils.joinWith(
                     CommandUtils.LINUX_LINE_BREAK,
+                    String.format("sh %s", LINUX_STOP_SCRIPT),
                     String.format("sh %s", LINUX_UNINSTALL_SCRIPT),
                     "sleep 10",
                     String.format("rm -rf %s", LINUX_INSTALL_DIR)
