@@ -1036,12 +1036,12 @@ public class CreateHandler extends HandlerCommon {
 
             receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-            execContainerInitCommand(cloudElement);
-
-            checkAccessModes(cloudElement);
             if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
                 containerClient.addRoute(cloudElement.getResourceId());
             }
+            execContainerInitCommand(cloudElement);
+
+            checkAccessModes(cloudElement);
         }
     }
 
