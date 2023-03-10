@@ -138,7 +138,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(value = CACHE_VAL_USERMODEL)
+//    @Cacheable(value = CACHE_VAL_USERMODEL)
     public ObjServiceResult<UserModel> get(String id) {
         return super.get(id);
     }
