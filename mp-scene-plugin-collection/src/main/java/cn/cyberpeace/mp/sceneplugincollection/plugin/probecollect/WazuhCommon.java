@@ -100,12 +100,10 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
                             "call c:\\wazuha\\uninstall.bat",
-                            //String.format("rd /s/q %s", WINDOWS_INSTALL_DIR),
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
-                            //String.format("if not exist %s%s (", WINDOWS_INSTALL_DIR, "\\bin\\tools"),
                             String.format("unzip -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
@@ -113,11 +111,6 @@ public class WazuhCommon {
                             String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
-                            //") else (",
-                            //String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\client.keys"),
-                            //String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\ossec.conf"),
-                            //String.format(" del/f/s/q %s%s", WINDOWS_INSTALL_DIR, "\\ossec.conf.st"),
-                            //")",
                             "cd C:\\wazuha",
                             "call config.bat",
                             "call " + probeCommand,
@@ -130,13 +123,9 @@ public class WazuhCommon {
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "sh /opt/wazuha/stop.sh",
                             "sh /opt/wazuha/uninstall.sh",
-                            //String.format("rm -rf %s", LINUX_INSTALL_DIR),
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
-                            //"restart_again=false;",
-                            //String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/bin/tools"),
-                            //"sh /opt/wazuha/uninstall.sh",
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
@@ -144,21 +133,11 @@ public class WazuhCommon {
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
                             String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
-                            //"else",
-                            //"restart_again=true;",
-                            //String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/client.keys"),
-                            //String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
-                            //String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf.st"),
-                            //"fi",
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
                             "sleep 10",
                             "sh start.sh"
-                            //"if [ restart_again ]; then",
-                            //"sleep 100",
-                            //"sh start.sh",
-                            //"fi"
                     ));
         }
         List<String> result = resource == null ? new ArrayList<>() :
@@ -213,17 +192,13 @@ public class WazuhCommon {
             cmd = StringUtils.joinWith(
                     CommandUtils.LINUX_LINE_BREAK,
                     String.format("sh %s", LINUX_STOP_SCRIPT),
-                    String.format("sh %s", LINUX_UNINSTALL_SCRIPT),
-                    "sleep 10",
-                    String.format("rm -rf %s", LINUX_INSTALL_DIR)
+                    String.format("sh %s", LINUX_UNINSTALL_SCRIPT)
             );
         } else if (SystemTypeCommandUtils.isWindows(systemType)) {
             osType = WazuhLauncher.OS_TYPE_WINDOWS;
             cmd = StringUtils.joinWith(
                     CommandUtils.WINDOWS_LINE_BREAK,
-                    String.format("call %s", WINDOWS_UNINSTALL_SCRIPT),
-                    "timeout /t 10 /nobreak > NUL",
-                    String.format("rd /s/q %s", WINDOWS_INSTALL_DIR)
+                    String.format("call %s", WINDOWS_UNINSTALL_SCRIPT)
             );
         }
 
@@ -234,6 +209,12 @@ public class WazuhCommon {
             runCommandItem.setCommand(cmd);
             runCommandItem.setExile(true);
             var result = WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
