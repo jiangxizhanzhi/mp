@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.auth.config.sso;
 
-import edu.yale.its.tp.cas.client.filter.LogoutFilter;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -12,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LogingOutConfig {
 
-    @Bean(name = "ssoLogoutFilter")
-    public LogoutFilter logoutFilter() {
-        return new LogoutFilter();
-    }
+    //@Bean(name = "ssoLogoutFilter")
+    //public LogoutFilter logoutFilter() {
+    //    return new LogoutFilter();
+    //}
 
 }

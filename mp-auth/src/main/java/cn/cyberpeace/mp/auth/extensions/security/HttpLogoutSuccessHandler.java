@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.config.sso.SSOFilterDelegate;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -13,9 +14,7 @@ import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.yale.its.tp.cas.client.filter.LogoutFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -24,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,8 +44,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
 
-    @Resource(name = "ssoLogoutFilter")
-    private LogoutFilter ssoLogoutFilter;
+    @Autowired
+    private SSOFilterDelegate ssoFilterDelegate;
 
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
@@ -73,12 +71,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             session.invalidate();
         }
 
-        try {
-            ssoLogoutFilter.doFilter(request, response, null);
-            log.info("ssoLogoutFilter invoke success");
-        } catch (Exception e) {
-            log.error("ssoLogoutFilter invoke error e:{}", ExceptionUtil.stacktraceToString(e));
-        }
+        log.info("invokeSSOLogoutFilter start...");
+        ssoFilterDelegate.invokeSSOLogoutFilter(request, response, null);
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
