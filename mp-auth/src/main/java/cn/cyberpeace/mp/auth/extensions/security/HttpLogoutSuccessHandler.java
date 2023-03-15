@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
-import cn.cyberpeace.mp.auth.config.sso.SSOFilterDelegate;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -45,9 +44,6 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
-    private SSOFilterDelegate ssoFilterDelegate;
-
-    @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
@@ -70,9 +66,6 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         if (session != null) {
             session.invalidate();
         }
-
-        log.info("invokeSSOLogoutFilter start...");
-        ssoFilterDelegate.invokeSSOLogoutFilter(request, response, null);
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
