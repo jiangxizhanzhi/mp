@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.auth.extensions.security;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.CookieUtils;
 import com.unionpay.common.util.PropertyUtil;
 import com.unionpay.common.util.StringUtil;
 import edu.yale.its.tp.cas.util.SecureHash64Util;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -25,6 +27,7 @@ import java.net.URLEncoder;
  * @Author zhouxinghuai
  * @Date：2023/3/15 17:13
  */
+@Slf4j
 public class SSOLogoutFilter implements Filter {
 
     public static final String CAS_FILTER_TOKENSTRING = "edu.yale.its.tp.cas.client.filter.tokenString";
@@ -56,6 +59,7 @@ public class SSOLogoutFilter implements Filter {
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain fc) throws ServletException, IOException {
+        log.info("SSOLogoutFilter doFilter invoke...");
         if (req instanceof HttpServletRequest && res instanceof HttpServletResponse) {
             HttpServletRequest request = (HttpServletRequest) req;
 
@@ -108,7 +112,7 @@ public class SSOLogoutFilter implements Filter {
                 session.invalidate();
             }
 
-            String originalService = this.getService((HttpServletRequest)request);
+            String originalService = this.getService(request);
             String serviceEncrypted = null;
 
             String targetUrl;
@@ -120,6 +124,9 @@ public class SSOLogoutFilter implements Filter {
             }
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
+
+            CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
+
             ((HttpServletResponse)res).sendRedirect(targetUrl);
         } else {
             throw new ServletException("CASFilter protects only HTTP resources");
