@@ -37,13 +37,21 @@ public class CreateHandler extends HandlerCommon {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    /**
+     * @description: 创建流量发生插件相关
+     *
+     * @throws
+     * @return void
+     */
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
+            //获取流量发生场景插件业务数据
             FlowPluginSceneBO scene = getPluginHandler().getScene();
             List<FlowNetworkInfo> networkInfos = new ArrayList<>();
+            //获取所有流量发生节点信息
             var flowElements = new ArrayList<>(getPluginHandler().getElementMap().values());
             if (CollectionUtils.isNotEmpty(flowElements)) {
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);

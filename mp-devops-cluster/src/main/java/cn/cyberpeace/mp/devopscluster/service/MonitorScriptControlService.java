@@ -97,8 +97,9 @@ public class MonitorScriptControlService {
         if (CollectionUtil.isEmpty(serviceList)) {
             return;
         }
-
+        // 云平台服务监控
         List<ServerMonitorConfig.MonitorProbe> cpSrvs = ServerMonitorConfig.cpCloudSrvMonitors;
+        //业务服务监控
         List<ServerMonitorConfig.MonitorProbe> bizSrvs = ServerMonitorConfig.businessSrvMonitors;
 
         if (CollectionUtil.isEmpty(cpSrvs)) {

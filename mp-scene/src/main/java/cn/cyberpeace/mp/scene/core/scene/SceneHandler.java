@@ -177,7 +177,9 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private int startSceneEvent(int event) {
+        //事件开始并打印日志
         var flag = getSceneEventHandler(event).startEvent();
+        //更新事件进度
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             // 推送场景最新的事件状态

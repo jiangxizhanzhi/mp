@@ -102,6 +102,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void create() {
+        //初始化创建过程
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
@@ -109,8 +110,10 @@ public class CreateHandler extends HandlerCommon {
         Set<String> collectorContainerInstanceIds = new HashSet<>();
         Set<String> mirrorVmInstanceIds = new HashSet<>();
         Set<String> mirrorContainerInstanceIds = new HashSet<>();
+        //云平台处理类
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        //是否创建流量采集器
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
             var portId = entry.getKey();

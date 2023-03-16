@@ -81,6 +81,7 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
+        //同步最新在位状态
         this.refreshIfNecessary();
         Integer total = devopsTargetService.totalCount(dto);
 

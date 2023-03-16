@@ -15,15 +15,27 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SceneAppConfig {
 
+    /**
+     * 场景任务线程池大小
+     */
     @Value("${mp.scene.scene_pool_size:100}")
     private Integer scenePoolSize;
 
+    /**
+     * 场景线程池总线程容量（线程池+队列线程）
+     */
     @Value("${mp.scene.scene_hold_size:10000}")
     private Integer sceneHoldSize;
 
+    /**
+     * 节点任务线程池大小
+     */
     @Value("${mp.scene.element_pool_size:100}")
     private Integer elementPoolSize;
 
+    /**
+     * 节点线程池总线程容量（线程池+队列线程）
+     */
     @Value("${mp.scene.element_hold_size:10000}")
     private Integer elementHoldSize;
 

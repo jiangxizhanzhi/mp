@@ -433,6 +433,7 @@ public class CsceneSpecialService {
                             CsceneInstanceStat::getEntityCount);
             var dataInfos = csceneInstanceMapper.list(humanCondition2, CsceneInstanceStat.class);
             if (CollectionUtils.isNotEmpty(dataInfos)) {
+                //场景id和场景状态关系
                 Map<String, CsceneInstanceStat> infos = new HashMap<>();
                 for (var dataInfo : dataInfos) {
                     infos.put(dataInfo.getId(), dataInfo);
