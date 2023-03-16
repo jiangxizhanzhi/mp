@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import static edu.yale.its.tp.cas.client.filter.CASFilter.CAS_FILTER_INSTITUTE;
-import static edu.yale.its.tp.cas.client.filter.CASFilter.CAS_FILTER_USER;
-
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -81,6 +78,7 @@ public class SSOLogoutFilter implements Filter {
             //    session.invalidate();
             //}
 
+
             HttpSession session = request.getSession();
             String casLogout = null;
             String logoutUrl = null;
@@ -94,9 +92,6 @@ public class SSOLogoutFilter implements Filter {
             if (logoutUrl != null) {
                 this.defaultCasLogout = logoutUrl + "/sso/logout";
             }
-
-            log.info("defaultCasLogout========={}",this.defaultCasLogout);
-
 
             String definedSSOUrl = null;
 
@@ -113,22 +108,8 @@ public class SSOLogoutFilter implements Filter {
                 casLogout = this.defaultCasLogout;
             }
 
-            log.info("casLogout========="+casLogout);
-
-            log.info("session========="+session.toString());
-
-            log.info("session===a======"+(String) session.getAttribute(CAS_FILTER_USER));
-            log.info("session===a======"+(String) session.getAttribute(CAS_FILTER_INSTITUTE));
             if (session != null) {
-                log.info("session===invalid====start==");
                 session.invalidate();
-                log.info("session===invalid====end==");
-                log.info("session===b======"+(String) session.getAttribute(CAS_FILTER_USER));
-                log.info("session===b======"+(String) session.getAttribute(CAS_FILTER_INSTITUTE));
-                session.removeAttribute(CAS_FILTER_USER);
-                session.removeAttribute(CAS_FILTER_INSTITUTE);
-                log.info("session===c======"+(String) session.getAttribute(CAS_FILTER_USER));
-                log.info("session===c======"+(String) session.getAttribute(CAS_FILTER_INSTITUTE));
             }
 
             String originalService = this.getService(request);
@@ -143,8 +124,6 @@ public class SSOLogoutFilter implements Filter {
             }
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
-
-            log.info("targetUrl======"+targetUrl);
 
             CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
 
