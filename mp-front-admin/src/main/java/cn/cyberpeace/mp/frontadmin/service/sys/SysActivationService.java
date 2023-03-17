@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.time.Duration;
@@ -192,15 +193,19 @@ public class SysActivationService {
      *
      * @return
      */
+    /**
+     * 查询系统UUID
+     *
+     * @return
+     */
     public String querySysUUID() {
-        /*status();
+        status();
         SysActivCtlModel sysActivCtlModel = null;
         if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
         }
-        SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
@@ -210,8 +215,11 @@ public class SysActivationService {
                 uuid = checkLine;
                 log.info("origin uuid is {}", uuid);
             }
-        }*/
-        String uuid = "c59a0e42-da48-5545-275b-9dcfae06ca85-z7mx0g";
+        }
+
+        // todo
+        //uuid = "aaaa-bbbb-cccc-dddd";
+        uuid = uuid + "-" + suffix;
         return uuid;
     }
 
