@@ -33,6 +33,7 @@ public class SSOLogoutFilter implements Filter {
 
     public static final String CAS_FILTER_TOKENSTRING = "edu.yale.its.tp.cas.client.filter.tokenString";
     public static final String defaultSSOUrl = "defaultSSOUrl";
+    //银联登出url拼接部分
     public static final String LOG_OUT_URL = "/sso_logout";
     private String defaultCasLogout;
     private String casWelcomeUrl;
