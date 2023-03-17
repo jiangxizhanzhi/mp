@@ -62,9 +62,9 @@ public class HostStateController {
     @ApiOperation(value = "集群状态趋势图")
     @GetMapping("/cluster_trend")
     public ServiceResult<List<HostState>> getClusterHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        hostStateTrendRequest.setSceneId(null);
-        hostStateTrendRequest.setElementIds(null);
-        List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
+//        hostStateTrendRequest.setSceneId(null);
+//        hostStateTrendRequest.setElementIds(null);
+//        List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
 
 //        return ServiceResult.success(hostStates);
         return ServiceResult.success(new ArrayList<>());
