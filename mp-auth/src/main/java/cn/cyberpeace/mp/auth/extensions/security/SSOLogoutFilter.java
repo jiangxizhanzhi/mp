@@ -32,6 +32,7 @@ public class SSOLogoutFilter implements Filter {
 
     public static final String CAS_FILTER_TOKENSTRING = "edu.yale.its.tp.cas.client.filter.tokenString";
     public static final String defaultSSOUrl = "defaultSSOUrl";
+    public static final String LOG_OUT_URL = "/sso_logout";
     private String defaultCasLogout;
     private String casWelcomeUrl;
     private String configFile = "";
@@ -90,7 +91,7 @@ public class SSOLogoutFilter implements Filter {
             }
 
             if (logoutUrl != null) {
-                this.defaultCasLogout = logoutUrl + "/sso/logout";
+                this.defaultCasLogout = logoutUrl + LOG_OUT_URL;
             }
 
             String definedSSOUrl = null;
@@ -102,8 +103,8 @@ public class SSOLogoutFilter implements Filter {
             }
 
             if (definedSSOUrl != null) {
-                casLogout = definedSSOUrl + "/sso/logout";
-                System.out.println("Find sso url with server \" " + request.getServerName() + " \" in " + this.configFile + " . Use defined SSO url : " + casLogout);
+                casLogout = definedSSOUrl + LOG_OUT_URL;
+                log.info("Find sso url with server \" " + request.getServerName() + " \" in " + this.configFile + " . Use defined SSO url : " + casLogout);
             } else {
                 casLogout = this.defaultCasLogout;
             }
