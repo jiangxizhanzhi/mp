@@ -18,13 +18,10 @@ public class LogingOutConfig {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private SSOConfig ssoConfig;
-
     @Bean
     public FilterRegistrationBean loginOutFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new SSOLogoutFilter(userService, ssoConfig));
+        filterRegistrationBean.setFilter(new SSOLogoutFilter(userService));
         filterRegistrationBean.setOrder(-101);
         filterRegistrationBean.setEnabled(true);
         filterRegistrationBean.addUrlPatterns("/auth/logout");
