@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +55,7 @@ public class HostStateController {
 
     /**
      * 集群状态趋势
+     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -64,7 +66,8 @@ public class HostStateController {
         hostStateTrendRequest.setElementIds(null);
         List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
 
-        return ServiceResult.success(hostStates);
+//        return ServiceResult.success(hostStates);
+        return ServiceResult.success(new ArrayList<>());
     }
 
 

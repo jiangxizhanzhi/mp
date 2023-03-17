@@ -200,38 +200,38 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(BasePageRequest request){
-        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
-        List<HypervisorPageVO> hypervisorPageRespons =  model.getList().stream().map(hypervisor ->
-                HypervisorPageVO.builder().name(hypervisor.getName())
-                        .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
-                        .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
-                        .diskUsed(hypervisor.getDiskUsed()).build()
-        ).collect(Collectors.toList());
+//        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
+//        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+//            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+//        }
+//        List<HypervisorPageVO> hypervisorPageRespons =  model.getList().stream().map(hypervisor ->
+//                HypervisorPageVO.builder().name(hypervisor.getName())
+//                        .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
+//                        .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
+//                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
+//                        .diskUsed(hypervisor.getDiskUsed()).build()
+//        ).collect(Collectors.toList());
+//
+//        // 获取所有物理主机服务状态
+//        CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
+//
+//        hypervisorPageRespons.forEach(v -> {
+//            String name = v.getName();
+//            Optional<ServiceStatus> serviceStatus =
+//                    serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
+//            // 设置物理主机服务状态
+//            v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
+//
+//            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
+//            Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
+//            v.setTotalContainers(totalContainers);
+//            if (Objects.nonNull(weightAndMaxInstances)) {
+//                v.setWeight(weightAndMaxInstances.getWeight());
+//                v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
+//            }
+//        });
 
-        // 获取所有物理主机服务状态
-        CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
-
-        hypervisorPageRespons.forEach(v -> {
-            String name = v.getName();
-            Optional<ServiceStatus> serviceStatus =
-                    serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
-            // 设置物理主机服务状态
-            v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
-
-            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
-            Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
-            v.setTotalContainers(totalContainers);
-            if (Objects.nonNull(weightAndMaxInstances)) {
-                v.setWeight(weightAndMaxInstances.getWeight());
-                v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
-            }
-        });
-
-        return new PageResult<>(hypervisorPageRespons, model.getTotal());
+        return new PageResult<>(new ArrayList<>(), 0);
     }
 
     /**
