@@ -117,7 +117,7 @@ public class SSOLogoutFilter implements Filter {
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
 
             CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
-
+            ((HttpServletResponse) res).setHeader("Access-Control-Allow-Origin", "*");
             ((HttpServletResponse)res).sendRedirect(targetUrl);
         } else {
             throw new ServletException("CASFilter protects only HTTP resources");
