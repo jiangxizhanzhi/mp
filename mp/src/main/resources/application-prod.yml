@@ -130,6 +130,8 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+    sso:
+      config-file: ${SSO_CONFIG_FILE}
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex:10.100.7.102}:${TREX_PORT:80}/api/v1/resource

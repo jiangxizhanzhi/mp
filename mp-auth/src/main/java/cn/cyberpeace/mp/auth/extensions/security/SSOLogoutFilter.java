@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.config.sso.SSOConfig;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.CookieUtils;
 import com.unionpay.common.util.PropertyUtil;
-import com.unionpay.common.util.StringUtil;
 import edu.yale.its.tp.cas.util.SecureHash64Util;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -34,28 +35,24 @@ public class SSOLogoutFilter implements Filter {
     public static final String defaultSSOUrl = "defaultSSOUrl";
     private String defaultCasLogout;
     private String casWelcomeUrl;
-    private String configFile = "";
+
+    private String configFile;
 
     private UserService userService;
 
-    public SSOLogoutFilter(UserService userService) {
+    private SSOConfig ssoConfig;
+
+    public SSOLogoutFilter(UserService userService, SSOConfig ssoConfig) {
         this.userService = userService;
+        if (Objects.nonNull(ssoConfig)) {
+            this.configFile = ssoConfig.getConfigFile();
+        } else {
+            configFile = "api/mp.properties";
+        }
     }
 
     public void init(FilterConfig config) throws ServletException {
         this.defaultCasLogout = config.getInitParameter("edu.yale.its.tp.cas.client.filter.logoutUrl");
-        String ssoFile = config.getInitParameter("sso.config");
-        String contextPath = config.getServletContext().getContextPath();
-        if (StringUtil.trim(contextPath).equals("")) {
-            this.configFile = "ssoClient.properties";
-        } else {
-            this.configFile = contextPath.substring(1) + ".properties";
-        }
-
-        if (!StringUtil.isBlank(ssoFile)) {
-            this.configFile = ssoFile;
-        }
-
     }
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain fc) throws ServletException, IOException {
@@ -69,15 +66,7 @@ public class SSOLogoutFilter implements Filter {
                 updateUser.setId(user.getId());
                 updateUser.initDefault("tokenSecret");
                 userService.update(updateUser);
-                //recordLogoutLog(user, request);
             }
-
-            // 清空session
-            //HttpSession session = request.getSession(false);
-            //if (session != null) {
-            //    session.invalidate();
-            //}
-
 
             HttpSession session = request.getSession();
             String casLogout = null;
