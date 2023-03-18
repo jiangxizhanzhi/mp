@@ -48,7 +48,8 @@ public class SysCtlService {
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
             // not null, to update  example: oldTs 1644778431000
             Long currTs = System.currentTimeMillis();
-            Long oldTs = oldActivCtlModel.getSysTimestamp();
+            String oldTsStr = oldActivCtlModel.getSysTimestamp();
+            Long oldTs = Long.valueOf(oldTsStr);
             if (Objects.nonNull(oldTs) && oldTs > 0 && currTs >= oldTs) {
                 // 更新数据库系统时间戳，同时累加run_seconds
                 Long diff = currTs - oldTs;
@@ -60,7 +61,7 @@ public class SysCtlService {
                 }
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
-                newActivCtlModel.setSysTimestamp(currTs);
+                newActivCtlModel.setSysTimestamp(String.valueOf(currTs));
 
                 Long newRunSeconds = diffSeconds + oldRunSeconds;
                 log.info("newRunSeconds:{}, diffSeconds:{}, oldRunSeconds:{}", newRunSeconds, diffSeconds, oldRunSeconds);
@@ -74,7 +75,7 @@ public class SysCtlService {
                 // 直接更新系统时间戳，不累加run_seconds
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
-                newActivCtlModel.setSysTimestamp(currTs);
+                newActivCtlModel.setSysTimestamp(String.valueOf(currTs));
                 sysActivCtlService.update(newActivCtlModel);
             }
         }

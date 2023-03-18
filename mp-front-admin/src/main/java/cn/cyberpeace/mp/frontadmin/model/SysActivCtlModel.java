@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.frontadmin.model;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -65,8 +64,8 @@ public class SysActivCtlModel extends BaseModel {
     private Integer activeCount;
 
     @ApiModelProperty(value = "定时任务记录的系统时间戳，发生时间回拨，则该值也回到回拨时间，用于累计系统运行秒数")
-    @DefaultLong(-1)
-    private Long sysTimestamp;
+    @DefaultStr("-1")
+    private String sysTimestamp;
 
     @ApiModelProperty(value = "(密文）系统运行秒数(该条件与过期日期，二者达到其一即可判断为license过期。防止通过回拨服务器时间，达到白嫖目的)")
     @DefaultStr

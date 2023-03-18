@@ -447,7 +447,7 @@ public class SysActivationService {
         log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
-        newSysActivCtlModel.setSysTimestamp(currTs);
+        newSysActivCtlModel.setSysTimestamp(String.valueOf(currTs));
         String suffix = RandomUtil.randomString(6);
         newSysActivCtlModel.setSuffix(suffix);
         newSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
@@ -476,7 +476,7 @@ public class SysActivationService {
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
         updateSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
-        updateSysActivCtlModel.setSysTimestamp(System.currentTimeMillis());
+        updateSysActivCtlModel.setSysTimestamp(String.valueOf(System.currentTimeMillis()));
         updateSysActivCtlModel.setActiveCount(1);
         updateSysActivCtlModel.setStatus(SysActivCtlModel.STATUS_VALID);
         sysActivCtlService.update(updateSysActivCtlModel);
