@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -261,6 +262,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             modelService.removeMock();
         }
         return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("获得原始的所有Ip")
+    @GetMapping("/get_origin_ip")
+    public ServiceResult<OriginIpsResponse> gerOriginIp() {
+        return new ServiceResult<>(modelService.getOriginIps()).asResult();
     }
 
     @ApiOperation("场景实例启动节点流量")

@@ -41,6 +41,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
@@ -92,6 +93,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -608,11 +610,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public Boolean checkClear(){
-        if (sceneDeleteCallback.mock.get(2) != null) {
-            return true;
-        } else {
+        if (sceneDeleteCallback.mock.get(2) == null){
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
         }
+        if (sceneDeleteCallback.mock.get(1) != null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
+        }
+        return true;
     }
 
     public void removeMock(){
@@ -621,6 +625,26 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    public OriginIpsResponse getOriginIps() {
+        String js = "{\n" +
+                "  \"controller\": {\n" +
+                "    \"ip\": \"10.100.7.1\",\n" +
+                "    \"netmask\": \"255.255.255.0\",\n" +
+                "    \"gateway\": \"10.100.7.254\",\n" +
+                "    \"allocation_pools\": \"10.100.7.100-10.100.7.200\"\n" +
+                "  },\n" +
+                "  \"compute\": [\n" +
+                "      {\n" +
+                "          \"name\": \"compute2\",\n" +
+                "          \"ip\": \"10.100.7.2\"\n" +
+                "      }\n" +
+                "  ],\n" +
+                "  \"office\": {\n" +
+                "    \"ip\": \"10.100.7.30\"\n" +
+                "  }\n" +
+                "}";
+        return JSON.parseObject(js, OriginIpsResponse.class);
+    }
 
     public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
         var csceneInstanceObjs = getCsceneInstanceObjs(Arrays.asList(ids)).stream()

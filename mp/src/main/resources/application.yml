@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api/mp
-  port: 1314
+  port: 8080
   tomcat:
     threads:
       min-spare: 10
