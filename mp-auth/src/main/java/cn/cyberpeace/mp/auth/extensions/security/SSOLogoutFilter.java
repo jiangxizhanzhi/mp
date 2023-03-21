@@ -168,7 +168,9 @@ public class SSOLogoutFilter implements Filter {
                 }
 
                 sb.append(casServerName);
-                sb.append(request.getContextPath());
+                //TODO 设置为首页进行测试
+                sb.append("/page/mg");
+                //sb.append(request.getContextPath());
                 this.casWelcomeUrl = URLEncoder.encode(sb.toString());
             }
             log.info("this.casWelcomeUrl==="+this.casWelcomeUrl);
