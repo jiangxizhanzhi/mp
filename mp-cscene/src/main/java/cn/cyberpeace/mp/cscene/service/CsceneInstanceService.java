@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import ch.qos.logback.core.encoder.EchoEncoder;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -42,9 +43,11 @@ import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.cscene.util.SceneDeleteCallback;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -53,6 +56,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -159,6 +163,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LogFileService logFileService;
+
+    @Autowired
+    private SceneDeleteCallback sceneDeleteCallback;
+
+    @Autowired
+    private SceneMapper sceneMapper;
 
     @Resource
     private CsceneService csceneService;
@@ -581,6 +591,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         return deleteById(csceneInstanceObjs.get(0).getId(), false, context);
     }
+
+    public ServiceResult<Boolean> clearAll(){
+        if (sceneDeleteCallback.mock.get(1) != null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
+        }
+        sceneDeleteCallback.mock.put(1, "123");
+        sceneDeleteCallback.mock.put(2, "123");
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
+
+        }
+        sceneDeleteCallback.mock.remove(1);
+        return new ServiceResult<>(true);
+    }
+
+    public Boolean checkClear(){
+        if (sceneDeleteCallback.mock.get(2) != null) {
+            return true;
+        } else {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
+        }
+    }
+
+    public void removeMock(){
+        if (sceneDeleteCallback.mock.get(2) != null) {
+            sceneDeleteCallback.mock.remove(2);
+        }
+    }
+
 
     public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
         var csceneInstanceObjs = getCsceneInstanceObjs(Arrays.asList(ids)).stream()

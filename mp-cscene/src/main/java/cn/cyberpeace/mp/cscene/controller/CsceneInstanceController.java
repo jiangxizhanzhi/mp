@@ -247,6 +247,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("删除所有运行中的场景和靶标示例")
+    @DeleteMapping("/clear_all")
+    public ServiceResult<Boolean> clearAll() {
+        modelService.clearAll();
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("重新设置所有Ip")
+    @PostMapping("/reset_all_ip")
+    public ServiceResult<Boolean> resetAllIp(@RequestBody CsceneInstanceClearAllRequest request) {
+        if (modelService.checkClear()) {
+            modelService.removeMock();
+        }
+        return new ServiceResult<>(true).asResult();
+    }
+
     @ApiOperation("场景实例启动节点流量")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
