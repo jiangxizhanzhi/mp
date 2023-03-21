@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.CookieUtils;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import com.unionpay.common.util.PropertyUtil;
 import com.unionpay.common.util.StringUtil;
 import edu.yale.its.tp.cas.util.SecureHash64Util;
@@ -126,10 +127,12 @@ public class SSOLogoutFilter implements Filter {
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
             log.info("targetUrl================="+targetUrl);
 
-            CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
-
-            ((HttpServletResponse) res).setHeader("Access-Control-Allow-Origin", "*");
-            ((HttpServletResponse)res).sendRedirect(targetUrl);
+//            CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
+//
+//            ((HttpServletResponse) res).setHeader("Access-Control-Allow-Origin", "*");
+//            ((HttpServletResponse)res).sendRedirect(targetUrl);
+            String result = HttpUtils.sendGet(targetUrl);
+            log.info("sso logout result=========="+result);
         } else {
             throw new ServletException("CASFilter protects only HTTP resources");
         }
