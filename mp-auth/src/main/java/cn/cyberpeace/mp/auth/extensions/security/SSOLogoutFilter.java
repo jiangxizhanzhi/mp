@@ -124,6 +124,7 @@ public class SSOLogoutFilter implements Filter {
             }
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
+            log.info("targetUrl================="+targetUrl);
 
             CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
 
@@ -141,11 +142,19 @@ public class SSOLogoutFilter implements Filter {
         this.casWelcomeUrl = null;
         String casServerName = null;
         int port = request.getServerPort();
+        log.info("requestServername============="+request.getServerName());
+        log.info("requestServerport============="+request.getServerPort());
+        log.info("port============="+port);
         if (port != 80 && port != 443) {
             casServerName = request.getServerName() + ":" + request.getServerPort();
         } else {
             casServerName = request.getServerName();
         }
+
+        log.info("casServerName============="+casServerName);
+        log.info("request.getContextPath()========"+request.getContextPath());
+        casServerName = request.getServerName();
+        log.info("test===updatefor====ssourl===="+casServerName);
 
         if (casServerName == null && this.casWelcomeUrl == null) {
             throw new ServletException("need one of the following configuration parameters: edu.yale.its.tp.cas.client.filter.welcomeUrl or edu.yale.its.tp.cas.client.filter.serverName");
@@ -162,6 +171,7 @@ public class SSOLogoutFilter implements Filter {
                 sb.append(request.getContextPath());
                 this.casWelcomeUrl = URLEncoder.encode(sb.toString());
             }
+            log.info("this.casWelcomeUrl==="+this.casWelcomeUrl);
 
             return this.casWelcomeUrl;
         }
