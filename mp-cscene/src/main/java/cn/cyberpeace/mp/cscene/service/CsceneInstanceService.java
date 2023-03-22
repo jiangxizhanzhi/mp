@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
@@ -41,10 +41,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
-import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
-import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
@@ -57,7 +55,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -93,7 +90,6 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -168,9 +164,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private SceneDeleteCallback sceneDeleteCallback;
-
-    @Autowired
-    private SceneMapper sceneMapper;
 
     @Resource
     private CsceneService csceneService;
@@ -552,6 +545,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+                    sceneDeleteCallback.doCallback(id);
                 }
                 if (!logic) {
                     screenshotService.batchDeleteBySceneId(id);
@@ -592,58 +586,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(false);
         }
         return deleteById(csceneInstanceObjs.get(0).getId(), false, context);
-    }
-
-    public ServiceResult<Boolean> clearAll(){
-        if (sceneDeleteCallback.mock.get(1) != null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
-        }
-        sceneDeleteCallback.mock.put(1, "123");
-        sceneDeleteCallback.mock.put(2, "123");
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-
-        }
-        sceneDeleteCallback.mock.remove(1);
-        return new ServiceResult<>(true);
-    }
-
-    public Boolean checkClear(){
-        if (sceneDeleteCallback.mock.get(2) == null){
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
-        }
-        if (sceneDeleteCallback.mock.get(1) != null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
-        }
-        return true;
-    }
-
-    public void removeMock(){
-        if (sceneDeleteCallback.mock.get(2) != null) {
-            sceneDeleteCallback.mock.remove(2);
-        }
-    }
-
-    public OriginIpsResponse getOriginIps() {
-        String js = "{\n" +
-                "  \"controller\": {\n" +
-                "    \"ip\": \"10.100.7.1\",\n" +
-                "    \"netmask\": \"255.255.255.0\",\n" +
-                "    \"gateway\": \"10.100.7.254\",\n" +
-                "    \"allocation_pools\": \"10.100.7.100-10.100.7.200\"\n" +
-                "  },\n" +
-                "  \"compute\": [\n" +
-                "      {\n" +
-                "          \"name\": \"compute2\",\n" +
-                "          \"ip\": \"10.100.7.2\"\n" +
-                "      }\n" +
-                "  ],\n" +
-                "  \"office\": {\n" +
-                "    \"ip\": \"10.100.7.30\"\n" +
-                "  }\n" +
-                "}";
-        return JSON.parseObject(js, OriginIpsResponse.class);
     }
 
     public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
