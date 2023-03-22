@@ -18,6 +18,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        log.info("add Global Cros config");
         registry.addMapping("/**") // 所有接口
                 .allowCredentials(true) // 是否发送 Cookie
                 .allowedOriginPatterns("*") // 支持域
