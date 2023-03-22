@@ -109,6 +109,10 @@ public class SSOLogoutFilter implements Filter {
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
             log.info("targetUrl======{}",targetUrl);
+            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Origin", "*");
+            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Credentials", "true");
+            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Headers", "*");
             ((HttpServletResponse)response).sendRedirect(targetUrl);
 
         } else {
