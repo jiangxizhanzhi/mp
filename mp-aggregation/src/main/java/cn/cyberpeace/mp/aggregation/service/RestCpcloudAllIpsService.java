@@ -87,7 +87,7 @@ public class RestCpcloudAllIpsService {
                         sceneDeleteCallback.removeSceneOrInstanceId(sceneInstance.getId());
                         sceneDeleteCallback.finishClearJob();
                     });
-                    modelService.deleteById(sceneInstance.getId(), false, new CsceneContextBO());
+                    modelService.deleteById(sceneInstance.getId(), true, new CsceneContextBO());
 
                 });
                 allInstances.forEach(instance -> {
@@ -131,7 +131,7 @@ public class RestCpcloudAllIpsService {
         if (checkHasClear()) {
             //调云平台接口
             int poolSize = 10;
-            String server = "http://10.4.1.103:9999";
+            String server = "http://10.100.7.1:9999";
             Integer timeout = 6000;
             CpcloudHttpClient cpcloudHttpClient = new CpcloudHttpClient(server, timeout, poolSize);
             var response = cpcloudHttpClient.post(ResetCpcloudIpsUrl.RESET_CPCLOUD_ALL_IPS, request, null, OriginIpsResult.class);
@@ -143,7 +143,7 @@ public class RestCpcloudAllIpsService {
     public OriginIpsResult getOriginIps() {
         //调云平台接口
         int poolSize = 10;
-        String server = "http://10.4.1.103:9999";
+        String server = "http://10.100.7.1:9999";
         Integer timeout = 6000;
         CpcloudHttpClient cpcloudHttpClient = new CpcloudHttpClient(server, timeout, poolSize);
         var response = cpcloudHttpClient.get(ResetCpcloudIpsUrl.GET_CPCLOUD_ALL_ORIGIN_IPS, null, OriginIpsResult.class);
