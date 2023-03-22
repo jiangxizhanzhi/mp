@@ -58,32 +58,18 @@ public class SSOLogoutFilter implements Filter {
 
     }
 
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain fc) throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc) throws ServletException, IOException {
         log.info("SSOLogoutFilter doFilter invoke...");
-        if (req instanceof HttpServletRequest && res instanceof HttpServletResponse) {
-            HttpServletRequest request = (HttpServletRequest) req;
-
-            UserModel user = JwtCommon.verifyToken(request);
-            if (user != null) {
-                var updateUser = new UserModel();
-                updateUser.setId(user.getId());
-                updateUser.initDefault("tokenSecret");
-                userService.update(updateUser);
-                //recordLogoutLog(user, request);
-            }
-
-            // 清空session
-            //HttpSession session = request.getSession(false);
-            //if (session != null) {
-            //    session.invalidate();
-            //}
-
-
-            HttpSession session = request.getSession();
+        if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+            HttpSession session = ((HttpServletRequest)request).getSession();
+            HttpServletRequest req = (HttpServletRequest) request;
             String casLogout = null;
             String logoutUrl = null;
 
             try {
+                if (session != null) {
+                    session.invalidate();
+                }
                 logoutUrl = PropertyUtil.getInstance().getValueByDefaultFileKey(this.configFile, "defaultSSOUrl");
             } catch (Exception var13) {
                 var13.printStackTrace();
@@ -103,18 +89,16 @@ public class SSOLogoutFilter implements Filter {
 
             if (definedSSOUrl != null) {
                 casLogout = definedSSOUrl + "/sso/logout";
-                System.out.println("Find sso url with server \" " + request.getServerName() + " \" in " + this.configFile + " . Use defined SSO url : " + casLogout);
+                log.info("Find sso url with server \" " + request.getServerName() + " \" in " + this.configFile + " . Use defined SSO url : " + casLogout);
             } else {
                 casLogout = this.defaultCasLogout;
             }
 
-            if (session != null) {
-                session.invalidate();
-            }
 
-            String originalService = this.getService(request);
+            String originalService = this.getService(req);
             String serviceEncrypted = null;
 
+            log.info("originalService======{}",originalService);
             String targetUrl;
             try {
                 targetUrl = URLDecoder.decode(originalService);
@@ -124,12 +108,9 @@ public class SSOLogoutFilter implements Filter {
             }
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
-            log.info("targetUrl================="+targetUrl);
+            log.info("targetUrl======{}",targetUrl);
+            ((HttpServletResponse)response).sendRedirect(targetUrl);
 
-//            CookieUtils.setCookie((HttpServletResponse) res, "JSESSIONID", "", null, 0);
-
-//            ((HttpServletResponse) res).setHeader("Access-Control-Allow-Origin", "*");
-            ((HttpServletResponse)res).sendRedirect(targetUrl);
         } else {
             throw new ServletException("CASFilter protects only HTTP resources");
         }
@@ -169,7 +150,8 @@ public class SSOLogoutFilter implements Filter {
 
                 sb.append(casServerName);
                 //TODO 设置为首页进行测试
-                sb.append("/page/mg");
+                sb.append("/page/mg/login");
+                log.info("loginpage==="+sb.toString());
                 //sb.append(request.getContextPath());
                 this.casWelcomeUrl = URLEncoder.encode(sb.toString());
             }
