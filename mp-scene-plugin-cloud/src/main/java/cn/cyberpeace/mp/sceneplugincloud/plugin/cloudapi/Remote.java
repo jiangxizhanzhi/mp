@@ -27,6 +27,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutDa
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeResult;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +66,16 @@ public class Remote extends CloudClient {
     public String getContainerConsoleUrl(String containerId) {
         ContainerGetResult result = getHttpClient().get(String.format(CloudUrlConstant.CONTAINER_GET_URL, containerId), null, ContainerGetResult.class);
         return result.getData() == null ? null : result.getData().getUrl();
+    }
+
+    public OriginIpsResult resetCpcloudAllIps(ResetCplcoudAllIpsData request) {
+        OriginIpsResult result = getHttpClient().post(CloudUrlConstant.RESET_CPCLOUD_ALL_IPS, request, null, OriginIpsResult.class);
+        return result;
+    }
+
+    public OriginIpsResult getCpcloudOriginIps() {
+        OriginIpsResult result = getHttpClient().get(CloudUrlConstant.GET_CPCLOUD_ALL_ORIGIN_IPS, null, OriginIpsResult.class);
+        return result;
     }
 
     public String removeConnection() {
