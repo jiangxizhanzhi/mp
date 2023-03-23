@@ -178,7 +178,7 @@ public class AuthTestController {
 
     @GetMapping("/ssoTestLogout")
     public void ssoTestLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        log.info("sso logoutest===start");
+        log.info("sso logout====");
         UserModel user = JwtCommon.verifyToken(request);
         if (user != null) {
             var updateUser = new UserModel();
@@ -186,22 +186,7 @@ public class AuthTestController {
             updateUser.initDefault("tokenSecret");
             userService.update(updateUser);
         }
-        HttpSession session = request.getSession();
-        if (session != null) {
-            session.invalidate();
-        }
-        String targetUrl="http://146.4.130.11:10060/sso/logout";
-        String originalService="http://145.0.46.10/page/mg/login";
-        String serviceEncrypted = null;
-        try {
-            targetUrl = URLDecoder.decode(originalService);
-            serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
-        } catch (Exception var11) {
-            var11.printStackTrace();
-        }
-        targetUrl = "http://146.4.130.11:10060/sso/logout?service=" + targetUrl + "&flag=" + serviceEncrypted;
-        log.info("sso logoutest==={}",targetUrl);
-        response.sendRedirect(targetUrl);
+
     }
 
     @GetMapping("/olrecord/track/period")
