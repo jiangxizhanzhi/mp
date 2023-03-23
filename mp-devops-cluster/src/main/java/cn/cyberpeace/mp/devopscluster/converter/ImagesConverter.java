@@ -5,10 +5,8 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.cscene.util.SceneDeleteCallback;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
@@ -38,7 +36,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,9 +67,6 @@ public class ImagesConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final SnapshotConverter snapshotConverter;
-
-    @Autowired
-    private SceneDeleteCallback sceneDeleteCallback;
 
     /**
      * 分页查询镜像列表
@@ -341,12 +335,6 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
-        try {
-            Thread.sleep(10000);
-        } catch (Exception e) {
-
-        }
-        sceneDeleteCallback.doCallback(request.getUuid());
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(request.getUuid());
         updateTargetModel.setInstanceCreateUser(StringUtils.EMPTY);

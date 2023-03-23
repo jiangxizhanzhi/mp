@@ -1,15 +1,14 @@
-package cn.cyberpeace.mp.cscene.util;
+package cn.cyberpeace.mp.scene.util;
 
+import cn.hutool.core.collection.ConcurrentHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * @Description
@@ -19,9 +18,9 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Component
 @Slf4j
 public class SceneDeleteCallback {
-    private Set<String> sceneIds = new ConcurrentSkipListSet<>();
+    private Set<String> sceneIds = new ConcurrentHashSet<>();
     private Map<String, List<Runnable>> callbacks = new ConcurrentHashMap<>();
-    private Map<Integer, String> status = new HashMap<>();
+    private Map<Integer, String> status = new ConcurrentHashMap<>();
 
     public void addCallback(String id, Runnable callback) {
         this.sceneIds.add(id);
@@ -36,20 +35,6 @@ public class SceneDeleteCallback {
                 r.run();
             });
         }
-//        callbacks.forEach((key, task) -> {
-//            task.forEach(r -> {
-//                try {
-//                    r.run();
-//                } catch (Exception e) {
-//                    log.info("clear {} instance failed, error is {}", key, e.getMessage());
-//                } finally {
-//                    if (this.sceneIds.size() == 0 && this.status.get(Status.CLEARING) != null) {
-//                        // 标识一下，清除完毕
-//                        this.removeClearingStatus();
-//                    }
-//                }
-//            });
-//        });
     }
 
     public Boolean isClearing() {
@@ -79,12 +64,12 @@ public class SceneDeleteCallback {
         this.sceneIds.remove(id);
     }
 
-    public void setStatus() {
+    public void setClearingAndHasClearStatus() {
         this.status.put(Status.CLEARING, Status.CLEARING_VALUE);
         this.status.put(Status.HAS_CLEAR, Status.HAS_CLEAR_VALUE);
     }
 
-    public void startClear() {
+    public void setClearingStatus() {
         this.status.put(Status.CLEARING, Status.CLEARING_VALUE);
     }
 

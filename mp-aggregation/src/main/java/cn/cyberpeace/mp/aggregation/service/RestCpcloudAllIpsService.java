@@ -1,30 +1,24 @@
 package cn.cyberpeace.mp.aggregation.service;
 
-import cn.cyberpeace.mp.aggregation.config.ResetCpcloudIpsUrl;
-import cn.cyberpeace.mp.aggregation.utils.CpcloudHttpClient;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.cscene.util.SceneDeleteCallback;
+import cn.cyberpeace.mp.scene.util.SceneDeleteCallback;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
-import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,16 +67,16 @@ public class RestCpcloudAllIpsService {
             if (CollectionUtils.isEmpty(allSceneInstances) && CollectionUtils.isEmpty(allInstances)) {
                 //没有需要清理的场景和靶标实例
                 //标记一下，已经执行过清理操作了
-                sceneDeleteCallback.setStatus();
+                sceneDeleteCallback.setClearingAndHasClearStatus();
                 //标记已经完成清理操作
                 sceneDeleteCallback.removeClearingStatus();
                 return new ServiceResult<>(true);
             } else {
                 // 标识一下，正在清除,并标识已经执行过清除操作
-                sceneDeleteCallback.setStatus();
+                sceneDeleteCallback.setClearingAndHasClearStatus();
                 allSceneInstances.stream().forEach(sceneInstance -> {
 
-                    sceneDeleteCallback.startClear();
+                    sceneDeleteCallback.setClearingStatus();
                     if (isTrue) {
                         sceneDeleteCallback.addCallback(sceneInstance.getId(), () -> {
                             sceneDeleteCallback.removeSceneOrInstanceId(sceneInstance.getId());
@@ -98,13 +92,19 @@ public class RestCpcloudAllIpsService {
                     request.setUuid(instance.getUuid());
                     request.setImageType(instance.getImageType());
 
-                    sceneDeleteCallback.startClear();
+                    sceneDeleteCallback.setClearingStatus();
                     if (isTrue) {
                         sceneDeleteCallback.addCallback(instance.getUuid(), () -> {
                             sceneDeleteCallback.removeSceneOrInstanceId(instance.getUuid());
                             sceneDeleteCallback.finishClearJob();
                         });
-                        imagesConverter.delete(request);
+                        try {
+                            imagesConverter.delete(request);
+                        } catch (Exception e) {
+                            log.info("clear instance {} failed, error is {}", instance.getUuid(), e.getMessage());
+                        } finally {
+                            sceneDeleteCallback.doCallback(request.getUuid());
+                        }
                     }
                 });
                 if (!isTrue) {
@@ -136,11 +136,7 @@ public class RestCpcloudAllIpsService {
     public void resetAllIps(ResetCplcoudAllIpsData request) {
         if (checkHasClear()) {
             //调云平台接口
-            int poolSize = 10;
-            String server = "http://10.100.7.1:9999";
-            Integer timeout = 6000;
-            CpcloudHttpClient cpcloudHttpClient = new CpcloudHttpClient(server, timeout, poolSize);
-            var response = cpcloudHttpClient.post(ResetCpcloudIpsUrl.RESET_CPCLOUD_ALL_IPS, request, null, OriginIpsResult.class);
+            var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
             sceneDeleteCallback.clearAll();
         }
@@ -148,11 +144,7 @@ public class RestCpcloudAllIpsService {
 
     public OriginIpsResult getOriginIps() {
         //调云平台接口
-        int poolSize = 10;
-        String server = "http://10.100.7.1:9999";
-        Integer timeout = 6000;
-        CpcloudHttpClient cpcloudHttpClient = new CpcloudHttpClient(server, timeout, poolSize);
-        var response = cpcloudHttpClient.get(ResetCpcloudIpsUrl.GET_CPCLOUD_ALL_ORIGIN_IPS, null, OriginIpsResult.class);
+        var response = scenePluginCloudSceneService.getCpcloudOriginIps();
         log.info("get cpcloud origin ips response:{}", JsonCommon.stringify(response));
         return response;
     }
