@@ -26,7 +26,8 @@ public enum CsceneErrorCode implements ErrorCode {
     PARAMS_NAME_TOO_LONG("MP-110295", "params_name_too_long"),
     PARAMS_DESCRIPTION_TOO_LONG("MP-110296", "params_description_too_long"),
     SCENE_INSTANCE_IS_CLEARING("MP-110297", "scene_instance_is_clearing"),
-    SCENE_INSTANCE_NEED_CLEAR("MP-110298", "scene_instance_need_clear");
+    SCENE_INSTANCE_NEED_CLEAR("MP-110298", "scene_instance_need_clear"),
+    SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110299", "scene_instance_still_need_clear");
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
