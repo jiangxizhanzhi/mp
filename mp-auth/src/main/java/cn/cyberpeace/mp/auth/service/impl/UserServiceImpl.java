@@ -49,6 +49,7 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,6 +119,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private DefaultImgService defaultImgService;
 
+    @Value("${mp.auth.redirect-loginurl:}")
+    private String ssoRedirectLoginPage;
+
+    @Override
+    public String getSsoRedirectLoginPage() {
+        return ssoRedirectLoginPage;
+    }
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {

@@ -8,6 +8,7 @@ import com.unionpay.common.util.PropertyUtil;
 import com.unionpay.common.util.StringUtil;
 import edu.yale.its.tp.cas.util.SecureHash64Util;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -93,11 +94,12 @@ public class SSOLogoutFilter implements Filter {
             } else {
                 casLogout = this.defaultCasLogout;
             }
-
-            String originalService = this.getService(req);
+            //获取重定向登录页
+            String originalService = userService.getSsoRedirectLoginPage();
+            originalService= StringUtils.isNotEmpty(originalService)?URLEncoder.encode(originalService):this.getService(req);
+            //flag值
             String serviceEncrypted = null;
 
-            log.info("originalService======{}",originalService);
             String targetUrl;
             try {
                 targetUrl = URLDecoder.decode(originalService);
@@ -107,11 +109,7 @@ public class SSOLogoutFilter implements Filter {
             }
 
             targetUrl = casLogout + "?service=" + originalService + "&flag=" + serviceEncrypted;
-            log.info("targetUrl======{}",targetUrl);
-//            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Origin", "*");
-//            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
-//            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Credentials", "true");
-//            ((HttpServletResponse)response).setHeader("Access-Control-Allow-Headers", "*");
+            log.info("sso redirect targetUrl is {}",targetUrl);
             ((HttpServletResponse)response).sendRedirect(targetUrl);
 
         } else {
@@ -125,20 +123,16 @@ public class SSOLogoutFilter implements Filter {
     private String getService(HttpServletRequest request) throws ServletException {
         this.casWelcomeUrl = null;
         String casServerName = null;
-        int port = request.getServerPort();
-        log.info("requestServername============="+request.getServerName());
-        log.info("requestServerport============="+request.getServerPort());
-        log.info("port============="+port);
-        if (port != 80 && port != 443) {
-            casServerName = request.getServerName() + ":" + request.getServerPort();
-        } else {
-            casServerName = request.getServerName();
-        }
-
-        log.info("casServerName============="+casServerName);
-        log.info("request.getContextPath()========"+request.getContextPath());
+//        int port = request.getServerPort();
+//        log.info("requestServername============="+request.getServerName());
+//        log.info("requestServerport============="+request.getServerPort());
+//        log.info("port============="+port);
+//        if (port != 80 && port != 443) {
+//            casServerName = request.getServerName() + ":" + request.getServerPort();
+//        } else {
+//            casServerName = request.getServerName();
+//        }
         casServerName = request.getServerName();
-        log.info("test===updatefor====ssourl===="+casServerName);
 
         if (casServerName == null && this.casWelcomeUrl == null) {
             throw new ServletException("need one of the following configuration parameters: edu.yale.its.tp.cas.client.filter.welcomeUrl or edu.yale.its.tp.cas.client.filter.serverName");
@@ -152,14 +146,12 @@ public class SSOLogoutFilter implements Filter {
                 }
 
                 sb.append(casServerName);
-                //TODO 设置为首页进行测试
+                //设置为首页
                 sb.append("/page/mg/login");
-                log.info("loginpage==="+sb.toString());
+                log.info("loginpage is {}",sb.toString());
                 //sb.append(request.getContextPath());
                 this.casWelcomeUrl = URLEncoder.encode(sb.toString());
             }
-            log.info("this.casWelcomeUrl==="+this.casWelcomeUrl);
-
             return this.casWelcomeUrl;
         }
     }

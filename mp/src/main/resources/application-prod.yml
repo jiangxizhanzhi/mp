@@ -127,6 +127,7 @@ mp:
   auth:
     sysidstr: ${SYS_ID_STR:F7EB8C529C1A503B79E729581EDBC95E}
     redirect-url: http://${ip.self}/page/mg/personal
+    redirect-loginurl: http://${ip.self}/page/mg/login
     activation:
       enable: true
       licenseDir: /home/mp/config/license
