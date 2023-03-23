@@ -23,6 +23,7 @@ import com.unionpay.common.userclient.UserInfoUtil;
 import com.unionpay.common.userclient.vo.BaseUserInfo;
 import com.unionpay.common.userclient.vo.User;
 import edu.yale.its.tp.cas.client.filter.CASFilter;
+import edu.yale.its.tp.cas.util.SecureHash64Util;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 /**
@@ -209,6 +212,26 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 //            response.sendRedirect(redirectUrl);
 //        }
 //    }
+
+    @GetMapping("/ssoTestLogout")
+    public void ssoTestLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("sso logoutest===start");
+        HttpSession session = request.getSession();
+        session.invalidate();
+        String targetUrl="http://146.4.130.11:10060/sso/logout";
+        String serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
+        String originalService="http://145.0.46.10/page/mg/login";
+        try {
+            targetUrl = URLDecoder.decode(originalService);
+        } catch (Exception var11) {
+            var11.printStackTrace();
+        }
+        String encode = URLEncoder.encode(originalService);
+        targetUrl = "http://146.4.130.11:10060/sso/logout?service=" + encode + "&flag=" + serviceEncrypted;
+        log.info("sso logoutest==={}",targetUrl);
+        response.sendRedirect(targetUrl);
+    }
+
 
     private UserRequest convert2UserRequest(BaseUserInfo userInfo) {
         UserRequest userRequest = new UserRequest();
