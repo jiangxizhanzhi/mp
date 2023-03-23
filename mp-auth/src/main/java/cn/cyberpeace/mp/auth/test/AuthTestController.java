@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import edu.yale.its.tp.cas.util.SecureHash64Util;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,6 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -167,6 +173,25 @@ public class AuthTestController {
         List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(stime, etime);
         log.info("{}", list);
         return list;
+    }
+
+    @GetMapping("/ssoTestLogout")
+    public void ssoTestLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        log.info("sso logoutest===start");
+        HttpSession session = request.getSession();
+        session.invalidate();
+        String targetUrl="http://146.4.130.11:10060/sso/logout";
+        String serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
+        String originalService="http://145.0.46.10/page/mg/login";
+        try {
+            targetUrl = URLDecoder.decode(originalService);
+        } catch (Exception var11) {
+            var11.printStackTrace();
+        }
+        String encode = URLEncoder.encode(originalService);
+        targetUrl = "http://146.4.130.11:10060/sso/logout?service=" + encode + "&flag=" + serviceEncrypted;
+        log.info("sso logoutest==={}",targetUrl);
+        response.sendRedirect(targetUrl);
     }
 
     @GetMapping("/olrecord/track/period")
