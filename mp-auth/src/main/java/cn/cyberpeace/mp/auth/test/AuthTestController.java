@@ -191,15 +191,15 @@ public class AuthTestController {
             session.invalidate();
         }
         String targetUrl="http://146.4.130.11:10060/sso/logout";
-        String serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
         String originalService="http://145.0.46.10/page/mg/login";
+        String serviceEncrypted = null;
         try {
             targetUrl = URLDecoder.decode(originalService);
+            serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
         } catch (Exception var11) {
             var11.printStackTrace();
         }
-        String encode = URLEncoder.encode(originalService);
-        targetUrl = "http://146.4.130.11:10060/sso/logout?service=" + encode + "&flag=" + serviceEncrypted;
+        targetUrl = "http://146.4.130.11:10060/sso/logout?service=" + targetUrl + "&flag=" + serviceEncrypted;
         log.info("sso logoutest==={}",targetUrl);
         response.sendRedirect(targetUrl);
     }
