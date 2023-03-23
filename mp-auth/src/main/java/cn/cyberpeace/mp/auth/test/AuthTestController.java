@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -178,8 +179,17 @@ public class AuthTestController {
     @GetMapping("/ssoTestLogout")
     public void ssoTestLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
         log.info("sso logoutest===start");
+        UserModel user = JwtCommon.verifyToken(request);
+        if (user != null) {
+            var updateUser = new UserModel();
+            updateUser.setId(user.getId());
+            updateUser.initDefault("tokenSecret");
+            userService.update(updateUser);
+        }
         HttpSession session = request.getSession();
-        session.invalidate();
+        if (session != null) {
+            session.invalidate();
+        }
         String targetUrl="http://146.4.130.11:10060/sso/logout";
         String serviceEncrypted = SecureHash64Util.obfusecate(targetUrl);
         String originalService="http://145.0.46.10/page/mg/login";
