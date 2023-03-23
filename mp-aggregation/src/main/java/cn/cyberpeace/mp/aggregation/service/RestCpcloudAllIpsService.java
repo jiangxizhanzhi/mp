@@ -61,7 +61,7 @@ public class RestCpcloudAllIpsService {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
-    public ServiceResult<Boolean> clearAll() {
+    public ServiceResult<Boolean> clearAll(Boolean isTrue) {
         if (sceneDeleteCallback.isClearing()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
         } else {
@@ -83,11 +83,13 @@ public class RestCpcloudAllIpsService {
                 allSceneInstances.stream().forEach(sceneInstance -> {
 
                     sceneDeleteCallback.startClear();
-                    sceneDeleteCallback.addCallback(sceneInstance.getId(), () -> {
-                        sceneDeleteCallback.removeSceneOrInstanceId(sceneInstance.getId());
-                        sceneDeleteCallback.finishClearJob();
-                    });
-                    modelService.deleteById(sceneInstance.getId(), true, new CsceneContextBO());
+                    if (isTrue) {
+                        sceneDeleteCallback.addCallback(sceneInstance.getId(), () -> {
+                            sceneDeleteCallback.removeSceneOrInstanceId(sceneInstance.getId());
+                            sceneDeleteCallback.finishClearJob();
+                        });
+                        modelService.deleteById(sceneInstance.getId(), true, new CsceneContextBO());
+                    }
 
                 });
                 allInstances.forEach(instance -> {
@@ -97,13 +99,17 @@ public class RestCpcloudAllIpsService {
                     request.setImageType(instance.getImageType());
 
                     sceneDeleteCallback.startClear();
-                    sceneDeleteCallback.addCallback(instance.getUuid(), () -> {
-                        sceneDeleteCallback.removeSceneOrInstanceId(instance.getUuid());
-                        sceneDeleteCallback.finishClearJob();
-                    });
-                    imagesConverter.delete(request);
-
+                    if (isTrue) {
+                        sceneDeleteCallback.addCallback(instance.getUuid(), () -> {
+                            sceneDeleteCallback.removeSceneOrInstanceId(instance.getUuid());
+                            sceneDeleteCallback.finishClearJob();
+                        });
+                        imagesConverter.delete(request);
+                    }
                 });
+                if (!isTrue) {
+                    sceneDeleteCallback.finishClearJob();
+                }
 
             }
         }
@@ -122,7 +128,7 @@ public class RestCpcloudAllIpsService {
         }
         if (CollectionUtils.isNotEmpty(getAllInstances()) || CollectionUtils.isNotEmpty(getAllSceneInstances())) {
             // 还有没有清理的场景或实例
-
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_STILL_NEED_CLEAR);
         }
         return true;
     }

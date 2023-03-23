@@ -32,8 +32,10 @@ public class RestCpcloudAllIpsController {
 
     @ApiOperation("删除所有运行中的场景和靶标示例")
     @DeleteMapping("/clear_all")
-    public ServiceResult<Boolean> clearAll() {
-        modelService.clearAll();
+    public ServiceResult<Boolean> clearAll(Boolean isTrue) {
+        if (isTrue != null) {
+            modelService.clearAll(isTrue);
+        }
         return new ServiceResult<>(true).asResult();
     }
 
