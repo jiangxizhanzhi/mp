@@ -24,7 +24,7 @@ public class LogingOutConfig {
         filterRegistrationBean.setFilter(new SSOLogoutFilter(userService));
         filterRegistrationBean.setOrder(-101);
         filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/test/ssoTestLogout");
+        filterRegistrationBean.addUrlPatterns("/unauth/test/ssoTestLogout");
         return filterRegistrationBean;
     }
 
