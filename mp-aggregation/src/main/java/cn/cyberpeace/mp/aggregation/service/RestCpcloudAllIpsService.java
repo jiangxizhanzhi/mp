@@ -9,13 +9,12 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.scene.util.SceneDeleteCallback;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -25,6 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description
@@ -38,10 +40,7 @@ public class RestCpcloudAllIpsService {
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
     @Autowired
-    private SceneDeleteCallback sceneDeleteCallback;
-
-    @Autowired
-    private SceneMapper sceneMapper;
+    private ResourceClearHandler resourceClearHandler;
 
     @Autowired
     private ImagesConverter imagesConverter;
@@ -55,80 +54,57 @@ public class RestCpcloudAllIpsService {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
-    public ServiceResult<Boolean> clearAll(Boolean isTrue) {
-        if (sceneDeleteCallback.isClearing()) {
+    private ReentrantLock lock = new ReentrantLock();
+
+    public ServiceResult<Boolean> clearAll() {
+        if (!lock.tryLock()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
         } else {
-            //首先要找到所有的需要清理的数据
-            var allSceneInstances = getAllSceneInstances();
-            // 查询所有启动的靶标实例
-            var allInstances = getAllInstances();
-
-            if (CollectionUtils.isEmpty(allSceneInstances) && CollectionUtils.isEmpty(allInstances)) {
-                //没有需要清理的场景和靶标实例
-                //标记一下，已经执行过清理操作了
-                sceneDeleteCallback.setClearingAndHasClearStatus();
-                //标记已经完成清理操作
-                sceneDeleteCallback.removeClearingStatus();
-                return new ServiceResult<>(true);
-            } else {
-                // 标识一下，正在清除,并标识已经执行过清除操作
-                sceneDeleteCallback.setClearingAndHasClearStatus();
-                allSceneInstances.stream().forEach(sceneInstance -> {
-
-                    sceneDeleteCallback.setClearingStatus();
-                    if (isTrue) {
-                        sceneDeleteCallback.addCallback(sceneInstance.getId(), () -> {
-                            sceneDeleteCallback.removeSceneOrInstanceId(sceneInstance.getId());
-                            sceneDeleteCallback.finishClearJob();
+            try {
+                //首先要找到所有的需要清理的数据
+                var allSceneInstances = getAllSceneInstances();
+                // 查询所有启动的靶标实例
+                var allInstances = getAllInstances();
+                if (CollectionUtils.isNotEmpty(allSceneInstances)) {
+                    CountDownLatch countDownLatch = new CountDownLatch(allSceneInstances.size());
+                    allSceneInstances.stream().forEach(sceneInstance -> {
+                        resourceClearHandler.addCallback(sceneInstance.getId(), () -> {
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            countDownLatch.countDown();
                         });
                         modelService.deleteById(sceneInstance.getId(), true, new CsceneContextBO());
-                    }
-
-                });
-                allInstances.forEach(instance -> {
-
-                    ImagesDeleteInstanceRequest request = new ImagesDeleteInstanceRequest();
-                    request.setUuid(instance.getUuid());
-                    request.setImageType(instance.getImageType());
-
-                    sceneDeleteCallback.setClearingStatus();
-                    if (isTrue) {
-                        sceneDeleteCallback.addCallback(instance.getUuid(), () -> {
-                            sceneDeleteCallback.removeSceneOrInstanceId(instance.getUuid());
-                            sceneDeleteCallback.finishClearJob();
-                        });
-                        try {
-                            imagesConverter.delete(request);
-                        } catch (Exception e) {
-                            log.info("clear instance {} failed, error is {}", instance.getUuid(), e.getMessage());
-                        } finally {
-                            sceneDeleteCallback.doCallback(request.getUuid());
-                        }
-                    }
-                });
-                if (!isTrue) {
-                    sceneDeleteCallback.finishClearJob();
+                    });
+                    countDownLatch.await(allSceneInstances.size() * 3, TimeUnit.MINUTES);
                 }
-
+                if (CollectionUtils.isNotEmpty(allInstances)) {
+                    allInstances.forEach(instance -> {
+                        ImagesDeleteInstanceRequest request = new ImagesDeleteInstanceRequest();
+                        request.setUuid(instance.getUuid());
+                        request.setImageType(instance.getImageType());
+//                        imagesConverter.delete(request);
+                    });
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } finally {
+                lock.unlock();
             }
         }
-
         return new ServiceResult<>(true);
     }
 
     public Boolean checkHasClear() {
-        if (!sceneDeleteCallback.hasClear()) {
-            // 还没有执行过清除操作，提示一下
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
-        }
-        if (sceneDeleteCallback.isClearing()) {
+        if (lock.isLocked()) {
             // 正在清除，提示一下
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
         }
         if (CollectionUtils.isNotEmpty(getAllInstances()) || CollectionUtils.isNotEmpty(getAllSceneInstances())) {
             // 还有没有清理的场景或实例
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_STILL_NEED_CLEAR);
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
         }
         return true;
     }
@@ -138,7 +114,7 @@ public class RestCpcloudAllIpsService {
             //调云平台接口
             var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
-            sceneDeleteCallback.clearAll();
+            resourceClearHandler.clearAll();
         }
     }
 
@@ -150,7 +126,6 @@ public class RestCpcloudAllIpsService {
     }
 
     private List<CsceneInstanceModel> getAllSceneInstances() {
-        HumanCondition humanCondition = new HumanCondition();
         var csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getDeleted, 0));
         return csceneInstanceModels;
     }

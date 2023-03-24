@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Slf4j
-public class SceneDeleteCallback {
+public class ResourceClearHandler {
     private Set<String> sceneIds = new ConcurrentHashSet<>();
     private Map<String, List<Runnable>> callbacks = new ConcurrentHashMap<>();
     private Map<Integer, String> status = new ConcurrentHashMap<>();

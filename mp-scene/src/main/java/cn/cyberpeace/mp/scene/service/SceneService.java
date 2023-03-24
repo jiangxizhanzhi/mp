@@ -18,10 +18,9 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
-import cn.cyberpeace.mp.scene.util.SceneDeleteCallback;
+import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,7 +41,7 @@ public class SceneService {
     private SceneElementSnapshotMapper sceneElementSnapshotMapper;
 
     @Autowired
-    private SceneDeleteCallback sceneDeleteCallback;
+    private ResourceClearHandler resourceClearHandler;
 
     public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId, SceneContextBO context) {
         SceneHandler sceneHandler;
@@ -118,7 +117,7 @@ public class SceneService {
                     try {
                         sceneHandler.delete();
                     } finally {
-                        sceneDeleteCallback.doCallback(id);
+                        resourceClearHandler.doCallback(id);
                     }
                 });
             }
