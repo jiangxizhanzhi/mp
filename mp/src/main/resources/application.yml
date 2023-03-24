@@ -147,6 +147,8 @@ management:
     web:
       exposure:
         include: health, info, mappings, caches, env, scheduledtasks
+    #关闭监控
+    enabled-by-default: false
   info:
     git:
       mode: full
