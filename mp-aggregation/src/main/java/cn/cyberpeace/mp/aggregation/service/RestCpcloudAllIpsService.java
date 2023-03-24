@@ -69,11 +69,6 @@ public class RestCpcloudAllIpsService {
                     CountDownLatch countDownLatch = new CountDownLatch(allSceneInstances.size());
                     allSceneInstances.stream().forEach(sceneInstance -> {
                         resourceClearHandler.addCallback(sceneInstance.getId(), () -> {
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
                             countDownLatch.countDown();
                         });
                         modelService.deleteById(sceneInstance.getId(), true, new CsceneContextBO());
@@ -85,7 +80,7 @@ public class RestCpcloudAllIpsService {
                         ImagesDeleteInstanceRequest request = new ImagesDeleteInstanceRequest();
                         request.setUuid(instance.getUuid());
                         request.setImageType(instance.getImageType());
-//                        imagesConverter.delete(request);
+                        imagesConverter.delete(request);
                     });
                 }
             } catch (InterruptedException e) {
