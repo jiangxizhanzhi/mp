@@ -104,13 +104,17 @@ public class RestCpcloudAllIpsService {
         return true;
     }
 
-    public void resetAllIps(ResetCplcoudAllIpsData request) {
+    public ServiceResult<Boolean> resetAllIps(ResetCplcoudAllIpsData request) {
         if (checkHasClear()) {
             //调云平台接口
             var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
-            resourceClearHandler.clearAll();
+            if (response != null && response.getSuccess()) {
+                resourceClearHandler.clearAll();
+                return new ServiceResult<>(true).asResult();
+            }
         }
+        return new ServiceResult<>(false).asResult();
     }
 
     public OriginIpsResult getOriginIps() {
