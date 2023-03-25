@@ -23,6 +23,7 @@ public class OriginIpsResult implements CloudHttpData {
     private Office office;
     private Boolean success;
     private String requestId;
+    private String message;
 
     @Data
     private static class Controller {
