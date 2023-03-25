@@ -115,7 +115,7 @@ public class RestCpcloudAllIpsService {
                     resourceClearHandler.clearAll();
                     return new ServiceResult<>(true).asResult();
                 } else {
-                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                    throw new MpRuntimeException(CsceneErrorCode.PARAMS_FIELD_ERROR.format(response.getMessage()));
                 }
             }
         }
