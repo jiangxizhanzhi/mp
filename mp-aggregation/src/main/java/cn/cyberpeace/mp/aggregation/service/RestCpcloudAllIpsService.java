@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -109,9 +110,13 @@ public class RestCpcloudAllIpsService {
             //调云平台接口
             var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
-            if (response != null && response.getSuccess()) {
-                resourceClearHandler.clearAll();
-                return new ServiceResult<>(true).asResult();
+            if (response != null) {
+                if (response.getSuccess()) {
+                    resourceClearHandler.clearAll();
+                    return new ServiceResult<>(true).asResult();
+                } else {
+                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                }
             }
         }
         return new ServiceResult<>(false).asResult();
