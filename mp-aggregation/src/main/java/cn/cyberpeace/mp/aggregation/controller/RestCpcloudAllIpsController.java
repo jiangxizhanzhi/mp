@@ -40,8 +40,7 @@ public class RestCpcloudAllIpsController {
     @ApiOperation("重新设置环境所有Ip")
     @PostMapping("/reset_all_ip")
     public ServiceResult<Boolean> resetAllIp(@RequestBody ResetCplcoudAllIpsData request) {
-        modelService.resetAllIps(request);
-        return new ServiceResult<>(true).asResult();
+        return modelService.resetAllIps(request);
     }
 
     @ApiOperation("获得原始的所有Ip")

@@ -21,7 +21,7 @@ public class OriginIpsResult implements CloudHttpData {
     private Controller controller;
     private List<Compute> compute;
     private Office office;
-    private String success;
+    private Boolean success;
     private String requestId;
 
     @Data
