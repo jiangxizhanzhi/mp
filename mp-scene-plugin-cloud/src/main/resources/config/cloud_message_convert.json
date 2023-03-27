@@ -596,5 +596,167 @@
         "relation": "regx"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Someone is currently modifying"
+      },
+      {
+        "locale": "zh",
+        "message": "有人正在修改IP"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^Someone is currently modifying$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "gateway {gateway} cannot be the same as compute ip {gateway}"
+      },
+      {
+        "locale": "zh",
+        "message": "网关节点ip {gateway} 不能与计算节点 {gateway} 相同"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^gateway (.*) cannot be the same as compute ip (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "execute modify web ip error"
+      },
+      {
+        "locale": "zh",
+        "message": "执行修改web ip出错"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^execute modify web ip error$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "The controller ip {controller_ip} cannot be within the address pool {ip_list} range"
+      },
+      {
+        "locale": "zh",
+        "message": "控制节点ip{controller_ip}不能在地址池{ip_list}范围"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^The controller ip (.*) cannot be within the address pool (.*) range$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "office ip {office_ip} cannot be the same as controller ip {controller_ip}"
+      },
+      {
+        "locale": "zh",
+        "message": "office ip{office_ip}不能与控制节点{controller_ip}相同"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^office ip (.*) cannot be the same as controller ip (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "office ip {office_ip} cannot be the same as compute ip {office_ip}"
+      },
+      {
+        "locale": "zh",
+        "message": "office ip{office_ip}不能与计算节点{office_ip}相同"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^office ip (.*) cannot be the same as compute ip (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "office ip {office_ip} cannot be the same as compute ip {office_ip}"
+      },
+      {
+        "locale": "zh",
+        "message": "office ip{office_ip}不能与计算节点{office_ip}相同"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^office ip (.*) cannot be the same as compute ip (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "compute_ip {controller_ip} cannot be the same as controller ip {controller_ip}"
+      },
+      {
+        "locale": "zh",
+        "message": "计算节点ip {compute_ip}不属于{10.100.1.0/24}ip范围"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^compute_ip (.*) cannot be the same as controller ip (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "pools ip not in {cidr} IP range"
+      },
+      {
+        "locale": "zh",
+        "message": "地址池ip不属于{10.100.1.0/24}ip范围"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^pools ip (.*) not in (.*) IP range$",
+        "relation": "regx"
+      }
+    ]
   }
 ]
