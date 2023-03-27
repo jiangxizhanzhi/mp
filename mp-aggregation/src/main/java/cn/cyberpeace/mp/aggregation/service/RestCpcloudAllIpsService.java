@@ -18,12 +18,15 @@ import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +57,9 @@ public class RestCpcloudAllIpsService {
 
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
+
+    @Resource
+    private CloudCommonConfigService cloudCommonConfigService;
 
     private ReentrantLock lock = new ReentrantLock();
 
@@ -106,19 +112,21 @@ public class RestCpcloudAllIpsService {
     }
 
     public ServiceResult<Boolean> resetAllIps(ResetCplcoudAllIpsData request) {
-        if (checkHasClear()) {
-            //调云平台接口
-            var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
-            log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
-            if (response != null) {
-                if (response.getSuccess()) {
-                    resourceClearHandler.clearAll();
-                    return new ServiceResult<>(true).asResult();
-                } else {
-                    throw new MpRuntimeException(CsceneErrorCode.PARAMS_FIELD_ERROR.format(response.getMessage()));
-                }
-            }
-        }
+
+//        if (checkHasClear()) {
+//            //调云平台接口
+//            var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
+//            log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
+//            if (response != null) {
+//                if (response.getSuccess()) {
+//                    resourceClearHandler.clearAll();
+//                    return new ServiceResult<>(true).asResult();
+//                } else {
+//                    throw new MpRuntimeException(CsceneErrorCode.PARAMS_FIELD_ERROR.
+//                            format(convertMessages(CloudMessageConvertUtil.getMessage(response.getMessage()), request)));
+//                }
+//            }
+//        }
         return new ServiceResult<>(false).asResult();
     }
 
@@ -139,5 +147,24 @@ public class RestCpcloudAllIpsService {
         dto.setVmStarted(true);
         var allInstances = deviceTargetMapper.page(dto);
         return allInstances;
+    }
+
+    private String convertMessages(String message, ResetCplcoudAllIpsData resetCplcoudAllIpsData) {
+        if (message != null) {
+            message.replaceAll("\\{office_ip}",resetCplcoudAllIpsData.getOffice().getIp());
+            if (message.contains("\\{cidr}")) {
+                String ip = resetCplcoudAllIpsData.getController().getIp();
+                String[] ips = ip.split("\\.");
+                if (ips.length == 4) {
+                    ips[3] = "0/24";
+                }
+                message.replaceAll("\\{cidr}",ips.toString());
+            }
+            message.replaceAll("\\{gateway}",resetCplcoudAllIpsData.getController().getGateway());
+            if (CollectionUtils.isNotEmpty(resetCplcoudAllIpsData.getCompute())) {
+                message.replaceAll("\\{compute_ip}",resetCplcoudAllIpsData.getCompute().get(0).getIp());
+            }
+        }
+        return message;
     }
 }

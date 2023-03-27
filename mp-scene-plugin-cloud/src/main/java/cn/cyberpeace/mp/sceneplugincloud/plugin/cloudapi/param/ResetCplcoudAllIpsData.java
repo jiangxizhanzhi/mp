@@ -17,7 +17,7 @@ public class ResetCplcoudAllIpsData implements CloudHttpData {
     private Office office;
 
     @Data
-    private static class Controller {
+    public static class Controller {
         private String ip;
         private String netmask;
         private String gateway;
@@ -25,14 +25,14 @@ public class ResetCplcoudAllIpsData implements CloudHttpData {
     }
 
     @Data
-    private static class Compute {
+    public static class Compute {
         private String name;
         private boolean status;
         private String ip;
     }
 
     @Data
-    private static class Office {
+    public static class Office {
         private String ip;
     }
 }
