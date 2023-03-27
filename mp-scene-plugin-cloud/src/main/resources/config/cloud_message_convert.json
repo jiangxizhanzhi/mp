@@ -727,16 +727,16 @@
     "messages": [
       {
         "locale": "en",
-        "message": "compute_ip {controller_ip} cannot be the same as controller ip {controller_ip}"
+        "message": "pools ip not in {cidr} IP range"
       },
       {
         "locale": "zh",
-        "message": "计算节点ip {compute_ip}不属于{10.100.1.0/24}ip范围"
+        "message": "地址池ip不属于{cidr}ip范围"
       }
     ],
     "rules": [
       {
-        "keyword": "^compute_ip (.*) cannot be the same as controller ip (.*)$",
+        "keyword": "^pools ip (.*) not in (.*) IP range$",
         "relation": "regx"
       }
     ]
@@ -745,16 +745,16 @@
     "messages": [
       {
         "locale": "en",
-        "message": "pools ip not in {cidr} IP range"
+        "message": "compute_ip {controller_ip} cannot be the same as controller ip {controller_ip}"
       },
       {
         "locale": "zh",
-        "message": "地址池ip不属于{10.100.1.0/24}ip范围"
+        "message": "计算节点ip {controller_ip}不能与控制节点{controller_ip}相同"
       }
     ],
     "rules": [
       {
-        "keyword": "^pools ip (.*) not in (.*) IP range$",
+        "keyword": "^compute_ip (.*) cannot be the same as controller ip (.*)$",
         "relation": "regx"
       }
     ]
