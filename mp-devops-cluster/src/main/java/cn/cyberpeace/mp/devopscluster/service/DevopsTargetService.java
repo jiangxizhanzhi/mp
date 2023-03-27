@@ -76,6 +76,58 @@ public class DevopsTargetService {
     }
 
     /**
+     * 更新实体设备申请数量
+     * @param uuids
+     * @return
+     */
+    public Integer updateRealEquipmentApplicationNum(List<String> uuids, Integer operate) {
+        if (CollectionUtils.isNotEmpty(uuids)) {
+            var deviceTargetPOs = deviceTargetMapper.findByUuids(uuids);
+            if (CollectionUtils.isNotEmpty(deviceTargetPOs)) {
+                DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+                deviceTargetPO.setUuid(uuids.get(0));
+                if (operate == 1) {
+                    deviceTargetPO.setApplicationNum(deviceTargetPOs.get(0).getApplicationNum() + 1);
+                } else if (operate == 2) {
+                    deviceTargetPO.setApplicationNum(deviceTargetPOs.get(0).getApplicationNum() - 1);
+                }
+                deviceTargetPO.setIsInit(null);
+                deviceTargetPO.setIsHide(null);
+                deviceTargetPO.setIsOccupy(null);
+                return deviceTargetMapper.updateById(deviceTargetPO);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * 更新实体设备占用状态
+     * @param uuids
+     * @return
+     */
+    public Integer updateRealEquipmentOccupy(List<String> uuids, Integer operate) {
+        if (CollectionUtils.isNotEmpty(uuids)) {
+            var deviceTargetPOs = deviceTargetMapper.findByUuids(uuids);
+            if (CollectionUtils.isNotEmpty(deviceTargetPOs)) {
+                DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+                deviceTargetPO.setUuid(uuids.get(0));
+                if (operate == 1) {
+                    // 被占用
+                    deviceTargetPO.setIsOccupy(1);
+                } else if (operate == 2) {
+                    // 未被占用
+                    deviceTargetPO.setIsOccupy(0);
+                }
+                deviceTargetPO.setApplicationNum(null);
+                deviceTargetPO.setIsInit(null);
+                deviceTargetPO.setIsHide(null);
+                return deviceTargetMapper.updateById(deviceTargetPO);
+            }
+        }
+        return 0;
+    }
+
+    /**
      * 新增
      * @param deviceList
      * @return

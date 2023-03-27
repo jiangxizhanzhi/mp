@@ -165,4 +165,16 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    /**
+     * 该设备的申请数量
+     */
+    @DefaultInt
+    private Integer applicationNum;
+
+    /**
+     * 是否被占用
+     */
+    @DefaultInt
+    private Integer isOccupy;
 }

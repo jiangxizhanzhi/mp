@@ -125,4 +125,15 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("系统信息")
     private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 该设备的申请数量
+     */
+    @ApiModelProperty("是否有申请: 1 有申请, 0 无申请")
+    private Integer applicationStatus;
+
+    /**
+     * 是否被占用
+     */
+    private Integer isOccupy;
 }
