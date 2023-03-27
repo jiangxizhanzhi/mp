@@ -130,4 +130,14 @@ public class RealEquipmentBO extends BasePageConvertModel {
      * 引用状态
      */
     private Integer referenceStatus;
+
+    /**
+     * 该设备的申请数量
+     */
+    private Integer applicationStatus;
+
+    /**
+     * 是否被占用
+     */
+    private Integer isOccupy;
 }
