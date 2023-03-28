@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -95,7 +96,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -156,11 +156,11 @@ public class ImagesController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public PageResult<ImagesPageVO> page(ImagePageRequest request){
+    public PageResult<ImagesPageVO> page(ImagePageRequest request) {
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
         List<ImagesPageVO> list = convertBOToPageVO(model);
 
-        return new PageResult<>(list,model.getTotal());
+        return new PageResult<>(list, model.getTotal());
     }
 
     /**
@@ -170,7 +170,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult add(@RequestBody ImageRequest request){
+    public ServiceResult add(@RequestBody ImageRequest request) {
         validImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
@@ -179,13 +179,14 @@ public class ImagesController {
     /**
      * 更新
      */
+    @OperateAuth(resourceClass = ImageRequest.class, resourceField = "uuid")
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult update(@RequestBody ImageRequest request){
+    public ServiceResult update(@RequestBody ImageRequest request) {
         validImageRequest(request);
-        if (StringUtils.isBlank(request.getUuid())){
+        if (StringUtils.isBlank(request.getUuid())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         imagesConverter.update(request);
@@ -234,7 +235,7 @@ public class ImagesController {
     @ApiOperation("根据UUID集合查询")
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageByUuidsRequest.class)
     @PostMapping("/search/uuids")
-    public Result<List<ImagesByUuidsVO>> findByIds(@RequestBody ImageByUuidsRequest request){
+    public Result<List<ImagesByUuidsVO>> findByIds(@RequestBody ImageByUuidsRequest request) {
         List<ImageTargetConvertModel> models = imagesConverter.findByUuids(request.getUuids());
         List<ImagesByUuidsVO> responseList = models.stream().map(model -> {
             ImagesByUuidsVO response = new ImagesByUuidsVO();
@@ -242,7 +243,7 @@ public class ImagesController {
             response.setUuid(model.getUuid());
             return response;
         }).collect(Collectors.toList());
-        return  new Result<>(responseList);
+        return new Result<>(responseList);
     }
 
     /**
@@ -252,7 +253,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesBuildRequest.class)
     @PostMapping("/build")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult build(@RequestBody ImagesBuildRequest request){
+    public ServiceResult build(@RequestBody ImagesBuildRequest request) {
         imagesConverter.build(request);
         return ResultCommon.success();
     }
@@ -261,11 +262,12 @@ public class ImagesController {
     /**
      * 删除镜像
      */
+    @OperateAuth(resourceClass = ImagesDeleteRequest.class, resourceField = "imageIds", resourceFieldType = "list")
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除信息请求体", dataTypeClass = ImagesDeleteRequest.class)
     @DeleteMapping("/page")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
+    public ServiceResult delete(@RequestBody ImagesDeleteRequest request) {
         imagesConverter.delete(request);
         return ResultCommon.success();
     }
@@ -277,7 +279,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesAuthRequest.class)
     @PostMapping("/auth")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "授权镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult auth(@RequestBody ImagesAuthRequest request){
+    public ServiceResult auth(@RequestBody ImagesAuthRequest request) {
         imagesConverter.auth(request);
         return ResultCommon.success();
     }
@@ -288,7 +290,7 @@ public class ImagesController {
     @ApiOperation("根据uuid查询授权用户信息")
     @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
     @GetMapping("/auth-users")
-    public Result<List<UserBo>> authUsers(@RequestParam("uuid") String uuid ){
+    public Result<List<UserBo>> authUsers(@RequestParam("uuid") String uuid) {
         List<UserBo> userBos = imagesConverter.findUsersByUuid(uuid);
         return new Result<>(userBos);
     }
@@ -328,7 +330,7 @@ public class ImagesController {
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
-    public ServiceResult create(@PathVariable("id") String uuid){
+    public ServiceResult create(@PathVariable("id") String uuid) {
         imagesConverter.create(uuid);
         return ResultCommon.success();
     }
@@ -340,7 +342,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesDeleteInstanceRequest.class)
     @PostMapping("/delete-instance")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
+    public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request) {
         imagesConverter.delete(request);
         return ResultCommon.success();
     }
@@ -352,7 +354,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesRebootInstanceRequest.class)
     @PostMapping("/reboot")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
+    public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request) {
         imagesConverter.reboot(request);
         return ResultCommon.success();
     }
@@ -363,7 +365,7 @@ public class ImagesController {
     @ApiOperation("查询快照历史")
     @ApiImplicitParam(name = "uuid", value = "靶标id", paramType = "path", dataTypeClass = String.class)
     @GetMapping("/{id}/snapshot/list")
-    public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
+    public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid) {
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
         var list = convertModel.getList();
         if (CollectionUtils.isNotEmpty(list)) {
@@ -375,7 +377,7 @@ public class ImagesController {
             List<String> uuids = new ArrayList<>();
             for (var m : list) {
                 var sceneInfo = nameMap.get(m.getSceneId());
-                if(StringUtils.isNotEmpty(m.getUuid())){
+                if (StringUtils.isNotEmpty(m.getUuid())) {
                     uuids.add(m.getUuid());
                 }
                 if (sceneInfo != null) {
@@ -406,7 +408,7 @@ public class ImagesController {
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @ApiImplicitParam(name = "name", value = "镜像名称", dataTypeClass = String.class)
     @GetMapping("/snapshot/by-name")
-    public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
+    public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name) {
         DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);
         return new Result(convertModel);
     }
@@ -418,7 +420,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = SnapshotMergeRequest.class)
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
-    public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
+    public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request) {
 //        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
         var res = snapshotConverter.list(request.getUuid());
         snapshotConverter.merge(request);
@@ -449,7 +451,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "创建数据请求体", dataTypeClass = SnapshotRequest.class)
     @PostMapping("/snapshot/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.SNAPSHOT)
-    public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
+    public ServiceResult createSnapshot(@RequestBody SnapshotRequest request) {
         snapshotConverter.create(request);
         return ResultCommon.success();
     }
@@ -461,9 +463,9 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageInjectFileRequest.class)
     @PostMapping("/inject-file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "文件注入", target = OpTargetEnums.IMAGE)
-    public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
+    public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request) {
         scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
-                request.getFileUrl(),request.getFileName(),request.getFileSize()));
+                request.getFileUrl(), request.getFileName(), request.getFileSize()));
         return ResultCommon.success();
     }
 
@@ -472,7 +474,7 @@ public class ImagesController {
      */
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
-    public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
+    public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request) {
         BasePageBO<InjectFileConvertModel> list = injectFileConverter.list(request.getDeviceUuid());
         return new Result(list.getList());
     }
@@ -484,7 +486,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ImageInjectFileDeleteRequest.class)
     @DeleteMapping("/inject-file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除文件注入", target = OpTargetEnums.IMAGE)
-    public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
+    public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request) {
         injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
         return ResultCommon.success();
     }
@@ -495,10 +497,10 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public Result<List<Flavor>> pageFlavor(){
+    public Result<List<Flavor>> pageFlavor() {
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
-        String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
+        String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE, request);
         CloudPlatformPageResult<Flavor> page = flavorService.page(getParams);
         List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
@@ -509,7 +511,7 @@ public class ImagesController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection")
-    public Result<List<TargetConnection>> connection(@RequestParam String uuid){
+    public Result<List<TargetConnection>> connection(@RequestParam String uuid) {
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         return new Result<>(connection.getList());
     }
@@ -517,10 +519,10 @@ public class ImagesController {
     @ApiOperation("同步镜像数据")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageAsyncRequest.class)
     @PostMapping("/async")
-    public ServiceResult async(@RequestBody ImageAsyncRequest request){
+    public ServiceResult async(@RequestBody ImageAsyncRequest request) {
         List<Integer> requestIds = request.getIds();
-        if (CollectionUtils.isEmpty(requestIds)){
-           throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        if (CollectionUtils.isEmpty(requestIds)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Integer result = imagesConverter.async(request);
         return result > 0 ? ResultCommon.success() : ResultCommon.fail("");
@@ -586,23 +588,25 @@ public class ImagesController {
 
     /**
      * 验证请求参数
+     *
      * @param request
      */
-    private void validImageRequest(ImageRequest request){
-        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
+    private void validImageRequest(ImageRequest request) {
+        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126) {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
         }
-        if (StringUtils.isNotBlank(request.getDescription()) && request.getDescription().length() > 1000){
+        if (StringUtils.isNotBlank(request.getDescription()) && request.getDescription().length() > 1000) {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH);
         }
     }
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
-    private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> model){
+    private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> model) {
         return model.getList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
