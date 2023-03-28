@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
+import cn.cyberpeace.mp.devopscluster.dto.ApplicationNumUpdateDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
@@ -77,36 +78,28 @@ public class DevopsTargetService {
 
     /**
      * 更新实体设备申请数量
-     * @param uuids
+     * @param uuid
      * @return
      */
-    public Integer updateRealEquipmentApplicationNum(List<String> uuids, Integer operate) {
-        if (CollectionUtils.isNotEmpty(uuids)) {
-            var deviceTargetPOs = deviceTargetMapper.findByUuids(uuids);
-            if (CollectionUtils.isNotEmpty(deviceTargetPOs)) {
-                DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
-                deviceTargetPO.setUuid(uuids.get(0));
-                if (operate == 1) {
-                    deviceTargetPO.setApplicationNum(deviceTargetPOs.get(0).getApplicationNum() + 1);
-                } else if (operate == 2) {
-                    deviceTargetPO.setApplicationNum(deviceTargetPOs.get(0).getApplicationNum() - 1);
-                }
-                deviceTargetPO.setIsInit(null);
-                deviceTargetPO.setIsHide(null);
-                deviceTargetPO.setIsOccupy(null);
-                return deviceTargetMapper.updateById(deviceTargetPO);
-            }
+    public Integer updateRealEquipmentApplicationNum(String uuid, Integer operate) {
+        if (StringUtils.isNotEmpty(uuid)) {
+            ApplicationNumUpdateDTO applicationNumUpdateDTO = new ApplicationNumUpdateDTO();
+            applicationNumUpdateDTO.setOperate(operate);
+            applicationNumUpdateDTO.setUuid(uuid);
+            return deviceTargetMapper.updateApplicationNum(applicationNumUpdateDTO);
         }
         return 0;
     }
 
     /**
      * 更新实体设备占用状态
-     * @param uuids
+     * @param uuid
      * @return
      */
-    public Integer updateRealEquipmentOccupy(List<String> uuids, Integer operate) {
-        if (CollectionUtils.isNotEmpty(uuids)) {
+    public Integer updateRealEquipmentOccupy(String uuid, Integer operate) {
+        if (StringUtils.isNotEmpty(uuid)) {
+            List<String> uuids = new ArrayList<>();
+            uuids.add(uuid);
             var deviceTargetPOs = deviceTargetMapper.findByUuids(uuids);
             if (CollectionUtils.isNotEmpty(deviceTargetPOs)) {
                 DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
