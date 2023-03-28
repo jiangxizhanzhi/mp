@@ -129,8 +129,8 @@ public class RealEquipmentPageVO extends BaseVO {
     /**
      * 该设备的申请数量
      */
-    @ApiModelProperty("是否有申请: 1 有申请, 0 无申请")
-    private Integer applicationStatus;
+    @ApiModelProperty("是否有申请: 大于等于1 有申请, 0 无申请")
+    private Integer applicationNum;
 
     /**
      * 是否被占用

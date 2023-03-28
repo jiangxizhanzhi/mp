@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.devopscluster.dto.ApplicationNumUpdateDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -108,4 +109,10 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    /**
+     * 更新申请数量
+     * @return
+     */
+    Integer updateApplicationNum(ApplicationNumUpdateDTO applicationNumUpdateDTO);
 }
