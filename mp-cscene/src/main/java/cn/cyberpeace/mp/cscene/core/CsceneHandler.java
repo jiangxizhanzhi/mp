@@ -327,7 +327,11 @@ public class CsceneHandler extends BaseCsceneHandler<
                         CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
                         var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
                         if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
-                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
+                            String sceneName = "";
+                            if (serviceResult.getSource().get(image) != null && serviceResult.getSource().get(image).size() > 0) {
+                                sceneName = serviceResult.getSource().get(image).get(0).getName();
+                            }
+                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image), sceneName));
                         }
                     }
                 });
