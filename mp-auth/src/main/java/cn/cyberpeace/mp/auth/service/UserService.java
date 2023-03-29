@@ -114,4 +114,12 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
+    /**
+     * 通过用户id获取相同组织下的所有用户
+     * @param userId
+     * @return
+     */
+    List<UserModel> getSameOrgUsers(String userId);
+
+
 }
