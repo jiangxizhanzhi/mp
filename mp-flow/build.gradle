@@ -4,5 +4,6 @@ dependencies {
     implementation project(':mp-log')
     implementation project(':mp-situation-aware')
     implementation project(':mp-auth')
+    implementation project(':mp-auth-base')
     task wrapper() {}
 }
