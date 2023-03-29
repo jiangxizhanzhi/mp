@@ -1146,7 +1146,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    @Override
+    public List<UserModel> getSameOrgUsers(String userId) {
+        //获取用户下所有组织
+        List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userId);
+        List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
+        List<UserModel> modelArrayList = new ArrayList<>();
+        for (String orgId : orgIds) {
+            List<UserModel> userModels = tenantUserService.listUsersByOrgId(orgId);
+            modelArrayList.addAll(userModels);
+        }
+        return modelArrayList;
+    }
+
     public List<UserOrgRoleBo> getByUserIds(String[] userIds) {
+        //组织查询用户信息的条件
         HumanCondition userCondition = new HumanCondition()
                 .filterIn(UserModel::getId, userIds)
                 .distinct()
