@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -138,6 +139,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
+    @OperateAuth(resourceClass = ModifyBackgroundFlowRequest.class,resourceField = "id",resourceType = "flowOperateResource")
     @ApiOperation("更新背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新背景流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/background")

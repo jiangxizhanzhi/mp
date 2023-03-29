@@ -796,6 +796,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setScriptFile(addRequest.getFilePath());
         flowInfoModel.setRunCmd(addRequest.getRunCmd());
         flowInfoModel.setPcapFile(addRequest.getPcapFilePath());
+        var user = UserUtils.getLoginUser();
+        if (user != null) {
+            flowInfoModel.setCreateUser(user.getId());
+        }
 
         return flowInfoModel;
     }
