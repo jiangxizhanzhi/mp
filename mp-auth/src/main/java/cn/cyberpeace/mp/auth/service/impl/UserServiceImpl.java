@@ -921,12 +921,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
                 boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));
                 boolean isSuperUser = Objects.equals(userOrgRoleBo.getId(), AuthConstant.ROOT_USER_ID);
+                boolean isTrialAccount = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, authConfig.getRoleTrialId()));
 
                 processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
+                processIsTrail(userBo,isTrialAccount);
             } else {
                 userBo.setRoles(Collections.emptyList());
                 userBo.setIsSuperUser(0);
                 userBo.setIsAdmin(0);
+                userBo.setIsTrialAccount(0);
             }
             userBos.add(userBo);
         }
@@ -962,8 +965,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
+            boolean isTrialAccount = roles.stream().anyMatch(r -> Objects.equals(r.getId(), authConfig.getRoleTrialId()));
 
             processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
+            processIsTrail(userBo,isTrialAccount);
         }
 
         return userBo;
@@ -1026,6 +1031,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userBo.setIsSuperUser(1);
         } else {
             userBo.setIsSuperUser(0);
+        }
+    }
+
+    /**
+     * @description: 处理试用账号
+     * @param userBo
+     * @param isTrialAccount
+     * @throws
+     * @return void
+     */
+    private void processIsTrail(UserBo userBo, boolean isTrialAccount){
+        if (isTrialAccount) {
+            userBo.setIsTrialAccount(1);
+        } else {
+            userBo.setIsTrialAccount(0);
         }
     }
 

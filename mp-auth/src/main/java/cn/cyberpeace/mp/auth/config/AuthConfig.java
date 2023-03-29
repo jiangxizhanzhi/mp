@@ -51,4 +51,7 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    //试用角色id
+    private String roleTrialId;
 }
