@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.cscene.config;
 
 import cn.cyberpeace.mp.auth.config.IOperateResource;
 import cn.cyberpeace.mp.auth.config.OperateAuth;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -35,7 +37,7 @@ public class CsceneConfigOperateResouce implements IOperateResource {
                     return 0;
                 }
                 if (StringUtils.isEmpty(cscene.getCreateUser())) {
-                    throw new UnsupportedOperationException();
+                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
                 }
                 // createUser 和 当前用户是同一个组织下的用户 允许操作
                 return 0;
