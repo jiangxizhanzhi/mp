@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.handler.AbstractRoleHandler;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,7 +20,7 @@ import javax.annotation.Resource;
 public class OperateAspect {
 
     @Resource
-    private UserService userService ;
+    private UserService userService;
 
     @Pointcut(value = "@annotation(cn.cyberpeace.mp.auth.config.OperateAuth)")
     public void pointCut() {
@@ -28,11 +30,11 @@ public class OperateAspect {
     @Around(value = "pointCut() && @annotation(opearte))")
     public Object before(ProceedingJoinPoint joinPoint, OperateAuth opearte) {
         if (this.isTrailAccount()) {
+            IOperateResource operateResource = (IOperateResource) BeanCommon.getBean(opearte.resourceType());
             try {
-                IOperateResource operateResource = (IOperateResource) BeanCommon.getBean(opearte.resourceType());
                 operateResource.resourceType(joinPoint.getArgs(), opearte);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                throw new MpRuntimeException(BaseErrorCode.ERROR);
             }
         }
         try {

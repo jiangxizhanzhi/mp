@@ -19,34 +19,30 @@ public class ProbeOperateResouce implements IOperateResource {
     private ProbeMapper probeMapper;
 
     @Override
-    public int resourceType(Object[] args, OperateAuth opearte) {
-        try {
-            var resource = args[opearte.resourceParam()];
-            Field x1 = this.getField(opearte.resourceClass(), opearte.resourceField());
-            x1.setAccessible(true);
-            var param = x1.get(resource);
-            if (param == null) {
+    public int resourceType(Object[] args, OperateAuth opearte) throws IllegalAccessException {
+        var resource = args[opearte.resourceParam()];
+        Field x1 = this.getField(opearte.resourceClass(), opearte.resourceField());
+        x1.setAccessible(true);
+        var param = x1.get(resource);
+        if (param == null) {
+            return 0;
+        }
+        if (opearte.resourceFieldType().equals("string")) {
+            String id = (String) param;
+            var model = probeMapper.get(id);
+            if (model == null) {
                 return 0;
             }
-            if (opearte.resourceFieldType().equals("string")) {
-                String id = (String) param;
-                var model = probeMapper.get(id);
-                if (model == null) {
-                    return 0;
-                }
-                if (StringUtils.isEmpty(model.getCreator())) {
-                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
-                }
-                // createUser 和 当前用户是同一个组织下的用户 允许操作
-                var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
-                if (!userIds.contains(model.getCreator())) {
-                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
-                }
-                return 0;
+            if (StringUtils.isEmpty(model.getCreator())) {
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+            }
+            // createUser 和 当前用户是同一个组织下的用户 允许操作
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            if (!userIds.contains(model.getCreator())) {
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
             }
             return 0;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        return 0;
     }
 }

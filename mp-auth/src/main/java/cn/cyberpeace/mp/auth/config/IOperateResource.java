@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface IOperateResource {
-    int resourceType(Object[] args, OperateAuth operateAuth);
+    int resourceType(Object[] args, OperateAuth operateAuth) throws IllegalAccessException, NoSuchFieldException;
 
     default Map<String, Field> getAllFields(Class clazz) {
         Map<String, Field> result = new HashMap<>();
