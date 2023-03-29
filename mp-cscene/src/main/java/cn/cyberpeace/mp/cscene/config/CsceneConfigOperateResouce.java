@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.config;
 import cn.cyberpeace.mp.auth.config.IOperateResource;
 import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -40,11 +41,23 @@ public class CsceneConfigOperateResouce implements IOperateResource {
                     throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
                 }
                 // createUser 和 当前用户是同一个组织下的用户 允许操作
+                var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+                if (!userIds.contains(cscene.getCreateUser())) {
+                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                }
                 return 0;
             } else if (opearte.resourceFieldType().equals("array")) {
                 String[] ids = (String[]) param;
                 var models = csceneMapper.list(new HumanCondition().filterIn(CsceneModel::getId, ids));
                 // 判断每一个model是否可操作
+                var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+                if (models != null) {
+                    for (var model : models) {
+                        if (!userIds.contains(model.getCreateUser())) {
+                            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                        }
+                    }
+                }
             }
             return 0;
         } catch (Exception e) {

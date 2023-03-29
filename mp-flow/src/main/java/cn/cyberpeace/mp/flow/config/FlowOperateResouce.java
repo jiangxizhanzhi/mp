@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.config;
 import cn.cyberpeace.mp.auth.config.IOperateResource;
 import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,10 @@ public class FlowOperateResouce implements IOperateResource {
                     throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
                 }
                 // createUser 和 当前用户是同一个组织下的用户 允许操作
+                var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+                if (!userIds.contains(flowInfoModel.getCreateUser())) {
+                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                }
                 return 0;
             }
             return 0;

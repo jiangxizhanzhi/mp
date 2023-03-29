@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.config;
 import cn.cyberpeace.mp.auth.config.IOperateResource;
 import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -39,14 +40,24 @@ public class ImageOperateResouce implements IOperateResource {
                         throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
                     }
                     // createUser 和 当前用户是同一个组织下的用户 允许操作
-
+                    var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+                    if (!userIds.contains(device.getCreateUser())) {
+                        throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                    }
                 }
                 return 0;
             } else if (opearte.resourceFieldType().equals("list")) {
                 List<String> ids = (List<String>) param;
                 var targets = deviceTargetMapper.findByIds(ids);
                 // 判断每一个镜像是否有权限
-                int abc = 0;
+                var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+                if (targets != null) {
+                    for (var target : targets) {
+                        if (!userIds.contains(target.getCreateUser())) {
+                            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                        }
+                    }
+                }
             }
             return 0;
         } catch (Exception e) {
