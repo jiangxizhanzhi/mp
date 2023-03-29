@@ -17,6 +17,12 @@ public class EventTrackingService {
         record.setModule(request.getModule());
         record.setTarget(request.getTarget());
         record.setCategory(request.getCategory());
+        record.setOperationType(request.getOperationType());
+        record.setCurrentUrl(request.getCurrentUrl());
+        record.setTitle(request.getTitle());
+        record.setParameter(request.getParameter());
+        record.setUserId(request.getUserId());
+        record.setUserName(request.getUserName());
         recordMapper.save(record);
     }
 }

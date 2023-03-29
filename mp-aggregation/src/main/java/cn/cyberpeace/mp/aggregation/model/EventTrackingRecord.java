@@ -18,4 +18,19 @@ public class EventTrackingRecord extends BaseModel {
     private String action;
     @DefaultStr
     private String target;
+    @DefaultStr
+    private String operationType;
+    @DefaultStr
+    private String currentUrl;
+    @DefaultStr
+    private String title;
+    @DefaultStr
+    private String parameter;
+    @DefaultStr
+    private String userId;
+    @DefaultStr
+    private String userName;
+
+
+
 }
