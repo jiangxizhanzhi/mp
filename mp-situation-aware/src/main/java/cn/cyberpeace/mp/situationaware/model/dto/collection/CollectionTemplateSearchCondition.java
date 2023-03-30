@@ -23,4 +23,7 @@ public class CollectionTemplateSearchCondition {
     @ApiModelProperty(value = "创建者用户名")
     private String creator;
 
+    @ApiModelProperty(value = "创建者ids")
+    private String[] creatorIds;
+
 }

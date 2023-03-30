@@ -32,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,7 +65,7 @@ public class CollectionTemplateService {
     private ProbeService probeService;
 
     /**
-     * 分页查询探针列表
+     * 分页查询采集模板列表
      *
      * @return
      */
@@ -77,6 +74,12 @@ public class CollectionTemplateService {
 
         CollectionTemplateSearchCondition condition = new CollectionTemplateSearchCondition();
         BeanUtils.copyProperties(pageQueryRequest, condition);
+        //采集模板,当前用户为试用账号时只可查看同组织用户创建的模板
+        if(UserUtils.isCurrentUserTrailAccount()){
+            Set<String> userIdsSet = UserUtils.getSameOrgUserIdsByCurrentUser();
+            String[] userIds = userIdsSet.stream().toArray(String[]::new);
+            condition.setCreatorIds(userIds);
+        }
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<CollectionTemplatePageItemDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
@@ -237,8 +240,14 @@ public class CollectionTemplateService {
 
         String templateId = TextUtils.uuid();
         colTempModelToCreate.setId(templateId);
-        colTempModelToCreate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
+        if(UserUtils.getLoginUser()!= null){
+            colTempModelToCreate.setCreatorId(UserUtils.getLoginUser().getId());
+            colTempModelToCreate.setCreator(UserUtils.getLoginUser().getUsername());
+        }else{
+            colTempModelToCreate.setCreatorId(StringUtils.EMPTY);
+            colTempModelToCreate.setCreator(StringUtils.EMPTY);
+        }
         List<CollectionTemplateProbeModel> allColTempProbeList = new ArrayList<>();
         List<ProbeParamModel> probeParamList = new ArrayList<>();
         processColTempRequestForAddTemplate(addRequest, templateId, allColTempProbeList, probeParamList);
