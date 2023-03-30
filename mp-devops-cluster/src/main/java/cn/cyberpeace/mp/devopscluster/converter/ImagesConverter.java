@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
@@ -68,12 +70,33 @@ public class ImagesConverter implements BaseConverter{
 
     private final SnapshotConverter snapshotConverter;
 
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
+
     /**
      * 分页查询镜像列表
      * @param dto
      * @return
      */
     public BasePageBO<ImageConvertModel> page(ImagePageDTO dto) {
+
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            paramsIds.add("");
+            var list = deviceTargetMapper.list(new HumanCondition()
+                                                       .selectAs("id",DeviceTargetPO::getId)
+                                                       .filterIn(DeviceTargetPO::getCreateUser, paramsIds.toArray(new String[]{})));
+            List<String> p = new ArrayList<>();
+            list.forEach(l -> p.add(l.getId()));
+            dto.setIds(p);
+        }
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();

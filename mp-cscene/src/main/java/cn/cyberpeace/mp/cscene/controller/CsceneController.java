@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -121,6 +125,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
+
         var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
         getModelService().setSharedUser(result.getData().getList(), queryParams);
         return result;
@@ -163,7 +168,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @OperateAuth(resourceClass = CsceneBO.class, resourceField = "id",resourceType = "csceneOperateResource")
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/server_api/sync")
@@ -182,7 +186,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @OperateAuth(resourceClass = CsceneActionRequest.class, resourceField = "id",resourceType = "csceneOperateResource")
     @ApiOperation("克隆指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),

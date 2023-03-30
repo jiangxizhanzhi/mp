@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -204,6 +207,17 @@ public class CsceneSpecialService {
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
     }
 
+    @Autowired
+    private UserService userService;
+
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 场景实例数据
      * @param queryParams 查询参数
@@ -241,6 +255,14 @@ public class CsceneSpecialService {
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getId, ids);
         }
+
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            humanCondition.filterIn(CsceneInstanceModel::getCreateUser, paramsIds.toArray(new String[]{}));
+        }
+
+
         var type = queryParams.getType();
         if (type != null) {
             humanCondition.filterEqual(CsceneInstanceModel::getType, type);

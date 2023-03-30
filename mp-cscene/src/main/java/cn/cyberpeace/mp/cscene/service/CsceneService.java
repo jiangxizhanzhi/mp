@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -220,6 +223,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (type != null) {
             humanCondition.filterEqual(CsceneModel::getType, type);
         }
+        if (queryParams.getIds() != null) {
+            humanCondition.filterIn(CsceneModel::getId, queryParams.getIds());
+        }
     }
 
     public ServiceResult<CsceneAuthorizeBO> getCsceneAuthorizeInfo(String csceneId) {
@@ -298,6 +304,17 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(true);
     }
 
+    @Autowired
+    private UserService userService ;
+
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
     public ListObjServiceResult<CsceneBO> listCsceneBO(CsceneQueryParams queryParams, boolean withInstance,
                                                        CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
@@ -314,6 +331,21 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             } else {
                 queryParams.setIds(ids.toArray(new String[0]));
             }
+        }
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            paramsIds.add("");
+            var list = getModelMapper().list(new HumanCondition()
+                    .filterEqual(CsceneModel::getDeleted,false)
+                    .filterEqual(CsceneModel::getType,CsceneModel.Type.TEMPLATE)
+                                                     .filterIn(CsceneModel::getCreateUser, paramsIds.toArray(new String[]{})));
+            List<String> p = new ArrayList<>();
+            list.forEach(l -> p.add(l.getId()));
+            if (p.isEmpty()) {
+                p.add("00000000");
+            }
+            queryParams.setIds(p.toArray(new String[]{}));
         }
         // 未指定排序方式时默认按创建时间倒序排列
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
