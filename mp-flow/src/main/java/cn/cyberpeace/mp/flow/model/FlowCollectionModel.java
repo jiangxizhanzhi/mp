@@ -58,4 +58,11 @@ public class FlowCollectionModel extends BaseModel {
     @DefaultInt
     private Integer attackFlowCount;
 
+    /**
+     * 创建用户id
+     */
+    @ApiModelProperty(value = "创建用户")
+    @DefaultStr
+    private String createUser;
+
 }

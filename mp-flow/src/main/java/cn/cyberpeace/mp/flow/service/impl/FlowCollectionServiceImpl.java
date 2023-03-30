@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -29,10 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -198,6 +196,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         if (!checkNameUnique(flowCollectionModel.getTitle(), StringUtils.EMPTY)) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
+        flowCollectionModel.setCreateUser(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getId() : "");
         this.getModelMapper().create(flowCollectionModel);
         return ResultCommon.success(flowCollectionModel);
     }
@@ -229,4 +228,19 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return Objects.isNull(flowCollectionModel) || flowCollectionModel.getId().equals(id);
     }
 
+    /**
+     * @description: 判断处理试用账号流量集合过滤
+     * @param queryParams
+     * @return void
+     */
+    public void handleTrialAccount(FlowCollectionQueryParams queryParams) {
+        if (UserUtils.isCurrentUserTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            var list = getModelMapper().list(new HumanCondition().filterIn(FlowCollectionModel::getCreateUser, paramsIds.toArray(new String[]{})));
+            List<String> p = new ArrayList<>();
+            list.forEach(l -> p.add(l.getId()));
+            queryParams.setIds(p.toArray(new String[]{}));
+        }
+    }
 }

@@ -231,7 +231,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (this.isTrailAccount()) {
             var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
             var paramsIds = new HashSet<String>(userIds);
-            paramsIds.add("");
+//            paramsIds.add("");
             var list = getModelMapper().list(new HumanCondition().filterIn(FlowInfoModel::getCreateUser, paramsIds.toArray(new String[]{})));
             List<String> p = new ArrayList<>();
             list.forEach(l -> p.add(l.getId()));
