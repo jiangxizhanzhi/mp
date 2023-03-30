@@ -51,6 +51,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,9 +343,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             ids = Arrays.asList(req.getIds());
         }
-
+        var roleIds = req.getRoleIds();
+        if(UserUtils.isCurrentUserTrailAccount() && CollectionUtils.isEmpty(roleIds)){
+            roleIds = new ArrayList<>();
+            roleIds.add(AuthConstant.ROLE_ADMIN_ID);
+        }
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
-        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null, req.getPage(), req.getPageSize());
+        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), roleIds, null, null, req.getPage(), req.getPageSize());
         return result;
     }
 
