@@ -168,7 +168,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @OperateAuth(resourceClass = CsceneBO.class, resourceField = "id",resourceType = "csceneOperateResource")
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/server_api/sync")
@@ -187,7 +186,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @OperateAuth(resourceClass = CsceneActionRequest.class, resourceField = "id",resourceType = "csceneOperateResource")
     @ApiOperation("克隆指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
