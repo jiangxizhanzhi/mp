@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -296,6 +297,13 @@ public class TenantUserServiceImpl
 
     @Override
     public PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req) {
+
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            req.setOrg(user.getOrgIds().get(0));
+        }
+
+
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
