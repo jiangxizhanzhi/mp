@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
@@ -20,6 +24,7 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
@@ -31,11 +36,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
@@ -75,6 +82,20 @@ public class RealEquipmentConverter implements BaseConverter{
         return page.getTotal();
     }
 
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
+    private DeviceTargetMapper deviceTargetMapper ;
+
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 分页查询实装列表
      * @param dto
@@ -82,6 +103,19 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
         this.refreshIfNecessary();
+
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            paramsIds.add("");
+            var list = deviceTargetMapper.list(new HumanCondition()
+                                                       .selectAs("id",DeviceTargetPO::getId)
+                                                       .filterIn(DeviceTargetPO::getCreateUser, paramsIds.toArray(new String[]{})));
+            List<String> p = new ArrayList<>();
+            list.forEach(l -> p.add(l.getId()));
+            dto.setIds(p);
+        }
+
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
