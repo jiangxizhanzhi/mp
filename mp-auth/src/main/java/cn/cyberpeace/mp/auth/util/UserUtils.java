@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -86,6 +87,17 @@ public class UserUtils {
         return sameOrgUsers.stream().map(UserModel::getId).collect(Collectors.toSet());
     }
 
+
+    /**
+     * @description: 获取当前用户所在组织下的所有用户id
+     * @throws
+     * @return Set<String>
+     */
+    public static Set<String> getSameOrgUserIdsByCurrentUser(){
+        var user = getLoginUserDtoWithoutOrg();
+        return Objects.isNull(user)?new HashSet<>():getSameOrgUserIds(user.getId());
+    }
+
     /**
      * 获取当前登录用户
      * 如果返回null，有可能是client认证，也有可能是免认证的接口
@@ -121,6 +133,17 @@ public class UserUtils {
         Collection authorities = authentication.getAuthorities();
         Set<String> authoritySet = AuthorityUtils.authorityListToSet(authorities);
         return authoritySet;
+    }
+
+    /**
+     * @description: 判断当前用户是否为
+     * @throws
+     * @return boolean
+     */
+    public static boolean isCurrentUserTrailAccount(){
+        var user = getLoginUserDtoWithoutOrg();
+        return Objects.isNull(user) ? false
+                : RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount());
     }
 
 

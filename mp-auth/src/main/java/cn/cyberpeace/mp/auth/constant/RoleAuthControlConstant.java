@@ -80,7 +80,7 @@ public class RoleAuthControlConstant {
      * TODO 临时使用配置，后续通用角色可改为数据库表
      */
     public enum FORBIDDEN_REQUEST {
-        IMAGES_QUERY(TM_IMAGES_API_PATH+"/page",HttpMethod.GET.name(),"imagesQuery"),
+        //IMAGES_QUERY(TM_IMAGES_API_PATH+"/page",HttpMethod.GET.name(),"imagesQuery"),
         //镜像管理相关
         //IMAGES_UPDATE(TM_IMAGES_API_PATH+"/update",HttpMethod.POST.name(),"imagesUpdate"),//ImageRequest String uuid
         //IMAGES_DELETE(TM_IMAGES_API_PATH+"/page", HttpMethod.DELETE.name(),"imagesDelete"),//ImagesDeleteRequest List<String> imageIds
