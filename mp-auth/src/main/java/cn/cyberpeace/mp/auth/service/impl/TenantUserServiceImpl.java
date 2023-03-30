@@ -300,7 +300,9 @@ public class TenantUserServiceImpl
 
         var user = userService.getCurrentUserDto();
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
-            req.setOrg(user.getOrgIds().get(0));
+            if (req.getOrg() == null || !user.getOrgIds().contains(req.getOrg())) {
+                req.setOrg(user.getOrgIds().get(0));
+            }
         }
 
 

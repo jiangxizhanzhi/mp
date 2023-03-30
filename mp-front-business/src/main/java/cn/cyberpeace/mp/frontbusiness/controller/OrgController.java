@@ -57,7 +57,9 @@ public class OrgController {
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
         var user = userService.getCurrentUserDto();
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
-            orgId = user.getOrgIds().get(0);
+            if (orgId == null || !user.getOrgIds().contains(orgId)) {
+                orgId = user.getOrgIds().get(0);
+            }
         }
         List<OrgDto> tree = orgService.getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();
