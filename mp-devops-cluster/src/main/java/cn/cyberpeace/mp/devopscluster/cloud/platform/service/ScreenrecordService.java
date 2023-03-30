@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -68,6 +70,12 @@ public class ScreenrecordService extends BaseCpService {
                 .append("&page=").append(queryParams.getPage());
         if (StringUtils.isNotBlank(queryParams.getSearch())) {
             getParams.append("&params=").append(queryParams.getSearch());
+        }
+        if(UserUtils.isCurrentUserTrailAccount()){
+            UserModel user = UserUtils.getLoginUser();
+            if(Objects.nonNull(user)){
+                getParams.append("&userid=").append(user.getId());
+            }
         }
         if (StringUtils.isNotBlank(queryParams.getStartTime())) {
             getParams.append("&start_time=").append(queryParams.getStartTime());
