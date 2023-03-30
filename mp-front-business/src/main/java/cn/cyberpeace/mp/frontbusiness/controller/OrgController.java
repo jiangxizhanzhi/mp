@@ -3,7 +3,10 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -52,8 +55,24 @@ public class OrgController {
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            orgId = user.getOrgIds().get(0);
+        }
         List<OrgDto> tree = orgService.getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();
     }
+
+    @Autowired
+    private UserService userService ;
+
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
 
 }
