@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -43,13 +44,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -247,6 +242,13 @@ public class DashboardService {
 
         //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
         List<String> onlinedUserIds = userOnlineReportBoList.stream().map(UserOnlineReportBo::getUser).collect(Collectors.toList());
+        //如果是试用账号，则需要在线用户只能是同组织下的用户
+        if(UserUtils.isCurrentUserTrailAccount()){
+            Set<String> sameOrgUserIds = UserUtils.getSameOrgUserIdsByCurrentUser();
+            List<String> sameOrgUserList = new ArrayList<>(sameOrgUserIds);
+            //取交集
+            onlinedUserIds = onlinedUserIds.stream().filter(userId -> sameOrgUserList.contains(userId)).collect(Collectors.toList());
+        }
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
             ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
