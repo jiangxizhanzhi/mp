@@ -64,6 +64,11 @@ public class ProbeModel extends BaseModel {
     /**
      * 创建者用户名
      */
+    @ApiModelProperty(value = "创建者用户id")
+    @DefaultStr
+    private String creatorId;
+
+
     @ApiModelProperty(value = "创建者用户名")
     @DefaultStr
     private String creator;

@@ -1,0 +1,1 @@
+alter table mp_situation_probe add column creator_id varchar(64) not null default '' comment '创建者用户id' ;
