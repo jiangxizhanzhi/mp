@@ -122,6 +122,13 @@
             <if test="createUserName != null">
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
             </if>
+            <if test="ids != null">
+                and i.id in (
+                    <foreach collection="ids" item="item" index="index" separator=",">
+                        #{item}
+                    </foreach>
+                )
+            </if>
 
         </where>
     </sql>

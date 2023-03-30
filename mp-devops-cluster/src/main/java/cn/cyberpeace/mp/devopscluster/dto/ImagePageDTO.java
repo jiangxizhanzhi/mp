@@ -21,6 +21,8 @@ import java.util.Objects;
 @EqualsAndHashCode(callSuper = true)
 public class ImagePageDTO extends BasePageDTO{
 
+    private List<String> ids ;
+
     /**
      * 角色
      */

@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -121,6 +125,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
+
         var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
         getModelService().setSharedUser(result.getData().getList(), queryParams);
         return result;
