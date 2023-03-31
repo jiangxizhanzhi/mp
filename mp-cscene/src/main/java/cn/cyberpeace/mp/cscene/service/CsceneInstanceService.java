@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -159,6 +160,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LogFileService logFileService;
+
+    @Autowired
+    private ResourceClearHandler resourceClearHandler;
 
     @Resource
     private CsceneService csceneService;
@@ -540,6 +544,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+                    resourceClearHandler.doCallback(id);
                 }
                 if (!logic) {
                     screenshotService.batchDeleteBySceneId(id);
