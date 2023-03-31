@@ -34,7 +34,7 @@ public class ImagesManagementTMRoleHandler extends AbstractRoleHandler implement
 //            String model = forbiddenRequest.getModel();
 //            Method method = ImagesManagementTMRoleHandler.class.getMethod(model, HttpServletRequest.class);
 //            method.invoke(this,request);
-            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
         }
     }
 }

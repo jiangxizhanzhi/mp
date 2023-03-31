@@ -36,12 +36,12 @@ public class ImageOperateResouce implements IOperateResource {
             }
             if (device != null) {
                 if (StringUtils.isEmpty(device.getCreateUser())) {
-                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
                 }
                 // createUser 和 当前用户是同一个组织下的用户 允许操作
                 var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
                 if (!userIds.contains(device.getCreateUser())) {
-                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                    throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
                 }
             }
             return 0;
@@ -53,7 +53,7 @@ public class ImageOperateResouce implements IOperateResource {
             if (targets != null) {
                 for (var target : targets) {
                     if (!userIds.contains(target.getCreateUser())) {
-                        throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                        throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
                     }
                 }
             }

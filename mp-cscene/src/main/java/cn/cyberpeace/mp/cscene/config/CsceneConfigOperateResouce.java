@@ -37,12 +37,12 @@ public class CsceneConfigOperateResouce implements IOperateResource {
                 return 0;
             }
             if (StringUtils.isEmpty(cscene.getCreateUser())) {
-                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
             }
             // createUser 和 当前用户是同一个组织下的用户 允许操作
             var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
             if (!userIds.contains(cscene.getCreateUser())) {
-                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
             }
             return 0;
         } else if (opearte.resourceFieldType().equals("array")) {
@@ -53,7 +53,7 @@ public class CsceneConfigOperateResouce implements IOperateResource {
             if (models != null) {
                 for (var model : models) {
                     if (!userIds.contains(model.getCreateUser())) {
-                        throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                        throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
                     }
                 }
             }

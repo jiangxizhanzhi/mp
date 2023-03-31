@@ -26,7 +26,7 @@ public class DefaultRoleHandler extends AbstractRoleHandler implements RoleHandl
     public void handleRequest(HttpServletRequest request){
         //请求为配置中角色禁用的请求则提示无操作权限
         if(RoleAuthControlConstant.FORBIDDEN_REQUEST.containsRquest(request.getServletPath(), request.getMethod())){
-            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
         }
     }
 }

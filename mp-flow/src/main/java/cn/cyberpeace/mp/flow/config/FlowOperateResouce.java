@@ -34,12 +34,12 @@ public class FlowOperateResouce implements IOperateResource {
                 return 0;
             }
             if (StringUtils.isEmpty(flowInfoModel.getCreateUser())) {
-                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
             }
             // createUser 和 当前用户是同一个组织下的用户 允许操作
             var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
             if (!userIds.contains(flowInfoModel.getCreateUser())) {
-                throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+                throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
             }
             return 0;
         }
