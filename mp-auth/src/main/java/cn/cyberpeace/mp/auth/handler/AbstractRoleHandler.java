@@ -2,8 +2,7 @@ package cn.cyberpeace.mp.auth.handler;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -30,8 +29,7 @@ public abstract class AbstractRoleHandler implements RoleHandler{
      * @return UserBo
      */
     protected UserBo getCurrentUser(){
-        var userService = BeanCommon.getBean(UserService.class);
-        return userService.getCurrentUserDto();
+        return UserUtils.getLoginUserDtoWithoutOrg();
     }
 
     /**
