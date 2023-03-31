@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
 
     @Autowired
     private MessageSource messageSource;
+
 
     @Override
     public void create(OperationLogRequest request, Locale locale) {
@@ -124,6 +126,9 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
 
         if (StringUtils.isNotBlank(request.getUserId())) {
             humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
+        }else if(StringUtils.isBlank(request.getUserId()) && ArrayUtils.isNotEmpty(request.getUserIds())){
+            //试用账号组织下的所有用户
+            humanCondition.filterIn(OperateLogSqlModel::getUserId,request.getUserIds());
         }
 
         if (Objects.nonNull(request.getModule())) {

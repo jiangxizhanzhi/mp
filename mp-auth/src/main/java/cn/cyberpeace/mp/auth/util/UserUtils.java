@@ -146,6 +146,18 @@ public class UserUtils {
                 : RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount());
     }
 
+    /**
+     * @description: 判断用户是否为试用角色
+     * @param userId
+     * @return boolean
+     */
+    public static boolean isUserTrailAccount(String userId){
+        var userModel = getUser(userId);
+        var user = userModel2UserDtoWithoutOrg(userModel);
+        return Objects.isNull(user) ? false
+                : RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount());
+    }
+
 
 
     public static UserBo getLoginUserDtoWithoutOrg() {
@@ -154,6 +166,15 @@ public class UserUtils {
             return null;
         }
         return userService.userModel2UserDtoWithoutOrg(currentUserModel);
+    }
+
+    /**
+     * @description: 用户模型数据补充为用户业务数据（不包含组织）
+     * @param userModel
+     * @return UserBo
+     */
+    public static UserBo userModel2UserDtoWithoutOrg(UserModel userModel){
+        return userService.userModel2UserDtoWithoutOrg(userModel);
     }
 
 
