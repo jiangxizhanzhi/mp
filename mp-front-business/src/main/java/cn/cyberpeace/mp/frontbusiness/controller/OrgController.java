@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -55,7 +57,12 @@ public class OrgController {
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
-        var user = userService.getCurrentUserDto();
+        UserBo user = null;
+        try {
+            user = userService.getCurrentUserDto();
+        } catch (MpRuntimeException e) {
+            user = null;
+        }
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
             if (orgId == null || !user.getOrgIds().contains(orgId)) {
                 orgId = user.getOrgIds().get(0);
@@ -68,13 +75,6 @@ public class OrgController {
     @Autowired
     private UserService userService ;
 
-    private boolean isTrailAccount() {
-        var user = userService.getCurrentUserDto();
-        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
-            return true;
-        }
-        return false;
-    }
 
 
 }

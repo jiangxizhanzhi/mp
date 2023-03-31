@@ -297,8 +297,12 @@ public class TenantUserServiceImpl
 
     @Override
     public PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req) {
-
-        var user = userService.getCurrentUserDto();
+        UserBo user = null;
+        try {
+            user = userService.getCurrentUserDto();
+        } catch (MpRuntimeException e) {
+            user = null;
+        }
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
             if (req.getOrg() == null || !user.getOrgIds().contains(req.getOrg())) {
                 req.setOrg(user.getOrgIds().get(0));
