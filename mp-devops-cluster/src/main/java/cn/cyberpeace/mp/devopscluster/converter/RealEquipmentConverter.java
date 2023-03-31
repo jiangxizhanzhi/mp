@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
@@ -21,13 +22,14 @@ import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.request.OrganizeRealEquipmentRequest;
-import cn.cyberpeace.mp.devopscluster.request.UpdateApplicationRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devopscluster.request.UpdateApplicationRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -209,7 +211,7 @@ public class RealEquipmentConverter implements BaseConverter{
 
         } else if (request.getOperate() == 2) {
             // 回收设备， 让某个场景不能再接入该设备
-
+            BeanCommon.getBean(ScenePluginCloudSceneService.class).releaseImageConnect(request.getUuid());
         }
         // 更新占用状态
         var result = devopsTargetService.updateRealEquipmentOccupy(request.getUuid(), request.getOperate());

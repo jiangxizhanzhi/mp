@@ -963,4 +963,11 @@ public class ScenePluginCloudSceneService {
         }
         return connectionIdSessionMap;
     }
+
+    public void releaseImageConnect(String imageUuid) {
+        // 根据 imageUuid 查询占用的场景节点
+        // 在 cloudPluginSceneConnectionMapper 中查询启动的连接
+        // 调用底层接口释放连接
+    }
+
 }

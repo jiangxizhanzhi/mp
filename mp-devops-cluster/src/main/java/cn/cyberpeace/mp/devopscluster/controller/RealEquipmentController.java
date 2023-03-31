@@ -243,7 +243,7 @@ public class RealEquipmentController {
     @PostMapping("/organize_real_equipment")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "分配/回收实体设备", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult addApplication(@RequestBody OrganizeRealEquipmentRequest request) {
-        if (StringUtils.isBlank(request.getUuid()) || StringUtils.isEmpty(request.getSceneId())){
+        if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         realEquipmentConverter.orginizeRealEquipment(request);
