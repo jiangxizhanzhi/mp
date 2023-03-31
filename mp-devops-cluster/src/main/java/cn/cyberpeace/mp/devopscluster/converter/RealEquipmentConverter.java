@@ -20,6 +20,8 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.request.OrganizeRealEquipmentRequest;
+import cn.cyberpeace.mp.devopscluster.request.UpdateApplicationRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
@@ -27,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -36,7 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -51,6 +56,8 @@ public class RealEquipmentConverter implements BaseConverter{
     private static long IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
 
     private static ReentrantLock IN_POSITION_UPDATE_TIME_LOCK = new ReentrantLock();
+
+    private static ReentrantLock APPLICATION_NUM_UPDATE_TIME_LOCK = new ReentrantLock();
 
     private final RealEquipmentService realEquipmentService;
 
@@ -106,6 +113,12 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
+        Map<String, Integer> uuid2ApplicationNum = new HashMap<>();
+        Map<String, Integer> uuid2Occupy = new HashMap<>();
+        deviceTargetPOS.forEach(device -> {
+            uuid2ApplicationNum.put(device.getUuid(), device.getApplicationNum());
+            uuid2Occupy.put(device.getUuid(), device.getIsOccupy());
+        });
         POLogoUtils.changeLogoPathToUrl(model.getList());
         List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
             RealEquipmentBO realEquipmentBO = convertDevice(device);
@@ -120,6 +133,13 @@ public class RealEquipmentConverter implements BaseConverter{
             }
             realEquipmentBO.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
             realEquipmentBO.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
+            int applicationStatus = 0;
+            int applicationNum = Objects.isNull(uuid2ApplicationNum.get(device.getUuid())) ? 0 : uuid2ApplicationNum.get(device.getUuid());
+            if (applicationNum > 0) {
+                applicationStatus = 1;
+            }
+            realEquipmentBO.setApplicationStatus(applicationStatus);
+            realEquipmentBO.setIsOccupy(Objects.isNull(uuid2Occupy.get(device.getUuid())) ? 0 : uuid2Occupy.get(device.getUuid()));
             return realEquipmentBO;
         }).collect(Collectors.toList());
 
@@ -171,6 +191,49 @@ public class RealEquipmentConverter implements BaseConverter{
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);
         return result;
+    }
+
+    /**
+     * 更新实装设备申请数量
+     * @param request
+     * @return
+     */
+    public Boolean updateRealEquipmentApplicationNum(UpdateApplicationRequest request) {
+        APPLICATION_NUM_UPDATE_TIME_LOCK.lock();
+        try {
+            List<String> uuids = new ArrayList<>();
+            uuids.add(request.getUuid());
+            // 更新
+            var result = devopsTargetService.updateRealEquipmentApplicationNum(uuids, request.getOperate());
+            return result != 0;
+        } finally {
+            APPLICATION_NUM_UPDATE_TIME_LOCK.unlock();
+        }
+    }
+
+    /**
+     * 分配/回收实体设备
+     * @param request
+     * @return
+     */
+    public Boolean orginizeRealEquipment(OrganizeRealEquipmentRequest request) {
+        APPLICATION_NUM_UPDATE_TIME_LOCK.lock();
+        try {
+            List<String> uuids = new ArrayList<>();
+            uuids.add(request.getUuid());
+            if (request.getOperate() == 1) {
+                // 分配设备，让某个场景可以接入该设备
+
+            } else if (request.getOperate() == 2) {
+                // 回收设备， 让某个场景不能再接入该设备
+
+            }
+            // 更新占用状态
+            var result = devopsTargetService.updateRealEquipmentOccupy(uuids, request.getOperate());
+            return result != 0;
+        } finally {
+            APPLICATION_NUM_UPDATE_TIME_LOCK.unlock();
+        }
     }
 
     /**
