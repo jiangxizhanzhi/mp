@@ -74,7 +74,7 @@ public class ScreenrecordService extends BaseCpService {
         if(UserUtils.isCurrentUserTrailAccount()){
             UserModel user = UserUtils.getLoginUser();
             if(Objects.nonNull(user)){
-                getParams.append("&userid=").append(user.getId());
+                getParams.append("&user_id=").append(user.getId());
             }
         }
         if (StringUtils.isNotBlank(queryParams.getStartTime())) {
