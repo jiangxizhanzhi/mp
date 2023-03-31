@@ -425,6 +425,18 @@
         </foreach>
     </update>
 
+    <update id="updateApplicationNum" parameterType="cn.cyberpeace.mp.devopscluster.dto.ApplicationNumUpdateDTO">
+        update mp_devops_target
+        <set>
+            <if test="operate == 1">
+                application_num = application_num + 1
+            </if>
+            <if test="operate == 2">
+                application_num = application_num - 1
+            </if>
+        </set>
+        where uuid = #{uuid}
+    </update>
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO">
         delete from mp_devops_target

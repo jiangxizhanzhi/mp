@@ -134,7 +134,7 @@ public class RealEquipmentBO extends BasePageConvertModel {
     /**
      * 该设备的申请数量
      */
-    private Integer applicationStatus;
+    private Integer applicationNum;
 
     /**
      * 是否被占用

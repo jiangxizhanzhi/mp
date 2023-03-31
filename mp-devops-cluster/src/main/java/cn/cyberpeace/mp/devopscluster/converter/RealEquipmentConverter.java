@@ -29,7 +29,6 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -133,12 +132,7 @@ public class RealEquipmentConverter implements BaseConverter{
             }
             realEquipmentBO.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
             realEquipmentBO.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
-            int applicationStatus = 0;
-            int applicationNum = Objects.isNull(uuid2ApplicationNum.get(device.getUuid())) ? 0 : uuid2ApplicationNum.get(device.getUuid());
-            if (applicationNum > 0) {
-                applicationStatus = 1;
-            }
-            realEquipmentBO.setApplicationStatus(applicationStatus);
+            realEquipmentBO.setApplicationNum(Objects.isNull(uuid2ApplicationNum.get(device.getUuid())) ? 0 : uuid2ApplicationNum.get(device.getUuid()));
             realEquipmentBO.setIsOccupy(Objects.isNull(uuid2Occupy.get(device.getUuid())) ? 0 : uuid2Occupy.get(device.getUuid()));
             return realEquipmentBO;
         }).collect(Collectors.toList());
@@ -199,16 +193,9 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public Boolean updateRealEquipmentApplicationNum(UpdateApplicationRequest request) {
-        APPLICATION_NUM_UPDATE_TIME_LOCK.lock();
-        try {
-            List<String> uuids = new ArrayList<>();
-            uuids.add(request.getUuid());
-            // 更新
-            var result = devopsTargetService.updateRealEquipmentApplicationNum(uuids, request.getOperate());
-            return result != 0;
-        } finally {
-            APPLICATION_NUM_UPDATE_TIME_LOCK.unlock();
-        }
+        // 更新
+        var result = devopsTargetService.updateRealEquipmentApplicationNum(request.getUuid(), request.getOperate());
+        return result != 0;
     }
 
     /**
@@ -217,23 +204,16 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public Boolean orginizeRealEquipment(OrganizeRealEquipmentRequest request) {
-        APPLICATION_NUM_UPDATE_TIME_LOCK.lock();
-        try {
-            List<String> uuids = new ArrayList<>();
-            uuids.add(request.getUuid());
-            if (request.getOperate() == 1) {
-                // 分配设备，让某个场景可以接入该设备
+        if (request.getOperate() == 1) {
+            // 分配设备，让某个场景可以接入该设备
 
-            } else if (request.getOperate() == 2) {
-                // 回收设备， 让某个场景不能再接入该设备
+        } else if (request.getOperate() == 2) {
+            // 回收设备， 让某个场景不能再接入该设备
 
-            }
-            // 更新占用状态
-            var result = devopsTargetService.updateRealEquipmentOccupy(uuids, request.getOperate());
-            return result != 0;
-        } finally {
-            APPLICATION_NUM_UPDATE_TIME_LOCK.unlock();
         }
+        // 更新占用状态
+        var result = devopsTargetService.updateRealEquipmentOccupy(request.getUuid(), request.getOperate());
+        return result != 0;
     }
 
     /**
