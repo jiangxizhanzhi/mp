@@ -199,28 +199,33 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        status();
-        SysActivCtlModel sysActivCtlModel = null;
-        if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
-            sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
-        } else {
-            sysActivCtlModel = sysCtlService.getValidCtlModel();
-        }
-        String suffix = sysActivCtlModel.getSuffix();
-
-        String uuid = "";
-        // If root privileges this will work
-        for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
-            if (StringUtils.isNotBlank(checkLine)) {
-                uuid = checkLine;
-                log.info("origin uuid is {}", uuid);
+        try {
+            status();
+            SysActivCtlModel sysActivCtlModel = null;
+            if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
+                sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
+            } else {
+                sysActivCtlModel = sysCtlService.getValidCtlModel();
             }
-        }
+            String suffix = sysActivCtlModel.getSuffix();
 
-        // todo
-        //uuid = "aaaa-bbbb-cccc-dddd";
-        uuid = uuid + "-" + suffix;
-        return uuid;
+            String uuid = "";
+            // If root privileges this will work
+            for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
+                if (StringUtils.isNotBlank(checkLine)) {
+                    uuid = checkLine;
+                    log.info("origin uuid is {}", uuid);
+                }
+            }
+
+            // todo
+            //uuid = "aaaa-bbbb-cccc-dddd";
+            uuid = uuid + "-" + suffix;
+            return uuid;
+        } catch (Exception e) {
+            log.error("failed to querySysUUID ", e);
+            return "";
+        }
     }
 
     @Deprecated
