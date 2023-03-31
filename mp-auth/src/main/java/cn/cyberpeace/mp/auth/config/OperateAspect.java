@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.handler.AbstractRoleHandler;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -45,7 +46,12 @@ public class OperateAspect {
     }
 
     private boolean isTrailAccount() {
-        var user = userService.getCurrentUserDto();
+        UserBo user = null;
+        try {
+            user = userService.getCurrentUserDto();
+        } catch (MpRuntimeException e) {
+            user = null;
+        }
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
             return true;
         }

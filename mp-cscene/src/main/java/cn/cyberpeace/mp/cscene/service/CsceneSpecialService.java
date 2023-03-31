@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
@@ -211,7 +213,12 @@ public class CsceneSpecialService {
     private UserService userService;
 
     private boolean isTrailAccount() {
-        var user = userService.getCurrentUserDto();
+        UserBo user = null;
+        try {
+            user = userService.getCurrentUserDto();
+        } catch (MpRuntimeException e) {
+            user = null;
+        }
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
             return true;
         }
