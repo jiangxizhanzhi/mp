@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Version: 1.0
  */
 @Service
-@UrlKey({RoleAuthControlConstant.SYS_CONFIG_API_PATH,RoleAuthControlConstant.RUNTIMELOG_DOWNLOAD_API_PATH,
+@UrlKey({RoleAuthControlConstant.SYS_CONFIG_UPDATEALL_API_PATH,RoleAuthControlConstant.RUNTIMELOG_DOWNLOAD_API_PATH,
         RoleAuthControlConstant.SYS_NOTICE_API_PATH,RoleAuthControlConstant.CPMONITOR_API_PATH})
 public class DefaultRoleHandler extends AbstractRoleHandler implements RoleHandler {
     @Override
