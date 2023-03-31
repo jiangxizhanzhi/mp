@@ -515,6 +515,48 @@
       "l1_parent_id": 1
     },
     {
+      "id": 11,
+      "name": "36kv远程监控",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 12,
+      "name": "ATS控制中心",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 13,
+      "name": "DCU",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 14,
+      "name": "DSC设备",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 15,
+      "name": "PCA",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 16,
+      "name": "区域控制器",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 17,
+      "name": "车控室MCS远程通信",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
       "id": 35102,
       "name": "5G核心网设备",
       "l2_parent_id": 51,
@@ -523,6 +565,18 @@
     {
       "id": 35001,
       "name": "ONU/ONT设备",
+      "l2_parent_id": 50,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 35002,
+      "name": "PSC",
+      "l2_parent_id": 50,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 35003,
+      "name": "供电总控单元",
       "l2_parent_id": 50,
       "l1_parent_id": 3
     }
