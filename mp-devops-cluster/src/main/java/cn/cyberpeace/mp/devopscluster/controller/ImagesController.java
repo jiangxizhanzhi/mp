@@ -460,6 +460,7 @@ public class ImagesController {
      * 文件注入
      */
     @ApiOperation("文件注入")
+    @OperateAuth(resourceClass = ImageInjectFileRequest.class, resourceField = "deviceUuid")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageInjectFileRequest.class)
     @PostMapping("/inject-file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "文件注入", target = OpTargetEnums.IMAGE)
