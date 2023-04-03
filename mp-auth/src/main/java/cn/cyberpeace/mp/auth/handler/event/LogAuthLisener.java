@@ -29,24 +29,29 @@ public class LogAuthLisener {
     @EventListener
     public void onLogAuthEventPublished(LogAuthEvent logAuthEvent) {
         //从上下文中获取用户信息
-        UserModel user = getLogContextUser(logAuthEvent.getUsercontext());
-        if(Objects.isNull(user)){
-            return;
+        try {
+            UserModel user = getLogContextUser(logAuthEvent.getUsercontext());
+            if(Objects.isNull(user)){
+                return;
+            }
+            //非试用账号则不做任何处理
+            if(!UserUtils.isUserTrailAccount(user.getId())){
+                return;
+            }
+            //获取同组织的所有用户id
+            Set<String> sameOrgUserIdSet = UserUtils.getSameOrgUserIds(user.getId());
+            String[] sameOrgUserIds = sameOrgUserIdSet.stream().toArray(String[]::new);
+            Object source = logAuthEvent.getSource();
+            //回传数据
+            if(source instanceof LogAuth){
+                LogAuth logAuth = (LogAuth)logAuthEvent.getSource();
+                logAuth.setUserIds(sameOrgUserIds);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            logAuthEvent.getLatch().countDown();
         }
-        //非试用账号则不做任何处理
-        if(!UserUtils.isUserTrailAccount(user.getId())){
-            return;
-        }
-        //获取同组织的所有用户id
-        Set<String> sameOrgUserIdSet = UserUtils.getSameOrgUserIds(user.getId());
-        String[] sameOrgUserIds = sameOrgUserIdSet.stream().toArray(String[]::new);
-        Object source = logAuthEvent.getSource();
-        //回传数据
-        if(source instanceof LogAuth){
-            LogAuth logAuth = (LogAuth)logAuthEvent.getSource();
-            logAuth.setUserIds(sameOrgUserIds);
-        }
-        logAuthEvent.getLatch().countDown();
     }
 
 
