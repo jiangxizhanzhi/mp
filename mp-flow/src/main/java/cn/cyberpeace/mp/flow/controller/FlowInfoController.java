@@ -76,6 +76,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param ids
      * @return
      */
+    @OperateAuth(resourceClass = String.class,resourceField = "ids",resourceFieldType = "array",resourceType = "flowOperateResource")
     @ApiOperation("批量删除流量信息")
     @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
