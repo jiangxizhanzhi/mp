@@ -92,8 +92,9 @@ public class RoleAuthControlConstant {
         //REALEQUIPMENT_UPDATE(TM_REALEQUIPMENT_API_PATH+"/update", HttpMethod.PUT.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentRequest uuid
 
         //服务管理相关
-        //SERVICE_DELETE(TM_SERVICE_API_PATH+"/", HttpMethod.DELETE.name(),TM_SERVICE_API_PATH),//List<String> uuids  InstallerDeleteRequest
-        //SERVICE_UPDATE(TM_SERVICE_API_PATH+"/", HttpMethod.PATCH.name(),TM_SERVICE_API_PATH),//String uuid
+        SERVICE_DELETE(TM_SERVICE_API_PATH+"/", HttpMethod.DELETE.name(),TM_SERVICE_API_PATH),//List<String> uuids  InstallerDeleteRequest
+        SERVICE_UPDATE(TM_SERVICE_API_PATH+"/", HttpMethod.PATCH.name(),TM_SERVICE_API_PATH),//String uuid
+        SERVICE_ADD(TM_SERVICE_API_PATH+"/", HttpMethod.POST.name(),TM_SERVICE_API_PATH),
 
         //系统更新设置
         SYS_CONFIG_POST(SYS_CONFIG_UPDATEALL_API_PATH, HttpMethod.POST.name(),SYS_CONFIG_API_PATH),

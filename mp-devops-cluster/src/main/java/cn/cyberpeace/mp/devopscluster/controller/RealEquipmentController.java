@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -31,10 +32,7 @@ import cn.cyberpeace.mp.devopscluster.model.SnmpBaseAuth;
 import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentByIdVO;
 import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentDevopsDetailVO;
 import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentNetworkCardPageVO;
@@ -212,6 +210,7 @@ public class RealEquipmentController {
     /**
      * 更新
      */
+    @OperateAuth(resourceClass = RealEquipmentRequest.class, resourceField = "uuid", resourceType = "realEquipmentOperateResource")
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = RealEquipmentRequest.class)
     @PutMapping("/update")
@@ -227,6 +226,7 @@ public class RealEquipmentController {
     /**
      * 删除
      */
+    @OperateAuth(resourceClass = RealEquipmentDeleteRequest.class, resourceField = "uuids", resourceFieldType = "list", resourceType = "realEquipmentOperateResource")
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = RealEquipmentDeleteRequest.class)
     @DeleteMapping("/delete")
