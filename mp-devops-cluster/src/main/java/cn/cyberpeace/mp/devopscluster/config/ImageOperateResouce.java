@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +49,10 @@ public class ImageOperateResouce implements IOperateResource {
             return 0;
         } else if (opearte.resourceFieldType().equals("list")) {
             List<String> ids = (List<String>) param;
-            var targets = deviceTargetMapper.findByIds(ids);
+            List<DeviceTargetPO> targets = deviceTargetMapper.findByIds(ids);
+            if (CollectionUtils.isEmpty(targets)) {
+                targets = deviceTargetMapper.findByUuids(ids);
+            }
             // 判断每一个镜像是否有权限
             var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
             if (targets != null) {
