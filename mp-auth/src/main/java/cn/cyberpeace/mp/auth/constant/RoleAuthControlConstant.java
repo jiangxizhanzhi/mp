@@ -60,6 +60,9 @@ public class RoleAuthControlConstant {
     //探针管理相关
     public static final String PROBE_MANAGE_API_PATH = "/probes";
 
+    //采集模板
+    public static final String PROBE_CT_API_PATH ="/collection/template";
+
     public static final String SYS_CONFIG_API_PATH = "/sys/config";
 
     //系统配置
@@ -145,6 +148,12 @@ public class RoleAuthControlConstant {
         PROBE_MANAGE_ADD(PROBE_MANAGE_API_PATH, HttpMethod.POST.name(),PROBE_MANAGE_API_PATH),
         PROBE_MANAGE_UPDATE(PROBE_MANAGE_API_PATH, HttpMethod.PATCH.name(),PROBE_MANAGE_API_PATH),
         PROBE_MANAGE_DELETE(PROBE_MANAGE_API_PATH, HttpMethod.DELETE.name(),PROBE_MANAGE_API_PATH),
+
+        //采集模板
+        PROBE_CT_ADD(PROBE_CT_API_PATH, HttpMethod.POST.name(),PROBE_CT_API_PATH),
+        PROBE_CT_UPDATE(PROBE_CT_API_PATH, HttpMethod.PATCH.name(),PROBE_CT_API_PATH),
+        PROBE_CT_DELETE(PROBE_CT_API_PATH, HttpMethod.DELETE.name(),PROBE_CT_API_PATH),
+
 
         //系统更新设置
         SYS_CONFIG_POST(SYS_CONFIG_UPDATEALL_API_PATH, HttpMethod.POST.name(),SYS_CONFIG_API_PATH),
