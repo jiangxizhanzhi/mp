@@ -44,6 +44,8 @@ public class RoleAuthControlConstant {
     //背景流量
     public static final String FLOW_INFO_BACKGROUND_API_PATH = FLOW_INFO_API_PATH+"/background";
 
+    public static final String FLOW_INFO_ATTACK_API_PATH = FLOW_INFO_API_PATH+"/attack";
+
     //流量集合
     public static final String FLOW_COLLECTION_API_PATH = FLOW_BASE_API_PATH+"/collection";
 
@@ -51,7 +53,9 @@ public class RoleAuthControlConstant {
     public static final String FLOW_COLLECTION_BULK_API_PATH = FLOW_COLLECTION_API_PATH+"/bulk";
 
     //删除集合关联信息
-    public static final String FLOW_COLLECTION_DELETE_API_PATH = FLOW_COLLECTION_API_PATH+"/collection_rel";
+    public static final String FLOW_COLLECTION_DELETE_API_PATH = FLOW_COLLECTION_API_PATH+"/bulk_delete";
+    //流量管理
+    public static final String FLOW_COLLECTION_MG_API_PATH = FLOW_COLLECTION_API_PATH+"/collection_rel";
 
     //探针管理相关
     public static final String PROBE_MANAGE_API_PATH = "/probes";
@@ -121,14 +125,21 @@ public class RoleAuthControlConstant {
         SERVICE_ADD(TM_SERVICE_API_PATH, HttpMethod.POST.name(),TM_SERVICE_API_PATH),
 
         //流量管理
-        FLOW_INFO_DELETE(FLOW_INFO_DELETE_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
-        FLOW_INFO_UPDATE(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.PATCH.name(),FLOW_INFO_API_PATH),
-        FLOW_INFO_ADD(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_DELETE(FLOW_INFO_DELETE_API_PATH, HttpMethod.DELETE.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_BG_UPDATE(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.PATCH.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_BG_ADD(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
+        //攻击流量
+        FLOW_INFO_AT_ADD(FLOW_INFO_ATTACK_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_AT_UPDATE(FLOW_INFO_ATTACK_API_PATH, HttpMethod.PATCH.name(),FLOW_INFO_API_PATH),
+
 
         //流量集合
         FLOW_COLLECTION_ADD(FLOW_COLLECTION_BULK_API_PATH, HttpMethod.POST.name(),FLOW_COLLECTION_API_PATH),
         FLOW_COLLECTION_UPDATE(FLOW_COLLECTION_BULK_API_PATH, HttpMethod.PATCH.name(),FLOW_COLLECTION_API_PATH),
-        FLOW_COLLECTION_DELETE(FLOW_COLLECTION_DELETE_API_PATH, HttpMethod.PATCH.name(),FLOW_COLLECTION_API_PATH),
+        FLOW_COLLECTION_DELETE(FLOW_COLLECTION_DELETE_API_PATH, HttpMethod.DELETE.name(),FLOW_COLLECTION_API_PATH),
+        FLOW_COLLECTION_REL_ADD(FLOW_COLLECTION_MG_API_PATH, HttpMethod.POST.name(),FLOW_COLLECTION_API_PATH),
+        FLOW_COLLECTION_REL_DELETE(FLOW_COLLECTION_MG_API_PATH, HttpMethod.DELETE.name(),FLOW_COLLECTION_API_PATH),
+
 
         //探针相关
         PROBE_MANAGE_ADD(PROBE_MANAGE_API_PATH, HttpMethod.POST.name(),PROBE_MANAGE_API_PATH),
