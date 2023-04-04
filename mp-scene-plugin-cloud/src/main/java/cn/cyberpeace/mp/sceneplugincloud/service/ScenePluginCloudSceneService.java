@@ -46,6 +46,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePrivateOperateData;
@@ -263,6 +265,14 @@ public class ScenePluginCloudSceneService {
             var remoteClient = new Remote();
             remoteClient.deleteRecords(recordingNames);
         }
+    }
+
+    public OriginIpsResult resetCpcloudAllIps(ResetCplcoudAllIpsData request) {
+        return new Remote().resetCpcloudAllIps(request);
+    }
+
+    public OriginIpsResult getCpcloudOriginIps() {
+        return new Remote().getCpcloudOriginIps();
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
