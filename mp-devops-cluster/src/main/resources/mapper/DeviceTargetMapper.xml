@@ -19,6 +19,7 @@
         <result column="reference_status" property="referenceStatus" />
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="create_user_name" property="createUserName"/>
+        <result column="create_user" property="createUser"/>
     </resultMap>
 
     <sql id="commonTargetWhere">
@@ -216,7 +217,7 @@
 
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user,i.support_export,i.create_user_name,i.init_support
+        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user,i.support_export,i.create_user_name,i.create_user,i.init_support
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultType="java.lang.Integer">
