@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+@Slf4j
 @Component
 @Aspect
 public class OperateAspect {
@@ -40,7 +42,10 @@ public class OperateAspect {
         }
         try {
             return joinPoint.proceed();
+        } catch (MpRuntimeException mpRuntimeException) {
+            throw mpRuntimeException;
         } catch (Throwable e) {
+            log.error("faild to exec proceed", e);
             throw new RuntimeException(e);
         }
     }
