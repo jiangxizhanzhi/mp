@@ -275,6 +275,7 @@ public class ImagesController {
     /**
      * 授权
      */
+    @OperateAuth(resourceClass =ImagesAuthRequest.class,resourceField = "isAllPublic",resourceFieldType = "PublicEnum" ,resourceType = "authOperateResouce")
     @ApiOperation("授权/批量授权")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesAuthRequest.class)
     @PostMapping("/auth")
