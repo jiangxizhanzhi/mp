@@ -117,7 +117,7 @@ public class RoleAuthControlConstant {
         //IMAGES_DELETE(TM_IMAGES_API_PATH+"/page", HttpMethod.DELETE.name(),"imagesDelete"),//ImagesDeleteRequest List<String> imageIds
         //IMAGES_INJECT_POST(TM_IMAGES_API_PATH+"/inject-file", HttpMethod.POST.name(),"imagesInjectPost"),//ImageInjectFileRequest String deviceUuid
         //IMAGES_INJECT_DELETE(TM_IMAGES_API_PATH+"/inject-file", HttpMethod.DELETE.name(),"imagesInjectDelete"),//ImageInjectFileDeleteRequest String injectUuid;
-        IMAGES_AUTH_POST(TM_IMAGES_AUTHPOST_API_PATH, HttpMethod.POST.name(), TM_IMAGES_API_PATH),
+        //IMAGES_AUTH_POST(TM_IMAGES_AUTHPOST_API_PATH, HttpMethod.POST.name(), TM_IMAGES_API_PATH),
         //实装管理相关
         //REALEQUIPMENT_DELETE(TM_REALEQUIPMENT_API_PATH+"/delete", HttpMethod.DELETE.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentDeleteRequest List<String> uuids
         //REALEQUIPMENT_UPDATE(TM_REALEQUIPMENT_API_PATH+"/update", HttpMethod.PUT.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentRequest uuid
