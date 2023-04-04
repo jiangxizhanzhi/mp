@@ -32,6 +32,30 @@ public class RoleAuthControlConstant {
     //实装管理
     public static final String TM_REALEQUIPMENT_API_PATH = BASE_API_PATH + "/real-equipment";
 
+    //流量相关
+    public static final String FLOW_BASE_API_PATH = "/flow";
+
+    //流量信息
+    public static final String FLOW_INFO_API_PATH = FLOW_BASE_API_PATH+"/info";
+
+    //删除流量
+    public static final String FLOW_INFO_DELETE_API_PATH = FLOW_INFO_API_PATH+"/batch_delete";
+
+    //背景流量
+    public static final String FLOW_INFO_BACKGROUND_API_PATH = FLOW_INFO_API_PATH+"/background";
+
+    //流量集合
+    public static final String FLOW_COLLECTION_API_PATH = FLOW_BASE_API_PATH+"/collection";
+
+    //流量集合（新增，更新）
+    public static final String FLOW_COLLECTION_BULK_API_PATH = FLOW_COLLECTION_API_PATH+"/bulk";
+
+    //删除集合关联信息
+    public static final String FLOW_COLLECTION_DELETE_API_PATH = FLOW_COLLECTION_API_PATH+"/collection_rel";
+
+    //探针管理相关
+    public static final String PROBE_MANAGE_API_PATH = "/probes";
+
     public static final String SYS_CONFIG_API_PATH = "/sys/config";
 
     //系统配置
@@ -95,6 +119,21 @@ public class RoleAuthControlConstant {
         SERVICE_DELETE(TM_SERVICE_API_PATH, HttpMethod.DELETE.name(),TM_SERVICE_API_PATH),//List<String> uuids  InstallerDeleteRequest
         SERVICE_UPDATE(TM_SERVICE_API_PATH, HttpMethod.PATCH.name(),TM_SERVICE_API_PATH),//String uuid
         SERVICE_ADD(TM_SERVICE_API_PATH, HttpMethod.POST.name(),TM_SERVICE_API_PATH),
+
+        //流量管理
+        FLOW_INFO_DELETE(FLOW_INFO_DELETE_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_UPDATE(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.PATCH.name(),FLOW_INFO_API_PATH),
+        FLOW_INFO_ADD(FLOW_INFO_BACKGROUND_API_PATH, HttpMethod.POST.name(),FLOW_INFO_API_PATH),
+
+        //流量集合
+        FLOW_COLLECTION_ADD(FLOW_COLLECTION_BULK_API_PATH, HttpMethod.POST.name(),FLOW_COLLECTION_API_PATH),
+        FLOW_COLLECTION_UPDATE(FLOW_COLLECTION_BULK_API_PATH, HttpMethod.PATCH.name(),FLOW_COLLECTION_API_PATH),
+        FLOW_COLLECTION_DELETE(FLOW_COLLECTION_DELETE_API_PATH, HttpMethod.PATCH.name(),FLOW_COLLECTION_API_PATH),
+
+        //探针相关
+        PROBE_MANAGE_ADD(PROBE_MANAGE_API_PATH, HttpMethod.POST.name(),PROBE_MANAGE_API_PATH),
+        PROBE_MANAGE_UPDATE(PROBE_MANAGE_API_PATH, HttpMethod.PATCH.name(),PROBE_MANAGE_API_PATH),
+        PROBE_MANAGE_DELETE(PROBE_MANAGE_API_PATH, HttpMethod.DELETE.name(),PROBE_MANAGE_API_PATH),
 
         //系统更新设置
         SYS_CONFIG_POST(SYS_CONFIG_UPDATEALL_API_PATH, HttpMethod.POST.name(),SYS_CONFIG_API_PATH),

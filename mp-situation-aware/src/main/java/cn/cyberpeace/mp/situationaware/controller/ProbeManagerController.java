@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
-import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -125,7 +124,7 @@ public class ProbeManagerController {
     }
 
 
-    @OperateAuth(resourceClass = ProbeRequest.class,resourceField = "id",resourceType = "probeOperateResource")
+    //@OperateAuth(resourceClass = ProbeRequest.class,resourceField = "id",resourceType = "probeOperateResource")
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)

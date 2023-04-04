@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
-import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -21,7 +19,6 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -29,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -76,7 +72,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param ids
      * @return
      */
-    @OperateAuth(resourceClass = String.class,resourceField = "ids",resourceFieldType = "array",resourceType = "flowOperateResource")
+    //@OperateAuth(resourceClass = String.class,resourceField = "ids",resourceFieldType = "array",resourceType = "flowOperateResource")
     @ApiOperation("批量删除流量信息")
     @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
@@ -140,7 +136,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
-    @OperateAuth(resourceClass = ModifyBackgroundFlowRequest.class,resourceField = "id",resourceType = "flowOperateResource")
+    //@OperateAuth(resourceClass = ModifyBackgroundFlowRequest.class,resourceField = "id",resourceType = "flowOperateResource")
     @ApiOperation("更新背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新背景流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/background")
