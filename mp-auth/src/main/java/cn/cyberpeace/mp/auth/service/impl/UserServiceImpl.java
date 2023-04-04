@@ -1159,6 +1159,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return modelArrayList;
     }
 
+    @Override
+    public List<UserBo> getAllAdminUsers() {
+        List<UserModel> users = getModelMapper().list(new HumanCondition());
+        List<String> userIds = users.stream().map(UserModel::getId).collect(Collectors.toList());
+        List<UserOrgRoleBo> userOrgRoleBos = getByUserIds(userIds.toArray(String[]::new));
+        List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
+        return userBos.stream().filter(userBo -> userBo.getIsAdmin().equals(1)).collect(Collectors.toList());
+    }
+
     public List<UserOrgRoleBo> getByUserIds(String[] userIds) {
         //组织查询用户信息的条件
         HumanCondition userCondition = new HumanCondition()

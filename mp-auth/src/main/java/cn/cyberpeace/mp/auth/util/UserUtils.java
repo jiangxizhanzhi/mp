@@ -177,6 +177,16 @@ public class UserUtils {
         return userService.userModel2UserDtoWithoutOrg(userModel);
     }
 
+    /**
+     * @description: 获取所有admin角色用户
+     * @throws
+     * @return List<String>
+     */
+    public static List<String> getAllAdminUsers(){
+        List<UserBo> allAdminUsers = userService.getAllAdminUsers();
+        return allAdminUsers.stream().map(UserBo::getId).collect(Collectors.toList());
+    }
+
 
 
 }
