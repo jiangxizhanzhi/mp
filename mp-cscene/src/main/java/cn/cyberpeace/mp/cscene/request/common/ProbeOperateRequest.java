@@ -1,9 +1,17 @@
 package cn.cyberpeace.mp.cscene.request.common;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProbeOperateRequest {
 
     @ApiModelProperty("场景id")
