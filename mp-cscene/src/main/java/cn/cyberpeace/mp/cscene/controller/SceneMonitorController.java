@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.ProbeOperateRequest;
+import cn.cyberpeace.mp.cscene.response.ProbeEventState;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import io.swagger.annotations.Api;
@@ -58,6 +60,24 @@ public class SceneMonitorController {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
         return ResultCommon.success(basicInfoList);
     }
+
+    @ApiOperation(value = "查询场景探针开关状态")
+    @GetMapping("/probe/operateInfo")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+    })
+    public ServiceResult<ProbeEventState> getProbeInfo(String sceneId) {
+        // todo
+        return new ServiceResult<>(new ProbeEventState()).asResult();
+    }
+
+    @ApiOperation(value = "开启或关闭探针")
+    @PostMapping("/probe/operate")
+    public ServiceResult<Boolean> opearteProbe(ProbeOperateRequest request) {
+        // todo
+        return ResultCommon.success();
+    }
+
 
 
     @ApiOperation(value = "查询场景所有IP列表")
