@@ -74,7 +74,7 @@ public class SceneMonitorController {
 
     @ApiOperation(value = "开启或关闭探针")
     @PostMapping("/probe/operate")
-    public ServiceResult<Boolean> opearteProbe(ProbeOperateRequest request) {
+    public ServiceResult<Boolean> opearteProbe(@RequestBody ProbeOperateRequest request) {
         // todo
         return ResultCommon.success();
     }
