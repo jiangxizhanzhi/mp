@@ -648,6 +648,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         FlowRecordsResponse response = new FlowRecordsResponse();
         FlowTaskModel flowTaskModel = getModelMapper().get(taskId);
         if (Objects.isNull(flowTaskModel)) {
+            taskId = "MP_SCENE_" + taskId;
             HumanCondition condition = new HumanCondition().filterEqual(FlowTaskModel::getNodeId, taskId);
             List<FlowTaskModel> flowTaskModelList = getModelMapper().list(condition);
             if (CollectionUtils.isEmpty(flowTaskModelList)) {
