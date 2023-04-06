@@ -135,5 +135,6 @@ public class RealEquipmentPageVO extends BaseVO {
     /**
      * 是否被占用
      */
+    @ApiModelProperty("是否被占用")
     private Integer isOccupy;
 }

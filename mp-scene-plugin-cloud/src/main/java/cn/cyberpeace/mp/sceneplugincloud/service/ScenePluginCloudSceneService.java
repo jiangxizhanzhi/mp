@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
@@ -44,16 +45,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePrivateOperateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -118,6 +113,9 @@ public class ScenePluginCloudSceneService {
 
     @Resource
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+
+    @Resource
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
     @Resource
     private SceneSnapshotService sceneSnapshotService;
@@ -964,10 +962,40 @@ public class ScenePluginCloudSceneService {
         return connectionIdSessionMap;
     }
 
+    /**
+     * @description: 释放镜像连接
+     * @param imageUuid 镜像uuid
+     * @throws
+     * @return void
+     */
     public void releaseImageConnect(String imageUuid) {
+        //构建条件
+        HumanCondition condition = new HumanCondition()
+                //联查两表
+                .link(SceneModel.class,CloudPluginSceneElementModel.class)
+                .filterLink(SceneModel.class,SceneModel::getId,CloudPluginSceneElementModel.class,CloudPluginSceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted,false)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getImageUuid, imageUuid)
+                .select(CloudPluginSceneElementModel::getScene)
+                .select(CloudPluginSceneElementModel::getSceneElement);
         // 根据 imageUuid 查询占用的场景节点
+        List<CloudPluginSceneElementModel> sceneConfigElementModels = cloudPluginSceneElementMapper.list(condition);
+        //一条结果
+        CloudPluginSceneElementModel cpsem = sceneConfigElementModels.stream().findFirst().get();
         // 在 cloudPluginSceneConnectionMapper 中查询启动的连接
+        List<CloudPluginSceneConnectionModel> sceneConnectionModelList = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getScene,cpsem.getScene())
+                .filterEqual(CloudPluginSceneConnectionModel::getSceneElement,cpsem.getSceneElement()));
         // 调用底层接口释放连接
+        sceneConnectionModelList.stream().forEach(cloudPluginSceneConnectionModel -> {
+            String connectionId = cloudPluginSceneConnectionModel.getConnectionId();
+            GuacamoleDeleteConnectionUrlResult result = new Remote().deleteConnectionUrl(connectionId);
+            if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
+                log.error("Delete scene connection[{}] with empty result: {}", connectionId, result);
+            }
+        });
     }
 
 }
