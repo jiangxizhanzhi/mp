@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +67,7 @@ public class SceneMonitorController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
     })
-    public ServiceResult<ProbeEventState> getProbeInfo(String sceneId) {
+    public ServiceResult<ProbeEventState> getProbeInfo(@Param("sceneId") String sceneId) {
         // todo
         return new ServiceResult<>(new ProbeEventState()).asResult();
     }
