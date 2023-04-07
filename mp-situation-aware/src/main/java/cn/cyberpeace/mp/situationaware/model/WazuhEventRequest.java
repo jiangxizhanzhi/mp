@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -94,5 +98,20 @@ public class WazuhEventRequest {
      */
     @ApiModelProperty(value = "事件触发标识id")
     private String sicLaunchId;
+
+    private List<TimeRange> timeRanges;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class TimeRange {
+        private LocalDateTime from;
+        private LocalDateTime to;
+
+        public TimeRange(String fromYYYYMMDDHHMMSS, String toYYYYMMDDHHMMSS) {
+            from = LocalDateTime.parse(fromYYYYMMDDHHMMSS, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            to = LocalDateTime.parse(toYYYYMMDDHHMMSS, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+    }
 
 }

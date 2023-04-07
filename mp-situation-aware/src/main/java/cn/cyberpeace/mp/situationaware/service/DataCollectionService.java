@@ -1476,6 +1476,17 @@ public class DataCollectionService extends CollectionBaseService {
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
 
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(wazuhEventRequest.getTimeRanges())) {
+            var shouldBuilder = QueryBuilders.boolQuery();
+            for (var timeRange : wazuhEventRequest.getTimeRanges()) {
+                shouldBuilder.should(
+                        QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
+                                .from(timeRange.getFrom().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                                .to(timeRange.getTo().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                );
+            }
+            boolQueryBuilder.must(shouldBuilder);
+        }
     }
 
     private void buildRuleIdsQuery(List<String> ruleIds, BoolQueryBuilder boolQueryBuilder) {
@@ -1523,7 +1534,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param allAgentMacAddr
      */
     private int buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
-        MultiValueMap<String, String> allAgentMacAddr) {
+                                  MultiValueMap<String, String> allAgentMacAddr) {
         Set<String> agentSet = this.queryAgentIdsByMac(macIds, allAgentMacAddr);
         boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.id", agentSet));
         return agentSet.size();
@@ -1565,7 +1576,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串2021.05.01,2021.05.02,....
      *
      * @param startTime startTime
-     * @param endTime endTime
+     * @param endTime   endTime
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
