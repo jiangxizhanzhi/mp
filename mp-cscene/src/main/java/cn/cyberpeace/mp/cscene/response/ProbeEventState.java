@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.cscene.response;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-
+@Data
+@Builder
 public class ProbeEventState {
     @ApiModelProperty("变更事件开关状态, 0:关闭,1:开启")
     @NotNull

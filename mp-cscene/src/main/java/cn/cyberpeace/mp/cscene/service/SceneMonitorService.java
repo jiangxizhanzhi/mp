@@ -6,9 +6,13 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.ProbeOperateBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.ProbeOperateRequest;
+import cn.cyberpeace.mp.cscene.response.ProbeEventState;
+import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -24,15 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -61,6 +57,9 @@ public class SceneMonitorService {
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private ProbeOperateLogService probeOperateLogService;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -311,5 +310,61 @@ public class SceneMonitorService {
         return supported;
     }
 
+    /**
+     * @description: 查询当前探针开关记录信息
+     * @param sceneId 场景id
+     * @throws
+     * @return ProbeEventState
+     */
+    public ProbeEventState queryProbeInfo(String sceneId) {
+        Map<String, ProbeOperateBO> newestMap = getNewestProbeOperateMap(sceneId);
+        if(newestMap.isEmpty()){
+            return null;
+        }
+        ProbeEventState probeEventState =
+            ProbeEventState.builder().changeEventState(newestMap.get("changeEventState").getOperate())
+                .originLog(newestMap.get("originLog").getOperate()).logEvent(newestMap.get("logEvent").getOperate())
+                .customCollection(newestMap.get("customCollection").getOperate()).build();
+        return probeEventState;
+
+    }
+
+    /**
+     * @description: 记录开启或关闭探针（与最近一次开关状态完全相同不记录）
+     * @param request 探针操作请求
+     * @return boolean 更新结果
+     */
+    public boolean operateProbe(ProbeOperateRequest request) {
+        Map<String, ProbeOperateBO> newestMap = getNewestProbeOperateMap(request.getSceneId());
+        //ProbeOperateRequest转换为批量处理的业务list
+        List<ProbeOperateBO> probeOperateBOList = request.transFormToProbeOperateBO();
+        //比较最近操作和最新请求是否有变化,获取变化的记录
+        if(!newestMap.isEmpty()){
+            probeOperateBOList = probeOperateBOList.stream().filter(
+                    probeOperateBO -> newestMap.get(probeOperateBO.getType()).getOperate() != probeOperateBO.getOperate())
+                .collect(Collectors.toList());
+        }
+        //只新增变化的记录
+        return probeOperateLogService.operateProbeBatchInsert(probeOperateBOList);
+    }
+
+
+    /**
+     * @description: 通过场景id查询出最近的操作开关操作记录
+     * @param sceneId 场景id
+     * @return Map<String,ProbeOperateBO> 操作类型，ProbeOperateBO对象
+     */
+    public Map<String,ProbeOperateBO> getNewestProbeOperateMap(String sceneId){
+        //构建查询参数
+        ProbeOperateQueryParams queryParams =
+            ProbeOperateQueryParams.builder().scene(sceneId).build();
+        //获取对应场景所有操作记录
+        List<ProbeOperateBO> operateList = probeOperateLogService.queryOperateProbe(queryParams);
+        //处理获取最近探针操作所有类型的记录map
+        return operateList.stream().collect(
+            Collectors.groupingBy(ProbeOperateBO::getType, Collectors.collectingAndThen(
+                Collectors.reducing((p1, p2) -> p1.getCreateTime().isAfter(p2.getCreateTime()) ? p1 : p2),
+                Optional::get)));
+    }
 
 }

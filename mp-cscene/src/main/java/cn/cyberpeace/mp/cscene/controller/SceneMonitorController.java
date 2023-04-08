@@ -16,8 +16,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -67,16 +67,14 @@ public class SceneMonitorController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
     })
-    public ServiceResult<ProbeEventState> getProbeInfo(@Param("sceneId") String sceneId) {
-        // todo
-        return new ServiceResult<>(new ProbeEventState()).asResult();
+    public ServiceResult<ProbeEventState> getProbeInfo(@RequestParam("sceneId") String sceneId) {
+        return new ServiceResult<>(sceneMonitorService.queryProbeInfo(sceneId)).asResult();
     }
 
     @ApiOperation(value = "开启或关闭探针")
     @PostMapping("/probe/operate")
-    public ServiceResult<Boolean> opearteProbe(@RequestBody ProbeOperateRequest request) {
-        // todo
-        return ResultCommon.success();
+    public ServiceResult<Boolean> operateProbe(@RequestBody @Validated ProbeOperateRequest request) {
+        return ResultCommon.success(sceneMonitorService.operateProbe(request));
     }
 
 
