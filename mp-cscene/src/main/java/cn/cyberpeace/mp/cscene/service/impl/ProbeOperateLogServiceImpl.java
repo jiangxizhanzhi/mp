@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.repository.ProbeOperateLogMapper;
 import cn.cyberpeace.mp.cscene.service.ProbeOperateLogService;
 import cn.cyberpeace.mp.cscene.service.filed.ProbeOperateLogFields;
 import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,9 @@ public class ProbeOperateLogServiceImpl extends BaseModelServiceImpl<ProbeOperat
 
     @Override
     public boolean operateProbeBatchInsert(List<ProbeOperateBO> probeOperateBOList) {
+        if(CollectionUtils.isEmpty(probeOperateBOList)){
+            return false;
+        }
         //对象转换
         List<ProbeOperateLogModel> probeOperateLogModelList = probeOperateBOList.stream().map(probeOperateBO -> {
             return ProbeOperateLogModel.builder().scene(probeOperateBO.getScene()).type(probeOperateBO.getType()).operate(probeOperateBO.getOperate()).build();
