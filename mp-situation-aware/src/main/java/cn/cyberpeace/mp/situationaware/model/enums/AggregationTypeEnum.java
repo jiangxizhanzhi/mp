@@ -24,5 +24,10 @@ public enum AggregationTypeEnum {
     /**
      * 攻击严重性
      */
-    SURICATA_SEVERITY
+    SURICATA_SEVERITY,
+
+    /**
+     * 攻击协议
+     */
+    PROTOCOL
 }

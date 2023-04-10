@@ -120,6 +120,7 @@ public class ScenePluginCollectionSceneService {
         public static final String TYPE = "type";
         public static final String SOURCE_IP = "source_ip";
         public static final String DEST_IP = "dest_ip";
+        public static final String PROTOCOL = "protocol";
     }
 
     public static class GroupCountHostEventField {
@@ -582,6 +583,20 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<Map<String, Integer>> groupCountFlowByType(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
         return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime, sourceIps, topSize);
+    }
+
+    /**
+     * 安全类型分组查询采集流量的聚合统计数量
+     *
+     * @param sceneIds  场景id列表，不传默认为全部
+     * @param nodeIds   节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountFlowByProtocol(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.PROTOCOL, startTime, endTime, sourceIps, topSize);
     }
 
 
@@ -1131,6 +1146,8 @@ public class ScenePluginCollectionSceneService {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
         } else if (GroupCountFlowField.TYPE.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
+        }else if(GroupCountFlowField.PROTOCOL.equals(groupField)){
+            request.setAggregationTypeEnum(AggregationTypeEnum.PROTOCOL);
         }
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);

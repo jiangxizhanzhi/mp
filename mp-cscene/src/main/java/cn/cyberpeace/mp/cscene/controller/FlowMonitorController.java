@@ -146,6 +146,15 @@ public class FlowMonitorController {
         return ResultCommon.success(attackTypeCounts);
     }
 
+    @ApiOperation(value = "攻击流量各类别统计")
+    @GetMapping("/attack_protocol_count")
+    public ServiceResult<List<FlowAttackTypeCount>> getProtocolTypeCount(BaseSceneElementRequest baseRequest) {
+        log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
+
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackProtocolCount(baseRequest);
+        return ResultCommon.success(attackTypeCounts);
+    }
+
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
     @GetMapping("/attack_ip_count")
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {

@@ -63,6 +63,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
@@ -617,6 +618,10 @@ public class FlowAnalysisService extends AbstractBaseService {
         }else if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_SEVERITY){
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
                     .field("suricata.severity").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
+        } else if (aggregationTypeEnum == AggregationTypeEnum.PROTOCOL) {
+            aggregationBuilder = AggregationBuilders.terms("aggregationType")
+                    .field("protocol").size(request.getTopSize());
             searchSourceBuilder.aggregation(aggregationBuilder);
         }
 

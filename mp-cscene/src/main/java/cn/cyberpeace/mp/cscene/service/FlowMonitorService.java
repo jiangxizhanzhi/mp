@@ -334,6 +334,30 @@ public class FlowMonitorService {
         return riskCount;
     }
 
+    public List<FlowAttackTypeCount> getAttackProtocolCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+
+        List<String> nodeIds = null;
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
+        }
+
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
+
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByProtocol(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(), baseRequest.getTopSize());
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTypeCount> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(new FlowAttackTypeCount(type, num)));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
     public List<FlowAttackTypeCount> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
