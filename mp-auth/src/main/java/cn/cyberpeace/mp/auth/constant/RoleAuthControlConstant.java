@@ -37,7 +37,13 @@ public class RoleAuthControlConstant {
     public static final String TM_SERVICE_API_PATH = BASE_API_PATH + "/service";
 
     //实装管理
-    //public static final String TM_REALEQUIPMENT_API_PATH = BASE_API_PATH + "/real-equipment";
+    public static final String TM_REALEQUIPMENT_API_PATH = BASE_API_PATH + "/real-equipment";
+
+    public static final String TM_REALEQUIPMENT_ADD_API_PATH = TM_REALEQUIPMENT_API_PATH +"/add";
+
+    public static final String TM_REALEQUIPMENT_UPDATE_API_PATH = TM_REALEQUIPMENT_API_PATH +"/update";
+
+    public static final String TM_REALEQUIPMENT_DELETE_API_PATH = TM_REALEQUIPMENT_API_PATH + "/delete";
 
     //流量相关
     public static final String FLOW_BASE_API_PATH = "/flow";
@@ -138,8 +144,9 @@ public class RoleAuthControlConstant {
         //IMAGES_INJECT_DELETE(TM_IMAGES_API_PATH+"/inject-file", HttpMethod.DELETE.name(),"imagesInjectDelete"),//ImageInjectFileDeleteRequest String injectUuid;
         //IMAGES_AUTH_POST(TM_IMAGES_AUTHPOST_API_PATH, HttpMethod.POST.name(), TM_IMAGES_API_PATH),
         //实装管理相关
-        //REALEQUIPMENT_DELETE(TM_REALEQUIPMENT_API_PATH+"/delete", HttpMethod.DELETE.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentDeleteRequest List<String> uuids
-        //REALEQUIPMENT_UPDATE(TM_REALEQUIPMENT_API_PATH+"/update", HttpMethod.PUT.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentRequest uuid
+        REALEQUIPMENT_ADD(TM_REALEQUIPMENT_ADD_API_PATH, HttpMethod.POST.name(),TM_REALEQUIPMENT_API_PATH),
+        REALEQUIPMENT_UPDATE(TM_REALEQUIPMENT_UPDATE_API_PATH, HttpMethod.PUT.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentRequest uuid
+        REALEQUIPMENT_DELETE(TM_REALEQUIPMENT_DELETE_API_PATH, HttpMethod.DELETE.name(),TM_REALEQUIPMENT_API_PATH),//RealEquipmentDeleteRequest List<String> uuids
 
         //服务管理相关
         SERVICE_DELETE(TM_SERVICE_API_PATH, HttpMethod.DELETE.name(),TM_SERVICE_API_PATH),//List<String> uuids  InstallerDeleteRequest
