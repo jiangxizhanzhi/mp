@@ -24,13 +24,20 @@ public class RoleAuthControlConstant {
     //镜像管理
     public static final String TM_IMAGES_API_PATH = BASE_API_PATH + "/images";
 
-    public static final String TM_IMAGES_AUTHPOST_API_PATH = TM_IMAGES_API_PATH + "/auth";
+    //镜像管理-快照相关
+    public static final String TM_IMAGESSNAPSHOT_API_PATH = TM_IMAGES_API_PATH + "/snapshot";
+
+    //镜像管理-快照相关-合并快照
+    public static final String TM_IMAGESSNAPSHOT_MERGE_API_PATH = TM_IMAGESSNAPSHOT_API_PATH + "/merge";
+
+
+    //public static final String TM_IMAGES_AUTHPOST_API_PATH = TM_IMAGES_API_PATH + "/auth";
 
     //服务管理
     public static final String TM_SERVICE_API_PATH = BASE_API_PATH + "/service";
 
     //实装管理
-    public static final String TM_REALEQUIPMENT_API_PATH = BASE_API_PATH + "/real-equipment";
+    //public static final String TM_REALEQUIPMENT_API_PATH = BASE_API_PATH + "/real-equipment";
 
     //流量相关
     public static final String FLOW_BASE_API_PATH = "/flow";
@@ -88,6 +95,18 @@ public class RoleAuthControlConstant {
 
     //云平台服务重启
     public static final String CPMONITOR_RESTART_API_PATH = CPMONITOR_API_PATH + "/restart";
+
+    //场景相关
+    public static final String CSCENE_API_PATH = "/cscene";
+
+    //靶场实例相关
+    public static final String CSCENEINSTANCE_API_PATH = CSCENE_API_PATH + "/cscene_instances";
+
+    //靶场实例监控-清除数据
+    public static final String CSCENEINSTANCE_CLEAR_API_PATH = CSCENEINSTANCE_API_PATH + "/clear";
+
+    //靶场实例监控-批量清除数据
+    public static final String CSCENEINSTANCE_BULKCLEAR_API_PATH = CSCENEINSTANCE_API_PATH + "/bulk_clear";
 
 
     /**
@@ -174,19 +193,16 @@ public class RoleAuthControlConstant {
         CPMONITOR_RELEASE_GET(CPMONITOR_RELEASE_API_PATH, HttpMethod.GET.name(), CPMONITOR_API_PATH),
 
         //云平台服务重启
-        CPMONITOR_RESTART_POST(CPMONITOR_RESTART_API_PATH, HttpMethod.POST.name(), CPMONITOR_API_PATH);
+        CPMONITOR_RESTART_POST(CPMONITOR_RESTART_API_PATH, HttpMethod.POST.name(), CPMONITOR_API_PATH),
 
+        //靶场实例监控-清除数据
+        CSCENEINSTANCE_CLEAR_DELETE(CSCENEINSTANCE_CLEAR_API_PATH, HttpMethod.DELETE.name(), CSCENEINSTANCE_API_PATH),
 
+        //靶场实例监控-批量清除数据
+        CSCENEINSTANCE_BULKCLEAR_DELETE(CSCENEINSTANCE_BULKCLEAR_API_PATH, HttpMethod.DELETE.name(), CSCENEINSTANCE_API_PATH),
 
-
-
-
-
-
-
-
-
-
+        //合并快照
+        SNAPSHOT_MERGE_POST(TM_IMAGESSNAPSHOT_MERGE_API_PATH, HttpMethod.POST.name(), TM_IMAGESSNAPSHOT_API_PATH);
 
 
 
