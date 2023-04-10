@@ -35,4 +35,11 @@ public class ImageMetaData implements Serializable {
      */
     @ApiModelProperty("视频图像驱动")
     private String hwVideoModel;
+
+    private String hwCpuMode;
+
+    private String hwCpuModel;
+
+    private String hwCpuVendorId;
+
 }
