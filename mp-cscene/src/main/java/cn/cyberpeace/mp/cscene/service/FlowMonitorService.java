@@ -138,6 +138,20 @@ public class FlowMonitorService {
     }
 
     /**
+     * 查询场景机器流量趋势
+     *
+     * @param trendRequest
+     * @return
+     */
+    public Map<String, List<FlowTrend>> getAttackCountTrend(FlowTrendRequest trendRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
+
+        return processFlowTrend2(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), trendRequest.getSourceIps(), trendRequest.getType());
+    }
+
+    /**
      * 模拟流量
      *
      * @param request
@@ -551,6 +565,64 @@ public class FlowMonitorService {
         flowTrends.sort(Comparator.comparing(FlowTrend::getTime));
 
         return flowTrends;
+    }
+
+    private Map<String,List<FlowTrend>> processFlowTrend2(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount, List<String> sourceIps, Integer type) {
+        // 默认值
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        if (Objects.isNull(startTime)) {
+            // todo 默认时间间隔8小时
+            startTime = endTime.minusHours(4);
+        }
+
+        if (Objects.isNull(segmentCount)) {
+            segmentCount = 40;
+        }
+
+        // todo 转好
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+
+        ServiceResult<Map<String, List<IntervalSizeBO<LocalDateTime, Long>>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize2(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type);
+
+        Map<String, List<IntervalSizeBO<LocalDateTime, Long>>> intervalFlowSizeBOs = flowResult.getSource();
+        if (Objects.isNull(intervalFlowSizeBOs) || intervalFlowSizeBOs.isEmpty()) {
+            return new HashMap<>();
+        }
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
+        Map<String,List<FlowTrend>> result = new HashMap<>();
+        for (var list : intervalFlowSizeBOs.entrySet()) {
+            List<FlowTrend> flowTrends = new ArrayList<>();
+            Map<LocalDateTime, FlowTrend> flowTrendMap = new HashMap<>();
+            for (LocalDateTime time : timeList) {
+                FlowTrend flowTrend = new FlowTrend();
+                // 初始化
+                flowTrend.setTime(time);
+                flowTrend.setDataSize(0L);
+                flowTrendMap.put(time, flowTrend);
+            }
+
+            // flow
+            for (IntervalSizeBO<LocalDateTime, Long> bo :   list.getValue()) {
+                if (Objects.nonNull(bo.getStart())) {
+                    FlowTrend flowTrend = getClosest(bo.getStart(), flowTrendMap);
+                    if (Objects.nonNull(flowTrend)) {
+                        flowTrend.setDataSize(bo.getSize());
+                    }
+                }
+            }
+
+            flowTrendMap.entrySet().forEach(entry -> {
+                flowTrends.add(entry.getValue());
+            });
+            flowTrends.sort(Comparator.comparing(FlowTrend::getTime));
+            result.put(list.getKey(),flowTrends);
+        }
+
+        return result;
     }
 
     /**

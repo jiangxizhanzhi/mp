@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -321,6 +322,81 @@ public class FlowAnalysisService extends AbstractBaseService {
             log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return attackTimestampBOS;
+    }
+
+    public Map<String,List<AttackDateHistogramNetworkBytesBO>> countByDateHistogramTimestamp2(FlowAnalysisRequest request){
+        Integer secondsInterval = request.getSecondsInterval();
+        if (Objects.isNull(secondsInterval) || secondsInterval <= 0
+                || CollectionUtils.isEmpty(request.getGroupList())
+                || Objects.isNull(request.getStartDateTime())
+                || Objects.isNull(request.getEndDateTime())
+                || request.getStartDateTime().isAfter(request.getEndDateTime()) ){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("lastHourAttack").field("@timestamp")
+                .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
+                .subAggregation(
+                        AggregationBuilders.terms("suricata_severity").field("suricata.severity")
+                                .subAggregation(AggregationBuilders.count("count").field("destination.ip"))
+                );
+
+        var boolQueryBuilder = buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
+
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = searchResponse.getHits().getTotalHits().value;
+            if (totalHits == 0) {
+                return new HashMap<>();
+            }
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedDateHistogram parsedTerms = aggregations.get("lastHourAttack");
+            List<? extends Histogram.Bucket> buckets = parsedTerms.getBuckets();
+            Map<String, List<AttackDateHistogramNetworkBytesBO>> result = new HashMap<>();
+            result.put("low", new ArrayList<>());
+            result.put("mid", new ArrayList<>());
+            result.put("high", new ArrayList<>());
+            buckets.forEach(bucket -> {
+                String time = bucket.getKeyAsString();
+                long low = 0, mid = 0, high = 0;
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedTerms suricataSeverity = bucketAggregations.get("suricata_severity");
+                for (var b : suricataSeverity.getBuckets()) {
+                    if ("1".equals(b.getKeyAsString())) {
+                        high += b.getDocCount();
+                    } else if ("2".equals(b.getKeyAsString())) {
+                        mid += b.getDocCount();
+                    } else {
+                        low += b.getDocCount();
+                    }
+                }
+                AttackDateHistogramNetworkBytesBO lowBo = new AttackDateHistogramNetworkBytesBO();
+                lowBo.setTime(time);
+                lowBo.setAttackNumber(low);
+                result.get("low").add(lowBo);
+
+                AttackDateHistogramNetworkBytesBO midBo = new AttackDateHistogramNetworkBytesBO();
+                midBo.setTime(time);
+                midBo.setAttackNumber(mid);
+                result.get("mid").add(midBo);
+
+                AttackDateHistogramNetworkBytesBO highBo = new AttackDateHistogramNetworkBytesBO();
+                highBo.setTime(time);
+                highBo.setAttackNumber(high);
+                result.get("high").add(highBo);
+            });
+            return result;
+        } catch (Exception e) {
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
+        }
+        return new HashMap<>();
     }
 
     /**

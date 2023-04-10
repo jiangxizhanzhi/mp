@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -146,13 +147,22 @@ public class FlowMonitorController {
         return ResultCommon.success(attackTypeCounts);
     }
 
-    @ApiOperation(value = "攻击流量各类别统计")
+    @ApiOperation(value = "攻击流量各协议统计")
     @GetMapping("/attack_protocol_count")
     public ServiceResult<List<FlowAttackTypeCount>> getProtocolTypeCount(BaseSceneElementRequest baseRequest) {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackProtocolCount(baseRequest);
         return ResultCommon.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "攻击流量按等级统计的时间趋势")
+    @GetMapping("/attack_count_trend_by_type")
+    public ServiceResult<Map<String,List<FlowTrend>>> attackCountTrendByType(FlowTrendRequest flowTrendRequest) {
+
+        Map<String, List<FlowTrend>> result = flowMonitorService.getAttackCountTrend(flowTrendRequest);
+
+        return new ServiceResult<>(result).asResult();
     }
 
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")

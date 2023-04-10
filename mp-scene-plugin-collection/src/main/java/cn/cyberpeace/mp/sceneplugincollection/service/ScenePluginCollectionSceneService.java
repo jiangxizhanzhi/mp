@@ -702,6 +702,56 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+
+    public ServiceResult<Map<String,List<IntervalSizeBO<LocalDateTime, Long>>>> timeIntervalSumFlowSize2(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalSeconds, List<String> sourceIps, Integer type) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new HashMap<>());
+        }
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+            return new ServiceResult<>(new HashMap<>());
+        }
+        // 构造参数
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        if (CollectionUtils.isEmpty(sourceIps)) {
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        } else {
+            request.setSourceIps(sourceIps);
+        }
+        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
+        request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
+        request.setSecondsInterval(intervalSeconds);
+        request.setSeverityEnum(SeverityEnum.ALL);
+        // 执行查询
+        Map<String, List<AttackDateHistogramNetworkBytesBO>> result = flowAnalysisService.countByDateHistogramTimestamp2(request);
+
+        if (result.isEmpty()) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        Map<String, List<IntervalSizeBO<LocalDateTime, Long>>> map = new HashMap<>();
+        result.forEach((k, v) -> {
+            List<IntervalSizeBO<LocalDateTime, Long>> list = v.stream()
+                    .map(bo -> {
+                        LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter)
+                                .atZone(ZoneOffset.UTC)
+                                .withZoneSameInstant(ZoneId.systemDefault())
+                                .toLocalDateTime();
+                        return Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type) ?
+                                new IntervalSizeBO<>(time, time, bo.getTrafficSize().longValue()) :
+                                new IntervalSizeBO<>(time, time, bo.getAttackNumber());
+                    }).collect(Collectors.toList());
+            Collections.sort(list, Comparator.comparing(IntervalSizeBO::getStart));
+            map.put(k,list);
+        });
+        return new ServiceResult<>(map);
+    }
+
     /**
      * 模拟流量
      *
