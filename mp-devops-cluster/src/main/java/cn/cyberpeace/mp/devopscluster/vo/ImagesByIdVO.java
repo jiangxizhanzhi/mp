@@ -24,7 +24,7 @@ public class ImagesByIdVO extends BaseVO {
      * imageCate
      */
     @ApiModelProperty(value = "镜像分类")
-    private Integer imageCate;
+    private String[] imageCate;
 
     /**
      * UUID

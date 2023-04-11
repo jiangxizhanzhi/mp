@@ -185,7 +185,7 @@ public class Device extends BaseCloudPlatformResult {
      * imageCate
      */
     @ApiModelProperty(value = "镜像类型")
-    private Integer imageCate;
+    private String[] imageCate;
 
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;

@@ -159,7 +159,7 @@ public class ImagesConverter implements BaseConverter{
         Device device = deviceService.findByUuid(id);
         var deviceTarget = deviceTargetMapper.findByUuid(id);
         if(deviceTarget != null){
-            device.setImageCate(deviceTarget.getImageCate());
+            device.setImageCate(StringUtils.split(deviceTarget.getImageCate(), ","));
         }
         return wrapperImageConvertModel(device);
     }
