@@ -19,6 +19,7 @@
         <result column="reference_status" property="referenceStatus" />
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="create_user_name" property="createUserName"/>
+        <result column="biz_type" property="bizType"/>
         <result column="application_num" property="applicationNum"/>
         <result column="is_occupy" property="isOccupy"/>
     </resultMap>
@@ -124,6 +125,9 @@
             <if test="createUserName != null">
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
             </if>
+            <if test="bizType != null">
+                and i.biz_type = #{bizType}
+            </if>
 
         </where>
     </sql>
@@ -212,7 +216,7 @@
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
         i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user,i.support_export,i.create_user_name,i.init_support,
-        i.application_num,i.is_occupy
+        i.application_num,i.is_occupy,i.biz_type
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultType="java.lang.Integer">
@@ -459,7 +463,7 @@
         role, image_type,is_public, quick_create_support,
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
-        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name)
+        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,biz_type)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (
@@ -472,7 +476,7 @@
             #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
-            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}
+            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName},#{item.bizType}
             )
         </foreach>
     </insert>

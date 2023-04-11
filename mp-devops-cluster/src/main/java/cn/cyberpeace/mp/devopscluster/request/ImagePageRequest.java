@@ -18,6 +18,9 @@ import java.util.Objects;
 @EqualsAndHashCode(callSuper = true)
 public class ImagePageRequest extends BasePageRequest {
 
+    @ApiModelProperty(value = "镜像分类")
+    private Integer bizType;
+
     /**
      * 角色
      */

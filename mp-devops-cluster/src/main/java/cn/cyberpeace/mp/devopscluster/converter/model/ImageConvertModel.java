@@ -17,6 +17,11 @@ import java.util.List;
 public class ImageConvertModel extends BasePageConvertModel{
 
     /**
+     * 镜像分类
+     */
+    private Integer bizType ;
+
+    /**
      * UUID
      */
     private String uuid;

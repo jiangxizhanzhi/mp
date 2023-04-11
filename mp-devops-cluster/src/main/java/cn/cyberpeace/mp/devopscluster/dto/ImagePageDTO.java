@@ -20,6 +20,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ImagePageDTO extends BasePageDTO{
+    private Integer bizType ;
 
     /**
      * 角色
@@ -169,6 +170,7 @@ public class ImagePageDTO extends BasePageDTO{
      */
     public ImagePageDTO(ImagePageRequest request){
         this.setRole(request.getRole());
+        this.setBizType(request.getBizType());
         this.setMainCategory(request.getMainCategory());
         this.setSubCategory(request.getSubCategory());
         this.setThirdCategory(request.getThirdCategory());

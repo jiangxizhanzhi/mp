@@ -201,6 +201,7 @@ public class ImagesController {
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
+        imagesByIdVO.setBizType(model.getBizType());
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());

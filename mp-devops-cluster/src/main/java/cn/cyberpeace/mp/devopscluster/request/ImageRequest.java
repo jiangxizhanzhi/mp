@@ -98,6 +98,9 @@ public class ImageRequest extends BaseRequest {
     @ApiModelProperty(value = "虚拟类型")
     private ExtVm extVm;
 
+    @ApiModelProperty(value = "镜像类型")
+    private Integer bizType;
+
     /**
      * 接入方式
      */

@@ -181,6 +181,12 @@ public class Device extends BaseCloudPlatformResult {
      */
     private String defaultLaunchImageName;
 
+    /**
+     * bizType
+     */
+    @ApiModelProperty(value = "镜像类型")
+    private Integer bizType;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

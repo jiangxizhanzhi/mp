@@ -1,0 +1,1 @@
+alter table mp_devops_target add column biz_type int(11) not null comment '镜像分类' ;

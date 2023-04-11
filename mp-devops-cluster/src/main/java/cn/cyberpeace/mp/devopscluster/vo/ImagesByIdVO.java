@@ -21,6 +21,12 @@ import java.util.List;
 public class ImagesByIdVO extends BaseVO {
 
     /**
+     * bizType
+     */
+    @ApiModelProperty(value = "镜像分类")
+    private Integer bizType;
+
+    /**
      * UUID
      */
     @ApiModelProperty(value = "UUID")

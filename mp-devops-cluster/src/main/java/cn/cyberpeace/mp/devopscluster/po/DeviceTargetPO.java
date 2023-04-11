@@ -38,6 +38,11 @@ public class DeviceTargetPO extends BaseModel {
     private Integer role;
 
     /**
+     * 镜像分类
+     */
+    private Integer bizType;
+
+    /**
      * 分类
      */
     private Integer mainCategory;
