@@ -7,11 +7,14 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.ProbeOperateBO;
+import cn.cyberpeace.mp.cscene.bo.ProbeOperateTimeRange;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.ProbeOperateRequest;
 import cn.cyberpeace.mp.cscene.response.ProbeEventState;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.PROBEOPERATE_TYPE;
 import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -22,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.*;
 
 /**
  * @Description: 场景监控Service
@@ -321,10 +327,11 @@ public class SceneMonitorService {
         if(newestMap.isEmpty()){
             return null;
         }
-        ProbeEventState probeEventState =
-            ProbeEventState.builder().changeEventState(newestMap.get("changeEventState").getOperate())
-                .originLog(newestMap.get("originLog").getOperate()).logEvent(newestMap.get("logEvent").getOperate())
-                .customCollection(newestMap.get("customCollection").getOperate()).build();
+        ProbeEventState probeEventState = ProbeEventState.builder()
+            .changeEventState(newestMap.get(PROBEOPERATE_TYPE.CHANGE_EVENT_STATE.getValue()).getOperate())
+            .originLog(newestMap.get(PROBEOPERATE_TYPE.ORIGIN_LOG.getValue()).getOperate())
+            .logEvent(newestMap.get(PROBEOPERATE_TYPE.LOG_EVENT.getValue()).getOperate())
+            .customCollection(newestMap.get(PROBEOPERATE_TYPE.CUSTOM_COLLECTION.getValue()).getOperate()).build();
         return probeEventState;
 
     }
@@ -365,6 +372,76 @@ public class SceneMonitorService {
             Collectors.groupingBy(ProbeOperateBO::getType, Collectors.collectingAndThen(
                 Collectors.reducing((p1, p2) -> p1.getCreateTime().isAfter(p2.getCreateTime()) ? p1 : p2),
                 Optional::get)));
+    }
+
+    /**
+     * @description: 查询探针开关列表信息
+     * @param queryParams 
+     * @throws 
+     * @return List<ProbeOperateBO>
+     */
+    public List<ProbeOperateBO> queryProbeOperateLog(ProbeOperateQueryParams queryParams){
+        return probeOperateLogService.queryOperateProbe(queryParams);
+    }
+
+
+
+    /**
+     * @description: 查询探针开关操作时间段
+     * @param queryParams
+     * @throws 
+     * @return List<ProbeOperateTimeRange>
+     */
+    public List<ProbeOperateTimeRange> queryProbeOperateTimeRange(ProbeOperateQueryParams queryParams){
+        List<ProbeOperateBO> probeOperateBOList = queryProbeOperateLog(queryParams);
+        if(CollectionUtils.isEmpty(probeOperateBOList)){
+            return new ArrayList<>();
+        }
+        //影响核心逻辑的关键在于第一条是1（开），还是0（关），以及记录数num
+        ProbeOperateBO probeOperateBO = probeOperateBOList.get(0);
+        if(ProbeOperateConstant.ONE_NUM == probeOperateBOList.size() && probeOperateBO.getOperate().equals(OPEN_SWITCH)){
+            return Collections.singletonList(new ProbeOperateTimeRange(minTime,LocalDateTime.now()));
+        }
+        return handlerTimeRangeByList(probeOperateBOList);
+    }
+
+    /**
+     * @description: 处理探针开关操作列表获取所有时间段
+     * @param probeOperateBOList 
+     * @throws
+     * @return List<ProbeOperateTimeRange>
+     */
+    private List<ProbeOperateTimeRange> handlerTimeRangeByList(List<ProbeOperateBO> probeOperateBOList) {
+        List<ProbeOperateTimeRange> timeRangeList = new ArrayList<>();
+        LocalDateTime fromTime = null;
+        LocalDateTime toTime = null;
+        for (int i = 0; i < probeOperateBOList.size(); i++) {
+            ProbeOperateBO bo = probeOperateBOList.get(i);
+            if(i==0){
+                fromTime = minTime;
+                if(CLOSE_SWITCH==bo.getOperate()){
+                    toTime = bo.getCreateTime();
+                }
+            }else{
+                if(!Objects.isNull(fromTime) && CLOSE_SWITCH==bo.getOperate()){
+                    toTime = bo.getCreateTime();
+                }else if(Objects.isNull(fromTime) && OPEN_SWITCH==bo.getOperate()){
+                    fromTime = bo.getCreateTime();
+                }else{
+                    //do nothing
+                }
+                //最后记录
+                if(i==probeOperateBOList.size()-1 && OPEN_SWITCH==bo.getOperate()){
+                    toTime = LocalDateTime.now();
+                }
+            }
+            if(!Objects.isNull(fromTime) && !Objects.isNull(toTime)){
+                timeRangeList.add(new ProbeOperateTimeRange(fromTime,toTime));
+                fromTime = null;
+                toTime = null;
+            }
+        }
+        return timeRangeList;
     }
 
 }

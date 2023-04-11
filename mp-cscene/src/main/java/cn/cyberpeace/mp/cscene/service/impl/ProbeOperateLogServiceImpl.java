@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +49,11 @@ public class ProbeOperateLogServiceImpl extends BaseModelServiceImpl<ProbeOperat
         if(StringUtils.isNotEmpty(probeOperateQueryParams.getType())){
             condition.filterEqual(ProbeOperateLogModel::getType,probeOperateQueryParams.getType());
         }
+        if(!Objects.isNull(probeOperateQueryParams.getOperate())){
+            condition.filterEqual(ProbeOperateLogModel::getOperate,probeOperateQueryParams.getOperate());
+        }
+        //默认按照主键升序排列
+        condition.orderBy(ProbeOperateLogModel::getPk);
         return getModelMapper().list(condition,ProbeOperateBO.class);
     }
 

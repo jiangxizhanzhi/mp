@@ -9,20 +9,15 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.ProbeOperateTimeRange;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
-import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
-import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.PROBEOPERATE_TYPE;
+import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -61,16 +56,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -111,6 +97,9 @@ public class SceneElementMonitorService {
 
     @Autowired
     private SituationAwareConfig situationAwareConfig;
+
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
 
     private Integer getWazuhVulnerabilityScanInterval() {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
@@ -500,6 +489,7 @@ public class SceneElementMonitorService {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        //通过场景id和节点id获取探针name
         var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
         if (CollectionUtil.isEmpty(agentNames)) {
             return Collections.emptyList();
@@ -514,6 +504,8 @@ public class SceneElementMonitorService {
 
         String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize)));
         String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes(1));
+        //处理增加探针开关参数，并获取所有时间范围
+        probeOperateHandler(pageRequest,wazuhEventRequest);
 
         var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
 
@@ -533,6 +525,24 @@ public class SceneElementMonitorService {
         List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
         Collections.reverse(finalList);
         return finalList;
+    }
+
+    /**
+     * @description: 探针开关操作记录需要展示的时间段赋值
+     * @param pageRequest
+     * @param wazuhEventRequest
+     * @return void
+     */
+    private void probeOperateHandler(ElementMonitorRequest pageRequest,WazuhEventRequest wazuhEventRequest) {
+        ProbeOperateQueryParams queryParams = ProbeOperateQueryParams.builder().scene(pageRequest.getSceneId())
+            .type(PROBEOPERATE_TYPE.CHANGE_EVENT_STATE.getValue()).build();
+        //查询对应日志类型探针开关操作时间段
+        List<ProbeOperateTimeRange> timeRangeList = sceneMonitorService.queryProbeOperateTimeRange(queryParams);
+        //转为探针请求的时间段范围
+        List<WazuhEventRequest.TimeRange> timeRanges = timeRangeList.stream().map(probeOperateTimeRange -> {
+            return new WazuhEventRequest.TimeRange(probeOperateTimeRange.getFrom(), probeOperateTimeRange.getTo());
+        }).collect(Collectors.toList());
+        wazuhEventRequest.setTimeRanges(timeRanges);
     }
 
     @Deprecated
@@ -948,6 +958,7 @@ public class SceneElementMonitorService {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         LocalDateTime startTime = null;
         LocalDateTime endTime = null;
+        //时间不为空则直接转换
         if (StringUtils.isNotBlank(pageRequest.getStartTime())) {
             startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         }
@@ -955,7 +966,7 @@ public class SceneElementMonitorService {
         if (StringUtils.isNotBlank(pageRequest.getEndTime())) {
             endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
         }
-
+        //时间为空则使用场景的创建时间
         if (Objects.isNull(startTime)) {
             String translatedScendId = csceneCommonService.translateSceneId(pageRequest.getSceneId());
             startTime = csceneCommonService.getSceneCreateTime(translatedScendId);
@@ -964,7 +975,7 @@ public class SceneElementMonitorService {
         if (Objects.isNull(startTime)) {
             startTime = LocalDateTime.now().minusHours(24);
         }
-
+        //结束时间为空使用当前时间
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
         }
