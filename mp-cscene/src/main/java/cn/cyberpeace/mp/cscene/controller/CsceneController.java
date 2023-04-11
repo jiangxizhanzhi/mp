@@ -5,7 +5,12 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -16,7 +21,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.cscene.util.ZipUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.hutool.core.io.IoUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,9 +40,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -142,6 +158,78 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> export(@RequestParam String id) {
         return modelService.export(id, null).asResult();
     }
+
+    @ApiOperation("批量导出场景")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_export", params = "ids")
+    public void export(HttpServletResponse response, @RequestParam String[] ids) throws Exception {
+        List<CsceneBO> csceneBOS = new ArrayList<>();
+        for (String id : ids) {
+            csceneBOS.add(modelService.export(id, null).getSource());
+        }
+        String dir = TextUtils.uuid();
+        File file = new File(dir);
+        file.mkdir();
+        for (var cs : csceneBOS) {
+            File content = new File(dir + "/" + cs.getName() + ".json");
+            FileOutputStream outputStream = null;
+            try {
+                outputStream = new FileOutputStream(content);
+                outputStream.write(JsonCommon.stringify(cs).getBytes());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                IoUtil.close(outputStream);
+            }
+        }
+        ZipUtils.zip(dir, dir + "/scene.zip");
+
+
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        try {
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-disposition", "attachment; filename=" + new String("scene".getBytes("utf-8"), "ISO8859-1"));
+            byte[] buffer = new byte[4096];
+            fis = new FileInputStream(dir + "/scene.zip");
+            bis = new BufferedInputStream(fis);
+            OutputStream os = response.getOutputStream();
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = bis.read(buffer);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+
+    }
+
+    private void compressFile(File file, ZipOutputStream out, String basedir) {
+        if (!file.exists()) {
+            System.out.println("压缩文件不存在,请核实！");
+            return;
+        }
+        try {
+            BufferedInputStream bis = new BufferedInputStream(
+                    new FileInputStream(file));
+            ZipEntry entry = new ZipEntry(basedir + file.getName());
+            out.putNextEntry(entry);
+            int count;
+            byte data[] = new byte[80960];
+            while ((count = bis.read(data, 0, 8096)) != -1) {
+                out.write(data, 0, count);
+            }
+            bis.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
