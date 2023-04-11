@@ -13,8 +13,7 @@ import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.ProbeOperateRequest;
 import cn.cyberpeace.mp.cscene.response.ProbeEventState;
-import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant;
-import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.PROBEOPERATE_TYPE;
+import static cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.*;
 import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -36,7 +35,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.*;
 
 /**
  * @Description: 场景监控Service
@@ -399,7 +397,7 @@ public class SceneMonitorService {
         }
         //影响核心逻辑的关键在于第一条是1（开），还是0（关），以及记录数num
         ProbeOperateBO probeOperateBO = probeOperateBOList.get(0);
-        if(ProbeOperateConstant.ONE_NUM == probeOperateBOList.size() && probeOperateBO.getOperate().equals(OPEN_SWITCH)){
+        if(ONE_NUM == probeOperateBOList.size() && probeOperateBO.getOperate().equals(OPEN_SWITCH)){
             return Collections.singletonList(new ProbeOperateTimeRange(minTime,LocalDateTime.now()));
         }
         return handlerTimeRangeByList(probeOperateBOList);
