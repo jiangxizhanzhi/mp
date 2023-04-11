@@ -31,6 +31,10 @@ public abstract class BaseCsceneBO<
     private Boolean enableRecording;
     @ApiModelProperty(value = "是否只是部分启动")
     private Boolean supportPartialStart;
+    @ApiModelProperty(value = "场景应用类型")
+    private Integer appType;
+    @ApiModelProperty(value = "场景类型")
+    private Integer bizType;
     @Override
     public T export() {
         setId(null);
