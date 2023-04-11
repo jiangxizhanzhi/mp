@@ -126,7 +126,7 @@
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
             </if>
             <if test="imageCate != null">
-                and i.image_cate = #{imageCate}
+                and i.image_cate like CONCAT('%',#{imageCate},'%')
             </if>
 
         </where>

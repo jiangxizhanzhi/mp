@@ -40,7 +40,7 @@ public class DeviceTargetPO extends BaseModel {
     /**
      * 镜像分类
      */
-    private Integer imageCate;
+    private String imageCate;
 
     /**
      * 分类

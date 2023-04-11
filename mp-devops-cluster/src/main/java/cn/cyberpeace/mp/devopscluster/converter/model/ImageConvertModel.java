@@ -19,7 +19,7 @@ public class ImageConvertModel extends BasePageConvertModel{
     /**
      * 镜像分类
      */
-    private Integer imageCate ;
+    private String[] imageCate ;
 
     /**
      * UUID
