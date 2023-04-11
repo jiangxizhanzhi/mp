@@ -145,7 +145,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        device.setBizType(request.getBizType());
+        device.setImageCate(request.getImageCate());
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
     }
@@ -159,7 +159,7 @@ public class ImagesConverter implements BaseConverter{
         Device device = deviceService.findByUuid(id);
         var deviceTarget = deviceTargetMapper.findByUuid(id);
         if(deviceTarget != null){
-            device.setBizType(deviceTarget.getBizType());
+            device.setImageCate(deviceTarget.getImageCate());
         }
         return wrapperImageConvertModel(device);
     }
@@ -450,7 +450,7 @@ public class ImagesConverter implements BaseConverter{
      */
     protected ImageConvertModel wrapperImageConvertModel(Device device){
         ImageConvertModel imageModel = new ImageConvertModel();
-        imageModel.setBizType(device.getBizType());
+        imageModel.setImageCate(device.getImageCate());
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
         imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));

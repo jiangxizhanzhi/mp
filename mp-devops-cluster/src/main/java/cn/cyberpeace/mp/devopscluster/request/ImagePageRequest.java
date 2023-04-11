@@ -19,7 +19,7 @@ import java.util.Objects;
 public class ImagePageRequest extends BasePageRequest {
 
     @ApiModelProperty(value = "镜像分类")
-    private Integer bizType;
+    private Integer imageCate;
 
     /**
      * 角色

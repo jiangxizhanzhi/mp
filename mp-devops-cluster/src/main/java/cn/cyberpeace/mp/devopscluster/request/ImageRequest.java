@@ -99,7 +99,7 @@ public class ImageRequest extends BaseRequest {
     private ExtVm extVm;
 
     @ApiModelProperty(value = "镜像类型")
-    private Integer bizType;
+    private Integer imageCate;
 
     /**
      * 接入方式

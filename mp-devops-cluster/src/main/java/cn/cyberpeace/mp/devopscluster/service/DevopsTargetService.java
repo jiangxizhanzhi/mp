@@ -230,7 +230,7 @@ public class DevopsTargetService {
         deviceTargetPO.setImageType(device.getImageType());
         deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
-        deviceTargetPO.setBizType(device.getBizType());
+        deviceTargetPO.setImageCate(device.getImageCate());
         if (device.getSupportExport() != null) {
             deviceTargetPO.setSupportExport(device.getSupportExport());
         }
