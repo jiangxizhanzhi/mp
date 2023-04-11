@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,7 +39,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -159,6 +162,23 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
+    @ApiOperation(value = "批量导入场景", notes = "")
+    @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
+    @PostMapping("/list_import")
+    @ResponseBody
+    public void upload(MultipartFile file) throws Exception {
+        File file1 = new File(TextUtils.uuid());
+        FileOutputStream outputStream = new FileOutputStream(file1);
+        outputStream.write(file.getBytes());
+        outputStream.close();
+
+        ZipUtils.unzip(file1.getName(), "test");
+        for (var f : new File("test").listFiles()) {
+            var csceneStr = FileUtils.readFileToString(f, "UTF8");
+            sync(JsonCommon.parse(csceneStr, CsceneBO.class));
+        }
+    }
+
     @ApiOperation("批量导出场景")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -177,6 +197,8 @@ public class CsceneController implements BaseModelListControllerBase {
             FileOutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(content);
+                cs.setId(null);
+                cs.getSceneConfig().getTopology().getScene().setEid(null);
                 outputStream.write(JsonCommon.stringify(cs).getBytes());
             } catch (Exception e) {
                 throw new RuntimeException(e);
