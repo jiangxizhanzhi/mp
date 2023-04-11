@@ -162,6 +162,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
+    // todo 导入导出之后需要清理下失效文件
     @ApiOperation(value = "批量导入场景", notes = "")
     @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/list_import")
@@ -213,7 +214,7 @@ public class CsceneController implements BaseModelListControllerBase {
         BufferedInputStream bis = null;
         try {
             response.setContentType("application/octet-stream");
-            response.setHeader("Content-disposition", "attachment; filename=" + new String("scene".getBytes("utf-8"), "ISO8859-1"));
+            response.setHeader("Content-disposition", "attachment; filename=" + new String("scene.zip".getBytes("utf-8"), "ISO8859-1"));
             byte[] buffer = new byte[4096];
             fis = new FileInputStream(dir + "/scene.zip");
             bis = new BufferedInputStream(fis);
