@@ -26,12 +26,14 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -115,7 +117,7 @@ public class LogFileService {
             return ResultUtils.emptyListObjServiceResult();
         }
         //原始日志文件数据探针开关处理
-        allLogFileVOs = probeOperateHandler(pageRequest.getSceneId(),allLogFileVOs);
+        allLogFileVOs = probeOperateHandler(pageRequest,allLogFileVOs);
         Map<String, Integer> elementIdOrderMap = new HashMap<>();
         int order = 0;
         for (ElementMonitorBasicInfo element : allElements) {
@@ -140,13 +142,20 @@ public class LogFileService {
 
     /**
      * @description: 探针开关记录处理
-     * @param sceneId 
+     * @param pageRequest
      * @param allLogFileVOs 
      * @throws
      * @return List<LogFileVO>
      */
-    private List<LogFileVO> probeOperateHandler(String sceneId, List<LogFileVO> allLogFileVOs) {
-        ProbeOperateQueryParams params = ProbeOperateQueryParams.builder().scene(sceneId)
+    private List<LogFileVO> probeOperateHandler(BaseSceneElementPageRequest pageRequest, List<LogFileVO> allLogFileVOs) {
+        //该入口可能为自定义采集包含探针id，且类型为原始日志；也可能为原始日志接口直接调用，需要通过pageRequest中的timerange判断
+        List<WazuhEventRequest.TimeRange> timeRanges = pageRequest.getTimeRanges();
+        if(CollectionUtils.isNotEmpty(timeRanges)){
+            return allLogFileVOs.stream().filter(logFileVO ->
+                timeRanges.stream().filter(time -> logFileVO.getCreateTime().isAfter(time.getFrom()) && logFileVO.getCreateTime().isBefore(time.getTo())).findAny().isPresent()
+            ).collect(Collectors.toList());
+        }
+        ProbeOperateQueryParams params = ProbeOperateQueryParams.builder().scene(pageRequest.getSceneId())
             .type(ProbeOperateConstant.PROBEOPERATE_TYPE.ORIGIN_LOG.getValue()).build();
         //查询对应日志类型探针开关操作时间段
         List<ProbeOperateTimeRange> timeRangeList = sceneMonitorService.queryProbeOperateTimeRange(params);

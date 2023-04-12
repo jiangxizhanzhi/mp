@@ -234,6 +234,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return csceneInstancesResult.getObjs();
     }
 
+    /**
+     * @description: 自定义采集存在探针id时获取采集数据
+     * @param sceneInstanceId  场景实例id
+     * @param sceneId   场景id
+     * @param requestId  请求id
+     * @param nodeIds   节点
+     * @param sceneHandler  场景处理类
+     * @param nodeId2ProbeNameMap 节点，探针名映射
+     * @param probeId  探针id
+     * @param queryParams  查询参数
+     * @param cloudPluginHandler
+     * @param type 文件预警类型（进程，端口，网络连接，文件，用户）FileEventType定义
+     * @throws
+     * @return ListObjServiceResult<CollectionHostEventBO>
+     */
     private ListObjServiceResult<CollectionHostEventBO> getProbeCollectData(String sceneInstanceId, String sceneId, String requestId,
                                                                             List<String> nodeIds, SceneHandler sceneHandler,
                                                                             Map<String, Map<String, String>> nodeId2ProbeNameMap,
@@ -268,9 +283,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setElementIds(CollUtil.toList(element.getId()));
                 request.setPage(queryParams.getPage());
                 request.setPageSize(queryParams.getPageSize());
-                //request.setTimeRanges(queryParams.getTimeRanges());
+                request.setTimeRanges(queryParams.getTimeRanges());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
-                    // 硬件信息
+                    // 硬件信息(当前状态)
                     res = hostStateService.listHostStates(request);
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
@@ -309,6 +324,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setPage(queryParams.getPage());
                 params.setPageSize(queryParams.getPageSize());
                 params.setFetchIfSceneInstanceShutdown(true);
+                params.setTimeRanges(queryParams.getTimeRanges());
                 if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
                     // 网卡信息
                     var r = hostStateService.pageNetifaces(params);
@@ -340,6 +356,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setPageSize(queryParams.getPageSize());
                 params.setStartTime(queryParams.getStartTime());
                 params.setEndTime(queryParams.getEndTime());
+                params.setTimeRanges(queryParams.getTimeRanges());
                 ListObjServiceResult<CollectionHostEventBO> r;
                 if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     // 文件变更信息

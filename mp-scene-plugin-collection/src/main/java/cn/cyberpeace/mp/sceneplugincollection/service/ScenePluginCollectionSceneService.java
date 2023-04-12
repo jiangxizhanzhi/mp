@@ -1375,6 +1375,7 @@ public class ScenePluginCollectionSceneService {
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
+        wazuhRequest.setTimeRanges(listPageInfoQueryParams.getTimeRanges());
 
         if (wazuhRequest.getAgentNames().contains(null)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
@@ -1407,6 +1408,7 @@ public class ScenePluginCollectionSceneService {
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
+        wazuhRequest.setTimeRanges(listPageInfoQueryParams.getTimeRanges());
 
         if (wazuhRequest.getAgentNames().contains(null)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
@@ -1459,7 +1461,7 @@ public class ScenePluginCollectionSceneService {
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
-
+        wazuhRequest.setTimeRanges(listPageInfoQueryParams.getTimeRanges());
         if (wazuhRequest.getAgentNames().contains(null)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }

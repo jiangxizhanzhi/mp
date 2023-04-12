@@ -155,6 +155,7 @@ public class SceneElementMonitorService {
         listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollUtil.toList(pageRequest.getSceneId())));
         listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
+        listPageInfoQueryParams.setTimeRanges(pageRequest.getTimeRanges());
         ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
 
         List<ConnectionState> connectionStates = new ArrayList<>();
