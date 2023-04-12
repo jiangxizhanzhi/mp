@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -50,4 +51,14 @@ public class HostEventQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "是否是滚动分页请求")
     private Boolean scroll;
+    /**
+     * 存储探针开关操作类型
+     */
+    private String probeOperateType;
+
+    /**
+     * 事件查询时间段
+     */
+    private List<WazuhEventRequest.TimeRange> timeRanges;
+
 }

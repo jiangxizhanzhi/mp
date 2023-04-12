@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.request.element;
 
 import cn.cyberpeace.mp.cscene.request.common.PageRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -22,5 +23,7 @@ public class BaseSceneElementPageRequest extends PageRequest {
 
     @ApiModelProperty(value = "场景关闭情况下是否仍然查询数据，默认false，表示不查询")
     private Boolean fetchIfSceneInstanceShutdown = false;
+
+    private List<WazuhEventRequest.TimeRange> timeRanges;
 
 }

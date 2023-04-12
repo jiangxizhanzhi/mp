@@ -42,4 +42,9 @@ public class WazuhMonitorEventsRequest {
      */
     @ApiModelProperty(value = "结束时间")
     private LocalDateTime endTime;
+
+
+    private List<WazuhEventRequest.TimeRange> timeRanges;
+
+
 }

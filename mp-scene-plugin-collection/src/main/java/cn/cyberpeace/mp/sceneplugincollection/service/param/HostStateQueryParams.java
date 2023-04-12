@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -24,5 +25,10 @@ public class HostStateQueryParams extends QueryParams {
 
     @ApiModelProperty(value = "节点id列表")
     private List<String> nodeIds;
+
+    /**
+     * 事件查询时间段
+     */
+    private List<WazuhEventRequest.TimeRange> timeRanges;
 
 }

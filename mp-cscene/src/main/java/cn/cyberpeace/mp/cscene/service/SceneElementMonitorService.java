@@ -371,6 +371,7 @@ public class SceneElementMonitorService {
         hostEventQueryParams.setPath(path);
         hostEventQueryParams.setPage(pageRequest.getPage());
         hostEventQueryParams.setPageSize(pageRequest.getPageSize());
+        hostEventQueryParams.setProbeOperateType(PROBEOPERATE_TYPE.CHANGE_EVENT_STATE.getValue());
         ListObjServiceResult<CollectionHostEventBO> hostEventsBos = csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
         mergeModifyData(hostEventsBos, hostEventQueryParams, pageRequest, sceneHandler);
 

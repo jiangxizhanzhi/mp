@@ -16,11 +16,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
@@ -41,7 +37,9 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
+import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
@@ -179,6 +177,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
 
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
+
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
@@ -267,6 +268,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setElementIds(CollUtil.toList(element.getId()));
                 request.setPage(queryParams.getPage());
                 request.setPageSize(queryParams.getPageSize());
+                //request.setTimeRanges(queryParams.getTimeRanges());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     // 硬件信息
                     res = hostStateService.listHostStates(request);
@@ -374,6 +376,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setEndTime(endTime);
                 request.setPageNum(queryParams.getPage());
                 request.setPageSize(queryParams.getPageSize());
+                request.setTimeRanges(queryParams.getTimeRanges());
                 var r = dataCollectionService.queryCustomProbeData(request, CollUtil.toList(probeId));
                 res = r.getObjs();
                 total = r.getTotal() + total;
@@ -477,6 +480,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
+        request.setTimeRanges(queryParams.getTimeRanges());
         // 分页查询自定义探针数据
         var listObjResult = dataCollectionService.queryCustomProbeData(request, queryProbeIds);
         var res = listObjResult.getObjs();
@@ -765,8 +769,35 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         FileEventType.USERS.name());
             }
         }
-
+        probeOperateHandler(id,queryParams);
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    }
+
+    /**
+     * @description: 提前处理加入时间范围参数
+     * @param id  场景实例id
+     * @param queryParams 
+     * @throws 
+     * @return void
+     */
+    private void probeOperateHandler(String id,HostEventQueryParams queryParams) {
+        //非变更事件,自定义采集事件,此入口则为日志事件
+        if(StringUtils.isEmpty(queryParams.getProbeOperateType()) && CollectionUtils.isNotEmpty(queryParams.getCatagories())){
+            queryParams.setProbeOperateType(ProbeOperateConstant.PROBEOPERATE_TYPE.LOG_EVENT.getValue());
+        }
+        //处理后依然没有探针操作类型处理
+        if(StringUtils.isEmpty(queryParams.getProbeOperateType())){
+            return;
+        }
+        ProbeOperateQueryParams params = ProbeOperateQueryParams.builder().scene(id)
+            .type(queryParams.getProbeOperateType()).build();
+        //查询对应日志类型探针开关操作时间段
+        List<ProbeOperateTimeRange> timeRangeList = sceneMonitorService.queryProbeOperateTimeRange(params);
+        //转为探针请求的时间段范围
+        List<WazuhEventRequest.TimeRange> timeRanges = timeRangeList.stream().map(probeOperateTimeRange -> {
+            return new WazuhEventRequest.TimeRange(probeOperateTimeRange.getFrom(), probeOperateTimeRange.getTo());
+        }).collect(Collectors.toList());
+        queryParams.setTimeRanges(timeRanges);
     }
 
     /**
@@ -828,6 +859,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (queryParams.getEndTime() == null) {
             queryParams.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
         }
+        //处理探针开关记录
+        queryParams.setProbeOperateType(ProbeOperateConstant.PROBEOPERATE_TYPE.CUSTOM_COLLECTION.getValue());
+        probeOperateHandler(sceneInstanceId,queryParams);
         if (probeId != null) {
             // 有探针id，查询指定探针采集数据
             return getProbeCollectData(sceneInstanceId, sceneId, requestId, newNodeIds, sceneHandler, nodeId2ProbeNameMap,

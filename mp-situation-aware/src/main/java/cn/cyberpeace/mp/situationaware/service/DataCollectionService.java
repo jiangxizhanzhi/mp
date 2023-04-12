@@ -1026,6 +1026,17 @@ public class DataCollectionService extends CollectionBaseService {
                     .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(wazuhEventRequest.getTimeRanges())) {
+            var shouldBuilder = QueryBuilders.boolQuery();
+            for (var timeRange : wazuhEventRequest.getTimeRanges()) {
+                shouldBuilder.should(
+                    QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
+                        .from(timeRange.getFrom().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                        .to(timeRange.getTo().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                );
+            }
+            boolQueryBuilder.must(shouldBuilder);
+        }
     }
 
 

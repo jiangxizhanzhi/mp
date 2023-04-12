@@ -268,6 +268,7 @@ public class ScenePluginCollectionSceneService {
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime())
                 .orElse(LocalDateTime.now())
         );
+        request.setTimeRanges(queryParams.getTimeRanges());
         return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request);
     }
 
@@ -484,6 +485,9 @@ public class ScenePluginCollectionSceneService {
         }
         if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
             request.setScroll(true);
+        }
+        if(CollectionUtils.isNotEmpty(queryParams.getTimeRanges())){
+            request.setTimeRanges(queryParams.getTimeRanges());
         }
 
         return request;
