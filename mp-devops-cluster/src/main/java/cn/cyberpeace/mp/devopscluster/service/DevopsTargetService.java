@@ -71,6 +71,7 @@ public class DevopsTargetService {
         if (Objects.nonNull(oldDeviceTargetPO)) {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            deviceTargetPO.setImageCate(StringUtils.join(device.getImageCate(), ","));
             return deviceTargetMapper.updateById(deviceTargetPO);
         }
         return 0;

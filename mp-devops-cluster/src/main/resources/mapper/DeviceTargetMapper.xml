@@ -397,6 +397,9 @@
             <if test="isOccupy != null">
                 is_occupy = #{isOccupy}
             </if>
+            <if test="imageCate != null">
+                image_cate = #{imageCate}
+            </if>
         </set>
         where uuid = #{uuid}
     </update>

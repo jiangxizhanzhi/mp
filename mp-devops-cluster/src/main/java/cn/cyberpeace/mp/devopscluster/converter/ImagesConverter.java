@@ -188,6 +188,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        device.setImageCate(request.getImageCate());
         devopsTargetService.updateById(device);
     }
 
@@ -409,6 +410,7 @@ public class ImagesConverter implements BaseConverter{
         device.setL3Category(request.getThirdCategory());
         device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
+        device.setImageCate(request.getImageCate());
         final ExtVm extVm = request.getExtVm();
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());
