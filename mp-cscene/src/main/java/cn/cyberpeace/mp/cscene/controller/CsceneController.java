@@ -227,7 +227,10 @@ public class CsceneController implements BaseModelListControllerBase {
                 IoUtil.close(outputStream);
             }
         }
-        ZipUtils.zip(file, dir + "/scene.zip");
+        String targetDir = TextUtils.uuid();
+        File targetFile = new File(targetDir);
+        targetFile.mkdir();
+        ZipUtils.zip(dir, targetDir + "/scene.zip");
 
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -235,7 +238,7 @@ public class CsceneController implements BaseModelListControllerBase {
             response.setContentType("application/octet-stream");
             response.setHeader("Content-disposition", "attachment; filename=" + new String("scene.zip".getBytes("utf-8"), "ISO8859-1"));
             byte[] buffer = new byte[4096];
-            fis = new FileInputStream(dir + "/scene.zip");
+            fis = new FileInputStream(targetDir + "/scene.zip");
             bis = new BufferedInputStream(fis);
             OutputStream os = response.getOutputStream();
             int i = bis.read(buffer);
@@ -244,7 +247,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 i = bis.read(buffer);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("failed to export scenes, ids is {}", StringUtils.join(ids, ","), e);
         } finally {
             //删除文件
             if (fis != null) {
@@ -254,6 +257,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 IOUtils.close(bis);
             }
             FileUtils.deleteDirectory(file);
+            FileUtils.deleteDirectory(targetFile);
         }
     }
 

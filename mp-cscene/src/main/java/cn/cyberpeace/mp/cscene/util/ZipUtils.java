@@ -23,7 +23,9 @@ public class ZipUtils {
      */
     private static final int BUFFER = 512;
 
-    public static boolean zip(File parentDir, String zipFileName) {
+    public static boolean zip(String srcPath, String zipFileName) {
+        File srcFile = new File(srcPath);
+        // 扫描所有要压缩的文件
         // 缓冲器
         byte[] buffer = new byte[BUFFER];
         ZipEntry zipEntry = null;
@@ -31,20 +33,29 @@ public class ZipUtils {
         int readLength = 0;
         try {
             ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
-            for (File file : parentDir.listFiles()) {
-                zipEntry = new ZipEntry(file.getName());
-                zipEntry.setSize(file.length());
-                zipEntry.setTime(file.lastModified());
-                zipOutputStream.putNextEntry(zipEntry);
-                InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-                while ((readLength = inputStream.read(buffer, 0, BUFFER)) != -1) {
-                    zipOutputStream.write(buffer, 0, readLength);
+            for (File file : srcFile.listFiles()) {
+                // 若是文件，则压缩这个文件
+                if (file.isFile()) {
+                    zipEntry = new ZipEntry(getRelativePath(srcPath, file));
+                    zipEntry.setSize(file.length());
+                    zipEntry.setTime(file.lastModified());
+                    zipOutputStream.putNextEntry(zipEntry);
+                    InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                    while ((readLength = inputStream.read(buffer, 0, BUFFER)) != -1) {
+                        zipOutputStream.write(buffer, 0, readLength);
+                    }
+                    inputStream.close();
+                } else {
+                    //若是目录（即空目录）则将这个目录写入zip条目
+                    zipEntry = new ZipEntry(getRelativePath(srcPath, file) + "/");
+                    zipOutputStream.putNextEntry(zipEntry);
                 }
-                inputStream.close();
             }
             zipOutputStream.close();
-        } catch (Exception e) {
-            log.error("failed to zip ,directory is {}", parentDir.getAbsolutePath(), e);
+        } catch (FileNotFoundException e) {
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -96,6 +107,24 @@ public class ZipUtils {
             }
         }
         return true;
+    }
+
+    private static String getRelativePath(String dirPath, File file) {
+        File dir = new File(dirPath);
+        String relativePath = file.getName();
+        StringBuilder sb = new StringBuilder(relativePath);
+        while (true) {
+            file = file.getParentFile();
+            if (file == null) {
+                break;
+            }
+            if (file.equals(dir)) {
+                break;
+            } else {
+                sb.append(file.getName()).append("/").append(relativePath);
+            }
+        }
+        return sb.toString();
     }
 
     /**
