@@ -5,17 +5,13 @@ import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +59,9 @@ public class DefaultImgController {
         }else{
             fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
         }
+
+        fileNameList = convertLocalPaths(fileNameList);
+
         return ResultCommon.success(fileNameList);
     }
 
@@ -73,14 +71,16 @@ public class DefaultImgController {
         if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
-        List<String> groupList = Collections.singletonList(DefaultImgDirEnum.SYS_LOGO.getGroup());
-        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
-        Map<String, String> urlMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(modelList)) {
-            modelList.forEach(model -> urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile())));
-        }
+        List<String> fileNameList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.SYS_LOGO);
+        fileNameList = convertLocalPaths(fileNameList);
 
-        return ResultCommon.success(urlMap);
+        Map<String, String> map = new HashMap<>();
+        fileNameList.forEach(fileName -> {
+            String name = StringUtils.substring(fileName, StringUtils.lastIndexOf(fileName, "/") + 1);
+            map.put(name, fileName);
+        });
+
+        return ResultCommon.success(map);
     }
 
     /**
@@ -90,6 +90,18 @@ public class DefaultImgController {
      */
     private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
         return defaultImgDirEnums.stream().map(v -> defaultImgService.getFileByDefaultImgDirEnum(v)).flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private List<String> convertLocalPaths(List<String> paths) {
+        List<String> convertedPaths =
+        paths.stream().map(path -> {
+            if (!path.startsWith("/api/mp/")) {
+                path = "/api/mp/" + path;
+            }
+            return path;
+        }).collect(Collectors.toList());
+
+        return convertedPaths;
     }
 
 
