@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,7 +183,13 @@ public class CsceneController implements BaseModelListControllerBase {
             ZipUtils.unzip(zipFile.getName(), contentDir);
             for (var f : contentFile.listFiles()) {
                 var csceneStr = FileUtil.readString(f, "UTF8");
-                csceneBOS.add(JsonCommon.parse(csceneStr, CsceneBO.class));
+                var bo = JsonCommon.parse(csceneStr, CsceneBO.class);
+                String sceneName = f.getName().substring(0, f.getName().indexOf(".json"));
+                bo.setName(sceneName);
+                bo.getSceneConfig().getTopology().getScene().setName(sceneName);
+                // 导入类型默认为漏洞挖掘
+                bo.setBizType(new String[]{"1000"});
+                csceneBOS.add(bo);
             }
             for (var csceneBO : csceneBOS) {
                 sync(csceneBO);
@@ -208,7 +215,9 @@ public class CsceneController implements BaseModelListControllerBase {
     public void export(HttpServletResponse response, @RequestParam String[] ids) throws Exception {
         List<CsceneBO> csceneBOS = new ArrayList<>();
         for (String id : ids) {
-            csceneBOS.add(modelService.export(id, null).getSource());
+            var bo = modelService.export(id, null).getSource();
+            bo.setBizType(null);
+            csceneBOS.add(bo);
         }
         String dir = TextUtils.uuid();
         File file = new File(dir);
@@ -236,7 +245,12 @@ public class CsceneController implements BaseModelListControllerBase {
         BufferedInputStream bis = null;
         try {
             response.setContentType("application/octet-stream");
-            response.setHeader("Content-disposition", "attachment; filename=" + new String("scene.zip".getBytes("utf-8"), "ISO8859-1"));
+//            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + "拓扑模板" + ".zip");
+
+            String fileName = "拓扑模板.zip";
+            String fileNameURL = URLEncoder.encode(fileName, "UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename="+fileNameURL+";"+"filename*=utf-8''"+fileNameURL);
+
             byte[] buffer = new byte[4096];
             fis = new FileInputStream(targetDir + "/scene.zip");
             bis = new BufferedInputStream(fis);
@@ -251,22 +265,15 @@ public class CsceneController implements BaseModelListControllerBase {
         } finally {
             FileInputStream finalFis = fis;
             BufferedInputStream finalBis = bis;
-            new Thread(() -> {
-                try {
-                    Thread.sleep(5000);
-                    //删除文件
-                    if (finalFis != null) {
-                        IOUtils.close(finalFis);
-                    }
-                    if (finalBis != null) {
-                        IOUtils.close(finalBis);
-                    }
-                    FileUtils.deleteDirectory(file);
-                    FileUtils.deleteDirectory(targetFile);
-                } catch (Exception e) {
-                    log.error("failed to clean ", e);
-                }
-            }).start();
+            //删除文件
+            if (finalFis != null) {
+                IOUtils.close(finalFis);
+            }
+            if (finalBis != null) {
+                IOUtils.close(finalBis);
+            }
+            FileUtils.deleteDirectory(file);
+            FileUtils.deleteDirectory(targetFile);
         }
     }
 

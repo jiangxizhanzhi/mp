@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -109,7 +111,13 @@ public class TypeController {
         allResponse.setHwVifModelList(typeConverter.findHwVifModel());
         allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
         allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
-        return new Result<>(allResponse);
+        String str = JsonCommon.stringify(allResponse);
+        str = StringUtils.replace(str, "网络设备", "网络节点");
+        str = StringUtils.replace(str, "应用系统", "业务节点");
+        str = StringUtils.replace(str, "安防设备", "安防节点");
+        str = StringUtils.replace(str, "中间件", "应用服务器");
+        str = StringUtils.replace(str, "数据库", "数据库服务器");
+        return new Result<>(JsonCommon.parse(str, TypeAllVO.class));
     }
 
     /**

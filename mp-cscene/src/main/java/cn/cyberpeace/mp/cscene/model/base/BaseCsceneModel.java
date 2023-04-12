@@ -22,10 +22,10 @@ public class BaseCsceneModel extends BaseModel {
     private String name;
     @DefaultBool
     private Boolean supportPartialStart;
-    @DefaultInt
-    private Integer appType;
-    @DefaultInt
-    private Integer bizType;
+    @DefaultStr
+    private String appType;
+    @DefaultStr
+    private String bizType;
 
     @Override
     public boolean hasDeleted() {

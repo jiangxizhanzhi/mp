@@ -215,11 +215,19 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
         humanCondition.filterEqual(CsceneModel::getDeleted, false);
-        if (queryParams.getAppType() != null) {
-            humanCondition.filterEqual(CsceneModel::getAppType, queryParams.getAppType());
+        if (queryParams.getAppType() != null && queryParams.getAppType().length > 0) {
+            var orCondition = humanCondition.filterOrStart();
+            for (var type : queryParams.getAppType()) {
+                orCondition.orContains(CsceneModel::getAppType, type);
+            }
+            orCondition.filterOrEnd();
         }
-        if (queryParams.getBizType() != null) {
-            humanCondition.filterEqual(CsceneModel::getBizType, queryParams.getBizType());
+        if (queryParams.getBizType() != null && queryParams.getBizType().length > 0) {
+            var orCondition = humanCondition.filterOrStart();
+            for (var type : queryParams.getBizType()) {
+                orCondition.orContains(CsceneModel::getBizType, type);
+            }
+            orCondition.filterOrEnd();
         }
 
         Integer type = queryParams.getType();
