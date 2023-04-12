@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,15 +50,31 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     @Override
     public void fromModel(CsceneModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getAppType),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType)
+        ));
+        this.setAppType(StringUtils.isEmpty(obj.getAppType()) ? new String[]{} : StringUtils.split(obj.getAppType(), ","));
+        this.setBizType(StringUtils.isEmpty(obj.getBizType()) ? new String[]{} : StringUtils.split(obj.getBizType(), ","));
     }
 
     @Override
     public CsceneModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getAppType),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType)
+        ));
         if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
+        }
+        obj.setAppType(StringUtils.EMPTY);
+        if (this.getAppType() != null && this.getAppType().length > 0) {
+            obj.setAppType(StringUtils.join(this.getAppType(), ","));
+        }
+        obj.setBizType(StringUtils.EMPTY);
+        if (this.getBizType() != null && this.getBizType().length > 0) {
+            obj.setBizType(StringUtils.join(this.getBizType(), ","));
         }
         return obj;
     }

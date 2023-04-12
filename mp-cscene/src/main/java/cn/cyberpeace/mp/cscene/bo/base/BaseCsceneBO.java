@@ -32,9 +32,9 @@ public abstract class BaseCsceneBO<
     @ApiModelProperty(value = "是否只是部分启动")
     private Boolean supportPartialStart;
     @ApiModelProperty(value = "场景应用类型")
-    private Integer appType;
+    private String[] appType;
     @ApiModelProperty(value = "场景类型")
-    private Integer bizType;
+    private String[] bizType;
     @Override
     public T export() {
         setId(null);

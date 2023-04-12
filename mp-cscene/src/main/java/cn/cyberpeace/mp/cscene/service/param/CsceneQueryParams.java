@@ -18,7 +18,7 @@ public class CsceneQueryParams extends QueryParams {
     @ApiModelProperty(value = "模板类型")
     private Integer type;
     @ApiModelProperty(value = "场景应用类型")
-    private Integer appType ;
+    private String[] appType;
     @ApiModelProperty(value = "场景类型")
-    private Integer bizType;
+    private String[] bizType;
 }
