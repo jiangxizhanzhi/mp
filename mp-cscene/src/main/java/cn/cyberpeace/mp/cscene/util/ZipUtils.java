@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,12 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 public class ZipUtils {
 
     /**
@@ -21,18 +23,7 @@ public class ZipUtils {
      */
     private static final int BUFFER = 512;
 
-    /**
-     * 压缩方法
-     * （可以压缩空的子目录）
-     *
-     * @param srcPath     压缩源路径
-     * @param zipFileName 目标压缩文件
-     * @return
-     */
-    public static boolean zip(String srcPath, String zipFileName) {
-        File srcFile = new File(srcPath);
-        // 扫描所有要压缩的文件
-        List<File> fileList = getAllFiles(srcFile);
+    public static boolean zip(File parentDir, String zipFileName) {
         // 缓冲器
         byte[] buffer = new byte[BUFFER];
         ZipEntry zipEntry = null;
@@ -40,29 +31,20 @@ public class ZipUtils {
         int readLength = 0;
         try {
             ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
-            for (File file : fileList) {
-                // 若是文件，则压缩这个文件
-                if (file.isFile()) {
-                    zipEntry = new ZipEntry(getRelativePath(srcPath, file));
-                    zipEntry.setSize(file.length());
-                    zipEntry.setTime(file.lastModified());
-                    zipOutputStream.putNextEntry(zipEntry);
-                    InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-                    while ((readLength = inputStream.read(buffer, 0, BUFFER)) != -1) {
-                        zipOutputStream.write(buffer, 0, readLength);
-                    }
-                    inputStream.close();
-                } else {
-                    //若是目录（即空目录）则将这个目录写入zip条目
-                    zipEntry = new ZipEntry(getRelativePath(srcPath, file) + "/");
-                    zipOutputStream.putNextEntry(zipEntry);
+            for (File file : parentDir.listFiles()) {
+                zipEntry = new ZipEntry(file.getName());
+                zipEntry.setSize(file.length());
+                zipEntry.setTime(file.lastModified());
+                zipOutputStream.putNextEntry(zipEntry);
+                InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                while ((readLength = inputStream.read(buffer, 0, BUFFER)) != -1) {
+                    zipOutputStream.write(buffer, 0, readLength);
                 }
+                inputStream.close();
             }
             zipOutputStream.close();
-        } catch (FileNotFoundException e) {
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("failed to zip ,directory is {}", parentDir.getAbsolutePath(), e);
             return false;
         }
         return true;
@@ -76,8 +58,10 @@ public class ZipUtils {
      * @return
      */
     public static boolean unzip(String zipFileName, String dstPath) {
+        OutputStream outputStream = null;
+        ZipInputStream zipInputStream = null;
         try {
-            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFileName));
+            zipInputStream = new ZipInputStream(new FileInputStream(zipFileName));
             ZipEntry zipEntry = null;
             byte[] buffer = new byte[BUFFER];
             int readLength = 0;
@@ -92,74 +76,26 @@ public class ZipUtils {
                 }
                 //若是文件，则需创建该文件
                 File file = createFile(dstPath, zipEntry.getName());
-                OutputStream outputStream = new FileOutputStream(file);
+                outputStream = new FileOutputStream(file);
                 while ((readLength = zipInputStream.read(buffer, 0, BUFFER)) != -1) {
                     outputStream.write(buffer, 0, readLength);
                 }
-                outputStream.close();
             }
         } catch (FileNotFoundException e) {
             return false;
         } catch (IOException e) {
             return false;
+        } finally {
+            try {
+                IOUtils.close(outputStream);
+            } catch (IOException e) {
+            }
+            try {
+                IOUtils.close(zipInputStream);
+            } catch (IOException e) {
+            }
         }
         return true;
-    }
-
-    /**
-     * 取的给定源目录下的所有文件及空的子目录
-     * 递归实现
-     *
-     * @param srcFile
-     * @return
-     */
-    private static List<File> getAllFiles(File srcFile) {
-        List<File> fileList = new ArrayList<>();
-        File[] tmp = srcFile.listFiles();
-
-        for (int i = 0; i < tmp.length; i++) {
-
-            if (tmp[i].isFile()) {
-                fileList.add(tmp[i]);
-            }
-
-            if (tmp[i].isDirectory()) {
-                // 若不是空目录，则递归添加其下的目录和文件
-                if (tmp[i].listFiles().length != 0) {
-                    fileList.addAll(getAllFiles(tmp[i]));
-                } else {
-                    // 若是空目录，则添加这个目录到fileList
-                    fileList.add(tmp[i]);
-                }
-            }
-        }
-        return fileList;
-    }
-
-    /**
-     * 取相对路径
-     * 依据文件名和压缩源路径得到文件在压缩源路径下的相对路径
-     *
-     * @param dirPath 压缩源路径
-     * @param file
-     * @return 相对路径
-     */
-    private static String getRelativePath(String dirPath, File file) {
-        File dir = new File(dirPath);
-        String relativePath = file.getName();
-        StringBuilder sb = new StringBuilder(relativePath);
-        while (true) {
-            file = file.getParentFile();
-            if (file == null) {
-                break;
-            }
-            if (file.equals(dir)) {
-                break;
-            } else {
-                sb.append(file.getName()).append("/").append(relativePath);
-            }
-        }
-        return sb.toString();
     }
 
     /**

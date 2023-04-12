@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ZipUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -31,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,8 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -162,21 +162,41 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
-    // todo 导入导出之后需要清理下失效文件
     @ApiOperation(value = "批量导入场景", notes = "")
     @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/list_import")
     @ResponseBody
     public void upload(MultipartFile file) throws Exception {
-        File file1 = new File(TextUtils.uuid());
-        FileOutputStream outputStream = new FileOutputStream(file1);
-        outputStream.write(file.getBytes());
-        outputStream.close();
+        String zipFileName = TextUtils.uuid();
+        File zipFile = new File(zipFileName);
+        String contentDir = TextUtils.uuid();
+        File contentFile = new File(contentDir);
 
-        ZipUtils.unzip(file1.getName(), "test");
-        for (var f : new File("test").listFiles()) {
-            var csceneStr = FileUtils.readFileToString(f, "UTF8");
-            sync(JsonCommon.parse(csceneStr, CsceneBO.class));
+        FileOutputStream outputStream = null;
+        List<CsceneBO> csceneBOS = new ArrayList<>();
+        try {
+            // 文件先写入本地
+            outputStream = new FileOutputStream(zipFile);
+            outputStream.write(file.getBytes());
+            // 解压
+            ZipUtils.unzip(zipFile.getName(), contentDir);
+            for (var f : contentFile.listFiles()) {
+                var csceneStr = FileUtil.readString(f, "UTF8");
+                csceneBOS.add(JsonCommon.parse(csceneStr, CsceneBO.class));
+            }
+            for (var csceneBO : csceneBOS) {
+                sync(csceneBO);
+            }
+        } finally {
+            if (outputStream != null) {
+                IOUtils.close(outputStream);
+            }
+            if (zipFile.exists()) {
+                FileUtils.delete(zipFile);
+            }
+            if (contentFile.exists()) {
+                FileUtils.deleteDirectory(contentFile);
+            }
         }
     }
 
@@ -207,8 +227,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 IoUtil.close(outputStream);
             }
         }
-        ZipUtils.zip(dir, dir + "/scene.zip");
-
+        ZipUtils.zip(file, dir + "/scene.zip");
 
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -227,32 +246,16 @@ public class CsceneController implements BaseModelListControllerBase {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-
-        }
-
-    }
-
-    private void compressFile(File file, ZipOutputStream out, String basedir) {
-        if (!file.exists()) {
-            System.out.println("压缩文件不存在,请核实！");
-            return;
-        }
-        try {
-            BufferedInputStream bis = new BufferedInputStream(
-                    new FileInputStream(file));
-            ZipEntry entry = new ZipEntry(basedir + file.getName());
-            out.putNextEntry(entry);
-            int count;
-            byte data[] = new byte[80960];
-            while ((count = bis.read(data, 0, 8096)) != -1) {
-                out.write(data, 0, count);
+            //删除文件
+            if (fis != null) {
+                IOUtils.close(fis);
             }
-            bis.close();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            if (bis != null) {
+                IOUtils.close(bis);
+            }
+            FileUtils.deleteDirectory(file);
         }
     }
-
 
     @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
