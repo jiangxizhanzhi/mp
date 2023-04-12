@@ -95,8 +95,8 @@ public class DefaultImgController {
     private List<String> convertLocalPaths(List<String> paths) {
         List<String> convertedPaths =
         paths.stream().map(path -> {
-            if (!path.startsWith("/api/mp/")) {
-                path = "/api/mp/" + path;
+            if (!path.startsWith("/api/mp")) {
+                path = "/api/mp" + path;
             }
             return path;
         }).collect(Collectors.toList());
