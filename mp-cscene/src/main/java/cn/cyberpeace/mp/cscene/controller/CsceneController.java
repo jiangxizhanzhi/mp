@@ -247,9 +247,11 @@ public class CsceneController implements BaseModelListControllerBase {
             response.setContentType("application/octet-stream");
 //            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + "拓扑模板" + ".zip");
 
-            String fileName = "拓扑模板.zip";
-            String fileNameURL = URLEncoder.encode(fileName, "UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename="+fileNameURL+";"+"filename*=utf-8''"+fileNameURL);
+//            String fileName = "拓扑模板.zip";
+//            String fileNameURL = URLEncoder.encode(fileName, "UTF-8");
+//            response.setHeader("Content-disposition", "attachment;filename="+fileNameURL+";"+"filename*=utf-8''"+fileNameURL);
+
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String("拓扑模板.zip".getBytes("UTF-8"), "ISO8859-1"));
 
             byte[] buffer = new byte[4096];
             fis = new FileInputStream(targetDir + "/scene.zip");
