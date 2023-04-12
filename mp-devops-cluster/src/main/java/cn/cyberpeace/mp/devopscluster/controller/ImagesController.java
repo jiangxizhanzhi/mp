@@ -663,6 +663,7 @@ public class ImagesController {
                 }
             }
             vo.setCreateUserName(v.getCreateUserName());
+            vo.setImageCate(v.getImageCate());
             return vo;
         }).collect(Collectors.toList());
     }

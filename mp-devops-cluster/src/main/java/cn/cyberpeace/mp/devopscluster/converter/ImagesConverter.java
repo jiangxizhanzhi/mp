@@ -120,6 +120,7 @@ public class ImagesConverter implements BaseConverter{
                 }
                 if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
                     imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
+                    imageConvertModel.setImageCate(StringUtils.split(deviceTargetPOMap.get(imageConvertModel.getUuid()).getImageCate()));
                 }
                 imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
                 if (supportExports.containsKey(imageConvertModel.getUuid())) {

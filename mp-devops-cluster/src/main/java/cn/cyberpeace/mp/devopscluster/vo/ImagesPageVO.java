@@ -137,4 +137,7 @@ public class ImagesPageVO extends BaseVO {
 
     @ApiModelProperty("靶标创建用户名称")
     private String createUserName;
+
+    @ApiModelProperty("镜像分类")
+    private String[] imageCate;
 }
