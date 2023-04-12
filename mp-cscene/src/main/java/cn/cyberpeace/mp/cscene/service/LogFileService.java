@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.cscene.bo.ProbeOperateTimeRange;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -15,6 +16,8 @@ import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant;
+import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
@@ -101,16 +104,18 @@ public class LogFileService {
         List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
         Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(pageRequest.getSceneId(), pageRequest.getElementIds());
 
-        List<LogFileVO> allLogFileVOs = new ArrayList<>();
+        List<LogFileVO> finalAllLogFileVOs = new ArrayList<>();
         agentNames2ElementIdMap.forEach((agentName, elementId) -> {
             if (elementId2LogFile.containsKey(elementId)) {
-                allLogFileVOs.addAll(elementId2LogFile.get(elementId));
+                finalAllLogFileVOs.addAll(elementId2LogFile.get(elementId));
             }
         });
+        List<LogFileVO> allLogFileVOs = finalAllLogFileVOs;
         if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
         }
-
+        //原始日志文件数据探针开关处理
+        allLogFileVOs = probeOperateHandler(pageRequest.getSceneId(),allLogFileVOs);
         Map<String, Integer> elementIdOrderMap = new HashMap<>();
         int order = 0;
         for (ElementMonitorBasicInfo element : allElements) {
@@ -131,6 +136,24 @@ public class LogFileService {
         pageInfo.setTotal(allLogFileVOs.size());
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    /**
+     * @description: 探针开关记录处理
+     * @param sceneId 
+     * @param allLogFileVOs 
+     * @throws
+     * @return List<LogFileVO>
+     */
+    private List<LogFileVO> probeOperateHandler(String sceneId, List<LogFileVO> allLogFileVOs) {
+        ProbeOperateQueryParams params = ProbeOperateQueryParams.builder().scene(sceneId)
+            .type(ProbeOperateConstant.PROBEOPERATE_TYPE.ORIGIN_LOG.getValue()).build();
+        //查询对应日志类型探针开关操作时间段
+        List<ProbeOperateTimeRange> timeRangeList = sceneMonitorService.queryProbeOperateTimeRange(params);
+        //文件创建时间在查询范围中即符合条件
+        return allLogFileVOs.stream().filter(logFileVO ->
+            timeRangeList.stream().filter(time -> logFileVO.getCreateTime().isAfter(time.getFrom()) && logFileVO.getCreateTime().isBefore(time.getTo())).findAny().isPresent()
+        ).collect(Collectors.toList());
     }
 
     public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
