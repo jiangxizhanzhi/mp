@@ -34,6 +34,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -304,8 +305,35 @@ public class TenantUserServiceImpl
             user = null;
         }
         if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
-            if (req.getOrg() == null || !user.getOrgIds().contains(req.getOrg())) {
+            if (req.getOrg() == null) {
                 req.setOrg(user.getOrgIds().get(0));
+            } else if (!user.getOrgIds().contains(req.getOrg())) {
+                // 如果查询的不是自己直属的组织,那么可以筛选下级组织的数据
+                var tree = orgService.getTree(user.getOrgIds().get(0));
+                if (tree != null) {
+                    Queue<OrgDto> orgQueue = new ArrayDeque<>();
+                    Set<String> orgIds = new HashSet<>();
+                    tree.stream().forEach(t -> orgQueue.add(t));
+                    int protect = 0;
+                    while (!orgQueue.isEmpty()) {
+                        var org = orgQueue.poll();
+                        if (org == null) {
+                            continue;
+                        }else{
+                            orgIds.add(org.getId());
+                            if (CollectionUtils.isNotEmpty(org.getChildren())) {
+                                orgQueue.addAll(org.getChildren());
+                            }
+                        }
+                        protect++;
+                        if (protect > 1000) {
+                            break;
+                        }
+                    }
+                    if (!orgIds.contains(req.getOrg())) {
+                        req.setOrg(user.getOrgIds().get(0));
+                    }
+                }
             }
         }
 
