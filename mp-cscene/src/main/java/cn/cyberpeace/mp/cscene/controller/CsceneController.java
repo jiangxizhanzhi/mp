@@ -249,15 +249,24 @@ public class CsceneController implements BaseModelListControllerBase {
         } catch (Exception e) {
             log.error("failed to export scenes, ids is {}", StringUtils.join(ids, ","), e);
         } finally {
-            //删除文件
-            if (fis != null) {
-                IOUtils.close(fis);
-            }
-            if (bis != null) {
-                IOUtils.close(bis);
-            }
-            FileUtils.deleteDirectory(file);
-            FileUtils.deleteDirectory(targetFile);
+            FileInputStream finalFis = fis;
+            BufferedInputStream finalBis = bis;
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                    //删除文件
+                    if (finalFis != null) {
+                        IOUtils.close(finalFis);
+                    }
+                    if (finalBis != null) {
+                        IOUtils.close(finalBis);
+                    }
+                    FileUtils.deleteDirectory(file);
+                    FileUtils.deleteDirectory(targetFile);
+                } catch (Exception e) {
+                    log.error("failed to clean ", e);
+                }
+            }).start();
         }
     }
 
