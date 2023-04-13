@@ -200,7 +200,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @OperateAuth(resourceClass = CsceneActionRequest.class,resourceParam = 1, resourceField = "id",resourceType = "csceneOperateResource")
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -211,10 +210,17 @@ public class CsceneController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
+        return delete2(request);
+    }
+
+    @OperateAuth(resourceClass = CsceneActionRequest.class,resourceField = "id",resourceType = "csceneOperateResource")
+    public ServiceResult<Boolean> delete2(CsceneActionRequest request) {
         var result = modelService.deleteById(request.getId(), true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }
+
+
 
     @ApiOperation("批量删除场景模板")
     @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
