@@ -229,16 +229,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
-        if (this.isTrailAccount()) {
-            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
-            var paramsIds = new HashSet<String>(userIds);
-            //userId为空表示自有配置流量
-            paramsIds.add("");
-            var list = getModelMapper().list(new HumanCondition().filterIn(FlowInfoModel::getCreateUser, paramsIds.toArray(new String[]{})));
-            List<String> p = new ArrayList<>();
-            list.forEach(l -> p.add(l.getId()));
-            queryParams.setIds(p.toArray(new String[]{}));
-        }
+//        if (this.isTrailAccount()) {
+//            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+//            var paramsIds = new HashSet<String>(userIds);
+//            //userId为空表示自有配置流量
+//            paramsIds.add("");
+//            var list = getModelMapper().list(new HumanCondition().filterIn(FlowInfoModel::getCreateUser, paramsIds.toArray(new String[]{})));
+//            List<String> p = new ArrayList<>();
+//            list.forEach(l -> p.add(l.getId()));
+//            queryParams.setIds(p.toArray(new String[]{}));
+//        }
         // 查询流量信息
         ListObjServiceResult<FlowInfoModel> listObjServiceResult = list(queryParams);
 
