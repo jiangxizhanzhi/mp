@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
@@ -27,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +54,8 @@ public class TargetConverter{
 
     private final DevopsTargetService devopsTargetService;
 
+    private final UserService userService ;
+
     /**
      * 分页查询
      * @param dto
@@ -67,12 +75,38 @@ public class TargetConverter{
         return targetPageModel;
     }
 
+    private boolean isTrailAccount() {
+        UserBo user = null;
+        try {
+            user = userService.getCurrentUserDto();
+        } catch (MpRuntimeException e) {
+            user = null;
+        }
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 查询所有靶标数据
      * @param dto
      * @return
      */
     public BasePageBO<Device> allTarget(ImagePageDTO dto) {
+
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            paramsIds.add("");
+            var list = deviceTargetMapper.list(new HumanCondition()
+                    .selectAs("id", DeviceTargetPO::getId)
+                    .filterIn(DeviceTargetPO::getCreateUser, paramsIds.toArray(new String[]{})));
+            List<String> p = new ArrayList<>();
+            list.forEach(l -> p.add(l.getId()));
+            dto.setIds(p);
+        }
+
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
