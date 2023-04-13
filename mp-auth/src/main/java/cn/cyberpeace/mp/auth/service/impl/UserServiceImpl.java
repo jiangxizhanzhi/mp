@@ -190,7 +190,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userModel.setAvatar(getDefaultUserAvatar());
             }
 
-            userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
+            //userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
         }
     }
 
@@ -207,8 +207,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 if (StringUtils.isEmpty(userDto.getAvatar())) {
                     userDto.setAvatar(defaultAvatar);
                 }
-                String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
-                userDto.setAvatar(path);
+                //String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
+                //userDto.setAvatar(path);
             });
         }
     }
