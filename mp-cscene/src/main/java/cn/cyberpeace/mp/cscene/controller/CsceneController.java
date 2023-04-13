@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.config.OperateAuth;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -55,6 +56,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private BaseAppConfig baseAppConfig;
 
+    private CsceneTempService csceneTempService ;
+
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
             request = new CsceneActionRequest();
@@ -102,9 +105,10 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig,CsceneTempService csceneTempService) {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
+        setCsceneTempService(csceneTempService);
         this.baseAppConfig = baseAppConfig;
     }
 
@@ -210,11 +214,7 @@ public class CsceneController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
-        return delete2(request);
-    }
-
-    @OperateAuth(resourceClass = CsceneActionRequest.class,resourceField = "id",resourceType = "csceneOperateResource")
-    public ServiceResult<Boolean> delete2(CsceneActionRequest request) {
+        csceneTempService.delete(request);
         var result = modelService.deleteById(request.getId(), true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
