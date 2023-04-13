@@ -1,0 +1,575 @@
+{
+  "first_type_list": [
+    {
+      "id": 1,
+      "name": "操作系统",
+      "l2_parent_id": null,
+      "l1_parent_id": null
+    },
+    {
+      "id": 2,
+      "name": "应用系统",
+      "l2_parent_id": null,
+      "l1_parent_id": null
+    },
+    {
+      "id": 3,
+      "name": "网络设备",
+      "l2_parent_id": null,
+      "l1_parent_id": null
+    },
+    {
+      "id": 4,
+      "name": "安全设备",
+      "l2_parent_id": null,
+      "l1_parent_id": null
+    }
+  ],
+  "second_type_list": [
+    {
+      "id": 1,
+      "name": "WINDOWS",
+      "l2_parent_id": null,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 2,
+      "name": "LINUX",
+      "l2_parent_id": null,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 3,
+      "name": "UNIX",
+      "l2_parent_id": null,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 4,
+      "name": "BSD",
+      "l2_parent_id": null,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 5,
+      "name": "OTHER",
+      "l2_parent_id": null,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 30,
+      "name": "网络服务",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 31,
+      "name": "中间件",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 32,
+      "name": "数据库",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 33,
+      "name": "软件开发",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 34,
+      "name": "基础镜像",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 35,
+      "name": "运维工具",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 36,
+      "name": "邮件服务器",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 37,
+      "name": "文件服务器",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 38,
+      "name": "企业办公",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 39,
+      "name": "统计分析",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 40,
+      "name": "负载均衡",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 41,
+      "name": "应用框架",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 42,
+      "name": "Web服务器",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 43,
+      "name": "其他",
+      "l2_parent_id": null,
+      "l1_parent_id": 2
+    },
+    {
+      "id": 50,
+      "name": "交换机",
+      "l2_parent_id": null,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 51,
+      "name": "路由器",
+      "l2_parent_id": null,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 52,
+      "name": "防火墙",
+      "l2_parent_id": null,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 53,
+      "name": "外部网络",
+      "l2_parent_id": null,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 54,
+      "name": "NPC",
+      "l2_parent_id": null,
+      "l1_parent_id": 3
+    },
+    {
+      "id": 500,
+      "name": "IDS",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 501,
+      "name": "WAF",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 502,
+      "name": "VPN",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 503,
+      "name": "行为管理",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 504,
+      "name": "安全审计",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 505,
+      "name": "防火墙",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 506,
+      "name": "IPS",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 507,
+      "name": "SIEM",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    },
+    {
+      "id": 508,
+      "name": "其他",
+      "l2_parent_id": null,
+      "l1_parent_id": 4
+    }
+  ],
+  "third_type_list": [
+    {
+      "id": 97,
+      "name": "WindowsXP",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 98,
+      "name": "Windows-Server2016",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 99,
+      "name": "Windows8",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 100,
+      "name": "Windows-Server2008",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 101,
+      "name": "Windows-Server2003",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 102,
+      "name": "Windows Vista",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 103,
+      "name": "Windows-Server2019",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 104,
+      "name": "Windows-Server2012",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 105,
+      "name": "Windows-Server2010",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 106,
+      "name": "Windows10",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 107,
+      "name": "Windows7",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 108,
+      "name": "Windows-Server2000",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 109,
+      "name": "Windows11",
+      "l2_parent_id": 1,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 301,
+      "name": "Gentoo",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 302,
+      "name": "Mint",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 303,
+      "name": "Arch",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 304,
+      "name": "Ubuntu",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 305,
+      "name": "Deepin",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 306,
+      "name": "CentOS",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 307,
+      "name": "Debian",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 308,
+      "name": "Rocky",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 309,
+      "name": "Kali",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 310,
+      "name": "Fedora",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 311,
+      "name": "Android",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 312,
+      "name": "Redhat",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 313,
+      "name": "SUSE",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 314,
+      "name": "其他",
+      "l2_parent_id": 2,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 1,
+      "name": "AIX",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 2,
+      "name": "HP-UX",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 3,
+      "name": "Solaris",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 4,
+      "name": "IRIX",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 5,
+      "name": "A/UX",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 6,
+      "name": "Xenix",
+      "l2_parent_id": 3,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 201,
+      "name": "FreeBSD",
+      "l2_parent_id": 4,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 202,
+      "name": "OpenBSD",
+      "l2_parent_id": 4,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 203,
+      "name": "NetBSD",
+      "l2_parent_id": 4,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 204,
+      "name": "DragonFly BSD",
+      "l2_parent_id": 4,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 401,
+      "name": "IOS",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    },
+    {
+      "id": 402,
+      "name": "MacOS",
+      "l2_parent_id": 5,
+      "l1_parent_id": 1
+    }
+  ],
+  "role": [
+    {
+      "id": 3,
+      "name": "外部网络",
+      "parent_id": null,
+      "child": null
+    },
+    {
+      "id": 4,
+      "name": "终端节点",
+      "parent_id": null,
+      "child": null
+    },
+    {
+      "id": 6,
+      "name": "网关节点",
+      "parent_id": null,
+      "child": [
+        {
+          "id": 21,
+          "name": "路由器",
+          "parent_id": 6,
+          "child": null
+        },
+        {
+          "id": 22,
+          "name": "交换机",
+          "parent_id": 6,
+          "child": null
+        },
+        {
+          "id": 23,
+          "name": "防火墙",
+          "parent_id": 6,
+          "child": null
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "NPC",
+      "parent_id": null,
+      "child": null
+    }
+  ],
+  "entity_role": null,
+  "category": null,
+  "deploy_type": null,
+  "install_mode": null,
+  "image_type": [
+    {
+      "id": "vm",
+      "name": "虚拟机"
+    },
+    {
+      "id": "container",
+      "name": "容器"
+    },
+    {
+      "id": "entity",
+      "name": "Entity"
+    },
+    {
+      "id": "simple",
+      "name": "简易型"
+    }
+  ],
+  "language": null,
+  "system_architecure": null,
+  "disk_format": [
+    {
+      "id": "qcow2",
+      "name": "disk_format_qcow2"
+    },
+    {
+      "id": "vmdk",
+      "name": "disk_format_vmdk"
+    },
+    {
+      "id": "vdi",
+      "name": "disk_format_vdi"
+    },
+    {
+      "id": "raw",
+      "name": "disk_format_raw"
+    }
+  ],
+  "access_type": null,
+  "service_categories": null,
+  "service_start_types": null,
+  "installer_platforms": null,
+  "access_protocols_ports": null,
+  "switch_convert_models": null,
+  "serial_port_respons": null,
+  "snmp_versions": null,
+  "hw_disk_bus_list": [
+    "ide",
+    "scsi",
+    "usb",
+    "virtio"
+  ],
+  "hw_vif_model_list": [
+    "e1000",
+    "rtl8139",
+    "virtio"
+  ],
+  "hw_video_model_list": [
+    "cirrus",
+    "qxl",
+    "vga"
+  ]
+}

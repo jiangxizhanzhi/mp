@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devopscluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
+import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
 import cn.cyberpeace.mp.devopscluster.vo.SerialPortVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeL2AllVO;
@@ -52,6 +53,8 @@ public class TypeController {
 
     private final SwitchConverter switchConverter;
 
+    private final JsonMockService jsonMockService;
+
     /**
      * 查询所有分类
      * @return
@@ -92,23 +95,25 @@ public class TypeController {
     @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
     public Result<TypeAllVO> imageCategories(Boolean isAll){
-        if (Objects.isNull(isAll)){
-            isAll = Boolean.FALSE;
-        }
-        TypeAllConvertModel roles = typeConverter.findRoles(isAll);
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
-        TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
-        TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
-        TypeAllVO allResponse = new TypeAllVO();
-        allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
-        allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
-        allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
-        allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
-        allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
-        allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
-        allResponse.setHwVifModelList(typeConverter.findHwVifModel());
-        allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
-        allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
+        //if (Objects.isNull(isAll)){
+        //    isAll = Boolean.FALSE;
+        //}
+        //TypeAllConvertModel roles = typeConverter.findRoles(isAll);
+        //TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
+        //TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
+        //TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
+        //TypeAllVO allResponse = new TypeAllVO();
+        //allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
+        //allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
+        //allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
+        //allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
+        //allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
+        //allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
+        //allResponse.setHwVifModelList(typeConverter.findHwVifModel());
+        //allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
+        //allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
+
+        TypeAllVO allResponse = jsonMockService.getTypeAllVO();
         return new Result<>(allResponse);
     }
 
