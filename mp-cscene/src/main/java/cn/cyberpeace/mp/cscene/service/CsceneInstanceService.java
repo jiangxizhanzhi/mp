@@ -175,6 +175,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
 
+    @Autowired
+    private SceneJsonMockService sceneJsonMockService;
+
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
@@ -527,8 +530,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        return new ServiceResult<>(instanceHandler.toData());
+        //var instanceHandler = new CsceneInstanceHandler(id, context);
+        var instance = sceneJsonMockService.getInstanceBO();
+        return new ServiceResult<>(instance);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {

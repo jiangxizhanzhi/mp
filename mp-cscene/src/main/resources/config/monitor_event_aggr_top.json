@@ -1,0 +1,37 @@
+[
+  {
+    "element_id": "8901622a-a3f5-400d-8a27-fe66f172679e",
+    "element_name": "DC2",
+    "percent": 17.94,
+    "sum": 2664,
+    "type": null
+  },
+  {
+    "element_id": "bb3be023-9943-449e-ba48-08fac17f530d",
+    "element_name": "DC1",
+    "percent": 17.94,
+    "sum": 2664,
+    "type": null
+  },
+  {
+    "element_id": "5d2014f4-c27e-4206-b674-9fef4fcc2103",
+    "element_name": "OA",
+    "percent": 17.94,
+    "sum": 2664,
+    "type": null
+  },
+  {
+    "element_id": "b8c8294f-3baf-473f-9f26-d1e2a206be0b",
+    "element_name": "wiki",
+    "percent": 17.94,
+    "sum": 2664,
+    "type": null
+  },
+  {
+    "element_id": "f3090832-a731-421e-a859-c2ddd0dbb627",
+    "element_name": "Kali",
+    "percent": 17.94,
+    "sum": 2664,
+    "type": null
+  }
+]

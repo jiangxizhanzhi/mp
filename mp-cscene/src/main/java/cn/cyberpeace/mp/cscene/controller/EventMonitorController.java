@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.request.event.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.request.event.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
+import cn.cyberpeace.mp.cscene.service.SceneJsonMockService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -35,6 +34,9 @@ public class EventMonitorController {
 
     @Autowired
     private EventMonitorService eventMonitorService;
+
+    @Autowired
+    private SceneJsonMockService sceneJsonMockService;
 
     /**
      * 查询事件总数
@@ -58,12 +60,13 @@ public class EventMonitorController {
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
     @GetMapping("/aggr_top")
     public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
-        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
-
-        if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
-            eventPercentRequest.setTopCount(5);
-        }
-        List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
+        //List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
+        //
+        //if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
+        //    eventPercentRequest.setTopCount(5);
+        //}
+        //List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
+        var limitList = sceneJsonMockService.getEventAggrTop();
         return ResultCommon.success(limitList);
     }
 
@@ -77,7 +80,8 @@ public class EventMonitorController {
     @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
-        EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
+        //EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
+        var eventAggr = sceneJsonMockService.getEventAggr();
         return ResultCommon.success(eventAggr);
     }
 

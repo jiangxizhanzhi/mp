@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.SceneJsonMockService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -15,7 +16,11 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -37,13 +42,17 @@ public class SceneMonitorController {
     @Autowired
     private SceneMonitorService sceneMonitorService;
 
+    @Autowired
+    private SceneJsonMockService sceneJsonMockService;
+
     @ApiOperation(value = "查询场景监控信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
     })
     @GetMapping("/info/{sceneId}")
     public ServiceResult<SceneMonitorInfo> getSceneMonitorInfo(@PathVariable String sceneId) {
-        SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
+        //SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
+        var sceneMonitorInfo = sceneJsonMockService.getSceneMonitorInfo();
         return ResultCommon.success(sceneMonitorInfo);
     }
 
@@ -55,7 +64,8 @@ public class SceneMonitorController {
     })
     @GetMapping("/all_elements/{sceneId}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId, @RequestParam(required = false) Boolean realTimeHostState) {
-        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
+        //List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
+        var basicInfoList = sceneJsonMockService.listElementMonitorBasicInfos();
         return ResultCommon.success(basicInfoList);
     }
 

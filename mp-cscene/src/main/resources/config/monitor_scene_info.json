@@ -1,0 +1,17 @@
+{
+  "type": 2,
+  "reference_type": 236,
+  "reference_meta_data": "{\"business_code\":236,\"business_id\":\"764f80f2d0f3883c358e66c1bea21324\",\"business_name\":\"delta_s01\",\"create_user_id\":\"3f655d87112f4ae094bbaf70830e20aa\"}",
+  "create_username": "admin",
+  "create_time": "2023-04-14 09:44:28",
+  "run_minutes": 63,
+  "scene_attr": 1,
+  "virtual_machine_count": 28,
+  "container_count": 0,
+  "entity_count": 0,
+  "switch_count": 15,
+  "elastic_ip_count": 0,
+  "router_count": 20,
+  "firewall_count": 0,
+  "flow_table_count": 0
+}

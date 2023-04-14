@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.cscene.service.SceneJsonMockService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -37,6 +38,9 @@ public class HostStateController {
     @Autowired
     private HostStateService hostStateService;
 
+    @Autowired
+    private SceneJsonMockService sceneJsonMockService;
+
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
@@ -47,9 +51,9 @@ public class HostStateController {
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
-
-        return ResultCommon.success(hostStates);
+        //List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
+        var list = sceneJsonMockService.listMonitorHoststateSceneTrend();
+        return ResultCommon.success(list);
     }
 
 
