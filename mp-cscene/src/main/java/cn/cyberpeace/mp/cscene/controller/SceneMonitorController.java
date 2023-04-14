@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +55,14 @@ public class SceneMonitorController {
     @GetMapping("/info/{sceneId}")
     public ServiceResult<SceneMonitorInfo> getSceneMonitorInfo(@PathVariable String sceneId) {
         //SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
+
         var sceneMonitorInfo = sceneJsonMockService.getSceneMonitorInfo();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
+        LocalDateTime createTime = today.minusDays(2).atTime(10, 18, 29);
+        sceneMonitorInfo.setCreateTime(createTime);
+        sceneMonitorInfo.setRunMinutes(Duration.between(createTime, now).toMinutes());
+
         return ResultCommon.success(sceneMonitorInfo);
     }
 

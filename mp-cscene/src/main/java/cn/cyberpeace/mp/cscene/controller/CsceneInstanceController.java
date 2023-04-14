@@ -74,6 +74,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -514,10 +515,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/list_host_events", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
-        //handleQueryParams("listHostEvents", queryParams);
-        //return modelService.listHostEvents(id, queryParams).asResult();
         var list = sceneJsonMockService.listHostEvents();
-        return new ListObjServiceResult<>(new ListObjResult<>(list, 19087));
+
+        LocalDateTime now = LocalDateTime.now();
+        list.forEach(bo -> {
+            bo.setTime(now.minusMinutes(4));
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(list, 19087)).asResult();
     }
 
 
