@@ -274,7 +274,11 @@
                 and i.instance_state in (1,2,3)
             </if>
         </where>
-        ORDER BY i.create_time desc
+        ORDER BY
+        <if test="order != null and sort != null ">
+            ${order} ${sort},
+        </if>
+        i.create_time desc
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}
         </if>

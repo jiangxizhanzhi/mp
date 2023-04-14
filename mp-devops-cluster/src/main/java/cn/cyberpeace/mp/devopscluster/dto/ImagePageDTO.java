@@ -158,6 +158,14 @@ public class ImagePageDTO extends BasePageDTO{
      * 靶标创建用户名称
      */
     private String createUserName ;
+    /**
+     * 排序字段
+     */
+    private String order;
+    /**
+     * 升序，降序
+     */
+    private String sort;
 
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
@@ -194,6 +202,8 @@ public class ImagePageDTO extends BasePageDTO{
         this.setIsHide(Boolean.FALSE);
         this.setVmStarted(request.getVmStarted());
         this.setCreateUserName(request.getCreateUserName());
+        this.setOrder(request.getOrder());
+        this.setSort(SORT_ORDER.DESC.name().equalsIgnoreCase(request.getSort())?SORT_ORDER.DESC.name():SORT_ORDER.ASC.name());
     }
 
     /**
@@ -252,5 +262,9 @@ public class ImagePageDTO extends BasePageDTO{
         this.setImageTypeList(request.getImageTypeList());
         this.setPreTypeList(request.getPreTypeList());
         this.setParentSystemType(request.getParentSystemType());
+    }
+
+    public enum SORT_ORDER {
+        ASC, DESC
     }
 }
