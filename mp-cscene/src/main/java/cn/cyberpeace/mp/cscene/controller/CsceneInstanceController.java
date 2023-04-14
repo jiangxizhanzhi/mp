@@ -519,7 +519,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
         LocalDateTime now = LocalDateTime.now();
         list.forEach(bo -> {
-            bo.setTime(now.minusMinutes(4));
+            // 设定now为当前时间减去190秒，且秒数为10
+            bo.setTime(now.minusSeconds(190).withSecond(11));
         });
         return new ListObjServiceResult<>(new ListObjResult<>(list, 19087)).asResult();
     }
