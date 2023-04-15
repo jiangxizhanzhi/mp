@@ -163,7 +163,7 @@
     "time": "2023-04-15 09:18:29",
     "timestamp": 1681521509843,
     "attack_info": {
-      "severity": 3,
+      "severity": 2,
       "attack_type": "Detection of a Network Scan"
     }
   },
@@ -303,7 +303,7 @@
     "time": "2023-04-15 09:18:12",
     "timestamp": 1681521492653,
     "attack_info": {
-      "severity": 3,
+      "severity": 2,
       "attack_type": "Detection of a Network Scan"
     }
   },
