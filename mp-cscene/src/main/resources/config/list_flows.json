@@ -23,7 +23,7 @@
     "time": "2023-04-15 09:18:34",
     "timestamp": 1681521514426,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Attempted Administrator Privilege Gain"
     }
   },
@@ -51,7 +51,7 @@
     "time": "2023-04-15 09:18:33",
     "timestamp": 1681521513494,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A client was using an unusual port"
     }
   },
@@ -79,7 +79,7 @@
     "time": "2023-04-15 09:18:32",
     "timestamp": 1681521512524,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Denial of Service"
     }
   },
@@ -107,7 +107,7 @@
     "time": "2023-04-15 09:18:31",
     "timestamp": 1681521511644,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Attempted User Privilege Gain"
     }
   },
@@ -135,7 +135,7 @@
     "time": "2023-04-15 09:18:30",
     "timestamp": 1681521510792,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful Credential Theft Detected"
     }
   },
@@ -191,7 +191,7 @@
     "time": "2023-04-15 09:18:29",
     "timestamp": 1681521509141,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Denial of Service"
     }
   },
@@ -219,7 +219,7 @@
     "time": "2023-04-15 09:18:27",
     "timestamp": 1681521507930,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Detection of a Denial of Service Attack"
     }
   },
@@ -247,7 +247,7 @@
     "time": "2023-04-15 09:18:26",
     "timestamp": 1681521506950,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A suspicious filename was detected"
     }
   },
@@ -275,7 +275,7 @@
     "time": "2023-04-15 09:18:13",
     "timestamp": 1681521493358,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A client was using an unusual port"
     }
   },
@@ -331,7 +331,7 @@
     "time": "2023-04-15 09:18:11",
     "timestamp": 1681521491809,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possible Social Engineering Attempted"
     }
   },
@@ -359,7 +359,7 @@
     "time": "2023-04-15 09:18:11",
     "timestamp": 1681521491069,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Web Application Attack"
     }
   },
@@ -387,7 +387,7 @@
     "time": "2023-04-15 09:18:10",
     "timestamp": 1681521490214,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "A Network Trojan was detected"
     }
   },
@@ -415,7 +415,7 @@
     "time": "2023-04-15 09:18:09",
     "timestamp": 1681521489459,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Device Retrieving External IP Address Detected"
     }
   },
@@ -443,7 +443,7 @@
     "time": "2023-04-15 09:18:08",
     "timestamp": 1681521488528,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possible Social Engineering Attempted"
     }
   },
@@ -471,7 +471,7 @@
     "time": "2023-04-15 09:18:07",
     "timestamp": 1681521487574,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Potentially Bad Traffic"
     }
   },
@@ -555,7 +555,7 @@
     "time": "2023-04-15 09:14:32",
     "timestamp": 1681521272498,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Device Retrieving External IP Address Detected"
     }
   },
@@ -611,7 +611,7 @@
     "time": "2023-04-15 09:14:30",
     "timestamp": 1681521270670,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Potential Corporate Privacy Violation"
     }
   },
@@ -639,7 +639,7 @@
     "time": "2023-04-15 09:14:29",
     "timestamp": 1681521269786,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Denial of Service"
     }
   },
@@ -695,7 +695,7 @@
     "time": "2023-04-15 09:14:27",
     "timestamp": 1681521267679,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful Credential Theft Detected"
     }
   },
@@ -723,7 +723,7 @@
     "time": "2023-04-15 09:14:26",
     "timestamp": 1681521266548,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Large Scale Information Leak"
     }
   },
@@ -751,7 +751,7 @@
     "time": "2023-04-15 09:14:25",
     "timestamp": 1681521265618,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful User Privilege Gain"
     }
   },
@@ -779,7 +779,7 @@
     "time": "2023-04-15 09:14:24",
     "timestamp": 1681521264718,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful User Privilege Gain"
     }
   },
@@ -807,7 +807,7 @@
     "time": "2023-04-15 09:14:23",
     "timestamp": 1681521263754,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Detection of a Denial of Service Attack"
     }
   },
@@ -835,7 +835,7 @@
     "time": "2023-04-15 09:14:22",
     "timestamp": 1681521262748,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "A Network Trojan was detected"
     }
   },
@@ -863,7 +863,7 @@
     "time": "2023-04-15 09:14:21",
     "timestamp": 1681521261422,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "access to a potentially vulnerable web application"
     }
   },
@@ -919,7 +919,7 @@
     "time": "2023-04-15 09:08:16",
     "timestamp": 1681520896382,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Executable code was detected"
     }
   },
@@ -947,7 +947,7 @@
     "time": "2023-04-15 09:08:15",
     "timestamp": 1681520895507,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Targeted Malicious Activity was Detected"
     }
   },
@@ -1003,7 +1003,7 @@
     "time": "2023-04-15 09:08:13",
     "timestamp": 1681520893637,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Large Scale Information Leak"
     }
   },
@@ -1031,7 +1031,7 @@
     "time": "2023-04-15 09:08:12",
     "timestamp": 1681520892732,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful Credential Theft Detected"
     }
   },
@@ -1059,7 +1059,7 @@
     "time": "2023-04-15 09:08:11",
     "timestamp": 1681520891856,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "SCORE! Get the lotion!"
     }
   },
@@ -1087,7 +1087,7 @@
     "time": "2023-04-15 09:08:10",
     "timestamp": 1681520890986,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Large Scale Information Leak"
     }
   },
@@ -1115,7 +1115,7 @@
     "time": "2023-04-15 09:08:10",
     "timestamp": 1681520890050,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Information Leak"
     }
   },
@@ -1143,7 +1143,7 @@
     "time": "2023-04-15 09:08:09",
     "timestamp": 1681520889107,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Targeted Malicious Activity was Detected"
     }
   },
@@ -1171,7 +1171,7 @@
     "time": "2023-04-15 09:08:07",
     "timestamp": 1681520887979,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "SCORE! Get the lotion!"
     }
   },
@@ -1199,7 +1199,7 @@
     "time": "2023-04-15 09:08:06",
     "timestamp": 1681520886969,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A suspicious filename was detected"
     }
   },
@@ -1227,7 +1227,7 @@
     "time": "2023-04-15 09:08:06",
     "timestamp": 1681520886133,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Detection of a Denial of Service Attack"
     }
   },
@@ -1255,7 +1255,7 @@
     "time": "2023-04-15 09:08:05",
     "timestamp": 1681520885239,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "SCORE! Get the lotion!"
     }
   },
@@ -1283,7 +1283,7 @@
     "time": "2023-04-15 09:08:04",
     "timestamp": 1681520884281,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Exploit Kit Activity Detected"
     }
   },
@@ -1339,7 +1339,7 @@
     "time": "2023-04-15 09:08:02",
     "timestamp": 1681520882591,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Large Scale Information Leak"
     }
   },
@@ -1395,7 +1395,7 @@
     "time": "2023-04-15 09:08:00",
     "timestamp": 1681520880717,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possibly Unwanted Program Detected"
     }
   },
@@ -1423,7 +1423,7 @@
     "time": "2023-04-15 09:07:59",
     "timestamp": 1681520879723,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Decode of an RPC Query"
     }
   },
@@ -1451,7 +1451,7 @@
     "time": "2023-04-15 09:07:58",
     "timestamp": 1681520878849,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Potentially Bad Traffic"
     }
   },
@@ -1479,7 +1479,7 @@
     "time": "2023-04-15 09:07:57",
     "timestamp": 1681520877935,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Domain Observed Used for C2 Detected"
     }
   },
@@ -1507,7 +1507,7 @@
     "time": "2023-04-15 09:07:48",
     "timestamp": 1681520868573,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Misc Attack"
     }
   },
@@ -1535,7 +1535,7 @@
     "time": "2023-04-15 09:07:47",
     "timestamp": 1681520867664,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possible Social Engineering Attempted"
     }
   },
@@ -1563,7 +1563,7 @@
     "time": "2023-04-15 09:07:46",
     "timestamp": 1681520866746,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "An attempted login using a suspicious username was detected"
     }
   },
@@ -1591,7 +1591,7 @@
     "time": "2023-04-15 09:07:44",
     "timestamp": 1681520864528,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Detection of a non-standard protocol or event"
     }
   },
@@ -1619,7 +1619,7 @@
     "time": "2023-04-15 09:07:42",
     "timestamp": 1681520862146,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possibly Unwanted Program Detected"
     }
   },
@@ -1675,7 +1675,7 @@
     "time": "2023-04-15 09:07:40",
     "timestamp": 1681520860174,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Attempted User Privilege Gain"
     }
   },
@@ -1703,7 +1703,7 @@
     "time": "2023-04-15 09:07:39",
     "timestamp": 1681520859076,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Executable code was detected"
     }
   },
@@ -1731,7 +1731,7 @@
     "time": "2023-04-15 09:07:38",
     "timestamp": 1681520858056,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful Credential Theft Detected"
     }
   },
@@ -1815,7 +1815,7 @@
     "time": "2023-04-15 09:07:34",
     "timestamp": 1681520854872,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possible Social Engineering Attempted"
     }
   },
@@ -1899,7 +1899,7 @@
     "time": "2023-04-15 09:07:15",
     "timestamp": 1681520835175,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "An attempted login using a suspicious username was detected"
     }
   },
@@ -1927,7 +1927,7 @@
     "time": "2023-04-15 09:07:14",
     "timestamp": 1681520834253,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Exploit Kit Activity Detected"
     }
   },
@@ -1983,7 +1983,7 @@
     "time": "2023-04-15 09:07:12",
     "timestamp": 1681520832355,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Information Leak"
     }
   },
@@ -2011,7 +2011,7 @@
     "time": "2023-04-15 09:07:11",
     "timestamp": 1681520831435,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "An attempted login using a suspicious username was detected"
     }
   },
@@ -2039,7 +2039,7 @@
     "time": "2023-04-15 09:07:10",
     "timestamp": 1681520830403,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Denial of Service"
     }
   },
@@ -2067,7 +2067,7 @@
     "time": "2023-04-15 09:07:09",
     "timestamp": 1681520829479,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Potential Corporate Privacy Violation"
     }
   },
@@ -2095,7 +2095,7 @@
     "time": "2023-04-15 09:07:08",
     "timestamp": 1681520828509,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "SCORE! Get the lotion!"
     }
   },
@@ -2123,7 +2123,7 @@
     "time": "2023-04-15 09:07:06",
     "timestamp": 1681520826787,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Information Leak"
     }
   },
@@ -2151,7 +2151,7 @@
     "time": "2023-04-15 09:07:05",
     "timestamp": 1681520825897,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A suspicious filename was detected"
     }
   },
@@ -2179,7 +2179,7 @@
     "time": "2023-04-15 09:07:04",
     "timestamp": 1681520824908,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Attempted Administrator Privilege Gain"
     }
   },
@@ -2207,7 +2207,7 @@
     "time": "2023-04-15 09:07:03",
     "timestamp": 1681520823971,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Exploit Kit Activity Detected"
     }
   },
@@ -2235,7 +2235,7 @@
     "time": "2023-04-15 09:07:02",
     "timestamp": 1681520822949,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Targeted Malicious Activity was Detected"
     }
   },
@@ -2291,7 +2291,7 @@
     "time": "2023-04-15 09:06:41",
     "timestamp": 1681520801675,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A client was using an unusual port"
     }
   },
@@ -2319,7 +2319,7 @@
     "time": "2023-04-15 09:06:40",
     "timestamp": 1681520800462,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "A Network Trojan was detected"
     }
   },
@@ -2347,7 +2347,7 @@
     "time": "2023-04-15 09:06:39",
     "timestamp": 1681520799512,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Potential Corporate Privacy Violation"
     }
   },
@@ -2403,7 +2403,7 @@
     "time": "2023-04-15 09:06:37",
     "timestamp": 1681520797507,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "A Network Trojan was detected"
     }
   },
@@ -2431,7 +2431,7 @@
     "time": "2023-04-15 09:06:36",
     "timestamp": 1681520796398,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Crypto Currency Mining Activity Detected"
     }
   },
@@ -2459,7 +2459,7 @@
     "time": "2023-04-15 09:06:35",
     "timestamp": 1681520795377,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A system call was detected"
     }
   },
@@ -2487,7 +2487,7 @@
     "time": "2023-04-15 09:06:34",
     "timestamp": 1681520794313,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Successful Credential Theft Detected"
     }
   },
@@ -2515,7 +2515,7 @@
     "time": "2023-04-15 09:06:33",
     "timestamp": 1681520793271,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Crypto Currency Mining Activity Detected"
     }
   },
@@ -2543,7 +2543,7 @@
     "time": "2023-04-15 09:06:32",
     "timestamp": 1681520792246,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A suspicious filename was detected"
     }
   },
@@ -2571,7 +2571,7 @@
     "time": "2023-04-15 09:06:31",
     "timestamp": 1681520791245,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A suspicious filename was detected"
     }
   },
@@ -2599,7 +2599,7 @@
     "time": "2023-04-15 09:06:30",
     "timestamp": 1681520790307,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Decode of an RPC Query"
     }
   },
@@ -2627,7 +2627,7 @@
     "time": "2023-04-15 09:05:36",
     "timestamp": 1681520736866,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Possibly Unwanted Program Detected"
     }
   },
@@ -2655,7 +2655,7 @@
     "time": "2023-04-15 09:05:35",
     "timestamp": 1681520735899,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A client was using an unusual port"
     }
   },
@@ -2711,7 +2711,7 @@
     "time": "2023-04-15 09:05:34",
     "timestamp": 1681520734761,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A system call was detected"
     }
   },
@@ -2739,7 +2739,7 @@
     "time": "2023-04-15 09:05:34",
     "timestamp": 1681520734232,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "Attempted Denial of Service"
     }
   },
@@ -2767,7 +2767,7 @@
     "time": "2023-04-15 09:05:33",
     "timestamp": 1681520733651,
     "attack_info": {
-      "severity": 2,
+      "severity": 4,
       "attack_type": "A system call was detected"
     }
   },
@@ -2795,7 +2795,7 @@
     "time": "2023-04-15 09:05:33",
     "timestamp": 1681520733120,
     "attack_info": {
-      "severity": 1,
+      "severity": 4,
       "attack_type": "Domain Observed Used for C2 Detected"
     }
   }

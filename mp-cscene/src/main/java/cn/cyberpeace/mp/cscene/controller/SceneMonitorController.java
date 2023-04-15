@@ -59,7 +59,7 @@ public class SceneMonitorController {
         var sceneMonitorInfo = sceneJsonMockService.getSceneMonitorInfo();
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = LocalDate.now();
-        LocalDateTime createTime = today.minusDays(1).atTime(10, 18, 29);
+        LocalDateTime createTime = today.minusDays(1).atTime(9, 18, 29);
         sceneMonitorInfo.setCreateTime(createTime);
         sceneMonitorInfo.setRunMinutes(Duration.between(createTime, now).toMinutes());
 
