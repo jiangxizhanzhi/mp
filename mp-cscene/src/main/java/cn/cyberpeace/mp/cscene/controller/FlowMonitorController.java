@@ -92,12 +92,12 @@ public class FlowMonitorController {
         //List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
         var list = sceneJsonMockService.listFlowTrend();
         LocalDateTime now = LocalDateTime.now();
-        long step = 0;
+        long step = 240;
 
         for (FlowTrend bo : list) {
             // 设定now为当前时间减去190秒，且秒数为10
             bo.setTime(now.minusMinutes(step));
-            step += 6;
+            step -= 6;
         }
 
         return ResultCommon.success(list);

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneJsonMockService;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -22,7 +23,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -52,7 +55,18 @@ public class HostStateController {
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         //List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
+
+        LocalDateTime now = LocalDateTime.now();
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(now.minusHours(24), now, 10);
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(now.minusHours(24), now, intervalSeconds);
+
         var list = sceneJsonMockService.listMonitorHoststateSceneTrend();
+        for (int i = 0; i < list.size(); i++) {
+            if (Objects.nonNull(timeList.get(i))) {
+                list.get(i).setTime(timeList.get(i));
+            }
+        }
+
         return ResultCommon.success(list);
     }
 
