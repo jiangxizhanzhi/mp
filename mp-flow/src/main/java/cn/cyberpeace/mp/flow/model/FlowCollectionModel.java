@@ -45,6 +45,14 @@ public class FlowCollectionModel extends BaseModel {
     private Integer category;
 
     /**
+     * 流量集合分类  0背景流量，1攻击流量，2混合流量
+      */
+    @ApiModelProperty(value = "流量集合分类")
+    @NotNull(message = "typeFlag can not be empty")
+    @DefaultInt(2)
+    private Integer typeFlag;
+
+    /**
      * 背景流量数量
      */
     @ApiModelProperty(value = "背景流量数量")

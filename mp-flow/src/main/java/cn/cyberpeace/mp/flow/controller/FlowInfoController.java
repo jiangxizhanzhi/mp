@@ -2,10 +2,11 @@ package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.flow.constant.*;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -20,7 +21,6 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -91,6 +90,15 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ServiceResult<List<OptionBO>> flowCategories() {
         return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
+
+    @GetMapping("/categories/add")
+    @ApiOperation(value = "新增流量分类")
+    public ServiceResult<OptionModel> addCategories() {
+        OptionModel optionModel = new OptionModel();
+        ObjServiceResult<OptionModel> optionModelObjServiceResult = optionService.create(optionModel);
+        return ResultCommon.success(optionModelObjServiceResult.getSource().asResult());
+    }
+
 
     /**
      * 分页查询流量信息
