@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import com.alibaba.fastjson.JSONObject;
@@ -48,6 +50,32 @@ public class SceneJsonMockService {
 
     private static final String MONITOR_FLOW_RISK_COUNT = "config/monitor_flow_risk_count.json";
 
+    private static final String LIST_FLOWS = "config/list_flows.json";
+
+    private static final String MONITOR_FLOW_SCENE_TREND = "config/monitor_flow_scene_trend.json";
+
+
+    public List<FlowTrend> listFlowTrend() {
+        List<FlowTrend> infos = new ArrayList<>();
+        String content = getContent(MONITOR_FLOW_SCENE_TREND);
+
+        if (StringUtils.isNotBlank(content)) {
+            infos = JSONObject.parseArray(content, FlowTrend.class);
+        }
+
+        return infos;
+    }
+
+    public List<FlowAttackDto> listFlows() {
+        List<FlowAttackDto> infos = new ArrayList<>();
+        String content = getContent(LIST_FLOWS);
+
+        if (StringUtils.isNotBlank(content)) {
+            infos = JSONObject.parseArray(content, FlowAttackDto.class);
+        }
+
+        return infos;
+    }
 
     public FlowRiskCount getFlowRiskCount() {
         FlowRiskCount info = new FlowRiskCount();

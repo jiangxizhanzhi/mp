@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -43,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,9 +89,18 @@ public class FlowMonitorController {
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
-        List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
+        //List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
+        var list = sceneJsonMockService.listFlowTrend();
+        LocalDateTime now = LocalDateTime.now();
+        long step = 0;
 
-        return ResultCommon.success(flowTrends);
+        for (FlowTrend bo : list) {
+            // 设定now为当前时间减去190秒，且秒数为10
+            bo.setTime(now.minusMinutes(step));
+            step += 6;
+        }
+
+        return ResultCommon.success(list);
     }
 
     /**
@@ -183,8 +195,16 @@ public class FlowMonitorController {
     public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
 
-        ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
-        return result;
+        var list = sceneJsonMockService.listFlows();
+
+        LocalDateTime now = LocalDateTime.now();
+        long step = 0;
+        for (FlowAttackDto dto : list) {
+            dto.setTime(now.minusSeconds(100).minus(step, ChronoUnit.MILLIS));
+            step += 30;
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(list, 1683)).asResult();
     }
 
 

@@ -1,0 +1,2802 @@
+[
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:34",
+    "timestamp": 1681521514426,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Attempted Administrator Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:33",
+    "timestamp": 1681521513494,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A client was using an unusual port"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:32",
+    "timestamp": 1681521512524,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Denial of Service"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:31",
+    "timestamp": 1681521511644,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Attempted User Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:30",
+    "timestamp": 1681521510792,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful Credential Theft Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:29",
+    "timestamp": 1681521509843,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Detection of a Network Scan"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:29",
+    "timestamp": 1681521509141,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Denial of Service"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:27",
+    "timestamp": 1681521507930,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Detection of a Denial of Service Attack"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "target_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "source_node_name": "win10-pc2-school-tjh",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.12",
+    "target_ip": "10.8.100.73",
+    "source_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "target_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:26",
+    "timestamp": 1681521506950,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A suspicious filename was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:13",
+    "timestamp": 1681521493358,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A client was using an unusual port"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:12",
+    "timestamp": 1681521492653,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Detection of a Network Scan"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:11",
+    "timestamp": 1681521491809,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possible Social Engineering Attempted"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:11",
+    "timestamp": 1681521491069,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Web Application Attack"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:10",
+    "timestamp": 1681521490214,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "A Network Trojan was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:09",
+    "timestamp": 1681521489459,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Device Retrieving External IP Address Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:08",
+    "timestamp": 1681521488528,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possible Social Engineering Attempted"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:07",
+    "timestamp": 1681521487574,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Potentially Bad Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:18:05",
+    "timestamp": 1681521485733,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Misc activity"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:33",
+    "timestamp": 1681521273395,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Misc activity"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:32",
+    "timestamp": 1681521272498,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Device Retrieving External IP Address Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:31",
+    "timestamp": 1681521271555,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Generic Protocol Command Decode"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:30",
+    "timestamp": 1681521270670,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Potential Corporate Privacy Violation"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:29",
+    "timestamp": 1681521269786,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Denial of Service"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:28",
+    "timestamp": 1681521268868,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Not Suspicious Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:27",
+    "timestamp": 1681521267679,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful Credential Theft Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:26",
+    "timestamp": 1681521266548,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Large Scale Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:25",
+    "timestamp": 1681521265618,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful User Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:24",
+    "timestamp": 1681521264718,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful User Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:23",
+    "timestamp": 1681521263754,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Detection of a Denial of Service Attack"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:22",
+    "timestamp": 1681521262748,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "A Network Trojan was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:14:21",
+    "timestamp": 1681521261422,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "access to a potentially vulnerable web application"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:17",
+    "timestamp": 1681520897333,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Not Suspicious Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:16",
+    "timestamp": 1681520896382,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Executable code was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:15",
+    "timestamp": 1681520895507,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Targeted Malicious Activity was Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:14",
+    "timestamp": 1681520894548,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "A suspicious string was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:13",
+    "timestamp": 1681520893637,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Large Scale Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:12",
+    "timestamp": 1681520892732,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful Credential Theft Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:11",
+    "timestamp": 1681520891856,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "SCORE! Get the lotion!"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:10",
+    "timestamp": 1681520890986,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Large Scale Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:10",
+    "timestamp": 1681520890050,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:09",
+    "timestamp": 1681520889107,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Targeted Malicious Activity was Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:07",
+    "timestamp": 1681520887979,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "SCORE! Get the lotion!"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:06",
+    "timestamp": 1681520886969,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A suspicious filename was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:06",
+    "timestamp": 1681520886133,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Detection of a Denial of Service Attack"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:05",
+    "timestamp": 1681520885239,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "SCORE! Get the lotion!"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:04",
+    "timestamp": 1681520884281,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Exploit Kit Activity Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:03",
+    "timestamp": 1681520883394,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Detection of a Network Scan"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:02",
+    "timestamp": 1681520882591,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Large Scale Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "DC2",
+    "target_node_name": "James",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:01",
+    "timestamp": 1681520881564,
+    "attack_info": {
+      "severity": 4,
+      "attack_type": "A TCP connection was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "DC2",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:08:00",
+    "timestamp": 1681520880717,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possibly Unwanted Program Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "DC2",
+    "target_node_name": "DC1",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:59",
+    "timestamp": 1681520879723,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Decode of an RPC Query"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "DC2",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:58",
+    "timestamp": 1681520878849,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Potentially Bad Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "OA",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:57",
+    "timestamp": 1681520877935,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Domain Observed Used for C2 Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Kevin",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:48",
+    "timestamp": 1681520868573,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Misc Attack"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Kevin",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:47",
+    "timestamp": 1681520867664,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possible Social Engineering Attempted"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Kevin",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:46",
+    "timestamp": 1681520866746,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "An attempted login using a suspicious username was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Kevin",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:44",
+    "timestamp": 1681520864528,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Detection of a non-standard protocol or event"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Windows",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:42",
+    "timestamp": 1681520862146,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possibly Unwanted Program Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Windows",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:41",
+    "timestamp": 1681520861170,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Misc activity"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "Windows",
+    "target_node_name": "Kali",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:40",
+    "timestamp": 1681520860174,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Attempted User Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "Kali",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:39",
+    "timestamp": 1681520859076,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Executable code was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "PC-liming",
+    "target_node_name": "mysql",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:38",
+    "timestamp": 1681520858056,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful Credential Theft Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:36",
+    "timestamp": 1681520856936,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Generic Protocol Command Decode"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:35",
+    "timestamp": 1681520855894,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Unknown Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:34",
+    "timestamp": 1681520854872,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possible Social Engineering Attempted"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:33",
+    "timestamp": 1681520853890,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Misc activity"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "PC-liming",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:32",
+    "timestamp": 1681520852717,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Detection of a Network Scan"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:15",
+    "timestamp": 1681520835175,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "An attempted login using a suspicious username was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:14",
+    "timestamp": 1681520834253,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Exploit Kit Activity Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:13",
+    "timestamp": 1681520833331,
+    "attack_info": {
+      "severity": 4,
+      "attack_type": "A TCP connection was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:12",
+    "timestamp": 1681520832355,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:11",
+    "timestamp": 1681520831435,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "An attempted login using a suspicious username was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:10",
+    "timestamp": 1681520830403,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Denial of Service"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:09",
+    "timestamp": 1681520829479,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Potential Corporate Privacy Violation"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "PC-liming",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:08",
+    "timestamp": 1681520828509,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "SCORE! Get the lotion!"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "PC-liming",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:06",
+    "timestamp": 1681520826787,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Information Leak"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:05",
+    "timestamp": 1681520825897,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A suspicious filename was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:04",
+    "timestamp": 1681520824908,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Attempted Administrator Privilege Gain"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:03",
+    "timestamp": 1681520823971,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Exploit Kit Activity Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:02",
+    "timestamp": 1681520822949,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Targeted Malicious Activity was Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:07:01",
+    "timestamp": 1681520821950,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Unknown Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:41",
+    "timestamp": 1681520801675,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A client was using an unusual port"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:40",
+    "timestamp": 1681520800462,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "A Network Trojan was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:39",
+    "timestamp": 1681520799512,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Potential Corporate Privacy Violation"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:38",
+    "timestamp": 1681520798512,
+    "attack_info": {
+      "severity": 3,
+      "attack_type": "Unknown Traffic"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:37",
+    "timestamp": 1681520797507,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "A Network Trojan was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:36",
+    "timestamp": 1681520796398,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Crypto Currency Mining Activity Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:35",
+    "timestamp": 1681520795377,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A system call was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:34",
+    "timestamp": 1681520794313,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Successful Credential Theft Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:33",
+    "timestamp": 1681520793271,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Crypto Currency Mining Activity Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:32",
+    "timestamp": 1681520792246,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A suspicious filename was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:31",
+    "timestamp": 1681520791245,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A suspicious filename was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:06:30",
+    "timestamp": 1681520790307,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Decode of an RPC Query"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:36",
+    "timestamp": 1681520736866,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Possibly Unwanted Program Detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "James",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:35",
+    "timestamp": 1681520735899,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A client was using an unusual port"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "James",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:35",
+    "timestamp": 1681520735321,
+    "attack_info": {
+      "severity": 4,
+      "attack_type": "A TCP connection was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:34",
+    "timestamp": 1681520734761,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A system call was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:34",
+    "timestamp": 1681520734232,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "Attempted Denial of Service"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "James",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:33",
+    "timestamp": 1681520733651,
+    "attack_info": {
+      "severity": 2,
+      "attack_type": "A system call was detected"
+    }
+  },
+  {
+    "scene_id": null,
+    "source_node_id": "4298e0e1-d6b2-499d-bcab-7163dea72395",
+    "target_node_id": "bd47ba94-040d-4b3a-93e3-6c111d575c4d",
+    "source_node_name": "OA",
+    "target_node_name": "win10-pc2-school-tjh",
+    "source_ip": "10.8.100.73",
+    "target_ip": "10.8.100.12",
+    "source_mac": [
+      "fa:16:3e:8a:34:03"
+    ],
+    "target_mac": [
+      "fa:16:3e:88:69:f0"
+    ],
+    "source_port": "1546",
+    "target_port": "547",
+    "protocol": [
+      "dhcpv6",
+      "udp"
+    ],
+    "size": 2048,
+    "time": "2023-04-15 09:05:33",
+    "timestamp": 1681520733120,
+    "attack_info": {
+      "severity": 1,
+      "attack_type": "Domain Observed Used for C2 Detected"
+    }
+  }
+]
