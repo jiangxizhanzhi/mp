@@ -6,12 +6,12 @@
   "create_time": "2023-04-14 09:44:28",
   "run_minutes": 63,
   "scene_attr": 1,
-  "virtual_machine_count": 28,
-  "container_count": 0,
-  "entity_count": 0,
+  "virtual_machine_count": 23,
+  "container_count": 5,
+  "entity_count": 1,
   "switch_count": 15,
-  "elastic_ip_count": 0,
+  "elastic_ip_count": 5,
   "router_count": 20,
-  "firewall_count": 0,
-  "flow_table_count": 0
+  "firewall_count": 10,
+  "flow_table_count": 3
 }
