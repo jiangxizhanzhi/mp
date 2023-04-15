@@ -9,28 +9,28 @@
   {
     "element_id": "2adf5891-4479-4c97-9e9c-8e0141f941c8",
     "element_name": "James",
-    "percent": 9.31,
+    "percent": 12.33,
     "sum": 3165,
     "type": null
   },
   {
     "element_id": "aa99c223-ef8a-4681-a446-16b9a0319155",
     "element_name": "PC-zhangsan",
-    "percent": 9.31,
+    "percent": 11.68,
     "sum": 3164,
     "type": null
   },
   {
     "element_id": "f331bf48-4ec3-41e6-8f69-42699f79a7f1",
     "element_name": "Kevin",
-    "percent": 9.31,
+    "percent": 10.81,
     "sum": 3165,
     "type": null
   },
   {
     "element_id": "a8406719-f2a0-413d-a38a-b6f797877943",
     "element_name": "mysql",
-    "percent": 9.31,
+    "percent": 9.22,
     "sum": 3165,
     "type": null
   }
