@@ -3,10 +3,8 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.flow.constant.*;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -90,15 +88,6 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ServiceResult<List<OptionBO>> flowCategories() {
         return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
-
-    @GetMapping("/categories/add")
-    @ApiOperation(value = "新增流量分类")
-    public ServiceResult<OptionModel> addCategories() {
-        OptionModel optionModel = new OptionModel();
-        ObjServiceResult<OptionModel> optionModelObjServiceResult = optionService.create(optionModel);
-        return ResultCommon.success(optionModelObjServiceResult.getSource().asResult());
-    }
-
 
     /**
      * 分页查询流量信息
