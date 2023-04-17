@@ -87,6 +87,7 @@ public class WazuhLauncher {
         launchInput.setGroup(launchInput.getMatcher());
         launchInput.setId(runCommandItem.getRunId());
         launchInput.setOutputFormat(runCommandItem.getOutputFormat());
+        launchInput.setExile(runCommandItem.getExile());
         launchInput.setCommand(runCommandItem.getCommand());
 
         var runCommandHttpCallbacks = runCommandItem.getHttpCallbacks();
@@ -343,6 +344,7 @@ public class WazuhLauncher {
         private String command;
         private String outputFormat;
         private String httpCallbacks;
+        private Boolean exile;
     }
 
     @Data
@@ -373,6 +375,7 @@ public class WazuhLauncher {
         /** required */
         private String command;
         private String outputFormat;
+        private Boolean exile;
         private Boolean checkOutput;
         private Integer checkOutputTime;
         private Integer checkOutputInterval;
