@@ -13,8 +13,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -185,7 +183,7 @@ public class WazuhCommon {
     }
 
     public static void uninstallAgent(String agentName, String systemType) {
-        String cmd = null;
+        /*String cmd = null;
         String osType = null;
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             osType = WazuhLauncher.OS_TYPE_LINUX;
@@ -215,7 +213,7 @@ public class WazuhCommon {
                 e.printStackTrace();
             }
 
-        }
+        }*/
     }
 
     /**
