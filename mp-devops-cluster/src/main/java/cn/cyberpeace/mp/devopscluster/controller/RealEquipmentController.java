@@ -229,7 +229,7 @@ public class RealEquipmentController {
     @ApiOperation("更新实体设备申请数")
     @ApiImplicitParam(name = "request", value = "更新实体设备申请数", dataTypeClass = UpdateApplicationRequest.class)
     @PostMapping("/update_application_num")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "更新实体设备申请数", target = OpTargetEnums.REALEQUIPMENT)
+    //@OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "更新实体设备申请数", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult<Boolean> updateApplicationNum(@RequestBody UpdateApplicationRequest request) {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -241,7 +241,7 @@ public class RealEquipmentController {
     @ApiOperation("分配/回收实体设备")
     @ApiImplicitParam(name = "request", value = "分配/回收实体设备", dataTypeClass = OrganizeRealEquipmentRequest.class)
     @PostMapping("/organize_real_equipment")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "分配/回收实体设备", target = OpTargetEnums.REALEQUIPMENT)
+    //@OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "分配/回收实体设备", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult addApplication(@RequestBody OrganizeRealEquipmentRequest request) {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
