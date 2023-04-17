@@ -209,7 +209,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("批量导出场景")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "ids", value = "场景模板ids", dataTypeClass = String[].class),
     })
     @GetMapping(value = "/list_export", params = "ids")
     public void export(HttpServletResponse response, @RequestParam String[] ids) throws Exception {
