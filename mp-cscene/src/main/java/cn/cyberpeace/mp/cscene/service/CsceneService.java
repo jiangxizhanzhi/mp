@@ -14,7 +14,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -38,6 +42,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -46,7 +51,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -72,6 +83,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
+
+    private SceneJsonMockService sceneJsonMockService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -197,7 +210,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneSnapshotService csceneSnapshotService,
                          CsceneModelFields csceneModelFields,
                          CsceneAuthMapper csceneAuthMapper,
-                         TenantUserServiceImpl tenantUserService) {
+                         TenantUserServiceImpl tenantUserService,
+                         SceneJsonMockService sceneJsonMockService) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -209,6 +223,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneSnapshotService(csceneSnapshotService);
         setCsceneAuthMapper(csceneAuthMapper);
         setTenantUserService(tenantUserService);
+        setSceneJsonMockService(sceneJsonMockService);
     }
 
     @Override
@@ -365,8 +380,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
-        return new ServiceResult<>(csceneHandler.toData(withInstance));
+        //var csceneHandler = new CsceneHandler(id, context);
+        var instanceBO = sceneJsonMockService.getInstanceBO();
+        String jsonStr = JSON.toJSONString(instanceBO);
+        CsceneBO bo = JSON.parseObject(jsonStr, CsceneBO.class);
+
+        var scene = instanceBO.getScene();
+        String sceneJsonStr = JSON.toJSONString(scene);
+        bo.setSceneConfig(JSON.parseObject(sceneJsonStr, SceneConfigDataBO.class));
+        return new ServiceResult<>(bo);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
