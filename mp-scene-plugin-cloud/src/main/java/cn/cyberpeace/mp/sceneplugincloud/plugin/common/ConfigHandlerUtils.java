@@ -112,12 +112,10 @@ public class ConfigHandlerUtils {
         }
 
         // 判断是否是交换机 且开启辅助网络
-        if (type != null && type.equals(BaseSceneElementModel.Type.SWITCH)
-                && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+        if (type != null && type.equals(BaseSceneElementModel.Type.SWITCH)) {
             return cloudElement;
         }
-        if (connectedType != null && connectedType.equals(BaseSceneElementModel.Type.SWITCH)
-                && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+        if (connectedType != null && connectedType.equals(BaseSceneElementModel.Type.SWITCH)) {
             return connectedCloudElement;
         }
 
