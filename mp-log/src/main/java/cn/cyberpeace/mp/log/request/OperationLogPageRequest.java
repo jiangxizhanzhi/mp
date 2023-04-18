@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.log.model.OperationLogModel;
+import cn.cyberpeace.mp.log.service.impl.OpModuleService;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -94,6 +95,8 @@ public class OperationLogPageRequest extends BasePageRequest{
         String userNameOrOpTarget = this.getUserNameOrOpTarget();
         if (Objects.nonNull(moduleID)) {
             boolBuilder.must(QueryBuilders.termQuery("opModuleID", moduleID));
+        }else {
+            boolBuilder.must(QueryBuilders.termsQuery("opModuleID", OpModuleService.OpModules));
         }
         if (StringUtils.isNotBlank(userId)) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));

@@ -129,7 +129,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
-            List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            List<Integer> moduleOrdinals = OpModuleService.OpModules;
             moduleOrdinals.add(-1);
             humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
