@@ -248,6 +248,8 @@ public class CsceneSpecialService {
         var referenceTypes = queryParams.getReferenceTypes();
         if (referenceTypes != null && referenceTypes.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getReferenceType, referenceTypes);
+        }else{
+            humanCondition.filterIn(CsceneInstanceModel::getReferenceType, CsceneInstanceTypeService.INSTANCE_TYPES.toArray(new String[0]));
         }
         var valid = queryParams.getValid();
         if (Boolean.TRUE.equals(valid)) {

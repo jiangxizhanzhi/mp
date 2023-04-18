@@ -37,7 +37,10 @@ public class OpModuleService {
      * @return void
      */
     @PostConstruct
-    public void initOpModules(){
+    private void initOpModules(){
+        if(CollectionUtils.isNotEmpty(OpModules)){
+            return;
+        }
         List<OptionModel> optionModelList = optionService.findByType(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
         if(CollectionUtils.isEmpty(optionModelList)){
             OpModules.addAll(Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(
@@ -45,6 +48,5 @@ public class OpModuleService {
             return;
         }
         OpModules.addAll(optionModelList.stream().map(optionModel -> Integer.valueOf(optionModel.getCode())).collect(Collectors.toList()));
-        System.out.println(OpModules);
     }
 }
