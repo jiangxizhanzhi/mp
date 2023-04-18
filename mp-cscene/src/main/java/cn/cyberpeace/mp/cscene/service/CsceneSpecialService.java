@@ -89,7 +89,7 @@ public class CsceneSpecialService {
     @Resource
     private ScenePluginCloudSceneService cloudSceneService;
 
-    @Autowired
+    @Resource
     private CsceneInstanceTypeService csceneInstanceTypeService;
 
     @Data
