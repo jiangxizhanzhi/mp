@@ -252,7 +252,6 @@ public class CsceneSpecialService {
         if (referenceTypes != null && referenceTypes.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getReferenceType, referenceTypes);
         }else{
-            csceneInstanceTypeService = csceneInstanceTypeService == null?BeanCommon.getBean(CsceneInstanceTypeService.class):csceneInstanceTypeService;
             humanCondition.filterIn(CsceneInstanceModel::getReferenceType, csceneInstanceTypeService.getOptionService().toArray(new String[0]));
         }
         var valid = queryParams.getValid();

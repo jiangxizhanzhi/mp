@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 public class OpModuleService {
 
-    public static final List<Integer> OpModules = new ArrayList<>();
+    public List<Integer> OpModules = new ArrayList<>();
 
     @Resource(name = "optionServiceImpl")
     private OptionService optionService;
@@ -36,17 +36,21 @@ public class OpModuleService {
      * @throws
      * @return void
      */
-    @PostConstruct
-    private void initOpModules(){
+    private List<Integer> initOpModules(){
         if(CollectionUtils.isNotEmpty(OpModules)){
-            return;
+            return OpModules;
         }
         List<OptionModel> optionModelList = optionService.findByType(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
         if(CollectionUtils.isEmpty(optionModelList)){
             OpModules.addAll(Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(
                 Collectors.toList()));
-            return;
+            return OpModules;
         }
         OpModules.addAll(optionModelList.stream().map(optionModel -> Integer.valueOf(optionModel.getCode())).collect(Collectors.toList()));
+        return OpModules;
+    }
+
+    public List<Integer> getOpModules(){
+        return initOpModules();
     }
 }

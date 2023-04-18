@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class CsceneInstanceTypeService {
 
-    public List<String> INSTANCE_TYPES = new ArrayList<>();
+    public List<String> instanceTypes = new ArrayList<>();
 
     @Resource(name = "optionServiceImpl")
     private OptionService optionService;
@@ -35,14 +34,14 @@ public class CsceneInstanceTypeService {
      * @throws
      * @return void
      */
-    @PostConstruct
-    private void initInstanceTypes(){
-        if(CollectionUtils.isNotEmpty(INSTANCE_TYPES)){
-            return;
+    private List<String> initInstanceTypes(){
+        if(CollectionUtils.isNotEmpty(instanceTypes)){
+            return instanceTypes;
         }
         List<OptionModel> optionModelList = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
-        INSTANCE_TYPES.addAll(optionModelList.stream().map(OptionModel::getCode).collect(
+        instanceTypes.addAll(optionModelList.stream().map(OptionModel::getCode).collect(
             Collectors.toList()));
+        return instanceTypes;
     }
 
     /**
@@ -51,6 +50,6 @@ public class CsceneInstanceTypeService {
      * @return List<String>
      */
     public List<String> getOptionService() {
-        return INSTANCE_TYPES;
+        return initInstanceTypes();
     }
 }

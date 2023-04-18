@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.log.request;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
@@ -96,7 +97,8 @@ public class OperationLogPageRequest extends BasePageRequest{
         if (Objects.nonNull(moduleID)) {
             boolBuilder.must(QueryBuilders.termQuery("opModuleID", moduleID));
         }else {
-            boolBuilder.must(QueryBuilders.termsQuery("opModuleID", OpModuleService.OpModules));
+            OpModuleService opModuleService = BeanCommon.getBean(OpModuleService.class);
+            boolBuilder.must(QueryBuilders.termsQuery("opModuleID", opModuleService.getOpModules()));
         }
         if (StringUtils.isNotBlank(userId)) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));

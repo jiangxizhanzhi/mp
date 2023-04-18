@@ -54,6 +54,9 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private OpModuleService opModuleService;
+
     @Override
     public void create(OperationLogRequest request, Locale locale) {
         OperateLogSqlModel model = opRequest2Model(request, locale);
@@ -129,7 +132,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
-            List<Integer> moduleOrdinals = OpModuleService.OpModules;
+            List<Integer> moduleOrdinals = opModuleService.getOpModules();
             moduleOrdinals.add(-1);
             humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
