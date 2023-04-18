@@ -122,7 +122,7 @@ public class ElementMonitorController {
                                                                          @RequestParam(required = false) Integer bucketSize,
                                                                          ElementMonitorRequest pageRequest) {
         if (Objects.isNull(intervalMinutes)) {
-            intervalMinutes = 15;
+            intervalMinutes = 1;
         }
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
@@ -152,7 +152,7 @@ public class ElementMonitorController {
                                                                              @RequestParam(required = false) Integer bucketSize,
                                                                              ElementMonitorRequest pageRequest) {
         if (Objects.isNull(intervalMinutes)) {
-            intervalMinutes = 15;
+            intervalMinutes = 1;
         }
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
