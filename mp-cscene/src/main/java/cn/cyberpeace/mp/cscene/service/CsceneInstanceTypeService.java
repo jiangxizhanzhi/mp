@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class CsceneInstanceTypeService {
 
-    public static final List<String> INSTANCE_TYPES = new ArrayList<>();
+    public List<String> INSTANCE_TYPES = new ArrayList<>();
 
     @Resource(name = "optionServiceImpl")
     private OptionService optionService;
@@ -45,4 +45,12 @@ public class CsceneInstanceTypeService {
             Collectors.toList()));
     }
 
+    /**
+     * @description: 获取初始加载实例
+     * @throws
+     * @return List<String>
+     */
+    public List<String> getOptionService() {
+        return INSTANCE_TYPES;
+    }
 }
