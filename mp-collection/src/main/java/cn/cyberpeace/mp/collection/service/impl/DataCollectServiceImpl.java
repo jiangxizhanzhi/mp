@@ -24,13 +24,14 @@ public class DataCollectServiceImpl implements DataCollectService {
     private CollectionClient collectionClient;
 
     // expires in 10 minutes
-    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
 
     @Override
     public ListObjServiceResult<FileEventModel> queryFileModifyEvents(SyscheckEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
         wazuhEventRequest.setRuleGroups(CollectionConstant.FILE_MODIFY_GROUP);
+        wazuhEventRequest.setTrackTotalHits(true);
         var result = collectionClient.queryFileEvents(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }

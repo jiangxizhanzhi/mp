@@ -7,27 +7,23 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
+import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
-import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
-import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -75,7 +71,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
+//        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
@@ -90,6 +86,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
+            if (total > 10000) {
+                restHighLevelClient.updateDataMaxQueryNum(ARKIME_SESSIONS3_ + "*", total);
+            }
         }
 
 
@@ -327,15 +326,20 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
-        if (Objects.nonNull(start) && Objects.nonNull(end)) {
-            return buildRequestIndex(start, end);
-        } else {
-            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
-            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
-            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-            return indices.getIndices();
+        if (Objects.isNull(start) || Objects.isNull(end)) {
+            end = LocalDateTime.now();
+            start = end.plusDays(-5);
         }
+        return buildRequestIndex(start, end);
+//        if (Objects.nonNull(start) && Objects.nonNull(end)) {
+//            return buildRequestIndex(start, end);
+//        } else {
+//            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
+//            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
+//            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
+//            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+//            return indices.getIndices();
+//        }
     }
 
     /**

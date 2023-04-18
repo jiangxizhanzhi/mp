@@ -2,8 +2,13 @@ package cn.cyberpeace.mp.collection.core.es;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
 import cn.cyberpeace.mp.collection.config.ClusterConfig;
 import cn.cyberpeace.mp.collection.context.ContextHolder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -25,7 +30,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -35,6 +46,10 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
 
     private static Map<String, RestHighLevelClient> restHighLevelClientMap;
 
+    private static Map<String, HttpClient> httpClientMap;
+
+    private static Map<String, GroupSet> groupSetMap = new ConcurrentHashMap<>();
+
     public static void updateClientMap() {
         init = false;
         initClientMap();
@@ -43,8 +58,11 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     public static void initClientMap() {
         if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
             restHighLevelClientMap = new ConcurrentHashMap<>();
-            ClusterConfig.nodes.forEach(node ->
-                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAddress())));
+            httpClientMap = new ConcurrentHashMap<>();
+            ClusterConfig.nodes.forEach(node -> {
+                restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAddress()));
+                httpClientMap.put(node.getNodeId(), HttpClient.builder().configServer("http://" + node.getEsAddress()).build());
+            });
             init = true;
         }
     }
@@ -114,6 +132,25 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
         }
     }
 
+    @Override
+    public void updateDataMaxQueryNum(String index, long total) {
+        GroupSet groupSet = groupSetMap.getOrDefault(ContextHolder.getContext().getGroupId(), new GroupSet());
+        groupSetMap.put(ContextHolder.getContext().getGroupId(), groupSet);
+        LocalDate date = TimeUtils.utcToLocalDateTime(TimeUtils.localDateTimeToUtcString(LocalDateTime.now())).toLocalDate();
+        if (groupSet.getIndex().contains(index) && Objects.equals(groupSet.getDate(), date) && groupSet.getMaxTotal() > total) {
+            return;
+        }
+        groupSet.setDate(date);
+        groupSet.getIndex().add(index);
+        groupSet.setMaxTotal(getMaxTotal(total, groupSet.getMaxTotal()));
+
+        IndexParams indexParams = new IndexParams();
+        indexParams.setMaxResultWindow(groupSet.getMaxTotal());
+        Data data = new Data();
+        data.setIndex(indexParams);
+        httpClientMap.get(ContextHolder.getContext().getGroupId()).put("/" + index + "/_settings", data, null, new HashMap<>(), null);
+    }
+
     private static HttpHost[] createHttpHost(String esAddress) {
         Asserts.check(!ObjectUtils.isEmpty(esAddress), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = esAddress.split(",");
@@ -126,5 +163,33 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
             httpHosts[i] = new HttpHost(ip, port, "http");
         }
         return httpHosts;
+    }
+
+    private long getMaxTotal(long total, long maxTotal) {
+        long initialMaxTotal = 1000000l;
+        for (int i = 1; maxTotal < total; i++) {
+            maxTotal = maxTotal + initialMaxTotal * i;
+        }
+        return maxTotal;
+    }
+
+    @Getter
+    @Setter
+    private static class Data implements SnakeHttpData {
+        private IndexParams index;
+    }
+
+    @Getter
+    @Setter
+    private static class IndexParams {
+        private long maxResultWindow;
+    }
+
+    @Getter
+    @Setter
+    private static class GroupSet {
+        private LocalDate date;
+        private long maxTotal;
+        private Set<String> index = new HashSet<>();
     }
 }

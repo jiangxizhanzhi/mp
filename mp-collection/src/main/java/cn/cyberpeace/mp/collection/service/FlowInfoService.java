@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
+import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 
 import java.time.LocalDateTime;
 import java.util.Map;

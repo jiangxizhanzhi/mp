@@ -22,4 +22,6 @@ public interface IRestHighLevelClient {
     void allDeleteByQuery(DeleteByQueryRequest deleteRequest);
 
     GetIndexResponse getIndices(GetIndexRequest getIndexRequest);
+
+    void updateDataMaxQueryNum(String index, long total);
 }

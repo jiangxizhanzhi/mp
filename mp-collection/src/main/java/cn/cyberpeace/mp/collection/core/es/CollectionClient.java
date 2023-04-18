@@ -6,7 +6,18 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.collection.constant.SicLaunchConfig;
-import cn.cyberpeace.mp.collection.model.*;
+import cn.cyberpeace.mp.collection.model.FileEventModel;
+import cn.cyberpeace.mp.collection.model.WazuhEventRequest;
+import cn.cyberpeace.mp.collection.model.WazuhFileRoot;
+import cn.cyberpeace.mp.collection.model.WazuhHostMonitorPageRequest;
+import cn.cyberpeace.mp.collection.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.collection.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.collection.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.collection.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.collection.model.WazuhProcessModel;
+import cn.cyberpeace.mp.collection.model.WazuhSystemUserModel;
+import cn.cyberpeace.mp.collection.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.collection.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.collection.model.enums.FileEventType;
 import cn.cyberpeace.mp.collection.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.collection.model.sic.BaseInput;
@@ -29,7 +40,6 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -55,7 +65,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -122,6 +139,9 @@ public class CollectionClient {
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
+            if (total > 10000) {
+                restHighLevelClient.updateDataMaxQueryNum(WAZUH_ALERT_INDEX_PREFIX + "*", total);
+            }
         }
         return new ListObjResult<>(fileEventModelList, BigDecimal.valueOf(total).intValue());
     }
@@ -286,6 +306,9 @@ public class CollectionClient {
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
+            if (total > 10000) {
+                restHighLevelClient.updateDataMaxQueryNum(WAZUH_ALERT_INDEX_PREFIX + "*", total);
+            }
         }
         return new ListObjResult<>(hostStateModels, BigDecimal.valueOf(total).intValue());
     }
@@ -655,11 +678,13 @@ public class CollectionClient {
      * @return
      */
     private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
-        // 时间为空时返回所有相关索引
+        // 时间为空时查询五天内的数据
         if (Objects.isNull(start) || Objects.isNull(end)) {
-            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
-            var result = restHighLevelClient.getIndices(getIndexRequest);
-            return result.getIndices();
+            end = LocalDateTime.now();
+            start = end.plusDays(-5);
+//            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
+//            var result = restHighLevelClient.getIndices(getIndexRequest);
+//            return result.getIndices();
         }
         List<String> indexList = indexListBuilder(getUtcTime(start), getUtcTime(end));
         var indexArray = new String[indexList.size()];
@@ -825,7 +850,7 @@ public class CollectionClient {
             sourceBuilder.from(0).size(request.getTopSize());
         }
         //处理分页
-        processPageable(request, sourceBuilder);
+//        processPageable(request, sourceBuilder);
         return sourceBuilder;
     }
 
@@ -834,7 +859,8 @@ public class CollectionClient {
         // 按时间排序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         //处理分页
-        processPageable(request, sourceBuilder);
+//        processPageable(request, sourceBuilder);
+        sourceBuilder.trackTotalHits(true);
         return sourceBuilder;
     }
 
