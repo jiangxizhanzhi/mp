@@ -25,8 +25,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryPar
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -46,7 +44,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -301,6 +306,25 @@ public class HostStateService {
 
         return collectionHostStateBOs2HostStates(hostStateBOS);
     }
+
+    public Map<String, List<HostState>> mapHostStatesByAgentName(AgentNameBasedRequest request) {
+        request.ensure();
+        if (CollectionUtil.isEmpty(request.getAgentNames())) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.AGENT_NAME)));
+        }
+        HostStateQueryParams queryParams = new HostStateQueryParams();
+        queryParams.setPage(request.getPage());
+        queryParams.setPageSize(request.getPageSize());
+        Map<String, List<CollectionHostStateBO>> map = csceneInstanceService.mapHostStatesByAgentNames(request.getAgentNames(), queryParams);
+        Map<String, List<HostState>> convertedMap = new HashMap<>();
+        map.forEach((k, v) -> {
+            List<HostState> hostStates = collectionHostStateBOs2HostStates(v);
+            convertedMap.put(k, hostStates);
+        });
+
+        return convertedMap;
+    }
+
 
     private List<HostState> collectionHostStateBOs2HostStates(List<CollectionHostStateBO> hostStateBOS) {
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
