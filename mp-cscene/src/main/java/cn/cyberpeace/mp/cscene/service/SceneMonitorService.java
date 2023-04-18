@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -61,6 +63,9 @@ public class SceneMonitorService {
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private HostStateService hostStateService;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -165,10 +170,10 @@ public class SceneMonitorService {
      * @return
      */
     public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState) {
+        log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
         if (Objects.isNull(fetchRealTimeHostState)) {
             fetchRealTimeHostState = true;
         }
-        log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
 
@@ -186,8 +191,8 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
-            var finalFetchRealTimeHostState = fetchRealTimeHostState;
-            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, finalFetchRealTimeHostState));
+            // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
+            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false));
             cfList.add(cf);
         }
 
@@ -215,6 +220,23 @@ public class SceneMonitorService {
 
         }
 
+        if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
+            // 查询实时主机状态
+            var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
+            if (CollectionUtil.isNotEmpty(agentNames)) {
+                AgentNameBasedRequest request = new AgentNameBasedRequest();
+                request.setAgentNames(agentNames);
+                request.setPageSize(1);
+
+                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(request);
+                basicInfos.forEach(basicInfo -> {
+                    var hostStates = map.get(basicInfo.getEid());
+                    if (CollectionUtil.isNotEmpty(hostStates)) {
+                        basicInfo.setHostState(hostStates.get(0));
+                    }
+                });
+            }
+        }
         return basicInfos;
     }
 
