@@ -26,6 +26,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +53,10 @@ public class WazuhClient extends RequestProcessor{
 
     public static final String CACHE_KEY_AGENTS = "agents";
 
-    // expires in 10 minutes
-    private static final TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
+    private int wazuhTokenExpiredSeconds = 900;
+
+    private String wazuhToken;
+    private LocalDateTime wazuhTokenExpiredTime;
 
     /**
      * 查询wazuhToken防止token失效
@@ -73,7 +76,7 @@ public class WazuhClient extends RequestProcessor{
         agentRequest.ensure();
         var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
         List<NameValuePair> params = this.processRequestParams(agentRequest);
-        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
+        this.syncWazuhApiToken();
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
         BaseResponse<Agent> result = JSON.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
         });
@@ -97,7 +100,7 @@ public class WazuhClient extends RequestProcessor{
 
         List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
 
-        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
+        this.syncWazuhApiToken();
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
         BaseResponse<Port> result = JSON.parseObject(res, new TypeReference<>() {
         });
@@ -154,16 +157,6 @@ public class WazuhClient extends RequestProcessor{
         BaseResponse<OS> result = JSON.parseObject(res, new TypeReference<>() {
         });
         return result.getData().getAffectedItems();
-    }
-
-    private String getWazuhTokenWithUrl(String wazuhUrl) {
-        if (Objects.isNull(TIMED_CACHE.get(wazuhUrl))) {
-            String wazuhToken = this.authenticate();
-            TIMED_CACHE.put(wazuhUrl, wazuhToken);
-            return wazuhToken;
-        } else {
-            return TIMED_CACHE.get(wazuhUrl);
-        }
     }
 
     /**
@@ -245,5 +238,13 @@ public class WazuhClient extends RequestProcessor{
         }
 
         return params;
+    }
+
+    private void syncWazuhApiToken() {
+        if (wazuhTokenExpiredTime == null || LocalDateTime.now().compareTo(wazuhTokenExpiredTime) >= 0) {
+            this.wazuhToken = authenticate();
+            // 预留十秒，减少网络延迟导致的过期概率
+            this.wazuhTokenExpiredTime = LocalDateTime.now().plusSeconds(wazuhTokenExpiredSeconds - 10L);
+        }
     }
 }
