@@ -45,8 +45,8 @@ public class Remote extends CloudClient {
      * @return GuacamoleDeleteConnectionUrlResult
      */
     public GuacamoleDeleteConnectionUrlResult deleteConnectionUrl(String connectionId) {
-        GuacamoleDeleteConnectionUrlResult result = getHttpClient().get(CloudUrlConstant.DELETE_CONNECTION_URL,
-                new GuacamoleDeleteConnectionUrlParam(connectionId), GuacamoleDeleteConnectionUrlResult.class);
+        GuacamoleDeleteConnectionUrlResult result = getHttpClient().delete(CloudUrlConstant.DELETE_CONNECTION_URL, new GuacamoleDeleteConnectionUrlData(connectionId), null
+            , GuacamoleDeleteConnectionUrlResult.class);
         if (result == null) {
             return null;
         }
