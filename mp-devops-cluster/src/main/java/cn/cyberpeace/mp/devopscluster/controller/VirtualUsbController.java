@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.VirtualUsbStorag
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.VirtualUsbService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.VirtualUsbDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.VirtualUsbQueryParams;
 import cn.cyberpeace.mp.devopscluster.vo.TargetUploadVO;
@@ -103,7 +102,7 @@ public class VirtualUsbController {
      * @return
      */
     @ApiOperation("删除虚拟USB")
-    @ApiImplicitParam(name = "request", value = "删除虚拟USB请求体", dataTypeClass = ImagesDeleteRequest.class)
+    @ApiImplicitParam(name = "request", value = "删除虚拟USB请求体", dataTypeClass = VirtualUsbDeleteRequest.class)
     @DeleteMapping("/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除虚拟USB", target = OpTargetEnums.VIRTUAL_USB)
     public ServiceResult delete(@RequestBody VirtualUsbDeleteRequest request){
@@ -132,7 +131,7 @@ public class VirtualUsbController {
      */
     @ApiOperation("上传文件到虚拟USB")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "files", value = "文件", dataTypeClass = MultipartFile.class),
+            @ApiImplicitParam(name = "files", value = "文件", dataTypeClass = List.class),
             @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),
     })
     @PostMapping(value = "/upload")
