@@ -8,8 +8,6 @@ import cn.cyberpeace.mp.devopscluster.request.queryparam.VirtualUsbQueryParams;
 import cn.cyberpeace.mp.devopscluster.vo.VirtualUsbVO;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 /**
  * @Description: 虚拟USB服务
  * @Author: guquan
@@ -58,11 +56,11 @@ public interface VirtualUsbService {
 
     /**
      * 上传文件到虚拟USB
-     * @param files
+     * @param file
      * @param uuid
      * @return
      */
-    BaseCloudPlatformResult upload(List<MultipartFile> files, String uuid);
+    BaseCloudPlatformResult upload(MultipartFile file, String uuid);
 
     /**
      * 虚拟USB删除文件

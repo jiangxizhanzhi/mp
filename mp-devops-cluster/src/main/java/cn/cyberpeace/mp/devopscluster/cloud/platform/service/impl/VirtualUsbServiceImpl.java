@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -158,15 +159,15 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
 
     /**
      * 上传文件到虚拟USB
-     * @param files
+     * @param file
      * @param uuid
      */
     @Override
-    public BaseCloudPlatformResult upload(List<MultipartFile> files, String uuid) {
+    public BaseCloudPlatformResult upload(MultipartFile file, String uuid) {
         log.info("VirtualUsbServiceImpl.upload begin. uuid:{}", uuid);
         List<File> fileList = null;
         try {
-            fileList = FileUtils.transferToFileList(files);
+            fileList = FileUtils.transferToFileList(Collections.singletonList(file));
             BaseCloudPlatformResult result = super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/files", fileList, BaseCloudPlatformResult.class);
             super.checkResult(result);
             return result;
