@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
- * @Description: 虚拟USB对象
+ * @Description: 虚拟USB对象VO
  * @Author: guquan
  * @Date：2023/4/17 9:01
  */
