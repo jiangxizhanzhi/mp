@@ -77,6 +77,7 @@ public class CloudUrlConstant {
     public static final String LINK_STATUS = "/cpcloud/instance_control/v1/link_status";
     public static final String SCP_FILE = "/cpcloud/instance_control/v1/scpfile";
     public static final String SSH_CMD = "/cpcloud/instance_control/v1/ssh_cmd";
+    public static final String ATTACH_ISO = "/cpcloud/device/v1/iso/vm_attach";
 
     public static final String DEVICE_SNAPSHOT = "/cpcloud/device/v1/snapshot";
 

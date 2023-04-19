@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
@@ -257,5 +258,10 @@ public class VirtualMachine extends CloudClient {
     public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
         var virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
         return virtualMachineExecuteResult;
+    }
+
+    public void attachISO(VirtualMachineAttachISOData data) {
+        cloudPost(CloudUrlConstant.ATTACH_ISO, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
     }
 }
