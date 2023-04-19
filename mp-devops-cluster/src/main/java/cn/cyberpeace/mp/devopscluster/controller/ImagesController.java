@@ -594,7 +594,7 @@ public class ImagesController {
 
     @ApiOperation("上传iso文件")
     @PostMapping(value = "/file/upload/iso")
-    public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file, @RequestBody(required = false) String tmpdirUuid) {
+    public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file, String tmpdirUuid) {
         if (StringUtils.isNotEmpty(tmpdirUuid)) {
             this.checkISOReference(tmpdirUuid);
         }
