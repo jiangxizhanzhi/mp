@@ -594,7 +594,10 @@ public class ImagesController {
 
     @ApiOperation("上传iso文件")
     @PostMapping(value = "/file/upload/iso")
-    public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file) {
+    public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file, @RequestBody(required = false) String tmpdirUuid) {
+        if (StringUtils.isNotEmpty(tmpdirUuid)) {
+            this.checkISOReference(tmpdirUuid);
+        }
         isoUploadService = isoUploadService.build(file);
         return isoUploadService.upload();
     }
@@ -609,6 +612,7 @@ public class ImagesController {
     @ApiOperation("删除iso文件")
     @DeleteMapping(value = "/file/delete/iso")
     public ServiceResult<Boolean> deleteISOFile(@RequestBody ISOFileRequest request) {
+        this.checkISOReference(request.getTmpdirUuid());
         isoService.delete(request.getTmpdirUuid(), request.getFileName());
         return new ServiceResult<>(true).asResult();
     }
@@ -693,5 +697,13 @@ public class ImagesController {
             vo.setCreateUserName(v.getCreateUserName());
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    private void checkISOReference(String isoTmpdirUuid) {
+        var result = csceneSpecialService.statISOReferCscenes(isoTmpdirUuid).getSource();
+        if (CollectionUtils.isNotEmpty(result)) {
+            throw new MpRuntimeException(DevopsClusterErrorCode.ISO_REFERENCE_SCENE_WITH_NAME
+                    .format(StringUtils.joinWith(",", result.toArray())));
+        }
     }
 }

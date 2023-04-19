@@ -95,6 +95,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @Valid
     private List<FirewallRule> firewallRules;
 
+    // 虚拟机属性
+    @ApiModelProperty(value = "挂载iso文件名")
+    private String isoAttachFilename;
+    @ApiModelProperty(value = "挂载iso临时文件地址")
+    private String isoTmpdirUuid;
+
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
