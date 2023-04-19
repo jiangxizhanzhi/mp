@@ -437,6 +437,7 @@ public class AsyncPlatFlowTaskService {
      * @param uuid
      */
     private void addFlowExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
+        log.info("addFlowExecutor networkInfos:{}", networkInfos);
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
         try {

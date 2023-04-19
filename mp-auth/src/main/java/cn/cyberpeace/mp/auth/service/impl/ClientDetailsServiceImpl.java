@@ -37,7 +37,7 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_CLIENTS)
     public ClientDetailsModel getByClientId(String clientId) {
-        ClientDetailsModel model = getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
+        ClientDetailsModel model = getModelMapper().first(new HumanCondition().filterEqual(ClientDetailsModel::getClientId, clientId));
         if (Objects.nonNull(model)) {
             String secret = model.getClientSecret();
             String decryptedSecret = PasswordUtils.desDecrypt(secret);

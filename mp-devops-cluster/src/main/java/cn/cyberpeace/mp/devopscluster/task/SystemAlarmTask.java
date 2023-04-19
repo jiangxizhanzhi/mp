@@ -31,9 +31,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -202,12 +202,13 @@ public class SystemAlarmTask {
             return Collections.emptyList();
         }
         List<HostState> allHostStates = new ArrayList<>();
-        for (String hostName : hostNames) {
-            AgentNameBasedRequest request = new AgentNameBasedRequest();
-            request.setPage(1);
-            request.setPageSize(1);
-            request.setAgentNames(Arrays.asList(hostName));
-            List<HostState> hostStates  = hostStateService.listHostStatesByAgentName(request);
+        AgentNameBasedRequest request = new AgentNameBasedRequest();
+        request.setPage(1);
+        request.setPageSize(1);
+        request.setAgentNames(hostNames);
+        Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(request);
+
+        for (List<HostState> hostStates : map.values()) {
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 allHostStates.add(hostStates.get(0));
             }

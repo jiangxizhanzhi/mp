@@ -806,6 +806,9 @@ public class CreateHandler extends HandlerCommon {
                             accessMode.setAccessIp(accessModeData.getIpAddress());
                             accessMode.setAccessPort(accessModeData.getPort());
                         }
+                        if (StringUtils.isEmpty(accessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
+                            accessMode.setAccessIp(cloudPort.getSrcPort().getIp());
+                        }
                         if (Boolean.TRUE.equals(accessMode.getProxy()) && CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
                             this.trySetPublicNetProxy(accessMode);
                         }
@@ -1033,12 +1036,12 @@ public class CreateHandler extends HandlerCommon {
 
             receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-            execContainerInitCommand(cloudElement);
-
-            checkAccessModes(cloudElement);
             if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
                 containerClient.addRoute(cloudElement.getResourceId());
             }
+            execContainerInitCommand(cloudElement);
+
+            checkAccessModes(cloudElement);
         }
     }
 

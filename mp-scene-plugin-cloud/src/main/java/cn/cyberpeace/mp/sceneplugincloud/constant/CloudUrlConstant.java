@@ -86,6 +86,8 @@ public class CloudUrlConstant {
     public static final String FORCE_DELETE_ROUTER = "/cpcloud/host/v1/router";
 
     public static final String SNAPSHOT_LIST = "/cpcloud/device/v1/snapshot";
+    public static final String GET_CPCLOUD_ALL_ORIGIN_IPS = "/cpcloud/info/v1/revise_ip";
+    public static final String RESET_CPCLOUD_ALL_IPS = "/cpcloud/info/v1/revise_ip";
 
     private CloudUrlConstant() {
     }

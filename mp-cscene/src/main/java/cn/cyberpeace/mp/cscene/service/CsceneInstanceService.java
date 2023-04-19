@@ -55,6 +55,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
+import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -159,6 +160,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LogFileService logFileService;
+
+    @Autowired
+    private ResourceClearHandler resourceClearHandler;
 
     @Resource
     private CsceneService csceneService;
@@ -540,6 +544,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+                    resourceClearHandler.doCallback(id);
                 }
                 if (!logic) {
                     screenshotService.batchDeleteBySceneId(id);
@@ -715,6 +720,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         queryParams.setNodeIds(null);
         return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);
+    }
+
+    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+        queryParams.setNodeIds(null);
+        return scenePluginCollectionSceneService.mapHostStatesByAgentNames(agentNames, queryParams);
     }
 
     /**
