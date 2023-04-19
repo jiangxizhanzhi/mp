@@ -45,7 +45,9 @@ public enum OpTargetEnums {
     // 节点
     SCENE_ELEMENT("scene_element"),
     // 节点流量
-    SCENE_ELEMENT_FLOW("scene_element_flow");
+    SCENE_ELEMENT_FLOW("scene_element_flow"),
+    //虚拟usb
+    VIRTUAL_USB("virtual_usb");
     //DEFAULT("");
 
 
