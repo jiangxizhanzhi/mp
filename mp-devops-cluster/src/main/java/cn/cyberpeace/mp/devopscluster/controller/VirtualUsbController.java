@@ -71,7 +71,6 @@ public class VirtualUsbController {
      * @return
      */
     @ApiOperation("新增虚拟USB")
-    @ApiImplicitParam(name = "virtualUsbVO", value = "虚拟USB请求体", dataTypeClass = VirtualUsbVO.class)
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增虚拟USB", target = OpTargetEnums.VIRTUAL_USB)
     public ServiceResult add(@RequestBody VirtualUsbVO virtualUsbVO){
@@ -85,7 +84,6 @@ public class VirtualUsbController {
      * @return
      */
     @ApiOperation("编辑虚拟USB")
-    @ApiImplicitParam(name = "virtualUsbVO", value = "虚拟USB请求体", dataTypeClass = VirtualUsbVO.class)
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "编辑虚拟USB", target = OpTargetEnums.VIRTUAL_USB)
     public ServiceResult update(@RequestBody VirtualUsbVO virtualUsbVO){
