@@ -101,6 +101,26 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
 
+
+        // 保留 deviceTargetMapper.page 得到的顺序
+        Map<String, Integer> orders = new HashMap<>();
+        for (int i = 0; i < deviceTargetPOS.size(); i++) {
+            orders.put(deviceTargetPOS.get(i).getId(), i);
+        }
+        Device[] devices = new Device[deviceTargetPOS.size()];
+        for (var d : deviceList) {
+            if (orders.containsKey(d.getId().toString())) {
+                devices[orders.get(d.getId().toString())] = d;
+            }
+        }
+        List<Device> orderDevices = new ArrayList<>();
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i] != null) {
+                orderDevices.add(devices[i]);
+            }
+        }
+        deviceList = orderDevices;
+
         List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
 
         List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
