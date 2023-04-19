@@ -10,7 +10,7 @@ import lombok.Data;
  * @Date：2023/4/17 9:01
  */
 @Data
-@ApiModel("虚拟USB对象")
+@ApiModel("虚拟USB对象VO")
 public class VirtualUsbVO extends VirtualUsb {
 
 }
