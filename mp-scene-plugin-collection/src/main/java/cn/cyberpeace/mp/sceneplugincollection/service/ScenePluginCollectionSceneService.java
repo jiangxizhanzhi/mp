@@ -1326,8 +1326,7 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        return sysCollectorService.pagePorts(collectorBaseRequest);
     }
 
     public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
@@ -1410,8 +1409,9 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        //pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
+        //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        return sysCollectorService.pageNetifaces(collectorBaseRequest);
     }
 
 

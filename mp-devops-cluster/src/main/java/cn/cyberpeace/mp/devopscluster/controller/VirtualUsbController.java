@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 /**
  * @Description: 靶标管理-USB仿真
  * @Author: guquan
@@ -47,7 +45,6 @@ public class VirtualUsbController {
      * @return
      */
     @ApiOperation("分页查询虚拟USB信息")
-    @ApiImplicitParam(name = "queryParams", value = "查询虚拟USB请求", dataTypeClass = VirtualUsbQueryParams.class)
     @GetMapping("/page")
     public ListObjServiceResult<VirtualUsbVO> page(VirtualUsbQueryParams queryParams) {
         queryParams.ensure();
@@ -125,19 +122,16 @@ public class VirtualUsbController {
 
     /**
      * 上传文件到虚拟USB
-     * @param files
+     * @param file
      * @param uuid
      * @return
      */
     @ApiOperation("上传文件到虚拟USB")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "files", value = "文件", dataTypeClass = List.class),
-            @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),
-    })
+    @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
     @PostMapping(value = "/upload")
     @ResponseBody
-    public ServiceResult<?> upload(@RequestParam List<MultipartFile> files, @RequestParam String uuid) {
-        BaseCloudPlatformResult result = usbServicesbService.upload(files, uuid);
+    public ServiceResult<?> upload(MultipartFile file, @RequestParam String uuid) {
+        BaseCloudPlatformResult result = usbServicesbService.upload(file, uuid);
         return new Result(new TargetUploadVO(result.getTmpdirUuid(),result.getFileNames()));
     }
 
