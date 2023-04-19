@@ -49,7 +49,7 @@ public class VirtualUsbController {
     @ApiOperation("分页查询虚拟USB信息")
     @ApiImplicitParam(name = "queryParams", value = "查询虚拟USB请求", dataTypeClass = VirtualUsbQueryParams.class)
     @GetMapping("/page")
-    public ListObjServiceResult<VirtualUsbVO> page(VirtualUsbQueryParams queryParams) {
+    public ListObjServiceResult<VirtualUsbVO> page(@RequestParam VirtualUsbQueryParams queryParams) {
         queryParams.ensure();
         ListObjServiceResult<VirtualUsbVO> result = usbServicesbService.virtualUsbPage(queryParams);
         return result;
