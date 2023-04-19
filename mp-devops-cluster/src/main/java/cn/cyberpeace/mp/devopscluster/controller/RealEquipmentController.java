@@ -247,6 +247,13 @@ public class RealEquipmentController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         realEquipmentConverter.orginizeRealEquipment(request);
+        if (request.getOperate() != null && request.getOperate() == 1) {
+            // 分配完之后申请数量减1
+            UpdateApplicationRequest updateApplicationRequest = new UpdateApplicationRequest();
+            updateApplicationRequest.setUuid(request.getUuid());
+            updateApplicationRequest.setOperate(2);
+            realEquipmentConverter.updateRealEquipmentApplicationNum(updateApplicationRequest);
+        }
         return ResultCommon.success();
     }
 
