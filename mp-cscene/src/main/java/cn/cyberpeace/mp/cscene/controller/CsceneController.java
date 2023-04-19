@@ -187,8 +187,8 @@ public class CsceneController implements BaseModelListControllerBase {
                 String sceneName = f.getName().substring(0, f.getName().indexOf(".json"));
                 bo.setName(sceneName);
                 bo.getSceneConfig().getTopology().getScene().setName(sceneName);
-                // 导入类型默认为漏洞挖掘
-                bo.setBizType(new String[]{"1000"});
+                // 导入场景应用类型默认为漏洞挖掘
+                bo.setAppType(new String[]{"1000"});
                 csceneBOS.add(bo);
             }
             for (var csceneBO : csceneBOS) {

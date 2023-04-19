@@ -33,6 +33,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -160,6 +161,8 @@ public class FlowMonitorController {
     @GetMapping("/attack_count_trend_by_type")
     public ServiceResult<Map<String,List<FlowTrend>>> attackCountTrendByType(FlowTrendRequest flowTrendRequest) {
 
+        // 按照攻击次数统计
+        flowTrendRequest.setType(NumberUtils.INTEGER_ONE);
         Map<String, List<FlowTrend>> result = flowMonitorService.getAttackCountTrend(flowTrendRequest);
 
         return new ServiceResult<>(result).asResult();
