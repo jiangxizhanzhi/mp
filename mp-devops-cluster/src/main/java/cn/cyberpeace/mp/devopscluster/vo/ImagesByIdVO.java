@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtGateway;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -92,6 +97,9 @@ public class ImagesByIdVO extends BaseVO {
      */
     @ApiModelProperty(value = "是否初始靶标")
     private Boolean isInit;
+
+    @ApiModelProperty(value = "是否允许变更iso文件")
+    private Boolean allowChangeIso;
 
     /**
      * 接入方式

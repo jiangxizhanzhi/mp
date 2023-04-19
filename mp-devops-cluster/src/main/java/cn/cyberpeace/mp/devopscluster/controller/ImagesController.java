@@ -232,6 +232,12 @@ public class ImagesController {
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
+        if (Objects.nonNull(extVm) && StringUtils.isNotEmpty(extVm.getIsoTmpdirUuid())) {
+            var res = csceneSpecialService.statISOReferCscenes(extVm.getIsoTmpdirUuid()).getSource();
+            imagesByIdVO.setAllowChangeIso(CollectionUtils.isEmpty(res));
+        } else {
+            imagesByIdVO.setAllowChangeIso(true);
+        }
         return new Result<>(imagesByIdVO);
     }
 
