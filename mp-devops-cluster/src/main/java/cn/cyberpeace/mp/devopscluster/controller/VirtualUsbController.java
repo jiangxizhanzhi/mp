@@ -35,7 +35,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/virtualUsb")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/virtual_usb")
 @Api(tags = "靶标管理-USB仿真")
 public class VirtualUsbController {
 
@@ -63,7 +63,7 @@ public class VirtualUsbController {
      */
     @ApiOperation("根据UUID查询虚拟USB信息")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
-    @GetMapping("/findByUuid")
+    @GetMapping("/find_by_uuid")
     public Result<VirtualUsbVO> findByUuid(@RequestParam String uuid){
         VirtualUsbVO virtualUsbVO = usbServicesbService.findByUuid(uuid);
         return new Result<>(virtualUsbVO);
@@ -118,7 +118,7 @@ public class VirtualUsbController {
      */
     @ApiOperation("根据UUID查询虚拟USB文件列表")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
-    @GetMapping("/fileListByUuid")
+    @GetMapping("/file_list_by_uuid")
     public Result<VirtualUsbStorage> fileListByUuid(@RequestParam String uuid){
         VirtualUsbStorage virtualUsbStorage = usbServicesbService.fileListByUuid(uuid);
         return new Result<>(virtualUsbStorage);
@@ -153,7 +153,7 @@ public class VirtualUsbController {
             @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),
             @ApiImplicitParam(name = "fileName", value = "文件名", dataTypeClass = String.class)
     })
-    @DeleteMapping("/deleteFile")
+    @DeleteMapping("/delete_file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "虚拟USB删除文件", target = OpTargetEnums.VIRTUAL_USB)
     public ServiceResult deleteFile(@RequestParam String uuid, @RequestParam String fileName){
         usbServicesbService.deleteFile(uuid, fileName);
@@ -167,7 +167,7 @@ public class VirtualUsbController {
      */
     @ApiOperation("虚拟USB格式化")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
-    @DeleteMapping("/deleteAllFiles")
+    @DeleteMapping("/delete_all_files")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "虚拟USB格式化", target = OpTargetEnums.VIRTUAL_USB)
     public ServiceResult deleteAllFiles(@RequestParam String uuid){
         usbServicesbService.deleteAllFiles(uuid);
@@ -185,7 +185,7 @@ public class VirtualUsbController {
             @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),
             @ApiImplicitParam(name = "fileName", value = "文件名", dataTypeClass = String.class)
     })
-    @GetMapping("/downloadFile")
+    @GetMapping("/download_file")
     public Result<String> downloadFile(@RequestParam String uuid, @RequestParam String fileName){
         String url = usbServicesbService.downloadFile(uuid, fileName);
         return new Result<>(url);
