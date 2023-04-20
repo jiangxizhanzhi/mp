@@ -850,7 +850,7 @@ public class CollectionClient {
             sourceBuilder.from(0).size(request.getTopSize());
         }
         //处理分页
-//        processPageable(request, sourceBuilder);
+        processPageable(request, sourceBuilder);
         return sourceBuilder;
     }
 
@@ -859,7 +859,7 @@ public class CollectionClient {
         // 按时间排序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         //处理分页
-//        processPageable(request, sourceBuilder);
+        processPageable(request, sourceBuilder);
         sourceBuilder.trackTotalHits(true);
         return sourceBuilder;
     }
@@ -923,22 +923,14 @@ public class CollectionClient {
         }
 
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
-        sourceBuilder.from(Math.min(offset, 10000));
-        if ((offset + wazuhEventRequest.getPageSize()) > 10000) {
-            sourceBuilder.size(Math.max(10000 - offset, 0));
-        } else {
-            sourceBuilder.size(wazuhEventRequest.getPageSize());
-        }
+        sourceBuilder.from(offset);
+        sourceBuilder.size(wazuhEventRequest.getPageSize());
     }
 
     private void processPageable(WazuhHostMonitorPageRequest hostMonitorRequest, SearchSourceBuilder sourceBuilder) {
         int offset = (hostMonitorRequest.getPageNum() - 1) * (hostMonitorRequest.getPageSize());
-        sourceBuilder.from(Math.min(offset, 10000));
-        if ((offset + hostMonitorRequest.getPageSize()) > 10000) {
-            sourceBuilder.size(Math.max(10000 - offset, 0));
-        } else {
-            sourceBuilder.size(hostMonitorRequest.getPageSize());
-        }
+        sourceBuilder.from(offset);
+        sourceBuilder.size(hostMonitorRequest.getPageSize());
     }
 
     /**

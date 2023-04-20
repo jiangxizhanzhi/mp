@@ -71,7 +71,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-//        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
+        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
@@ -302,13 +302,8 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         }
 
         int offset = (pageFlowRequest.getPage() - 1) * (pageFlowRequest.getPageSize());
-        sourceBuilder.from(Math.min(offset, 10000));
-        if ((offset + pageFlowRequest.getPageSize()) > 10000) {
-            sourceBuilder.size(Math.max(10000 - offset, 0));
-        } else {
-            sourceBuilder.size(pageFlowRequest.getPageSize());
-        }
-
+        sourceBuilder.from(offset);
+        sourceBuilder.size(pageFlowRequest.getPageSize());
     }
 
 
