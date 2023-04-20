@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
@@ -980,6 +981,9 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
             this.attachISO(cloudElement);
         }
+        if (cloudElement.getVirtualUsbs() != null && cloudElement.getVirtualUsbs().size() > 0) {
+            this.attachVirtualUsbs(cloudElement);
+        }
 
         checkAccessModes(cloudElement);
     }
@@ -1310,5 +1314,13 @@ public class CreateHandler extends HandlerCommon {
         data.setFileName(cloudElement.getIsoAttachFilename());
         data.setTmpdirUuid(cloudElement.getIsoTmpdirUuid());
         vmClient.attachISO(data);
+    }
+
+    private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachVirtualUsbsData data = new AttachVirtualUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setVirtualUsbUuids(usbUuids);
+        vmClient.attachVirtualUsbs(data);
     }
 }
