@@ -98,6 +98,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String isoAttachFilename;
     @DefaultStr
     private String isoTmpdirUuid;
+    @DefaultStr
+    private String virtualUsbs;
 
     // 虚拟机/容器属性
     @DefaultStr
