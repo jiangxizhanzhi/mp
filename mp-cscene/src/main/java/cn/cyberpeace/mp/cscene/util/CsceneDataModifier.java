@@ -24,9 +24,13 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
+import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -782,6 +786,38 @@ public class CsceneDataModifier {
                         }
                     }
                 });
+            }
+        }
+    }
+
+    public static void checkCloudElement(CsceneBO csceneBO) {
+        if (csceneBO != null && csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && elements.size() > 0) {
+                // 校验虚拟usb 规则: 单个节点usb不能超过4个 , 单个场景的虚拟usb不能重复
+                Set<String> existsUsbs = new HashSet<>();
+                for (var entry : elements.entrySet()) {
+                    CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
+                    if (CollectionUtils.isNotEmpty(elementBO.getVirtualUsbs())) {
+                        int maxUsbNums = 4 ;
+                        if (elementBO.getVirtualUsbs().size() > maxUsbNums) {
+                            String name = "";
+                            for (var srcElement : csceneBO.getSceneConfig().getTopology().getElements()) {
+                                if (srcElement.getId().equals(entry.getKey())) {
+                                    name = srcElement.getName();
+                                }
+                            }
+                            throw new MpRuntimeException(CsceneErrorCode.VIRTUAL_USB_OUT_OF_RANGE.format(name, String.valueOf(maxUsbNums)));
+                        }
+                        elementBO.getVirtualUsbs().forEach(usb -> {
+                            if (existsUsbs.contains(usb.getUuid())) {
+                                throw new MpRuntimeException(CsceneErrorCode.SAME_USB_HAS_USED.format(usb.getName()));
+                            } else {
+                                existsUsbs.add(usb.getUuid());
+                            }
+                        });
+                    }
+                }
             }
         }
     }

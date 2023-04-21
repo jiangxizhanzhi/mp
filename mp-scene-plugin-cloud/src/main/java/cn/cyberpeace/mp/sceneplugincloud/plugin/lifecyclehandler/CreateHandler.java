@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
@@ -40,6 +41,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
@@ -56,7 +58,6 @@ import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.StackLocatorUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -977,6 +978,13 @@ public class CreateHandler extends HandlerCommon {
             this.configVyosNetwork(cloudElement);
         }
 
+        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+            this.attachISO(cloudElement);
+        }
+        if (cloudElement.getVirtualUsbs() != null && cloudElement.getVirtualUsbs().size() > 0) {
+            this.attachVirtualUsbs(cloudElement);
+        }
+
         checkAccessModes(cloudElement);
     }
 
@@ -1298,5 +1306,21 @@ public class CreateHandler extends HandlerCommon {
             accessMode.setPublicNetProxyIp(null);
             accessMode.setPublicNetProxyPort(null);
         }
+    }
+
+    private void attachISO(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        data.setFileName(cloudElement.getIsoAttachFilename());
+        data.setTmpdirUuid(cloudElement.getIsoTmpdirUuid());
+        vmClient.attachISO(data);
+    }
+
+    private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachVirtualUsbsData data = new AttachVirtualUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setVirtualUsbUuids(usbUuids);
+        vmClient.attachVirtualUsbs(data);
     }
 }

@@ -93,6 +93,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String firewallRules;
 
+    // 虚拟机属性
+    @DefaultStr
+    private String isoAttachFilename;
+    @DefaultStr
+    private String isoTmpdirUuid;
+    @DefaultStr
+    private String virtualUsbs;
+
     // 虚拟机/容器属性
     @DefaultStr
     private String image;

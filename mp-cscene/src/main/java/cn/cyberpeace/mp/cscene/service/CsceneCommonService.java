@@ -67,7 +67,7 @@ public class CsceneCommonService {
      * @param elementIds 为空表示获取场景中所有的节点
      * @return
      */
-    @Cacheable(value = "query_agentnames_by_elementids")
+    @Cacheable(value = "query_agentnames_by_scene_and_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
         String translatedSceneId = translateSceneId(sceneId);
         if (StringUtils.isBlank(translatedSceneId)) {

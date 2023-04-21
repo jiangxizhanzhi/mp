@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentProcessModel;
@@ -7,13 +9,20 @@ import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.NetAddr;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.*;
-import com.github.pagehelper.PageInfo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -49,11 +57,11 @@ public class SysCollectorService extends RequestProcessor {
      *
      * @return 端口号
      */
-    public PageInfo<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
+    public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
-            return new PageInfo<>(new ArrayList<>());
+            return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
         var uri = "/syscollector/" + agentId + "/ports";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
@@ -64,13 +72,10 @@ public class SysCollectorService extends RequestProcessor {
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
         List<Port> ports = result.getData().getAffectedItems();
 
-        PageInfo pageInfo = new PageInfo(ports);
-        pageInfo.setTotal(result.getData().getTotalAffectedItems());
+        return new ListObjServiceResult(new ListObjResult<>(ports, result.getData().getTotalAffectedItems()).asResult()).asResult();
 
-        return pageInfo;
     }
 
 
@@ -79,11 +84,11 @@ public class SysCollectorService extends RequestProcessor {
      *
      * @return 进程集合
      */
-    public PageInfo<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
+    public ListObjServiceResult<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
-            return new PageInfo<>(new ArrayList<>());
+            return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
         var uri = "/syscollector/" + agentId + "/processes";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
@@ -96,10 +101,9 @@ public class SysCollectorService extends RequestProcessor {
         });
         log.info("{}", result);
         List<Process> processes = result.getData().getAffectedItems();
-        PageInfo pageInfo = new PageInfo(processes);
-        pageInfo.setTotal(result.getData().getTotalAffectedItems());
 
-        return pageInfo;
+        return new ListObjServiceResult(new ListObjResult<>(processes, result.getData().getTotalAffectedItems()).asResult()).asResult();
+
     }
 
 
@@ -108,11 +112,11 @@ public class SysCollectorService extends RequestProcessor {
      *
      * @return 进程集合
      */
-    public PageInfo<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
+    public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
-            return new PageInfo<>(new ArrayList<>());
+            return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
         var uri = "/syscollector/" + agentId + "/netiface";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
@@ -133,10 +137,7 @@ public class SysCollectorService extends RequestProcessor {
             }
         });
 
-        PageInfo pageInfo = new PageInfo(netifaces);
-        pageInfo.setTotal(result.getData().getTotalAffectedItems());
-
-        return pageInfo;
+        return new ListObjServiceResult(new ListObjResult<>(netifaces, result.getData().getTotalAffectedItems()).asResult()).asResult();
     }
 
     /**

@@ -14,14 +14,15 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
@@ -213,6 +214,12 @@ public class DeleteHandler extends HandlerCommon {
             }
             return true;
         }
+
+        // 卸载虚拟usb
+        if (CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
+            this.deleteVirtualUsbs(cloudElement);
+        }
+
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             vmClient.deleteByName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
@@ -468,5 +475,13 @@ public class DeleteHandler extends HandlerCommon {
 
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
+    }
+
+    private void deleteVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachVirtualUsbsData data = new AttachVirtualUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setVirtualUsbUuids(usbUuids);
+        vmClient.deleteVirtualUsbs(data);
     }
 }
