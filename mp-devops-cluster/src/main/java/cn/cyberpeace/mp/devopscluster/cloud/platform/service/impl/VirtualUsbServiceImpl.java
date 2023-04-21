@@ -44,7 +44,7 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 @Slf4j
 public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbService {
 
-    private final String VIRTUAL_USB = "/virtual_usbs";
+    private static final String VIRTUAL_USB = "/virtual_usbs";
 
     public VirtualUsbServiceImpl(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -73,6 +73,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         }
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams, CloudPlatformItemsPageResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams + ". response: {}", pageResult);
+        super.checkResult(pageResult);
         List<VirtualUsb> responseList = new ArrayList<>();
         Integer count = 0;
         if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getItems())) {
