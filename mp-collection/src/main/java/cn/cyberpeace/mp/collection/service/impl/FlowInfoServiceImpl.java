@@ -339,6 +339,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
             var result = indices.getIndices();
             if (result.length > 5) {
+                org.apache.commons.collections4.CollectionUtils.reverseArray(result);
                 result = Arrays.stream(result).limit(5).toArray(String[]::new);
             }
             return result;
