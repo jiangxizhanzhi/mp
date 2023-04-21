@@ -1,24 +1,32 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SnmpParams;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.RealEquipmentByParams;
 import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
+import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
 
@@ -33,6 +41,8 @@ public class RealEquipmentService extends BaseCpService {
     private static final String ENTITY = "/entity";
 
     private static final String SNMP = "/snmp";
+
+    private static final String ENTITY_USB = "/entity_usbs";
 
     public RealEquipmentService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -170,5 +180,36 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
+    }
+
+    /**
+     * 获取服务器列表
+     * @return
+     */
+    public List<Hypervisor> hypervisorList() {
+        log.info("RealEquipmentService.hypervisorList begin.");
+        CloudPlatformResult result = super.sendGet(URL_VERSION + "/hypervisors", CloudPlatformResult.class);
+        super.checkResult(result);
+        List<Hypervisor> hypervisorList = JSONObject.parseArray(JSONObject.toJSONString(((JSONObject)result.getData()).getJSONArray("list")), Hypervisor.class);
+        log.info("RealEquipmentService.hypervisorList end. hypervisorList:{}", hypervisorList);
+        return hypervisorList;
+    }
+
+    /**
+     * 根据hostName查询usb列表
+     * @return
+     */
+    public ListObjServiceResult<EntityUsb> physicalUsbListByHost(String hostName) {
+        log.info("RealEquipmentService.physicalUsbListByHost begin. hostName:{}", hostName);
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY_USB + "?host=" + hostName, CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<EntityUsb> responseList = new ArrayList<>();
+        Integer count = 0;
+        if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getItems())) {
+            count = pageResult.getTotal();
+            responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), EntityUsb.class);
+        }
+        log.info("RealEquipmentService.physicalUsbListByHost end.");
+        return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 }
