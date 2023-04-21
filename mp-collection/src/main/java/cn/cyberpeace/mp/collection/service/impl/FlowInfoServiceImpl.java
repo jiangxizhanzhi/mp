@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -334,9 +335,13 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         } else {
             IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "23042*");
+            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "2304*");
             GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-            return indices.getIndices();
+            var result = indices.getIndices();
+            if (result.length > 5) {
+                result = Arrays.stream(result).limit(5).toArray(String[]::new);
+            }
+            return result;
         }
     }
 
