@@ -59,6 +59,10 @@ public enum OpModuleEnums {
     PENETRATION("penetration"),
     // 25:战队"
     TEAM("team"),
+    // 26:红队训练
+    RED_TEAM("red_team"),
+    // 27:蓝队训练
+    BLUE_TEAM("blue_team"),
 
     DEFAULT("");
 
