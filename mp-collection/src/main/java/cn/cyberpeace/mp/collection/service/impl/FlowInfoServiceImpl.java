@@ -335,7 +335,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         } else {
             IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "2304*");
+            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "230*");
             GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
             var result = indices.getIndices();
             if (result.length > 5) {
