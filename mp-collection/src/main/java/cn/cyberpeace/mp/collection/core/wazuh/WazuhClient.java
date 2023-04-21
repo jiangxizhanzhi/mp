@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.collection.core.wazuh;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.collection.constant.CollectionConstant;
 import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
 import cn.cyberpeace.mp.collection.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseRequest;
@@ -12,8 +14,6 @@ import cn.cyberpeace.mp.collection.model.wazuh.syscollector.NetAddr;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
-import cn.hutool.cache.CacheUtil;
-import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
@@ -55,7 +55,6 @@ public class WazuhClient extends RequestProcessor{
 
     private int wazuhTokenExpiredSeconds = 900;
 
-    private String wazuhToken;
     private LocalDateTime wazuhTokenExpiredTime;
 
     /**
@@ -76,8 +75,8 @@ public class WazuhClient extends RequestProcessor{
         agentRequest.ensure();
         var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
         List<NameValuePair> params = this.processRequestParams(agentRequest);
-        this.syncWazuhApiToken();
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
+        String token = this.syncWazuhApiToken();
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, token);
         BaseResponse<Agent> result = JSON.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
         });
         List<Agent> agents = result.getData().getAffectedItems();
@@ -100,8 +99,8 @@ public class WazuhClient extends RequestProcessor{
 
         List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
 
-        this.syncWazuhApiToken();
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
+        String token = this.syncWazuhApiToken();
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, token);
         BaseResponse<Port> result = JSON.parseObject(res, new TypeReference<>() {
         });
         List<Port> ports = result.getData().getAffectedItems();
@@ -240,11 +239,15 @@ public class WazuhClient extends RequestProcessor{
         return params;
     }
 
-    private void syncWazuhApiToken() {
+    private String syncWazuhApiToken() {
+        String token = CollectionConstant.wazuhUrl2Token.get(this.wazuhUrl);
         if (wazuhTokenExpiredTime == null || LocalDateTime.now().compareTo(wazuhTokenExpiredTime) >= 0) {
-            this.wazuhToken = authenticate();
+            token = authenticate();
+            CollectionConstant.wazuhUrl2Token.put(this.wazuhUrl, token);
             // 预留十秒，减少网络延迟导致的过期概率
             this.wazuhTokenExpiredTime = LocalDateTime.now().plusSeconds(wazuhTokenExpiredSeconds - 10L);
         }
+        log.info("all wazuh token:{},current url:{},current token:{}", JsonCommon.stringify(CollectionConstant.wazuhUrl2Token), this.wazuhUrl, token);
+        return token;
     }
 }
