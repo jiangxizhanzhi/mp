@@ -776,7 +776,7 @@ public class SceneHandler extends BaseSceneHandler<
     public void deleteElement(String nodeId) {
     }
 
-    public void modifyElement(String nodeId) {
+    public void modifyElement(String nodeId, SceneHandler updateHandler) {
     }
 
     public void recreateElement(String nodeId) {

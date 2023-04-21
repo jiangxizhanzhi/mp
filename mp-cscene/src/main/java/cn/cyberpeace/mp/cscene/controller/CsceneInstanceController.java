@@ -679,6 +679,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("更新节点")
+    @PostMapping("/modify_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
+        modelService.modifyElement(elementModifyBO,new CsceneContextBO());
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
+    }
+
+    @ApiOperation("删除节点")
+    @PostMapping("/delete_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody CsceneInstanceNodeActionRequest request) {
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
+    }
+
     @ApiOperation("挂起节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
