@@ -683,7 +683,7 @@ public class CollectionClient {
         if (Objects.isNull(start) || Objects.isNull(end)) {
 //            end = LocalDateTime.now();
 //            start = end.plusDays(-5);
-            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "2023*");
+            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "2023.04*");
             var result = restHighLevelClient.getIndices(getIndexRequest);
             return result.getIndices();
         }
