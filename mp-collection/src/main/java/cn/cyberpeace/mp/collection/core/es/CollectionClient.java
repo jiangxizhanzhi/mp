@@ -40,6 +40,7 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -680,11 +681,11 @@ public class CollectionClient {
     private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         // 时间为空时查询五天内的数据
         if (Objects.isNull(start) || Objects.isNull(end)) {
-            end = LocalDateTime.now();
-            start = end.plusDays(-5);
-//            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
-//            var result = restHighLevelClient.getIndices(getIndexRequest);
-//            return result.getIndices();
+//            end = LocalDateTime.now();
+//            start = end.plusDays(-5);
+            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
+            var result = restHighLevelClient.getIndices(getIndexRequest);
+            return result.getIndices();
         }
         List<String> indexList = indexListBuilder(getUtcTime(start), getUtcTime(end));
         var indexArray = new String[indexList.size()];

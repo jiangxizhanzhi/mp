@@ -19,9 +19,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
@@ -321,20 +324,20 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
-        if (Objects.isNull(start) || Objects.isNull(end)) {
-            end = LocalDateTime.now();
-            start = end.plusDays(-5);
-        }
-        return buildRequestIndex(start, end);
-//        if (Objects.nonNull(start) && Objects.nonNull(end)) {
-//            return buildRequestIndex(start, end);
-//        } else {
-//            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
-//            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-//            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
-//            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-//            return indices.getIndices();
+//        if (Objects.isNull(start) || Objects.isNull(end)) {
+//            end = LocalDateTime.now();
+//            start = end.plusDays(-5);
 //        }
+//        return buildRequestIndex(start, end);
+        if (Objects.nonNull(start) && Objects.nonNull(end)) {
+            return buildRequestIndex(start, end);
+        } else {
+            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
+            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
+            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
+            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+            return indices.getIndices();
+        }
     }
 
     /**
