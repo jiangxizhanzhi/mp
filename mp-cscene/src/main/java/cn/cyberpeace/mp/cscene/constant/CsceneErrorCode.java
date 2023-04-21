@@ -16,7 +16,7 @@ public enum CsceneErrorCode implements ErrorCode {
 
     VLANID_HAS_BEEN_USED("MP-110209", "vlan_id_has_been_used"),
     VIRTUAL_USB_OUT_OF_RANGE("MP-110210", "virtual_usb_out_of_range"),
-    SAME_USB_HAS_USED("MP-110210", "same_usb_has_used"),
+    SAME_USB_HAS_USED("MP-110211", "same_usb_has_used"),
 
 
 
