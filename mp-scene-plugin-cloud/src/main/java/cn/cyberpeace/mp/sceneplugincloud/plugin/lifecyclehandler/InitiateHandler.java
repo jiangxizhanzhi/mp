@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1167,7 +1168,11 @@ public class InitiateHandler extends HandlerCommon {
             initiateElementTasks.forEach(task -> task.run());
         }
 
-        getPluginHandler().createElementNetworks();
+        try {
+            getPluginHandler().createElementNetworks();
+        } catch (Exception e) {
+            log.error("failed to create network ", e);
+        }
 
         // 初始化ip池
         var initiateElementIpPoolTasks = cloudElements.stream()
