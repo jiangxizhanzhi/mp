@@ -130,4 +130,9 @@ public class RealEquipmentBO extends BasePageConvertModel {
      * 引用状态
      */
     private Integer referenceStatus;
+
+    /**
+     * 实体USB信息
+     */
+    private EntityUsb extEntityUsb;
 }

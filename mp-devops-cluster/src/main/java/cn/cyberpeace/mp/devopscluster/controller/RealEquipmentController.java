@@ -174,7 +174,7 @@ public class RealEquipmentController {
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo()).role(realEquipmentBO.getRole())
                 .mainCategory(realEquipmentBO.getMainCategory()).subCategory(realEquipmentBO.getSubCategory()).thirdCategory(realEquipmentBO.getThirdCategory())
                 .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
-                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).build();
+                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         return new Result(response);
     }
 
@@ -227,7 +227,7 @@ public class RealEquipmentController {
         }
         RealEquipmentDevopsDetailVO response = RealEquipmentDevopsDetailVO.builder()
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
-                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).build();
+                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
             response.setAddress(realEquipmentBO.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
         }
