@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -35,6 +36,11 @@ public class UserCommon {
             log.error("Get user[{}] failed: ", userId, e);
         }
         return user;
+    }
+
+
+    public static List<UserModel> getUsers(List<String> userIds) {
+        return userService.getUserModelNoRestrictByUserIds(userIds);
     }
 
     public static UserModel getUserWithContext(CsceneContextBO context) {

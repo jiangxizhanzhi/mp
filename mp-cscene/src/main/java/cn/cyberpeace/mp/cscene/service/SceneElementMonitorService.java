@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -316,6 +317,9 @@ public class SceneElementMonitorService {
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
 
+        basicInfo.setEvent(sceneElementBO.getEvent());
+        basicInfo.setEventStatus(sceneElementBO.getEventStatus());
+
         // 操作系统
         // 参考SystemTypeUtils
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
@@ -352,6 +356,9 @@ public class SceneElementMonitorService {
 
         // 实例类型
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
+
+        // 设备类型
+        basicInfo.setCategory(cpSceneElementBO.getCategory());
     }
 
     public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
