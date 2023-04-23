@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @Description: 实体USB
  * @Author: guquan
  * @Date：2023/4/21 10:15
  */
@@ -37,5 +37,17 @@ public class EntityUsb extends BaseModel {
      */
     @ApiModelProperty("usb控制器device")
     private Integer usbDevice;
+
+    /**
+     * 型号
+     */
+    @ApiModelProperty("型号")
+    private String style;
+
+    /**
+     * 参数
+     */
+    @ApiModelProperty("参数")
+    private String params;
 
 }
