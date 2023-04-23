@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.cscene.util.ZipUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.io.FileUtil;
@@ -223,7 +224,7 @@ public class CsceneController implements BaseModelListControllerBase {
         File file = new File(dir);
         file.mkdir();
         for (var cs : csceneBOS) {
-            File content = new File(dir + "/" + cs.getName() + ".json");
+            File content = LogFileUtil.getFinalFileName(new File(dir + "/" + cs.getName() + ".json"));
             FileOutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(content);

@@ -5,11 +5,14 @@ import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -69,4 +72,37 @@ public class LogFileUtil {
         init();
         return BeanCommon.getBean(LogFileService.class).loadLogFile(sceneId);
     }
+
+    /**
+     * @description: 获取文件的最终名称（如果重复则顺序在文件名加序号）
+     * @param file
+     * @return File
+     */
+    public static File getFinalFileName(File file){
+        if(!file.exists()){
+           return file;
+        }
+        String prefix = FileUtil.getPrefix(file);
+        String suffix = FileUtil.getSuffix(file);
+        return createOrRenameFile(file,prefix,suffix);
+    }
+
+
+    public static File createOrRenameFile(File file, String toPrefix, String toSuffix){
+        File directory = file.getParentFile();
+        if (!directory.exists()){
+            if (directory.mkdir()){
+                log.info("Created directory " + directory.getAbsolutePath());
+            }
+        }
+        File newFile = new File(directory, toPrefix + StrUtil.DOT + toSuffix);
+        for (int i = 1; newFile.exists() && i < Integer.MAX_VALUE; i++){
+            newFile = new File(directory, toPrefix + '(' + i + ')' + StrUtil.DOT +toSuffix);
+        }
+        return newFile;
+    }
+
+
+
+
 }
