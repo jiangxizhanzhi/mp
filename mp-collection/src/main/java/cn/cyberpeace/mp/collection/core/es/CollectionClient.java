@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +130,9 @@ public class CollectionClient {
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return new ListObjResult<>(new ArrayList<>(), 0);
+        }
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
         var wazuhFileRootList = EsResponseParseUtils.parseResponse(response, WazuhFileRoot.class);
@@ -178,6 +182,9 @@ public class CollectionClient {
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return new ListObjResult<>(new ArrayList<>(), 0);
+        }
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
         List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
@@ -219,6 +226,9 @@ public class CollectionClient {
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return new ListObjResult<>(new ArrayList<>(), 0);
+        }
         SearchResponse response = restHighLevelClient.search(searchRequest);
         List<WazuhVulnerabilityInfoModel> wazuhModelList = new ArrayList<>();
         for (var hit : response.getHits().getHits()) {
@@ -261,6 +271,9 @@ public class CollectionClient {
         sourceBuilder.aggregation(AggregationBuilders.terms(fieldName).field(fieldPath));
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return new ArrayList<>();
+        }
         List<WazuhVulnerabilityInfoCountModel> vulnerabilityInfoCounts;
         SearchResponse response = restHighLevelClient.search(searchRequest);
         long totalHits = response.getHits().getTotalHits().value;
@@ -289,6 +302,9 @@ public class CollectionClient {
             return new ListObjResult<>(new ArrayList<>(), 0);
         }
         SearchResponse response = querySICLaunchEventsWithTimeRange(request, SicLaunchConfig.LAUNCH_ID_HOST_STATE);
+        if (response == null) {
+            return new ListObjResult<>(new ArrayList<>(), 0);
+        }
         List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSON.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
@@ -329,6 +345,9 @@ public class CollectionClient {
         wazuhMonitorEventsRequest.setPageNum(1);
         wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
+        if (response == null) {
+            return new ArrayList<>();
+        }
         List<JSONObject> jsonObjects = processBaseChangeOutput(response);
         if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
@@ -363,6 +382,9 @@ public class CollectionClient {
         wazuhMonitorEventsRequest.setPageNum(1);
         wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
+        if (response == null) {
+            return new ArrayList<>();
+        }
         List<JSONObject> jsonObjects = processBaseChangeOutput(response);
         if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
@@ -399,6 +421,9 @@ public class CollectionClient {
         wazuhMonitorEventsRequest.setPageNum(1);
         wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
+        if (response == null) {
+            return new ArrayList<>();
+        }
         List<JSONObject> jsonObjects = processBaseChangeOutput(response);
         if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
@@ -486,6 +511,9 @@ public class CollectionClient {
                 .field("agent.name");
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return new HashMap<>();
+        }
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
             Terms terms = response.getAggregations().get(aggregationName);
@@ -513,6 +541,9 @@ public class CollectionClient {
                 .field("rule.id").size(100);
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return map;
+        }
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
             Terms terms = response.getAggregations().get(aggregationName);
@@ -531,6 +562,9 @@ public class CollectionClient {
             return 0L;
         }
         CountRequest countRequest = buildCountRequest(request);
+        if (countRequest == null) {
+            return 0L;
+        }
         CountResponse response = restHighLevelClient.count(countRequest);
         return response.getCount();
     }
@@ -544,6 +578,9 @@ public class CollectionClient {
             return 0L;
         }
         DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
+        if (deleteRequest == null) {
+            return 0L;
+        }
         BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteRequest);
         return response.getUpdated();
     }
@@ -554,6 +591,9 @@ public class CollectionClient {
      */
     public void deleteDocByTime(WazuhEventRequest request) {
         DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
+        if (deleteRequest == null) {
+            return;
+        }
         restHighLevelClient.allDeleteByQuery(deleteRequest);
     }
 
@@ -586,6 +626,9 @@ public class CollectionClient {
         sourceBuilder.aggregation(sumAggregationBuilder);
         sourceBuilder.size(0);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return 0;
+        }
         int changedCount = 0;
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
@@ -648,6 +691,9 @@ public class CollectionClient {
             addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        if (searchRequest == null) {
+            return null;
+        }
         return restHighLevelClient.search(searchRequest);
     }
 
@@ -684,16 +730,16 @@ public class CollectionClient {
     private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         // 时间为空时查询五天内的数据
         if (Objects.isNull(start) || Objects.isNull(end)) {
-//            end = LocalDateTime.now();
-//            start = end.plusDays(-5);
-            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "2023.04*");
-            var result = restHighLevelClient.getIndices(getIndexRequest);
-            return result.getIndices();
+            end = LocalDateTime.now();
+            start = end.plusDays(-5);
         }
         List<String> indexList = indexListBuilder(getUtcTime(start), getUtcTime(end));
-        var indexArray = new String[indexList.size()];
-        indexList.toArray(indexArray);
-        return indexArray;
+        GetIndexRequest getIndexRequest = new GetIndexRequest(indexList.toArray(String[]::new));
+        var result = restHighLevelClient.getIndices(getIndexRequest);
+        if (result == null) {
+            return new String[0];
+        }
+        return result.getIndices();
     }
 
     /**
@@ -814,6 +860,9 @@ public class CollectionClient {
 
     private SearchRequest buildSearchRequest(WazuhEventRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
+        if (indexArray.length < 1) {
+            return null;
+        }
         var searchRequest = new SearchRequest(indexArray);
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -829,6 +878,9 @@ public class CollectionClient {
 
     private SearchRequest buildSearchRequest(WazuhHostMonitorPageRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
+        if (indexArray.length < 1) {
+            return null;
+        }
         var searchRequest = new SearchRequest(indexArray);
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -884,6 +936,9 @@ public class CollectionClient {
 
     private CountRequest buildCountRequest(WazuhEventRequest request) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
+        if (indexArray.length < 1) {
+            return null;
+        }
         var countRequest = new CountRequest(indexArray);
 
         var boolQueryBuilder = QueryBuilders.boolQuery();
@@ -900,6 +955,9 @@ public class CollectionClient {
 
     private DeleteByQueryRequest buildDeleteRequest(WazuhEventRequest request) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
+        if (indexArray.length < 1) {
+            return null;
+        }
         var deleteRequest = new DeleteByQueryRequest(indexArray);
 
         var boolQueryBuilder = QueryBuilders.boolQuery();

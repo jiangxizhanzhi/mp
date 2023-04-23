@@ -128,7 +128,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
             return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es get indices error: ", e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+            return null;
         }
     }
 

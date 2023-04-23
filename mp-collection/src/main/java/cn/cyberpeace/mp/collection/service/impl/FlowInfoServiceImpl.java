@@ -19,7 +19,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -39,7 +38,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +63,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         log.info("{}", pageFlowRequest);
 
         String[] indexArray = buildEsIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
+        if (indexArray.length < 1) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -111,6 +112,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         }
         log.info("{}", flowQueryRequest);
         String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
+        if (indexArray.length < 1) {
+            return new ServiceResult<>(new HashMap<>());
+        }
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -325,25 +329,17 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
-//        if (Objects.isNull(start) || Objects.isNull(end)) {
-//            end = LocalDateTime.now();
-//            start = end.plusDays(-5);
-//        }
-//        return buildRequestIndex(start, end);
-        if (Objects.nonNull(start) && Objects.nonNull(end)) {
-            return buildRequestIndex(start, end);
-        } else {
-            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
-            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "230*");
-            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-            var result = indices.getIndices();
-            if (result.length > 5) {
-                org.apache.commons.collections4.CollectionUtils.reverseArray(result);
-                result = Arrays.stream(result).limit(5).toArray(String[]::new);
-            }
-            return result;
+        if (Objects.isNull(start) || Objects.isNull(end)) {
+            end = LocalDateTime.now();
+            start = end.plusDays(-5);
         }
+        var index = buildRequestIndex(start, end);
+        GetIndexRequest getIndexRequest = new GetIndexRequest(index);
+        GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+        if (indices == null) {
+            return new String[0];
+        }
+        return indices.getIndices();
     }
 
     /**
@@ -352,7 +348,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         if (Objects.isNull(start) || Objects.isNull(end)) {
-            return null;
+            return new ArrayList<>();
         }
         List<String> dateStringList = fetchFormatterTime(start, end);
         return dateStringList.stream().map(dateString -> ARKIME_SESSIONS3_ + dateString).collect(Collectors.toList());
