@@ -11,8 +11,10 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
+import cn.cyberpeace.mp.flow.constant.FlowConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
@@ -31,14 +33,17 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -1114,34 +1119,64 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     }
 
 
-    public List<String> pcapAnalyse(MultipartFile multipartFile) {
-        List<String> protocolList = new ArrayList<>();
-        String strProtocols = null;
-        String scriptPath = "";
+    /**
+     * pcap协议解析
+     * @param multipartFile
+     * @return
+     */
+    public List<ProtocolBO> pcapAnalyse(MultipartFile multipartFile) {
+        List<ProtocolBO> protocolList = new ArrayList<>();
+        String fileMd5 = null;
+        try {
+            fileMd5 = DigestUtils.md5Hex(multipartFile.getBytes());
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(fileMd5)) {
+                String pcapMd5Result = FlowCacheUtil.pcapAnalyseCache.getIfPresent(fileMd5);
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(pcapMd5Result)) {
+                    log.info("get file analyse result from cache: {}", pcapMd5Result);
+                    Map proMap = JSON.parseObject(pcapMd5Result);
+                    for (Object key : proMap.keySet()) {
+                        ProtocolBO protocol = new ProtocolBO();
+                        protocol.setRate(Double.parseDouble(proMap.get(key).toString()));
+                        protocol.setName(key.toString());
+                        String desc = MessageCommonUtil.convertMessageWithNull(key.toString().toLowerCase());
+                        if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
+                            // 未知协议
+                            desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
+                        }
+                        protocol.setDesc(desc);
+                        protocolList.add(protocol);
+                    }
+
+                    // 降序排列
+                    this.sortProtocol(protocolList);
+                    return protocolList;
+                }
+            }
+        } catch (Exception e) {
+            log.error("get pcap file md5 error", e);
+        }
+
+        String strProtocols;
+        String scriptPath = PRE_PATH.concat("protocol_analyse.py");
         String pcapPath = "";
         OutputStream out = null;
         BufferedReader input = null;
-        File tmp_file = null;
+        File tmpFile = null;
 
-        String prePath = "/root/.mp/resources/flows/protocol/";
         try {
-            if (StringUtils.isBlank(scriptPath)) {
-                scriptPath  = prePath.concat("protocol_analyse.py");
-            }
-
-            String fileName = System.currentTimeMillis() + multipartFile.getOriginalFilename();
-            pcapPath = prePath.concat(fileName);
-            tmp_file = new File(pcapPath);
-            out = new FileOutputStream(tmp_file);
+            String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + multipartFile.getOriginalFilename();
+            pcapPath = PRE_PATH.concat(fileName);
+            tmpFile = new File(pcapPath);
+            out = new FileOutputStream(tmpFile);
             byte[] ss = multipartFile.getBytes();
             for (byte s : ss) {
                 out.write(s);
             }
 
-            String pythonCmd = String.format("python %s %s", scriptPath, pcapPath);
-            log.info("============pythonCmd: {}", pythonCmd);
+            String pythonCmd = String.format("python3 %s %s", scriptPath, pcapPath);
+            log.info("============python analyse cmd: {}", pythonCmd);
 
-            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
+            Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
             strProtocols = "";
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -1151,25 +1186,63 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
             log.info("============pcapRead result: {}", strProtocols);
 
-            if (StringUtils.isNotBlank(strProtocols)) {
-                String[] protocolArray = strProtocols.split(BaseConstants.COMMA);
-                protocolList = Arrays.asList(protocolArray);
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(strProtocols)) {
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(fileMd5)) {
+                    FlowCacheUtil.pcapAnalyseCache.put(fileMd5, strProtocols);
+                }
+
+                Map proMap = JSON.parseObject(strProtocols);
+                for (Object key : proMap.keySet()) {
+                    ProtocolBO protocol = new ProtocolBO();
+                    protocol.setName(key.toString());
+                    String desc = MessageCommonUtil.convertMessageWithNull(key.toString().toLowerCase());
+                    if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
+                        // 未知协议
+                        desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
+                    }
+                    protocol.setDesc(desc);
+                    protocol.setRate(Double.parseDouble(proMap.get(key).toString()));
+                    protocolList.add(protocol);
+                }
             }
         } catch (Exception e) {
             log.error("exec error:", e);
         } finally {
-            IOUtils.closeQuietly(out);
-            IOUtils.closeQuietly(input);
+            org.apache.poi.util.IOUtils.closeQuietly(out);
+            org.apache.poi.util.IOUtils.closeQuietly(input);
 
-            if (Objects.nonNull(tmp_file) && tmp_file.exists()) {
+            if (Objects.nonNull(tmpFile) && tmpFile.exists()) {
                 try {
-                    tmp_file.delete();
+                    tmpFile.delete();
                 } catch (Exception e) {
                     log.error(pcapPath + "delete error");
                 }
             }
         }
 
+        // 降序排列
+        this.sortProtocol(protocolList);
+        return protocolList;
+    }
+
+
+    private List<ProtocolBO> sortProtocol(List<ProtocolBO> protocolList) {
+        Collections.sort(protocolList);
+
+        // other排序到最后
+        if (protocolList.size() == 11) {
+            int otherIndex = 0;
+            for (int i = 0; i < protocolList.size(); i++) {
+                if ("other".equals(protocolList.get(i).getName())) {
+                    otherIndex = i;
+                    break;
+                }
+            }
+
+            ProtocolBO bo = protocolList.get(otherIndex);
+            protocolList.remove(otherIndex);
+            protocolList.add(bo);
+        }
         return protocolList;
     }
 

@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.*;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.*;
@@ -13,12 +16,14 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
+import cn.cyberpeace.mp.flow.response.PcapAnalyseResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -26,8 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -214,21 +221,34 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.checkNamesExist(request);
     }
 
-//    @GetMapping("/pcapRead")
-//    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
-//        if (Objects.isNull(file)) {
-//            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
-//        }
-//
-//        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
-//        if (!BaseConstants.STR_PCAP.equals(suffix)) {
-//            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
-//        }
-//
-//        // 解析流量包包含的协议内容
-//        List<String> protocolList = flowServiceImpl.pcapAnalyse(file);
-//        return ResultCommon.success(protocolList);
-//    }
+    @ApiOperation(value = "流量包解析", notes = "获取流量包包含的协议集合")
+    @PostMapping("/analyse")
+    public ServiceResult<PcapAnalyseResponse> flowAnalyse(MultipartFile file) {
+        PcapAnalyseResponse response = new PcapAnalyseResponse();
+        if (Objects.isNull(file)) {
+            throw new MpRuntimeException(FlowErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("file"));
+        }
+
+        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+        if (!BaseConstants.STR_PCAP.equals(suffix)) {
+            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
+        }
+
+        // 上传文件获取路径
+        String filePath = null;
+        try {
+            filePath = FsCommon.upload(file.getInputStream(), suffix);
+            response.setPcapFile(filePath);
+        } catch (IOException e) {
+            log.error("analyse upload pcap file error", e);
+            return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+        }
+
+        // 解析流量包包含的协议内容
+        List<ProtocolBO> protocolList = flowServiceImpl.pcapAnalyse(file);
+        response.setProtocolList(protocolList);
+        return ResultCommon.success(response);
+    }
 
 
 }

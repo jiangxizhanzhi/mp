@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,6 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -64,6 +62,17 @@ public class MessageCommonUtil {
     public static String convertMessage(String name) {
         if (!keys.contains(name)) {
             return name;
+        }
+        if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
+            return zhMap.get(name);
+        } else {
+            return enMap.get(name);
+        }
+    }
+
+    public static String convertMessageWithNull(String name) {
+        if (!keys.contains(name)) {
+            return null;
         }
         if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
             return zhMap.get(name);
