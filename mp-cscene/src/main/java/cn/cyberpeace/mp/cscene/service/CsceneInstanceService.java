@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -34,6 +35,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
+import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
@@ -56,12 +58,15 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -119,6 +124,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         BaseModelFields, QueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
+    private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
     public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
 
@@ -504,9 +510,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     @Autowired
-    public CsceneInstanceService(CsceneInstanceMapper modelMapper, CsceneInstanceRoleMapper csceneInstanceRoleMapper) {
+    public CsceneInstanceService(CsceneInstanceMapper modelMapper, CsceneInstanceRoleMapper csceneInstanceRoleMapper,
+                                 CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         setModelMapper(modelMapper);
         setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
+        setCloudPluginSceneConnectionMapper(cloudPluginSceneConnectionMapper);
     }
 
     public ListObjServiceResult<CsceneInstanceBO> listCsceneInstanceBO(QueryParams queryParams,
@@ -538,6 +546,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         if (ReentrantLockUtils.tryLock(id)) {
             try {
+                // 移除定时任务
+                SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 var instanceHandler = new CsceneInstanceHandler(id, context);
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
                 String sceneId = this.getSceneId(id);
@@ -958,8 +968,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
         CsceneContextHolder.setCsceneInstanceId(id);
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
         if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
             return new ServiceResult<>(null);
+        }
+        if (context.getPassThrough() == null) {
+            CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
+            var csceneInstanceModel = getModelMapper().get(id);
+            csceneInstance.fromModel(csceneInstanceModel);
         }
         context.loadTransparentContext();
 
@@ -968,8 +984,29 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(null);
         }
         var cloudScenePluginContext = context.toCloudScenePluginContext();
-        return scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
+        var result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
                 context.getAccessUserId(), cloudScenePluginContext);
+
+        var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+                .select(CloudPluginSceneConnectionModel::getAccessUser)
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
+                .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, nodeId)
+                .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+        if (CollectionUtils.isNotEmpty(connections)) {
+            Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
+            List<AccessUserBO> accessUsers = UserCommon.getUsers(new ArrayList<>(userIds)).stream().map(userModel -> {
+                AccessUserBO accessUser = new AccessUserBO();
+                accessUser.setId(userModel.getId());
+                accessUser.setName(userModel.getName());
+                return accessUser;
+            }).collect(Collectors.toList());
+            CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
+            csceneElementCommon.setNodeId(nodeId);
+            csceneElementCommon.setData(accessUsers);
+            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
+        }
+        return result;
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -98,7 +99,7 @@ public class LogFileService {
         if (elementId2LogFile == null || elementId2LogFile.isEmpty()) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
-        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
+        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false, new SceneAllElementsQueryRequest());
         Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(pageRequest.getSceneId(), pageRequest.getElementIds());
 
         List<LogFileVO> allLogFileVOs = new ArrayList<>();
@@ -143,7 +144,7 @@ public class LogFileService {
         if (model == null || StringUtils.isEmpty(model.getProbeCollector())) {
             return new ConcurrentHashMap<>();
         }
-        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(csceneId, false);
+        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(csceneId, false, new SceneAllElementsQueryRequest());
         if (allElements == null || allElements.isEmpty()) {
             return new ConcurrentHashMap<>();
         }
