@@ -23,6 +23,7 @@ public class VirtualMachineCreateData implements CloudHttpData {
     private String hostname;
     private String userData;
     private List<VirtualNic> networks;
+    private Boolean isoAttach;
 
     private String id;
 }
