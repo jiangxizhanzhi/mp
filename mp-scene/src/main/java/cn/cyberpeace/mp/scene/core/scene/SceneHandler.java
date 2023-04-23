@@ -47,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -774,6 +775,46 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void deleteElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.DELETE);
+        startElementEvent(nodeId, SceneElementModel.Event.DELETE);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.deleteElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.DELETE, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.DELETE);
+        // 去除 被删除节点 的数据
+        var scene = toData();
+        Iterator<SceneElementBO> elementIts = scene.getTopology().getElements().iterator();
+        while (elementIts.hasNext()) {
+            var s = elementIts.next();
+            if (s.getId().equals(nodeId)) {
+                elementIts.remove();
+                break;
+            }
+        }
+        Set<String> deletePortIds = new HashSet<>();
+        for (var p : element.getPorts()) {
+            deletePortIds.add(p.getId());
+        }
+        Iterator<SceneElementPortConnectionBO> connectIts = scene.getTopology().getConnections().iterator();
+        while (connectIts.hasNext()) {
+            var c = connectIts.next();
+            if (deletePortIds.contains(c.getSource()) || deletePortIds.contains(c.getTarget())) {
+                connectIts.remove();
+            }
+        }
+        for (var plugin : scene.getPlugins().values()) {
+            plugin.getElements().remove(element.getId());
+            for (var port : element.getPorts()) {
+                plugin.getElementPorts().remove(port.getId());
+            }
+        }
+        new SceneHandler(scene, null).save();
     }
 
     public void modifyElement(String nodeId, SceneHandler updateHandler) {

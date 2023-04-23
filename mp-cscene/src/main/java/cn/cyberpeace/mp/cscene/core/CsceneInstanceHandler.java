@@ -227,6 +227,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.modifyElement(sceneId, nodeId, updateHandler, generateSceneContext()).getSource();
     }
 
+    public boolean deleteElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.deleteElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
     public boolean suspendElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {

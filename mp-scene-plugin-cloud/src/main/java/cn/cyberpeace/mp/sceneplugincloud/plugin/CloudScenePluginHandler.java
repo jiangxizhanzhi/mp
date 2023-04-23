@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementCreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementDeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementInitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementModifyHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
@@ -325,6 +326,15 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
         CloudScenePluginHandler updateCloudHandler = updateHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         new ElementModifyHandler(this, getSceneHandler().getScene().getEvent()).modifyElement(updateCloudHandler.getElement(nodeId));
+    }
+
+    @Override
+    public void deleteElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new ElementDeleteHandler(this, getSceneHandler().getScene().getEvent()).deleteElement(element);
     }
 
     @Override
