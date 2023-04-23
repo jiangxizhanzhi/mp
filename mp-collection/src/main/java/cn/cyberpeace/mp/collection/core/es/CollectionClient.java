@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.collection.constant.SicLaunchConfig;
+import cn.cyberpeace.mp.collection.enums.LaunchStatusEnum;
 import cn.cyberpeace.mp.collection.model.FileEventModel;
 import cn.cyberpeace.mp.collection.model.WazuhEventRequest;
 import cn.cyberpeace.mp.collection.model.WazuhFileRoot;
@@ -43,6 +44,7 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
@@ -643,6 +645,7 @@ public class CollectionClient {
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         if (StringUtils.isNotEmpty(launchId)) {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
+            addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
         return restHighLevelClient.search(searchRequest);
@@ -1070,5 +1073,15 @@ public class CollectionClient {
     private Long string2Long(String val) {
         Double doubleVal = Double.valueOf(val);
         return BigDecimal.valueOf(doubleVal).longValue();
+    }
+
+    /**
+     * 添加output字段存在，且status为success条件
+     * @param boolQueryBuilder
+     */
+    private void addLaunchOutputSuccessCondition(BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_STATUS, LaunchStatusEnum.SUCCESS.getValue()));
+        ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT);
+        boolQueryBuilder.filter(QueryBuilders.nestedQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT, existsQuery, ScoreMode.None));
     }
 }
