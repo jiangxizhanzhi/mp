@@ -139,6 +139,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void modifyElement(String nodeId, SceneHandler updatedSceneHandler) {
+
+    }
+
     public void suspendElement(String nodeId) {
 
     }

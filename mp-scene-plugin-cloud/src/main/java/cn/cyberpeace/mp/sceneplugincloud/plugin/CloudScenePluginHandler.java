@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementCreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementInitiateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementModifyHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
@@ -314,6 +315,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
         new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
+    }
+
+    @Override
+    public void modifyElement(String nodeId, SceneHandler updateHandler) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        CloudScenePluginHandler updateCloudHandler = updateHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        new ElementModifyHandler(this, getSceneHandler().getScene().getEvent()).modifyElement(updateCloudHandler.getElement(nodeId));
     }
 
     @Override

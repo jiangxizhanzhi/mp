@@ -777,6 +777,25 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void modifyElement(String nodeId, SceneHandler updateHandler) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.MODIFY);
+        startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+        try {
+            // 基础数据 modify
+            var newElement = updateHandler.getElement(nodeId);
+            element.setName(newElement.getName());
+            element.setIcon2(newElement.getIcon2());
+            element.setIcon3(newElement.getIcon3());
+            // 插件数据 modify
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.modifyElement(nodeId, updateHandler);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.MODIFY, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+        updateSceneElementWithPlugins(nodeId);
     }
 
     public void recreateElement(String nodeId) {
