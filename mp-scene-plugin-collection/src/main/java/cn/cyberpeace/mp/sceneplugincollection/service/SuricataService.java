@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SuricataData;
 import cn.cyberpeace.mp.sceneplugincollection.model.SuricataRuleModel;
 import cn.cyberpeace.mp.sceneplugincollection.repository.SuricataRuleMapper;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.SuricataQueryParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +22,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.sceneplugincollection.constant.SuricataConstant.*;
@@ -192,4 +200,41 @@ public class SuricataService {
         }
     }
 
+
+    /**
+     * @description: 分页查询流量规则信息
+     * @param suricataQueryParams
+     * @return ServiceResult<List<SuricataData>>
+     */
+    public ServiceResult<List<SuricataData>> queryPage(SuricataQueryParams suricataQueryParams) {
+        suricataQueryParams.ensure();
+        //构建查询参数
+        HumanCondition condition = new HumanCondition();
+        if(StringUtils.isNotEmpty(suricataQueryParams.getProtocol())){
+            condition.filterEqual(SuricataRuleModel::getProtocol,suricataQueryParams.getProtocol());
+        }
+        if(StringUtils.isNotEmpty(suricataQueryParams.getRuleName())){
+            condition.filterContains(SuricataRuleModel::getRuleName,suricataQueryParams.getRuleName());
+        }
+        if(StringUtils.isNotEmpty(suricataQueryParams.getAttck())){
+            condition.filterContains(SuricataRuleModel::getAttck,suricataQueryParams.getAttck());
+        }
+        //查询结果总数
+        int total = suricataRuleMapper.total(condition);
+        if(total == 0){
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), total)).asResult();
+        }
+        //添加分页信息
+        condition.pagination(suricataQueryParams.getPage(),suricataQueryParams.getPageSize());
+        //执行查询
+        List<SuricataRuleModel> suricataRuleModelList = suricataRuleMapper.list(condition);
+        //转换响应为业务数据
+        List<SuricataData> result = suricataRuleModelList.stream().map(rule -> {
+            return SuricataData.builder().action(rule.getAction()).protocol(rule.getProtocol()).source(rule.getSource())
+                .sourcePorts(rule.getSourcePorts()).direction(rule.getDirection()).destination(rule.getDestination())
+                .destinationPorts(rule.getDestinationPorts()).ruleMsg(rule.getRuleMsg()).ruleName(rule.getRuleName())
+                .sid(rule.getSid()).attck(rule.getAttck()).build();
+        }).collect(Collectors.toList());
+        return new ListObjServiceResult(new ListObjResult(result, total)).asResult();
+    }
 }

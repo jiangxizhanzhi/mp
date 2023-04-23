@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincollection.constant.SuricataConstant;
 import cn.cyberpeace.mp.sceneplugincollection.service.SuricataService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.SuricataQueryParams;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,11 +34,23 @@ public class SuricataController {
     private SuricataService suricataService;
 
 
+    /**
+     * @description: Suricata规则文件导入
+     * @param file
+     * @return ServiceResult
+     */
     @PostMapping("/rule/reimport")
     @PreAuthorize("hasAnyAuthority('ROLE_" + SuricataConstant.ROLE_ADMIN + "')")
     public ServiceResult importSuricataRules(MultipartFile file) {
-        boolean b = suricataService.handlerRuleFile(file);
-        return ResultCommon.success(b);
+        return ResultCommon.success(suricataService.handlerRuleFile(file));
     }
+
+
+    @ApiOperation(value = "分页查询流量分析规则")
+    @GetMapping("/rule/page")
+    public ServiceResult querySuricataRulesPage(SuricataQueryParams suricataQueryParams){
+        return suricataService.queryPage(suricataQueryParams);
+    }
+
 
 }
