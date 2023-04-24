@@ -45,6 +45,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1244,6 +1245,82 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             protocolList.add(bo);
         }
         return protocolList;
+    }
+
+    /**
+     * 根据协议结合过滤pcap包
+     * @param pcapPath 原pcap的fdfs地址
+     * @param protocolList 保留的协议集合
+     * @return 过滤后的pcap包fdfs地址
+     */
+    public String pcapFilter(String pcapPath, List<String> protocolList) {
+        String outPcapPath = "";
+        String scriptPath = PRE_PATH.concat("protocol_filter.py");
+        BufferedOutputStream bos = null;
+        FileOutputStream fos = null;
+        BufferedReader input = null;
+        File srcFile = null;
+        File dstFile = null;
+        String strProtocols = org.apache.commons.lang3.StringUtils.join(protocolList, BaseConstants.COMMA);
+
+        try {
+            // 下载原pcap文件
+            byte[] pcapByte = FdfsCommon.downloadRawContent(pcapPath);
+            String fileName = FilenameUtils.getName(pcapPath);;
+            String srcPcapPath = PRE_PATH.concat(fileName);
+            srcFile = new File(srcPcapPath);
+            fos = new FileOutputStream(srcFile);
+            bos = new BufferedOutputStream(fos);
+            bos.write(pcapByte);
+
+            // 根据协议过滤pcap生成新的包
+            String pythonCmd = String.format("python3 %s %s %s %s", scriptPath, srcPcapPath, strProtocols);
+            log.info("============python filter cmd: {}", pythonCmd);
+            Process process = Runtime.getRuntime().exec(pythonCmd);
+            process.waitFor();
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            String filterResult = "";
+            while ((line = input.readLine()) != null) {
+                filterResult = line;
+            }
+            // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
+            log.info("============pcap filter result: {}", filterResult);
+
+            // TODO 保存mp_flow_pcap表数据
+            JSONObject filterObj = JSONObject.parseObject(filterResult);
+            Double duration = filterObj.getDoubleValue("duration");
+            Integer pktNum = filterObj.getInteger("count");
+            String dstPcapPath = filterObj.getString("dstPath");
+            Long pcapSize = filterObj.getLongValue("fileSize");
+
+            dstFile = new File(dstPcapPath);
+            // 上传新pcap包
+            outPcapPath = FdfsCommon.upload(dstPcapPath);
+        } catch (Exception e) {
+            log.error("pcap file filter error", e);
+        } finally {
+            org.apache.poi.util.IOUtils.closeQuietly(fos);
+            org.apache.poi.util.IOUtils.closeQuietly(bos);
+
+            if (Objects.nonNull(srcFile) && srcFile.exists()) {
+                try {
+                    srcFile.delete();
+                } catch (Exception e) {
+                    log.error("pcap src file delete error");
+                }
+            }
+
+            if (Objects.nonNull(dstFile) && dstFile.exists()) {
+                try {
+                    dstFile.delete();
+                } catch (Exception e) {
+                    log.error("pcap dst file delete error");
+                }
+            }
+        }
+
+        return outPcapPath;
     }
 
 }
