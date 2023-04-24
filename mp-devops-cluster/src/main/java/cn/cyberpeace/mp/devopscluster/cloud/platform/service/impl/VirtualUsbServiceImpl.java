@@ -71,6 +71,9 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             }
             clouldParams.append("&sort_key=").append(sortKey);
         }
+        if (StringUtils.isNotEmpty(queryParams.getName())) {
+            clouldParams.append("&name=").append(queryParams.getName());
+        }
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams, CloudPlatformItemsPageResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams + ". response: {}", pageResult);
         super.checkResult(pageResult);
