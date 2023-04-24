@@ -24,7 +24,7 @@ public class VirtualUsbStorage extends BaseModel {
      * 已使用
      */
     @ApiModelProperty("已使用")
-    private String used;
+    private Integer used;
 
     /**
      * 文件列表
