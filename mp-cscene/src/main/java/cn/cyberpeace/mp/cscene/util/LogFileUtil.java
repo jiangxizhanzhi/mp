@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class LogFileUtil {
@@ -26,6 +28,9 @@ public class LogFileUtil {
     private static LoadingCache<String, Map<String, List<LogFileVO>>> cache = null;
 
     private static ScheduledThreadPoolExecutor refreshExecutor = new ScheduledThreadPoolExecutor(1);
+
+    //字符串包含类似(1)的正则
+    private static final Pattern FILE_SUFFIX_NUM_REGEX = Pattern.compile("\\((\\d*)\\)");
 
     public static void init() {
         if (cache == null) {
@@ -100,6 +105,24 @@ public class LogFileUtil {
             newFile = new File(directory, toPrefix + '(' + i + ')' + StrUtil.DOT +toSuffix);
         }
         return newFile;
+    }
+
+
+    /**
+     * @description: 去除文件名后缀为(1)的   类似格式(1),(2),(...)
+     * @param filePrefixName 
+     * @return String
+     */
+    public static String renameNumSuffixFile(String filePrefixName){
+        Matcher matcher = FILE_SUFFIX_NUM_REGEX.matcher(filePrefixName);
+        int lastStrStart = 0;
+        int lastStrEnd = 0;
+        while(matcher.find()){
+            lastStrStart = matcher.start();
+            lastStrEnd = matcher.end();
+        }
+        StringBuilder stringBuilder = new StringBuilder(filePrefixName).replace(lastStrStart, lastStrEnd, "");
+        return stringBuilder.toString();
     }
 
 
