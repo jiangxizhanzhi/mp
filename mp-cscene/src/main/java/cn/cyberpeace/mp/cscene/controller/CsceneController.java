@@ -186,7 +186,8 @@ public class CsceneController implements BaseModelListControllerBase {
                 var csceneStr = FileUtil.readString(f, "UTF8");
                 var bo = JsonCommon.parse(csceneStr, CsceneBO.class);
                 String sceneName = f.getName().substring(0, f.getName().indexOf(".json"));
-                bo.setName(LogFileUtil.renameNumSuffixFile(sceneName));
+                sceneName = LogFileUtil.renameNumSuffixFile(sceneName);
+                bo.setName(sceneName);
                 bo.getSceneConfig().getTopology().getScene().setName(sceneName);
                 // 导入场景应用类型默认为漏洞挖掘
                 bo.setAppType(new String[]{"1000"});
