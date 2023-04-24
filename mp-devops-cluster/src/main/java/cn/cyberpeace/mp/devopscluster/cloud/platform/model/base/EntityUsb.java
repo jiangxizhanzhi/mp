@@ -33,6 +33,12 @@ public class EntityUsb extends BaseModel {
     private Integer usbBus;
 
     /**
+     * usb控制器port
+     */
+    @ApiModelProperty("usb控制器port")
+    private Integer usbPort;
+
+    /**
      * usb控制器device
      */
     @ApiModelProperty("usb控制器device")
