@@ -33,10 +33,10 @@ public class SceneAppConfig {
     @Value("${mp.scene.report_hold_size:200000}")
     private Integer reportHoldSize;
 
-    @Value("${mp.scene.windows_installer_dir:C:\\Users\\Public}")
+    @Value("${mp.scene.windows_installer_dir:C:\\Users\\Administrator\\Desktop}")
     private String windowsInstallerDir;
 
-    @Value("${mp.scene.linux_installer_dir:/tmp/tmp_installers}")
+    @Value("${mp.scene.linux_installer_dir:/home}")
     private String linuxInstallerDir;
 
     // TODO: 迁移到cloud
