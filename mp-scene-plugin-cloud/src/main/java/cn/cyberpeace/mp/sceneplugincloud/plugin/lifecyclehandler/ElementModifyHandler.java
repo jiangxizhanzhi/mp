@@ -26,6 +26,7 @@ public class ElementModifyHandler extends HandlerCommon {
         boolean ramChange = srcElement.getRam() != originElement.getRam();
         if (cpuChange || diskChange || ramChange) {
             // todo 调用底层接口更新节点
+            log.error("update instance");
         }
     }
 

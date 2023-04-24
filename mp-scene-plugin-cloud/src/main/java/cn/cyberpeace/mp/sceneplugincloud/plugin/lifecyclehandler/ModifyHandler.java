@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +27,9 @@ public class ModifyHandler extends HandlerCommon {
     private ModifyInitiateHandler modifyInitiateHandler;
     private ModifyCreateHandler modifyCreateHandler;
     private ModifyDeleteHandler modifyDeleteHandler;
+    private ElementModifyHandler elementModifyHandler;
+    private Set<String> mayUpdateNodeIds = null ;
+    private CloudScenePluginHandler newPlugin;
 
     public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin, List<String> updateElementIds) {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
@@ -33,17 +39,33 @@ public class ModifyHandler extends HandlerCommon {
         this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, getTaskPool());
         this.modifyCreateHandler = new ModifyCreateHandler(createdNodeIds, newPlugin, getTaskPool());
         Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
+
+        mayUpdateNodeIds = new HashSet<>(originNodeIds);
+        mayUpdateNodeIds.retainAll(newNodeIds);
+
         originNodeIds.removeAll(newNodeIds);
         if (CollectionUtils.isNotEmpty(updateElementIds)) {
             originNodeIds.addAll(updateElementIds);
         }
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
+        this.elementModifyHandler = new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent());
+        this.newPlugin = newPlugin;
     }
 
     public void modify() {
         this.modifyDeleteHandler.delete();
         this.modifyInitiateHandler.initiate();
         this.modifyCreateHandler.create();
+        if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
+            for (var e : this.elementModifyHandler.getPluginHandler().getElementMap().values()) {
+                if (mayUpdateNodeIds.contains(e.getSrcElement().getId())) {
+                    // 5.4 支持虚拟机和容器的更新
+                    if (e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE || e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                        this.elementModifyHandler.modifyElement(this.newPlugin.getElement(e.getSrcElement().getId()));
+                    }
+                }
+            }
+        }
     }
 
     private static class ModifyInitiateHandler extends InitiateHandler {
