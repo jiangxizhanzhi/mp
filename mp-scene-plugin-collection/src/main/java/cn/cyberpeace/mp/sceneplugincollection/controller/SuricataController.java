@@ -34,16 +34,11 @@ public class SuricataController {
     private SuricataService suricataService;
 
 
-    /**
-     * @description: Suricata规则文件导入
-     * @param file
-     * @return ServiceResult
-     */
-    @PostMapping("/rule/reimport")
-    @PreAuthorize("hasAnyAuthority('ROLE_" + SuricataConstant.ROLE_ADMIN + "')")
-    public ServiceResult importSuricataRules(MultipartFile file) {
-        return ResultCommon.success(suricataService.handlerRuleFile(file));
-    }
+//    @PostMapping("/rule/reimport")
+//    @PreAuthorize("hasAnyAuthority('ROLE_" + SuricataConstant.ROLE_ADMIN + "')")
+//    public ServiceResult importSuricataRules(MultipartFile file) {
+//        return ResultCommon.success(suricataService.handlerRuleFile(file));
+//    }
 
 
     @ApiOperation(value = "分页查询流量分析规则")
