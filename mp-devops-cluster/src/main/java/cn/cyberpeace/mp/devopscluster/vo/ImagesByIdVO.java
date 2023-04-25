@@ -93,6 +93,12 @@ public class ImagesByIdVO extends BaseVO {
     @ApiModelProperty(value = "是否初始靶标")
     private Boolean isInit;
 
+    @ApiModelProperty("型号")
+    private String model;
+
+    @ApiModelProperty("厂商")
+    private String manufacturer;
+
     /**
      * 接入方式
      */

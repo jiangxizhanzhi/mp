@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter.model;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
@@ -146,4 +147,13 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String createUserName;
 
+    /**
+     * 型号
+     */
+    private String model;
+
+    /**
+     * 厂商
+     */
+    private String manufacturer;
 }

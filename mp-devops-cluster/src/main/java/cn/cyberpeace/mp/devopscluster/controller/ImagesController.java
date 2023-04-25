@@ -38,6 +38,8 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
@@ -95,7 +97,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +127,8 @@ public class ImagesController {
     private final ImagesService imagesService;
 
     private final SnapshotService snapshotService;
+
+    private final DeviceTargetMapper deviceTargetMapper;
 
     private final DevopsClusterConfig devopsClusterConfig;
 
@@ -200,6 +203,7 @@ public class ImagesController {
     @GetMapping("/search/{uuid}")
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
+        DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
@@ -224,6 +228,8 @@ public class ImagesController {
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
+        imagesByIdVO.setModel(deviceTargetPO.getModel());
+        imagesByIdVO.setManufacturer(deviceTargetPO.getManufacturer());
         return new Result<>(imagesByIdVO);
     }
 
@@ -614,6 +620,8 @@ public class ImagesController {
                     .isImport(v.getIsImport())
                     .isInternal(v.getIsInternal())
                     .allowExport(true)
+                    .model(v.getModel())
+                    .manufacturer(v.getManufacturer())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)

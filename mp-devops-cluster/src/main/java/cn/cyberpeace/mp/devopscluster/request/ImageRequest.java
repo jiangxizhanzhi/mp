@@ -124,4 +124,10 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+    @ApiModelProperty("型号")
+    private String model;
+
+    @ApiModelProperty("厂商")
+    private String manufacturer;
 }

@@ -165,4 +165,16 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    /**
+     * 型号
+     */
+    @DefaultStr
+    private String model;
+
+    /**
+     * 厂商
+     */
+    @DefaultStr
+    private String manufacturer;
 }
