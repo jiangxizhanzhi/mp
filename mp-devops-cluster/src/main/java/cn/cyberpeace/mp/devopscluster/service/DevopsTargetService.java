@@ -234,8 +234,8 @@ public class DevopsTargetService {
             deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
 
-        deviceTargetPO.setModel(device.getModel());
-        deviceTargetPO.setManufacturer(device.getManufacturer());
+        deviceTargetPO.setModel(device.getModel() == null ? StringUtils.EMPTY : device.getModel());
+        deviceTargetPO.setManufacturer(device.getManufacturer() == null ? StringUtils.EMPTY : device.getManufacturer());
         return deviceTargetPO;
     }
 
