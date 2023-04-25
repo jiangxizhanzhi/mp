@@ -265,6 +265,22 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> deleteElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.deleteElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneHandler updateHandler, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> {
+            sceneHandler.modifyElement(nodeId, updateHandler);
+        });
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
