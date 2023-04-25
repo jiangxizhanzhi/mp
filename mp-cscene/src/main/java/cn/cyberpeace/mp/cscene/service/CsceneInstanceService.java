@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
@@ -1107,6 +1108,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> modifyElement(ElementModifyBO bo, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(bo.getId(), context, true);
+        boolean result = instanceHandler.modifyElement(bo);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> deleteElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.deleteElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.suspendElement(nodeId);
@@ -1266,12 +1279,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> instanceModify(CsceneUpdateBO csceneBO) {
-        CsceneInstanceBO newData = csceneBO.exportToCsceneInstance();
-        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getCsceneInstanceId(), null);
-        CsceneInstanceBO originData = originHandler.toData();
+        CsceneInstanceBO instance = new CsceneInstanceBO();
+        instance.setId(csceneBO.getId());
+        instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
+        instance.setScene(csceneBO.getUpdateScene());
 
-        // 合并下数据
-        CsceneInstanceBO instance = this.mergeInstance(csceneBO.getCsceneInstanceId(), newData, originData);
         var instanceHandler = new CsceneInstanceHandler(instance, null);
         instanceHandler.update();
         return new ServiceResult<>(instanceHandler.toData());
