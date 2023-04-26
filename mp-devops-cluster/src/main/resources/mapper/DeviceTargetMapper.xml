@@ -386,10 +386,10 @@
                 is_init = #{isInit},
             </if>
             <if test="instanceCreateUser != null">
-                instance_create_user = #{instanceCreateUser}
+                instance_create_user = #{instanceCreateUser},
             </if>
             <if test="model != null">
-                model = #{model}
+                model = #{model},
             </if>
             <if test="manufacturer != null">
                 manufacturer = #{manufacturer}
