@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
@@ -53,7 +54,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileNameUtil;
+import cn.hutool.core.util.URLUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -668,6 +671,24 @@ public class CreateHandler extends HandlerCommon {
         }
         if (!StringUtils.isEmpty(elementFileUrl)) {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
+            // 向桌面再传一份压缩包
+            String toZipPath = null;
+            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                toZipPath = SystemTypeCommandUtils.joinPath(standardSystemType, SceneSingleton.sceneAppConfig.getWindowsDeskDir(), srcElement.getEid());
+                toZipPath = toZipPath + SceneFileUtils.ZIP_FILE_SUFFIX;
+            } else {
+                toZipPath = SystemTypeCommandUtils.joinPath(standardSystemType, SceneSingleton.sceneAppConfig.getLinuxDeskDir(), srcElement.getEid());
+                toZipPath = toZipPath + SceneFileUtils.ZIP_FILE_SUFFIX;
+            }
+            var filename = FileUtil.getName(toZipPath);
+            var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(elementFileUrl), filename);
+            var toDir = toZipPath.substring(0, toZipPath.length() - filename.length());
+            try {
+                containerClient.executeCommand(containerId, "mkdir -p /home/tools");
+                containerClient.copyFile(containerId, tmpZipFilepath, toDir);
+            } finally {
+                FileUtil.del(tmpZipFilepath);
+            }
         }
 
         List<String> commands = new ArrayList<>();
