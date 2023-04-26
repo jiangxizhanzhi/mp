@@ -38,7 +38,7 @@
             <if test=" mainCategory != null">
                 and i.main_category = #{mainCategory}
             </if>
-            <if test=" mainCategory != null and mainCategory != 4">
+            <if test=" mainCategory != 4">
                 and i.main_category != 4
             </if>
             <if test=" subCategory != null">
