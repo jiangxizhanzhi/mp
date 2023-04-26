@@ -174,6 +174,8 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setModel(request.getModel());
+        device.setManufacturer(request.getManufacturer());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -209,7 +211,9 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public void update(ImageRequest request) {
-        Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        Device device = imagesService.update(request.getUuid(), convertRequest(request));
+        device.setModel(request.getModel());
+        device.setManufacturer(request.getManufacturer());
         devopsTargetService.updateById(device);
     }
 
