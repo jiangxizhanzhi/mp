@@ -95,6 +95,26 @@ public class SceneFileUtils {
         return commands;
     }
 
+    public static List<String> uploadZipFileInitCommand(String systemType, String fileUrl, String toPath) {
+        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
+        var filename = FileUtil.getName(toPath);
+        var toPathDir = toPath.substring(0, toPath.length() - filename.length());
+        List<String> commands;
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
+            commands = List.of(
+                    CommandUtils.windowsMkDir(toPathDir),
+                    CommandUtils.windowsDownloadFile(absoluteFileUrl, toPath)
+            );
+        } else {
+            commands = List.of(
+                    CommandUtils.linuxMkDir(toPathDir),
+                    CommandUtils.linuxDownloadFile(absoluteFileUrl, toPath)
+            );
+        }
+        return commands;
+    }
+
     public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
         var unzipDir = getSceneFileUnzipDir(systemType, sceneId);
         var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);

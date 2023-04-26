@@ -6,11 +6,11 @@ import org.apache.commons.io.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -52,13 +52,23 @@ public class ZipUtils {
                 }
             }
             zipOutputStream.close();
-        } catch (FileNotFoundException e) {
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("failed to zip file", e);
             return false;
         }
         return true;
+    }
+
+    public static boolean unzip(String zipFileName, String dstPath) {
+        String[] charsets = new String[]{"UTF8", "GB2312", "GBK"};
+        boolean result = false;
+        for (String charset : charsets) {
+            result = unzip(zipFileName, dstPath, charset);
+            if (result) {
+                break;
+            }
+        }
+        return result;
     }
 
     /**
@@ -68,11 +78,11 @@ public class ZipUtils {
      * @param dstPath     解压目标路径
      * @return
      */
-    public static boolean unzip(String zipFileName, String dstPath) {
+    private static boolean unzip(String zipFileName, String dstPath, String charset) {
         OutputStream outputStream = null;
         ZipInputStream zipInputStream = null;
         try {
-            zipInputStream = new ZipInputStream(new FileInputStream(zipFileName));
+            zipInputStream = new ZipInputStream(new FileInputStream(zipFileName), Charset.forName(charset));
             ZipEntry zipEntry = null;
             byte[] buffer = new byte[BUFFER];
             int readLength = 0;
@@ -92,21 +102,22 @@ public class ZipUtils {
                     outputStream.write(buffer, 0, readLength);
                 }
             }
-        } catch (FileNotFoundException e) {
-            return false;
-        } catch (IOException e) {
+            return true;
+        } catch (Exception e) {
+            log.error("failed to unzip file", e);
             return false;
         } finally {
             try {
                 IOUtils.close(outputStream);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                log.error("failed to close stream", e);
             }
             try {
                 IOUtils.close(zipInputStream);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                log.error("failed to close stream", e);
             }
         }
-        return true;
     }
 
     private static String getRelativePath(String dirPath, File file) {

@@ -33,11 +33,17 @@ public class SceneAppConfig {
     @Value("${mp.scene.report_hold_size:200000}")
     private Integer reportHoldSize;
 
-    @Value("${mp.scene.windows_installer_dir:C:\\Users\\Administrator\\Desktop}")
+    @Value("${mp.scene.windows_installer_dir:C:\\Users\\Public}")
     private String windowsInstallerDir;
 
-    @Value("${mp.scene.linux_installer_dir:/home}")
+    @Value("${mp.scene.linux_installer_dir:/tmp/tmp_installers}")
     private String linuxInstallerDir;
+
+    @Value("${mp.scene.windows_desk_dir:C:\\Users\\Administrator\\Desktop\\tools}")
+    private String windowsDeskDir;
+
+    @Value("${mp.scene.linux_desk_dir:/home/tools}")
+    private String linuxDeskDir;
 
     // TODO: 迁移到cloud
     @Value("${mp.scene.metadata_file_server:http://169.254.169.254/file}")

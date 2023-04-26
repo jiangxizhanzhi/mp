@@ -171,10 +171,15 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/list_import")
     @ResponseBody
     public void upload(MultipartFile file) throws Exception {
+        String sceneDirPath = "sceneDir";
+        File sceneDir = new File(sceneDirPath);
+        if (!sceneDir.exists()) {
+            sceneDir.mkdir();
+        }
         String zipFileName = TextUtils.uuid();
-        File zipFile = new File(zipFileName);
+        File zipFile = new File(sceneDir.getAbsolutePath() + "/" + zipFileName);
         String contentDir = TextUtils.uuid();
-        File contentFile = new File(contentDir);
+        File contentFile = new File(sceneDir.getParentFile() + "/" + contentDir);
 
         FileOutputStream outputStream = null;
         List<CsceneBO> csceneBOS = new ArrayList<>();
@@ -183,7 +188,7 @@ public class CsceneController implements BaseModelListControllerBase {
             outputStream = new FileOutputStream(zipFile);
             outputStream.write(file.getBytes());
             // 解压
-            ZipUtils.unzip(zipFile.getName(), contentDir);
+            ZipUtils.unzip(sceneDir.getAbsolutePath() + "/" + zipFile.getName(), contentFile.getAbsolutePath());
             for (var f : contentFile.listFiles()) {
                 var csceneStr = FileUtil.readString(f, "UTF8");
                 var bo = JsonCommon.parse(csceneStr, CsceneBO.class);
@@ -199,6 +204,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 sync(csceneBO);
             }
         }catch (Exception e){
+            log.error("failed to import scenes ", e);
             throw new MpRuntimeException(CsceneErrorCode.SCENE_CONFIG_FILE_NOT_FORMAT);
         }finally {
             if (outputStream != null) {
@@ -219,17 +225,22 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @GetMapping(value = "/list_export", params = "ids")
     public void export(HttpServletResponse response, @RequestParam String[] ids) throws Exception {
+        String sceneDirPath = "sceneDir";
+        File sceneDir = new File(sceneDirPath);
+        if (!sceneDir.exists()) {
+            sceneDir.mkdir();
+        }
         List<CsceneBO> csceneBOS = new ArrayList<>();
         for (String id : ids) {
             var bo = modelService.export(id, null).getSource();
             bo.setBizType(null);
             csceneBOS.add(bo);
         }
-        String dir = TextUtils.uuid();
+        String dir = sceneDir.getAbsolutePath() + "/" + TextUtils.uuid();
         File file = new File(dir);
         file.mkdir();
         for (var cs : csceneBOS) {
-            File content = LogFileUtil.getFinalFileName(new File(dir + "/" + cs.getName() + ".json"));
+            File content = LogFileUtil.getFinalFileName(new File(file.getAbsolutePath() + "/" + cs.getName() + ".json"));
             FileOutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(content);
@@ -242,21 +253,15 @@ public class CsceneController implements BaseModelListControllerBase {
                 IoUtil.close(outputStream);
             }
         }
-        String targetDir = TextUtils.uuid();
+        String targetDir = sceneDir.getAbsolutePath() + "/" + TextUtils.uuid();
         File targetFile = new File(targetDir);
         targetFile.mkdir();
-        ZipUtils.zip(dir, targetDir + "/scene.zip");
+        ZipUtils.zip(file.getAbsolutePath(), targetDir + "/scene.zip");
 
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         try {
             response.setContentType("application/octet-stream");
-//            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + "拓扑模板" + ".zip");
-
-//            String fileName = "拓扑模板.zip";
-//            String fileNameURL = URLEncoder.encode(fileName, "UTF-8");
-//            response.setHeader("Content-disposition", "attachment;filename="+fileNameURL+";"+"filename*=utf-8''"+fileNameURL);
-
             response.addHeader("Content-Disposition", "attachment;filename=" + new String("拓扑模板.zip".getBytes("UTF-8"), "ISO8859-1"));
 
             byte[] buffer = new byte[4096];

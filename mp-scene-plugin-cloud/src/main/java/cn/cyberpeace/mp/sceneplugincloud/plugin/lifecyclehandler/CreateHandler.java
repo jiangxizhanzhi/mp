@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -547,6 +548,16 @@ public class CreateHandler extends HandlerCommon {
         if (!StringUtils.isEmpty(elementFileUrl)) {
             commands.addAll(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
                     srcElement.getEid()));
+            String toZipPath = null ;
+            // 向桌面再传一份压缩包
+            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                toZipPath = SystemTypeCommandUtils.joinPath(standardSystemType, SceneSingleton.sceneAppConfig.getWindowsDeskDir(), srcElement.getEid());
+                toZipPath = toZipPath + SceneFileUtils.ZIP_FILE_SUFFIX;
+            } else {
+                toZipPath = SystemTypeCommandUtils.joinPath(standardSystemType, SceneSingleton.sceneAppConfig.getLinuxDeskDir(), srcElement.getEid());
+                toZipPath = toZipPath + SceneFileUtils.ZIP_FILE_SUFFIX;
+            }
+            commands.addAll(SceneFileUtils.uploadZipFileInitCommand(standardSystemType, elementFileUrl, toZipPath));
         }
 
         List<String> initCommands = srcElement.getInitCommands();
