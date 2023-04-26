@@ -225,6 +225,9 @@ public class LogFileService {
         ServiceResult<Map<String, Object>> result = cloudCommonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
+        if(Objects.isNull(osTypeCode)){
+            return StringUtils.EMPTY;
+        }
         String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
         if (Objects.nonNull(osType)) {
             osType = osType.trim().toLowerCase();
