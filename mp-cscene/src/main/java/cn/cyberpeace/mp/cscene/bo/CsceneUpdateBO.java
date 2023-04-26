@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,8 +15,8 @@ import org.apache.commons.lang3.ArrayUtils;
 public class CsceneUpdateBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneUpdateBO> {
     @ApiModelProperty(value = "场景实例id")
     private String csceneInstanceId;
-    @ApiModelProperty(value = "场景模板拓扑配置")
-    private SceneConfigDataBO sceneConfig;
+    @ApiModelProperty(value = "场景配置")
+    private SceneDataBO updateScene;
 
     private CsceneContextBO context;
 
@@ -35,8 +35,8 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, C
     public CsceneModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
-        if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
-            obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
+        if (updateScene != null && updateScene.getTopology() != null && updateScene.getTopology().getScene() != null) {
+            obj.setSceneConfig(updateScene.getTopology().getScene().getEid());
         }
         return obj;
     }
@@ -44,25 +44,18 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, C
     @Override
     public CsceneUpdateBO export() {
         var csceneBO = super.export();
-        if (sceneConfig != null) {
-            csceneBO.setSceneConfig(sceneConfig.export());
+        if (updateScene != null) {
+            csceneBO.setUpdateScene(updateScene.export());
         }
         return this;
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {
-        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class, CsceneUpdateBO::getSceneConfig);
-        if (sceneConfig != null) {
-            csceneInstance.setScene(sceneConfig.exportToScene());
+        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class, CsceneUpdateBO::getUpdateScene);
+        if (updateScene != null) {
+            csceneInstance.setScene(updateScene.export());
         }
         return csceneInstance;
     }
 
-    public CsceneInstanceBO exportToCsceneInstance1() {
-        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class, CsceneUpdateBO::getSceneConfig);
-        if (sceneConfig != null) {
-            csceneInstance.setScene(sceneConfig.exportToScene());
-        }
-        return csceneInstance;
-    }
 }

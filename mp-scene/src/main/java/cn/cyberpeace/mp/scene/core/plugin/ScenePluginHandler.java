@@ -139,6 +139,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void modifyElement(String nodeId, SceneHandler updatedSceneHandler) {
+
+    }
+
     public void suspendElement(String nodeId) {
 
     }
@@ -163,6 +167,9 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void unpauseElement(String nodeId) {
+    }
+
+    public void deleteElement(String nodeId) {
     }
 
     public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {

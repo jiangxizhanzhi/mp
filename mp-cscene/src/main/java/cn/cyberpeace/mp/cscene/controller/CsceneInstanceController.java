@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -535,10 +534,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/modify")
     public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
-        log.info("app_instance params,request:{}", JsonCommon.stringify(request));
-        CsceneBO csceneBO = new CsceneBO();
-        csceneBO.setSceneConfig(request.getSceneConfig());
-        CsceneDataModifier.checkIngressAndEgress(csceneBO);
+        log.info("modify_instance params,request:{}", JsonCommon.stringify(request));
         var result = modelService.instanceModify(request).asResult();
         return result;
     }
@@ -677,6 +673,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var result = modelService.recreateElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
         return result;
+    }
+
+    @ApiOperation("更新节点")
+    @PostMapping("/modify_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
+        modelService.modifyElement(elementModifyBO,new CsceneContextBO());
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
+    }
+
+    @ApiOperation("删除节点")
+    @PostMapping("/delete_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody CsceneInstanceNodeActionRequest request) {
+        modelService.deleteElement(request.getId(), request.getNodeId(), request.getContext());
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
     }
 
     @ApiOperation("挂起节点")
