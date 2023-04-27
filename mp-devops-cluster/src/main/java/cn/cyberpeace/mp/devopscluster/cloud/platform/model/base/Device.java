@@ -167,6 +167,11 @@ public class Device extends BaseCloudPlatformResult {
     private ExtDocker extDocker;
 
     /**
+     * 实体USB信息
+     */
+    private EntityUsb extEntityUsb;
+
+    /**
      * 是否内置镜像
      */
     private Boolean isBuildIn;

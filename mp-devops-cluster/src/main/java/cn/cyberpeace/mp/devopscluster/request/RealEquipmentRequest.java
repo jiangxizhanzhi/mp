@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
@@ -78,6 +79,12 @@ public class RealEquipmentRequest extends BaseRequest{
      */
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
+
+    /**
+     * 实体USB信息
+     */
+    @ApiModelProperty("实体USB信息")
+    private EntityUsb extEntityUsb;
 
     /**
      * 交换机

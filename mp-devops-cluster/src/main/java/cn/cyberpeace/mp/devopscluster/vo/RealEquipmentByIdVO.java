@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtGateway;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -73,6 +70,12 @@ public class RealEquipmentByIdVO extends BaseVO {
      */
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
+
+    /**
+     * 实体USB
+     */
+    @ApiModelProperty("实体USB")
+    private EntityUsb extEntityUsb;
 
     /**
      * 扩展网关信息

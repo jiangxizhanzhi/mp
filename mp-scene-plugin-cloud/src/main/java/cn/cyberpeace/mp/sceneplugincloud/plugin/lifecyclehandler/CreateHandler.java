@@ -968,6 +968,9 @@ public class CreateHandler extends HandlerCommon {
             createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+            createData.setIsoAttach(true);
+        }
         var virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getHost());

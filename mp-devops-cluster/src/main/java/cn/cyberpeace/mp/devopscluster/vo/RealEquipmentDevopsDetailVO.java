@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
@@ -61,6 +62,12 @@ public class RealEquipmentDevopsDetailVO extends BaseVO {
      */
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
+
+    /**
+     * 实体USB
+     */
+    @ApiModelProperty("实体USB")
+    private EntityUsb extEntityUsb;
 
     /**
      * CPU使用率

@@ -5,7 +5,10 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
@@ -13,17 +16,22 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,6 +74,9 @@ public class SceneMonitorService {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Resource
+    private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -169,7 +180,7 @@ public class SceneMonitorService {
      * @param sceneId
      * @return
      */
-    public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState) {
+    public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState, SceneAllElementsQueryRequest request) {
         log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
         if (Objects.isNull(fetchRealTimeHostState)) {
             fetchRealTimeHostState = true;
@@ -186,7 +197,12 @@ public class SceneMonitorService {
         var topology = csceneInstanceBO.getScene().getTopology();
         var topologyElements = topology.getElements();
 
-        List<String> nodeIds = topologyElements.stream().map(SceneElementBO::getId).collect(Collectors.toList());
+        // 根据名称模糊筛选
+        var stream = topologyElements.stream();
+        if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
+            stream = topologyElements.stream().filter(e -> e.getName().contains(request.getName()));
+        }
+        List<String> nodeIds = stream.map(SceneElementBO::getId).collect(Collectors.toList());
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
@@ -220,15 +236,20 @@ public class SceneMonitorService {
 
         }
 
+        // 根据设备类型筛选
+        if (Objects.nonNull(request) && Objects.nonNull(request.getCategory())) {
+            basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
+        }
+
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
             var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
             if (CollectionUtil.isNotEmpty(agentNames)) {
-                AgentNameBasedRequest request = new AgentNameBasedRequest();
-                request.setAgentNames(agentNames);
-                request.setPageSize(1);
+                AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
+                agentNameBasedRequest.setAgentNames(agentNames);
+                agentNameBasedRequest.setPageSize(1);
 
-                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(request);
+                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
                 basicInfos.forEach(basicInfo -> {
                     var hostStates = map.get(basicInfo.getEid());
                     if (CollectionUtil.isNotEmpty(hostStates)) {
@@ -236,6 +257,36 @@ public class SceneMonitorService {
                     }
                 });
             }
+
+            // 查询用户连接信息
+            var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+                    .select(CloudPluginSceneConnectionModel::getSceneElement)
+                    .select(CloudPluginSceneConnectionModel::getAccessUser)
+                    .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                    .filterEqual(CloudPluginSceneConnectionModel::getScene, csceneInstanceBO.getScene().getTopology().getScene().getEid())
+                    .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+            Map<String, List<AccessUserBO>> nodeId2Users = new HashMap<>();
+            if (CollectionUtils.isNotEmpty(connections)) {
+                Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
+                var userModels = UserCommon.getUsers(new ArrayList<>(userIds));
+                Map<String, UserModel> userId2User = userModels.stream().collect(Collectors.toMap(UserModel::getId, userModel -> userModel));
+                connections.forEach(model -> {
+                    var users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
+                    nodeId2Users.put(model.getSceneElement(), users);
+                    var userModel = userId2User.get(model.getAccessUser());
+                    if (userModel != null) {
+                        AccessUserBO accessUser = new AccessUserBO();
+                        accessUser.setId(userModel.getId());
+                        accessUser.setName(userModel.getName());
+                        users.add(accessUser);
+                    }
+                });
+            }
+            basicInfos.forEach(basicInfo -> basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
+                    .stream().distinct().collect(Collectors.toList())));
+
+            // 添加定时上报任务
+            SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
         return basicInfos;
     }
@@ -296,7 +347,7 @@ public class SceneMonitorService {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
-        List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true);
+        List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true, new SceneAllElementsQueryRequest());
 
         // cpu
         Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> e.getHostState().getCpuPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));

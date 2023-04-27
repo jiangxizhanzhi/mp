@@ -3,15 +3,11 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SnmpConfig;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SnmpParams;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -24,21 +20,14 @@ import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.RealEquipmentByParams;
-import cn.cyberpeace.mp.devopscluster.model.SnmpAuth;
-import cn.cyberpeace.mp.devopscluster.model.SnmpBaseAuth;
-import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
-import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
+import cn.cyberpeace.mp.devopscluster.model.*;
+import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentByIdVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentDevopsDetailVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentNetworkCardPageVO;
-import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentPageVO;
+import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -56,15 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -193,7 +174,7 @@ public class RealEquipmentController {
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo()).role(realEquipmentBO.getRole())
                 .mainCategory(realEquipmentBO.getMainCategory()).subCategory(realEquipmentBO.getSubCategory()).thirdCategory(realEquipmentBO.getThirdCategory())
                 .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
-                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).build();
+                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         return new Result(response);
     }
 
@@ -246,7 +227,7 @@ public class RealEquipmentController {
         }
         RealEquipmentDevopsDetailVO response = RealEquipmentDevopsDetailVO.builder()
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
-                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).build();
+                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
             response.setAddress(realEquipmentBO.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
         }
@@ -419,4 +400,28 @@ public class RealEquipmentController {
     public ServiceResult<List<OptionBO>> getUseStatus() {
         return optionService.getIntOptions(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE);
     }
+
+    /**
+     * 获取服务器列表
+     * @return
+     */
+    @ApiOperation("获取服务器列表")
+    @GetMapping("/hypervisor_list")
+    public ServiceResult<List<Hypervisor>> hypervisorList() {
+        return new ServiceResult<>(realEquipmentService.hypervisorList()).asResult();
+    }
+
+    /**
+     * 根据hostName查询usb列表
+     * @return
+     */
+    @ApiOperation("根据hostName查询usb列表")
+    @ApiImplicitParam(name = "hostName", value = "服务器主机名", dataTypeClass = String.class)
+    @GetMapping("/usb_list")
+    public ListObjServiceResult<EntityUsb> usbList(@RequestParam("hostName") String hostName) {
+        ListObjServiceResult<EntityUsb> result = realEquipmentService.physicalUsbListByHost(hostName);
+        return result;
+    }
+
+
 }

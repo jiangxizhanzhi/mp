@@ -5,4 +5,7 @@ public class CsceneCallAction {
     public static final String NODE_STOP_FLOW = "node_stop_flow";
     public static final String NODE_START_PROBE = "node_start_probe";
     public static final String NODE_STOP_PROBE = "node_stop_probe";
+
+    public static final String NODE_ACCESS_USER = "node_access_user";
+    public static final String NODE_HOST_STATE = "node_host_state";
 }

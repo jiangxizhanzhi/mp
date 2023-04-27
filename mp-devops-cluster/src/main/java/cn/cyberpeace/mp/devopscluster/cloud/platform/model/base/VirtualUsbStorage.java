@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @Description: 虚拟USB存储信息
  * @Author: guquan
@@ -26,11 +24,11 @@ public class VirtualUsbStorage extends BaseModel {
      * 已使用
      */
     @ApiModelProperty("已使用")
-    private String used;
+    private Integer used;
 
     /**
      * 文件列表
      */
     @ApiModelProperty("文件列表")
-    private List<VirtualUsbFileList> files;
+    private VirtualUsbFileList files;
 }
