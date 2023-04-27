@@ -611,7 +611,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
-    @ApiOperation("启动节点")
+    @ApiOperation("节点开机")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
     })
@@ -622,7 +622,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
-    @ApiOperation("关闭节点")
+    @ApiOperation("节点关机")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
     })
