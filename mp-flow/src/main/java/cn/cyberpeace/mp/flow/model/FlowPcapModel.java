@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table("mp_flow_pcap")
 public class FlowPcapModel extends BaseModel {
 
@@ -27,9 +29,9 @@ public class FlowPcapModel extends BaseModel {
 	private String flowId;
 
 	/**
-	 * 时长(单位s)
+	 * 时长(单位ms)
 	 */
-	@ApiModelProperty(value = "时长(单位s)")
+	@ApiModelProperty(value = "时长(单位ms)")
 	private Long duration;
 
 	/**

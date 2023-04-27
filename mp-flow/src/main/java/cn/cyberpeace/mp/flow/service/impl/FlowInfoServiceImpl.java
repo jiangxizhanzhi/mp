@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -91,6 +92,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowProtocolServiceImpl flowProtocolService;
+
+    @Autowired
+    private FlowPcapServiceImpl flowPcapService;
 
     @Autowired
     public BaseAppConfig baseAppConfig;
@@ -401,7 +405,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtools(addRequest.getProtocolList(), serviceResult.getSource().getObj().getId());
+        this.batchSaveProtools(addRequest.getProtocolList(), serviceResult.getSource().getObj().getId(), flowInfoModel.getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -413,8 +417,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * 批量保存流量协议
      * @param protocolList
      * @param flowId
+     * @param filePath
      */
-    private void batchSaveProtools(List<FlowProtocolBO> protocolList, String flowId) {
+    private void batchSaveProtools(List<FlowProtocolBO> protocolList, String flowId, String filePath) {
         if (CollectionUtils.isNotEmpty(protocolList)) {
             List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
 
@@ -425,14 +430,23 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 flowProtocolService.deleteByFlowId(flowId);
             }
 
+            // 勾选协议
+            List<String> filterProtocols = new ArrayList<>();
             // 批量新增流量协议
             for (FlowProtocolBO flowProtocolBO : protocolList) {
                 FlowProtocolModel flowProtocolModel = new FlowProtocolModel();
                 BeanUtils.copyProperties(flowProtocolBO, flowProtocolModel);
                 flowProtocolModel.setFlowId(flowId);
                 flowProtocolModels.add(flowProtocolModel);
+
+                if (1 == flowProtocolBO.getMarked()) {
+                    filterProtocols.add(flowProtocolBO.getProtocolName());
+                }
             }
             flowProtocolService.bulkCreate(flowProtocolModels);
+
+            // 异步生成过滤包
+            TaskCommon.executeTask(() -> this.pcapFilter(flowId, filePath, filterProtocols));
         }
     }
 
@@ -563,7 +577,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             FlowInfoModel resultModel = serviceResult.getSource().getObj();
 
             // 保存流量关联协议信息
-            this.batchSaveProtools(addRequest.getProtocolList(), resultModel.getId());
+            this.batchSaveProtools(addRequest.getProtocolList(), resultModel.getId(), flowInfoModel.getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -621,7 +635,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId());
+        this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -778,7 +792,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
             // 保存流量关联协议信息
-            this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId());
+            this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -1295,7 +1309,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param protocolList 保留的协议集合
      * @return 过滤后的pcap包fdfs地址
      */
-    public String pcapFilter(String pcapPath, List<String> protocolList) {
+    public void pcapFilter(String flowId, String pcapPath, List<String> protocolList) {
+        if (CollectionUtils.isEmpty(protocolList)) {
+            log.error("protocolList to filter is empty");
+            return;
+        }
         String outPcapPath = "";
         String scriptPath = PRE_PATH.concat("protocol_filter.py");
         BufferedOutputStream bos = null;
@@ -1329,7 +1347,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
             log.info("============pcap filter result: {}", filterResult);
 
-            // TODO 保存mp_flow_pcap表数据
+            // 保存mp_flow_pcap表数据
             JSONObject filterObj = JSONObject.parseObject(filterResult);
             Double duration = filterObj.getDoubleValue("duration");
             Integer pktNum = filterObj.getInteger("count");
@@ -1339,6 +1357,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             dstFile = new File(dstPcapPath);
             // 上传新pcap包
             outPcapPath = FdfsCommon.upload(dstPcapPath);
+
+            // 新增流量包数据
+            FlowPcapModel flowPcapModel = FlowPcapModel.builder()
+                    .flowId(flowId)
+                    .pcapFile(outPcapPath)
+                    .pcapSize(pcapSize)
+                    .pktNum(pktNum.longValue())
+                    .duration(Math.round(duration * 1000))
+                    .protocols(String.join(BaseConstants.COMMA, protocolList))
+                    .build();
+            flowPcapService.create(flowPcapModel);
         } catch (Exception e) {
             log.error("pcap file filter error", e);
         } finally {
@@ -1361,8 +1390,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 }
             }
         }
-
-        return outPcapPath;
     }
 
 }

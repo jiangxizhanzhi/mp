@@ -24,7 +24,7 @@ CREATE TABLE `mp_flow_pcap`
     `pk`          bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id`          varchar(64)         NOT NULL COMMENT '流量包id',
     `flow_id`     varchar(64)         NOT NULL COMMENT '流量id',
-    `duration`    bigint(20) UNSIGNED NOT NULL COMMENT '时长(单位s)',
+    `duration`    bigint(20) UNSIGNED NOT NULL COMMENT '时长(单位ms)',
     `pcap_size`   bigint(10) UNSIGNED NOT NULL COMMENT '大小(单位Byte)',
     `pkt_num`     bigint(10) UNSIGNED NOT NULL COMMENT '包数(报文数量)',
     `protocols`   varchar(128)        NOT NULL COMMENT '包含协议',
