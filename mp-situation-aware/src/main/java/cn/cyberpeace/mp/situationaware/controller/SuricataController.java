@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.sceneplugincollection.controller;
+package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.sceneplugincollection.constant.SuricataConstant;
-import cn.cyberpeace.mp.sceneplugincollection.service.SuricataService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.SuricataQueryParams;
+import cn.cyberpeace.mp.situationaware.constant.SuricataConstant;
+import cn.cyberpeace.mp.situationaware.request.SuricataQueryRequest;
+import cn.cyberpeace.mp.situationaware.service.SuricataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +39,8 @@ public class SuricataController {
 
     @ApiOperation(value = "分页查询流量分析规则")
     @GetMapping("/rule/page")
-    public ServiceResult querySuricataRulesPage(SuricataQueryParams suricataQueryParams){
-        return suricataService.queryPage(suricataQueryParams);
+    public ServiceResult querySuricataRulesPage(SuricataQueryRequest suricataQueryRequest){
+        return suricataService.queryPage(suricataQueryRequest);
     }
 
 

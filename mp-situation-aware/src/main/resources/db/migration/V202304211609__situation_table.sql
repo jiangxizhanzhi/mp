@@ -1,5 +1,5 @@
 # v5.4
-CREATE TABLE `mp_sceneplugincollection_suricatarule`
+CREATE TABLE `mp_situation_suricatarule`
 (
     `pk`                   int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id`                   varchar(64) NOT NULL COMMENT 'ID',

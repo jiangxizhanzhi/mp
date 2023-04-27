@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.service.param;
+package cn.cyberpeace.mp.situationaware.request;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SuricataQueryParams{
+public class SuricataQueryRequest {
 
     @ApiModelProperty("协议")
     private String protocol;

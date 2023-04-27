@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.constant;
+package cn.cyberpeace.mp.situationaware.constant;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.constant
