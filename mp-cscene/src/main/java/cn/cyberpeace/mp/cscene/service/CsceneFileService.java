@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.LfsCommon;
 import cn.cyberpeace.mp.base.service.impl.BaseRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
@@ -21,8 +22,8 @@ import java.util.HashSet;
 public class CsceneFileService extends BaseRemoteFileServiceImpl {
 
     @Autowired
-    public CsceneFileService(FsCommon fsCommon) {
-        setFileClient(FsCommon.fileClient);
+    public CsceneFileService(LfsCommon fsCommon) {
+        setFileClient(LfsCommon.lfsClient);
     }
 
     public ServiceResult<SceneFileUploadResponse> sceneUpload(InputStream is, String fileName, String fileSuffix, String... legalSuffix) {
