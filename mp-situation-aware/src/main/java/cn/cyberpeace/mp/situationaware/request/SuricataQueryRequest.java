@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.service.param
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.request
  * @Author: hhuang
  * @CreateTime: 2023/04/23  14:41
  * @Description: Suricata规则查询参数

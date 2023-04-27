@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.controller
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.controller
  * @Author: hhuang
  * @CreateTime: 2023/04/21  09:25
  * @Description: Arkime使用的Suricata规则控制器

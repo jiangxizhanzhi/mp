@@ -224,6 +224,36 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * @description: 启动节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        //执行任务启动节点
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.startElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        //执行任务关闭节点
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.stopElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);

@@ -23,23 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementCreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementDeleteHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementInitiateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementModifyHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PrepareHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SnapshotHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
@@ -335,6 +319,27 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
         new ElementDeleteHandler(this, getSceneHandler().getScene().getEvent()).deleteElement(element);
+    }
+
+    @Override
+    public void startElement(String nodeId) {
+        //获取云平台场景业务数据
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        //节点启动处理类执行启动节点
+        new StartHandler(this, getSceneHandler().getScene().getEvent()).startElement(element);
+    }
+
+    @Override
+    public void stopElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        //节点启动处理类执行启动节点
+        new StopHandler(this, getSceneHandler().getScene().getEvent()).stopElement(element);
     }
 
     @Override

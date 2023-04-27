@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.constant;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.constant
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.constant
  * @Author: hhuang
  * @CreateTime: 2023/04/21  09:29
  * @Description: Suricata常量类
