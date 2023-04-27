@@ -42,7 +42,6 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
-import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -380,15 +379,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        //var csceneHandler = new CsceneHandler(id, context);
-        var instanceBO = sceneJsonMockService.getInstanceBO();
-        String jsonStr = JSON.toJSONString(instanceBO);
-        CsceneBO bo = JSON.parseObject(jsonStr, CsceneBO.class);
-
-        var scene = instanceBO.getScene();
-        String sceneJsonStr = JSON.toJSONString(scene);
-        bo.setSceneConfig(JSON.parseObject(sceneJsonStr, SceneConfigDataBO.class));
-        return new ServiceResult<>(bo);
+        var csceneHandler = new CsceneHandler(id, context);
+        return new ServiceResult<>(csceneHandler.toData(withInstance));
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {

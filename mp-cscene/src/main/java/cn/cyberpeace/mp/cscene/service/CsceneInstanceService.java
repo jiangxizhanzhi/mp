@@ -530,9 +530,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        //var instanceHandler = new CsceneInstanceHandler(id, context);
-        var instance = sceneJsonMockService.getInstanceBO();
-        return new ServiceResult<>(instance);
+        var instanceHandler = new CsceneInstanceHandler(id, context);
+        return new ServiceResult<>(instanceHandler.toData());
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
