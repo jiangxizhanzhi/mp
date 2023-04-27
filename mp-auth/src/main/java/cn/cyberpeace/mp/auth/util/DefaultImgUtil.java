@@ -6,13 +6,15 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @Description: 默认图片工具类
@@ -82,16 +84,16 @@ public class DefaultImgUtil {
      * @return
      */
     public static String fdfsUrlToPath(String url) {
-        if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
-            String tmpUrl = url.substring(6);
-
-            HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
-            List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
-            if (CollectionUtils.isNotEmpty(mappingModels)) {
-                url = getPathByGroup(mappingModels.get(0).getGroup()).concat(FileUtil.FILE_SEPARATOR).concat(mappingModels.get(0).getName());
-            }
-        }
+//        if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
+//            String tmpUrl = url.substring(6);
+//
+//            HumanCondition humanCondition = new HumanCondition();
+//            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
+//            List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
+//            if (CollectionUtils.isNotEmpty(mappingModels)) {
+//                url = getPathByGroup(mappingModels.get(0).getGroup()).concat(FileUtil.FILE_SEPARATOR).concat(mappingModels.get(0).getName());
+//            }
+//        }
 
         return url;
     }
