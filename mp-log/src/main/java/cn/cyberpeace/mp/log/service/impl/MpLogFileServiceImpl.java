@@ -97,28 +97,28 @@ public class MpLogFileServiceImpl implements LogFileService {
         if (!fileName.endsWith(".zip")) {
             var zout = new ZipOutputStream(bos);
             for (File file : downloadFiles) {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                ZipEntry zipFile = new ZipEntry(file.getName());
-                zout.putNextEntry(zipFile);
-                byte[] tmp = new byte[4 * 1024];
-                int size = 0;
-                while ((size = fileInputStream.read(tmp)) != -1) {
-                    zout.write(tmp, 0, size);
+                try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    ZipEntry zipFile = new ZipEntry(file.getName());
+                    zout.putNextEntry(zipFile);
+                    byte[] tmp = new byte[4 * 1024];
+                    int size = 0;
+                    while ((size = fileInputStream.read(tmp)) != -1) {
+                        zout.write(tmp, 0, size);
+                    }
+                    zout.flush();
+                    zout.closeEntry();
                 }
-                zout.flush();
-                zout.closeEntry();
-                fileInputStream.close();
             }
             zout.finish();
         } else {
-            InputStream inputStream = new FileInputStream(downloadFiles.get(0));
-            byte[] tmp = new byte[4 * 1024];
-            int size = 0;
-            while ((size = inputStream.read(tmp)) != -1) {
-                bos.write(tmp, 0, size);
+            try (InputStream inputStream = new FileInputStream(downloadFiles.get(0))) {
+                byte[] tmp = new byte[4 * 1024];
+                int size = 0;
+                while ((size = inputStream.read(tmp)) != -1) {
+                    bos.write(tmp, 0, size);
+                }
+                bos.flush();
             }
-            bos.flush();
-            inputStream.close();
         }
 
         String downLoadFileName = !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName;
