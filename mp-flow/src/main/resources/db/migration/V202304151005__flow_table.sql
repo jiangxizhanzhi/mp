@@ -31,7 +31,6 @@ CREATE TABLE `mp_flow_pcap`
     `pcap_file`   varchar(255)        NOT NULL COMMENT 'pcap文件地址',
     `create_time` datetime            NOT NULL COMMENT '创建时间',
     `update_time` datetime            NOT NULL COMMENT '更新时间',
-    `create_user` varchar(64)         NOT NULL COMMENT '创建用户',
     PRIMARY KEY (`pk`),
     UNIQUE KEY `id` (`id`),
     UNIQUE KEY `flow_id` (`flow_id`)
@@ -50,7 +49,6 @@ CREATE TABLE `mp_flow_task_conf`
     `conf`           text                NOT NULL COMMENT '配置',
     `create_time`    datetime            NOT NULL COMMENT '创建时间',
     `update_time`    datetime            NOT NULL COMMENT '更新时间',
-    `create_user`    varchar(64)         NOT NULL COMMENT '创建用户',
     PRIMARY KEY (`pk`),
     UNIQUE KEY `id` (`id`),
     UNIQUE KEY `task_id` (`task_id`)
