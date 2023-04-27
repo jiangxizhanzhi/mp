@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.*;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.service
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.service
  * @Author: hhuang
  * @CreateTime: 2023/04/21  09:40
  * @Description: Suricata处理service

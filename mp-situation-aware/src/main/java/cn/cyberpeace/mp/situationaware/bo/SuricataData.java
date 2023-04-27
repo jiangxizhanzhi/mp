@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.bo
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.bo
  * @Author: hhuang
  * @CreateTime: 2023/04/21  09:43
  * @Description: Suricata规则数据

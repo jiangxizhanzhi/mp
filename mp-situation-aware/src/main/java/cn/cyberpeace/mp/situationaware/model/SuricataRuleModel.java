@@ -9,8 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.model
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.model
  * @Author: hhuang
  * @CreateTime: 2023/04/21  16:03
  * @Description: Suricata Rule Model
