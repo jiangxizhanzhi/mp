@@ -37,18 +37,18 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pathToFdfsUrl(String path) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
-            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-            }
-            HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
-                    .filterEqual(LocalFileMappingModel::getName, splitToName(path));
-            List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
-            if (CollectionUtils.isNotEmpty(fileMappingModels)) {
-                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
-            }
-        }
+//        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
+//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+//            }
+//            HumanCondition humanCondition = new HumanCondition();
+//            humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
+//                    .filterEqual(LocalFileMappingModel::getName, splitToName(path));
+//            List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
+//            if (CollectionUtils.isNotEmpty(fileMappingModels)) {
+//                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+//            }
+//        }
 
         return path;
     }

@@ -94,7 +94,7 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
-        POLogoUtils.changeLogoPathToUrl(deviceList);
+//        POLogoUtils.changeLogoPathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){
             imageConvertPageModel.setList(Lists.newArrayList());
@@ -124,6 +124,9 @@ public class ImagesConverter implements BaseConverter{
         }
 
         imageConvertPageModel.setList(modelList);
+        for (var m : modelList) {
+            m.setLogo("/api/mp"+m.getLogo());
+        }
         return imageConvertPageModel;
     }
 

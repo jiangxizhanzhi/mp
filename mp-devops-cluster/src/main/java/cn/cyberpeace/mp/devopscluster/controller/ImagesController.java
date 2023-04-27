@@ -207,7 +207,7 @@ public class ImagesController {
         imagesByIdVO.setSecondCategory(model.getSubCategory());
         imagesByIdVO.setThirdCategory(model.getThirdCategory());
         imagesByIdVO.setRole(model.getRole());
-        imagesByIdVO.setLogo(model.getLogo());
+        imagesByIdVO.setLogo("/api/mp"+model.getLogo());
         imagesByIdVO.setIsInternal(model.getIsInternal());
         imagesByIdVO.setIsInit(model.getIsInit());
         imagesByIdVO.setIsImport(model.getIsImport());
