@@ -10,7 +10,7 @@ import lombok.Data;
  * @Date：2022/11/15 17:14
  */
 @Data
-@ApiModel("协议解析结果对象")
+@ApiModel("协议解析结果对象BO")
 public class ProtocolBO implements Comparable<ProtocolBO> {
 
     @ApiModelProperty("协议名称")

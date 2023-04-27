@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.bo.FlowProtocolBO;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
@@ -19,10 +20,7 @@ import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
@@ -48,6 +46,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +88,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowCollectionRelServiceImpl flowCollectionRelService;
+
+    @Autowired
+    private FlowProtocolServiceImpl flowProtocolService;
 
     @Autowired
     public BaseAppConfig baseAppConfig;
@@ -398,10 +400,40 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
+        // 保存流量关联协议信息
+        this.batchSaveProtools(addRequest.getProtocolList(), serviceResult.getSource().getObj().getId());
+
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ResultCommon.success(response);
+    }
+
+    /**
+     * 批量保存流量协议
+     * @param protocolList
+     * @param flowId
+     */
+    private void batchSaveProtools(List<FlowProtocolBO> protocolList, String flowId) {
+        if (CollectionUtils.isNotEmpty(protocolList)) {
+            List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
+
+            // 判断是否已有关联协议数据
+            List<FlowProtocolModel> protocolModels = flowProtocolService.selectByFlowId(flowId);
+            if (CollectionUtils.isNotEmpty(protocolModels)) {
+                // 先删除原先关联协议数据
+                flowProtocolService.deleteByFlowId(flowId);
+            }
+
+            // 批量新增流量协议
+            for (FlowProtocolBO flowProtocolBO : protocolList) {
+                FlowProtocolModel flowProtocolModel = new FlowProtocolModel();
+                BeanUtils.copyProperties(flowProtocolBO, flowProtocolModel);
+                flowProtocolModel.setFlowId(flowId);
+                flowProtocolModels.add(flowProtocolModel);
+            }
+            flowProtocolService.bulkCreate(flowProtocolModels);
+        }
     }
 
     /**
@@ -530,6 +562,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
             FlowInfoModel resultModel = serviceResult.getSource().getObj();
 
+            // 保存流量关联协议信息
+            this.batchSaveProtools(addRequest.getProtocolList(), resultModel.getId());
+
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
             response = new AttackFlowResponse(resultModel, prefixUrl, null);
@@ -584,6 +619,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         FlowInfoModel flowInfoModel = this.getFlowInfoModel(modifyRequest);
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
+
+        // 保存流量关联协议信息
+        this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -738,6 +776,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             FlowInfoModel flowInfoModel = this.getFlowInfoModel(modifyRequest);
             // 更新流量信息
             ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
+
+            // 保存流量关联协议信息
+            this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId());
+
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
             response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, null);
