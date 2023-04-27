@@ -1078,6 +1078,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    /**
+     * @description: 启动节点
+     * @param id 
+     * @param nodeId 
+     * @param context 
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> startElement(String id, String nodeId, CsceneContextBO context) {
+        //获取场景实例操作对象
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        //执行节点启动
+        boolean result = instanceHandler.startElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> stopElement(String id, String nodeId, CsceneContextBO context) {
+        //获取场景实例操作对象
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        //执行节点启动
+        boolean result = instanceHandler.stopElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pauseElement(nodeId);

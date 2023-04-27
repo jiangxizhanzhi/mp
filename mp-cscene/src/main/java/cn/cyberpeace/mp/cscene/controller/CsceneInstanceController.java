@@ -611,6 +611,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("启动节点")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/start_element")
+    public ServiceResult<Boolean> startElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        return result;
+    }
+
+    @ApiOperation("关闭节点")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/stop_element")
+    public ServiceResult<Boolean> stopElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        return result;
+    }
+
     @ApiOperation("暂停节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),

@@ -171,11 +171,33 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean start(String instanceId) {
-        return doAction(instanceId, new VirtualMachineStartData());
+        try{
+            return doAction(instanceId, new VirtualMachineStartData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否是活动状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public boolean stop(String instanceId) {
-        return doAction(instanceId, new VirtualMachineStopData());
+        try{
+            return doAction(instanceId, new VirtualMachineStopData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否已是暂停状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.PAUSED.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
