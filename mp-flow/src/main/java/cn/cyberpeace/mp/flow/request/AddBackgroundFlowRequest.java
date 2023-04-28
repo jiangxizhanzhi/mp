@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.bo.FlowProtocolBO;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -34,7 +34,6 @@ public class AddBackgroundFlowRequest {
      * 文件
      */
     @ApiModelProperty(required = true, value = "文件")
-    @NotNull(message = "pcapFile can not be empty")
     private MultipartFile pcapFile;
 
     /**
@@ -70,6 +69,6 @@ public class AddBackgroundFlowRequest {
      * 流量协议集合
      */
     @ApiModelProperty("流量协议集合")
-    private List<FlowProtocolBO> protocolList;
+    private List<ProtocolBO> protocolList;
 
 }

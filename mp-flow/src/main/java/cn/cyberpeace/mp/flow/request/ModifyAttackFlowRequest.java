@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.bo.FlowProtocolBO;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -116,6 +116,6 @@ public class ModifyAttackFlowRequest {
      * 流量协议集合
      */
     @ApiModelProperty("流量协议集合")
-    private List<FlowProtocolBO> protocolList;
+    private List<ProtocolBO> protocolList;
 
 }

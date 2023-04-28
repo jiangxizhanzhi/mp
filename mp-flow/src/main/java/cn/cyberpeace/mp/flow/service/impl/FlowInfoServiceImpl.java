@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.flow.bo.FlowProtocolBO;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
@@ -54,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -329,7 +329,34 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
+        response.setProtocolList(this.getProtocolBOList(id));
         return ResultCommon.success(response);
+    }
+
+    /**
+     * 获取流量协议集合
+     * @param flowId
+     * @return
+     */
+    private List<ProtocolBO> getProtocolBOList(String flowId) {
+        // 添加流量协议信息
+        List<ProtocolBO> protocolBOList = new ArrayList<>();
+        List<FlowProtocolModel> flowProtocolModels = flowProtocolService.selectByFlowId(flowId);
+        if (CollectionUtils.isNotEmpty(flowProtocolModels)) {
+            for (FlowProtocolModel flowProtocolModel : flowProtocolModels) {
+                ProtocolBO protocolBO = new ProtocolBO();
+                BeanUtils.copyProperties(flowProtocolModel, protocolBO);
+                String desc = MessageCommonUtil.convertMessageWithNull(flowProtocolModel.getProtocolName().toLowerCase());
+                if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
+                    // 未知协议
+                    desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
+                }
+                protocolBO.setDesc(desc);
+                protocolBOList.add(protocolBO);
+            }
+        }
+
+        return this.sortProtocol(protocolBOList);
     }
 
     /**
@@ -371,6 +398,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
+        response.setProtocolList(this.getProtocolBOList(id));
         return ResultCommon.success(response);
     }
 
@@ -384,20 +412,27 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
-        String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
-        if (!BaseConstants.STR_PCAP.equals(suffix)) {
-            return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
+        if (StringUtils.isBlank(addRequest.getPcapFilePath())) {
+            if (Objects.isNull(addRequest.getPcapFile())) {
+                throw new MpRuntimeException(FlowErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("pcapFile"));
+            }
+
+            String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
+            if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
+            }
+
+            // 上传文件获取路径
+            String filePath = null;
+            try {
+                filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+            } catch (IOException e) {
+                log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
+                return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+            }
+            addRequest.setPcapFilePath(filePath);
         }
 
-        // 上传文件获取路径
-        String filePath = null;
-        try {
-            filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
-        } catch (IOException e) {
-            log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
-            return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
-        }
-        addRequest.setPcapFilePath(filePath);
 
         // 请求对象转换
         FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
@@ -405,7 +440,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtools(addRequest.getProtocolList(), serviceResult.getSource().getObj().getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(addRequest.getProtocolList(), serviceResult.getSource().getObj().getId(), flowInfoModel.getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -419,7 +454,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param flowId
      * @param filePath
      */
-    private void batchSaveProtools(List<FlowProtocolBO> protocolList, String flowId, String filePath) {
+    private void batchSaveProtcols(List<ProtocolBO> protocolList, String flowId, String filePath) {
         if (CollectionUtils.isNotEmpty(protocolList)) {
             List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
 
@@ -433,7 +468,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 勾选协议
             List<String> filterProtocols = new ArrayList<>();
             // 批量新增流量协议
-            for (FlowProtocolBO flowProtocolBO : protocolList) {
+            for (ProtocolBO flowProtocolBO : protocolList) {
                 FlowProtocolModel flowProtocolModel = new FlowProtocolModel();
                 BeanUtils.copyProperties(flowProtocolBO, flowProtocolModel);
                 flowProtocolModel.setFlowId(flowId);
@@ -551,24 +586,27 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (StringUtils.isEmpty(addRequest.getFileName())) {
                 return ResultCommon.fail("fileName can not be empty");
             }
-            if (Objects.isNull(addRequest.getPcapFile())) {
-                return ResultCommon.fail("pcapFile can not be empty");
-            }
 
-            String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
-            if (!BaseConstants.STR_PCAP.equals(suffix)) {
-                return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
-            }
+            if (StringUtils.isBlank(addRequest.getPcapFilePath())) {
+                if (Objects.isNull(addRequest.getPcapFile())) {
+                    return ResultCommon.fail("pcapFile can not be empty");
+                }
 
-            // 上传文件获取路径
-            String filePath;
-            try {
-                filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
-            } catch (IOException e) {
-                log.error("attack upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
-                return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
+                if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                    return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
+                }
+
+                // 上传文件获取路径
+                String filePath;
+                try {
+                    filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+                } catch (IOException e) {
+                    log.error("attack upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
+                    return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                }
+                addRequest.setPcapFilePath(filePath);
             }
-            addRequest.setPcapFilePath(filePath);
 
             // 请求对象转换
             FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
@@ -577,7 +615,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             FlowInfoModel resultModel = serviceResult.getSource().getObj();
 
             // 保存流量关联协议信息
-            this.batchSaveProtools(addRequest.getProtocolList(), resultModel.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(addRequest.getProtocolList(), resultModel.getId(), flowInfoModel.getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -612,7 +650,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
         }
 
-        if (Objects.nonNull(modifyRequest.getPcapFile())) {
+        if (StringUtils.isBlank(modifyRequest.getPcapFilePath()) && Objects.nonNull(modifyRequest.getPcapFile())) {
             // 文件后缀校验
             String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
             if (!BaseConstants.STR_PCAP.equals(suffix)) {
@@ -635,7 +673,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -763,27 +801,29 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
             response.setCode(modifyRequest.getCode());
         } else {
-            if (ResourceTypeEnum.PACP.toValue() != oldServiceResult.getSource().getObj().getResourceType()) {
-                // 脚本文件更新为pcap文件，判断pcap是否上传了
-                if (Objects.isNull(modifyRequest.getPcapFile())) {
-                    return ResultCommon.fail("pcapFile can not be empty");
+            if (StringUtils.isBlank(modifyRequest.getPcapFilePath())) {
+                if (ResourceTypeEnum.PACP.toValue() != oldServiceResult.getSource().getObj().getResourceType()) {
+                    // 脚本文件更新为pcap文件，判断pcap是否上传了
+                    if (Objects.isNull(modifyRequest.getPcapFile())) {
+                        return ResultCommon.fail("pcapFile can not be empty");
+                    }
                 }
-            }
-            if (Objects.nonNull(modifyRequest.getPcapFile())) {
-                // 文件后缀校验
-                String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
-                if (!BaseConstants.STR_PCAP.equals(suffix)) {
-                    return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
+                if (Objects.nonNull(modifyRequest.getPcapFile())) {
+                    // 文件后缀校验
+                    String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
+                    if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                        return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
+                    }
+                    // 上传文件获取路径
+                    String filePath = null;
+                    try {
+                        filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
+                    } catch (IOException e) {
+                        log.error("attack upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
+                        return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                    }
+                    modifyRequest.setPcapFilePath(filePath);
                 }
-                // 上传文件获取路径
-                String filePath = null;
-                try {
-                    filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
-                } catch (IOException e) {
-                    log.error("attack upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
-                    return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
-                }
-                modifyRequest.setPcapFilePath(filePath);
             }
 
             // 请求对象转换
@@ -792,7 +832,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
             // 保存流量关联协议信息
-            this.batchSaveProtools(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(modifyRequest.getProtocolList(), modifyRequest.getId(), flowInfoModel.getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -1193,8 +1233,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     Map proMap = JSON.parseObject(pcapMd5Result);
                     for (Object key : proMap.keySet()) {
                         ProtocolBO protocol = new ProtocolBO();
-                        protocol.setRate(Double.parseDouble(proMap.get(key).toString()));
-                        protocol.setName(key.toString());
+                        protocol.setRate(new BigDecimal(proMap.get(key).toString()));
+                        protocol.setProtocolName(key.toString());
                         String desc = MessageCommonUtil.convertMessageWithNull(key.toString().toLowerCase());
                         if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
                             // 未知协议
@@ -1251,14 +1291,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 Map proMap = JSON.parseObject(strProtocols);
                 for (Object key : proMap.keySet()) {
                     ProtocolBO protocol = new ProtocolBO();
-                    protocol.setName(key.toString());
+                    protocol.setProtocolName(key.toString());
                     String desc = MessageCommonUtil.convertMessageWithNull(key.toString().toLowerCase());
                     if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
                         // 未知协议
                         desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
                     }
                     protocol.setDesc(desc);
-                    protocol.setRate(Double.parseDouble(proMap.get(key).toString()));
+                    protocol.setRate(new BigDecimal(proMap.get(key).toString()));
                     protocolList.add(protocol);
                 }
             }
@@ -1284,22 +1324,25 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
 
     private List<ProtocolBO> sortProtocol(List<ProtocolBO> protocolList) {
-        Collections.sort(protocolList);
+        if (CollectionUtils.isNotEmpty(protocolList)) {
+            Collections.sort(protocolList);
 
-        // other排序到最后
-        if (protocolList.size() == 11) {
-            int otherIndex = 0;
-            for (int i = 0; i < protocolList.size(); i++) {
-                if ("other".equals(protocolList.get(i).getName())) {
-                    otherIndex = i;
-                    break;
+            // other排序到最后
+            if (protocolList.size() == 11) {
+                int otherIndex = 0;
+                for (int i = 0; i < protocolList.size(); i++) {
+                    if ("other".equals(protocolList.get(i).getProtocolName())) {
+                        otherIndex = i;
+                        break;
+                    }
                 }
-            }
 
-            ProtocolBO bo = protocolList.get(otherIndex);
-            protocolList.remove(otherIndex);
-            protocolList.add(bo);
+                ProtocolBO bo = protocolList.get(otherIndex);
+                protocolList.remove(otherIndex);
+                protocolList.add(bo);
+            }
         }
+
         return protocolList;
     }
 
@@ -1334,7 +1377,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             bos.write(pcapByte);
 
             // 根据协议过滤pcap生成新的包
-            String pythonCmd = String.format("python3 %s %s %s %s", scriptPath, srcPcapPath, strProtocols);
+            String pythonCmd = String.format("python3 %s %s %s", scriptPath, srcPcapPath, strProtocols);
             log.info("============python filter cmd: {}", pythonCmd);
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();

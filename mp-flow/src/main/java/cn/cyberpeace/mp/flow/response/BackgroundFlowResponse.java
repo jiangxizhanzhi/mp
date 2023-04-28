@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.response;
 
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.hutool.core.date.DateUtil;
 import io.swagger.annotations.ApiModel;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -40,6 +42,12 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
      */
     @ApiModelProperty(value = "流量文件地址(全地址)")
     private String pcapFilePath;
+
+    /**
+     * pcap包含的协议
+     */
+    @ApiModelProperty(value = "pcap包含协议集合")
+    private List<ProtocolBO> protocolList;
 
     public BackgroundFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {
         setResourceId(flowInfoModel.getId());

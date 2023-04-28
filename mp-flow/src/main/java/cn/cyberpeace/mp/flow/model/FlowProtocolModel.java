@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * @Description 流量协议对象
  * @Author qiaokang
@@ -37,7 +39,7 @@ public class FlowProtocolModel extends BaseModel {
 	 * 比例
 	 */
 	@ApiModelProperty(value = "比例", required = true)
-	private Float rate;
+	private BigDecimal rate;
 
 	/**
 	 * 是否勾选：0 否，1 是
