@@ -8,3 +8,5 @@ alter table mp_sceneplugincloud_scene_config_element
 
 alter table mp_sceneplugincloud_scene_element add column virtual_usbs varchar(512) not null comment '虚拟usb列表' ;
 alter table mp_sceneplugincloud_scene_config_element add column virtual_usbs varchar(512) not null comment '虚拟usb列表' ;
+alter table mp_sceneplugincloud_scene_element add column entity_usbs varchar(512) not null comment '实体usb列表' ;
+alter table mp_sceneplugincloud_scene_config_element add column entity_usbs varchar(512) not null comment '实体usb列表' ;

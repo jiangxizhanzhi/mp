@@ -111,6 +111,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<InitialTool> initialTools;
     @ApiModelProperty(value = "仿真usb列表")
     private List<VirtualUsb> virtualUsbs;
+    @ApiModelProperty(value = "实体usb列表")
+    private List<EntityUsb> entityUsbs;
 
     // 靶标属性
     @ApiModelProperty(value = "靶标角色")
@@ -213,6 +215,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
@@ -236,6 +239,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>(){});
         virtualUsbs = StringUtils.isEmpty(obj.getVirtualUsbs()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {});
+        entityUsbs = StringUtils.isEmpty(obj.getEntityUsbs()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {});
     }
 
     @Override
@@ -249,6 +254,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
@@ -282,6 +288,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (virtualUsbs != null) {
             obj.setVirtualUsbs(JsonCommon.stringify(virtualUsbs));
+        }
+        if (entityUsbs != null) {
+            obj.setEntityUsbs(JsonCommon.stringify(entityUsbs));
         }
         return obj;
     }
