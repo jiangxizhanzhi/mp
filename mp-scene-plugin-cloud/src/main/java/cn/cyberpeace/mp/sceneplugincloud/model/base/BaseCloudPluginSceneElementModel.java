@@ -100,6 +100,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String isoTmpdirUuid;
     @DefaultStr
     private String virtualUsbs;
+    @DefaultStr
+    private String entityUsbs;
 
     // 虚拟机/容器属性
     @DefaultStr
