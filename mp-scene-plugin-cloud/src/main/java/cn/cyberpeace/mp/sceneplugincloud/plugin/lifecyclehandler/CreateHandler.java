@@ -406,21 +406,25 @@ public class CreateHandler extends HandlerCommon {
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-        Integer ingress = samplePort.getIngress() < 0 ? 0 : samplePort.getIngress();
-        if (ingress > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        if (samplePort.getIngress() > 0) {
             var qosRule = new VirtualNic.QosRule();
-            qosRule.setMaxKbps(ingress);
+            qosRule.setMaxKbps(samplePort.getIngress());
             qosRule.setDirection(QosRuleDirection.INGRESS);
-            qosRule.setDelayMs(samplePort.getDelay());
-            qosRule.setLossPercent(samplePort.getLoss());
             qosRules.add(qosRule);
         }
-        Integer egress = samplePort.getEgress() < 0 ? 0 : samplePort.getEgress();
-        if (egress > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        if (samplePort.getEgress() > 0) {
             var qosRule = new VirtualNic.QosRule();
-            qosRule.setMaxKbps(egress);
+            qosRule.setMaxKbps(samplePort.getEgress());
             qosRule.setDirection(QosRuleDirection.EGRESS);
+            qosRules.add(qosRule);
+        }
+        if(samplePort.getDelay() > 0){
+            var qosRule = new VirtualNic.QosRule();
             qosRule.setDelayMs(samplePort.getDelay());
+            qosRules.add(qosRule);
+        }
+        if(samplePort.getLoss() > 0){
+            var qosRule = new VirtualNic.QosRule();
             qosRule.setLossPercent(samplePort.getLoss());
             qosRules.add(qosRule);
         }
