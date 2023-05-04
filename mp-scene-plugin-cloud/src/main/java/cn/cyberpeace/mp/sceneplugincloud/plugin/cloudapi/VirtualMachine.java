@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResizeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResumeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineStartData;
@@ -176,6 +177,12 @@ public class VirtualMachine extends CloudClient {
 
     public boolean stop(String instanceId) {
         return doAction(instanceId, new VirtualMachineStopData());
+    }
+
+    public boolean resize(String instanceId, String flavorId) {
+        VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
+        resizeData.setFlavorId(flavorId);
+        return doAction(instanceId, resizeData);
     }
 
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {

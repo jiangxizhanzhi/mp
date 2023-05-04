@@ -3,16 +3,23 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.util.NumberUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -53,6 +60,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 this.modifyVirtualMachine(newCloudElement);
             } else if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
                 // 更新容器终端
+                this.modifyContainer(newCloudElement);
             }
         }
     }
@@ -61,6 +69,16 @@ public class ElementModifyHandler extends HandlerCommon {
         CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
+            String flavorId = this.createFlavor(newCloudElement);
+            vm.resize(originCloudElement.getResourceId(), flavorId);
+        }
+    }
+
+    private void modifyContainer(CloudPluginSceneElementBO newCloudElement) {
+        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+        if (this.isFlavorChange(newCloudElement, originCloudElement)) {
+            // 先创建flavor
+            String flavorId = this.createFlavor(newCloudElement);
         }
     }
 
@@ -69,10 +87,7 @@ public class ElementModifyHandler extends HandlerCommon {
         if (CollectionUtils.isEmpty(originCloudElement.getDeriveNetworks())) {
             return;
         }
-        var currentElementNetwork = originCloudElement.getDeriveNetworks().stream()
-                .filter(n -> n.getNetwork().getCidr().equals(originCloudElement.getCidr()))
-                .findFirst().orElse(new ConnectedNetworkBO(null, null))
-                .network;
+        var currentElementNetwork = originCloudElement.getDeriveNetworks().stream().filter(n -> n.getNetwork().getCidr().equals(originCloudElement.getCidr())).findFirst().orElse(new ConnectedNetworkBO(null, null)).network;
         if (currentElementNetwork == null) {
             return;
         }
@@ -191,9 +206,22 @@ public class ElementModifyHandler extends HandlerCommon {
     private boolean isFlavorChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         var newElement = newCloudElement.getSrcElement();
         var originElement = originCloudElement.getSrcElement();
-        if (newElement.getCpu() != originElement.getCpu() || newElement.getRam() != originElement.getRam() || newElement.getDisk() != originElement.getDisk()) {
+        if (!NumberUtil.equals(newElement.getCpu(), originElement.getCpu()) ||
+                !NumberUtil.equals(newElement.getDisk(), originElement.getDisk()) ||
+                !NumberUtil.equals(newElement.getRam(), originElement.getRam())) {
             return true;
         }
         return false;
+    }
+
+    private String createFlavor(CloudPluginSceneElementBO newCloudElement) {
+        CreateFlavorData createFlavorData = new CreateFlavorData();
+        createFlavorData.setName(newCloudElement.getSrcElement().getEid().substring(0, 8));
+        createFlavorData.setCpu(newCloudElement.getSrcElement().getCpu());
+        createFlavorData.setRam(newCloudElement.getSrcElement().getRam());
+        createFlavorData.setDisk(newCloudElement.getSrcElement().getDisk());
+        var result = new Remote().cloudPost(CloudUrlConstant.CREATE_FLAVOR, createFlavorData, null, new TypeReference<CloudResponse<CreateFlavorResult>>() {
+        }, true);
+        return result.getData().getId();
     }
 }
