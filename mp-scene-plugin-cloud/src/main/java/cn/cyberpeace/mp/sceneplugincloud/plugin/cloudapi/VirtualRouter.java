@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -41,6 +42,14 @@ public class VirtualRouter extends CloudClient {
         heavyConcurrentWait();
 
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
+    }
+
+    public boolean update(String resourceId, VirtualRouterUpdateData updateData) {
+        heavyConcurrentWait();
+        CloudResponse<Object> result = cloudPatch(CloudUrlConstant.VIRTUAL_ROUTER_UPDATE_URL.replace("{router_id}", resourceId), updateData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;

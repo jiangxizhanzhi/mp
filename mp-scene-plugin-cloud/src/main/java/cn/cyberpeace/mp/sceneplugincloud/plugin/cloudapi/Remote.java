@@ -199,4 +199,8 @@ public class Remote extends CloudClient {
             return false;
         }
     }
+
+    public void createFlavor() {
+
+    }
 }
