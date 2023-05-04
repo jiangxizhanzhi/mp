@@ -20,5 +20,5 @@ public class CsceneModelFields extends BaseModelFields {
 
     public static final DynamicFields searchFields = new DynamicFields(CsceneModel::getName, CsceneModel::getReferenceMetaData);
 
-    public static final DynamicFields orderFields = new DynamicFields(BaseModel::getCreateTime, BaseModel::getUpdateTime, CsceneModel::getName);
+    public static final DynamicFields orderFields = new DynamicFields("createTime", "updateTime", "convert(name using gb2312)", "name");
 }
