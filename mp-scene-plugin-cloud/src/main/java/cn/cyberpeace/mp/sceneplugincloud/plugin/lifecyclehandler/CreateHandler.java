@@ -335,6 +335,11 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
+    /**
+     * @description: 生成虚拟网卡
+     * @param cloudElement
+     * @return List<VirtualNic>
+     */
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
         // 添加管理网卡
@@ -343,9 +348,11 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
+        //所有网络，包含生成的网络和连接的网络
         List<ConnectedNetworkBO> allNetworks = new ArrayList<>();
         allNetworks.addAll(cloudElement.getDeriveNetworks());
         allNetworks.addAll(cloudElement.getAccessNetworks());
+        //节点端口存在
         if (cloudElement.getSrcElement().getPorts() != null && cloudElement.getSrcElement().getPorts().size() > 0) {
             Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
             allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
@@ -375,6 +382,11 @@ public class CreateHandler extends HandlerCommon {
         return virtualNics;
     }
 
+    /**
+     * @description: 获得连接网络的虚拟网卡相关信息
+     * @param connectedNetwork
+     * @return VirtualNic
+     */
     private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
         var network = connectedNetwork.network;
         List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
@@ -394,17 +406,19 @@ public class CreateHandler extends HandlerCommon {
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-        if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        Integer ingress = samplePort.getIngress() < 0 ? 0 : samplePort.getIngress();
+        if (ingress > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
             var qosRule = new VirtualNic.QosRule();
-            qosRule.setMaxKbps(samplePort.getIngress());
+            qosRule.setMaxKbps(ingress);
             qosRule.setDirection(QosRuleDirection.INGRESS);
             qosRule.setDelayMs(samplePort.getDelay());
             qosRule.setLossPercent(samplePort.getLoss());
             qosRules.add(qosRule);
         }
-        if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        Integer egress = samplePort.getEgress() < 0 ? 0 : samplePort.getEgress();
+        if (egress > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
             var qosRule = new VirtualNic.QosRule();
-            qosRule.setMaxKbps(samplePort.getEgress());
+            qosRule.setMaxKbps(egress);
             qosRule.setDirection(QosRuleDirection.EGRESS);
             qosRule.setDelayMs(samplePort.getDelay());
             qosRule.setLossPercent(samplePort.getLoss());
