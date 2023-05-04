@@ -22,7 +22,7 @@ import java.util.Map;
 public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
         ElementModifyBO> {
     @ApiModelProperty(value = "更新的内容")
-    private SceneDataBO updateElement;
+    private SceneDataBO update;
     @ApiModelProperty(value = "透传字段")
     private Map<String, Object> passThrough;
 
@@ -48,8 +48,8 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
     public CsceneInstanceModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneInstanceModel::getScene)));
-        if (updateElement != null && updateElement.getTopology() != null && updateElement.getTopology().getScene() != null) {
-            obj.setScene(updateElement.getTopology().getScene().getEid());
+        if (update != null && update.getTopology() != null && update.getTopology().getScene() != null) {
+            obj.setScene(update.getTopology().getScene().getEid());
         }
         if (passThrough != null) {
             obj.setPassThrough(JsonCommon.stringify(passThrough));

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -33,6 +34,13 @@ public class VirtualSwitch extends CloudClient {
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;
+    }
+
+    public void update(String resourceId, VirtualSwitchUpdateData updateData) {
+        heavyConcurrentWait();
+
+        CloudResponse<Object> result = cloudPatch(CloudUrlConstant.VIRTUAL_SWITCH_UPDATE_URL.replace("{network_id}", resourceId), updateData, null, new TypeReference<>() {
+        }, true);
     }
 
     public boolean forceDelete(VirtualSwitchDeleteData deleteData) {
