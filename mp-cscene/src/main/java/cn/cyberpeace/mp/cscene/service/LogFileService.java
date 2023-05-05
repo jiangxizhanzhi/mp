@@ -159,6 +159,9 @@ public class LogFileService {
             .type(ProbeOperateConstant.PROBEOPERATE_TYPE.ORIGIN_LOG.getValue()).build();
         //查询对应日志类型探针开关操作时间段
         List<ProbeOperateTimeRange> timeRangeList = sceneMonitorService.queryProbeOperateTimeRange(params);
+        if(CollectionUtils.isEmpty(timeRangeList)){
+            return allLogFileVOs;
+        }
         //文件创建时间在查询范围中即符合条件
         return allLogFileVOs.stream().filter(logFileVO ->
             timeRangeList.stream().filter(time -> logFileVO.getCreateTime().isAfter(time.getFrom()) && logFileVO.getCreateTime().isBefore(time.getTo())).findAny().isPresent()
