@@ -288,9 +288,7 @@ public class VyosNetworkCommandUtils {
         //设置丢包率
         private String NETWORK_PACKET_LOSS = "set traffic-policy network-emulator snpolicy%s packet-loss %s";
 
-        //绑定设置的策略
-        private String BIND_IN_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy in snpolicy%s";
-
+        //绑定设置的策略（该策略只支持出站流量）
         private String BIND_OUT_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy out snpolicy%s";
 
         @Override
@@ -318,7 +316,6 @@ public class VyosNetworkCommandUtils {
                         result.add(lossCmd);
                     }
                     if (StringUtils.isNoneEmpty(delayCmd, lossCmd)) {
-                        result.add(String.format(BIND_IN_TRAFFIC_POLICY, order, order));
                         result.add(String.format(BIND_OUT_TRAFFIC_POLICY, order, order));
                     }
                 }
