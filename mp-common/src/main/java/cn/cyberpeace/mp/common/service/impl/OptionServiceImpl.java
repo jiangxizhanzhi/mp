@@ -2,24 +2,21 @@ package cn.cyberpeace.mp.common.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -29,12 +26,31 @@ import java.util.function.Function;
  */
 @Service
 @Slf4j
-public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, QueryParams>
+public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
         implements OptionService {
 
     @Autowired
-    public OptionServiceImpl(OptionMapper optionMapper) {
+    private OptionMapper optionMapper;
+
+    @Autowired
+    public OptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
+        setModelFields(optionFields);
         setModelMapper(optionMapper);
+    }
+
+    /**
+     * 补充list查询条件
+     * @param humanCondition
+     * @param queryParams
+     */
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
+        if (StringUtils.isNotEmpty(queryParams.getType())) {
+            humanCondition.filterEqual("type", queryParams.getType());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getZhName())) {
+            humanCondition.filterContains("zhName", queryParams.getZhName());
+        }
     }
 
     /**
@@ -74,6 +90,84 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true)).asResult();
+    }
+
+    /**
+     * 分页查询OptionModel列表
+     * @param queryParams
+     * @return
+     */
+    @Override
+    public ListObjServiceResult<OptionModel> page(OptionQueryParams queryParams) {
+        log.info("OptionServiceImpl.page begin. queryParams:{}", queryParams);
+        ListObjServiceResult<OptionModel> listObjServiceResult = list(queryParams);
+        log.info("OptionServiceImpl.page end. listObjServiceResult:{}", listObjServiceResult);
+        return listObjServiceResult.asResult();
+    }
+
+    /**
+     * 新增选项
+     * @param optionModel
+     */
+    @Override
+    public void addOption(OptionModel optionModel) {
+
+    }
+
+    /**
+     * 编辑选项
+     * @param optionModel
+     */
+    @Override
+    public void editOption(OptionModel optionModel) {
+
+    }
+
+    /**
+     * 删除选项
+     * @param ids
+     */
+    @Override
+    public void deleteOptions(List<String> ids) {
+
+    }
+
+    /**
+     * 根据ids查询列表
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<OptionModel> findByIds(List<String> ids) {
+        return null;
+    }
+
+    /**
+     * 根据type类型获取最大的code值（只对数字类型的code有效）
+     * @param type
+     * @return
+     */
+    @Override
+    public Integer getMaxCode(String type) {
+        log.info("SysOptionServiceImpl.getMaxCode begin. type:{}", type);
+        Integer result = optionMapper.getMaxCode(type);
+        result = result == null ? 0 : result;
+        log.info("SysOptionServiceImpl.getMaxCode end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 根据type类型获取最大的sort值
+     * @param type
+     * @return
+     */
+    @Override
+    public Integer getMaxSort(String type) {
+        log.info("SysOptionServiceImpl.getMaxSort begin. type:{}", type);
+        Integer result = optionMapper.getMaxSort(type);
+        result = result == null ? 0 : result;
+        log.info("SysOptionServiceImpl.getMaxSort end. result:{}", result);
+        return result;
     }
 
     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
