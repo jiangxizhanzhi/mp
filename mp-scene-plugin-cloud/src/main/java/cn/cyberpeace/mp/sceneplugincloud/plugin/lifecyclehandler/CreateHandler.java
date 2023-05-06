@@ -418,16 +418,17 @@ public class CreateHandler extends HandlerCommon {
             qosRule.setDirection(QosRuleDirection.EGRESS);
             qosRules.add(qosRule);
         }
-        if(samplePort.getDelay() > 0){
-            var qosRule = new VirtualNic.QosRule();
-            qosRule.setDelayMs(samplePort.getDelay());
-            qosRules.add(qosRule);
-        }
-        if(samplePort.getLoss() > 0){
-            var qosRule = new VirtualNic.QosRule();
-            qosRule.setLossPercent(samplePort.getLoss());
-            qosRules.add(qosRule);
-        }
+        //云平台暂不支持上下行带宽和时延丢包率同时设置，时延丢包率通过命令执行
+//        if(samplePort.getDelay() > 0){
+//            var qosRule = new VirtualNic.QosRule();
+//            qosRule.setDelayMs(samplePort.getDelay());
+//            qosRules.add(qosRule);
+//        }
+//        if(samplePort.getLoss() > 0){
+//            var qosRule = new VirtualNic.QosRule();
+//            qosRule.setLossPercent(samplePort.getLoss());
+//            qosRules.add(qosRule);
+//        }
         virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
 
         if (!HandlerUtils.isExternalNetwork(network.getResourceId())) {
