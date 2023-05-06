@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +33,7 @@ public class VyosNetworkCommandUtils {
         builderChains.add(new BGPCmdBuilder());
         builderChains.add(new RouterNameCmdBuilder());
         builderChains.add(new RIPCmdBuilder());
+        builderChains.add(new QosCmdBuilder());
     }
 
     public static List<String> genOpenDhcpCommands(int ethSize) {
@@ -276,6 +278,52 @@ public class VyosNetworkCommandUtils {
             });
             cmds.add(REDISTRIBUTE);
             return cmds;
+        }
+    }
+
+    private static class QosCmdBuilder implements NetworkingCmdBuilder{
+
+        //设置时延
+        private String NETWORK_DELAY = "set traffic-policy network-emulator snpolicy%s network-delay %s";
+        //设置丢包率
+        private String NETWORK_PACKET_LOSS = "set traffic-policy network-emulator snpolicy%s packet-loss %s";
+
+        //绑定设置的策略
+        private String BIND_IN_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy in snpolicy%s";
+
+        private String BIND_OUT_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy out snpolicy%s";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
+                return new ArrayList<>();
+            }
+            List<String> result = new ArrayList<>();
+            paramsWrapper.pluginPorts.forEach(p -> {
+                SceneElementPortBO srcPort = p.getSrcPort();
+                if (Objects.nonNull(srcPort)) {
+                    Integer delay = srcPort.getDelay();
+                    Integer loss = srcPort.getLoss();
+                    Integer order = srcPort.getOrder();
+                    String delayCmd = null;
+                    String lossCmd = null;
+                    if (delay > 0) {
+                        //时延命令
+                        delayCmd = String.format(NETWORK_DELAY, order, delay);
+                        result.add(delayCmd);
+                    }
+                    if (loss > 0) {
+                        //丢包率命令
+                        lossCmd = String.format(NETWORK_PACKET_LOSS, order, loss);
+                        result.add(lossCmd);
+                    }
+                    if (StringUtils.isNoneEmpty(delayCmd, lossCmd)) {
+                        result.add(String.format(BIND_IN_TRAFFIC_POLICY, order, order));
+                        result.add(String.format(BIND_OUT_TRAFFIC_POLICY, order, order));
+                    }
+                }
+            });
+            return result;
         }
     }
 }
