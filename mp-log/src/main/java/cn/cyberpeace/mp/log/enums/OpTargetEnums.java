@@ -32,6 +32,8 @@ public enum OpTargetEnums {
     COLLECTION_TEMPLATE("collection_template"),
     // 流量文件
     FLOW_INFO("flow_info"),
+    // 流量文件分类
+    FLOW_INFO_CATEGORY("flow_info_category"),
     // 流量集合
     FLOW_COLLECTION("flow_collection"),
     // 公告

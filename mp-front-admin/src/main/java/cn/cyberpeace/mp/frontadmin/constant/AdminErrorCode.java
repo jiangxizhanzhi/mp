@@ -25,7 +25,9 @@ public enum AdminErrorCode implements ErrorCode {
 
     SYS_NOTICE_NOT_EXISTED("MP-110040", "sys_notice_not_existed"),
 
-    SYS_TIMESTAMP_ROLLBACK("MP-110050", "sys_timestamp_rollback");
+    SYS_TIMESTAMP_ROLLBACK("MP-110050", "sys_timestamp_rollback"),
+
+    OPTION_NAME_EXIST("MP-110060", "option_name_exist");
 
     AdminErrorCode(String code, String message) {
         setCode(code, AdminConstant.ERROR_CODE_PREFIX + message);
