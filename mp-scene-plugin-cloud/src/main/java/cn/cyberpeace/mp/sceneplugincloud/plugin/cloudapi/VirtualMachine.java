@@ -4,32 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotParams;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecuteResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResumeData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineStartData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineStopData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineSuspendData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
@@ -296,5 +271,29 @@ public class VirtualMachine extends CloudClient {
     public void deleteVirtualUsbs(AttachVirtualUsbsData data) {
         cloudDelete(CloudUrlConstant.DELETE_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+    }
+
+    /**
+     * 虚拟机挂载实体USB
+     * @param data
+     */
+    public void attachEntityUsbs(AttachEntityUsbsData data) {
+        log.info("VirtualMachine.attachEntityUsbs begin. data:{}", data);
+        CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+        log.info("调用云平台挂载实体USB接口, response:{}", response);
+        log.info("VirtualMachine.attachEntityUsbs end.");
+    }
+
+    /**
+     * 虚拟机卸载实体USB
+     * @param data
+     */
+    public void deleteEntityUsbs(AttachEntityUsbsData data) {
+        log.info("VirtualMachine.deleteEntityUsbs begin. data:{}", data);
+        CloudResponse<Object> response = cloudDelete(CloudUrlConstant.DELETE_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+        log.info("调用云平台卸载实体USB接口, response:{}", response);
+        log.info("VirtualMachine.deleteEntityUsbs end.");
     }
 }

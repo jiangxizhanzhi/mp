@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import io.swagger.annotations.ApiModel;
@@ -125,4 +126,10 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("系统信息")
     private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 实体USB
+     */
+    @ApiModelProperty("实体USB")
+    private EntityUsb extEntityUsb;
 }

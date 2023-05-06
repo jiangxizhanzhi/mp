@@ -1931,8 +1931,8 @@
   },
   {
     "key": "collection.type.020105",
-    "zh_name": "FreeBSD",
-    "en_name": "FreeBSD"
+    "zh_name": "BSD",
+    "en_name": "BSD"
   },
   {
     "key": "collection.type.020106",
@@ -2073,6 +2073,11 @@
     "key": "collection.type.020312",
     "zh_name": "windows安全事件",
     "en_name": "windows security event"
+  },
+  {
+    "key": "collection.type.020313",
+    "zh_name": "WAF",
+    "en_name": "WAF"
   },
   {
     "key": "collection.type.03",
