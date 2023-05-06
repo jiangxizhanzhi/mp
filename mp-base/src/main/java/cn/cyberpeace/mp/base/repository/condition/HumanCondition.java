@@ -55,7 +55,7 @@ public class HumanCondition {
     private String currentLinkName;
 
     public static String formatSqlElement(String sqlElement) {
-        if ("convert(name using gb2312)".equals(sqlElement)) {
+        if ("convert(name using gbk)".equals(sqlElement)) {
             return String.format("%s", sqlElement);
         }
         return String.format("`%s`", sqlElement);

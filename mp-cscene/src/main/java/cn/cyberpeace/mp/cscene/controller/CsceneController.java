@@ -146,9 +146,9 @@ public class CsceneController implements BaseModelListControllerBase {
         if (queryParams.getOrders().length > 0) {
             for (int i = 0; i < queryParams.getOrders().length; i++) {
                 if (queryParams.getOrders()[i] != null && queryParams.getOrders()[i].equals("name")) {
-                    queryParams.getOrders()[i] = "convert(name using gb2312)";
+                    queryParams.getOrders()[i] = "convert(name using gbk)";
                 } else if (queryParams.getOrders()[i] != null && queryParams.getOrders()[i].equals("-name")) {
-                    queryParams.getOrders()[i] = "-convert(name using gb2312)";
+                    queryParams.getOrders()[i] = "-convert(name using gbk)";
                 }
             }
         }

@@ -84,7 +84,7 @@ public class ImagesConverter implements BaseConverter{
         }
         //特殊处理排序字段为name时兼容中文排序
         if("name".equals(dto.getOrder())){
-            dto.setOrder("convert(name using gb2312)");
+            dto.setOrder("convert(name using gbk)");
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
