@@ -143,7 +143,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        if (queryParams.getOrders().length > 0) {
+        if (queryParams != null && queryParams.getOrders() != null && queryParams.getOrders().length > 0) {
             for (int i = 0; i < queryParams.getOrders().length; i++) {
                 if (queryParams.getOrders()[i] != null && queryParams.getOrders()[i].equals("name")) {
                     queryParams.getOrders()[i] = "convert(name using gbk)";
