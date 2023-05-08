@@ -1,14 +1,14 @@
-package cn.cyberpeace.mp.sceneplugincollection.service;
+package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.sceneplugincollection.bo.SuricataData;
-import cn.cyberpeace.mp.sceneplugincollection.model.SuricataRuleModel;
-import cn.cyberpeace.mp.sceneplugincollection.repository.SuricataRuleMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.SuricataQueryParams;
+import cn.cyberpeace.mp.situationaware.bo.SuricataData;
+import cn.cyberpeace.mp.situationaware.model.SuricataRuleModel;
+import cn.cyberpeace.mp.situationaware.repository.SuricataRuleMapper;
+import cn.cyberpeace.mp.situationaware.request.SuricataQueryRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,18 +22,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static cn.cyberpeace.mp.sceneplugincollection.constant.SuricataConstant.*;
+import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.*;
 
-
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.service
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.service
  * @Author: hhuang
  * @CreateTime: 2023/04/21  09:40
  * @Description: Suricata处理service
@@ -203,21 +198,21 @@ public class SuricataService {
 
     /**
      * @description: 分页查询流量规则信息
-     * @param suricataQueryParams
+     * @param suricataQueryRequest
      * @return ServiceResult<List<SuricataData>>
      */
-    public ServiceResult<List<SuricataData>> queryPage(SuricataQueryParams suricataQueryParams) {
-        suricataQueryParams.ensure();
+    public ServiceResult<List<SuricataData>> queryPage(SuricataQueryRequest suricataQueryRequest) {
+        suricataQueryRequest.ensure();
         //构建查询参数
         HumanCondition condition = new HumanCondition();
-        if(StringUtils.isNotEmpty(suricataQueryParams.getProtocol())){
-            condition.filterEqual(SuricataRuleModel::getProtocol,suricataQueryParams.getProtocol());
+        if(StringUtils.isNotEmpty(suricataQueryRequest.getProtocol())){
+            condition.filterEqual(SuricataRuleModel::getProtocol, suricataQueryRequest.getProtocol());
         }
-        if(StringUtils.isNotEmpty(suricataQueryParams.getRuleName())){
-            condition.filterContains(SuricataRuleModel::getRuleName,suricataQueryParams.getRuleName());
+        if(StringUtils.isNotEmpty(suricataQueryRequest.getRuleName())){
+            condition.filterContains(SuricataRuleModel::getRuleName, suricataQueryRequest.getRuleName());
         }
-        if(StringUtils.isNotEmpty(suricataQueryParams.getAttck())){
-            condition.filterContains(SuricataRuleModel::getAttck,suricataQueryParams.getAttck());
+        if(StringUtils.isNotEmpty(suricataQueryRequest.getAttck())){
+            condition.filterContains(SuricataRuleModel::getAttck, suricataQueryRequest.getAttck());
         }
         //查询结果总数
         int total = suricataRuleMapper.total(condition);
@@ -225,7 +220,7 @@ public class SuricataService {
             return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), total)).asResult();
         }
         //添加分页信息
-        condition.pagination(suricataQueryParams.getPage(),suricataQueryParams.getPageSize());
+        condition.pagination(suricataQueryRequest.getPage(), suricataQueryRequest.getPageSize());
         //执行查询
         List<SuricataRuleModel> suricataRuleModelList = suricataRuleMapper.list(condition);
         //转换响应为业务数据

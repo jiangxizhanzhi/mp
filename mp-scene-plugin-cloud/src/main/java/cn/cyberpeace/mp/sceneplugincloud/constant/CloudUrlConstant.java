@@ -82,6 +82,8 @@ public class CloudUrlConstant {
     public static final String ATTACH_ISO = "/cpcloud/device/v1/iso/vm_attach";
     public static final String ATTACH_VIRTUAL_USBS = "/cpcloud/device/v1/virtual_usbs/vm_attach";
     public static final String DELETE_VIRTUAL_USBS = "/cpcloud/device/v1/virtual_usbs/vm_attach";
+    public static final String ATTACH_ENTITY_USBS = "/cpcloud/device/v1/entity_usbs/vm_attach";
+    public static final String DELETE_ENTITY_USBS = "/cpcloud/device/v1/entity_usbs/vm_attach";
 
     public static final String DEVICE_SNAPSHOT = "/cpcloud/device/v1/snapshot";
 

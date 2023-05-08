@@ -10,23 +10,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
@@ -40,11 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -218,6 +199,10 @@ public class DeleteHandler extends HandlerCommon {
         // 卸载虚拟usb
         if (CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
             this.deleteVirtualUsbs(cloudElement);
+        }
+        // 卸载实体usb
+        if (CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs())) {
+            this.deleteEntityUsbs(cloudElement);
         }
 
         var resourceId = cloudElement.getResourceId();
@@ -483,5 +468,14 @@ public class DeleteHandler extends HandlerCommon {
         var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setVirtualUsbUuids(usbUuids);
         vmClient.deleteVirtualUsbs(data);
+    }
+
+    private void deleteEntityUsbs(CloudPluginSceneElementBO cloudElement) {
+        log.info("CreateHandler.deleteEntityUsbs begin. cloudElement:{}", cloudElement);
+        AttachEntityUsbsData data = new AttachEntityUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        List<String>  usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setEntityUsbUuids(usbUuids);
+        vmClient.deleteEntityUsbs(data);
     }
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.service.param;
+package cn.cyberpeace.mp.situationaware.request;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincollection.service.param
+/*
+ * @BelongsPackage: cn.cyberpeace.mp.situationaware.request
  * @Author: hhuang
  * @CreateTime: 2023/04/23  14:41
  * @Description: Suricata规则查询参数
@@ -17,7 +17,7 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SuricataQueryParams{
+public class SuricataQueryRequest {
 
     @ApiModelProperty("协议")
     private String protocol;

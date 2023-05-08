@@ -58,7 +58,7 @@ public class UrlACFilter extends OncePerRequestFilter {
 
         boolean skip = false;
         // 拦截器总开关是否开启
-        if (Objects.nonNull(frontBusinessConfig) && !frontBusinessConfig.getUrlAcFilterEnabled()) {
+        if (Objects.equals(Boolean.FALSE, frontBusinessConfig.getUrlAcFilterEnabled())) {
             skip = true;
         }
 

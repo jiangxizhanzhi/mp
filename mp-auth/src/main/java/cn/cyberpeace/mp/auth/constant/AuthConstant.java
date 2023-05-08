@@ -75,7 +75,7 @@ public class AuthConstant {
     /**
      * 导入用户头像max size：20M
      */
-    public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024;
+    public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024L;
 
     /**
      * 导入用户头像支持后缀类型：png，jpeg，jpg

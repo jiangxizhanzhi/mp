@@ -1695,7 +1695,7 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setDiskUsed(string2Long(output.getDiskUsed()));
         }
 
-        if (StringUtils.isNotBlank(output.getDiskUsed()) && StringUtils.isNotBlank(output.getDiskUsed())) {
+        if (StringUtils.isNotBlank(output.getDiskTotal()) && StringUtils.isNotBlank(output.getDiskUsed())) {
             wazuhHostStateModel.setDiskUnused(wazuhHostStateModel.getDiskTotal() - wazuhHostStateModel.getDiskUsed());
         }
 

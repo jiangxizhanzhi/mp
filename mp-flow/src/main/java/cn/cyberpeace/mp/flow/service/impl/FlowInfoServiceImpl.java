@@ -17,10 +17,8 @@ import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
@@ -71,6 +69,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowCollectionRelMapper flowCollectionRelMapper;
+
+    @Autowired
+    private FlowCollectionMapper flowCollectionMapper;
 
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
@@ -1171,6 +1172,27 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return protocolList;
+    }
+
+    public boolean checkCategoryUsed(List<String> categoryList) {
+        log.info("FlowInfoServiceImpl.checkCategoryUsed begin. categoryList:{}", categoryList);
+        if (CollectionUtils.isEmpty(categoryList)) {
+            return false;
+        }
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(FlowInfoModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        List<FlowInfoModel> flowInfoModelList = getModelMapper().list(condition);
+        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+            return true;
+        }
+        HumanCondition conditionCollection = new HumanCondition();
+        conditionCollection.filterIn(FlowCollectionModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        List<FlowCollectionModel> flowCollectionModelList = flowCollectionMapper.list(conditionCollection);
+        if (CollectionUtils.isNotEmpty(flowCollectionModelList)) {
+            return true;
+        }
+        log.info("FlowInfoServiceImpl.checkCategoryUsed end.");
+        return false;
     }
 
 }
