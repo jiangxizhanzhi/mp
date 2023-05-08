@@ -61,7 +61,7 @@ public class ModifyHandler extends HandlerCommon {
         if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
             for (String elementId : mayUpdateNodeIds) {
                 CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement);
+                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement,newPlugin);
             }
         }
     }
