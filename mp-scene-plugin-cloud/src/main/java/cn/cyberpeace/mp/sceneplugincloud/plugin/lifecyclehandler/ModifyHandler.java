@@ -28,8 +28,9 @@ public class ModifyHandler extends HandlerCommon {
     private ModifyCreateHandler modifyCreateHandler;
     private ModifyDeleteHandler modifyDeleteHandler;
     private ElementModifyHandler elementModifyHandler;
-    private Set<String> mayUpdateNodeIds = null ;
+    private Set<String> mayUpdateNodeIds = null;
     private CloudScenePluginHandler newPlugin;
+    private CloudScenePluginHandler originPlugin;
 
     public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin, List<String> updateElementIds) {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
@@ -50,6 +51,7 @@ public class ModifyHandler extends HandlerCommon {
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
         this.elementModifyHandler = new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent());
         this.newPlugin = newPlugin;
+        this.originPlugin = originPlugin;
     }
 
     public void modify() {
@@ -57,13 +59,9 @@ public class ModifyHandler extends HandlerCommon {
         this.modifyInitiateHandler.initiate();
         this.modifyCreateHandler.create();
         if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
-            for (var e : this.elementModifyHandler.getPluginHandler().getElementMap().values()) {
-                if (mayUpdateNodeIds.contains(e.getSrcElement().getId())) {
-                    // 5.4 支持虚拟机和容器的更新
-                    if (e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE || e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
-                        this.elementModifyHandler.modifyElement(this.newPlugin.getElement(e.getSrcElement().getId()));
-                    }
-                }
+            for (String elementId : mayUpdateNodeIds) {
+                CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement);
             }
         }
     }

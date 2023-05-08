@@ -175,6 +175,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    public boolean resize(String instanceId, String flavorId) {
+        VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
+        resizeData.setFlavorId(flavorId);
+        return doAction(instanceId, resizeData);
+    }
+
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
         var param = new ConsoleInfoGetParam();
         param.setInstanceUuid(instanceId);

@@ -538,7 +538,6 @@ public class SceneHandler extends BaseSceneHandler<
     public void restart() {
     }
 
-    // 入参重新考虑下？
     public boolean modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
