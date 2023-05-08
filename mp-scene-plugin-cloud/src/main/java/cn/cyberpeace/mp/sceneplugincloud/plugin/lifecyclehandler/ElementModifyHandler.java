@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -22,6 +23,7 @@ import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ElementModifyHandler extends HandlerCommon {
 
+    private CloudScenePluginHandler newCloudScenePluginHandler;
+
     private VirtualMachine vm = new VirtualMachine();
     private VirtualSwitch vs = new VirtualSwitch();
     private VirtualRouter vr = new VirtualRouter();
@@ -44,7 +48,8 @@ public class ElementModifyHandler extends HandlerCommon {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
     }
 
-    public void modifyElement(CloudPluginSceneElementBO newCloudElement) {
+    public void modifyElement(CloudPluginSceneElementBO newCloudElement, CloudScenePluginHandler newCloudScenePluginHandler) {
+        this.newCloudScenePluginHandler = newCloudScenePluginHandler;
         if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
             // 更新网络
             this.modifyVirtualSwitch(newCloudElement);
@@ -107,13 +112,18 @@ public class ElementModifyHandler extends HandlerCommon {
         CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
+        // 端口qos变更
+        this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
     private void modifyVirtualFirewall(CloudPluginSceneElementBO newCloudElement) {
         CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
+        // 端口qos变更
+        this.qosRuleChange(newCloudElement, originCloudElement);
         // 防火墙规则变更
+        this.firewallRuleChange(newCloudElement, originCloudElement);
     }
 
     private void staticRouteChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
@@ -223,5 +233,77 @@ public class ElementModifyHandler extends HandlerCommon {
         var result = new Remote().cloudPost(CloudUrlConstant.CREATE_FLAVOR, createFlavorData, null, new TypeReference<CloudResponse<CreateFlavorResult>>() {
         }, true);
         return result.getData().getId();
+    }
+
+    private void qosRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
+        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        mayUpdatePortIds.retainAll(originPortIds);
+        if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
+            for (String portId : mayUpdatePortIds) {
+                var originPort = this.getPluginHandler().getPort(portId);
+                var newPort = this.newCloudScenePluginHandler.getPort(portId);
+                if (this.isQosRuleChange(newPort, originPort)) {
+                    this.doQosChange(newPort);
+                }
+            }
+        }
+    }
+
+    private boolean isQosRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
+        boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
+        boolean delayChange = newCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay();
+        boolean lossChange = newCloudPort.getSrcPort().getLoss() != originCloudPort.getSrcPort().getLoss();
+        if (eGressChange || inGressChange || delayChange || lossChange) {
+            return true;
+        }
+        return false;
+    }
+
+    private void doQosChange(CloudPluginSceneElementPortBO newCloudPort) {
+
+    }
+
+    private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
+        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        mayUpdatePortIds.retainAll(originPortIds);
+        if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
+            for (String portId : mayUpdatePortIds) {
+                var originPort = this.getPluginHandler().getPort(portId);
+                var newPort = this.newCloudScenePluginHandler.getPort(portId);
+                if (this.isFirewallRuleChange(newPort, originPort)) {
+                    this.doFirewallRuleChange(newPort);
+                }
+            }
+        }
+    }
+
+    private boolean isFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        Set<String> newFirewallRules = newCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(
+                ":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(),
+                f.getSourcePort(), f.getSourceIpAddress(),
+                f.getDestinationPort(), f.getDestinationIpAddress()
+        )).collect(Collectors.toSet());
+        Set<String> originFirewallRules = originCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(
+                ":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(),
+                f.getSourcePort(), f.getSourceIpAddress(),
+                f.getDestinationPort(), f.getDestinationIpAddress()
+        )).collect(Collectors.toSet());
+        // 数量不同
+        if (newFirewallRules.size() != originFirewallRules.size()) {
+            return true;
+        }
+        // 内容不同
+        newFirewallRules.removeAll(originFirewallRules);
+        if (newFirewallRules.size() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort) {
+
     }
 }
