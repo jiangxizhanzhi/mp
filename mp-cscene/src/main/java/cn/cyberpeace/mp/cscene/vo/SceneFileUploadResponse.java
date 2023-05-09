@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.vo;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.LfsCommon;
 import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import lombok.Data;
 
@@ -16,5 +18,15 @@ public class SceneFileUploadResponse extends FsFileUploadResponse {
         super();
         this.setId(id);
         this.fileName = fileName;
+    }
+
+    @Override
+    public String genHttpUrlFromId(String id) {
+        return LfsCommon.genHttpUrl(id);
+    }
+
+    @Override
+    public String genInnerHttpUrlFromId(String id) {
+        return LfsCommon.genInnerHttpUrl(id);
     }
 }
