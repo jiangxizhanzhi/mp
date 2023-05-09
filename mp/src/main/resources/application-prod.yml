@@ -83,6 +83,8 @@ mp:
     fdfs-inner-http-server: ${FDFS_INNER_FILE_SERVER:http://10.4.1.251/api/mp/file/}
     fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
     run-init: true
+    lfs-inner-http-url-template: ${LFS_INNER_HTTP_URL_TEMPLATE:http://10.4.1.251:8001/api/mp/file/%s}
+    lfs-outer-http-url-template: ${LFS_OUTER_HTTP_URL_TEMPLATE:http://10.4.1.251:8001/api/mp/file/%s}
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
@@ -154,7 +156,7 @@ mp:
     authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:38effa66e5454c5d9dd79711fc6ffc4d}
     authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
     authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
-    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public}
+    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/file/**}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   # mp-front-admin 模块
@@ -167,7 +169,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
-    url-ac-filter-exclude-urls: ${MP_FRONTBUSINESS_URLACFILTER_EXCLUDE_URLS:/api/mp/actuator/info,/api/mp/actuator/health}
+    url-ac-filter-exclude-urls: ${MP_FRONTBUSINESS_URLACFILTER_EXCLUDE_URLS:/api/mp/actuator/info,/api/mp/actuator/health,/api/mp/file/**}
   # mp-flow 模块配置
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
