@@ -16,7 +16,9 @@ public enum CsceneErrorCode implements ErrorCode {
 
     VLANID_HAS_BEEN_USED("MP-110209", "vlan_id_has_been_used"),
 
-
+    NODEIP_NOT_EXIST("MP-110210", "nodeip_not_exist"),
+    NETWORKID_NOT_EXIST("MP-110211", "networkid_not_exist"),
+    FLOW_NOT_EXIST("MP-110212", "flow_not_exist"),
 
     // validation-api params
     PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),

@@ -11,5 +11,13 @@ import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
  */
 public interface FlowTaskPortService extends BaseModelService<FlowTaskPortModel, QueryParams> {
 
+    /**
+     * 根据网络id和流量执行器id查询网口信息
+     * @param networkId
+     * @param actuatorId
+     * @return
+     */
+    FlowTaskPortModel findByNetworkIdAndActuatorId(String networkId, String actuatorId);
+
 }
 

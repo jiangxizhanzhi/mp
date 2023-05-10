@@ -11,5 +11,12 @@ import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
  */
 public interface FlowTaskConfService extends BaseModelService<FlowTaskConfModel, QueryParams> {
 
+    /**
+     * 根据taskId查询配置信息
+     * @param taskId
+     * @return
+     */
+    FlowTaskConfModel findByTaskId(String taskId);
+
 }
 

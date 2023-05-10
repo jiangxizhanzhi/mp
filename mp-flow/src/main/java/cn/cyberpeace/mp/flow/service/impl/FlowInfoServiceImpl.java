@@ -104,6 +104,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     private static final String PRE_PATH = "/root/.mp/resources/flows";
 
+    /**
+     * 根据id集合查询列表
+     * @param idList
+     * @return
+     */
+    @Override
+    public List<FlowInfoModel> findByIds(List<String> idList) {
+        log.info("FlowInfoServiceImpl.findByIds begin. idList:{}", idList);
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(FlowInfoModel::getId, idList.toArray());
+        List<FlowInfoModel> flowInfoModelList = getModelMapper().list(condition);
+        log.info("FlowInfoServiceImpl.findByIds end. flowInfoModelList:{}", flowInfoModelList);
+        return flowInfoModelList;
+    }
 
     /**
      * 补充list查询条件

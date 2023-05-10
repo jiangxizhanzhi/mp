@@ -60,6 +60,7 @@ CREATE TABLE `mp_flow_task_task`
 (
     `pk`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id`               varchar(64)         NOT NULL COMMENT '任务id',
+    `scene_id`         varchar(64)         NOT NULL COMMENT '场景实例id',
     `actuator_id`      varchar(64)         NOT NULL COMMENT '流量执行器id',
     `resource_type`    tinyint(2)          NOT NULL COMMENT '资源类型：0 pcap包，1 脚本',
     `interactive_type` tinyint(2)          NOT NULL COMMENT '交互类型：0 背景流量，1 攻击流量',
@@ -68,6 +69,7 @@ CREATE TABLE `mp_flow_task_task`
     `success_count`    int(11)             NOT NULL DEFAULT 0 COMMENT '成功执行次数',
     `error_count`      int(11)             NOT NULL DEFAULT 0 COMMENT '失败执行次数',
     `task_status`      tinyint(4)          NOT NULL DEFAULT 0 COMMENT '任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败',
+    `node_id`          varchar(64)         NOT NULL COMMENT '目标节点id',
     `node_ip`          varchar(24)         NOT NULL COMMENT '目标节点ip',
     `node_name`        varchar(64)         NOT NULL COMMENT '目标节点名称',
     `create_time`      datetime            NOT NULL COMMENT '创建时间',
