@@ -243,7 +243,8 @@ public class SuricataService {
         //查询协议类型
         condition.select(SuricataRuleModel::getProtocol).distinct();
         List<SuricataRuleModel> ruleModels = suricataRuleMapper.list(condition);
-        List<String> result = ruleModels.stream().map(SuricataRuleModel::getProtocol).collect(Collectors.toList());
+        List<String> result = ruleModels.stream().filter(rule -> StringUtils.isNotEmpty(rule.getProtocol()))
+            .map(SuricataRuleModel::getProtocol).collect(Collectors.toList());
         return new ServiceResult<>(result).asResult();
     }
 }
