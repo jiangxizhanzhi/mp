@@ -43,5 +43,10 @@ public class SuricataController {
         return suricataService.queryPage(suricataQueryRequest);
     }
 
+    @ApiOperation(value = "查询流量分析规则所有协议")
+    @GetMapping("/rule/protocols")
+    public ServiceResult querySuricataRulesAllProtocols(){
+        return suricataService.queryAllProtocols();
+    }
 
 }
