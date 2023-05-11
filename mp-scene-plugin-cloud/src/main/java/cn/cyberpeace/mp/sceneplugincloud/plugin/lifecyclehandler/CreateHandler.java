@@ -1009,6 +1009,15 @@ public class CreateHandler extends HandlerCommon {
             createData.setDisk(srcElement.getDisk());
         }
 
+        // 容器参数
+        if (cloudElement.getDockerParams() != null) {
+            var dockerParams = cloudElement.getDockerParams();
+            createData.setEnvironment(dockerParams.getEnvironment());
+            createData.setInteractive(dockerParams.getInteractive());
+            createData.setPrivileged(dockerParams.getPrivileged());
+            createData.setRun(dockerParams.getRun());
+        }
+
         // 容器初始化命令通过execContainerInitCommand执行
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));

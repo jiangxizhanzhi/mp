@@ -26,12 +26,12 @@ public class ContainerCreateData implements CloudHttpData {
     private Boolean interactive;
     private Boolean tty;
     private Boolean run;
-    private Boolean privilege;
+    private Boolean privileged;
     private Boolean keepNicsSequence;
     private String command;
     private String postCommand;
     private String workdir;
-    private Map<String, String> environment;
+        private Map<String, String> environment;
     private String hostname;
 
     private String id;
