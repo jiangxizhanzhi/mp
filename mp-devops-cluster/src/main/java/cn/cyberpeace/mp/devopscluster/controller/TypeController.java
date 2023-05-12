@@ -112,11 +112,11 @@ public class TypeController {
         allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
         allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
         String str = JsonCommon.stringify(allResponse);
-        str = StringUtils.replace(str, "网络设备", "网络节点");
-        str = StringUtils.replace(str, "应用系统", "业务节点");
-        str = StringUtils.replace(str, "安全设备", "安全节点");
-        str = StringUtils.replace(str, "中间件", "应用服务器");
-        str = StringUtils.replace(str, "数据库", "数据库服务器");
+//        str = StringUtils.replace(str, "网络设备", "网络节点");
+//        str = StringUtils.replace(str, "应用系统", "业务节点");
+//        str = StringUtils.replace(str, "安全设备", "安全节点");
+//        str = StringUtils.replace(str, "中间件", "应用服务器");
+//        str = StringUtils.replace(str, "数据库", "数据库服务器");
         return new Result<>(JsonCommon.parse(str, TypeAllVO.class));
     }
 
