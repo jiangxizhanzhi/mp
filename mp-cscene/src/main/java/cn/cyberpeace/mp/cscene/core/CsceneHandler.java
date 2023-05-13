@@ -328,13 +328,13 @@ public class CsceneHandler extends BaseCsceneHandler<
             if (elements != null && !elements.isEmpty()) {
                 CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
                 elements.values().forEach(e -> {
-                    if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-                        String image = e.get("image").toString();
-                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
-                        if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
-                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
-                        }
-                    }
+//                    if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+//                        String image = e.get("image").toString();
+//                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
+//                        if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
+//                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
+//                        }
+//                    }
                     if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0) {
                         var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
                         if (CollectionUtils.isNotEmpty(result)) {
