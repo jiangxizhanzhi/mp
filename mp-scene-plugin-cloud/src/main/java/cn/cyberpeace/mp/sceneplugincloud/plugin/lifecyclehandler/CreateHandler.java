@@ -877,6 +877,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+        if (cloudElement.getVlanId() != null && cloudElement.getVlanId().equals(2001)) {
+            return;
+        }
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var srcStaticRoutes = cloudElement.getStaticRoutes();
