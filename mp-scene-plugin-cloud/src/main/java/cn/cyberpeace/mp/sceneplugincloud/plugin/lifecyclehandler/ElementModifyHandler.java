@@ -9,10 +9,14 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
@@ -40,9 +44,10 @@ public class ElementModifyHandler extends HandlerCommon {
 
     private CloudScenePluginHandler newCloudScenePluginHandler;
 
-    private VirtualMachine vm = new VirtualMachine();
-    private VirtualSwitch vs = new VirtualSwitch();
-    private VirtualRouter vr = new VirtualRouter();
+    private VirtualMachine virtualMachine = new VirtualMachine();
+    private VirtualSwitch virtualSwitch = new VirtualSwitch();
+    private VirtualRouter virtualRouter = new VirtualRouter();
+    private VirtualPort virtualPort = new VirtualPort();
 
     public ElementModifyHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
@@ -50,6 +55,7 @@ public class ElementModifyHandler extends HandlerCommon {
 
     public void modifyElement(CloudPluginSceneElementBO newCloudElement, CloudScenePluginHandler newCloudScenePluginHandler) {
         this.newCloudScenePluginHandler = newCloudScenePluginHandler;
+        // todo 优化 去掉role这个业务字段
         if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
             // 更新网络
             this.modifyVirtualSwitch(newCloudElement);
@@ -75,8 +81,9 @@ public class ElementModifyHandler extends HandlerCommon {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
             String flavorId = this.createFlavor(newCloudElement);
-            vm.resize(originCloudElement.getResourceId(), flavorId);
+            virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
         }
+        this.changeConnect(newCloudElement, originCloudElement);
     }
 
     private void modifyContainer(CloudPluginSceneElementBO newCloudElement) {
@@ -156,7 +163,7 @@ public class ElementModifyHandler extends HandlerCommon {
             return staticRoute;
         }).collect(Collectors.toList());
         updateData.setRoutes(staticRoutes);
-        vr.update(originCloudElement.getResourceId(), updateData);
+        virtualRouter.update(originCloudElement.getResourceId(), updateData);
         originCloudElement.setStaticRoutes(newCloudElement.getStaticRoutes());
     }
 
@@ -203,7 +210,7 @@ public class ElementModifyHandler extends HandlerCommon {
         subnet.setDnsNameservers(newCloudElement.getDnsNameservers());
         subnet.setEnableDhcp(newCloudElement.getDhcp());
         updateData.setSubnet(subnet);
-        vs.update(currentElementNetwork.getResourceId(), updateData);
+        virtualSwitch.update(currentElementNetwork.getResourceId(), updateData);
         originCloudElement.setDhcp(newCloudElement.getDhcp());
         originCloudElement.setAllocationPools(newCloudElement.getAllocationPools());
         originCloudElement.setDnsNameservers(newCloudElement.getDnsNameservers());
@@ -216,9 +223,7 @@ public class ElementModifyHandler extends HandlerCommon {
     private boolean isFlavorChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         var newElement = newCloudElement.getSrcElement();
         var originElement = originCloudElement.getSrcElement();
-        if (!NumberUtil.equals(newElement.getCpu(), originElement.getCpu()) ||
-                !NumberUtil.equals(newElement.getDisk(), originElement.getDisk()) ||
-                !NumberUtil.equals(newElement.getRam(), originElement.getRam())) {
+        if (!NumberUtil.equals(newElement.getCpu(), originElement.getCpu()) || !NumberUtil.equals(newElement.getDisk(), originElement.getDisk()) || !NumberUtil.equals(newElement.getRam(), originElement.getRam())) {
             return true;
         }
         return false;
@@ -281,16 +286,8 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private boolean isFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
-        Set<String> newFirewallRules = newCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(
-                ":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(),
-                f.getSourcePort(), f.getSourceIpAddress(),
-                f.getDestinationPort(), f.getDestinationIpAddress()
-        )).collect(Collectors.toSet());
-        Set<String> originFirewallRules = originCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(
-                ":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(),
-                f.getSourcePort(), f.getSourceIpAddress(),
-                f.getDestinationPort(), f.getDestinationIpAddress()
-        )).collect(Collectors.toSet());
+        Set<String> newFirewallRules = newCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
+        Set<String> originFirewallRules = originCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
         // 数量不同
         if (newFirewallRules.size() != originFirewallRules.size()) {
             return true;
@@ -305,5 +302,75 @@ public class ElementModifyHandler extends HandlerCommon {
 
     private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort) {
 
+    }
+
+    private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
+        Set<String> newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        // 本次新增的端口
+        Set<String> addPortIds = new HashSet<>(newPortIds);
+        addPortIds.removeAll(originPortIds);
+
+        // 本次删除的端口
+        Set<String> delPortIds = new HashSet<>(originPortIds);
+        delPortIds.removeAll(newPortIds);
+
+        // 本次可能更新的端口
+        Set<String> mayUpdatePortIds = new HashSet<>(newPortIds);
+        mayUpdatePortIds.retainAll(newPortIds);
+
+        for (String addPortId : addPortIds) {
+            var addCloudPort = this.newCloudScenePluginHandler.getPort(addPortId);
+            var addPort = this.newCloudScenePluginHandler.getPort(addPortId).getSrcPort();
+            var net = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(addPort);
+
+            VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+            port.setFixedIp(addPort.getIp());
+            port.setNetworkId(net.getResourceId());
+            var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
+
+            addPort.setIp(result.getFixedIp());
+            addPort.setMacAddr(result.getMacAddress());
+            addCloudPort.setResourceId(result.getPortId());
+        }
+
+        for (String delPortId : delPortIds) {
+            virtualMachine.deletePort(originCloudElement.getResourceId(), delPortId);
+        }
+
+        for (String mayUpdatePortId : mayUpdatePortIds) {
+            var newCloudPort = this.newCloudScenePluginHandler.getPort(mayUpdatePortId);
+            var newPort = newCloudPort.getSrcPort();
+            var originCloudPort = this.getPluginHandler().getPort(mayUpdatePortId);
+            var originPort = originCloudPort.getSrcPort();
+
+            // 如果端口ip和连接的网络都没变,则不需要更新
+            String newIp = newPort.getIp();
+            String originIp = originPort.getIp();
+            boolean ipChange = !StringUtils.equals(newIp, originIp);
+            var newNet = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(newPort);
+            var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(originPort);
+            boolean netChange = !StringUtils.equals(newNet.getResourceId(), originNet.getResourceId());
+            if (netChange) {
+                // 去掉旧的
+                virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
+
+                // 添加新的
+                VirtualPortCreateData portCreateData = new VirtualPortCreateData();
+                portCreateData.setFixedIp(newIp);
+                portCreateData.setMacAddress(originPort.getMacAddr());
+                portCreateData.setNetworkId(newNet.getResourceId());
+                var newPortResult = virtualPort.create(portCreateData);
+                VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+                port.setFixedIp(newIp);
+                port.setPortId(newPortResult.getId());
+                port.setNetworkId(newNet.getResourceId());
+                virtualMachine.addPort(originCloudElement.getResourceId(), port);
+            } else if (ipChange) {
+                VirtualPortUpdateData portUpdateData = new VirtualPortUpdateData();
+                portUpdateData.setFixedIp(newIp);
+                virtualPort.update(portUpdateData);
+            }
+        }
     }
 }
