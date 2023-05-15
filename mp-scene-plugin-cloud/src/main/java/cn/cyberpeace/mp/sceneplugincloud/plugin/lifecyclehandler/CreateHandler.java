@@ -45,6 +45,7 @@ public class CreateHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
+    private VirtualDynamic vdClient = new VirtualDynamic();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -54,6 +55,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_FIREWALLS = new EventProcess("create_firewalls", "sceneplugincloud.event.create_firewall");
         public static final EventProcess CREATE_TERMINALS = new EventProcess("create_terminals", "sceneplugincloud.event.create_terminal");
         public static final EventProcess CREATE_NPCS = new EventProcess("create_npcs", "sceneplugincloud.event.create_npcs");
+        public static final EventProcess CONFIGURE = new EventProcess("configure", "sceneplugincloud.event.configure");
     }
 
     public static class ElementProcess {
@@ -65,6 +67,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_CONTAINER = new EventProcess("create_container", "sceneplugincloud.event.create_container");
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
+        public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
     }
 
     @Data
@@ -1091,6 +1094,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    protected void createVirtualDynamic(CloudPluginSceneElementBO cloudElement) {
+        VirtualDynamicCreateData createData = new VirtualDynamicCreateData();
+        vdClient.create(createData);
+    }
+
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
@@ -1157,6 +1165,10 @@ public class CreateHandler extends HandlerCommon {
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
+        // 下发配置
+        runSceneProgress(SceneProcess.CONFIGURE, () -> {
+            configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
+        });
     }
 
     protected void prepareEventProcess() {
@@ -1176,8 +1188,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
-        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_AUXILIARY_NETWORK,
-                () -> createAuxiliaryNetwork(cloudElement));
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_AUXILIARY_NETWORK, () -> createAuxiliaryNetwork(cloudElement));
     }
 
     public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
@@ -1211,9 +1222,30 @@ public class CreateHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_ENTITY_NODE,
                     () -> createEntityNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC,
-                    () -> recordNpcNode(cloudElement));
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamic(cloudElement));
         }
+    }
+
+    private void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
+        List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
+                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)
+                .collect(Collectors.toList());
+
+        List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
+            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            // 下发配置
+            vdClient.sendRule(e.getResourceId(), list);
+        }).collect(Collectors.toList());
+        runTasks(configDynamicIps);
+
+        List<Runnable> configDynamicStaticRoutes = dynamicElements.stream().map(e -> (Runnable) () -> {
+            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            // 下发配置
+            vdClient.sendRule(e.getResourceId(), list);
+        }).collect(Collectors.toList());
+        runTasks(configDynamicStaticRoutes);
     }
 
     /**

@@ -116,6 +116,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "docker参数")
     private DockerParams dockerParams;
 
+    // gns3 属性
+    @ApiModelProperty(value = "gns3 platform")
+    private String platform;
+
     // 靶标属性
     @ApiModelProperty(value = "靶标角色")
     private Integer role;

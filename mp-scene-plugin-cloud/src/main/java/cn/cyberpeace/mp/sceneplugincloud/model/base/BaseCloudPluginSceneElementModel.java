@@ -105,6 +105,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String entityUsbs;
     @DefaultStr
     private String dockerParams;
+    @DefaultStr
+    private String platform;
 
     // 虚拟机/容器属性
     @DefaultStr
@@ -145,6 +147,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int CONTAINER = 5;
         public static final int ENTITY_NODE = 6;
         public static final int NPC = 7;
+        public static final int DYNAMIC = 8;
 
         private VirtualType() {
         }
@@ -202,6 +205,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String VM = "vm";
         public static final String CONTAINER = "container";
         public static final String ENTITY = "entity";
+        public static final String DYNAMIC = "dynamic";
 
         private ImageType() {}
     }
