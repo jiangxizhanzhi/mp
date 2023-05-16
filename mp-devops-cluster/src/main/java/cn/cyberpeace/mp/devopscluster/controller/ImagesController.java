@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DynamicImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
@@ -518,6 +519,12 @@ public class ImagesController {
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
         return new Result<>(flavorList);
+    }
+
+    @ApiOperation("查询dynamic相关的信息")
+    @GetMapping("/dynamic_image_info")
+    public Result<DynamicImageInfo> getDynamicImageInfo() {
+        return new Result<>(DynamicImageInfo.mock());
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")
