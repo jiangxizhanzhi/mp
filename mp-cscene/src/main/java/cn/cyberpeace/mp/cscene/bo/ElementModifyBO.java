@@ -23,8 +23,8 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
         ElementModifyBO> {
     @ApiModelProperty(value = "更新的内容")
     private SceneDataBO update;
-    @ApiModelProperty(value = "透传字段")
-    private Map<String, Object> passThrough;
+    @ApiModelProperty(value = "场景上下文属性")
+    private CsceneContextBO context;
 
     @Override
     public CsceneInstanceModel createModel() {
@@ -35,11 +35,13 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
     public void fromModel(CsceneInstanceModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneInstanceModel::getScene)));
-        passThrough = StringUtils.isEmpty(obj.getPassThrough()) ? new HashMap<>() : JsonCommon.parse(obj.getPassThrough(), new TypeReference<Map<String, Object>>() {
-        });
+        context = new CsceneContextBO();
+        context.setPassThrough(StringUtils.isEmpty(obj.getPassThrough()) ? new HashMap<>() :
+                JsonCommon.parse(obj.getPassThrough(), new TypeReference<Map<String, Object>>() {
+                }));
         if (SysContextHolder.getPassThroughMap() == null || SysContextHolder.getPassThroughMap().isEmpty()) {
-            if (passThrough != null && !passThrough.isEmpty()) {
-                SysContextHolder.setPassThroughMap(passThrough);
+            if (context.getPassThrough() != null && !context.getPassThrough().isEmpty()) {
+                SysContextHolder.setPassThroughMap(context.getPassThrough());
             }
         }
     }
@@ -51,8 +53,8 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
         if (update != null && update.getTopology() != null && update.getTopology().getScene() != null) {
             obj.setScene(update.getTopology().getScene().getEid());
         }
-        if (passThrough != null) {
-            obj.setPassThrough(JsonCommon.stringify(passThrough));
+        if (context != null && context.getPassThrough() != null) {
+            obj.setPassThrough(JsonCommon.stringify(context.getPassThrough()));
         }
         return obj;
     }
