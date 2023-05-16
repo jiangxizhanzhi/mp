@@ -425,6 +425,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> syncWithoutCheckLimit(CsceneBO csceneBO, CsceneContextBO context) {
+        CsceneDataModifier.roleChangeAndAuxiliaryRouterOffSet(csceneBO);
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());

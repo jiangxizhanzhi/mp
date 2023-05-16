@@ -805,6 +805,20 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void roleChangeAndAuxiliaryRouterOffSet(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.values().forEach(e -> {
+                    if (e.get("role") != null && BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH == Integer.parseInt(e.get("role").toString())) {
+                        e.put("role", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+                        e.put("auxiliary_router_off", true);
+                    }
+                });
+            }
+        }
+    }
+
     public static void check(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getScene() != null) {
             var name = csceneBO.getSceneConfig().getTopology().getScene().getName();
