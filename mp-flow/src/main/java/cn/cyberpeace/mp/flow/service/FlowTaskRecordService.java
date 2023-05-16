@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
+import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description 流量任务记录service
@@ -25,6 +29,21 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
      * @param taskId
      */
     void deleteByTaskId(String taskId);
+
+    /**
+     * 批量统计每一个流量任务的实时速率
+     * @param taskIds
+     * @param conditions
+     * @return
+     */
+    Map<String, List<FlowRealTimeRate>> realTimeRate(List<String> taskIds, List<FlowStatisticalCondition> conditions);
+
+    /**
+     * 仿真概况
+     * @param sceneId
+     * @return
+     */
+    FlowSummary queryFlowSummary(String sceneId);
 
 }
 

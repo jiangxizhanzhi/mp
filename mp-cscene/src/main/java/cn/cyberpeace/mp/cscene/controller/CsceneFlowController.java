@@ -3,12 +3,16 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
+import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
+import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -66,6 +70,20 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     }
 
     /**
+     * 流量任务列表查询
+     * @param request
+     * @return
+     */
+    @ApiOperation("流量任务列表查询")
+    @GetMapping("/task/list")
+    public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageRequest request) {
+        log.info("FlowInfoController.taskList begin. request:{}", request);
+        ListObjServiceResult<FlowTaskPageResponse> result = csceneFlowService.taskList(request);
+        log.info("FlowInfoController.taskList end. result:{}", result);
+        return result;
+    }
+
+    /**
      * 编辑流量任务配置
      * @param request
      * @return
@@ -93,4 +111,21 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         log.info("FlowInfoController.queryConfByTaskId end. result:{}", result);
         return ResultCommon.success(result);
     }
+
+    /**
+     * 流量仿真概况
+     * @param id
+     * @return
+     */
+    @ApiOperation("流量仿真概况")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/summary")
+    public ServiceResult<FlowSummary> queryFlowSummary(@RequestParam String id) {
+        log.info("FlowInfoController.queryFlowSummary begin. id:{}", id);
+        FlowSummary result = csceneFlowService.queryFlowSummary(id);
+        log.info("FlowInfoController.queryFlowSummary end. result:{}", result);
+        return ResultCommon.success(result);
+    }
+
+
 }

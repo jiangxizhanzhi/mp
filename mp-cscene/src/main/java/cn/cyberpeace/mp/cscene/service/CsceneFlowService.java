@@ -1,14 +1,19 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
+import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
-import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.*;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -26,8 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 场景流量服务
@@ -59,6 +67,9 @@ public class CsceneFlowService {
 
     @Autowired
     private FlowTaskRecordService flowTaskRecordService;
+
+    @Autowired
+    private FlowTaskTaskMapper flowTaskTaskMapper;
 
     /**
      * 新增流量任务
@@ -159,6 +170,7 @@ public class CsceneFlowService {
      * 删除流量任务
      * @param id
      */
+    @Transactional
     public void deleteTask(String id) {
         log.info("CsceneFlowService.deleteTask begin. id:{}", id);
         flowTaskTaskService.delete(id);
@@ -187,6 +199,55 @@ public class CsceneFlowService {
     }
 
     /**
+     * 流量任务列表查询
+     * @param request
+     * @return
+     */
+    public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageRequest request) {
+        log.info("CsceneFlowService.taskList begin. request:{}", request);
+        String sceneId = csceneInstanceService.getSceneId(request.getId());
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.link(FlowTaskTaskModel.class, FlowInfoModel.class, FlowPcapModel.class)
+                .filterLink(FlowTaskTaskModel.class, FlowTaskTaskModel::getFlowId, FlowInfoModel.class, FlowInfoModel::getId)
+                .filterLink(FlowTaskTaskModel.class, FlowTaskTaskModel::getFlowId, FlowPcapModel.class, FlowPcapModel::getFlowId)
+                .currentLink(FlowTaskTaskModel.class)
+                .filterEqual(FlowTaskTaskModel::getSceneId, sceneId)
+                .selectAs(FlowTaskTaskModel::getId, FlowTaskPageResponse::getId)
+                .selectAs(FlowTaskTaskModel::getInteractiveType, FlowTaskPageResponse::getInteractiveType)
+                .selectAs(FlowTaskTaskModel::getNodeName, FlowTaskPageResponse::getNodeName)
+                .selectAs(FlowTaskTaskModel::getNodeIp, FlowTaskPageResponse::getNodeIp)
+                .selectAs(FlowTaskTaskModel::getSuccessCount, FlowTaskPageResponse::getSuccessCount)
+                .selectAs(FlowTaskTaskModel::getErrorCount, FlowTaskPageResponse::getErrorCount)
+                .selectAs(FlowTaskTaskModel::getErrorCount, FlowTaskPageResponse::getErrorCount)
+                .selectAs(FlowTaskTaskModel::getTaskStatus, FlowTaskPageResponse::getTaskStatus)
+                .currentLink(FlowInfoModel.class)
+                .selectAs(FlowInfoModel::getTitle, FlowTaskPageResponse::getTitle)
+                .currentLink(FlowPcapModel.class)
+                .selectAs(FlowPcapModel::getDuration, FlowTaskPageResponse::getDuration)
+                .selectAs(FlowPcapModel::getPcapSize, FlowTaskPageResponse::getPcapSize)
+                .selectAs(FlowPcapModel::getPktNum, FlowTaskPageResponse::getPktNum)
+                .selectAs(FlowPcapModel::getProtocols, FlowTaskPageResponse::getProtocols);
+        humanCondition.setLimit(request.getPerPage());
+        humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
+        // 查询符合条件的条数
+        int total = flowTaskTaskMapper.total(humanCondition);
+        List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.list(humanCondition, FlowTaskPageResponse.class);
+        //统计实时速率
+        if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
+            flowTaskPageResponseList.stream().forEach(rsp -> rsp.setTotalCount(rsp.getSuccessCount()+rsp.getErrorCount()));
+            List<String> ids = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getId).collect(Collectors.toList());
+            List<FlowStatisticalCondition> conditions = this.getRealTimeCondition();
+            Map<String, List<FlowRealTimeRate>> tealTimeRateMap = flowTaskRecordService.realTimeRate(ids, conditions);
+            for (FlowTaskPageResponse temp : flowTaskPageResponseList) {
+                temp.setRealTimeRateList(tealTimeRateMap.get(temp.getId()));
+            }
+        }
+        ListObjServiceResult<FlowTaskPageResponse> result = new ListObjServiceResult(new ListObjResult<>(flowTaskPageResponseList, total).asResult()).asResult();
+        log.info("CsceneFlowService.taskList end. result:{}", result);
+        return result;
+    }
+
+    /**
      * 流量任务配置查询
      * @param taskId
      * @return
@@ -200,5 +261,42 @@ public class CsceneFlowService {
         result.setFlowTaskConf(flowTaskConf);
         log.info("CsceneFlowService.queryConfByTaskId end. result:{}", result);
         return result;
+    }
+
+    /**
+     * 流量仿真概况
+     * @param id
+     * @return
+     */
+    public FlowSummary queryFlowSummary(String id) {
+        log.info("CsceneFlowService.queryFlowSummary begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
+        FlowSummary flowSummary = flowTaskRecordService.queryFlowSummary(sceneId);
+        log.info("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
+        return flowSummary;
+    }
+
+    /**
+     * 获取实时速率统计条件
+     * @return
+     */
+    private List<FlowStatisticalCondition> getRealTimeCondition() {
+        log.info("CsceneFlowService.getRealTimeCondition begin.");
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.plusSeconds(-300);
+        List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
+        Integer offSet = 0;
+        while (endTime.isAfter(startTime)) {
+            FlowStatisticalCondition flowStatisticalCondition = new FlowStatisticalCondition();
+            flowStatisticalCondition.setEndTime(endTime);
+            flowStatisticalCondition.setStartTime(endTime.minusSeconds(5));
+            flowStatisticalCondition.setOffsetUnit("s");
+            flowStatisticalCondition.setOffsetValue(offSet);
+            queryList.add(flowStatisticalCondition);
+            endTime = endTime.minusSeconds(5);
+            offSet -= 5;
+        }
+        log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
+        return queryList;
     }
 }

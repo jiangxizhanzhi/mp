@@ -2,4 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper">
 
+    <select id="realTimeRateByTaskId" parameterType="java.util.Map"
+            resultType="cn.cyberpeace.mp.flow.bo.FlowRealTimeRate">
+        <foreach collection="conditions" item="item" open="" close="" separator="union">
+            select task_id as taskId, #{item.endTime} as statisticalTime, #{item.offsetValue} as second, avg(tx_bps) as txBps
+            from mp_flow_task_record
+            where task_id in
+            <foreach collection="taskIds" item="record" open="(" close=")" separator=",">
+                #{record}
+            </foreach>
+            and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime}
+            group by task_id
+        </foreach>
+        order by taskId,statisticalTime
+    </select>
+
+    <select id="queryFlowSummary" resultType="cn.cyberpeace.mp.flow.bo.FlowSummary">
+        select count(1) as taskNum,sum(success_count) as successCount,sum(error_count) as errorCount,
+               sum(success_count+error_count) as runnedCount,count(distinct(node_id)) as totalNode,
+               (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) as runningTask,
+               (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) as runningNode
+        from mp_flow_task_task t
+        where scene_id=#{sceneId}
+    </select>
 </mapper>
