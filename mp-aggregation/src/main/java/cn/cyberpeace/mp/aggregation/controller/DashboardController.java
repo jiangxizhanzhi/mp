@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.response.AllResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
@@ -65,6 +66,13 @@ public class DashboardController {
     @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
         ResourceStatisticsResponse response = dashboardService.resourceStatistics();
+        return ResultCommon.success(response);
+    }
+
+    @ApiOperation("全部资源统计信息")
+    @GetMapping("/all_resource_statistics")
+    public ServiceResult<AllResourceStatisticsResponse> getAllResourceStatistics() {
+        var response = dashboardService.allResourceStatistics();
         return ResultCommon.success(response);
     }
 
