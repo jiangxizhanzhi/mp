@@ -4,10 +4,13 @@ import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.util.AuthLogUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -16,11 +19,14 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import com.google.common.base.Joiner;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +40,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 角色管理接口
@@ -52,6 +60,9 @@ public class RoleController {
 
     @Autowired
     private OperateRolePermissionService opRolePermService;
+
+    @Autowired
+    private RolePermissionModelService rolePermissionModelService;
 
 
     @ApiOperation("删除指定id角色")
@@ -111,9 +122,38 @@ public class RoleController {
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
+    //@OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
+        String roleId = modifyRequest.getId();
+        String roleName = modifyRequest.getName();
+        //更新前获取权限集合
+        List<TargetModel> targets = rolePermissionModelService.listTargetsByRoleIds(Arrays.asList(roleId));
         RoleModel roleModel = roleService.modify(modifyRequest);
+        List<TargetModel> updatedTargets = rolePermissionModelService.listTargetsByRoleIds(Arrays.asList(roleId));
+        //获取删除的权限
+        Collection<TargetModel> deletedTargets = CollectionUtils.subtract(targets, updatedTargets);
+        //获取新增的权限
+        Collection<TargetModel> addedTargets = CollectionUtils.subtract(updatedTargets, targets);
+        StringBuilder contentBuilder = new StringBuilder();
+        if(CollectionUtils.isNotEmpty(deletedTargets) || CollectionUtils.isNotEmpty(addedTargets)){
+            contentBuilder.append("更新角色");
+            contentBuilder.append(roleName);
+            contentBuilder.append("的权限信息。");
+            if(CollectionUtils.isNotEmpty(deletedTargets)){
+                contentBuilder.append(" 删除了权限：");
+                List<String> nameList = deletedTargets.stream().map(TargetModel::getName).collect(Collectors.toList());
+                String targetNames = Joiner.on(",").join(nameList);
+                contentBuilder.append(targetNames);
+            }
+            if(CollectionUtils.isNotEmpty(addedTargets)){
+                contentBuilder.append(" 新增了权限：");
+                List<String> updatedNameList = addedTargets.stream().map(TargetModel::getName).collect(Collectors.toList());
+                String UpdatedTargetNames = Joiner.on(",").join(updatedNameList);
+                contentBuilder.append(UpdatedTargetNames);
+            }
+        }
+        String content = contentBuilder.toString();
+        AuthLogUtils.recordAuthLog(OpTypeEnums.UPDATE,OpTargetEnums.ROLE,"修改角色",content, StringUtils.EMPTY);
         return ResultCommon.success(roleModel);
     }
 

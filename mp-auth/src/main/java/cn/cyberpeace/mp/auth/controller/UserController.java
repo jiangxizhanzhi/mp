@@ -4,9 +4,11 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.AuthLogUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -15,26 +17,24 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import com.google.common.base.Joiner;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 用户管理接口
@@ -49,6 +49,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+
 
     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
@@ -144,9 +146,39 @@ public class UserController {
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)
     @PostMapping("/modify")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
+    //@OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
+        //临时修改记录变化
+        String modifyRequestUserId = modifyRequest.getId();
+        UserBo modifyUserDto = userService.getUserDto(modifyRequestUserId);
+        String modifyUserName = modifyUserDto.getName();
+        //原始角色
+        List<RoleModel> roles = modifyUserDto.getRoles();
+        //更新
         UserModel userModel = userService.modify(modifyRequest);
+        //更新后的角色
+        UserBo updateUser = userService.getUserDto(modifyRequestUserId);
+        List<RoleModel> updatedRoles = updateUser.getRoles();
+        //获取删除的角色
+        Collection<RoleModel> deletedRoles = CollectionUtils.subtract(roles, updatedRoles);
+        //获取新增的角色
+        Collection<RoleModel> addedRoles = CollectionUtils.subtract(updatedRoles, roles);
+        StringBuilder contentBuilder = new StringBuilder();
+        if(CollectionUtils.isNotEmpty(deletedRoles) || CollectionUtils.isNotEmpty(addedRoles)){
+            contentBuilder.append("更新用户");
+            contentBuilder.append(modifyUserName);
+            contentBuilder.append("的角色信息。 更新前：");
+            List<String> nameList = roles.stream().map(RoleModel::getName).collect(Collectors.toList());
+            String roleNames = Joiner.on(",").join(nameList);
+            contentBuilder.append(roleNames);
+            contentBuilder.append(" 更新后：");
+            List<String> updatedNameList = updatedRoles.stream().map(RoleModel::getName).collect(Collectors.toList());
+            String UpdatedRoleNames = Joiner.on(",").join(updatedNameList);
+            contentBuilder.append(UpdatedRoleNames);
+        }
+        String content = contentBuilder.toString();
+        //记录日志
+        AuthLogUtils.recordAuthLog(OpTypeEnums.UPDATE,OpTargetEnums.USER,"更新用户",content, StringUtils.EMPTY);
         return ResultCommon.success(userModel);
     }
 }
