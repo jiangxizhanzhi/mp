@@ -2,26 +2,34 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.response.AllResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.FlowResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -138,6 +146,63 @@ public class DashboardService {
         List<CsceneInstanceCountByReferenceTypeBO> sceneStatics = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
         response.setSceneStatics(sceneStatics);
         return response;
+    }
+
+    /**
+     * 所有场景统计信息
+     * @return
+     */
+    public AllResourceStatisticsResponse allResourceStatistics() {
+        AllResourceStatisticsResponse response = new AllResourceStatisticsResponse();
+        var allTargets = resourceStatistics().getTargetStatics().get("all");
+        var containerTargetNum = allTargets.get("container");
+        var npcTargetNum = allTargets.get("npc");
+        var vmTargetNum = allTargets.get("vm");
+        var tgmTargetNum = allTargets.get("tgm");
+        Integer virtualTargetNum = 0;
+        virtualTargetNum += ObjectToInteger(containerTargetNum);
+        virtualTargetNum += ObjectToInteger(npcTargetNum);
+        virtualTargetNum += ObjectToInteger(vmTargetNum);
+        virtualTargetNum += ObjectToInteger(tgmTargetNum);
+        response.setDevopsNum(virtualTargetNum);
+
+        Integer entityTargetNum = 0;
+        var entityNum = allTargets.get("entity");
+        entityTargetNum += ObjectToInteger(entityNum);
+        response.setDeviceNum(entityTargetNum);
+
+        var csceneMapper = BeanCommon.getBean(CsceneMapper.class);
+        var csceneNum = csceneMapper.total(new HumanCondition().filterEqual(CsceneModel::getDeleted, 0));
+        response.setSceneNum(csceneNum);
+
+        var config = BeanCommon.getBean(DevopsClusterConfig.class);
+        String server = "http://" + config.getMpIp() + ":" + config.getMpPort();
+        HttpClient httpClient = HttpClient.builder().configServer(server).build();
+        Map<String, String> header = new HashMap<>();
+        header.put("clientId", "84261d495c414e");
+        header.put("clientSecret", "2112f4b855264ad7b1a4209737fc7836");
+        var flowRes1 = httpClient.get("/api/mp/flow/info/page?per_page=10&page=1&interactive_type=0&search_fields=title",
+                null,
+                header,
+                6000);
+        var flowRes2 = httpClient.get("/api/mp/flow/info/page?per_page=10&page=1&interactive_type=1&search_fields=title",
+                null,
+                header,
+                6000);
+        var flowNum1 = JsonCommon.parse(flowRes1.getResult(), FlowResponse.class);
+        var flowNum2 = JsonCommon.parse(flowRes2.getResult(), FlowResponse.class);
+        var flowNum = flowNum1.getData().getTotal() + flowNum2.getData().getTotal();
+        response.setFlowNum(flowNum);
+
+        return response;
+    }
+
+    private Integer ObjectToInteger(Object plus) {
+        if (Integer.class.isInstance(plus)) {
+            return (Integer) plus;
+        } else {
+            return ((BigDecimal) plus).intValue();
+        }
     }
 
     /**
