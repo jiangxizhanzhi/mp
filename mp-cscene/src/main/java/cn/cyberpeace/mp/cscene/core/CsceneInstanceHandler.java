@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.core;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -19,9 +21,14 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -262,6 +269,55 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
                 newMessage = newMessage + message.substring(1).toLowerCase();
             }
             csceneInstanceBO.getScene().getTopology().getScene().setProcessMessage(newMessage);
+        }
+
+        // 判断下访问的用户,如果是 非管理员用户 剔除仅管理员可见的接入方式
+        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
+        if (currentUserBo == null || Integer.valueOf(0).equals(currentUserBo.getIsAdmin())) {
+            if (csceneInstanceBO.getScene() != null) {
+                var scene = csceneInstanceBO.getScene();
+                var topology = scene.getTopology();
+                if (topology.getElements() != null) {
+                    for (var sceneElement : topology.getElements()) {
+                        if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+                            for (var p : sceneElement.getPorts()) {
+                                if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                                    var its = p.getAccessModes().iterator();
+                                    while (its.hasNext()) {
+                                        var it = its.next();
+                                        if (Boolean.TRUE.equals(it.getManageMode())) {
+                                            its.remove();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (scene.getPlugins() != null && scene.getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
+                    var cloudPlugin = scene.getPlugins().get(PluginConstant.PLUGIN_KEY);
+                    if (cloudPlugin.getElementPorts() != null) {
+                        Map<String, Map<String, Object>> ports = new HashMap<>();
+                        for (Map.Entry<String, Map<String, Object>> entry : cloudPlugin.getElementPorts().entrySet()) {
+                            String portId = entry.getKey();
+                            Map<String, Object> portMap = entry.getValue();
+                            var cloudPluginSceneElementPortBO = JsonCommon.snakeMapToBean(portMap,
+                                    CloudPluginSceneElementPortBO.class);
+                            if (CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
+                                var its = cloudPluginSceneElementPortBO.getAccessModes().iterator();
+                                while (its.hasNext()) {
+                                    var it = its.next();
+                                    if (Boolean.TRUE.equals(it.getManageMode())) {
+                                        its.remove();
+                                    }
+                                }
+                            }
+                            ports.put(portId, JsonCommon.beanToSnakeMap(cloudPluginSceneElementPortBO));
+                            cloudPlugin.setElementPorts(ports);
+                        }
+                    }
+                }
+            }
         }
         return csceneInstanceBO;
     }

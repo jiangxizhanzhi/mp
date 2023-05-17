@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -618,6 +619,19 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this, updateElementIds).modify();
+    }
+
+    public void correctPluginElementPort(BasePluginSceneElementPortBO portBO) {
+        CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO = (CloudPluginSceneElementPortBO) portBO;
+        if (CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
+            var its = cloudPluginSceneElementPortBO.getAccessModes().iterator();
+            while (its.hasNext()) {
+                var it = its.next();
+                if (Boolean.TRUE.equals(it.getManageMode())) {
+                    its.remove();
+                }
+            }
+        }
     }
 
 }

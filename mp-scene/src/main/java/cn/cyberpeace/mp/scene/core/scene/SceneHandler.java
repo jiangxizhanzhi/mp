@@ -314,6 +314,21 @@ public class SceneHandler extends BaseSceneHandler<
                     .collect(Collectors.toList());
             sceneElement.setPorts(ports);
         }
+
+        if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+            for (var p : sceneElement.getPorts()) {
+                if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                    var its = p.getAccessModes().iterator();
+                    while (its.hasNext()) {
+                        var it = its.next();
+                        if (Boolean.TRUE.equals(it.getManageMode())) {
+                            its.remove();
+                        }
+                    }
+                }
+            }
+        }
+
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();
         String message = null;
@@ -342,6 +357,7 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
+                        plugin.correctPluginElementPort(pluginPort);
                         pluginPorts.put(portId, pluginPort);
                     }
                 });
