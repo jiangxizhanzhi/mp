@@ -25,4 +25,28 @@
         from mp_flow_task_task t
         where scene_id=#{sceneId}
     </select>
+
+    <select id="getFirstTime" resultType="java.time.LocalDateTime">
+        select min(create_time) as firstTime
+        from mp_flow_task_record
+        where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
+    </select>
+
+    <select id="statisticsTaskId" parameterType="java.util.Map"
+            resultType="cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp">
+        <foreach collection="conditions" item="item" open="" close="" separator="union">
+            select #{item.endTime} as statisticalTime, #{item.offsetValue} as offsetValue, #{item.offsetUnit} as offsetUnit,
+            sum(tx_bps) as txBps, sum(tx_pps) as txPbs, CAST(avg(latency) as int) as latency, CAST(avg(jitter) as int) as jitter,
+            sum(total_tx_L2) as totalTxL2, sum(total_tx_L1) as totalTxL1, sum(total_pps) as totalPps, sum(total_rx) as totalRx, sum(queue_full) as queueFull, sum(drop_rate) as dropRate
+            from mp_flow_task_record
+            where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
+            and create_time=(
+            select max(create_time)
+            from mp_flow_task_record
+            where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
+            and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime}
+            )
+        </foreach>
+        order by statisticalTime
+    </select>
 </mapper>

@@ -3,9 +3,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
-import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
@@ -15,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,6 +104,118 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         FlowSummary flowSummary = this.getModelMapper().queryFlowSummary(sceneId);
         log.info("FlowTaskRecordServiceImpl.queryFlowSummary end. flowSummary:{}", flowSummary);
         return flowSummary;
+    }
+
+    /**
+     * 仿真统计
+     * @param sceneId
+     * @return
+     */
+    @Override
+    public FlowStatisticsInfo flowStatistics(String sceneId) {
+        log.info("FlowTaskRecordServiceImpl.flowStatistics begin. id:{}", sceneId);
+        FlowStatisticsInfo flowStatisticsInfo = new FlowStatisticsInfo();
+        List<FlowStatisticalCondition> conditionList = this.getCondition(sceneId);
+        List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(sceneId, conditionList);
+        List<FlowStatisticsDetail> txBpsList = new ArrayList<>();
+        List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
+        List<FlowStatisticsDetail> latencyList = new ArrayList<>();
+        List<FlowStatisticsDetail> jitterList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tempList)) {
+            for (FlowStatisticsTemp temp : tempList) {
+                if (temp.getOffsetValue() == 0) {
+                    flowStatisticsInfo.setTotalTxL2(temp.getTotalTxL2());
+                    flowStatisticsInfo.setTotalTxL1(temp.getTotalTxL1());
+                    flowStatisticsInfo.setTotalPps(temp.getTotalPps());
+                    flowStatisticsInfo.setTotalRx(temp.getTotalRx());
+                    flowStatisticsInfo.setQueueFull(temp.getQueueFull());
+                    flowStatisticsInfo.setDropRate(temp.getDropRate());
+                }
+                FlowStatisticsDetail txBps = new FlowStatisticsDetail();
+                txBps.setStatisticalTime(temp.getStatisticalTime());
+                txBps.setOffsetUnit(temp.getOffsetUnit());
+                txBps.setOffsetValue(temp.getOffsetValue());
+                txBps.setValue(temp.getTxBps());
+                txBpsList.add(txBps);
+                FlowStatisticsDetail txPps = new FlowStatisticsDetail();
+                txPps.setStatisticalTime(temp.getStatisticalTime());
+                txPps.setOffsetUnit(temp.getOffsetUnit());
+                txPps.setOffsetValue(temp.getOffsetValue());
+                txPps.setValue(temp.getTxPps());
+                txPpsList.add(txPps);
+                FlowStatisticsDetail latency = new FlowStatisticsDetail();
+                latency.setStatisticalTime(temp.getStatisticalTime());
+                latency.setOffsetUnit(temp.getOffsetUnit());
+                latency.setOffsetValue(temp.getOffsetValue());
+                latency.setValue(temp.getLatency());
+                latencyList.add(latency);
+                FlowStatisticsDetail jitter = new FlowStatisticsDetail();
+                jitter.setStatisticalTime(temp.getStatisticalTime());
+                jitter.setOffsetUnit(temp.getOffsetUnit());
+                jitter.setOffsetValue(temp.getOffsetValue());
+                jitter.setValue(temp.getJitter());
+                jitterList.add(jitter);
+            }
+        }
+        flowStatisticsInfo.setTxBpsList(txBpsList);
+        flowStatisticsInfo.setTxPpsList(txPpsList);
+        flowStatisticsInfo.setLatencyList(latencyList);
+        flowStatisticsInfo.setJitterList(jitterList);
+        log.info("FlowTaskRecordServiceImpl.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
+        return flowStatisticsInfo;
+    }
+
+    /**
+     * 获取统计条件
+     * @return
+     */
+    private List<FlowStatisticalCondition> getCondition(String sceneId) {
+        log.info("FlowTaskRecordServiceImpl.getCondition begin. sceneId:{}", sceneId);
+        LocalDateTime startTime = this.getModelMapper().getFirstTime(sceneId);
+        if (startTime == null) {
+            return null;
+        }
+        LocalDateTime endTime = LocalDateTime.now();
+        Duration duration = Duration.between(startTime, endTime);
+        Long totalDiff = duration.toSeconds();
+        if (totalDiff > 3600 * 12) {
+            totalDiff = 3600 * 12L;
+            startTime = endTime.minusSeconds(3600 * 12);
+        }
+        Integer diff = 2;
+        String offsetUnit = "s";
+        if (totalDiff <= 60) {
+            diff = 2;
+        } else if (totalDiff > 60 && totalDiff <= 300) {
+            diff = 5;
+        } else if (totalDiff > 300 && totalDiff <= 1800) {
+            diff = 30;
+        } else if (totalDiff > 1800 && totalDiff <= 3600*2) {
+            diff = 2;
+            offsetUnit = "m";
+        } else {
+            diff = 10;
+            offsetUnit = "m";
+        }
+        List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
+        Integer offSet = 0;
+        while (endTime.isAfter(startTime)) {
+            FlowStatisticalCondition flowStatisticalCondition = new FlowStatisticalCondition();
+            flowStatisticalCondition.setEndTime(endTime);
+            if ("m".equals(offsetUnit)) {
+                flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff * 60));
+                endTime = endTime.minusSeconds(diff * 60);
+            } else if ("s".equals(offsetUnit)) {
+                flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff));
+                endTime = endTime.minusSeconds(diff);
+            }
+            flowStatisticalCondition.setOffsetUnit(offsetUnit);
+            flowStatisticalCondition.setOffsetValue(offSet);
+            queryList.add(flowStatisticalCondition);
+            offSet -= diff;
+        }
+        log.info("FlowTaskRecordServiceImpl.getCondition end. queryList:{}", queryList);
+        return queryList;
     }
 
 }

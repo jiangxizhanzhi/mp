@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -126,6 +127,22 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         log.info("FlowInfoController.queryFlowSummary end. result:{}", result);
         return ResultCommon.success(result);
     }
+
+    /**
+     * 流量仿真统计
+     * @param id
+     * @return
+     */
+    @ApiOperation("流量仿真统计")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/statistics")
+    public ServiceResult<FlowStatisticsInfo> flowStatistics(@RequestParam String id) {
+        log.info("FlowInfoController.flowStatistics begin. id:{}", id);
+        FlowStatisticsInfo result = csceneFlowService.flowStatistics(id);
+        log.info("FlowInfoController.flowStatistics end. result:{}", result);
+        return ResultCommon.success(result);
+    }
+
 
 
 }

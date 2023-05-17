@@ -1,15 +1,17 @@
 package cn.cyberpeace.mp.flow.repository;
 
-import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
-import cn.cyberpeace.mp.flow.bo.FlowSummary;
-import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp;
+import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -36,5 +38,21 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
      * @return
      */
     FlowSummary queryFlowSummary(@Param("sceneId") String sceneId);
-	
+
+    /**
+     * 流量最开始启动时间
+     * @param sceneId
+     * @return
+     */
+    LocalDateTime getFirstTime(@Param("sceneId") String sceneId);
+
+    /**
+     * 根据任务id统计总数据
+     * @param sceneId
+     * @param conditions
+     * @return
+     */
+    List<FlowStatisticsTemp> statisticsTaskId(@Param("sceneId") String sceneId, @Param("conditions") List<FlowStatisticalCondition> conditions);
+
+
 }

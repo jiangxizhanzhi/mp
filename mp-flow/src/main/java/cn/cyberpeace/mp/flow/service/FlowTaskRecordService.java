@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 
@@ -44,6 +45,13 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
      * @return
      */
     FlowSummary queryFlowSummary(String sceneId);
+
+    /**
+     * 仿真统计
+     * @param sceneId
+     * @return
+     */
+    FlowStatisticsInfo flowStatistics(String sceneId);
 
 }
 

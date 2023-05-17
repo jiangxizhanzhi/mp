@@ -277,6 +277,19 @@ public class CsceneFlowService {
     }
 
     /**
+     * 流量仿真统计
+     * @param id
+     * @return
+     */
+    public FlowStatisticsInfo flowStatistics(String id) {
+        log.info("CsceneFlowService.flowStatistics begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
+        FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
+        log.info("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
+        return flowStatisticsInfo;
+    }
+
+    /**
      * 获取实时速率统计条件
      * @return
      */
