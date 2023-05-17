@@ -40,6 +40,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -117,6 +118,10 @@ public class SceneHandler extends BaseSceneHandler<
 
     // mock的进度
     private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
+
+    @Getter
+    @Setter
+    private Boolean isAdmin;
 
     @Setter
     private boolean realTimeUpdate;
@@ -315,14 +320,16 @@ public class SceneHandler extends BaseSceneHandler<
             sceneElement.setPorts(ports);
         }
 
-        if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
-            for (var p : sceneElement.getPorts()) {
-                if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
-                    var its = p.getAccessModes().iterator();
-                    while (its.hasNext()) {
-                        var it = its.next();
-                        if (Boolean.TRUE.equals(it.getManageMode())) {
-                            its.remove();
+        if (!Boolean.TRUE.equals(getIsAdmin())) {
+            if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+                for (var p : sceneElement.getPorts()) {
+                    if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                        var its = p.getAccessModes().iterator();
+                        while (its.hasNext()) {
+                            var it = its.next();
+                            if (Boolean.TRUE.equals(it.getManageMode())) {
+                                its.remove();
+                            }
                         }
                     }
                 }
@@ -357,8 +364,8 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
-                        plugin.correctPluginElementPort(pluginPort);
-                        pluginPorts.put(portId, pluginPort);
+                        var portCopy = plugin.correctPluginElementPort(pluginPort);
+                        pluginPorts.put(portId, portCopy);
                     }
                 });
                 portPluginData.put(plugin.getKey(), pluginPorts);

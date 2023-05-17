@@ -53,10 +53,12 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart,Runnable callback) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart,
+                                             Runnable callback,Boolean isAdmin) {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
+            sceneHandler.setIsAdmin(isAdmin);
             sceneHandler.setRealTimeUpdate(true);
             if (sceneHandler.getScene() != null) {
                 sceneHandler.getScene().setCreateTime(null);
@@ -89,11 +91,11 @@ public class SceneService {
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
-                                                            SceneContextBO context) {
-        return create(sceneConfigDataBO.exportToScene(), context, false, null);
+                                                            SceneContextBO context,Boolean isAdmin) {
+        return create(sceneConfigDataBO.exportToScene(), context, false, null, isAdmin);
     }
 
-    public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
+    public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context,Boolean isAdmin) {
         var sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null, null)
                 .getSource();
 
@@ -101,7 +103,7 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        return createFromSceneConfig(sceneConfigDataBO, context);
+        return createFromSceneConfig(sceneConfigDataBO, context,isAdmin);
     }
 
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneContextBO context) {

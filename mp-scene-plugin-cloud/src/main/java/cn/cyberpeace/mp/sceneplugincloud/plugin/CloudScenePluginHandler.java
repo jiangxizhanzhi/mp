@@ -621,17 +621,22 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this, updateElementIds).modify();
     }
 
-    public void correctPluginElementPort(BasePluginSceneElementPortBO portBO) {
-        CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO = (CloudPluginSceneElementPortBO) portBO;
-        if (CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
-            var its = cloudPluginSceneElementPortBO.getAccessModes().iterator();
-            while (its.hasNext()) {
-                var it = its.next();
-                if (Boolean.TRUE.equals(it.getManageMode())) {
-                    its.remove();
+    public BasePluginSceneElementPortBO correctPluginElementPort(BasePluginSceneElementPortBO portBO) {
+        if (!Boolean.TRUE.equals(getSceneHandler().getIsAdmin())) {
+            CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO = (CloudPluginSceneElementPortBO) portBO;
+            if (CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
+                CloudPluginSceneElementPortBO portCopy = JsonCommon.parse(JsonCommon.stringify(cloudPluginSceneElementPortBO), CloudPluginSceneElementPortBO.class);
+                var its = portCopy.getAccessModes().iterator();
+                while (its.hasNext()) {
+                    var it = its.next();
+                    if (Boolean.TRUE.equals(it.getManageMode())) {
+                        its.remove();
+                    }
                 }
+                return portCopy;
             }
         }
+        return portBO;
     }
 
 }

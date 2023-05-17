@@ -169,6 +169,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    public void correctPluginElementPort(BasePluginSceneElementPortBO portBO) {
+    public BasePluginSceneElementPortBO correctPluginElementPort(BasePluginSceneElementPortBO portBO) {
+        return portBO;
     }
 }

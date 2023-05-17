@@ -96,9 +96,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
+
+        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
+        boolean isAdmin = currentUserBo == null || Integer.valueOf(1).equals(currentUserBo.getIsAdmin());
+
         cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
             LogFileUtil.getLogFile(cscene.getId());
-        }).getSource());
+        }, isAdmin).getSource());
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
@@ -273,7 +277,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
         // 判断下访问的用户,如果是 非管理员用户 剔除仅管理员可见的接入方式
         UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
-        if (currentUserBo == null || Integer.valueOf(0).equals(currentUserBo.getIsAdmin())) {
+        if (currentUserBo != null && Integer.valueOf(0).equals(currentUserBo.getIsAdmin())) {
             if (csceneInstanceBO.getScene() != null) {
                 var scene = csceneInstanceBO.getScene();
                 var topology = scene.getTopology();
