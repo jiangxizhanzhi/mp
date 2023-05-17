@@ -113,6 +113,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<VirtualUsb> virtualUsbs;
     @ApiModelProperty(value = "实体usb列表")
     private List<EntityUsb> entityUsbs;
+    @ApiModelProperty(value = "docker参数")
+    private DockerParams dockerParams;
+
+    // gns3 属性
+    @ApiModelProperty(value = "gns3 platform")
+    private String platform;
 
     // 靶标属性
     @ApiModelProperty(value = "靶标角色")
@@ -216,6 +222,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDockerParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
@@ -241,6 +248,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {});
         entityUsbs = StringUtils.isEmpty(obj.getEntityUsbs()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {});
+        dockerParams = StringUtils.isEmpty(obj.getDockerParams()) ? new DockerParams()
+                : JsonCommon.parse(obj.getDockerParams(), new TypeReference<DockerParams>() {});
     }
 
     @Override
@@ -291,6 +300,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (entityUsbs != null) {
             obj.setEntityUsbs(JsonCommon.stringify(entityUsbs));
+        }
+        if(dockerParams != null){
+            obj.setDockerParams(JsonCommon.stringify(dockerParams));
         }
         return obj;
     }

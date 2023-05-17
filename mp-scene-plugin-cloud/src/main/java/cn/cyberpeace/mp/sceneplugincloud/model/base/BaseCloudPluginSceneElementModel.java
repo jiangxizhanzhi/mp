@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
 import lombok.Data;
 
 @Data
@@ -102,6 +103,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String virtualUsbs;
     @DefaultStr
     private String entityUsbs;
+    @DefaultStr
+    private String dockerParams;
+    @DefaultStr
+    private String platform;
 
     // 虚拟机/容器属性
     @DefaultStr
@@ -142,6 +147,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int CONTAINER = 5;
         public static final int ENTITY_NODE = 6;
         public static final int NPC = 7;
+        public static final int DYNAMIC = 8;
 
         private VirtualType() {
         }
@@ -199,6 +205,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String VM = "vm";
         public static final String CONTAINER = "container";
         public static final String ENTITY = "entity";
+        public static final String DYNAMIC = "dynamic";
 
         private ImageType() {}
     }
