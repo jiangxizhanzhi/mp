@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -97,8 +98,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         // 先保存设置id
         save();
 
-        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
-        boolean isAdmin = currentUserBo == null || Integer.valueOf(1).equals(currentUserBo.getIsAdmin());
+        boolean isAdmin = false;
+        var user = UserCommon.getUserWithContext(this.getContext());
+        if (user != null) {
+            var userBo = BeanCommon.getBean(UserService.class).userModel2UserDtoWithoutOrg(user);
+            isAdmin = Integer.valueOf(1).equals(userBo.getIsAdmin());
+        }
 
         cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
             LogFileUtil.getLogFile(cscene.getId());
@@ -275,9 +280,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             csceneInstanceBO.getScene().getTopology().getScene().setProcessMessage(newMessage);
         }
 
+        UserBo userBo = null;
+        var queryUser = UserCommon.getUserWithContext(this.getContext());
+        if (queryUser != null) {
+            userBo = BeanCommon.getBean(UserService.class).userModel2UserDtoWithoutOrg(queryUser);
+        }
         // 判断下访问的用户,如果是 非管理员用户 剔除仅管理员可见的接入方式
-        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
-        if (currentUserBo != null && Integer.valueOf(0).equals(currentUserBo.getIsAdmin())) {
+        if (userBo != null && Integer.valueOf(0).equals(userBo.getIsAdmin())) {
             if (csceneInstanceBO.getScene() != null) {
                 var scene = csceneInstanceBO.getScene();
                 var topology = scene.getTopology();
