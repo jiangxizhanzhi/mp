@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
@@ -11,8 +12,12 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.*;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
@@ -31,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +77,12 @@ public class CsceneFlowService {
     @Autowired
     private FlowTaskTaskMapper flowTaskTaskMapper;
 
+    @Autowired
+    private FlowActuatorMapper flowActuatorMapper;
+
+    @Autowired
+    private FlowConfig flowConfig;
+
     /**
      * 新增流量任务
      * @param request
@@ -109,12 +121,33 @@ public class CsceneFlowService {
         if (StringUtils.isEmpty(actuatorId)) {
             //TODO:如果没有流量执行器id，则需要创建流量执行器
         }
-
+        //网口信息，如果不存在则创建网口
         FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(networkId, actuatorId);
         if (flowTaskPortModel == null) {
-            //TODO:创建网口
+            flowTaskPortModel = new FlowTaskPortModel();
+            FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+            if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getInstanceId())) {
+                JSONObject addPortReq = new JSONObject();
+                addPortReq.put("network_id", networkId);
+                try {
+                    String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
+                            flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+                    JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                    log.info("add client port response:{}", addTrexClientObj.toJSONString());
+                    if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                        JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+                        String clientMac = clientDataObj.getString("mac_address");
+                        flowTaskPortModel.setMac(clientMac);
+                        flowTaskPortModel.setActuatorId(actuatorId);
+                        flowTaskPortModel.setNetworkId(networkId);
+                        flowTaskPortService.create(flowTaskPortModel);
+                    }
+                } catch (IOException e) {
+                    log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), networkId, e);
+                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+                }
+            }
         }
-
         List<FlowInfoModel> flowInfoModelList = flowServiceImpl.findByIds(request.getFlowIds());
         if (CollectionUtils.isEmpty(flowInfoModelList)) {
             throw new MpRuntimeException(CsceneErrorCode.FLOW_NOT_EXIST);
@@ -127,8 +160,7 @@ public class CsceneFlowService {
             flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
             flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
             flowTaskTaskModel.setFlowId(flowInfoModel.getId());
-            //todo:如果是需要创建网口的情况下，取值从新创建的网口的id
-            flowTaskTaskModel.setPortId(flowTaskPortModel.getId());
+            flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
             flowTaskTaskModel.setNodeId(request.getNodeId());
             flowTaskTaskModel.setNodeIp(nodeIp);
             flowTaskTaskModel.setNodeName(nodeName);
