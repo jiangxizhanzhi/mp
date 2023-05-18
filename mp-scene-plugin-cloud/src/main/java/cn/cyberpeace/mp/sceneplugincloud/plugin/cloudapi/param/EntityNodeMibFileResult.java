@@ -12,11 +12,11 @@ import lombok.Data;
 @Data
 public class EntityNodeMibFileResult {
 
-
-    private String access;
     private String name;
-    private String value;
-    private String parent;
-    private String status;
+    private String oid;
     private String syntax;
+    private String maxAccess;
+    private String status;
+    private String parent;
+
 }

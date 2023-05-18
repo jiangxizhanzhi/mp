@@ -30,8 +30,8 @@ public class EntityNode extends CloudClient {
      * @param data
      * @return List<EntityNodeMibFileResult>
      */
-    public List<EntityNodeMibFileResult> uploadAndParseMibFile(EntityNodeMibUploadData data) {
-        CloudResponse<List<EntityNodeMibFileResult>> result = cloudPost(CloudUrlConstant.ENTITY_NODE_MIB_UPLOAD_URL, data, null,
+    public List<EntityNodeMibFileResult> uploadAndParseMibFile(EntityNodeMibUploadData data,EntityNodeMibUploadParam param) {
+        CloudResponse<List<EntityNodeMibFileResult>> result = cloudPost(CloudUrlConstant.ENTITY_NODE_MIB_UPLOAD_URL, data, param,
             new TypeReference<CloudResponse<List<EntityNodeMibFileResult>>>() {
             }, true);
         return result.getData();
