@@ -30,11 +30,11 @@ public class ProtocolCollectionController {
     private ProtocolCollectionService protocolCollectionService;
 
 
-    @ApiOperation(value = "mib文件上传并解析")
-    @PostMapping("/mib/import")
-    public ServiceResult importMibFile(MultipartFile file) {
-        return protocolCollectionService.importMibFile(file);
-    }
+//    @ApiOperation(value = "mib文件上传并解析")
+//    @PostMapping("/mib/import")
+//    public ServiceResult importMibFile(MultipartFile file) {
+//        return protocolCollectionService.importMibFile(file);
+//    }
 
 
     @ApiOperation(value = "mib节点信息查询")

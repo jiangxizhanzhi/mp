@@ -44,7 +44,7 @@ public class ProtocolCollectionService {
      * @param multipartFile
      * @return ServiceResult
      */
-    public ServiceResult importMibFile(MultipartFile multipartFile) {
+    public ServiceResult<List<MibFileInfo>> importMibFile(MultipartFile multipartFile) {
         EntityNode entityNode = new EntityNode();
         String fileName = multipartFile.getOriginalFilename();
         //mib文件临时路径
@@ -63,7 +63,7 @@ public class ProtocolCollectionService {
             sortTree(tree);
         } catch (Exception e) {
             log.error("import mib file process failed ", e);
-            return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }finally {
             FileUtils.deleteQuietly(file);
         }
