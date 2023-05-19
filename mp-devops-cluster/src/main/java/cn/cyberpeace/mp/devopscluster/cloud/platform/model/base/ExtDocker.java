@@ -17,6 +17,18 @@ import java.util.List;
 @AllArgsConstructor
 public class ExtDocker implements Serializable {
 
+    @ApiModelProperty("flavor信息")
+    private String flavor;
+
+    @ApiModelProperty("CPU核数")
+    private Integer cpu;
+
+    @ApiModelProperty("内存大小")
+    private Integer ram;
+
+    @ApiModelProperty("磁盘大小")
+    private Integer disk;
+
     /**
      * 文件地址
      */

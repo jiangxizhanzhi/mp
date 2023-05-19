@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -179,6 +182,42 @@ public class CreateHandler extends HandlerCommon {
         // 绑定探针agent到探针采集器
         var probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
+            var containerElements = getPluginHandler().getElementMap().values().stream()
+                    .filter(e -> Boolean.TRUE.equals(e.getEnableProbeCollect()))
+                    .filter(e -> {
+                        // 非macvlan模式下的容器 且 有探针安装需要的可以加路由
+                        var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
+                        if (cloudElement == null || cloudElement.getVirtualType() == null) {
+                            return false;
+                        }
+                        if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                            return false;
+                        }
+                        List<ConnectedNetworkBO> allNets = new ArrayList<>();
+                        allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
+                        allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
+                        boolean normalNet = true;
+                        for (var net : allNets) {
+                            net.getNetwork().getNetMode();
+                            if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.getNetwork().getNetMode())) {
+                                normalNet = false;
+                                break;
+                            }
+                        }
+                        return normalNet;
+                    })
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(containerElements)) {
+                Container container = new Container();
+                var addRouterTasks = containerElements.stream()
+                        .map(e -> {
+                            var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
+                            return (Runnable) () -> container.addRoute(cloudElement.getResourceId());
+                        })
+                        .collect(Collectors.toList());
+                runTasks(addRouterTasks);
+            }
+
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
 //            var probeCollectionElements = getPluginHandler().getElementMap().values()
 //                    .stream()

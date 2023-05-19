@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.common.repository.OptionMapper">
+
+    <select id="getMaxCode" resultType="java.lang.Integer">
+        SELECT MAX(code+0) FROM mp_common_option
+        where type = #{type}
+    </select>
+
+    <select id="getMaxSort" resultType="java.lang.Integer">
+        SELECT MAX(sort) FROM mp_common_option
+        where type = #{type}
+    </select>
+
+</mapper>

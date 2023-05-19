@@ -63,6 +63,18 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.restart_hold_size:200000}")
     private Integer restartHoldSize;
 
+    @Value("${mp.sceneplugincloud.start_pool_size:10}")
+    private Integer startPoolSize;
+
+    @Value("${mp.sceneplugincloud.start_hold_size:200000}")
+    private Integer startHoldSize;
+
+    @Value("${mp.sceneplugincloud.stop_pool_size:10}")
+    private Integer stopPoolSize;
+
+    @Value("${mp.sceneplugincloud.stop_hold_size:200000}")
+    private Integer stopHoldSize;
+
     @Value("${mp.sceneplugincloud.pause_pool_size:10}")
     private Integer pausePoolSize;
 

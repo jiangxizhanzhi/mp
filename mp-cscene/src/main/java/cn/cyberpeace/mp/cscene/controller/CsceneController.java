@@ -96,6 +96,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerGns3Router(csceneBO);
         //接入方式处理
         CsceneDataModifier.handleAccessModePath(csceneBO);
+        CsceneDataModifier.checkCloudElement(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {

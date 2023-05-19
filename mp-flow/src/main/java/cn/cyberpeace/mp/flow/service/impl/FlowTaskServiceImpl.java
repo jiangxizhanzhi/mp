@@ -644,10 +644,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      */
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
         // 批量任务传的是nodeId，直接用该值查询
-        String thirdTaskId = taskId;
+        String thirdTaskId = null;
         FlowRecordsResponse response = new FlowRecordsResponse();
         FlowTaskModel flowTaskModel = getModelMapper().get(taskId);
         if (Objects.isNull(flowTaskModel)) {
+            taskId = "MP_SCENE_" + taskId;
+            thirdTaskId = taskId;
             HumanCondition condition = new HumanCondition().filterEqual(FlowTaskModel::getNodeId, taskId);
             List<FlowTaskModel> flowTaskModelList = getModelMapper().list(condition);
             if (CollectionUtils.isEmpty(flowTaskModelList)) {

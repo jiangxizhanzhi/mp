@@ -292,47 +292,88 @@ public class ScenePluginCollectionSceneService {
         return doQueryHostStateEventsWithTimeRange(null, null, request);
     }
 
+    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+        // 没有探针
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return Collections.emptyMap();
+        }
+        // 构建查询参数
+        var request = new WazuhMonitorEventsRequest();
+        int topSize = queryParams.getPageSize();
+        request.setAgentNames(agentNames);
+        // 开始时间,默认为场景创建时间
+        request.setStartTime(Optional.ofNullable(queryParams.getStartTime())
+                .orElse(LocalDateTime.now().minusHours(24))
+        );
+        // 结束时间,默认为当前时间
+        request.setEndTime(Optional.ofNullable(queryParams.getEndTime())
+                .orElse(LocalDateTime.now())
+        );
+        return doMapHostStateEventsWithTimeRange(null, null, request, queryParams.getPageSize());
+    }
+
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
-            CollectionHostStateBO hostState = new CollectionHostStateBO();
-            hostState.setAgentName(srcHostState.getAgentName());
-            hostState.setSceneId(sceneId);
-            hostState.setCpuFreq(srcHostState.getCpuFreq());
-            hostState.setCpuCount(srcHostState.getCpuCount());
-            hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
-            // 内存统一使用单位M
-            hostState.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
-            hostState.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
-            hostState.setMemoryPercent(srcHostState.getMemoryPercent());
-            // 磁盘统一使用单位G
-            hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
-            hostState.setDiskPercent(srcHostState.getDiskPercent());
-            hostState.setDiskUsed(this.byte2GB(srcHostState.getDiskUsed()));
-            hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
-            hostState.setTime(srcHostState.getTime());
-            // 网速
-            hostState.setDownloadSpeed(srcHostState.getDownloadSpeed());
-            hostState.setUploadSpeed(srcHostState.getUploadSpeed());
-            hostState.setDiskReadBytes(srcHostState.getDiskReadBytes());
-            hostState.setDiskWriteBytes(srcHostState.getDiskWriteBytes());
-            hostState.setDiskIoPercent(srcHostState.getDiskIoPercent());
-            hostState.setMaxDownloadSpeed(srcHostState.getMaxDownloadSpeed());
-            hostState.setMaxUploadSpeed(srcHostState.getMaxUploadSpeed());
-            hostState.setMaxNetSpeed(srcHostState.getMaxNetSpeed());
-            // todo 进程，端口，网络连接，磁盘使用率
-            if (CollectionUtil.isNotEmpty(agentName2Element)) {
-                var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
-                if (srcElement != null) {
-                    hostState.setNodeId(srcElement.getId());
-                    hostState.setNodeName(srcElement.getName());
-                }
-            }
-
-            return hostState;
+            return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
         }).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
+    }
+
+
+    private Map<String, List<CollectionHostStateBO>> doMapHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, int topSize) {
+        // 执行查询
+        Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
+        Map<String, List<CollectionHostStateBO>> convertedMap = new HashMap<>();
+        map.forEach((agentName, result) -> {
+            List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
+                return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
+            }).collect(Collectors.toList());
+
+            convertedMap.put(agentName, hostStates);
+        });
+
+        return convertedMap;
+    }
+
+
+    private CollectionHostStateBO hostStateModel2BO(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhHostStateModel srcHostState) {
+        CollectionHostStateBO hostState = new CollectionHostStateBO();
+        hostState.setAgentName(srcHostState.getAgentName());
+        hostState.setSceneId(sceneId);
+        hostState.setCpuFreq(srcHostState.getCpuFreq());
+        hostState.setCpuCount(srcHostState.getCpuCount());
+        hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
+        // 内存统一使用单位M
+        hostState.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
+        hostState.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
+        hostState.setMemoryPercent(srcHostState.getMemoryPercent());
+        // 磁盘统一使用单位G
+        hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
+        hostState.setDiskPercent(srcHostState.getDiskPercent());
+        hostState.setDiskUsed(this.byte2GB(srcHostState.getDiskUsed()));
+        hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
+        hostState.setTime(srcHostState.getTime());
+        // 网速
+        hostState.setDownloadSpeed(srcHostState.getDownloadSpeed());
+        hostState.setUploadSpeed(srcHostState.getUploadSpeed());
+        hostState.setDiskReadBytes(srcHostState.getDiskReadBytes());
+        hostState.setDiskWriteBytes(srcHostState.getDiskWriteBytes());
+        hostState.setDiskIoPercent(srcHostState.getDiskIoPercent());
+        hostState.setMaxDownloadSpeed(srcHostState.getMaxDownloadSpeed());
+        hostState.setMaxUploadSpeed(srcHostState.getMaxUploadSpeed());
+        hostState.setMaxNetSpeed(srcHostState.getMaxNetSpeed());
+        // todo 进程，端口，网络连接，磁盘使用率
+        if (CollectionUtil.isNotEmpty(agentName2Element)) {
+            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
+            if (srcElement != null) {
+                hostState.setNodeId(srcElement.getId());
+                hostState.setNodeName(srcElement.getName());
+            }
+        }
+
+        return hostState;
     }
 
     /**
@@ -1285,8 +1326,7 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        return sysCollectorService.pagePorts(collectorBaseRequest);
     }
 
     public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
@@ -1369,8 +1409,9 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        //pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
+        //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        return sysCollectorService.pageNetifaces(collectorBaseRequest);
     }
 
 

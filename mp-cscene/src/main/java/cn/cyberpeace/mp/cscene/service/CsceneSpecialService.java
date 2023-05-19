@@ -42,7 +42,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
@@ -546,6 +545,65 @@ public class CsceneSpecialService {
             result.put(image, referList);
         });
 
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 查询引用了虚拟usb的场景模板
+     *
+     * @param uuid
+     * @return
+     */
+    public ServiceResult<List<DeviceReferCsceneStat>> statVirtualUsbReferCscenes(String uuid) {
+        var referCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
+                .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
+                .selectAs(CsceneModel::getCreateUsername, DeviceReferCsceneStat::getCreateUsername)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterContains(CloudPluginSceneConfigElementModel::getVirtualUsbs, uuid)
+                .distinct();
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneInstanceMapper.list(referCondition,
+                DeviceReferCsceneStat.class);
+        return new ServiceResult<>(deviceReferCsceneStats);
+    }
+
+
+    /**
+     * 统计iso文件 对应 引用了iso文件的场景模板
+     * @param isoTmpdirUuid iso文件地址uuid
+     * @return iso文件uuid 对应 引用了iso文件的场景模板
+     */
+    public ServiceResult<List<String>> statISOReferCscenes(String isoTmpdirUuid) {
+        var isoReferCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterEqual(CloudPluginSceneConfigElementModel::getIsoTmpdirUuid, isoTmpdirUuid)
+                .distinct();
+        List<DeviceReferCsceneStat> isoReferCsceneStats = csceneMapper.list(isoReferCondition,
+                DeviceReferCsceneStat.class);
+        if (CollectionUtils.isEmpty(isoReferCsceneStats)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        var result = isoReferCsceneStats.stream().map(DeviceReferCsceneStat::getName).collect(Collectors.toList());
         return new ServiceResult<>(result);
     }
 

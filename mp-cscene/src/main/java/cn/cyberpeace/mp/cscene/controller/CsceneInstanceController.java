@@ -534,10 +534,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/modify")
     public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
-        log.info("app_instance params,request:{}", JsonCommon.stringify(request));
-        CsceneBO csceneBO = new CsceneBO();
-        csceneBO.setSceneConfig(request.getSceneConfig());
-        CsceneDataModifier.checkIngressAndEgress(csceneBO);
+        log.info("modify_instance params,request:{}", JsonCommon.stringify(request));
         var result = modelService.instanceModify(request).asResult();
         return result;
     }
@@ -614,6 +611,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("节点开机")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/start_element")
+    public ServiceResult<Boolean> startElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        return result;
+    }
+
+    @ApiOperation("节点关机")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/stop_element")
+    public ServiceResult<Boolean> stopElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        return result;
+    }
+
     @ApiOperation("暂停节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -676,6 +695,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var result = modelService.recreateElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
         return result;
+    }
+
+    @ApiOperation("更新节点")
+    @PostMapping("/modify_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
+        modelService.modifyElement(elementModifyBO,new CsceneContextBO());
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
+    }
+
+    @ApiOperation("删除节点")
+    @PostMapping("/delete_element")
+    public ServiceResult<ElementModifyBO> recreateElement(@RequestBody CsceneInstanceNodeActionRequest request) {
+        modelService.deleteElement(request.getId(), request.getNodeId(), request.getContext());
+        return new ServiceResult<>(new ElementModifyBO()).asResult();
     }
 
     @ApiOperation("挂起节点")

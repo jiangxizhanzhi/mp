@@ -7,10 +7,10 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonConstant;
 import cn.cyberpeace.mp.common.model.OptionModel;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivMenuDTO;
@@ -29,20 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -185,7 +174,7 @@ public class ActivMenuService {
         }
 
         List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
-        QueryParams queryParams = new QueryParams();
+        OptionQueryParams queryParams = new OptionQueryParams();
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
 
@@ -287,16 +276,14 @@ public class ActivMenuService {
         String jsonStr = "";
         try {
             File jsonFile = new File(filePath);
-            FileReader fileReader = new FileReader(jsonFile);
-
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
-            int ch = 0;
-            StringBuffer sb = new StringBuffer();
-            while ((ch = reader.read()) != -1) {
-                sb.append((char) ch);
+            StringBuffer sb;
+            try (FileReader fileReader = new FileReader(jsonFile); Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");) {
+                int ch = 0;
+                sb = new StringBuffer();
+                while ((ch = reader.read()) != -1) {
+                    sb.append((char) ch);
+                }
             }
-            fileReader.close();
-            reader.close();
             jsonStr = sb.toString();
             return jsonStr;
         } catch (IOException e) {
@@ -307,8 +294,7 @@ public class ActivMenuService {
 
     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
-        try {
-            Reader reader = new InputStreamReader(file.getInputStream(), "utf-8");
+        try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
             int ch = 0;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {

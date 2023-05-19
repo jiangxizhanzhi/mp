@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
@@ -18,9 +19,11 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -172,6 +175,33 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
     }
 
+    /**
+     * @description: 启动节点
+     * @param nodeId
+     * @return boolean
+     */
+    public boolean startElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.startElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param nodeId
+     * @throws
+     * @return boolean
+     */
+    public boolean stopElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.stopElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
     public boolean pauseElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -212,6 +242,25 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext(), () -> {
             SceneInstanceLinkCacheUtil.refresh(sceneId);
         }).getSource();
+    }
+
+    public boolean modifyElement(ElementModifyBO element) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        var context = generateSceneContext();
+        var updateHandler = new SceneHandler(element.getUpdate(), context);
+        var nodeId = new ArrayList<>(updateHandler.getElementMap().values()).get(0).getId();
+        return this.sceneService.modifyElement(sceneId, nodeId, updateHandler, generateSceneContext()).getSource();
+    }
+
+    public boolean deleteElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.deleteElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     public boolean suspendElement(String nodeId) {

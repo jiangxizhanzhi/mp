@@ -279,6 +279,7 @@ public class CloudSceneConnectionCommon {
         var result = remoteClient.convertRecording(connectionId);
         var flag = !StringUtils.isEmpty(result);
         if (flag) {
+            sceneConnection.setDisable(true);
             sceneConnection.setConnectionRecordingName(result);
             cloudPluginSceneConnectionMapper.save(sceneConnection);
         }

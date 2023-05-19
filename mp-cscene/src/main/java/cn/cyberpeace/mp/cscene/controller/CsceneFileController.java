@@ -2,7 +2,10 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.protocolcollection.MibFileInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
+import cn.cyberpeace.mp.cscene.service.ProtocolCollectionService;
+import cn.cyberpeace.mp.cscene.vo.MibFileUploadResponse;
 import cn.cyberpeace.mp.cscene.vo.SceneFileUploadResponse;
 import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description
@@ -34,6 +39,9 @@ public class CsceneFileController {
 
     @Autowired
     private CsceneFileService csceneFileService;
+
+    @Autowired
+    private ProtocolCollectionService protocolCollectionService;
 
     /**
      * @param file
@@ -113,6 +121,36 @@ public class CsceneFileController {
         var inputStream = file.getInputStream();
         var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
+    }
+
+
+    @ApiOperation("上传mib文件")
+    @ApiImplicitParam(name = "file", value = "mib文件", dataTypeClass = MultipartFile.class)
+    @PostMapping("/mib_import")
+    public ServiceResult<MibFileUploadResponse> sceneMibFileUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalSuffix = new String[]{ "mib" };
+        var fileName = file.getOriginalFilename();
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        //上传文件到中间件
+        ServiceResult<SceneFileUploadResponse> sceneMibFileUpload =
+            csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix);
+        SceneFileUploadResponse sceneFileUploadResponse = sceneMibFileUpload.getSource();
+        //上传失败响应
+        if(Objects.isNull(sceneFileUploadResponse)){
+            return new ServiceResult<>(null, sceneMibFileUpload.getServiceCode(), sceneMibFileUpload.getDetail());
+        }
+        //上传解析mib文件
+        ServiceResult<List<MibFileInfo>> mibFile = protocolCollectionService.importMibFile(file);
+        List<MibFileInfo> mibFileInfos = mibFile.getSource();
+        //失败响应
+        if(Objects.isNull(mibFileInfos)){
+            return new ServiceResult<>(null, mibFile.getServiceCode(), mibFile.getDetail());
+        }
+        //成功响应结果
+        MibFileUploadResponse mibFileUploadResponse =
+            new MibFileUploadResponse(sceneFileUploadResponse, mibFileInfos);
+        return new ServiceResult<>(mibFileUploadResponse).asResult();
     }
 
 }

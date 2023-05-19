@@ -26,4 +26,7 @@ public class RealEquipmentByParams implements Serializable {
 
     @ApiModelProperty("图标")
     private String logo;
+
+    @ApiModelProperty("mac地址")
+    private String mac;
 }

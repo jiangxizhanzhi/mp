@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.element;
 
+import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,15 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-操作系统名称")
     private String systemTypeName;
 
+    @ApiModelProperty(value = "设备类型")
+    private Integer category;
+
+    @ApiModelProperty(value = "事件")
+    private Integer event;
+
+    @ApiModelProperty(value = "事件状态")
+    private Integer eventStatus;
+
     @ApiModelProperty(value = "节点基本信息-镜像名称")
     private String imageName;
 
@@ -57,5 +67,8 @@ public class ElementMonitorBasicInfo {
 
     @ApiModelProperty(value = "节点实时信息")
     private ElementRTInfo rtInfo;
+
+    @ApiModelProperty(value = "接入用户集合")
+    private List<AccessUserBO> accessUsers;
 
 }

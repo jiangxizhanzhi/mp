@@ -93,6 +93,25 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String firewallRules;
 
+    // 虚拟机属性
+    @DefaultStr
+    private String isoAttachFilename;
+    @DefaultStr
+    private String isoTmpdirUuid;
+    @DefaultStr
+    private String virtualUsbs;
+    @DefaultStr
+    private String entityUsbs;
+    @DefaultStr
+    private String dockerParams;
+    @DefaultStr
+    private String platform;
+
+    @DefaultStr
+    private String snmpConfig;
+    @DefaultStr
+    private String mibData;
+
     // 虚拟机/容器属性
     @DefaultStr
     private String image;
@@ -132,6 +151,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int CONTAINER = 5;
         public static final int ENTITY_NODE = 6;
         public static final int NPC = 7;
+        public static final int DYNAMIC = 8;
 
         private VirtualType() {
         }
@@ -189,6 +209,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String VM = "vm";
         public static final String CONTAINER = "container";
         public static final String ENTITY = "entity";
+        public static final String DYNAMIC = "dynamic";
 
         private ImageType() {}
     }

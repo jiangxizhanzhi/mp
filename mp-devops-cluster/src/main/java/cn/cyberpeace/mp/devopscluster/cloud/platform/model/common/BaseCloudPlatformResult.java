@@ -70,6 +70,8 @@ public class BaseCloudPlatformResult extends BaseModel {
     @ApiModelProperty(hidden = true)
     private List<String> fileNames;
 
+    private String fileName;
+
     /**
      * 消息体
      */
@@ -87,4 +89,6 @@ public class BaseCloudPlatformResult extends BaseModel {
      */
     @ApiModelProperty(hidden = true)
     private String url;
+
+    private String nginxFileUrl;
 }

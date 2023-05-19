@@ -64,7 +64,10 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             log.error("list cp log error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
         }
-        if (Objects.isNull(t) || !t.isSuccess() ){
+        if (Objects.isNull(t)) {
+            throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
+        }
+        if (!t.isSuccess()){
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(t.getMessage()));
         }
         List<CpCloudLogPO> list = JSONObject.parseArray(JSONObject.toJSONString(t.getItems()), CpCloudLogPO.class);

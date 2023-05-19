@@ -211,6 +211,7 @@ public class RealEquipmentConverter implements BaseConverter{
         convertModel.setExtEntity(device.getExtEntity());
         convertModel.setExtSystemInfo(device.getExtSystemInfo());
         convertModel.setExtGateway(device.getExtGateway());
+        convertModel.setExtEntityUsb(device.getExtEntityUsb());
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             convertModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
@@ -235,6 +236,7 @@ public class RealEquipmentConverter implements BaseConverter{
         device.setExtEntityAccess(request.getExtEntityAccess());
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
+        device.setExtEntityUsb(request.getExtEntityUsb());
         return device;
     }
 

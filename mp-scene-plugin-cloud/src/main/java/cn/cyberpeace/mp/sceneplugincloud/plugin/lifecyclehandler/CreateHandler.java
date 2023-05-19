@@ -9,11 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.util.CommandUtils;
-import cn.cyberpeace.mp.scene.util.InstallerUtils;
-import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
-import cn.cyberpeace.mp.scene.util.SceneFileUtils;
-import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -24,49 +20,17 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.StackLocatorUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -81,6 +45,7 @@ public class CreateHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
+    private VirtualDynamic vdClient = new VirtualDynamic();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -90,6 +55,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_FIREWALLS = new EventProcess("create_firewalls", "sceneplugincloud.event.create_firewall");
         public static final EventProcess CREATE_TERMINALS = new EventProcess("create_terminals", "sceneplugincloud.event.create_terminal");
         public static final EventProcess CREATE_NPCS = new EventProcess("create_npcs", "sceneplugincloud.event.create_npcs");
+        public static final EventProcess CONFIGURE = new EventProcess("configure", "sceneplugincloud.event.configure");
     }
 
     public static class ElementProcess {
@@ -101,6 +67,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_CONTAINER = new EventProcess("create_container", "sceneplugincloud.event.create_container");
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
+        public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
     }
 
     @Data
@@ -369,6 +336,11 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
+    /**
+     * @description: 生成虚拟网卡
+     * @param cloudElement
+     * @return List<VirtualNic>
+     */
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
         // 添加管理网卡
@@ -377,9 +349,11 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
+        //所有网络，包含生成的网络和连接的网络
         List<ConnectedNetworkBO> allNetworks = new ArrayList<>();
         allNetworks.addAll(cloudElement.getDeriveNetworks());
         allNetworks.addAll(cloudElement.getAccessNetworks());
+        //节点端口存在
         if (cloudElement.getSrcElement().getPorts() != null && cloudElement.getSrcElement().getPorts().size() > 0) {
             Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
             allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
@@ -409,6 +383,11 @@ public class CreateHandler extends HandlerCommon {
         return virtualNics;
     }
 
+    /**
+     * @description: 获得连接网络的虚拟网卡相关信息
+     * @param connectedNetwork
+     * @return VirtualNic
+     */
     private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
         var network = connectedNetwork.network;
         List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
@@ -428,22 +407,29 @@ public class CreateHandler extends HandlerCommon {
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-        if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        if (samplePort.getIngress() > 0) {
             var qosRule = new VirtualNic.QosRule();
             qosRule.setMaxKbps(samplePort.getIngress());
             qosRule.setDirection(QosRuleDirection.INGRESS);
-            qosRule.setDelayMs(samplePort.getDelay());
-            qosRule.setLossPercent(samplePort.getLoss());
             qosRules.add(qosRule);
         }
-        if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+        if (samplePort.getEgress() > 0) {
             var qosRule = new VirtualNic.QosRule();
             qosRule.setMaxKbps(samplePort.getEgress());
             qosRule.setDirection(QosRuleDirection.EGRESS);
-            qosRule.setDelayMs(samplePort.getDelay());
-            qosRule.setLossPercent(samplePort.getLoss());
             qosRules.add(qosRule);
         }
+        //云平台暂不支持上下行带宽和时延丢包率同时设置，时延丢包率通过命令执行
+//        if(samplePort.getDelay() > 0){
+//            var qosRule = new VirtualNic.QosRule();
+//            qosRule.setDelayMs(samplePort.getDelay());
+//            qosRules.add(qosRule);
+//        }
+//        if(samplePort.getLoss() > 0){
+//            var qosRule = new VirtualNic.QosRule();
+//            qosRule.setLossPercent(samplePort.getLoss());
+//            qosRules.add(qosRule);
+//        }
         virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
 
         if (!HandlerUtils.isExternalNetwork(network.getResourceId())) {
@@ -961,10 +947,16 @@ public class CreateHandler extends HandlerCommon {
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
+            createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
+        }
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
             createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+            createData.setIsoAttach(true);
+        }
         var virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getHost());
@@ -973,6 +965,16 @@ public class CreateHandler extends HandlerCommon {
 
         if (ElementTypeUtils.isCoreRouter(cloudElement)) {
             this.configVyosNetwork(cloudElement);
+        }
+
+        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
+            this.attachISO(cloudElement);
+        }
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
+            this.attachVirtualUsbs(cloudElement);
+        }
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs())) {
+            this.attachEntityUsbs(cloudElement);
         }
 
         checkAccessModes(cloudElement);
@@ -1008,6 +1010,15 @@ public class CreateHandler extends HandlerCommon {
             createData.setDisk(srcElement.getDisk());
         }
 
+        // 容器参数
+        if (cloudElement.getDockerParams() != null) {
+            var dockerParams = cloudElement.getDockerParams();
+            createData.setEnvironment(dockerParams.getEnvironment());
+            createData.setInteractive(dockerParams.getInteractive());
+            createData.setPrivileged(dockerParams.getPrivileged());
+            createData.setRun(dockerParams.getRun());
+        }
+
         // 容器初始化命令通过execContainerInitCommand执行
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
@@ -1037,9 +1048,6 @@ public class CreateHandler extends HandlerCommon {
             execContainerInitCommand(cloudElement);
 
             checkAccessModes(cloudElement);
-            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
-                containerClient.addRoute(cloudElement.getResourceId());
-            }
         }
     }
 
@@ -1079,6 +1087,11 @@ public class CreateHandler extends HandlerCommon {
                 });
             });
         }
+    }
+
+    protected void createVirtualDynamic(CloudPluginSceneElementBO cloudElement) {
+        VirtualDynamicCreateData createData = new VirtualDynamicCreateData();
+        vdClient.create(createData);
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
@@ -1147,6 +1160,10 @@ public class CreateHandler extends HandlerCommon {
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
+        // 下发配置
+        runSceneProgress(SceneProcess.CONFIGURE, () -> {
+            configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
+        });
     }
 
     protected void prepareEventProcess() {
@@ -1166,8 +1183,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
-        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_AUXILIARY_NETWORK,
-                () -> createAuxiliaryNetwork(cloudElement));
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_AUXILIARY_NETWORK, () -> createAuxiliaryNetwork(cloudElement));
     }
 
     public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
@@ -1201,9 +1217,30 @@ public class CreateHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_ENTITY_NODE,
                     () -> createEntityNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC,
-                    () -> recordNpcNode(cloudElement));
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamic(cloudElement));
         }
+    }
+
+    private void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
+        List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
+                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)
+                .collect(Collectors.toList());
+
+        List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
+            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            // 下发配置
+            vdClient.sendRule(e.getResourceId(), list);
+        }).collect(Collectors.toList());
+        runTasks(configDynamicIps);
+
+        List<Runnable> configDynamicStaticRoutes = dynamicElements.stream().map(e -> (Runnable) () -> {
+            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            // 下发配置
+            vdClient.sendRule(e.getResourceId(), list);
+        }).collect(Collectors.toList());
+        runTasks(configDynamicStaticRoutes);
     }
 
     /**
@@ -1296,5 +1333,30 @@ public class CreateHandler extends HandlerCommon {
             accessMode.setPublicNetProxyIp(null);
             accessMode.setPublicNetProxyPort(null);
         }
+    }
+
+    private void attachISO(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        data.setFileName(cloudElement.getIsoAttachFilename());
+        data.setTmpdirUuid(cloudElement.getIsoTmpdirUuid());
+        vmClient.attachISO(data);
+    }
+
+    private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachVirtualUsbsData data = new AttachVirtualUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setVirtualUsbUuids(usbUuids);
+        vmClient.attachVirtualUsbs(data);
+    }
+
+    private void attachEntityUsbs(CloudPluginSceneElementBO cloudElement) {
+        log.info("CreateHandler.attachEntityUsbs begin. cloudElement:{}", cloudElement);
+        AttachEntityUsbsData data = new AttachEntityUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setEntityUsbUuids(usbUuids);
+        vmClient.attachEntityUsbs(data);
     }
 }
