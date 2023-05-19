@@ -31,12 +31,8 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
-import cn.cyberpeace.mp.auth.util.ParamCheck;
-import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.auth.util.*;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -67,22 +63,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -822,7 +805,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             String filepath = null;
             try {
                 String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
-                filepath = FdfsCommon.upload(multipartFile.getInputStream(), suffix);
+                filepath = FsCommon.upload(multipartFile.getInputStream(), suffix);
                 log.info("uploaded avatar success! filepath:{}", filepath);
             } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
@@ -830,7 +813,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             if (StringUtils.isNotBlank(filepath)) {
-                String httpUrl = FdfsCommon.genHttpUrl(filepath);
+                String httpUrl = FsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 var ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();

@@ -21,7 +21,7 @@ public class SuricataConstant {
     public static final String ROLE_ADMIN = "ADMIN";
 
     //空格
-    public static final String SPACE_REGEX = "\\s";
+    public static final String SPACE_REGEX = "\\s+";
 
     //开头的注释符
     public static final String STARTWITH_STR = "#";

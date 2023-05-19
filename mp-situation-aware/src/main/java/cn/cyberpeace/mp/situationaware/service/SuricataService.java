@@ -232,4 +232,19 @@ public class SuricataService {
         }).collect(Collectors.toList());
         return new ListObjServiceResult(new ListObjResult(result, total)).asResult();
     }
+
+    /**
+     * @description: 查询规则所有的协议类型
+     * @return ServiceResult<List<String>>
+     */
+    public ServiceResult<List<String>> queryAllProtocols() {
+        //构建查询条件
+        HumanCondition condition = new HumanCondition();
+        //查询协议类型
+        condition.select(SuricataRuleModel::getProtocol).distinct();
+        List<SuricataRuleModel> ruleModels = suricataRuleMapper.list(condition);
+        List<String> result = ruleModels.stream().filter(rule -> StringUtils.isNotEmpty(rule.getProtocol()))
+            .map(SuricataRuleModel::getProtocol).collect(Collectors.toList());
+        return new ServiceResult<>(result).asResult();
+    }
 }

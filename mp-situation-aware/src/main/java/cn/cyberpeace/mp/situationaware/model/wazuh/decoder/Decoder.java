@@ -49,6 +49,9 @@ public class Decoder {
 
         @ApiModelProperty(value = "排序")
         private String order;
+
+        @ApiModelProperty(value = "程序名")
+        private ProgramName programName;
     }
 
     @Data
@@ -60,6 +63,15 @@ public class Decoder {
 
         @ApiModelProperty(value = "偏移")
         private String offset;
+
+    }
+
+
+    @Data
+    public static class ProgramName {
+
+        @ApiModelProperty(value = "模式")
+        private String pattern;
 
     }
 

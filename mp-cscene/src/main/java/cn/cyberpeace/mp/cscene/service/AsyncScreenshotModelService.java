@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +26,7 @@ public class AsyncScreenshotModelService {
     public void batchDeleteScreenshot(List<ScreenshotModel> screenshotModels) {
         try {
             if (CollectionUtils.isNotEmpty(screenshotModels)) {
-                screenshotModels.forEach(model -> FdfsCommon.delete(model.getFile()));
+                screenshotModels.forEach(model -> FsCommon.delete(model.getFile()));
             }
         } catch (Exception e) {
             log.error("delete screenshot file error", e);

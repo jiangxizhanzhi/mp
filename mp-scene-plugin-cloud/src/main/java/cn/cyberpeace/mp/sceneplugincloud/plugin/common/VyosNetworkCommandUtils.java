@@ -315,7 +315,7 @@ public class VyosNetworkCommandUtils {
                         lossCmd = String.format(NETWORK_PACKET_LOSS, order, loss);
                         result.add(lossCmd);
                     }
-                    if (StringUtils.isNoneEmpty(delayCmd, lossCmd)) {
+                    if (!StringUtils.isAllEmpty(delayCmd, lossCmd)) {
                         result.add(String.format(BIND_OUT_TRAFFIC_POLICY, order, order));
                     }
                 }

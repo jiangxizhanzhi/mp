@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -12,7 +12,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @Description: 默认图片工具类
@@ -44,7 +47,7 @@ public class DefaultImgUtil {
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
-                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+                path = FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
         }
 
@@ -69,7 +72,7 @@ public class DefaultImgUtil {
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
             if (mappingModelOptional.isPresent()) {
-                path = FdfsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
+                path = FsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
         }
 

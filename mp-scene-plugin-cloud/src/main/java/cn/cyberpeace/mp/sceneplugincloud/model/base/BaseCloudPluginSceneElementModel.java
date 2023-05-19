@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
 import lombok.Data;
 
 @Data
@@ -107,6 +106,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String dockerParams;
     @DefaultStr
     private String platform;
+
+    @DefaultStr
+    private String snmpConfig;
+    @DefaultStr
+    private String mibData;
 
     // 虚拟机/容器属性
     @DefaultStr
