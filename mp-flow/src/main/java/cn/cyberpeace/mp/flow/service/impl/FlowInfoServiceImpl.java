@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
@@ -897,7 +896,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         flowInfoModel.setId(flowId);
                         flowInfoModel.setTitle(fileName);
                         flowInfoModel.setFileName(flowFile.getName());
-                        String fdfsPath = FdfsCommon.upload(flowFile.getAbsolutePath());
+                        String fdfsPath = FsCommon.upload(flowFile.getAbsolutePath());
                         if (flowFile.getName().endsWith(".pcap")) {
                             // 背景流量
                             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
@@ -1026,7 +1025,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
 
             flowInfoModel.setFileName(pcapFile.getName());
-            String fdfsPath = FdfsCommon.upload(pcapFile.getAbsolutePath());
+            String fdfsPath = FsCommon.upload(pcapFile.getAbsolutePath());
             flowInfoModel.setFlowDesc(readmeList.get(3));
             boolean isContainType = readmeList.get(10).contains("类型");
             int diffCount = 0;
