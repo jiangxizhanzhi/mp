@@ -30,6 +30,5 @@ public class MibData {
     private String parent;
 
     @ApiModelProperty(value = "下级数据")
-    @JsonManagedReference
     private List<MibData> children;
 }
