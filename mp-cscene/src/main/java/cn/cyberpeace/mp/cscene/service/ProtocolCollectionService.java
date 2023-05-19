@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeMibUplo
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MibNodeQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MibResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeMibUploadParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -55,8 +56,16 @@ public class ProtocolCollectionService {
             //写入文件
             FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), file);
             //请求云平台并获取解析结果
-            List<EntityNodeMibFileResult> entityNodeMibFileResults =
-                entityNode.uploadAndParseMibFile(new EntityNodeMibUploadData(file),new EntityNodeMibUploadParam(fileName));
+            CloudResponse<List<EntityNodeMibFileResult>> cloudResponse =
+                entityNode.uploadAndParseMibFile(new EntityNodeMibUploadData(file),
+                    new EntityNodeMibUploadParam(fileName));
+            //获取解析结果
+            List<EntityNodeMibFileResult> entityNodeMibFileResults = cloudResponse.getData();
+            String responseMessage = cloudResponse.getMessage();
+            if(StringUtils.isNotEmpty(responseMessage) && CollectionUtils.isEmpty(entityNodeMibFileResults)){
+                log.warn("import mib file and parse have something wrong!  {}", responseMessage);
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, responseMessage);
+            }
             //转换为树形结构
             tree = toTree(entityNodeMibFileResults);
             //排序
