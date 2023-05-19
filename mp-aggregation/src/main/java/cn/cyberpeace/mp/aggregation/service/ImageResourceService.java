@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModePar
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -33,7 +33,12 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @Description
@@ -99,7 +104,7 @@ public class ImageResourceService {
     private String exportLogo(String logoPath, String imagePath) {
         if (logoPath.startsWith("/fdfs") || logoPath.startsWith("group/")) {
             String logoUrl = StringUtils.replaceOnce(logoPath, "/fdfs/", "");
-            byte[] content = FdfsCommon.downloadRawContent(logoUrl);
+            byte[] content = FsCommon.downloadRawContent(logoUrl);
             // 判断图片文件类型
             if (this.isPng(content)) {
                 this.createFile(content, imagePath + "/logo.png");
