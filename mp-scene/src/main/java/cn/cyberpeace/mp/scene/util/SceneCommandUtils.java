@@ -31,42 +31,49 @@ public class SceneCommandUtils {
             return new ArrayList<>();
         }
         if (command.startsWith(ORIGIN_COMMAND_PREFIX)) {
-            parsedCommands.add(command.substring(ORIGIN_COMMAND_PREFIX.length()));
+            String commandContent = command.substring(ORIGIN_COMMAND_PREFIX.length());
+            if (StringUtils.isNotEmpty(commandContent)) {
+                parsedCommands.add(commandContent);
+            }
         } else if (command.startsWith(SCENE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(SCENE_COMMAND_PREFIX.length());
-            var sceneFileDir = SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId);
-            // 为兼容在节点目录内执行系统命令，执行相对路径的命令
-            if (isWindows) {
-                parsedCommands.add(CommandUtils.windowsCdDir(sceneFileDir));
-                // 确保call执行不退出
-                parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
-            } else {
-                // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
-                var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, sceneFileDir, relativeCommand);
-                parsedCommands.add(absoluteCommand);
+            if (StringUtils.isNotEmpty(relativeCommand)) {
+                var sceneFileDir = SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId);
+                // 为兼容在节点目录内执行系统命令，执行相对路径的命令
+                if (isWindows) {
+                    parsedCommands.add(CommandUtils.windowsCdDir(sceneFileDir));
+                    // 确保call执行不退出
+                    parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
+                } else {
+                    // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
+                    var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, sceneFileDir, relativeCommand);
+                    parsedCommands.add(absoluteCommand);
 
-                parsedCommands.add(CommandUtils.linuxCdDir(sceneFileDir));
-                parsedCommands.add(relativeCommand);
+                    parsedCommands.add(CommandUtils.linuxCdDir(sceneFileDir));
+                    parsedCommands.add(relativeCommand);
+                }
             }
         } else if (command.startsWith(NODE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
-            var nodeFileDir = SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId);
-            // 为兼容在节点目录内执行系统命令，执行相对路径的命令
-            if (isWindows) {
-                parsedCommands.add(CommandUtils.windowsCdDir(nodeFileDir));
-                // 确保call执行不退出
-                parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
+            if (StringUtils.isNotEmpty(relativeCommand)) {
+                var nodeFileDir = SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId);
+                // 为兼容在节点目录内执行系统命令，执行相对路径的命令
+                if (isWindows) {
+                    parsedCommands.add(CommandUtils.windowsCdDir(nodeFileDir));
+                    // 确保call执行不退出
+                    parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
 
-                parsedCommands.addAll(parseDirCommands(command, CommandUtils.WINDOWS_PATH_DELIMITER));
-            } else {
-                // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
-                var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, nodeFileDir, relativeCommand);
-                parsedCommands.add(absoluteCommand);
+                    parsedCommands.addAll(parseDirCommands(command, CommandUtils.WINDOWS_PATH_DELIMITER));
+                } else {
+                    // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
+                    var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, nodeFileDir, relativeCommand);
+                    parsedCommands.add(absoluteCommand);
 
-                parsedCommands.add(CommandUtils.linuxCdDir(nodeFileDir));
-                parsedCommands.add(relativeCommand);
+                    parsedCommands.add(CommandUtils.linuxCdDir(nodeFileDir));
+                    parsedCommands.add(relativeCommand);
 
-                parsedCommands.addAll(parseDirCommands(relativeCommand, CommandUtils.LINUX_PATH_DELIMITER));
+                    parsedCommands.addAll(parseDirCommands(relativeCommand, CommandUtils.LINUX_PATH_DELIMITER));
+                }
             }
         } else {
             parsedCommands.add(command);
