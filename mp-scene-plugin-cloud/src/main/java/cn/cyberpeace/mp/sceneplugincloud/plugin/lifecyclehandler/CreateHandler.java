@@ -631,20 +631,6 @@ public class CreateHandler extends HandlerCommon {
             extraCommands.add(CommandUtils.linuxMkDir(elementUnzipDir));
         }
 
-        // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
-        try {
-            ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
-        } catch (Exception e) {
-            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
-        }
-
-        if (!StringUtils.isEmpty(sceneFileUrl)) {
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, standardSystemType, sceneUnzipDir, true);
-        }
-        if (!StringUtils.isEmpty(elementFileUrl)) {
-            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
-        }
-
         List<String> commands = new ArrayList<>();
         List<String> initCommands = srcElement.getInitCommands();
         if (initCommands != null) {
@@ -655,6 +641,22 @@ public class CreateHandler extends HandlerCommon {
                         parsedCommands.toArray(new String[0]));
                 commands.add(inlineCommand);
             });
+        }
+
+        if (!StringUtils.isEmpty(sceneFileUrl) || !StringUtils.isEmpty(elementFileUrl) || !commands.isEmpty()) {
+            // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
+            try {
+                ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
+            } catch (Exception e) {
+                log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
+            }
+        }
+
+        if (!StringUtils.isEmpty(sceneFileUrl)) {
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, standardSystemType, sceneUnzipDir, true);
+        }
+        if (!StringUtils.isEmpty(elementFileUrl)) {
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
         boolean executeOnce = true;
