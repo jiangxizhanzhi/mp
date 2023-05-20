@@ -637,9 +637,11 @@ public class CreateHandler extends HandlerCommon {
             initCommands.forEach(initCommand -> {
                 var parsedCommands = SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
                         standardSystemType);
-                var inlineCommand = SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
-                        parsedCommands.toArray(new String[0]));
-                commands.add(inlineCommand);
+                if (!parsedCommands.isEmpty()) {
+                    var inlineCommand = SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
+                            parsedCommands.toArray(new String[0]));
+                    commands.add(inlineCommand);
+                }
             });
         }
 
@@ -659,39 +661,41 @@ public class CreateHandler extends HandlerCommon {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
-        boolean executeOnce = true;
-        for (var command : commands) {
-            if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
-                executeOnce = false;
-                break;
-            }
-        }
-        if (executeOnce) {
-            List<String> finnalCommands = new ArrayList<>();
-            for (var command : commands) {
-                if (StringUtils.isNotEmpty(command)) {
-                    String c = command.trim();
-                    if (c.endsWith(";")) {
-                        finnalCommands.add(c.substring(0, c.length() - 1));
-                    } else {
-                        finnalCommands.add(c);
-                    }
-                }
-            }
-            containerClient.executeCommand(containerId, SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
-                    finnalCommands.toArray(new String[0])));
-        } else {
+        if (commands != null && !commands.isEmpty()) {
+            boolean executeOnce = true;
             for (var command : commands) {
                 if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
-                    String[] path = command.split(StringUtils.SPACE);
-                    try {
-                        ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
-                    } catch (Exception e) {
-                        log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
-                    }
-                    continue;
+                    executeOnce = false;
+                    break;
                 }
-                containerClient.executeCommand(containerId, command);
+            }
+            if (executeOnce) {
+                List<String> finnalCommands = new ArrayList<>();
+                for (var command : commands) {
+                    if (StringUtils.isNotEmpty(command)) {
+                        String c = command.trim();
+                        if (c.endsWith(";")) {
+                            finnalCommands.add(c.substring(0, c.length() - 1));
+                        } else {
+                            finnalCommands.add(c);
+                        }
+                    }
+                }
+                containerClient.executeCommand(containerId, SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
+                        finnalCommands.toArray(new String[0])));
+            } else {
+                for (var command : commands) {
+                    if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
+                        String[] path = command.split(StringUtils.SPACE);
+                        try {
+                            ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                        } catch (Exception e) {
+                            log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                        }
+                        continue;
+                    }
+                    containerClient.executeCommand(containerId, command);
+                }
             }
         }
     }
