@@ -188,6 +188,7 @@ mp:
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
     gateway-types: ${GATEWAY_TYPES:2,3}
+    cpcloud-server-timeout: ${MP_CPLOUD_SERVER_TIMEOUT:600000}
     cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
     initiate-pool-size: ${MP_INITIATE_POOL_SIZE:10}
     initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
