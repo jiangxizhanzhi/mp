@@ -187,6 +187,7 @@ mp:
     public-net-proxy-ip:
     public-net-proxy-port:
     gateway-types: 2,3
+    cpcloud-server-timeout: 600000
     cpcloud-http-pool-size: 200
     initiate-pool-size: 10
     initiate-hold-size: 20000
