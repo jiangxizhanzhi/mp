@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
+import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import io.swagger.annotations.Api;
@@ -21,6 +22,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Description: 场景流量
@@ -143,6 +146,19 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-
+    /**
+     * TOP5实时速率
+     * @param id
+     * @return
+     */
+    @ApiOperation("TOP5实时速率")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/top5_node_txbps")
+    public ServiceResult<List<FlowNodeTxBps>> top5NodeTxBps(@RequestParam String id) {
+        log.info("FlowInfoController.flowStatistics begin. id:{}", id);
+        List<FlowNodeTxBps> result = csceneFlowService.top5NodeTxBps(id);
+        log.info("FlowInfoController.flowStatistics end. result:{}", result);
+        return ResultCommon.success(result);
+    }
 
 }

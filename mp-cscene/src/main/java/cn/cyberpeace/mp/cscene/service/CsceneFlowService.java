@@ -309,6 +309,22 @@ public class CsceneFlowService {
     }
 
     /**
+     * top5实时速率
+     * @param id
+     * @return
+     */
+    public List<FlowNodeTxBps> top5NodeTxBps(String id) {
+        log.info("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
+        List<FlowNodeTxBps> flowNodeTxBpsList = flowTaskRecordService.queryNodeTxBps(sceneId);
+        if (CollectionUtils.isNotEmpty(flowNodeTxBpsList) && flowNodeTxBpsList.size() > 5) {
+            flowNodeTxBpsList = flowNodeTxBpsList.subList(0, 5);
+        }
+        log.info("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
+        return flowNodeTxBpsList;
+    }
+
+    /**
      * 流量仿真统计
      * @param id
      * @return

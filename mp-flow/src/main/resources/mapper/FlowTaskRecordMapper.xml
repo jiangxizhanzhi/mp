@@ -49,4 +49,16 @@
         </foreach>
         order by statisticalTime
     </select>
+
+
+    <select id="queryNodeTxBps" resultType="cn.cyberpeace.mp.flow.bo.FlowNodeTxBps">
+        select node_name as nodeName,sum(tx_bps) as txBps
+        from mp_flow_task_task t,mp_flow_task_record r
+        where t.id=r.task_id and scene_id=#{sceneId} and task_status='1'
+          and r.create_time=(
+            select max(r.create_time) from mp_flow_task_task t,mp_flow_task_record r
+            where t.id=r.task_id and scene_id=#{sceneId} and task_status='1')
+        group by nodeName
+        order by txBps desc
+    </select>
 </mapper>

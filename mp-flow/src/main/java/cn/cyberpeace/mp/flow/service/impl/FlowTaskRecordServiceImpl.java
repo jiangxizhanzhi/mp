@@ -107,6 +107,19 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
     }
 
     /**
+     * 根据节点统计实时速率
+     * @param sceneId
+     * @return
+     */
+    @Override
+    public List<FlowNodeTxBps> queryNodeTxBps(String sceneId) {
+        log.info("FlowTaskRecordServiceImpl.queryNodeTxBps begin. id:{}", sceneId);
+        List<FlowNodeTxBps> flowNodeTxBpsList = this.getModelMapper().queryNodeTxBps(sceneId);
+        log.info("FlowTaskRecordServiceImpl.queryNodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
+        return flowNodeTxBpsList;
+    }
+
+    /**
      * 仿真统计
      * @param sceneId
      * @return

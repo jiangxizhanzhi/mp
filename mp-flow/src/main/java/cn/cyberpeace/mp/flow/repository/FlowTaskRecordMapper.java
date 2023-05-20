@@ -2,10 +2,7 @@ package cn.cyberpeace.mp.flow.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp;
-import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -54,5 +51,11 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
      */
     List<FlowStatisticsTemp> statisticsTaskId(@Param("sceneId") String sceneId, @Param("conditions") List<FlowStatisticalCondition> conditions);
 
+    /**
+     * 查询节点实时速率，按照速率倒序排列
+     * @param sceneId
+     * @return
+     */
+    List<FlowNodeTxBps> queryNodeTxBps(@Param("sceneId") String sceneId);
 
 }

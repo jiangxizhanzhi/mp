@@ -2,10 +2,7 @@ package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
-import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 
 import java.util.List;
@@ -45,6 +42,13 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
      * @return
      */
     FlowSummary queryFlowSummary(String sceneId);
+
+    /**
+     * 根据节点统计实时速率
+     * @param sceneId
+     * @return
+     */
+    List<FlowNodeTxBps> queryNodeTxBps(String sceneId);
 
     /**
      * 仿真统计
