@@ -144,18 +144,30 @@ mp:
     es-max-page-size: 10000
   # mp-auth 模块配置
   auth:
+    #最大可通过excel导入的用户数量
     max-import-user-size: 1000
+    #退出登录后是否重置tokenSecret
     logout-reset-secret: true
+    #用户默认头像
     default-user-avatar: /api/mp/avatar/1.png
+    #mq消息过期时间
     mq-msg-timeout: 3600000
     # authenticate
+    #认证缓存时间，默认30s
     authenticate-cache-time: 30
+    #是否获取个人token secret
     authenticate-use-individual-token-secret: true
+    #jwt秘钥
     authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
+    #token过期时间，默认7天
     authenticate-jwt-expires: 604800
+    #认证的url
     authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
+    #不认证的url
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip
+    #encoder循环次数
     authenticate-encoder-iterations: 10000
+    #encoder hash长度
     authenticate-encoder-hash-width: 256
   # mp-front-admin 模块配置
   frontadmin:
