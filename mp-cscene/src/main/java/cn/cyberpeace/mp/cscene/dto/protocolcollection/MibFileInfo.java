@@ -18,11 +18,6 @@ import java.util.List;
 @Data
 public class MibFileInfo extends EntityNodeMibFileResult {
 
-
-    @ApiModelProperty(value = "上级组织")
-    @JsonBackReference
-    MibFileInfo parentInfo;
-
     @ApiModelProperty(value = "下级组织")
     @JsonManagedReference
     List<MibFileInfo> children;
