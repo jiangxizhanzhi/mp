@@ -20,7 +20,7 @@ public class MibData {
     private String name;
     @ApiModelProperty(value = "oid")
     private String oid;
-    @ApiModelProperty(value = "被管理对象类型的关键字")
+    @ApiModelProperty(value = "被管理对象类型")
     private String syntax;
     @ApiModelProperty(value = "节点支持的访问方式")
     private String maxAccess;
