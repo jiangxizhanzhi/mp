@@ -19,6 +19,5 @@ import java.util.List;
 public class MibFileInfo extends EntityNodeMibFileResult {
 
     @ApiModelProperty(value = "下级组织")
-    @JsonManagedReference
     List<MibFileInfo> children;
 }
