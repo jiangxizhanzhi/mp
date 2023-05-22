@@ -881,6 +881,7 @@ public abstract class BaseSceneHandler<
      */
     private boolean saveScene() {
         S0 sceneObj = scene.toModel();
+        sceneObj.setDeleted(false);
         var result = sceneMapper.save(sceneObj);
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
