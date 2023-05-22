@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.response.AllActiveResponse;
 import cn.cyberpeace.mp.aggregation.response.AllResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.response.FlowResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -28,10 +27,16 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
+import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -40,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMappe
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +89,17 @@ public class DashboardService {
 
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
+    @Autowired
+    private FlowMonitorService flowMonitorService;
+
+    @Autowired
+    private SceneMapper sceneMapper;
+
+    @Autowired
+    private VmConverter vmConverter;
+
+    @Autowired
+    private ContainerConverter containerConverter;
 
     @Autowired
     public DashboardService(DeviceService deviceService,
@@ -172,29 +189,36 @@ public class DashboardService {
         response.setDeviceNum(entityTargetNum);
 
         var csceneMapper = BeanCommon.getBean(CsceneMapper.class);
-        var csceneNum = csceneMapper.total(new HumanCondition().filterEqual(CsceneModel::getDeleted, 0));
+        var csceneNum = csceneMapper.total(new HumanCondition()
+                .filterEqual(CsceneModel::getDeleted, 0)
+                .filterEqual(CsceneModel::getType, CsceneModel.Type.INSTANCE));
         response.setSceneNum(csceneNum);
 
-        var config = BeanCommon.getBean(DevopsClusterConfig.class);
-        String server = "http://" + config.getMpIp() + ":" + config.getMpPort();
-        HttpClient httpClient = HttpClient.builder().configServer(server).build();
-        Map<String, String> header = new HashMap<>();
-        header.put("clientId", "84261d495c414e");
-        header.put("clientSecret", "2112f4b855264ad7b1a4209737fc7836");
-        var flowRes1 = httpClient.get("/api/mp/flow/info/page?per_page=10&page=1&interactive_type=0&search_fields=title",
-                null,
-                header,
-                6000);
-        var flowRes2 = httpClient.get("/api/mp/flow/info/page?per_page=10&page=1&interactive_type=1&search_fields=title",
-                null,
-                header,
-                6000);
-        var flowNum1 = JsonCommon.parse(flowRes1.getResult(), FlowResponse.class);
-        var flowNum2 = JsonCommon.parse(flowRes2.getResult(), FlowResponse.class);
-        var flowNum = flowNum1.getData().getTotal() + flowNum2.getData().getTotal();
-        response.setFlowNum(flowNum);
+        response.setFlowNum(flowMonitorService.getFlowNumber());
 
         return response;
+    }
+
+    public AllActiveResponse getAllActive() {
+        AllActiveResponse allActiveResponse = new AllActiveResponse();
+        Integer entityTargetNum = 0;
+        HumanCondition humanCondition = new HumanCondition()
+                .link(SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, 0)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getVirtualType, 6);
+        var list = sceneMapper.list(humanCondition);
+        if (list != null) {
+            entityTargetNum = list.size();
+        }
+        Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
+        Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO());
+        allActiveResponse.setContainer(totalContainers);
+        allActiveResponse.setEntity(entityTargetNum);
+        allActiveResponse.setVm(totalInstances);
+        return allActiveResponse;
     }
 
     private Integer ObjectToInteger(Object plus) {

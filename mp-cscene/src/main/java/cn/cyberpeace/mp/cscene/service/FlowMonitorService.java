@@ -31,6 +31,8 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -107,10 +109,12 @@ public class FlowMonitorService {
     @Autowired
     private CsceneFileService csceneFileService;
 
+    @Autowired
+    private FlowInfoServiceImpl flowServiceImpl;
+
 
     /**
      * 查询单个节点机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
@@ -125,7 +129,6 @@ public class FlowMonitorService {
 
     /**
      * 查询场景机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
@@ -153,7 +156,6 @@ public class FlowMonitorService {
 
     /**
      * 模拟流量
-     *
      * @param request
      * @return
      */
@@ -179,7 +181,6 @@ public class FlowMonitorService {
 
     /**
      * 统计受攻击端口信息
-     *
      * @param request
      * @return
      */
@@ -219,7 +220,6 @@ public class FlowMonitorService {
 
     /**
      * 统计主机状态
-     *
      * @param request
      * @return
      */
@@ -263,7 +263,6 @@ public class FlowMonitorService {
 
     /**
      * 合并同一节点的多IP数据
-     *
      * @param boList
      * @param batchSceneHandler
      * @return
@@ -467,7 +466,6 @@ public class FlowMonitorService {
     /**
      * 流量分页接口包装
      * 根据攻击类型拆分
-     *
      * @param id
      * @param queryParams
      * @return
@@ -731,7 +729,6 @@ public class FlowMonitorService {
 
     /**
      * 导出全部流量文件
-     *
      */
     public String export(String taskId, String csceneId) {
         // csceneId -> sceneId
@@ -752,5 +749,19 @@ public class FlowMonitorService {
         }
         FlowPcapExportUtil.finalProcess(taskId, url);
         return url;
+    }
+
+    //获取流量信息
+    public Integer getFlowNumber() {
+        FlowInfoQueryParams queryParams = new FlowInfoQueryParams();
+        queryParams.setPage(1);
+        queryParams.setPerPage(999999);
+        queryParams.setInteractiveType(0);
+        queryParams.setSearchFields(new String[]{ "title" });
+        // 背景流量
+        var flowInfoResponseListObjServiceResult = flowServiceImpl.pageFlowInfo(queryParams);
+        queryParams.setInteractiveType(1);
+        var attackFlowInfoResponseListObjServiceResult = flowServiceImpl.pageFlowInfo(queryParams);
+        return flowInfoResponseListObjServiceResult.getSource().getTotal() + attackFlowInfoResponseListObjServiceResult.getSource().getTotal();
     }
 }
