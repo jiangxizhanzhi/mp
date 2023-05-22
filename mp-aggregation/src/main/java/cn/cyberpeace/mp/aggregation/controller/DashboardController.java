@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.aggregation.response.AllActiveResponse;
 import cn.cyberpeace.mp.aggregation.response.AllResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.response.SystemTimeResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.service.DashboardService;
@@ -81,6 +82,13 @@ public class DashboardController {
     @GetMapping("/all_active_info")
     public ServiceResult<AllActiveResponse> getAllActiveInfo() {
         var response = dashboardService.getAllActive();
+        return ResultCommon.success(response);
+    }
+
+    @ApiOperation("系统运行时间")
+    @GetMapping("/system_running_time")
+    public ServiceResult<SystemTimeResponse> getSystemRunningTime() {
+        var response = dashboardService.getSystemRunningTime();
         return ResultCommon.success(response);
     }
 
