@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.response.AllActiveResponse;
 import cn.cyberpeace.mp.aggregation.response.AllResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
@@ -73,6 +74,13 @@ public class DashboardController {
     @GetMapping("/all_resource_statistics")
     public ServiceResult<AllResourceStatisticsResponse> getAllResourceStatistics() {
         var response = dashboardService.allResourceStatistics();
+        return ResultCommon.success(response);
+    }
+
+    @ApiOperation("运行的虚拟机、容器、实装设备")
+    @GetMapping("/all_active_info")
+    public ServiceResult<AllActiveResponse> getAllActiveInfo() {
+        var response = dashboardService.getAllActive();
         return ResultCommon.success(response);
     }
 
