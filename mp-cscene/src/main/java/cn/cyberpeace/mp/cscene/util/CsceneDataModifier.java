@@ -812,8 +812,8 @@ public class CsceneDataModifier {
                 elements.values().forEach(e -> {
                     if (e.get("role") != null && BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH == Integer.parseInt(e.get("role").toString())) {
                         e.put("role", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
-                        e.put("auxiliary_router_off", true);
                     }
+                    e.put("auxiliary_router_off", true);
                 });
             }
         }
