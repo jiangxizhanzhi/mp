@@ -428,7 +428,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     SceneConfigMapper sceneConfigMapper = BeanCommon.getBean(SceneConfigMapper.class);
                     var sceneConfig = sceneConfigMapper.first(new HumanCondition().filterEqual(SceneConfigModel::getId,
                             cModel.getSceneConfig()));
-                    if (sceneConfig != null && !Boolean.TRUE.equals(sceneConfig.getDeleted())) {
+                    if (sceneConfig != null && Boolean.TRUE.equals(sceneConfig.getDeleted())) {
                         SceneConfigModel sceneConfigModel = new SceneConfigModel();
                         sceneConfigModel.setId(sceneConfig.getId());
                         sceneConfigModel.setDeleted(false);
