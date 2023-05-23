@@ -21,16 +21,20 @@ import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.*;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.flow.util.CommonUtil;
+import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -322,6 +326,39 @@ public class CsceneFlowService {
         }
         log.info("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
         return flowNodeTxBpsList;
+    }
+
+    /**
+     * TOP5流量协议
+     * @param id
+     * @return
+     */
+    public JSONArray top5Protocols(String id) {
+        log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
+        JSONArray protocols = new JSONArray();
+        String sceneId = csceneInstanceService.getSceneId(id);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
+        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        if (StringUtils.isNotEmpty(actuatorId)) {
+            FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+            if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getIp())) {
+                try {
+                    String rsp = HttpUtils.sendPost(CommonUtil.getHostUrl("flowActuatorModel.getIp()") + "/tasks/protocols/top5", "{}");
+                    JSONObject rspObj = JSONObject.parseObject(rsp);
+                    log.info("query top5 protocols response:{}", rspObj.toJSONString());
+                    if (ResponseUtils.checkResponse(rspObj)) {
+                        protocols = rspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("protocols");
+                    } else {
+                        log.error("query top5 protocols failed");
+                    }
+                } catch (Exception e) {
+                    log.error("query top5 protocols error, {}", ExceptionUtils.getStackTrace(e));
+                }
+            }
+        }
+        log.info("CsceneFlowService.top5Protocols end. protocols:{}", protocols);
+        return protocols;
     }
 
     /**

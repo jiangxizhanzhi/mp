@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -158,6 +159,21 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         log.info("FlowInfoController.flowStatistics begin. id:{}", id);
         List<FlowNodeTxBps> result = csceneFlowService.top5NodeTxBps(id);
         log.info("FlowInfoController.flowStatistics end. result:{}", result);
+        return ResultCommon.success(result);
+    }
+
+    /**
+     * TOP5流量协议
+     * @param id
+     * @return
+     */
+    @ApiOperation("TOP5流量协议")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/top5_protocols")
+    public ServiceResult<JSONArray> top5Protocols(@RequestParam String id) {
+        log.info("FlowInfoController.top5Protocols begin. id:{}", id);
+        JSONArray result = csceneFlowService.top5Protocols(id);
+        log.info("FlowInfoController.top5Protocols end. result:{}", result);
         return ResultCommon.success(result);
     }
 
