@@ -18,7 +18,7 @@ public class SnmpConfig implements Serializable {
     private static final long serialVersionUID = 389638345766063602L;
 
     @ApiModelProperty(value = "开关")
-    private String configSwitch;
+    private Boolean configSwitch;
 
     @ApiModelProperty(value = "snmp版本")
     private String version;
