@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordBatchDeleteRequest;
@@ -15,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,10 +41,17 @@ public class ScreenrecordController {
 
     private final ScreenrecordService screenrecordService;
 
+    private final CsceneInstanceMapper csceneInstanceMapper;
+
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
-        return screenrecordService.pageScreenrecord(queryParams);
+        String sceneId = null;
+        if (StringUtils.isNotEmpty(queryParams.getCsceneId())) {
+            var csceneModel = csceneInstanceMapper.get(queryParams.getCsceneId());
+            sceneId = csceneModel == null ? null : csceneModel.getScene();
+        }
+        return screenrecordService.pageScreenrecord(queryParams, sceneId);
     }
 
     @ApiOperation("按时间删除录屏文件")
