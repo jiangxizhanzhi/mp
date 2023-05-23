@@ -198,8 +198,7 @@ public class DashboardService {
 
         var csceneMapper = BeanCommon.getBean(CsceneMapper.class);
         var csceneNum = csceneMapper.total(new HumanCondition()
-                .filterEqual(CsceneModel::getDeleted, 0)
-                .filterEqual(CsceneModel::getType, CsceneModel.Type.INSTANCE));
+                .filterEqual(CsceneModel::getDeleted, 0));
         response.setSceneNum(csceneNum);
 
         response.setFlowNum(flowMonitorService.getFlowNumber());

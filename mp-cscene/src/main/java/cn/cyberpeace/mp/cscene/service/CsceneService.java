@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -35,6 +36,9 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
@@ -426,6 +430,26 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
+            if (StringUtils.isNotEmpty(csceneHandler.getCsceneId())) {
+                // cscene表 delete设置为false
+                CsceneModel csceneModel = new CsceneModel();
+                csceneModel.setId(csceneHandler.getCsceneId());
+                csceneModel.setDeleted(false);
+                getModelMapper().update(csceneModel);
+                // scene表 delete设置为false
+                var cModel = getModelMapper().get(csceneHandler.getCsceneId());
+                if (cModel != null) {
+                    SceneConfigMapper sceneConfigMapper = BeanCommon.getBean(SceneConfigMapper.class);
+                    var sceneConfig = sceneConfigMapper.first(new HumanCondition().filterEqual(SceneConfigModel::getId,
+                            cModel.getSceneConfig()));
+                    if (sceneConfig != null && !Boolean.TRUE.equals(sceneConfig.getDeleted())) {
+                        SceneConfigModel sceneConfigModel = new SceneConfigModel();
+                        sceneConfigModel.setId(sceneConfig.getId());
+                        sceneConfigModel.setDeleted(false);
+                        sceneConfigMapper.update(sceneConfigModel);
+                    }
+                }
+            }
             return new ServiceResult<>(csceneHandler.toData());
         }
     }
