@@ -13,14 +13,12 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.*;
 import cn.cyberpeace.mp.flow.model.*;
-import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
-import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
-import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
-import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
+import cn.cyberpeace.mp.flow.repository.*;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
+import cn.cyberpeace.mp.flow.service.FlowTaskPortService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -77,6 +75,9 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowScriptParamService flowScriptParamService;
+
+    @Autowired
+    private FlowTaskPortService flowTaskPortService;
 
     /**
      * tgn代码目录
@@ -424,6 +425,17 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
+     * 同步启动流量执行器
+     * @param trexName
+     * @return
+     */
+    public String syncStartExecutor(String trexName) {
+        String uuid = TextUtils.uuid();
+        this.startExecutor(uuid, trexName);
+        return uuid;
+    }
+
+    /**
      * 异步新增虚拟机、添加网口
      *
      */
@@ -533,6 +545,92 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
+
+    /**
+     * 启动trex虚拟机
+     * @param uuid
+     * @param trexName
+     */
+    private void startExecutor(String uuid, String trexName) {
+        log.info("addFlowExecutor name:{}", trexName);
+        // 获取外部networkId，用于管理端口
+        String externalNetId = "";
+        try {
+            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
+            JSONObject getNetworkObj = JSONObject.parseObject(getNetworkRsp);
+            log.info("get network response:{}", getNetworkObj.toJSONString());
+            if (BaseConstants.SUCCESS_ZERO.equals(getNetworkObj.getString(BaseConstants.STR_CODE))) {
+                JSONObject networkObj = getNetworkObj.getJSONObject(BaseConstants.STR_DATA);
+                externalNetId = networkObj.getString("external_net_id");
+            }
+        } catch (IOException e) {
+            log.error("get network error,{}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(FlowErrorCode.GET_OUTER_NETWORK_ERROR);
+        }
+
+        FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
+        AddVmRequest addVmRequest = new AddVmRequest();
+        addVmRequest.setName(trexName);
+        addVmRequest.setImage(flowConfig.getTrexImage());
+        AddVmRequest.Networks networks = new AddVmRequest.Networks();
+        networks.setNetworkId(externalNetId);
+        AddVmRequest.AccessModes accessModes = new AddVmRequest.AccessModes();
+        accessModes.setPort(80);
+        accessModes.setEnablePortMapping(false);
+        networks.setAccessModes(Collections.singletonList(accessModes));
+        addVmRequest.setNetworks(Collections.singletonList(networks));
+
+        try {
+            // 创建trex虚拟机
+            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
+                    JsonUtils.snakeStringify(addVmRequest));
+            JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
+            log.info("add trex vm response:{}", addVmObj.toJSONString());
+
+            String fixedIp = null;
+            if (BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
+                JSONObject vmObj = addVmObj.getJSONObject(BaseConstants.STR_DATA);
+                String instanceId = vmObj.getString("id");
+                JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
+                fixedIp = netWorkObj.getString("fixed_ip");
+                String ip = fixedIp + BaseConstants.COLON + "80";
+
+                String mac = netWorkObj.getString("mac_address");
+
+                // 新增流量执行器信息
+                flowActuatorModel.setId(uuid);
+                flowActuatorModel.setTitle(addVmRequest.getName());
+                flowActuatorModel.setInstanceId(instanceId);
+                flowActuatorModel.setIp(ip);
+                flowActuatorModel.setNetworkId(externalNetId);
+                flowActuatorMapper.create(flowActuatorModel);
+
+                // 添加流量任务网口信息
+                FlowTaskPortModel flowTaskPortModel = new FlowTaskPortModel();
+                flowTaskPortModel.setActuatorId(uuid);
+                flowTaskPortModel.setNetworkId(externalNetId);
+                flowTaskPortModel.setMac(mac);
+                flowTaskPortService.create(flowTaskPortModel);
+
+                // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
+                String finalFixedIp = fixedIp;
+                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
+                        null, 0, () -> checkStartTrex(finalFixedIp),
+                        () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+
+            } else {
+                log.error("add trex vm error");
+                throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
+            }
+        } catch (MpRuntimeException e) {
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
+            throw e;
+        } catch (Exception e) {
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
+        }
+    }
+
     /**
      * 校验trex服务状态
      * @param fixedIp
@@ -553,16 +651,21 @@ public class AsyncPlatFlowTaskService {
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
     }
 
-//    public static void main(String[] args) {
-//        String commands = "./init.sh";
-//        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
-//        serverInfo.setHost("10.100.7.192");
-//        serverInfo.setUser("root");
-//        serverInfo.setPassword("111111");
-//        SshUtil.refreshDir(serverInfo, commands, "/Users/qkjoe/Downloads/traffic_generators.zip", "/opt/project_dirs");
-//    }
+    /**
+     * 校验trex启动状态
+     * @param fixedIp
+     */
+    private void checkStartTrex(String fixedIp) {
+        String commands = "./init.sh";
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(fixedIp);
+        serverInfo.setUser("root");
+        serverInfo.setPassword("111111");
+        SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-
+        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                null, 0, null, () -> log.error("Trex vm start error:{}", fixedIp));
+    }
 
     /**
      * 删除网口信息
