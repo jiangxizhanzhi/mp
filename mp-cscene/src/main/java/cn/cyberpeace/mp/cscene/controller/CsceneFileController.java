@@ -84,7 +84,7 @@ public class CsceneFileController {
     @ApiImplicitParam(name = "file", value = "图标文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/icon_upload")
     public ServiceResult<SceneFileUploadResponse> iconUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        String[] legalSuffix = new String[]{ "png" };
+        String[] legalSuffix = new String[]{ "png", "svg" };
         var fileName = file.getOriginalFilename();
         var inputStream = file.getInputStream();
         var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
