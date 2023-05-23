@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -22,6 +23,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,7 +136,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     public void update() {
         var cscene = getCscene();
-        cscene.setScene(sceneService.modify(getSceneId(), cscene.getScene(), generateSceneContext()).getSource());
+        String sceneId = getSceneId();
+        if (StringUtils.isEmpty(sceneId)) {
+            var csceneInstanceModel = getCsceneMapper().first(new HumanCondition().filterEqual(CsceneInstanceModel::getId, cscene.getId()));
+            if (csceneInstanceModel != null) {
+                sceneId = csceneInstanceModel.getScene();
+            }
+        }
+        cscene.setScene(sceneService.modify(sceneId, cscene.getScene(), generateSceneContext()).getSource());
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
