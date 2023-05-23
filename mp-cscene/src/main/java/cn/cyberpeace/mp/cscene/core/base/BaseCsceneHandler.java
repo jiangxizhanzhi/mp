@@ -212,7 +212,6 @@ public abstract class BaseCsceneHandler<
         saveScene(cscene);
 
         C0 csceneObj = cscene.toModel();
-        csceneObj.setDeleted(false);
         var result = csceneMapper.save(csceneObj);
         setCsceneId(csceneObj.getId());
         cscene.fromModel(csceneObj);
