@@ -17,11 +17,14 @@ public class SnmpConfig implements Serializable {
 
     private static final long serialVersionUID = 389638345766063602L;
 
+    @ApiModelProperty(value = "开关")
+    private String configSwitch;
+
     @ApiModelProperty(value = "snmp版本")
     private String version;
     //团体字，一般为public
     @ApiModelProperty(value = "团体字")
-    private String community;
+    private String communityName;
     //ip地址
     @ApiModelProperty(value = "ip地址")
     private String ip;
