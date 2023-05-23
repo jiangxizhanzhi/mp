@@ -49,7 +49,7 @@ public class ProtocolCollectionService {
         EntityNode entityNode = new EntityNode();
         String fileName = multipartFile.getOriginalFilename();
         //mib文件临时路径
-        String mibFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(), "mibfile/tmp.rules");
+        String mibFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(), "mibfile/",fileName);
         File file = new File(mibFilePath);
         List<MibFileInfo> tree = new ArrayList<>();
         try {
