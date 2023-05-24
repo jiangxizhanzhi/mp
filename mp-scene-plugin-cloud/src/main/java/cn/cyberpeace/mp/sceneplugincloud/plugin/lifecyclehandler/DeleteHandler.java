@@ -353,7 +353,9 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));
         }
         // 删除dynamips节点
-        this.deleteVirtualDynamips(this.dynamipsIds);
+        if (!this.dynamipsIds.isEmpty()) {
+            this.deleteVirtualDynamips(this.dynamipsIds);
+        }
 
         // 删除辅助网络(包含虚拟交换机)
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
