@@ -14,20 +14,32 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class MibInfoQueryRequest {
+
+    @ApiModelProperty(value = "场景id")
+    @NotNull(message = "sceneId can not be empty")
+    private String sceneId;
+
+    @ApiModelProperty(value = "节点id")
+    @NotNull(message = "elementId can not be empty")
+    private String elementId;
+
     @ApiModelProperty(value = "oid")
     @NotNull(message = "oid can not be empty")
     private String oid;
     //snmp版本
     @ApiModelProperty(value = "snmp版本")
-    @NotNull(message = "snmp version can not be empty")
     private String version;
     //团体字，一般为public
     @ApiModelProperty(value = "团体字")
-    @NotNull(message = "community can not be empty")
     private String community;
-    //ip地址
-    @ApiModelProperty(value = "ip地址")
+    /**
+     * 宿主机ip地址
+     */
     private String ip;
+    /**
+     * 宿主机snmp协议转换端口
+     */
+    private String port;
     /**
      * snmp版本为v3时，会出现以下三个参数
      *  用户名

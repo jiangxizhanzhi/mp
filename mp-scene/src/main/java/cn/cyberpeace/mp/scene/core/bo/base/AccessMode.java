@@ -66,6 +66,8 @@ public class AccessMode {
         public static final String SERIAL = "serial";
         public static final String COM = "COM";
 
+        public static final String SNMP = "snmp";
+
         public static final Map<String, Integer> DEFAULT_PORT_MAP = Map.of(
                 SSH, 22,
                 TELNET, 23,
@@ -73,7 +75,8 @@ public class AccessMode {
                 VNC, 5900,
                 NC, 9999,
                 HTTP, 80,
-                HTTPS, 443
+                HTTPS, 443,
+                SNMP,161
         );
 
         private Protocol() {}

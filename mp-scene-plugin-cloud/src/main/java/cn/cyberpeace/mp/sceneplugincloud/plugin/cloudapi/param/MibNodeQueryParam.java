@@ -26,6 +26,8 @@ public class MibNodeQueryParam implements CloudHttpParam {
     private String community;
     //ip地址
     private String ip;
+    //端口
+    private String port;
     /**
      * snmp版本为v3时，会出现以下三个参数
      *  用户名
