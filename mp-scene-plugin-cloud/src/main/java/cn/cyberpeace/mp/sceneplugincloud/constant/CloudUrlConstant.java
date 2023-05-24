@@ -105,6 +105,9 @@ public class CloudUrlConstant {
 
     public static final String CREATE_FLAVOR = "/v1/flavors";
 
+    public static final String CREATE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
+    public static final String DELETE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
+
     private CloudUrlConstant() {
     }
 }
