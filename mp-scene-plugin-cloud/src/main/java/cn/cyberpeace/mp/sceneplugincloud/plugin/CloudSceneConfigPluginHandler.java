@@ -72,9 +72,6 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     // TODO 暂定 - 其它虚拟三层网关就是仿真路由
                     srcElement.setType(BaseSceneElementModel.Type.ROUTER);
                 }
-                if (imageType != null && imageType.equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
-                    cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
-                }
             }
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
             // 虚拟外部网络
@@ -139,6 +136,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
         } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
         }
     }
 

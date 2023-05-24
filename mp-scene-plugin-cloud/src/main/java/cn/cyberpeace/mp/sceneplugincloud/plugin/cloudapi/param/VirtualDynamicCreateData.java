@@ -10,13 +10,23 @@ public class VirtualDynamicCreateData implements CloudHttpData {
     private String name;
     private String image;
     private String host;
-    private Integer portNum;
+    private Integer portSum;
     private List<Network> networks;
+
+    // 返回值
+    private String platform;
+    private String deviceUuid;
+    private String id;
+    private String instanceId;
+    private Integer telnetPort;
 
     @Data
     public static class Network {
         private String networkId;
         private String slotPort;
         private String macAddress;
+        private String fixedIp;
+        private String portId;
+        private String tapId;
     }
 }

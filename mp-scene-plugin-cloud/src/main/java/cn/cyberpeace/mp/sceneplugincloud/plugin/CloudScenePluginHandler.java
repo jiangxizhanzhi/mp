@@ -638,6 +638,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
         } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
         }
     }
 
