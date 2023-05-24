@@ -2,10 +2,8 @@ package cn.cyberpeace.mp.frontadmin.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationStatus;
-import cn.cyberpeace.mp.frontadmin.dto.activation.ExpiredInfo;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
@@ -39,9 +37,6 @@ public class SysActivationController {
 
     @Autowired
     private SysActivationService activationService;
-
-    @Autowired
-    private FrontAdminConfig frontAdminConfig;
 
 
     @ApiOperation("激活")
@@ -95,16 +90,6 @@ public class SysActivationController {
     public ServiceResult getMachineCode() {
         String code = activationService.querySysUUID();
         return ResultCommon.success(code);
-    }
-
-    @ApiOperation("查询license过期信息")
-    @GetMapping("/expired_info")
-    public ServiceResult getExpiredInfo() {
-        ActivationResponse activationResponse = getActivationResponse();
-        //过期信息
-        ExpiredInfo expiredInfo = ExpiredInfo.builder().expiredDate(activationResponse.getExpiredDate())
-            .remindDays(frontAdminConfig.getLicenseRemindTime()).build();
-        return ResultCommon.success(expiredInfo);
     }
 
 
