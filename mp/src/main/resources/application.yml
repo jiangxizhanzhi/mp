@@ -161,8 +161,11 @@ mp:
   frontadmin:
     activ-enable: true
     license-dir: /home/mp/config/license
+    license-remind-enable: true
     # license到期提醒时间，默认剩余30天提醒
     license-remind-time: 30
+    #定时任务
+    cron-job-expression: 0 0 3 * * ?
   # mp-front-business 模块配置
   frontbusiness:
     url-ac-filter-enabled: true
