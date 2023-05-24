@@ -35,7 +35,7 @@ public class CustomImageUploadService extends BaseUploadService {
 
     @Override
     protected List<String> supportUploadType() {
-        return List.of("vmdk","raw","qcow2","vdi","zip","tar");
+        return List.of("vmdk","raw","qcow2","vdi","zip","tar","bin");
     }
 
     @Override

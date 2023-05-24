@@ -534,7 +534,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/modify")
     public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
-        log.info("modify_instance params,request:{}", JsonCommon.stringify(request));
+        log.info("modify_instance params,request:{}", JsonCommon.snakeStringify(request));
         var result = modelService.instanceModify(request).asResult();
         return result;
     }

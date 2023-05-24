@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.util.*;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
+import cn.cyberpeace.mp.scene.util.SceneFileUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -20,9 +24,38 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DynamicCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.io.file.FileNameUtil;
@@ -30,7 +63,15 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -45,7 +86,7 @@ public class CreateHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
-    private VirtualDynamic vdClient = new VirtualDynamic();
+    private VirtualDynamips vdClient = new VirtualDynamips();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -339,9 +380,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 生成虚拟网卡
      * @param cloudElement
      * @return List<VirtualNic>
+     * @description: 生成虚拟网卡
      */
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
@@ -386,9 +427,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 获得连接网络的虚拟网卡相关信息
      * @param connectedNetwork
      * @return VirtualNic
+     * @description: 获得连接网络的虚拟网卡相关信息
      */
     private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
         var network = connectedNetwork.network;
@@ -1097,8 +1138,23 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    protected void createVirtualDynamic(CloudPluginSceneElementBO cloudElement) {
+    protected void createVirtualDynamips(CloudPluginSceneElementBO cloudElement) {
         VirtualDynamicCreateData createData = new VirtualDynamicCreateData();
+        List<VirtualDynamicCreateData.Network> networks = new ArrayList<>();
+        createData.setNetworks(networks);
+        var srcElement = cloudElement.getSrcElement();
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+        if (srcElement.getPorts() != null) {
+            for (var port : srcElement.getPorts()) {
+                var net = getHandlerUtils().getNetworkByPort(port);
+                if (net != null) {
+                    VirtualDynamicCreateData.Network network = new VirtualDynamicCreateData.Network();
+                    network.setNetworkId(net.getResourceId());
+                    network.setSlotPort(port.getName());
+                    networks.add(network);
+                }
+            }
+        }
         vdClient.create(createData);
     }
 
@@ -1226,14 +1282,14 @@ public class CreateHandler extends HandlerCommon {
                     () -> createEntityNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamic(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamips(cloudElement));
         }
     }
 
     private void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
         List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
-                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIC)
+                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
                 .collect(Collectors.toList());
 
         List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
