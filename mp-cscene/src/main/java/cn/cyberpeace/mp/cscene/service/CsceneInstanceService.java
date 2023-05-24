@@ -1314,7 +1314,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
-        var instanceHandler = new CsceneInstanceHandler(instance, null);
+        var instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
         instanceHandler.update();
         return new ServiceResult<>(instanceHandler.toData());
     }
