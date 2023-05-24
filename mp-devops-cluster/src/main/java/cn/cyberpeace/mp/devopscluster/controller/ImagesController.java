@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ISOService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
@@ -134,6 +135,8 @@ public class ImagesController {
     private final SnapshotService snapshotService;
 
     private final DevopsClusterConfig devopsClusterConfig;
+
+    private final DynamipsService dynamipsService ;
 
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
@@ -524,7 +527,8 @@ public class ImagesController {
     @ApiOperation("查询dynamic相关的信息")
     @GetMapping("/dynamic_image_info")
     public Result<DynamicImageInfo> getDynamicImageInfo() {
-        return new Result<>(DynamicImageInfo.mock());
+        var info = dynamipsService.getInfo();
+        return new Result<>(info);
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")

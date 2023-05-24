@@ -1144,18 +1144,33 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(networks);
         var srcElement = cloudElement.getSrcElement();
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+        createData.setImage(cloudElement.getImage());
+        createData.setPortSum(cloudElement.getWanPortNumber());
+        Map<String, SceneElementPortBO> portName2Port = new HashMap<>();
         if (srcElement.getPorts() != null) {
             for (var port : srcElement.getPorts()) {
+                portName2Port.put(port.getName(), port);
                 var net = getHandlerUtils().getNetworkByPort(port);
-                if (net != null) {
+                if (net != null && StringUtils.isNotEmpty(net.getResourceId())) {
                     VirtualDynamicCreateData.Network network = new VirtualDynamicCreateData.Network();
                     network.setNetworkId(net.getResourceId());
                     network.setSlotPort(port.getName());
+                    network.setFixedIp(port.getIp());
                     networks.add(network);
                 }
             }
         }
-        vdClient.create(createData);
+        var result = vdClient.create(createData);
+        cloudElement.setResourceId(result.getId());
+        if (result.getNetworks() != null) {
+            for (var networkPort : result.getNetworks()) {
+                var port = portName2Port.get(networkPort.getSlotPort());
+                if (port != null) {
+                    port.setMacAddr(networkPort.getMacAddress());
+                    getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
+                }
+            }
+        }
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {

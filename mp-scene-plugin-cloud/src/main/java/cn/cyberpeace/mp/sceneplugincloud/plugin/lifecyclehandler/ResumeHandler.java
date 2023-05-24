@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.ResumeTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class ResumeHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
     private final Container container = new Container();
+    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
     public static class SceneProcess {
         public static final EventProcess RESUME_TERMINALS = new EventProcess("resume_terminals", "sceneplugincloud.event.resume_terminals");
@@ -33,6 +35,7 @@ public class ResumeHandler extends HandlerCommon {
         public static final EventProcess RESUME_VIRTUAL_MACHINE = new EventProcess("resume_virtual_machine", "sceneplugincloud.event.resume_virtual_machine");
         public static final EventProcess RESUME_CONTAINER = new EventProcess("resume_container", "sceneplugincloud.event.resume_container");
         public static final EventProcess RESUME_NODE = new EventProcess("resume_node", "sceneplugincloud.event.resume_node");
+        public static final EventProcess RESUME_DYNAMIPS = new EventProcess("resume_dynamips", "sceneplugincloud.event.resume_dynamips");
     }
 
     public ResumeHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -67,6 +70,11 @@ public class ResumeHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.RESUME, ElementProcess.RESUME_CONTAINER, () -> {
                 container.resume(instanceId);
                 checkAccessModes(element);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_DYNAMIPS));
+            runElementProgress(nodeId, SceneElementModel.Event.RESUME, ElementProcess.RESUME_DYNAMIPS, () -> {
+                virtualDynamips.resume(instanceId);
             });
         } else {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_NODE));

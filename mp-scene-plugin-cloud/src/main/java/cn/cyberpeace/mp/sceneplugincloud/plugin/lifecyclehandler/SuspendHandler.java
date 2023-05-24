@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.SuspendTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class SuspendHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
     private final Container container = new Container();
+    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
     public static class SceneProcess {
         public static final EventProcess SUSPEND_TERMINALS = new EventProcess("suspend_terminals", "sceneplugincloud.event.suspend_terminals");
@@ -33,6 +35,7 @@ public class SuspendHandler extends HandlerCommon {
         public static final EventProcess SUSPEND_VIRTUAL_MACHINE = new EventProcess("suspend_virtual_machine", "sceneplugincloud.event.suspend_virtual_machine");
         public static final EventProcess SUSPEND_CONTAINER = new EventProcess("suspend_container", "sceneplugincloud.event.suspend_container");
         public static final EventProcess SUSPEND_NODE = new EventProcess("suspend_node", "sceneplugincloud.event.suspend_node");
+        public static final EventProcess SUSPEND_DYNAMIPS = new EventProcess("suspend_dynamips", "sceneplugincloud.event.suspend_dynamips");
     }
 
     public SuspendHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -67,6 +70,11 @@ public class SuspendHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_CONTAINER, () -> {
                 closeAccessModes(element);
                 container.suspend(instanceId);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_DYNAMIPS));
+            runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_DYNAMIPS, () -> {
+                virtualDynamips.suspend(instanceId);
             });
         } else {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_NODE));

@@ -39,8 +39,10 @@ public class DeleteHandler extends HandlerCommon {
     protected final Container containerClient = CloudApiProxyBuilder.build(new Container(), Container.class);
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
+    private final VirtualDynamips virtualDynamips = CloudApiProxyBuilder.build(new VirtualDynamips(), VirtualDynamips.class);
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+    private final List<String> dynamipsIds = new ArrayList<>();
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -61,6 +63,7 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess DELETE_CONTAINER = new EventProcess("delete_container", "sceneplugincloud.event.delete_container");
         public static final EventProcess DELETE_ENTITY_NODE = new EventProcess("delete_entity_node", "sceneplugincloud.event.delete_entity_node");
         public static final EventProcess DELETE_NPC = new EventProcess("delete_npc", "sceneplugincloud.event.delete_npc");
+        public static final EventProcess DELETE_DYNAMIPS = new EventProcess("delete_dynamips", "sceneplugincloud.event.delete_dynamips");
     }
 
     @Data
@@ -349,6 +352,8 @@ public class DeleteHandler extends HandlerCommon {
         if (!deleteGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));
         }
+        // 删除dynamips节点
+        this.deleteVirtualDynamips(this.dynamipsIds);
 
         // 删除辅助网络(包含虚拟交换机)
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
@@ -427,6 +432,11 @@ public class DeleteHandler extends HandlerCommon {
                     () -> {
                         recordNpcNode(cloudElement);
                     });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_DYNAMIPS,
+                    () -> {
+                        this.dynamipsIds.add(cloudElement.getResourceId());
+                    });
         }
     }
 
@@ -477,5 +487,9 @@ public class DeleteHandler extends HandlerCommon {
         List<String>  usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setEntityUsbUuids(usbUuids);
         vmClient.deleteEntityUsbs(data);
+    }
+
+    private void deleteVirtualDynamips(List<String> ids) {
+        virtualDynamips.delete(ids);
     }
 }
