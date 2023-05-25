@@ -561,20 +561,20 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
-                //不存在任何接入方式则初始化一个空的
-                if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
-                    entityInterface.setAccessModes(new ArrayList<>());
-                }
-                //配置勾选了snmp，则单独处理snmp协议
-                SnmpConfig snmpConfig = cloudElement.getSnmpConfig();
-                if(!Objects.isNull(snmpConfig) && snmpConfig.getConfigSwitch() && !configSnmpFinished){
-                    var accessMode = new EntityNodeCreateData.Interface.AccessMode();
-                    accessMode.setProtocol(AccessMode.Protocol.SNMP);
-                    accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SNMP));
-                    accessMode.setIpAddress(TextUtils.emptyNull(port.getIp()));
-                    accessMode.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
-                    entityInterface.getAccessModes().add(accessMode);
-                }
+            }
+            //不存在任何接入方式则初始化一个空的
+            if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
+                entityInterface.setAccessModes(new ArrayList<>());
+            }
+            //配置勾选了snmp，则单独处理snmp协议
+            SnmpConfig snmpConfig = cloudElement.getSnmpConfig();
+            if(!Objects.isNull(snmpConfig) && snmpConfig.getConfigSwitch() && !configSnmpFinished){
+                var accessMode = new EntityNodeCreateData.Interface.AccessMode();
+                accessMode.setProtocol(AccessMode.Protocol.SNMP);
+                accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SNMP));
+                accessMode.setIpAddress(TextUtils.emptyNull(port.getIp()));
+                accessMode.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
+                entityInterface.getAccessModes().add(accessMode);
             }
             entityInterface.setFwdnsInterfaceIp(getHandlerUtils().getFwdnsInterfaceIp(srcElement.getId(), connectNetwork.getNetwork().getId()));
             entityInterfaces.add(entityInterface);
@@ -900,14 +900,23 @@ public class CreateHandler extends HandlerCommon {
 
             var accessModesData = entityInterface.getAccessModes();
             if (accessModesData != null && !accessModesData.isEmpty()) {
+                for (var accessModeData : accessModesData) {
+                    if (AccessMode.Protocol.SNMP.equals(accessModeData.getProtocol())) {
+                        var portMapping = accessModeData.getPortMapping();
+                        if (portMapping != null) {
+                            cloudElement.getSnmpConfig().setSceneIp(portMapping.getHost());
+                            cloudElement.getSnmpConfig().setScenePort(portMapping.getHostPort());
+                        } else {
+                            cloudElement.getSnmpConfig().setSceneIp(accessModeData.getIpAddress());
+                            cloudElement.getSnmpConfig().setScenePort(accessModeData.getPort());
+                        }
+                        break;
+                    }
+                }
+
                 Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
-                    if(accessMode.getProtocol().equals(AccessMode.Protocol.SNMP)){
-                        cloudElement.getSnmpConfig().setSceneIp(accessMode.getAccessIp());
-                        cloudElement.getSnmpConfig().setScenePort(accessMode.getPort());
-                        return;
-                    }
                     var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
                     if (accessModeData == null) {
                         return;
