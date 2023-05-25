@@ -2859,5 +2859,1170 @@
     "key": "scriptFlowError",
     "zh_name": "脚本执行异常==>",
     "en_name": "Script execute error==>"
+  },
+  {
+    "key": "http",
+    "zh_name": "无连接、无状态的协议，简单快速，支持C/S模式",
+    "en_name": "Connectionless, stateless protocol, simple and fast, supports client/server model"
+  },
+  {
+    "key": "https",
+    "zh_name": "以安全为目标的HTTP通道",
+    "en_name": "HTTP channel with security as the objective"
+  },
+  {
+    "key": "dns",
+    "zh_name": "分布式，将域名和IP地址相互映射",
+    "en_name": "Distributed system that maps domain names to IP addresses"
+  },
+  {
+    "key": "ftp",
+    "zh_name": "提供交互式访问，允许用户指定存储文件的类型与格式，可以在异构网络中传送文件",
+    "en_name": "Provides interactive access, allowing users to specify the type and format of stored files, and can transfer files in heterogeneous networks"
+  },
+  {
+    "key": "tcp",
+    "zh_name": "支持多网络应用的分层协议层次结构",
+    "en_name": "Supports layered protocol hierarchy for multiple network applications"
+  },
+  {
+    "key": "udp",
+    "zh_name": "提供面向事务的简单不可靠信息传送服务",
+    "en_name": "Provides transaction-oriented, simple, unreliable message transmission service"
+  },
+  {
+    "key": "ssl",
+    "zh_name": "广泛支持各种类型的网络安全，同时提供三种基本的安全服务",
+    "en_name": "Widely supports various types of network security while providing three basic security services"
+  },
+  {
+    "key": "llmnr",
+    "zh_name": "基于域名系统，解析同一本地链路上的主机执行名称",
+    "en_name": "Resolves host names on the same local link based on the domain name system"
+  },
+  {
+    "key": "oicq",
+    "zh_name": "基于Internet的即时通信网络协议",
+    "en_name": "Internet-based instant messaging network protocol"
+  },
+  {
+    "key": "nbns",
+    "zh_name": "基于NetBIOS名称访问网络上提供的主机名和地址映射",
+    "en_name": "Accesses host name and address mapping provided on the network based on NetBIOS names"
+  },
+  {
+    "key": "ssdp",
+    "zh_name": "即插即用，轻松建立小网络连接",
+    "en_name": "Plug-and-play, easy to establish small network connections"
+  },
+  {
+    "key": "arp",
+    "zh_name": "广播请求，获取目标物理地址",
+    "en_name": "Broadcasts requests to obtain the destination physical address"
+  },
+  {
+    "key": "eth",
+    "zh_name": "负责相邻设备之间的数据帧传输",
+    "en_name": "Is responsible for data frame transmission between adjacent devices"
+  },
+  {
+    "key": "vnc",
+    "zh_name": "虚拟网络控制台，高效实用的远程控制能力",
+    "en_name": "Virtual network console, efficient and practical remote control capabilities"
+  },
+  {
+    "key": "icmpv6",
+    "zh_name": "IPv6配套使用的互联网控制信息协议",
+    "en_name": "Internet Control Message Protocol for use with IPv6"
+  },
+  {
+    "key": "icmp",
+    "zh_name": "传输出错报告控制信息",
+    "en_name": "Transmits error reporting control information"
+  },
+  {
+    "key": "dhcp",
+    "zh_name": "主机IP、子网掩码、网关、DNS自动获取",
+    "en_name": "Automatic acquisition of host IP, subnet mask, gateway, and DNS"
+  },
+  {
+    "key": "dhcp",
+    "zh_name": "主机IP、子网掩码、网关、DNS自动获取",
+    "en_name": "Automatic acquisition of host IP, subnet mask, gateway, and DNS"
+  },
+  {
+    "key": "dhcpv6",
+    "zh_name": "向IPv6主机提供有状态的地址配置或无状态的配置设置",
+    "en_name": "Provides stateful address configuration or stateless configuration settings to IPv6 hosts"
+  },
+  {
+    "key": "json",
+    "zh_name": "轻量级的文本数据交换格式",
+    "en_name": "Lightweight textual data interchange format"
+  },
+  {
+    "key": "cattp",
+    "zh_name": "提供UICC到远程终端间可靠信息传输",
+    "en_name": "Provides reliable information transmission between UICC and remote terminals"
+  },
+  {
+    "key": "browser",
+    "zh_name": "灵活探测内网存活主机",
+    "en_name": "Flexibly detects live hosts within an intranet"
+  },
+  {
+    "key": "xml",
+    "zh_name": "可读性强，解析方便",
+    "en_name": "Strong readability and easy parsing"
+  },
+  {
+    "key": "ocsp",
+    "zh_name": "维护服务器和其它网络资源安全性",
+    "en_name": "Maintains the security of servers and other network resources"
+  },
+  {
+    "key": "bootp",
+    "zh_name": "用于无盘工作站的局域网中，让无盘工作站获得IP地址",
+    "en_name": "Used in LANs for diskless workstations to obtain IP addresses"
+  },
+  {
+    "key": "stp",
+    "zh_name": "防止网桥网络中的冗余链路形成环路",
+    "en_name": "Prevents redundant links from forming loops in bridge networks"
+  },
+  {
+    "key": "stun",
+    "zh_name": "用于两个同时处于NAT路由器之后的主机之间建立UDP通信",
+    "en_name": "Used for establishing UDP communication between two hosts behind NAT routers simultaneously"
+  },
+  {
+    "key": "smtp",
+    "zh_name": "跨越网络传输邮件",
+    "en_name": "Transfers emails across networks"
+  },
+  {
+    "key": "sip",
+    "zh_name": "创建、修改和释放一个或多个参与者的会话",
+    "en_name": "Creates, modifies, and releases a session for one or more participants"
+  },
+  {
+    "key": "rtp",
+    "zh_name": "管理EIGRP数据包的发送和接收",
+    "en_name": "Manages the sending and receiving of EIGRP packets"
+  },
+  {
+    "key": "rtsp",
+    "zh_name": "一对多应用程序有效地通过IP网络传送多媒体数据",
+    "en_name": "Effectively transmits multimedia data over IP networks for one-to-many applications"
+  },
+  {
+    "key": "mdns",
+    "zh_name": "实现局域网设备的发现",
+    "en_name": "Implements discovery of devices on a local network"
+  },
+  {
+    "key": "rip",
+    "zh_name": "分布式的、基于距离向量的路由选择协议",
+    "en_name": "Distributed, distance vector-based routing protocol"
+  },
+  {
+    "key": "ripv1",
+    "zh_name": "有类路由协议",
+    "en_name": "Classful routing protocol"
+  },
+  {
+    "key": "ntp",
+    "zh_name": "提供高精准度的时间校正",
+    "en_name": "Provides high-precision time synchronization"
+  },
+  {
+    "key": "ip",
+    "zh_name": "构成互联网的基础,整个TCP/IP协议族的核心",
+    "en_name": "Forms the basis of the Internet and is the core of the entire TCP/IP protocol family"
+  },
+  {
+    "key": "trdp",
+    "zh_name": "用于轨道交通实时以太网络,可提高实时性和可靠性",
+    "en_name": "Used for real-time Ethernet networks in rail transportation to improve real-time performance and reliability"
+  },
+  {
+    "key": "tls",
+    "zh_name": "用于在两个通信应用程序之间提供保密性和数据完整性",
+    "en_name": "Provides confidentiality and data integrity between two communicating applications"
+  },
+  {
+    "key": "smpp",
+    "zh_name": "用于无线数据应用与无线网络之间消息传送的协议",
+    "en_name": "Protocol for message transmission between wireless data applications and wireless networks"
+  },
+  {
+    "key": "bgp",
+    "zh_name": "运行于TCP上的一种自治系统的路由协议",
+    "en_name": "Autonomous system routing protocol that runs on TCP"
+  },
+  {
+    "key": "cip",
+    "zh_name": "一种应用在工业自动化的通信协定",
+    "en_name": "Communication protocol used in industrial automation"
+  },
+  {
+    "key": "bacapp",
+    "zh_name": "用于智能建筑的通信协议",
+    "en_name": "Communication protocol used in smart buildings"
+  },
+  {
+    "key": "mms",
+    "zh_name": "访问并流式接收Windows Media服务器中.asf文件的一种协议",
+    "en_name": "Protocol used to access and stream .asf files from Windows Media servers"
+  },
+  {
+    "key": "cotp",
+    "zh_name": "基于TCP的工控TCP，用于进行传输连接的建立",
+    "en_name": "Control-oriented Transmission Protocol based on TCP, used to establish transmission connections"
+  },
+  {
+    "key": "dnp3",
+    "zh_name": "一种应用于自动化组件之间的通讯协议",
+    "en_name": "Communication protocol used between automation components"
+  },
+  {
+    "key": "coap",
+    "zh_name": "一种专用于受限设备的Internet应用协议",
+    "en_name": "Internet application protocol designed for constrained devices"
+  },
+  {
+    "key": "mqtt",
+    "zh_name": "为硬件性能低下的远程设备以及网络状况糟糕的情况下而设计的发布/订阅型消息协议",
+    "en_name": "Publish/subscribe messaging protocol designed for remote devices with low hardware performance and poor network conditions"
+  },
+  {
+    "key": "modbus",
+    "zh_name": "工控标准协议",
+    "en_name": "Industrial control standard protocol"
+  },
+  {
+    "key": "lwm2m",
+    "zh_name": "一种轻量级的、标准通用的物联网设备管理协议",
+    "en_name": "A lightweight, standardized, universal device management protocol for the Internet of Things (IoT)"
+  },
+  {
+    "key": "sctp",
+    "zh_name": "提供可靠性、排序、流量控制以及全双工的数据传输",
+    "en_name": "Provides reliable, ordered, flow-controlled and full-duplex data transmission"
+  },
+  {
+    "key": "fix",
+    "zh_name": "一种主要用于证券交易过程交换的公开协议",
+    "en_name": "A public protocol primarily used for exchanging securities trading information"
+  },
+  {
+    "key": "wlan",
+    "zh_name": "IEEE最初制定的一个无线局域网标准",
+    "en_name": "An IEEE standard originally developed for wireless LANs"
+  },
+  {
+    "key": "wbxml",
+    "zh_name": "提供了一种简单的压缩算法的协议",
+    "en_name": "Provides a protocol with a simple compression algorithm"
+  },
+  {
+    "key": "imf",
+    "zh_name": "SMTP协议在互联网传输文本消息的格式",
+    "en_name": "The format for transmitting text messages over the Internet in the SMTP protocol"
+  },
+  {
+    "key": "ospf",
+    "zh_name": "一种基于链路状态的路由协议",
+    "en_name": "A link-state routing protocol"
+  },
+  {
+    "key": "radius",
+    "zh_name": "一种分布式的、C/S架构的信息交互协议",
+    "en_name": "A distributed, client/server architecture information exchange protocol"
+  },
+  {
+    "key": "c1222",
+    "zh_name": "用于智能电网的电力仪表网络的应用层协议",
+    "en_name": "An application layer protocol for power metering networks used in smart grids"
+  },
+  {
+    "key": "gnutella",
+    "zh_name": "一种P2P文件分享协议，允许用户在互联网上搜索和共享文件",
+    "en_name": "A P2P file sharing protocol that allows users to search and share files on the Internet"
+  },
+  {
+    "key": "amqp",
+    "zh_name": "高级消息队列协议，用于在应用程序之间进行消息传递",
+    "en_name": "Advanced Message Queuing Protocol used for messaging between applications"
+  },
+  {
+    "key": "diameter",
+    "zh_name": "一种认证、授权和计费协议，通常用于移动网络中的信令控制平面",
+    "en_name": "A protocol for authentication, authorization and accounting, typically used in the signaling control plane of mobile networks"
+  },
+  {
+    "key": "cipcls",
+    "zh_name": "一种Rockwell Automation用于设备之间通信的协议，用于工业自动化领域",
+    "en_name": "A Rockwell Automation protocol used for communication between devices in the field of industrial automation"
+  },
+  {
+    "key": "gtp",
+    "zh_name": "用于移动通信网络的协议，主要用于传输用户数据和信令",
+    "en_name": "Protocol used in mobile communication networks for transmitting user data and signaling"
+  },
+  {
+    "key": "twamp.control",
+    "zh_name": "一种测量IP网络性能的协议，主要用于测量网络延迟和带宽等指标",
+    "en_name": "Protocol used to measure IP network performance, primarily for measuring network delay and bandwidth"
+  },
+  {
+    "key": "websocket",
+    "zh_name": "一种基于TCP协议的通信协议，可实现全双工通信，通常用于Web应用程序中",
+    "en_name": "A communication protocol based on TCP that enables full-duplex communication and is commonly used in web applications"
+  },
+  {
+    "key": "bittorrent",
+    "zh_name": "一种P2P文件分享协议，允许用户在互联网上高速下载和分享文件",
+    "en_name": "A P2P file sharing protocol that allows users to download and share files at high speeds over the internet"
+  },
+  {
+    "key": "ripng",
+    "zh_name": "一种IPv6路由信息协议，用于在IPv6网络中确定最佳路径",
+    "en_name": "An IPv6 routing information protocol used to determine the best path in an IPv6 network"
+  },
+  {
+    "key": "wow",
+    "zh_name": "《魔兽世界》(World of Warcraft)的简称，是一款大型多人在线角色扮演游戏(MMORPG)，通常使用TCP和UDP协议进行通信",
+    "en_name": "Short for World of Warcraft, a massively multiplayer online role-playing game (MMORPG) that typically uses TCP and UDP protocols for communication"
+  },
+  {
+    "key": "t38",
+    "zh_name": "音频传输协议，用于在IP网络上传输实时扫描文本",
+    "en_name": "An audio transport protocol used to transmit real-time scanned text over IP networks"
+  },
+  {
+    "key": "ff",
+    "zh_name": "一种音频/视频容器格式，支持多种编解码器",
+    "en_name": "A multimedia container format that supports various codecs for audio and video"
+  },
+  {
+    "key": "opsi",
+    "zh_name": "开源客户端管理系统，用于在大规模计算机环境中自动安装和配置操作系统和应用程序",
+    "en_name": "An open source client management system used to automate the installation and configuration of operating systems and applications in large-scale computing environments"
+  },
+  {
+    "key": "dcc",
+    "zh_name": "直接客户端到客户端通信，一种P2P通信协议",
+    "en_name": "Direct client-to-client communication, a P2P communication protocol"
+  },
+  {
+    "key": "gtpprime",
+    "zh_name": "一种通用的GPRS隧道协议，用于在GSM网络中传输数据",
+    "en_name": "A universal GPRS tunneling protocol used to transmit data in GSM networks"
+  },
+  {
+    "key": "mmse",
+    "zh_name": "一种多媒体传输协议，主要用于在VoIP和视频会议中传输音频和视频数据",
+    "en_name": "A multimedia transport protocol primarily used to transmit audio and video data in VoIP and video conference systems"
+  },
+  {
+    "key": "opa.fe",
+    "zh_name": "一种基于OpenFabrics的高性能计算网络协议",
+    "en_name": "A high-performance computing network protocol based on OpenFabrics"
+  },
+  {
+    "key": "edonkey",
+    "zh_name": "一种P2P文件共享协议，用于在网络上分享文件",
+    "en_name": "A P2P file sharing protocol used to share files over a network"
+  },
+  {
+    "key": "pgsql",
+    "zh_name": "一种开源的对象关系型数据库管理系统",
+    "en_name": "An open source object-relational database management system"
+  },
+  {
+    "key": "lwres",
+    "zh_name": "轻型逆向解析服务，一种DNS协议",
+    "en_name": "Lightweight Resolver Service, a DNS protocol"
+  },
+  {
+    "key": "irc",
+    "zh_name": "互联网聊天协议，用于在线聊天和即时通讯",
+    "en_name": "Internet Relay Chat protocol used for online chatting and instant messaging"
+  },
+  {
+    "key": "who",
+    "zh_name": "一种网络工具，用于显示当前登录系统的用户信息",
+    "en_name": "A network tool used to display information about currently logged in users on a system"
+  },
+  {
+    "key": "openvpn",
+    "zh_name": "一种开源虚拟私有网络解决方案，用于创建安全的点对点或站到站连接",
+    "en_name": "An open source virtual private network solution used for creating secure point-to-point or site-to-site connections"
+  },
+  {
+    "key": "gtpv2",
+    "zh_name": "一种通用的分组核心网隧道协议，用于在移动网络中传输数据",
+    "en_name": "A universal packet core network tunneling protocol used to transmit data in mobile networks"
+  },
+  {
+    "key": "nspi",
+    "zh_name": "一种Windows网络服务协议，用于与Microsoft Exchange Server通信",
+    "en_name": "A Windows network service protocol used to communicate with Microsoft Exchange Server"
+  },
+  {
+    "key": "omron",
+    "zh_name": "一种用于工业自动化的通信协议，用于控制PLC",
+    "en_name": "A communication protocol used for industrial automation, used to control PLCs"
+  },
+  {
+    "key": "q931",
+    "zh_name": "腾讯QQ的早期版本使用的通信协议",
+    "en_name": "A communication protocol used in early versions of Tencent QQ"
+  },
+  {
+    "key": "104apci",
+    "zh_name": "一种开放的协议，用于在计算机之间传输数据",
+    "en_name": "An open protocol used for transmitting data between computers"
+  },
+  {
+    "key": "rtmpt",
+    "zh_name": "一种基于HTTP的Adobe Flash流媒体传输协议",
+    "en_name": "An Adobe Flash streaming transport protocol based on HTTP"
+  },
+  {
+    "key": "smb2",
+    "zh_name": "一种Microsoft的服务器消息块协议，用于在计算机网络中共享文件、打印机和串行端口等资源",
+    "en_name": "A Microsoft Server Message Block protocol used for sharing files, printers, and serial ports among computers on a network"
+  },
+  {
+    "key": "time",
+    "zh_name": "时间协议，用于同步网络中各个主机的时间",
+    "en_name": "Time protocol used to synchronize the time on various hosts in a network"
+  },
+  {
+    "key": "wsp",
+    "zh_name": "一种用于在无线设备上传输内容的协议，常用于移动设备和无线网络之间的通信",
+    "en_name": "A protocol used for transmitting content over wireless devices, often used for communication between mobile devices and wireless networks"
+  },
+  {
+    "key": "chargen",
+    "zh_name": "测试协议，用于产生无限量的字符流以测试网络传输性能",
+    "en_name": "Testing protocol used to generate an infinite stream of characters to test network transmission performance"
+  },
+  {
+    "key": "enip",
+    "zh_name": "以太网工业协议，用于在工业自动化领域中传输数据",
+    "en_name": "Ethernet Industrial Protocol used for transmitting data in industrial automation"
+  },
+  {
+    "key": "mapi",
+    "zh_name": "邮件应用程序编程接口，用于在邮件客户端和邮件服务器之间传输数据",
+    "en_name": "Messaging Application Programming Interface used to transfer data between email clients and servers"
+  },
+  {
+    "key": "amf",
+    "zh_name": "移动设备上的应用框架协议，用于传输移动应用程序和服务器之间的数据",
+    "en_name": "Action Message Format protocol used for transferring data between mobile applications and servers"
+  },
+  {
+    "key": "rsync",
+    "zh_name": "远程同步协议，用于在两个计算机之间同步文件和目录",
+    "en_name": "Remote Synchronization protocol used for syncing files and directories between two computers"
+  },
+  {
+    "key": "spoolss",
+    "zh_name": "用于打印系统的远程过程调用协议，常用于Windows系统中",
+    "en_name": "Spooler Subsystem Remote Protocol used for printing systems, often used in Windows systems"
+  },
+  {
+    "key": "xdmcp",
+    "zh_name": "X11显示管理协议，用于在Unix或Linux计算机之间远程管理图形化界面",
+    "en_name": "X Display Manager Control Protocol used for remotely managing graphical interfaces between Unix or Linux computers"
+  },
+  {
+    "key": "x11",
+    "zh_name": "Excel电子表格文件格式，用于在Microsoft Excel和其他应用程序之间传输数据",
+    "en_name": "Excel spreadsheet file format used for transferring data between Microsoft Excel and other applications"
+  },
+  {
+    "key": "ftp-data",
+    "zh_name": "文件传输协议的数据通道，用于在FTP客户端和服务器之间传输文件",
+    "en_name": "Data channel of the File Transfer Protocol used for transferring files between FTP clients and servers"
+  },
+  {
+    "key": "_ws.short",
+    "zh_name": "在网络流量中出现的WebSocket短消息协议",
+    "en_name": "Short message protocol that appears in network traffic for WebSockets"
+  },
+  {
+    "key": "png",
+    "zh_name": "一种用于存储和传输图像的无损压缩格式，常用于互联网上的图像文件",
+    "en_name": "Portable Network Graphics format used for storing and transmitting images, commonly used for image files on the Internet"
+  },
+  {
+    "key": "mojito",
+    "zh_name": "Yahoo的Web框架协议，用于在Web应用程序和服务器之间传输数据",
+    "en_name": "Web framework protocol developed by Yahoo used for transferring data between web applications and servers"
+  },
+  {
+    "key": "cipcm",
+    "zh_name": "以太网工业协议的一种，用于在工业自动化领域中传输数据",
+    "en_name": "A type of Ethernet Industrial Protocol used for transmitting data in industrial automation"
+  },
+  {
+    "key": "_ws.malformed",
+    "zh_name": "在网络流量中出现的WebSocket非法消息协议",
+    "en_name": "Illegal message protocol that appears in network traffic for WebSockets"
+  },
+  {
+    "key": "hl7",
+    "zh_name": "医疗健康领域使用的协议，用于在医疗设备和应用程序之间传输数据",
+    "en_name": "Health Level Seven protocol used in the medical and healthcare industry for transferring data between devices and applications"
+  },
+  {
+    "key": "kink",
+    "zh_name": "一个用于在网络上进行加密通信的协议，常用于安全浏览器扩展",
+    "en_name": "A protocol used for encrypted communication over networks, often used in secure browser extensions"
+  },
+  {
+    "key": "msrp",
+    "zh_name": "会话传输协议，用于在即时通讯应用程序之间传输数据",
+    "en_name": "Message Session Relay Protocol used for transferring data between instant messaging applications"
+  },
+  {
+    "key": "exec",
+    "zh_name": "用于在远程计算机上执行命令的协议",
+    "en_name": "Protocol used for executing commands on a remote computer"
+  },
+  {
+    "key": "openflow_v1",
+    "zh_name": "一种用于软件定义网络(SDN)的通信协议，它定义了控制器和交换机之间的协议，以及交换机应如何处理数据流的方式",
+    "en_name": "Communication protocol used for Software Defined Networking (SDN) that defines the protocol between controllers and switches, as well as how switches should handle data flows"
+  },
+  {
+    "key": "finger",
+    "zh_name": "一种用于查询远程主机用户信息的协议，通常使用TCP 79端口",
+    "en_name": "Protocol used for querying information about users on a remote host, often using TCP port 79"
+  },
+  {
+    "key": "quakeworld",
+    "zh_name": "一款基于UDP协议的多人在线游戏协议，使用自己的流量控制协议",
+    "en_name": "Multiplayer online game protocol based on UDP with its own flow control protocol"
+  },
+  {
+    "key": "capwap",
+    "zh_name": "一种用于无线接入点控制器(WLC)与接入点(AP)之间通信的协议，用于无线局域网(WLAN)的管理",
+    "en_name": "Protocol used for communication between wireless access point controllers (WLCs) and access points (APs) for managing wireless local area networks (WLANs)"
+  },
+  {
+    "key": "nfs",
+    "zh_name": "一种用于在网络上共享文件系统的协议，它允许计算机之间通过网络共享文件和目录",
+    "en_name": "Network File System protocol used for sharing file systems over a network, allowing computers to share files and directories over the network"
+  },
+  {
+    "key": "msnms",
+    "zh_name": "一种微软公司的消息通信协议，主要用于即时通信应用程序",
+    "en_name": "Microsoft Notification Protocol used primarily for instant messaging applications"
+  },
+  {
+    "key": "scop",
+    "zh_name": "一种基于IP的远程操作协议，用于允许远程管理应用程序和设备",
+    "en_name": "IP-based remote operation protocol used to allow remote management of applications and devices"
+  },
+  {
+    "key": "chdlc",
+    "zh_name": "Cisco高级数据链路控制(High-Level Data Link Control)协议，是一种广泛使用的数据链路层协议，用于连接网络设备和卫星终端",
+    "en_name": "Cisco High-Level Data Link Control protocol widely used as a data link layer protocol for connecting network devices and satellite terminals"
+  },
+  {
+    "key": "h245",
+    "zh_name": "一种多媒体通信协议，用于支持视频会议和流媒体应用",
+    "en_name": "Multimedia communication protocol used to support video conferencing and streaming applications"
+  },
+  {
+    "key": "gsm_abis_rsl",
+    "zh_name": "GSM_Abis无线接口上的无线通信协议，主要用于GSM数字无线电通信系统中的信令传输",
+    "en_name": "Wireless communication protocol on the GSM_Abis interface used primarily for signaling transmission in GSM digital radio communication systems"
+  },
+  {
+    "key": "pn_io_device",
+    "zh_name": "一种工业自动化领域的通信协议，用于在自动化过程控制中传输数据",
+    "en_name": "PN/IO Device, a communication protocol used in industrial automation for data transmission in process control"
+  },
+  {
+    "key": "ssh",
+    "zh_name": "一种用于安全登录和远程管理的协议，提供对远程计算机的加密和身份验证",
+    "en_name": "Secure Shell (SSH), a protocol used for secure login and remote management, providing encryption and authentication for remote computers"
+  },
+  {
+    "key": "DATA",
+    "zh_name": "一种用于在Hadoop分布式文件系统中传输数据的协议",
+    "en_name": "Data Transfer Protocol (DATA), used for transmitting data in Hadoop Distributed File System"
+  },
+  {
+    "key": "kismet",
+    "zh_name": "一种用于侦测无线局域网(WLAN)的开源网络嗅探器和入侵检测系统",
+    "en_name": "Kismet, an open-source network sniffer and intrusion detection system used for detecting Wireless Local Area Networks (WLANs)"
+  },
+  {
+    "key": "ymsg",
+    "zh_name": "雅虎即时通信(Yahoo! Messenger)协议，是雅虎公司的一种消息通信协议",
+    "en_name": "Yahoo! Messenger Protocol (YMSG), a messaging protocol used by Yahoo! Inc."
+  },
+  {
+    "key": "rtps",
+    "zh_name": "实时发布订阅协议(Real-Time Publish-Subscribe Protocol)，用于分布式系统之间的数据通信",
+    "en_name": "Real-Time Publish-Subscribe Protocol (RTPS), used for data communication between distributed systems"
+  },
+  {
+    "key": "opensafety_udp",
+    "zh_name": "一种通用的安全数据传输协议，用于工业自动化系统中的数据传输",
+    "en_name": "OpenSAFETY UDP, a generic secure data transfer protocol used for data transmission in industrial automation systems"
+  },
+  {
+    "key": "mp4",
+    "zh_name": "一种用于音频和视频文件的数字多媒体格式",
+    "en_name": "MPEG-4 Part 14 (MP4), a digital multimedia format used for audio and video files"
+  },
+  {
+    "key": "image-gif",
+    "zh_name": "一种用于在互联网上广泛使用的图片格式，通常用于小的动画和图像",
+    "en_name": "Graphics Interchange Format (GIF), an image format widely used on the Internet, often used for small animations and images"
+  },
+  {
+    "key": "db-lsp",
+    "zh_name": "一种用于在网络上分发和访问论文和学术研究文献的协议",
+    "en_name": "Digital Bibliographic Library Initiative (DB-LSP), a protocol used for distributing and accessing research papers and academic literature on the network"
+  },
+  {
+    "key": "http2",
+    "zh_name": "HTTP协议的第二个版本，其设计目标是提高性能和安全性，主要特点包括多路复用、二进制分帧、头部压缩等",
+    "en_name": "HTTP/2, the second version of the HTTP protocol designed to improve performance and security, featuring multiplexing, binary framing, and header compression"
+  },
+  {
+    "key": "lwm2mtlv",
+    "zh_name": "一种轻量级的机器对机器（M2M）通信协议，用于连接物联网设备和平台，基于二进制编码和TLV格式进行数据传输",
+    "en_name": "Lightweight Machine-to-Machine (LWM2M) Protocol based on TLV format and binary encoding used for connecting IoT devices and platforms"
+  },
+  {
+    "key": "memcache",
+    "zh_name": "一种高性能的分布式内存缓存系统，可用于加速动态Web应用程序的数据访问速度",
+    "en_name": "Memcached, a high-performance distributed memory caching system used to speed up data access for dynamic web applications"
+  },
+  {
+    "key": "other",
+    "zh_name": "通常指不属于已知协议类型的网络流量，可能是新出现的协议或未知类型的数据流",
+    "en_name": "Other, usually refers to network traffic that does not belong to a known protocol type, which may be a new or unknown type of data stream"
+  },
+  {
+    "key": "whois",
+    "zh_name": "一种用于广告交易的协议，可实现基于实时竞价的广告投放",
+    "en_name": "Protocol used for advertising transactions, enables real-time bidding for ad placement"
+  },
+  {
+    "key": "portcontrol",
+    "zh_name": "一种用于控制网络端口的协议，可用于实现端口转发、安全策略等",
+    "en_name": "Protocol used for controlling network ports, can be used for port forwarding, security policies, etc."
+  },
+  {
+    "key": "h225",
+    "zh_name": "一种音视频会议协议，通常用于H.323网络通信中，负责建立和维护通信会话",
+    "en_name": "Protocol used for audio and video conferencing, typically used in H.323 network communication, responsible for establishing and maintaining communication sessions"
+  },
+  {
+    "key": "elasticsearch",
+    "zh_name": "一种分布式搜索和分析引擎，可用于快速存储、搜索和分析大量数据",
+    "en_name": "A distributed search and analytics engine used for fast storage, search and analysis of large amounts of data"
+  },
+  {
+    "key": "lisp",
+    "zh_name": "一种网络协议，全称为Locator/ID Separation Protocol，可用于解决IP地址空间不足、移动性管理等问题",
+    "en_name": "A network protocol, full name is Locator/ID Separation Protocol, used to solve problems such as insufficient IP address space, mobility management, etc."
+  },
+  {
+    "key": "bjnp",
+    "zh_name": "BJNP 是用于打印机控制和通信的协议，通常用于 Canon 打印机",
+    "en_name": "BJNP is a protocol used for printer control and communication, typically used in Canon printers"
+  },
+  {
+    "key": "ipp",
+    "zh_name": "Internet 打印协议，用于网络打印",
+    "en_name": "Internet Printing Protocol, used for network printing"
+  },
+  {
+    "key": "tds",
+    "zh_name": "Tabular 数据流协议，是 Microsoft SQL Server 与 Sybase 数据库的通信协议",
+    "en_name": "Tabular Data Stream protocol, used for communication between Microsoft SQL Server and Sybase databases"
+  },
+  {
+    "key": "r3",
+    "zh_name": "SAP R/3 通信协议，用于 SAP 商业软件系统的通信",
+    "en_name": "SAP R/3 communication protocol, used for communication in SAP business software systems"
+  },
+  {
+    "key": "gsm_ipa",
+    "zh_name": "GSM 集成数字语音网关接口协议，用于移动电话网络的数字语音传输",
+    "en_name": "GSM Integrated Digital Voice Gateway Interface Protocol, used for digital voice transmission in mobile phone networks"
+  },
+  {
+    "key": "dcerpc",
+    "zh_name": "分布式计算环境远程过程调用协议，用于不同操作系统之间的进程通信",
+    "en_name": "Distributed Computing Environment Remote Procedure Call Protocol, used for inter-process communication between different operating systems"
+  },
+  {
+    "key": "tsp",
+    "zh_name": "网络时间协议，用于同步计算机的系统时间",
+    "en_name": "Network Time Protocol, used for synchronizing the system time of computers"
+  },
+  {
+    "key": "winsrepl",
+    "zh_name": "Windows Internet Name Service 远程查询协议，用于在 Windows 网络中查找主机名",
+    "en_name": "Windows Internet Name Service Remote Query Protocol, used for finding host names in Windows networks"
+  },
+  {
+    "key": "rpc",
+    "zh_name": "远程过程调用协议，用于在不同的计算机上执行远程程序和服务",
+    "en_name": "Remote Procedure Call Protocol, used for executing remote programs and services on different computers"
+  },
+  {
+    "key": "ppp",
+    "zh_name": "点对点协议，是在串行通信线路上建立的数据链路协议，用于连接两台计算机或计算机和路由器之间的通信",
+    "en_name": "Point-to-Point Protocol, a data link protocol established on a serial communication line, used for communication between two computers or between a computer and a router"
+  },
+  {
+    "key": "snmp",
+    "zh_name": "简单网络管理协议，用于管理和监控网络设备的状态",
+    "en_name": "Simple Network Management Protocol, used for managing and monitoring the status of network devices"
+  },
+  {
+    "key": "ldap",
+    "zh_name": "轻型目录访问协议，用于访问和维护分布式目录服务",
+    "en_name": "Lightweight Directory Access Protocol, used for accessing and maintaining distributed directory services"
+  },
+  {
+    "key": "skinny",
+    "zh_name": "Cisco IP电话和Cisco CallManager之间的协议，用于呼叫控制和会话控制",
+    "en_name": "Protocol between Cisco IP phones and Cisco CallManager, used for call and session control"
+  },
+  {
+    "key": "slsk",
+    "zh_name": "基于流量的安全网络协议，用于在不安全的公共网络上安全地传输数据",
+    "en_name": "Traffic-based Secure Network Protocol, used for securely transmitting data on an insecure public network"
+  },
+  {
+    "key": "sadmind",
+    "zh_name": "Sun系统管理员工具的管理守护进程协议",
+    "en_name": "Management daemon protocol for Sun system administrator tools"
+  },
+  {
+    "key": "vicp",
+    "zh_name": "维生素C中间件产品的远程调用协议，用于在分布式系统中执行远程过程调用",
+    "en_name": "Remote Call Protocol for Vitamin C Middleware Products, used for executing remote procedure calls in distributed systems"
+  },
+  {
+    "key": "bitcoin",
+    "zh_name": "一种点对点的数字加密货币协议，用于实现去中心化的加密货币交易",
+    "en_name": "Bitcoin, a Peer-to-Peer Digital Currency Protocol for Decentralized Cryptocurrency Transactions"
+  },
+  {
+    "key": "nbss",
+    "zh_name": "NetBIOS会话服务协议，用于在LAN上提供NetBIOS服务",
+    "en_name": "NetBIOS Session Service Protocol, Used to Provide NetBIOS Services on LAN"
+  },
+  {
+    "key": "cql",
+    "zh_name": "Cassandra查询语言，用于查询和操作Apache Cassandra数据库",
+    "en_name": "Cassandra Query Language, Used to Query and Manipulate Apache Cassandra Databases"
+  },
+  {
+    "key": "netsync",
+    "zh_name": "基于TCP / IP的网络时间协议，用于将计算机时钟同步到全球标准时间",
+    "en_name": "Network Time Protocol Based on TCP/IP, Used to Synchronize Computer Clocks to Global Standard Time"
+  },
+  {
+    "key": "rfr",
+    "zh_name": "远程文件共享协议",
+    "en_name": "Remote File Sharing Protocol"
+  },
+  {
+    "key": "distcc",
+    "zh_name": "分布式C编译器",
+    "en_name": "Distributed C Compiler"
+  },
+  {
+    "key": "telnet",
+    "zh_name": "远程终端协议",
+    "en_name": "Telnet, Remote Terminal Protocol"
+  },
+  {
+    "key": "sap",
+    "zh_name": "会话初始协议，用于SAP系统中的应用程序交互",
+    "en_name": "Session Initiation Protocol Used for Application Interaction in SAP Systems"
+  },
+  {
+    "key": "iscsi",
+    "zh_name": "用于在IP网络上运行SCSI协议的存储协议",
+    "en_name": "Internet Small Computer Systems Interface (iSCSI), Storage Protocol for Running SCSI over IP Networks"
+  },
+  {
+    "key": "ipmb",
+    "zh_name": "IP管理总线协议，用于IPMI系统管理",
+    "en_name": "Intelligent Platform Management Bus (IPMB) Protocol, Used for IPMI System Management"
+  },
+  {
+    "key": "rmi",
+    "zh_name": "远程方法调用协议",
+    "en_name": "Remote Method Invocation Protocol"
+  },
+  {
+    "key": "enttec",
+    "zh_name": "用于DMX512光缆控制协议",
+    "en_name": "Enttec Protocol Used for DMX512 Optical Cable Control"
+  },
+  {
+    "key": "lon",
+    "zh_name": "用于控制和管理物联网设备的协议",
+    "en_name": "LON Protocol Used for Controlling and Managing IoT Devices"
+  },
+  {
+    "key": "vrt",
+    "zh_name": "用于虚拟现实技术的协议",
+    "en_name": "VRT Protocol Used for Virtual Reality Technology"
+  },
+  {
+    "key": "bicc",
+    "zh_name": "用于GSM系统中的信令控制",
+    "en_name": "Bearer Independent Call Control (BICC) Protocol Used in GSM Systems for Signaling Control"
+  },
+  {
+    "key": "adp",
+    "zh_name": "用于苹果设备间的自动设备配对",
+    "en_name": "Apple Device Pairing Protocol (ADP) Used for Automatic Device Pairing Between Apple Devices"
+  },
+  {
+    "key": "ndmp",
+    "zh_name": "用于备份和恢复协议",
+    "en_name": "Network Data Management Protocol (NDMP), Used for Backup and Recovery"
+  },
+  {
+    "key": "mysql",
+    "zh_name": "用于MySQL数据库的协议",
+    "en_name": "MySQL Protocol Used for MySQL Databases"
+  },
+  {
+    "key": "tftp",
+    "zh_name": "简单文件传输协议，用于小文件传输",
+    "en_name": "Trivial File Transfer Protocol (TFTP), Used for Small File Transfers"
+  },
+  {
+    "key": "gadu-gadu",
+    "zh_name": "用于即时通讯的协议",
+    "en_name": "Gadu-Gadu Protocol Used for Instant Messaging"
+  },
+  {
+    "key": "wtp",
+    "zh_name": "用于无线电和电视传输协议",
+    "en_name": "Wireless Telephony Application (WTA) and Wireless Telephony Protocol (WTP), Used for Wireless Radio and Television Transmission"
+  },
+  {
+    "key": "a21",
+    "zh_name": "用于数字音频协议",
+    "en_name": "A21 Protocol Used for Digital Audio"
+  },
+  {
+    "key": "imap",
+    "zh_name": "互联网邮件访问协议",
+    "en_name": "Internet Message Access Protocol (IMAP), Used for Accessing Email"
+  },
+  {
+    "key": "mount",
+    "zh_name": "用于Unix系统中的文件系统挂载协议",
+    "en_name": "Mount Protocol Used for File System Mounting in Unix Systems"
+  },
+  {
+    "key": "h248",
+    "zh_name": "用于3G电路交换网络中的信令传输协议",
+    "en_name": "H.248 Protocol Used for Signaling Transmission in 3G Circuit-Switched Networks"
+  },
+  {
+    "key": "mpeg",
+    "zh_name": "用于音视频数据压缩协议",
+    "en_name": "MPEG Protocol Used for Audio and Video Data Compression"
+  },
+  {
+    "key": "gearman",
+    "zh_name": "分布式作业调度协议",
+    "en_name": "Gearman Protocol Used for Distributed Job Scheduling"
+  },
+  {
+    "key": "drda",
+    "zh_name": "分布式关系数据库体系结构",
+    "en_name": "Distributed Relational Database Architecture (DRDA)"
+  },
+  {
+    "key": "xmpp",
+    "zh_name": "可扩展通讯和表示协议",
+    "en_name": "Extensible Messaging and Presence Protocol (XMPP)"
+  },
+  {
+    "key": "openflow_v5",
+    "zh_name": "用于SDN中的协议",
+    "en_name": "OpenFlow Protocol Version 5 Used in SDN"
+  },
+  {
+    "key": "socks",
+    "zh_name": "用于网络数据包代理的协议",
+    "en_name": "SOCKS Protocol Used for Network Packet Proxy"
+  },
+  {
+    "key": "image-jfif",
+    "zh_name": "用于图像传输的协议",
+    "en_name": "JPEG File Interchange Format (JFIF) Protocol Used for Image Transmission"
+  },
+  {
+    "key": "ulp",
+    "zh_name": "用于蜂窝网络通信的协议",
+    "en_name": "User Plane (ULP) Protocol Used for Cellular Network Communication"
+  },
+  {
+    "key": "laplink",
+    "zh_name": "用于PC之间的数据传输协议",
+    "en_name": "LapLink Protocol Used for Data Transfer Between PCs"
+  },
+  {
+    "key": "udpencap",
+    "zh_name": "将IP数据报封装为UDP数据报的协议",
+    "en_name": "UDP Encapsulation Protocol Used to Encapsulate IP Datagrams as UDP Datagrams"
+  },
+  {
+    "key": "sasp",
+    "zh_name": "用于SAS存储协议的加密和身份验证",
+    "en_name": "SAS Authorization and Encryption Protocol (SASP) Used for SAS Storage Protocol"
+  },
+  {
+    "key": "cflow",
+    "zh_name": "用于流量控制的协议",
+    "en_name": "Cisco Flow Protocol Used for Traffic Control"
+  },
+  {
+    "key": "s1ap",
+    "zh_name": "用于LDAP操作的协议",
+    "en_name": "S1 Application Protocol (S1AP) Used for LDAP Operations"
+  },
+  {
+    "key": "ncp",
+    "zh_name": "用于NetWare网络通信的协议",
+    "en_name": "NetWare Core Protocol (NCP) Used for NetWare Network Communication"
+  },
+  {
+    "key": "msproxy",
+    "zh_name": "用于Microsoft代理服务器的协议",
+    "en_name": "Microsoft Proxy Server Protocol Used for Microsoft Proxy Server"
+  },
+  {
+    "key": "mp2t",
+    "zh_name": "用于多媒体计划任务协议",
+    "en_name": "MPEG-2 Transport Protocol Used for Multimedia Scheduling"
+  },
+  {
+    "key": "sigcomp",
+    "zh_name": "用于压缩信令传输的协议",
+    "en_name": "Signaling Compression (SigComp) Protocol Used for Compressing Signaling Transport"
+  },
+  {
+    "key": "gquic",
+    "zh_name": "Google快速UDP互联网连接协议",
+    "en_name": "Google QUIC (Quick UDP Internet Connections) Protocol"
+  },
+  {
+    "key": "smb",
+    "zh_name": "用于文件和打印机共享的协议",
+    "en_name": "Server Message Block (SMB) Protocol Used for File and Printer Sharing"
+  },
+  {
+    "key": "gprs-ns",
+    "zh_name": "用于GPRS网络中的数据传输协议",
+    "en_name": "GPRS Network Service (GPRS-NS) Protocol Used for Data Transmission in GPRS Networks"
+  },
+  {
+    "key": "daytime",
+    "zh_name": "一种简单的协议，用于从时间服务器获取当前日期和时间",
+    "en_name": "Daytime Protocol, a Simple Protocol Used to Retrieve Current Date and Time from a Time Server"
+  },
+  {
+    "key": "esp",
+    "zh_name": "封装安全负载以进行IPSec加密和身份验证的协议",
+    "en_name": "Encapsulating Security Payload (ESP) Protocol Used for IPSec Encryption and Authentication"
+  },
+  {
+    "key": "mih",
+    "zh_name": "移动IP协议，用于在不同网络之间切换移动设备的无缝移动",
+    "en_name": "Mobile IP (MIP) Protocol Used for Seamless Mobility of Mobile Devices Across Different Networks"
+  },
+  {
+    "key": "omapi",
+    "zh_name": "ISC DHCP服务器用于管理DHCP配置对象的API",
+    "en_name": "ISC DHCP Server OMAPI (Object Management Application Programming Interface) Used for Managing DHCP Configuration Objects"
+  },
+  {
+    "key": "bfd",
+    "zh_name": "检测连接故障的协议，用于快速发现两个节点之间的故障，以便快速切换到备份连接",
+    "en_name": "Bidirectional Forwarding Detection (BFD) Protocol Used for Detecting Connection Failures to Quickly Switch to Backup Connection"
+  },
+  {
+    "key": "s7comm",
+    "zh_name": "用于与西门子PLC通信的协议",
+    "en_name": "S7 Communication Protocol Used for Communication with Siemens PLC"
+  },
+  {
+    "key": "rsh",
+    "zh_name": "远程shell协议，允许用户在远程计算机上执行命令和程序",
+    "en_name": "Remote Shell (rsh) Protocol Used to Allow Users to Execute Commands and Programs on Remote Computers"
+  },
+  {
+    "key": "syslog",
+    "zh_name": "系统日志协议，用于将日志消息从设备发送到集中式日志服务器",
+    "en_name": "Syslog Protocol Used to Send Log Messages from Devices to Centralized Log Servers"
+  },
+  {
+    "key": "cldap",
+    "zh_name": "LDAP协议的一个变体，用于在Windows环境中进行目录服务",
+    "en_name": "Connectionless Lightweight Directory Access Protocol (cLDAP) Used for Directory Services in Windows Environment"
+  },
+  {
+    "key": "nntp",
+    "zh_name": "新闻组协议，用于阅读、发布和处理新闻组文章",
+    "en_name": "Network News Transfer Protocol (NNTP) Used for Reading, Posting, and Processing Usenet News Articles"
+  },
+  {
+    "key": "iax2",
+    "zh_name": "互联网语音交换协议，用于VoIP电话通信",
+    "en_name": "Inter-Asterisk eXchange Version 2 (IAX2) Protocol Used for VoIP Telephony Communication"
+  },
+  {
+    "key": "echo",
+    "zh_name": "回显协议，用于测试网络连接是否正常",
+    "en_name": "Echo Protocol Used for Testing Network Connectivity"
+  },
+  {
+    "key": "tns",
+    "zh_name": "Oracle数据库使用的协议，用于建立数据库连接",
+    "en_name": "Transparent Network Substrate (TNS) Protocol Used by Oracle Databases to Establish Database Connections"
+  },
+  {
+    "key": "synergy",
+    "zh_name": "用于在多个计算机之间共享键盘和鼠标的协议",
+    "en_name": "Synergy Protocol Used for Sharing Keyboard and Mouse Between Multiple Computers"
+  },
+  {
+    "key": "mime_multipart",
+    "zh_name": "多部分MIME邮件的一种协议，用于将电子邮件消息分成多个部分",
+    "en_name": "Multipurpose Internet Mail Extensions (MIME) Protocol Used for Dividing Email Messages into Multiple Parts"
+  },
+  {
+    "key": "tacplus",
+    "zh_name": "Cisco设备使用的一种AAA协议，用于管理网络设备的用户权限",
+    "en_name": "Terminal Access Controller Access-Control System Plus (TACACS+) Protocol Used by Cisco Devices for Managing User Permissions on Network Devices"
+  },
+  {
+    "key": "epm",
+    "zh_name": "DCE/RPC管理协议，用于启动、停止和查询RPC服务",
+    "en_name": "Endpoint Mapping (EPM) Protocol Used for Starting, Stopping, and Querying Remote Procedure Call (RPC) Services in DCE/RPC"
+  },
+  {
+    "key": "pptp",
+    "zh_name": "点对点隧道协议，用于建立虚拟私有网络",
+    "en_name": "Point-to-Point Tunneling Protocol (PPTP) Used for Establishing Virtual Private Networks"
+  },
+  {
+    "key": "rtcp",
+    "zh_name": "实时传输控制协议，用于在实时多媒体流中传输控制信息",
+    "en_name": "Real-time Transport Control Protocol (RTCP) Used for Transporting Control Information in Real-time Multimedia Streams"
+  },
+  {
+    "key": "dtls",
+    "zh_name": "数据报传输层安全协议，用于在不可靠的数据报网络上提供加密和身份验证",
+    "en_name": "Datagram Transport Layer Security (DTLS) Protocol Used for Providing Encryption and Authentication on Unreliable Datagram Networks"
+  },
+  {
+    "key": "igmp",
+    "zh_name": "互联网组管理协议，用于管理多播组成员资格",
+    "en_name": "Internet Group Management Protocol (IGMP) Used for Managing Membership in Multicast Groups"
+  },
+  {
+    "key": "portmap",
+    "zh_name": "端口映射协议，用于将RPC程序号映射到端口号",
+    "en_name": "Portmapper Protocol Used for Mapping RPC Program Numbers to Port Numbers"
+  },
+  {
+    "key": "isakmp",
+    "zh_name": "用于建立和管理IPSec VPN隧道的协议",
+    "en_name": "Internet Security Association and Key Management Protocol (ISAKMP) Used for Establishing and Managing IPSec VPN Tunnels"
+  },
+  {
+    "key": "srvsvc",
+    "zh_name": "用于查询和控制Windows共享资源的协议",
+    "en_name": "Server Service Control Protocol (SRVSVC) Used for Querying and Controlling Windows Shared Resources"
+  },
+  {
+    "key": "scsi",
+    "zh_name": "小型计算机系统接口协议，用于连接计算机和外围设备",
+    "en_name": "Small Computer System Interface (SCSI) Protocol Used for Connecting Computers and Peripheral Devices"
+  },
+  {
+    "key": "wtls",
+    "zh_name": "一种在无线网络上提供安全性的安全传输协议",
+    "en_name": "Wireless Transport Layer Security (WTLS) Protocol Used for Providing Security on Wireless Networks"
+  },
+  {
+    "key": "lpd",
+    "zh_name": "打印机协议，用于将打印任务发送到网络打印机",
+    "en_name": "Line Printer Daemon (LPD) Protocol Used for Sending Print Jobs to Network Printers"
+  },
+  {
+    "key": "gopher",
+    "zh_name": "一种Internet文档传输协议，用于在Web出现之前传输文档和小文件",
+    "en_name": "Gopher Protocol Used for Document Transfer on the Internet Before the Web"
+  },
+  {
+    "key": "uaudp",
+    "zh_name": "一种用户数据报协议，它是UDP协议的一种扩展，可在网络带宽有限的情况下进行流量控制",
+    "en_name": "User-Aware UDP (UAUDP) Protocol, an Extension of UDP Protocol Used for Traffic Control When Network Bandwidth is Limited"
+  },
+  {
+    "key": "tpkt",
+    "zh_name": "一种用于在远程计算机上执行命令和传输文件的协议",
+    "en_name": "Transport Packet Protocol (TPKT) Used for Executing Commands and Transferring Files on Remote Computers"
+  },
+  {
+    "key": "icap",
+    "zh_name": "一种HTTP协议扩展，用于在代理服务器上执行附加处理",
+    "en_name": "Internet Content Adaptation Protocol (ICAP), an Extension of HTTP Protocol Used for Additional Processing on Proxy Servers"
+  },
+  {
+    "key": "rlogin",
+    "zh_name": "一种基于TCP的远程登录协议，用于在UNIX和Linux系统之间进行远程登录和执行命令",
+    "en_name": "Remote Login (rlogin) Protocol Based on TCP Used for Remote Login and Command Execution Between UNIX and Linux Systems"
+  },
+  {
+    "key": "dcp-etsi",
+    "zh_name": "一种用于设备管理的协议，包括设备自动发现、管理和故障排除",
+    "en_name": "Device Control Protocol - European Telecommunications Standards Institute (DCP-ETSI) Used for Device Management, Including Automatic Discovery, Management, and Troubleshooting"
+  },
+  {
+    "key": "classicstun",
+    "zh_name": "P2P通信标准协议",
+    "en_name": "Classic STUN Protocol Used for Peer-to-Peer Communication"
+  },
+  {
+    "key": "pop",
+    "zh_name": "邮件协议，用于电子邮件传输",
+    "en_name": "Post Office Protocol (POP) Used for Email Transmission"
+  },
+  {
+    "key": "unknown_protocol",
+    "zh_name": "未知协议",
+    "en_name": "Unknown Protocol"
   }
 ]

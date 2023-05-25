@@ -13,6 +13,10 @@ public class FsCommon {
 
     public static FileClient fileClient;
 
+    public FsCommon() {
+
+    }
+
     public FsCommon(@Autowired BaseAppConfig baseAppConfig, @Autowired FdfsCommon fdfsCommon,
                     @Autowired LfsCommon lfsCommon) {
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {

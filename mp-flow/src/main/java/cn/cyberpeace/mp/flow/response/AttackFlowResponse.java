@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.response;
 
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
@@ -82,6 +83,12 @@ public class AttackFlowResponse extends FlowInfoResponse {
      */
     @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
     private Integer resourceType;
+
+    /**
+     * pcap包含的协议
+     */
+    @ApiModelProperty(value = "pcap包含协议集合")
+    private List<ProtocolBO> protocolList;
 
     public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());

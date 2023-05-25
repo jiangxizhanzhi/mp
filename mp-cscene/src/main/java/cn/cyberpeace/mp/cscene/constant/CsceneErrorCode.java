@@ -20,7 +20,9 @@ public enum CsceneErrorCode implements ErrorCode {
     ENTITY_USB_HAS_USD("MP-110212", "entity_usb_has_used"),
     ENTITY_USB_HOST_NOT_SAME("MP-110213", "entity_usb_host_not_same"),
 
-
+    NODEIP_NOT_EXIST("MP-110210", "nodeip_not_exist"),
+    NETWORKID_NOT_EXIST("MP-110211", "networkid_not_exist"),
+    FLOW_NOT_EXIST("MP-110212", "flow_not_exist"),
 
     // validation-api params
     PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),

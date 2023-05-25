@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: 新增背景流量请求
@@ -32,7 +34,6 @@ public class AddBackgroundFlowRequest {
      * 文件
      */
     @ApiModelProperty(required = true, value = "文件")
-    @NotNull(message = "pcapFile can not be empty")
     private MultipartFile pcapFile;
 
     /**
@@ -63,5 +64,11 @@ public class AddBackgroundFlowRequest {
      */
     @ApiModelProperty("文件路径")
     private String pcapFilePath;
+
+    /**
+     * 流量协议集合
+     */
+    @ApiModelProperty("流量协议集合")
+    private List<ProtocolBO> protocolList;
 
 }
