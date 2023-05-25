@@ -12,7 +12,7 @@ public class FsCommon {
 
     public static FileClient fileClient;
 
-    private FsCommon(FdfsCommon fdfsCommon, LfsCommon lfsCommon) {
+    private FsCommon(BaseAppConfig baseAppConfig, FdfsCommon fdfsCommon, LfsCommon lfsCommon) {
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
             FsCommon.fileClient = FdfsCommon.fdfsClient;
         } else {
