@@ -31,7 +31,7 @@ public class MibInfoQueryRequest {
     private String version;
     //团体字，一般为public
     @ApiModelProperty(value = "团体字")
-    private String community;
+    private String communityName;
     /**
      * 宿主机ip地址
      */
