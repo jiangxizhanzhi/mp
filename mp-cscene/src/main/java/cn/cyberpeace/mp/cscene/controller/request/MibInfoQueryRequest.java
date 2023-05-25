@@ -20,14 +20,17 @@ public class MibInfoQueryRequest implements Serializable {
     private static final long serialVersionUID = 2365480436323068459L;
 
     @ApiModelProperty(value = "场景id")
+    @NotNull
     @NotEmpty(message = "sceneId can not be empty")
     private String sceneId;
 
     @ApiModelProperty(value = "节点id")
+    @NotNull
     @NotEmpty(message = "elementId can not be empty")
     private String elementId;
 
     @ApiModelProperty(value = "oid")
+    @NotNull
     @NotEmpty(message = "oid can not be empty")
     private String oid;
     //snmp版本
@@ -37,14 +40,6 @@ public class MibInfoQueryRequest implements Serializable {
     //团体字，一般为public
     @ApiModelProperty(value = "团体字")
     private String communityName;
-    /**
-     * 宿主机ip地址
-     */
-    private String ip;
-    /**
-     * 宿主机snmp协议转换端口
-     */
-    private String port;
     /**
      * snmp版本为v3时，会出现以下三个参数
      *  用户名
