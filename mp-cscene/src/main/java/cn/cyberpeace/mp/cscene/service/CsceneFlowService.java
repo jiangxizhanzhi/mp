@@ -15,11 +15,13 @@ import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.*;
+import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -87,6 +89,9 @@ public class CsceneFlowService {
     @Autowired
     private FlowConfig flowConfig;
 
+    @Autowired
+    private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
+
     /**
      * 新增流量任务
      * @param request
@@ -122,8 +127,10 @@ public class CsceneFlowService {
         }
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         String actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        //流量执行器不存在则创建流量执行器
         if (StringUtils.isEmpty(actuatorId)) {
-            //TODO:如果没有流量执行器id，则需要创建流量执行器
+            String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
+            actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
         }
         //网口信息，如果不存在则创建网口
         FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(networkId, actuatorId);
@@ -156,6 +163,7 @@ public class CsceneFlowService {
         if (CollectionUtils.isEmpty(flowInfoModelList)) {
             throw new MpRuntimeException(CsceneErrorCode.FLOW_NOT_EXIST);
         }
+        //保存流量任务信息
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (FlowInfoModel flowInfoModel : flowInfoModelList) {
             FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
@@ -172,6 +180,7 @@ public class CsceneFlowService {
         }
         flowTaskTaskService.bulkCreate(flowTaskTaskModelList);
 
+        //保存流量任务配置信息
         List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();
         for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
             FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
