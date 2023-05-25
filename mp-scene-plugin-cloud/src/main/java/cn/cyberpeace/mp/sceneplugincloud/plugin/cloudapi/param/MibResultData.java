@@ -16,9 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MibResultData {
 
-    private String oid;
+    private String oidOrName;
     private String value;
     private String type;
-    private String address;
-
+    private String ipPort;
 }

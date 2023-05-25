@@ -39,7 +39,7 @@ public class ProtocolCollectionController {
 
     @ApiOperation(value = "mib节点信息查询")
     @GetMapping("/mib_nodeinfo")
-    public ServiceResult queryMibNodeInfo(@RequestBody @Validated MibInfoQueryRequest queryRequest) {
+    public ServiceResult queryMibNodeInfo(@Validated MibInfoQueryRequest queryRequest) {
         return protocolCollectionService.queryMibOidInfo(queryRequest);
     }
 }
