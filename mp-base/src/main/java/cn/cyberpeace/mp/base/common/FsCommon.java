@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.remotefile.FileClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -12,7 +13,8 @@ public class FsCommon {
 
     public static FileClient fileClient;
 
-    private FsCommon(BaseAppConfig baseAppConfig, FdfsCommon fdfsCommon, LfsCommon lfsCommon) {
+    public FsCommon(@Autowired BaseAppConfig baseAppConfig, @Autowired FdfsCommon fdfsCommon,
+                    @Autowired LfsCommon lfsCommon) {
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
             FsCommon.fileClient = FdfsCommon.fdfsClient;
         } else {
