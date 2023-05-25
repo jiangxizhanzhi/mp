@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
@@ -58,6 +59,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -504,17 +506,25 @@ public class CreateHandler extends HandlerCommon {
         return virtualNic;
     }
 
+    /**
+     * @description: 生成实体设备网口
+     * @param cloudElement
+     * @return List<Interface>
+     */
     private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
         List<EntityNodeCreateData.Interface> entityInterfaces = new ArrayList<>();
+        //节点信息
         var srcElement = cloudElement.getSrcElement();
+        //端口信息
         var ports = srcElement.getPorts();
         if (ports == null) {
             return entityInterfaces;
         }
-
+        //网络业务信息
         List<ConnectedNetworkBO> networks = new ArrayList<>();
         networks.addAll(cloudElement.getDeriveNetworks());
         networks.addAll(cloudElement.getAccessNetworks());
+        boolean configSnmpFinished = false;
         for (var connectNetwork : networks) {
             var port = connectNetwork.getFromPorts().get(0);
             var cloudPort = getPluginHandler().getPort(port.getId());
@@ -550,6 +560,18 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
+                //不存在任何接入方式则初始化一个空的
+                if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
+                    entityInterface.setAccessModes(new ArrayList<>());
+                }
+                //配置勾选了snmp，则单独处理snmp协议
+                SnmpConfig snmpConfig = cloudElement.getSnmpConfig();
+                if(!Objects.isNull(snmpConfig) && snmpConfig.getConfigSwitch() && !configSnmpFinished){
+                    var accessMode = new EntityNodeCreateData.Interface.AccessMode();
+                    accessMode.setProtocol(AccessMode.Protocol.SNMP);
+                    accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SNMP));
+                    entityInterface.getAccessModes().add(accessMode);
+                }
             }
             entityInterface.setFwdnsInterfaceIp(getHandlerUtils().getFwdnsInterfaceIp(srcElement.getId(), connectNetwork.getNetwork().getId()));
             entityInterfaces.add(entityInterface);
@@ -878,6 +900,11 @@ public class CreateHandler extends HandlerCommon {
                 Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
+                    if(accessMode.getProtocol().equals(AccessMode.Protocol.SNMP)){
+                        cloudElement.getSnmpConfig().setSceneIp(accessMode.getAccessIp());
+                        cloudElement.getSnmpConfig().setScenePort(accessMode.getPort());
+                        return;
+                    }
                     var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
                     if (accessModeData == null) {
                         return;
@@ -1100,6 +1127,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * @description: 创建实体设备
+     * @param cloudElement 云平台场景节点业务信息
+     * @return void
+     */
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));

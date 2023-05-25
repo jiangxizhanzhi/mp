@@ -3,8 +3,19 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.controller.request.MibInfoQueryRequest;
+import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.protocolcollection.MibFileInfo;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeMibFileResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeMibUploadData;
@@ -38,6 +49,9 @@ public class ProtocolCollectionService {
 
     @Resource
     private BaseAppConfig baseAppConfig;
+
+    @Resource
+    private CsceneInstanceService csceneInstanceService;
 
 
     /**
@@ -141,10 +155,33 @@ public class ProtocolCollectionService {
      */
     public ServiceResult queryMibOidInfo(MibInfoQueryRequest mibInfoQueryRequest){
         EntityNode entityNode = new EntityNode();
-        List<MibResultData> mibNodeInfo = entityNode.getMibNodeInfo(
-            new MibNodeQueryParam(mibInfoQueryRequest.getOid(), mibInfoQueryRequest.getVersion(),
-                mibInfoQueryRequest.getCommunity(), mibInfoQueryRequest.getIp(), mibInfoQueryRequest.getUsername(),
-                mibInfoQueryRequest.getAuthKey(), mibInfoQueryRequest.getPrivKey()));
+        //请求参数构建（oid必传）
+        var paramBuilder = MibNodeQueryParam.builder().oid(mibInfoQueryRequest.getOid());
+        //综合场景id获取场景id
+        String sceneId = csceneInstanceService.getSceneId(mibInfoQueryRequest.getSceneId());
+        //获取场景处理类
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        //获取云平台场景处理类
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        //获取节点和云平台插件场景节点信息的关系
+        Map<String, CloudPluginSceneElementBO> elementMap = cloudPluginHandler.getElementMap();
+        //获取节点信息
+        CloudPluginSceneElementBO cloudPluginSceneElementBO = elementMap.get(mibInfoQueryRequest.getElementId());
+        //获取snmp配置信息
+        SnmpConfig snmpConfig = cloudPluginSceneElementBO.getSnmpConfig();
+        //配置了snmp对应的ip
+        if(StringUtils.isNotEmpty(snmpConfig.getIp())){
+            //只传递此ip，无需获取生成的ip和端口
+            paramBuilder = paramBuilder.ip(snmpConfig.getIp());
+        }else{
+            paramBuilder = paramBuilder.ip(snmpConfig.getSceneIp()).port(snmpConfig.getScenePort());
+        }
+        MibNodeQueryParam mibNodeQueryParam =
+            paramBuilder.communityName(mibInfoQueryRequest.getCommunityName()).version(mibInfoQueryRequest.getVersion())
+                .username(mibInfoQueryRequest.getUsername()).authKey(mibInfoQueryRequest.getAuthKey())
+                .privKey(mibInfoQueryRequest.getPrivKey()).build();
+        List<MibResultData> mibNodeInfo = entityNode.getMibNodeInfo(mibNodeQueryParam);
+
         return new ServiceResult<>(mibNodeInfo).asResult();
     }
 

@@ -28,6 +28,12 @@ public class SnmpConfig implements Serializable {
     //ip地址
     @ApiModelProperty(value = "ip地址")
     private String ip;
+
+    @ApiModelProperty(value = "场景设备ip")
+    private String sceneIp;
+
+    @ApiModelProperty(value = "场景设备端口")
+    private Integer scenePort;
     /**
      * snmp版本为v3时，会出现以下三个参数
      *  用户名
