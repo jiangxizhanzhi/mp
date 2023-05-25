@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
@@ -75,6 +77,9 @@ public class CsceneFlowService {
     private FlowTaskConfService flowTaskConfService;
 
     @Autowired
+    private FlowProtocolService flowProtocolService;
+
+    @Autowired
     private FlowScriptParamService flowScriptParamService;
 
     @Autowired
@@ -108,10 +113,12 @@ public class CsceneFlowService {
         String nodeName = sceneHandler.getElement(request.getNodeId()).getName();
         String nodeIp = "";
         String networkId = "";
+        String macAddr = "";
         if (CollectionUtils.isNotEmpty(sceneHandler.getElement(request.getNodeId()).getPorts())) {
             CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             for (var p : sceneHandler.getElement(request.getNodeId()).getPorts()) {
                 nodeIp = p.getIp();
+                macAddr = p.getMacAddr();
                 if (StringUtils.isNotEmpty(nodeIp)) {
                     CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
                     networkId = cloudPluginSceneElementNetworkBO.getResourceId();
@@ -208,6 +215,20 @@ public class CsceneFlowService {
             flowTaskConfModelList.add(flowTaskConfModel);
         }
         flowTaskConfService.bulkCreate(flowTaskConfModelList);
+        //上传pcap包虚拟机
+        for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+            if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
+                log.error("upload flow file info error");
+                throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+            }
+        }
+        //初始化网口
+        for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+            if (!initNetwork(macAddr, flowTaskTaskModel.getId(), nodeIp, actuatorId)) {
+                log.error("init network error");
+                throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+            }
+        }
         log.info("CsceneFlowService.addTask end.");
     }
 
@@ -381,6 +402,88 @@ public class CsceneFlowService {
         FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
         log.info("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
+    }
+
+    /**
+     * 上传pcap包到trex虚拟机
+     * @param flowInfoModel
+     * @param actuatorId
+     * @return
+     */
+    public boolean uploadPcapToTrex(FlowInfoModel flowInfoModel, String actuatorId) {
+        log.info("CsceneFlowService.uploadPcapToTrex begin. flowInfoModel:{}, actuatorId:{}", flowInfoModel, actuatorId);
+        if (flowInfoModel == null || StringUtils.isEmpty(actuatorId)) {
+            return false;
+        }
+        boolean isSuccess = true;
+        try {
+            FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+            String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
+            byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
+
+            JSONObject object = new JSONObject();
+            object.put("flowId", flowInfoModel.getId());
+            object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
+            // 判断是pcap包还是脚本
+            if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+                List<FlowProtocolModel> flowProtocolModelList = flowProtocolService.selectByFlowId(flowInfoModel.getId());
+                if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
+                    JSONObject protocolRate = new JSONObject();
+                    for (FlowProtocolModel flowProtocolModel : flowProtocolModelList) {
+                        protocolRate.put(flowProtocolModel.getProtocolName(), flowProtocolModel.getRate());
+                    }
+                    object.put("protocolRate", protocolRate);
+                }
+            }
+            String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/upload", fileByte, "file", object);
+            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+            log.info("upload pcap file response:{}", jsonObject.toJSONString());
+            if (!ResponseUtils.checkResponse(jsonObject)) {
+                log.error("upload file to flow actuator platform fail!");
+                isSuccess = false;
+            }
+        } catch (Exception e) {
+            log.error("upload file to flow actuator platform error!", e);
+            isSuccess = false;
+        }
+        log.info("CsceneFlowService.uploadPcapToTrex end. isSuccess:{}", isSuccess);
+        return isSuccess;
+    }
+
+    /**
+     * 初始化网口
+     * @param mac
+     * @param taskId
+     * @param targetIp
+     * @param actuatorId
+     * @return
+     */
+    public boolean initNetwork(String mac, String taskId, String targetIp, String actuatorId) {
+        log.info("CsceneFlowService.initNetwork begin. mac:{}, taskId:{}, targetIp:{}, actuatorId:{}", mac, taskId, targetIp, actuatorId);
+        if (StringUtils.isEmpty(mac) || StringUtils.isEmpty(taskId) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
+            return false;
+        }
+        boolean isSuccess = true;
+        try {
+            FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+            String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
+            JSONObject object = new JSONObject();
+            object.put("mac", mac);
+            object.put("taskId", taskId);
+            object.put("targetIp", targetIp);
+            String pcapRsp = HttpUtils.sendPost(resourceUrl + "/network/init", object.toJSONString());
+            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+            log.info("init network response:{}", jsonObject.toJSONString());
+            if (!ResponseUtils.checkResponse(jsonObject)) {
+                log.error("init network fail!");
+                isSuccess = false;
+            }
+        } catch (Exception e) {
+            log.error("init network error!", e);
+            isSuccess = false;
+        }
+        log.info("CsceneFlowService.initNetwork end. isSuccess:{}", isSuccess);
+        return isSuccess;
     }
 
     /**
