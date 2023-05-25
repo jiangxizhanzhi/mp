@@ -571,6 +571,8 @@ public class CreateHandler extends HandlerCommon {
                     var accessMode = new EntityNodeCreateData.Interface.AccessMode();
                     accessMode.setProtocol(AccessMode.Protocol.SNMP);
                     accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SNMP));
+                    accessMode.setIpAddress(TextUtils.emptyNull(port.getIp()));
+                    accessMode.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
                     entityInterface.getAccessModes().add(accessMode);
                 }
             }
