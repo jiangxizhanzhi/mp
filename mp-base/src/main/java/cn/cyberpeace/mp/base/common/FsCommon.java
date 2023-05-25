@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.common;
 
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.remotefile.FileClient;
 import org.springframework.stereotype.Component;
 
@@ -11,16 +12,28 @@ public class FsCommon {
 
     public static FileClient fileClient;
 
-    private FsCommon(FdfsCommon fdfsCommon) {
-        FsCommon.fileClient = FdfsCommon.fdfsClient;
+    private FsCommon(FdfsCommon fdfsCommon, LfsCommon lfsCommon) {
+        if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
+            FsCommon.fileClient = FdfsCommon.fdfsClient;
+        } else {
+            FsCommon.fileClient = LfsCommon.lfsClient;
+        }
     }
 
     public static String genHttpUrl(String fileKey) {
-        return FdfsCommon.genHttpUrl(fileKey);
+        if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
+            return FdfsCommon.genHttpUrl(fileKey);
+        } else {
+            return LfsCommon.genHttpUrl(fileKey);
+        }
     }
 
     public static String genInnerHttpUrl(String fileKey) {
-        return FdfsCommon.genInnerHttpUrl(fileKey);
+        if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
+            return FdfsCommon.genInnerHttpUrl(fileKey);
+        } else {
+            return LfsCommon.genInnerHttpUrl(fileKey);
+        }
     }
 
     public static String uploadContent(String content) {
