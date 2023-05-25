@@ -32,6 +32,8 @@ public enum OpTargetEnums {
     COLLECTION_TEMPLATE("collection_template"),
     // 流量文件
     FLOW_INFO("flow_info"),
+    // 流量文件分类
+    FLOW_INFO_CATEGORY("flow_info_category"),
     // 流量集合
     FLOW_COLLECTION("flow_collection"),
     // 公告
@@ -45,7 +47,9 @@ public enum OpTargetEnums {
     // 节点
     SCENE_ELEMENT("scene_element"),
     // 节点流量
-    SCENE_ELEMENT_FLOW("scene_element_flow");
+    SCENE_ELEMENT_FLOW("scene_element_flow"),
+    //虚拟usb
+    VIRTUAL_USB("virtual_usb");
     //DEFAULT("");
 
 

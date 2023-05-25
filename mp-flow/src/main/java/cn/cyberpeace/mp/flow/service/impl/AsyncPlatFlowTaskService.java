@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.CheckUtils;
@@ -735,7 +735,7 @@ public class AsyncPlatFlowTaskService {
             if (CollectionUtils.isNotEmpty(infoModelList)) {
                 infoModelList.forEach(infoModel -> {
                     String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
-                    FdfsCommon.delete(filePath);
+                    FsCommon.delete(filePath);
                 });
             }
         } catch (Exception e) {
@@ -1049,7 +1049,7 @@ public class AsyncPlatFlowTaskService {
             // 判断是pcap包还是脚本
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 // 获取pcap流量包
-                byte[] fileByte = FdfsCommon.downloadRawContent(flowInfoModel.getPcapFile());
+                byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
                 // 先向流量发生平台导入pcap包
                 JSONObject object = new JSONObject();
                 object.put("fileName",
@@ -1085,7 +1085,7 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 // 获取script流量脚本
-                byte[] fileByte = FdfsCommon.downloadRawContent(flowInfoModel.getScriptFile());
+                byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
                 // 获取替换脚本参数后的脚本内容
                 String code = replaceCode(fileByte, flowInfoModel.getId(), addFlowTaskRequest);
 

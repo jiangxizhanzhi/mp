@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -76,7 +76,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         String suffix = FileUtil.getSuffix(request.getFile().getOriginalFilename());
         String filePath = null;
         try {
-            filePath = FdfsCommon.upload(request.getFile().getInputStream(), suffix);
+            filePath = FsCommon.upload(request.getFile().getInputStream(), suffix);
         } catch (IOException e) {
             return ResultCommon.fail("Upload screenshot error");
         }
@@ -115,7 +115,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 新增截屏文件
         this.create(model);
         // 返回前端地址加上 /fdfs 前缀
-        model.setFile(FdfsCommon.genHttpUrl(filePath));
+        model.setFile(FsCommon.genHttpUrl(filePath));
 
         return ResultCommon.success(model);
     }

@@ -147,6 +147,7 @@ public class InstallerUtils {
     public static boolean isNewerWindows(String systemType) {
         systemType = systemType.toLowerCase();
         return BaseSceneElementModel.SystemType.WINDOWS.equals(systemType)
+                || BaseSceneElementModel.SystemType.WINDOWS_11.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_10.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_8.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_7.equals(systemType)

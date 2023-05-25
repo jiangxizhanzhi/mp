@@ -30,8 +30,8 @@ public enum FlowErrorCode implements ErrorCode {
     ADD_PORT_ERROR("MP-110323", "add_port_error"),
     RECREATE_CUSTOM_FLOW_ERROR("MP-110324", "recreate_custom_flow"),
     NODE_NOT_START("MP-110325", "node_not_start"),
-    PARAMS_SHOULD_NOT_EMPTY("MP-110326", "params_should_not_empty");
-
+    PARAMS_SHOULD_NOT_EMPTY("MP-110326", "params_should_not_empty"),
+    CATEGORY_HAS_USED("MP-110327", "category_has_used");
 
 
     FlowErrorCode(String code, String message) {

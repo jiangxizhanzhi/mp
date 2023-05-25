@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.UnpauseTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class UnpauseHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
     private final Container container = new Container();
+    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
     public static class SceneProcess {
         public static final EventProcess UNPAUSE_TERMINALS = new EventProcess("unpause_terminals", "sceneplugincloud.event.unpause_terminals");
@@ -33,6 +35,7 @@ public class UnpauseHandler extends HandlerCommon {
         public static final EventProcess UNPAUSE_VIRTUAL_MACHINE = new EventProcess("unpause_virtual_machine", "sceneplugincloud.event.unpause_virtual_machine");
         public static final EventProcess UNPAUSE_CONTAINER = new EventProcess("unpause_container", "sceneplugincloud.event.unpause_container");
         public static final EventProcess UNPAUSE_NODE = new EventProcess("unpause_node", "sceneplugincloud.event.unpause_node");
+        public static final EventProcess UNPAUSE_DYNAMIPS = new EventProcess("unpause_dynamips", "sceneplugincloud.event.unpause_dynamips");
     }
 
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -67,6 +70,11 @@ public class UnpauseHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_CONTAINER, () -> {
                 container.unPause(instanceId);
                 checkAccessModes(element);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_DYNAMIPS));
+            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_DYNAMIPS, () -> {
+                virtualDynamips.unPause(instanceId);
             });
         } else {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_NODE));

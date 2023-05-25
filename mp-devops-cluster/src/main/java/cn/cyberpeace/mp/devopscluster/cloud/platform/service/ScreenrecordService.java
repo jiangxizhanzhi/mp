@@ -61,7 +61,7 @@ public class ScreenrecordService extends BaseCpService {
      * @param queryParams
      * @return
      */
-    public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
+    public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams,String sceneId) {
         queryParams.ensure();
         StringBuffer getParams = new StringBuffer("?");
         getParams.append("limit=").append(Objects.nonNull(queryParams.getPageSize()) ? queryParams.getPageSize() : queryParams.getPerPage())
@@ -74,6 +74,12 @@ public class ScreenrecordService extends BaseCpService {
         }
         if (StringUtils.isNotBlank(queryParams.getEndTime())) {
             getParams.append("&end_time=").append(queryParams.getEndTime());
+        }
+        if (StringUtils.isNotBlank(sceneId)) {
+            getParams.append("&scene_id=").append(sceneId);
+        }
+        if (StringUtils.isNotBlank(queryParams.getNodeId())) {
+            getParams.append("&host_id=").append(queryParams.getNodeId());
         }
         if (Objects.nonNull(queryParams.getOrders())) {
             String sortKey = queryParams.getOrders()[0];

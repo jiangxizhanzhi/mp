@@ -27,6 +27,12 @@ public abstract class BaseGns3PluginSceneElementBO<M extends BaseGns3PluginScene
     @ApiModelProperty(value = "ram")
     private Integer ram;
 
+    @ApiModelProperty(value = "cpu")
+    private Integer cpu;
+
+    @ApiModelProperty(value = "disk")
+    private Integer disk;
+
     // 虚拟路由属性
     @ApiModelProperty(value = "虚拟路由静态路由")
     @Valid

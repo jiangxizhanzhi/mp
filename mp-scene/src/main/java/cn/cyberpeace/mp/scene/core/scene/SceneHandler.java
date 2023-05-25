@@ -47,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -537,7 +538,6 @@ public class SceneHandler extends BaseSceneHandler<
     public void restart() {
     }
 
-    // 入参重新考虑下？
     public boolean modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
@@ -714,6 +714,43 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void stopElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.STOP);
+        startElementEvent(nodeId, SceneElementModel.Event.STOP);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.stopElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.STOP, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.STOP);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
+    public void startElement(String nodeId){
+        //获取节点的网元数据
+        SceneElementBO element = getElement(nodeId);
+        //节点前置事件
+        prepareElementEvent(element, SceneElementModel.Event.START);
+        //开始节点事件
+        startElementEvent(nodeId, SceneElementModel.Event.START);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.startElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.START, e.getMessage());
+            return;
+        }
+        //节点后置事件
+        overElementEvent(nodeId, SceneElementModel.Event.START);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void restartElement(String nodeId) {
@@ -774,9 +811,68 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void deleteElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.DELETE);
+        startElementEvent(nodeId, SceneElementModel.Event.DELETE);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.deleteElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.DELETE, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.DELETE);
+        // 去除 被删除节点 的数据
+        var scene = toData();
+        Iterator<SceneElementBO> elementIts = scene.getTopology().getElements().iterator();
+        while (elementIts.hasNext()) {
+            var s = elementIts.next();
+            if (s.getId().equals(nodeId)) {
+                elementIts.remove();
+                break;
+            }
+        }
+        Set<String> deletePortIds = new HashSet<>();
+        for (var p : element.getPorts()) {
+            deletePortIds.add(p.getId());
+        }
+        Iterator<SceneElementPortConnectionBO> connectIts = scene.getTopology().getConnections().iterator();
+        while (connectIts.hasNext()) {
+            var c = connectIts.next();
+            if (deletePortIds.contains(c.getSource()) || deletePortIds.contains(c.getTarget())) {
+                connectIts.remove();
+            }
+        }
+        for (var plugin : scene.getPlugins().values()) {
+            plugin.getElements().remove(element.getId());
+            for (var port : element.getPorts()) {
+                plugin.getElementPorts().remove(port.getId());
+            }
+        }
+        new SceneHandler(scene, null).save();
     }
 
-    public void modifyElement(String nodeId) {
+    public void modifyElement(String nodeId, SceneHandler updateHandler) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.MODIFY);
+        startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+        try {
+            // 基础数据 modify
+            var newElement = updateHandler.getElement(nodeId);
+            element.setName(newElement.getName());
+            element.setIcon2(newElement.getIcon2());
+            element.setIcon3(newElement.getIcon3());
+            // 插件数据 modify
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.modifyElement(nodeId, updateHandler);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.MODIFY, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+        updateSceneElementWithPlugins(nodeId);
     }
 
     public void recreateElement(String nodeId) {
@@ -838,8 +934,8 @@ public class SceneHandler extends BaseSceneHandler<
         prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
         startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
         try {
-            for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.snapshotElement(nodeId, snapshotId, snapshotName, description);
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).snapshotElement(nodeId, snapshotId, snapshotName, description);
             }
         } catch (Exception e) {
             errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());

@@ -26,4 +26,10 @@ public class ScreenrecordQueryParams extends QueryParams {
     @ApiModelProperty(value = "结束时间")
     private String endTime;
 
+    @ApiModelProperty(value = "场景id")
+    private String csceneId;
+
+    @ApiModelProperty(value = "节点id")
+    private String nodeId;
+
 }

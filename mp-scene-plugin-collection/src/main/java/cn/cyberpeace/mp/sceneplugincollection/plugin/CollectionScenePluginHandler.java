@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHand
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.ElementCreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -128,5 +129,16 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
             return;
         }
         new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
+    }
+
+    @Override
+    public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
+        CollectionPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            return;
+        }
+        if (Boolean.TRUE.equals(element.getEnableProbeCollect())) {
+            WazuhCommon.uninstallAgent(element.getSrcElement().getEid(), element.getSrcElement().getSystemType());
+        }
     }
 }

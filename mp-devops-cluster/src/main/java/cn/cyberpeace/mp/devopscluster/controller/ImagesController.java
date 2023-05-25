@@ -11,12 +11,15 @@ import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DynamicImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ISOService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SnapshotService;
@@ -39,6 +42,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ISOFileRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
@@ -55,8 +59,10 @@ import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
+import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devopscluster.vo.ISOUploadVO;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesByIdVO;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesByUuidsVO;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
@@ -95,7 +101,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -125,9 +130,13 @@ public class ImagesController {
 
     private final ImagesService imagesService;
 
+    private final ISOService isoService;
+
     private final SnapshotService snapshotService;
 
     private final DevopsClusterConfig devopsClusterConfig;
+
+    private final DynamipsService dynamipsService ;
 
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
@@ -141,6 +150,9 @@ public class ImagesController {
 
     @NonNull
     private CustomImageUploadService customImageUploadService;
+
+    @NonNull
+    private ISOUploadService isoUploadService;
 
     @NonNull
     private CsceneSpecialService csceneSpecialService;
@@ -224,6 +236,12 @@ public class ImagesController {
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
+        if (Objects.nonNull(extVm) && StringUtils.isNotEmpty(extVm.getIsoTmpdirUuid())) {
+            var res = csceneSpecialService.statISOReferCscenes(extVm.getIsoTmpdirUuid()).getSource();
+            imagesByIdVO.setAllowChangeIso(CollectionUtils.isEmpty(res));
+        } else {
+            imagesByIdVO.setAllowChangeIso(true);
+        }
         return new Result<>(imagesByIdVO);
     }
 
@@ -506,6 +524,13 @@ public class ImagesController {
         return new Result<>(flavorList);
     }
 
+    @ApiOperation("查询dynamic相关的信息")
+    @GetMapping("/dynamic_image_info")
+    public Result<DynamicImageInfo> getDynamicImageInfo() {
+        var info = dynamipsService.getInfo();
+        return new Result<>(info);
+    }
+
     @ApiOperation("根据设备ID获取登录链接信息")
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection")
@@ -582,6 +607,31 @@ public class ImagesController {
     public ServiceResult<FileResponseData> uploadInjectFile(MultipartFile file, HttpServletRequest request) {
         injectFileUploadService = injectFileUploadService.build(file);
         return injectFileUploadService.upload();
+    }
+
+    @ApiOperation("上传iso文件")
+    @PostMapping(value = "/file/upload/iso")
+    public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file, String tmpdirUuid) {
+        if (StringUtils.isNotEmpty(tmpdirUuid)) {
+            this.checkISOReference(tmpdirUuid);
+        }
+        isoUploadService = isoUploadService.build(file);
+        return isoUploadService.upload();
+    }
+
+    @ApiOperation("下载iso文件")
+    @GetMapping(value = "/file/download/iso")
+    public ServiceResult<String> downloadISOFile(ISOFileRequest request) {
+        var result = isoService.download(request.getTmpdirUuid(), request.getFileName());
+        return new ServiceResult<>(result.getNginxFileUrl()).asResult();
+    }
+
+    @ApiOperation("删除iso文件")
+    @DeleteMapping(value = "/file/delete/iso")
+    public ServiceResult<Boolean> deleteISOFile(@RequestBody ISOFileRequest request) {
+        this.checkISOReference(request.getTmpdirUuid());
+        isoService.delete(request.getTmpdirUuid(), request.getFileName());
+        return new ServiceResult<>(true).asResult();
     }
 
     /**
@@ -664,5 +714,13 @@ public class ImagesController {
             vo.setCreateUserName(v.getCreateUserName());
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    private void checkISOReference(String isoTmpdirUuid) {
+        var result = csceneSpecialService.statISOReferCscenes(isoTmpdirUuid).getSource();
+        if (CollectionUtils.isNotEmpty(result)) {
+            throw new MpRuntimeException(DevopsClusterErrorCode.ISO_REFERENCE_SCENE_WITH_NAME
+                    .format(StringUtils.joinWith(",", result.toArray())));
+        }
     }
 }

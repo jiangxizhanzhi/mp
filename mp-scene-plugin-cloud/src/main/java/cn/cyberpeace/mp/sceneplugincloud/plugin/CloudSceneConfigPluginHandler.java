@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
@@ -16,7 +15,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
@@ -138,6 +136,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
         } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
         }
     }
 

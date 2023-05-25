@@ -15,9 +15,11 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_FIREWALL_DELETE_URL = "/v1/scenarios/virtual_firewall";
 
     public static final String VIRTUAL_ROUTER_CREATE_URL = "/v1/scenarios/virtual_router";
+    public static final String VIRTUAL_ROUTER_UPDATE_URL = "/v1/routers/{router_id}";
     public static final String VIRTUAL_ROUTER_DELETE_URL = "/v1/scenarios/virtual_router";
 
     public static final String VIRTUAL_SWITCH_CREATE_URL = "/v1/scenarios/virtual_switch";
+    public static final String VIRTUAL_SWITCH_UPDATE_URL = "/v1/networks/{network_id}";
     public static final String VIRTUAL_SWITCH_DELETE_URL = "/v1/scenarios/virtual_switch";
 
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/v1/scenarios/vm";
@@ -66,6 +68,9 @@ public class CloudUrlConstant {
     public static final String ADD_VM_PORTS = "/v1/instances/{instance_id}/interfaces";
     public static final String DELETE_VM_PORTS = "/v1/instances/{instance_id}/interfaces/{port_id}";
 
+    public static final String CREATE_PORTS = "/v1/ports";
+    public static final String UPDATE_PORTS = "/v1/ports";
+
     public static final String GET_SERIAL_PORT_URL = "/v1/instances/{instance_id}/serial-port";
     public static final String ROUTER_CMD_SEND_URL = "/cpcloud/router/v1/send_rule";
     public static final String ROUTER_CONFIG_QUERY_URL = "/cpcloud/router/v1/get_rule";
@@ -78,6 +83,15 @@ public class CloudUrlConstant {
     public static final String SCP_FILE = "/cpcloud/instance_control/v1/scpfile";
     public static final String SSH_CMD = "/cpcloud/instance_control/v1/ssh_cmd";
 
+    public static final String ENTITY_NODE_MIB_UPLOAD_URL = "/cpcloud/instance_control/v1/upload_mib_file";
+
+    public static final String ENTITY_NODE_MIB_NODE_INFO_URL = "/cpcloud/instance_control/v1/get_mib_node_info";
+    public static final String ATTACH_ISO = "/cpcloud/device/v1/iso/vm_attach";
+    public static final String ATTACH_VIRTUAL_USBS = "/cpcloud/device/v1/virtual_usbs/vm_attach";
+    public static final String DELETE_VIRTUAL_USBS = "/cpcloud/device/v1/virtual_usbs/vm_attach";
+    public static final String ATTACH_ENTITY_USBS = "/cpcloud/device/v1/entity_usbs/vm_attach";
+    public static final String DELETE_ENTITY_USBS = "/cpcloud/device/v1/entity_usbs/vm_attach";
+
     public static final String DEVICE_SNAPSHOT = "/cpcloud/device/v1/snapshot";
 
     public static final String FORCE_DELETE_VM = "/cpcloud/host/v1/vm";
@@ -88,6 +102,13 @@ public class CloudUrlConstant {
     public static final String SNAPSHOT_LIST = "/cpcloud/device/v1/snapshot";
     public static final String GET_CPCLOUD_ALL_ORIGIN_IPS = "/cpcloud/info/v1/revise_ip";
     public static final String RESET_CPCLOUD_ALL_IPS = "/cpcloud/info/v1/revise_ip";
+
+    public static final String CREATE_FLAVOR = "/v1/flavors";
+
+    public static final String CREATE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
+    public static final String DELETE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
+    public static final String VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL = "/cpcloud/device/v1/dynamips/{instance_id}/action";
+    public static final String GET_DYNAMIPS_INFO = "/cpcloud/device/v1/dynamips/type";
 
     private CloudUrlConstant() {
     }

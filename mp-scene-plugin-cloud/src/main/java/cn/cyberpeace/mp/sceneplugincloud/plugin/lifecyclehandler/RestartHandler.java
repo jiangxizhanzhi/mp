@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,12 @@ import java.util.Arrays;
 public class RestartHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
     private final Container container = new Container();
+    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
     public static class ElementProcess {
         public static final EventProcess RESTART_VIRTUAL_MACHINE = new EventProcess("restart_virtual_machine", "sceneplugincloud.event.restart_virtual_machine");
         public static final EventProcess RESTART_CONTAINER = new EventProcess("restart_container", "sceneplugincloud.event.restart_container");
+        public static final EventProcess RESTART_DYNAMIPS = new EventProcess("restart_dynamips", "sceneplugincloud.event.restart_dynamips");
     }
 
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -55,6 +58,11 @@ public class RestartHandler extends HandlerCommon {
                 container.addRoute(instanceId);
                 container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
                 checkAccessModes(element);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_DYNAMIPS));
+            runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_DYNAMIPS, () -> {
+                virtualDynamips.restart(instanceId);
             });
         }
     }

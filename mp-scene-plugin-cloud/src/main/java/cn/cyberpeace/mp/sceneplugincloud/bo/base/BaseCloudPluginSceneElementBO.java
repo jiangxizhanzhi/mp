@@ -95,6 +95,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @Valid
     private List<FirewallRule> firewallRules;
 
+    // 虚拟机属性
+    @ApiModelProperty(value = "挂载iso文件名")
+    private String isoAttachFilename;
+    @ApiModelProperty(value = "挂载iso临时文件地址")
+    private String isoTmpdirUuid;
+
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
@@ -103,6 +109,22 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "终端初始包含工具")
     @Valid
     private List<InitialTool> initialTools;
+    @ApiModelProperty(value = "仿真usb列表")
+    private List<VirtualUsb> virtualUsbs;
+    @ApiModelProperty(value = "实体usb列表")
+    private List<EntityUsb> entityUsbs;
+    @ApiModelProperty(value = "docker参数")
+    private DockerParams dockerParams;
+
+    // gns3 属性
+    @ApiModelProperty(value = "gns3 platform")
+    private String platform;
+
+    @ApiModelProperty(value = "snmp协议配置")
+    private SnmpConfig snmpConfig;
+
+    @ApiModelProperty(value = "mib文件数据")
+    private List<MibData> mibData;
 
     // 靶标属性
     @ApiModelProperty(value = "靶标角色")
@@ -196,6 +218,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
+        //忽略直接赋值处理的字段，需要定制处理
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
@@ -204,7 +227,13 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDockerParams),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
+        ));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
         allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
@@ -225,6 +254,16 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
         auxiliaryNetworkHostRoutes = StringUtils.isEmpty(obj.getAuxiliaryNetworkHostRoutes()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>(){});
+        virtualUsbs = StringUtils.isEmpty(obj.getVirtualUsbs()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {});
+        entityUsbs = StringUtils.isEmpty(obj.getEntityUsbs()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {});
+        dockerParams = StringUtils.isEmpty(obj.getDockerParams()) ? new DockerParams()
+                : JsonCommon.parse(obj.getDockerParams(), new TypeReference<DockerParams>() {});
+        snmpConfig = StringUtils.isEmpty(obj.getSnmpConfig()) ? new SnmpConfig()
+            : JsonCommon.parse(obj.getSnmpConfig(), new TypeReference<SnmpConfig>() {});
+        mibData = StringUtils.isEmpty(obj.getMibData()) ? new ArrayList<>()
+            : JsonCommon.parse(obj.getMibData(), new TypeReference<List<MibData>>() {});
     }
 
     @Override
@@ -237,7 +276,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getEntityUsbs),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
+            ));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
         }
@@ -267,6 +311,21 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (auxiliaryNetworkHostRoutes != null) {
             obj.setAuxiliaryNetworkHostRoutes(JsonCommon.stringify(auxiliaryNetworkHostRoutes));
+        }
+        if (virtualUsbs != null) {
+            obj.setVirtualUsbs(JsonCommon.stringify(virtualUsbs));
+        }
+        if (entityUsbs != null) {
+            obj.setEntityUsbs(JsonCommon.stringify(entityUsbs));
+        }
+        if(dockerParams != null){
+            obj.setDockerParams(JsonCommon.stringify(dockerParams));
+        }
+        if(snmpConfig != null){
+            obj.setSnmpConfig(JsonCommon.stringify(snmpConfig));
+        }
+        if(mibData != null){
+            obj.setMibData(JsonCommon.stringify(mibData));
         }
         return obj;
     }

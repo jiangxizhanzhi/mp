@@ -22,6 +22,7 @@ public class SystemTypeCommandUtils {
 
     public static final Map<String, String> SYSTEM_TYPE_OS_TYPE = new HashMap<>() {
         {
+            put(BaseSceneElementModel.SystemType.WINDOWS_11, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_10, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_8, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_7, OS_TYPE_WINDOWS);

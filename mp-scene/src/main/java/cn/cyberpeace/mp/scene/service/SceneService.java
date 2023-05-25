@@ -146,6 +146,7 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
+        updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
         SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
         updatedSceneHandler.setRealTimeUpdate(true);
         if (updatedSceneHandler.getScene() != null) {
@@ -224,6 +225,36 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * @description: 启动节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        //执行任务启动节点
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.startElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        //执行任务关闭节点
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.stopElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -261,6 +292,22 @@ public class SceneService {
         ElementTaskPool.getInstance().executeTask(() -> {
             sceneHandler.recreateElement(nodeId);
             callback.run();
+        });
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> deleteElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.deleteElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneHandler updateHandler, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> {
+            sceneHandler.modifyElement(nodeId, updateHandler);
         });
         return new ServiceResult<>(true);
     }

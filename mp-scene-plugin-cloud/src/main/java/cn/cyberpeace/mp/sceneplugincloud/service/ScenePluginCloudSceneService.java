@@ -439,6 +439,8 @@ public class ScenePluginCloudSceneService {
         extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
         extraParam.setUsername(userId);
         extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+        extraParam.setSceneId(sceneId);
+        extraParam.setNodeId(nodeId);
         CloudSceneConnectionCommon.enableRecording(connectionLinkInfo.getSceneConnection(), extraParam);
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
@@ -529,6 +531,8 @@ public class ScenePluginCloudSceneService {
             extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
             extraParam.setUsername(userId);
             extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+            extraParam.setSceneId(sceneId);
+            extraParam.setNodeId(nodeId);
             var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
             if (enableRecordingFlag) {
                 nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());

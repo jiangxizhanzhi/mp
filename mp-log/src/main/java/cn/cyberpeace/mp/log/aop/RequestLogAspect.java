@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 @Component
 public class RequestLogAspect {
 
-    public static final String DEFAULT_PASSWORD_FIELD_REGEX = "((\\w+)Password|((\\w+)_)?password|password)((_|[A-Z])(\\w+)?)?|((\\w+)Pwd|((\\w+)_)?pwd|pwd)((_|[A-Z])(\\w+)?)?";
+    public static final String DEFAULT_PASSWORD_FIELD_REGEX = "((\\w+)Password|((\\w+)_)?password)((_|[A-Z])(\\w+)?)?|((\\w+)Pwd|((\\w+)_)?pwd)((_|[A-Z])(\\w+)?)?";
 
     private Pattern passwordPattern = Pattern.compile(DEFAULT_PASSWORD_FIELD_REGEX);
 

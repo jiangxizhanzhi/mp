@@ -10,20 +10,9 @@ import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.base.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
@@ -31,18 +20,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -782,6 +764,72 @@ public class CsceneDataModifier {
                         }
                     }
                 });
+            }
+        }
+    }
+
+    public static void checkCloudElement(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
+            return;
+        }
+        checkVirtualUsb(csceneBO);
+        checkEntityUsb(csceneBO);
+    }
+
+    public static void checkVirtualUsb(CsceneBO csceneBO) {
+        var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+        if (elements != null && elements.size() > 0) {
+            // 校验虚拟usb 规则: 单个节点usb不能超过4个 , 单个场景的虚拟usb不能重复
+            Set<String> existsUsbs = new HashSet<>();
+            for (var entry : elements.entrySet()) {
+                CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
+                if (CollectionUtils.isNotEmpty(elementBO.getVirtualUsbs())) {
+                    int maxUsbNums = 4 ;
+                    if (elementBO.getVirtualUsbs().size() > maxUsbNums) {
+                        String name = "";
+                        for (var srcElement : csceneBO.getSceneConfig().getTopology().getElements()) {
+                            if (srcElement.getId().equals(entry.getKey())) {
+                                name = srcElement.getName();
+                            }
+                        }
+                        throw new MpRuntimeException(CsceneErrorCode.VIRTUAL_USB_OUT_OF_RANGE.format(name, String.valueOf(maxUsbNums)));
+                    }
+                    elementBO.getVirtualUsbs().forEach(usb -> {
+                        if (existsUsbs.contains(usb.getUuid())) {
+                            throw new MpRuntimeException(CsceneErrorCode.SAME_USB_HAS_USED.format(usb.getName()));
+                        } else {
+                            existsUsbs.add(usb.getUuid());
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public static void checkEntityUsb(CsceneBO csceneBO) {
+        var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+        if (MapUtils.isEmpty(elements)) {
+            return;
+        }
+        //所有节点上usb集合
+        Set<String> existsUsbs = new HashSet<>();
+        for (var entry : elements.entrySet()) {
+            CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
+            if (CollectionUtils.isEmpty(elementBO.getEntityUsbs())) {
+                continue;
+            }
+            //1，同一个实体USB不能在一个场景中出现两次；2，同一个节点上挂的USB的host要一样
+            Set<String> hosts = new HashSet<>();
+            elementBO.getEntityUsbs().forEach(usb -> {
+                if (existsUsbs.contains(usb.getUuid())) {
+                    throw new MpRuntimeException(CsceneErrorCode.ENTITY_USB_HAS_USD.format(usb.getName()));
+                } else {
+                    existsUsbs.add(usb.getUuid());
+                    hosts.add(usb.getHost());
+                }
+            });
+            if (hosts.size() > 1) {
+                throw new MpRuntimeException(CsceneErrorCode.ENTITY_USB_HOST_NOT_SAME);
             }
         }
     }

@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.model.OptionModel;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.constant.*;
@@ -37,6 +39,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 流量信息控制器
@@ -49,6 +52,8 @@ import java.util.Objects;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
 public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowInfoQueryParams, FlowInfoService>
         implements FlowPrefixConstant {
+
+    private static final String FLOW_CATEGORY = "flow_category";
 
     @Autowired
     private FlowInfoServiceImpl flowServiceImpl;
@@ -250,5 +255,77 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return ResultCommon.success(response);
     }
 
+    /**
+     * 分页查询流量分类列表
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("分页查询流量分类列表")
+    @GetMapping("/page_categories")
+    public ListObjServiceResult<OptionModel> pageCategories(OptionQueryParams queryParams) {
+        log.info("FlowInfoController.pageCategories begin. queryParams:{}", queryParams);
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            queryParams.setOrders(new String[]{"sort"});
+        }
+        queryParams.setType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        ListObjServiceResult<OptionModel> result = optionService.page(queryParams);
+        log.info("FlowInfoController.pageCategories end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 新增流量分类
+     * @param optionModel
+     * @return
+     */
+    @ApiOperation("新增流量分类")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
+    @PostMapping("/add_category")
+    public ServiceResult addCategory(@RequestBody OptionModel optionModel) {
+        log.info("FlowInfoController.addCategory begin. optionModel:{}", optionModel);
+        optionModel.setType(FLOW_CATEGORY);
+        optionModel.setMeta("{\"activKeys\":\"no_auth\",\"visible\":1}");
+        optionModel.setCode(String.valueOf(optionService.getMaxCode(FLOW_CATEGORY) + 1));
+        optionModel.setSort(optionService.getMaxSort(FLOW_CATEGORY) + 1);
+        optionService.addOption(optionModel);
+        log.info("FlowInfoController.addCategory end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 编辑流量分类
+     * @param optionModel
+     * @return
+     */
+    @ApiOperation("编辑流量分类")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "编辑流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
+    @PostMapping("/edit_category")
+    public ServiceResult editCategory(@RequestBody OptionModel optionModel) {
+        log.info("FlowInfoController.editCategory begin. optionModel:{}", optionModel);
+        optionService.editOption(optionModel);
+        log.info("FlowInfoController.editCategory end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 删除流量分类
+     * @param request
+     * @return
+     */
+    @ApiOperation("删除流量分类")
+    @DeleteMapping("/delete_categories")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
+    public ServiceResult deleteCategories(@RequestBody DeleteCategoryRequest request){
+        log.info("FlowInfoController.deleteCategories begin. request:{}", request);
+        List<OptionModel> optionModels = optionService.findByIds(request.getIds());
+        List<String> codeList = optionModels.stream().map(OptionModel::getCode).collect(Collectors.toList());
+        if (flowServiceImpl.checkCategoryUsed(codeList)) {
+            return ResultCommon.fail(FlowErrorCode.CATEGORY_HAS_USED);
+        }
+        optionService.deleteOptions(request.getIds());
+        log.info("FlowInfoController.deleteCategories end");
+        return ResultCommon.success();
+    }
 
 }

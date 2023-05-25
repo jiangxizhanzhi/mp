@@ -82,6 +82,7 @@ mp:
       - ${FDFS_IP:10.100.1.26}:${FDFS_TRACKER_SERVERS_PORT:22122}
     fdfs-inner-http-server: http://${FDFS_IP:10.100.1.26}:${FDFS_INNER_FILE_SERVER_PORT:8888}
     fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
+    file-server: ${FILE_SERVER:fdfs}
     run-init: true
   # mp-devops-cluster模块
   devopscluster:
@@ -155,7 +156,7 @@ mp:
     authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:38effa66e5454c5d9dd79711fc6ffc4d}
     authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
     authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
-    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public}
+    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   # mp-front-admin 模块
@@ -168,7 +169,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
-    url-ac-filter-exclude-urls: ${MP_FRONTBUSINESS_URLACFILTER_EXCLUDE_URLS:/api/mp/actuator/info,/api/mp/actuator/health}
+    url-ac-filter-exclude-urls: ${MP_FRONTBUSINESS_URLACFILTER_EXCLUDE_URLS:/api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip}
   # mp-flow 模块配置
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
@@ -188,6 +189,7 @@ mp:
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
     gateway-types: ${GATEWAY_TYPES:2,3}
+    cpcloud-server-timeout: ${MP_CPLOUD_SERVER_TIMEOUT:600000}
     cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
     initiate-pool-size: ${MP_INITIATE_POOL_SIZE:10}
     initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}

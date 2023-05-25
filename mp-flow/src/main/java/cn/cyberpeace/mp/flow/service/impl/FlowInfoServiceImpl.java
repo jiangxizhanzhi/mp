@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
@@ -77,6 +78,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowCollectionRelMapper flowCollectionRelMapper;
+
+    @Autowired
+    private FlowCollectionMapper flowCollectionMapper;
 
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
@@ -1012,7 +1016,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         flowInfoModel.setId(flowId);
                         flowInfoModel.setTitle(fileName);
                         flowInfoModel.setFileName(flowFile.getName());
-                        String fdfsPath = FdfsCommon.upload(flowFile.getAbsolutePath());
+                        String fdfsPath = FsCommon.upload(flowFile.getAbsolutePath());
                         if (flowFile.getName().endsWith(".pcap")) {
                             // 背景流量
                             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
@@ -1141,7 +1145,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
 
             flowInfoModel.setFileName(pcapFile.getName());
-            String fdfsPath = FdfsCommon.upload(pcapFile.getAbsolutePath());
+            String fdfsPath = FsCommon.upload(pcapFile.getAbsolutePath());
             flowInfoModel.setFlowDesc(readmeList.get(3));
             boolean isContainType = readmeList.get(10).contains("类型");
             int diffCount = 0;
@@ -1358,6 +1362,27 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return protocolList;
+    }
+
+    public boolean checkCategoryUsed(List<String> categoryList) {
+        log.info("FlowInfoServiceImpl.checkCategoryUsed begin. categoryList:{}", categoryList);
+        if (CollectionUtils.isEmpty(categoryList)) {
+            return false;
+        }
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(FlowInfoModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        List<FlowInfoModel> flowInfoModelList = getModelMapper().list(condition);
+        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+            return true;
+        }
+        HumanCondition conditionCollection = new HumanCondition();
+        conditionCollection.filterIn(FlowCollectionModel::getCategory, categoryList.toArray(new String[categoryList.size()]));
+        List<FlowCollectionModel> flowCollectionModelList = flowCollectionMapper.list(conditionCollection);
+        if (CollectionUtils.isNotEmpty(flowCollectionModelList)) {
+            return true;
+        }
+        log.info("FlowInfoServiceImpl.checkCategoryUsed end.");
+        return false;
     }
 
     /**

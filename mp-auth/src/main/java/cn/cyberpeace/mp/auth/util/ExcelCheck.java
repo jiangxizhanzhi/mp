@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -29,7 +30,7 @@ public class ExcelCheck {
         boolean typeMatch = false;
         if (StringUtils.isNotBlank(type)) {
             for (String excelType : EXCEL_TYPES) {
-                if (type.equals(excelType)) {
+                if (Objects.equals(type, excelType)) {
                     typeMatch = true;
                     break;
                 }

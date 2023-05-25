@@ -397,7 +397,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && Boolean.TRUE.equals(network.getDhcp())) {
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && !Boolean.FALSE.equals(network.getDhcp())) {
                 List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway(), network.getCidr());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
@@ -803,6 +803,23 @@ public class InitiateHandler extends HandlerCommon {
         var ports = Optional
                 .ofNullable(cloudElement.getSrcElement().getPorts())
                 .orElse(new ArrayList<>());
+
+        // 如果连线的对端节点,有相同cidr的网络,那么这个网络就是默认网络
+        boolean defaultNetwordIsDerive = true;
+        for (var port : ports) {
+            var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            if (connectPort != null) {
+                // 有连线 且 对端端口已归属某个网络 则本端口接入即可
+                CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
+                if (connectNetwork != null) {
+                    if (StringUtils.equals(connectNetwork.getCidr(), defaultConnectedNetwork.getNetwork().getCidr())) {
+                        defaultConnectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
+                        defaultNetwordIsDerive = false;
+                    }
+                }
+            }
+        }
+
         Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
         List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
         for (var port : ports) {
@@ -863,7 +880,9 @@ public class InitiateHandler extends HandlerCommon {
         if (this.isCoreRouter(cloudElement)) {
             // 核心路由 每个端口都接网络
             if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-                cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+                if (defaultNetwordIsDerive) {
+                    cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+                }
             }
             cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
             cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
@@ -881,12 +900,16 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
-                deriveNetworks.add(defaultConnectedNetwork);
+                if (defaultNetwordIsDerive) {
+                    deriveNetworks.add(defaultConnectedNetwork);
+                }
             }
             // 至少有个网络
             if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
                 if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-                    deriveNetworks.add(defaultConnectedNetwork);
+                    if (defaultNetwordIsDerive) {
+                        deriveNetworks.add(defaultConnectedNetwork);
+                    }
                 }
                 // 如果虚拟终端没有默认网络 那么加一个
                 if (CollectionUtils.isEmpty(deriveNetworks) && cloudElement.getVirtualType() != null &&

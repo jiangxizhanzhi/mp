@@ -55,7 +55,9 @@ public class CloudSceneConnectionCommon {
     @Data
     @NoArgsConstructor
     public static class SceneConnectionEnableRecordingExtraParam {
+        private String sceneId;
         private String sceneName;
+        private String nodeId;
         private String nodeName;
         private String username;
         private String department;
@@ -239,8 +241,8 @@ public class CloudSceneConnectionCommon {
         }
 
         var remoteClient = new Remote();
-        var result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(),
-                extraParam.getNodeName(), extraParam.getUsername(), extraParam.getDepartment());
+        var result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(), extraParam.getSceneId(),
+                extraParam.getNodeName(), extraParam.getNodeId(), extraParam.getUsername(), extraParam.getDepartment());
         var flag = !StringUtils.isEmpty(result);
         if (flag) {
             sceneConnection.setConnectionEnableRecording(true);
@@ -279,6 +281,7 @@ public class CloudSceneConnectionCommon {
         var result = remoteClient.convertRecording(connectionId);
         var flag = !StringUtils.isEmpty(result);
         if (flag) {
+            sceneConnection.setDisable(true);
             sceneConnection.setConnectionRecordingName(result);
             cloudPluginSceneConnectionMapper.save(sceneConnection);
         }
