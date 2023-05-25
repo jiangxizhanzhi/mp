@@ -503,6 +503,7 @@ public class ScenePluginCloudSceneService {
         var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
         sceneConnectionParam.setSceneElementId(nodeId);
+        sceneConnectionParam.setSceneElementName(accessModeInfo.getCloudElement().getSrcElement().getName());
         sceneConnectionParam.setResourceId(cloudElement.getResourceId());
         sceneConnectionParam.setResourceHost(cloudElement.getHost());
         sceneConnectionParam.setSceneElementPortId(portId);

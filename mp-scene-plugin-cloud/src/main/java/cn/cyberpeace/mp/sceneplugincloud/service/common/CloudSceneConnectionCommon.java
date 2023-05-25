@@ -39,6 +39,7 @@ public class CloudSceneConnectionCommon {
     public static class SceneConnectionParam {
         private String sceneId;
         private String sceneElementId;
+        private String sceneElementName;
         private String resourceId;
         private String resourceHost;
         private String sceneElementPortId;
@@ -64,6 +65,7 @@ public class CloudSceneConnectionCommon {
     public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
+        var sceneElementName = param.getSceneElementName();
         var sceneElementPortId = param.getSceneElementPortId();
         var cloudAccessMode = param.getCloudAccessMode();
         var userId = param.getUserId();
@@ -172,6 +174,7 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
             guacamoleCreateConnectionData.setHost(param.getResourceHost());
             guacamoleCreateConnectionData.setFlag(false);
+            guacamoleCreateConnectionData.setConnectionName(sceneElementName);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
             // 协议的特殊处理
             String protocol = null;
