@@ -487,6 +487,26 @@ public class CsceneFlowService {
     }
 
     /**
+     * 流量任务启动
+     * @param taskId
+     */
+    public void startTask(String taskId) {
+        log.info("CsceneFlowService.startTask begin. taskId:{}", taskId);
+        asyncPlatFlowTaskService.startTask(taskId);
+        log.info("CsceneFlowService.startTask end.");
+    }
+
+    /**
+     * 流量任务启动
+     * @param taskIds
+     */
+    public void batchStartTasks(List<String> taskIds) {
+        log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
+        asyncPlatFlowTaskService.batchStartTasks(taskIds);
+        log.info("CsceneFlowService.batchStartTasks end.");
+    }
+
+    /**
      * 获取实时速率统计条件
      * @return
      */

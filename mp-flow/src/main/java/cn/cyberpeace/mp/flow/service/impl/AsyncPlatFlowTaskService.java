@@ -656,7 +656,7 @@ public class AsyncPlatFlowTaskService {
 
         // 任务状态校验
         FlowTaskTaskModel flowTaskTaskModel = taskServiceResult.getSource().getObj();
-        if (TaskStatusEnum.STOPED.toValue() != flowTaskTaskModel.getTaskStatus() && TaskStatusEnum.FAILED.toValue() != flowTaskTaskModel.getTaskStatus()) {
+        if (TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus() || TaskStatusEnum.STOPING.toValue() == flowTaskTaskModel.getTaskStatus()) {
             log.error("task is running for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
         }
@@ -735,8 +735,7 @@ public class AsyncPlatFlowTaskService {
 
         // 任务状态校验
         List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                flowTaskTaskModel.getTaskStatus() != TaskStatusEnum.STOPED.toValue() &&
-                        flowTaskTaskModel.getTaskStatus() != TaskStatusEnum.FAILED.toValue()).collect(Collectors.toList());
+                TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus() || TaskStatusEnum.STOPING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(runningTasks)) {
             log.error("some tasks are already running");
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
