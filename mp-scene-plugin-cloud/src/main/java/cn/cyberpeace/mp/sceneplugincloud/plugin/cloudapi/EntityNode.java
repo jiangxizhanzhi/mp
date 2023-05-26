@@ -42,7 +42,7 @@ public class EntityNode extends CloudClient {
      * @return List<MibResultData>
      */
     public List<MibResultData> getMibNodeInfo(MibNodeQueryParam param) {
-        CloudResponse<List<MibResultData>> result = cloudPost(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, null, param,
+        CloudResponse<List<MibResultData>> result = cloudGet(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, param,
             new TypeReference<CloudResponse<List<MibResultData>>>() {
             }, true);
         return result.getData();

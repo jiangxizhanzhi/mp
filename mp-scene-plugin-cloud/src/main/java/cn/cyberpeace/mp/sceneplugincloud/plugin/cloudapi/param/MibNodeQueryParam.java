@@ -21,11 +21,13 @@ public class MibNodeQueryParam implements CloudHttpParam {
 
     private String oid;
     //snmp版本
-    private String version;
+    private Integer version;
     //团体字，一般为public
-    private String community;
+    private String communityName;
     //ip地址
     private String ip;
+    //端口
+    private Integer port;
     /**
      * snmp版本为v3时，会出现以下三个参数
      *  用户名
