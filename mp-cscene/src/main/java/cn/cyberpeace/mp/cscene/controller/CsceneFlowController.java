@@ -194,11 +194,11 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     }
 
     /**
-     * 流量任务启动
+     * 流量任务批量启动
      * @param request
      * @return
      */
-    @ApiOperation("流量任务启动")
+    @ApiOperation("流量任务批量启动")
     @PostMapping("/task/batch_start")
     public ServiceResult batchStartTasks(@RequestBody FlowTaskBatchStartRequest request) {
         log.info("FlowInfoController.batchStartTasks begin. request:{}", request);
