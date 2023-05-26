@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTaskBatchStartRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
@@ -175,6 +176,35 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         JSONArray result = csceneFlowService.top5Protocols(id);
         log.info("FlowInfoController.top5Protocols end. result:{}", result);
         return ResultCommon.success(result);
+    }
+
+    /**
+     * 流量任务启动
+     * @param taskId
+     * @return
+     */
+    @ApiOperation("流量任务启动")
+    @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
+    @PostMapping("/task/start")
+    public ServiceResult startTask(@RequestParam String taskId) {
+        log.info("FlowInfoController.startTask begin. taskId:{}", taskId);
+        csceneFlowService.startTask(taskId);
+        log.info("FlowInfoController.startTask end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 流量任务启动
+     * @param request
+     * @return
+     */
+    @ApiOperation("流量任务启动")
+    @PostMapping("/task/batch_start")
+    public ServiceResult batchStartTasks(@RequestBody FlowTaskBatchStartRequest request) {
+        log.info("FlowInfoController.batchStartTasks begin. request:{}", request);
+        csceneFlowService.batchStartTasks(request.getTaskIds());
+        log.info("FlowInfoController.batchStartTasks end.");
+        return ResultCommon.success();
     }
 
 }

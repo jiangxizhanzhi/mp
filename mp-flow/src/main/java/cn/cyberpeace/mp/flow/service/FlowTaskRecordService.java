@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,12 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
      * @return
      */
     FlowStatisticsInfo flowStatistics(String sceneId);
+
+    /**
+     * 同步执行记录
+     * @param jsonMessage
+     */
+    void syncRecord(JSONObject jsonMessage);
 
 }
 
