@@ -38,8 +38,8 @@ public class FlowTaskCommonConf {
     private Integer ipg;
 
     /**
-     * 时长(单位ms)
+     * 时长(单位s)
      */
-    @ApiModelProperty("时长(单位ms)")
+    @ApiModelProperty("时长(单位s)")
     private Integer duration;
 }

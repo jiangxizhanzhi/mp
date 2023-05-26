@@ -1,28 +1,32 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskStart;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.*;
 import cn.cyberpeace.mp.flow.model.*;
-import cn.cyberpeace.mp.flow.repository.*;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
-import cn.cyberpeace.mp.flow.service.FlowPortService;
-import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
-import cn.cyberpeace.mp.flow.service.FlowTaskPortService;
-import cn.cyberpeace.mp.flow.util.CommonUtil;
-import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
-import cn.cyberpeace.mp.flow.util.ResponseUtils;
-import cn.cyberpeace.mp.flow.util.SshUtil;
+import cn.cyberpeace.mp.flow.service.*;
+import cn.cyberpeace.mp.flow.util.*;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -78,6 +82,12 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowTaskPortService flowTaskPortService;
+
+    @Autowired
+    private FlowTaskTaskService flowTaskTaskService;
+
+    @Autowired
+    private FlowTaskConfService flowTaskConfService;
 
     /**
      * tgn代码目录
@@ -628,6 +638,174 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
+        }
+    }
+
+    /**
+     * 单个启动流量任务
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<Boolean> startTask(String taskId) {
+        // 任务存在校验
+        ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
+        if (Objects.isNull(taskServiceResult.getSource()) || Objects.isNull(taskServiceResult.getSource().getObj())) {
+            log.error("task is not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 任务状态校验
+        FlowTaskTaskModel flowTaskTaskModel = taskServiceResult.getSource().getObj();
+        if (TaskStatusEnum.STOPED.toValue() != flowTaskTaskModel.getTaskStatus() && TaskStatusEnum.FAILED.toValue() != flowTaskTaskModel.getTaskStatus()) {
+            log.error("task is running for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+        }
+
+        // 任务配置校验
+        FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
+        if (Objects.isNull(flowTaskConfModel)) {
+            log.error("task config error for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+
+        // 流量执行器校验
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModel.getActuatorId());
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("start task error, flowActuator not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+
+        // 解析任务配置
+        FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
+        // 封装流量任务配置参数
+        FlowTaskStart flowTaskStart = FlowTaskStart.builder()
+                .taskId(flowTaskTaskModel.getId())
+                .flowId(flowTaskTaskModel.getFlowId())
+                .resourceType(flowTaskTaskModel.getResourceType())
+                .keepRunning(flowTaskConfModel.getKeepRunning())
+                .commonConf(flowTaskConf.getCommonConf())
+                .rateUnlimited(flowTaskConfModel.getRateUnlimited())
+                .rateConf(flowTaskConf.getRateConf())
+                .replay(flowTaskConfModel.getReplay())
+                .flowConf(flowTaskConf.getFlowConf())
+                .build();
+        StartFlowTaskRequest startFlowTaskRequest = StartFlowTaskRequest.builder()
+                .action(TaskActionEnum.START.toValue())
+                .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
+                .task(flowTaskStart)
+                .build();
+
+        try {
+            String startTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/v2/tasks/action",
+                    JsonUtils.snakeStringify(startFlowTaskRequest));
+            JSONObject startTaskObj = JSONObject.parseObject(startTaskRsp);
+            log.info("start task response:{}", startTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(startTaskObj)) {
+                log.info("start task success for {}", taskId);
+
+                // 跟流量执行器建立ws连接，用于接收任务状态信息
+                FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+                wsClient.sendMessage(taskId);
+
+                // 更新任务状态为运行中
+                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
+                return ResultCommon.success(true);
+            } else {
+                log.error("start task failed for {}", taskId);
+                return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("start task error for {}", taskId, e);
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+    }
+
+    /**
+     * 批量启动流量任务
+     * @param taskIds
+     * @return
+     */
+    public ServiceResult<Boolean> batchStartTasks(List<String> taskIds) {
+        // 任务存在校验
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByTaskIds(taskIds);
+        if (CollectionUtils.isEmpty(flowTaskTaskModels) || flowTaskTaskModels.size() != taskIds.size()) {
+            log.error("tasks are not all exist");
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 任务状态校验
+        List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
+                flowTaskTaskModel.getTaskStatus() != TaskStatusEnum.STOPED.toValue() &&
+                        flowTaskTaskModel.getTaskStatus() != TaskStatusEnum.FAILED.toValue()).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(runningTasks)) {
+            log.error("some tasks are already running");
+            throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+        }
+
+        // 任务配置校验
+        List<FlowTaskConfModel> flowTaskConfModels = flowTaskConfService.listByTaskIds(taskIds);
+        if (CollectionUtils.isEmpty(flowTaskConfModels) || flowTaskConfModels.size() != taskIds.size()) {
+            log.error("not all tasks config exist");
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+
+        // 流量执行器校验
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModels.get(0).getActuatorId());
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("batch start tasks error, flowActuator not exist");
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+
+        List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
+        flowTaskTaskModels.forEach(flowTaskTaskModel -> {
+            // 解析任务配置
+            FlowTaskConfModel flowTaskConfModel = flowTaskConfModels.stream().filter(taskConfModel ->
+                    taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())).findFirst().get();
+            FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
+
+            // 封装流量任务配置参数
+            FlowTaskStart flowTaskStart = FlowTaskStart.builder()
+                    .taskId(flowTaskTaskModel.getId())
+                    .flowId(flowTaskTaskModel.getFlowId())
+                    .resourceType(flowTaskTaskModel.getResourceType())
+                    .keepRunning(flowTaskConfModel.getKeepRunning())
+                    .commonConf(flowTaskConf.getCommonConf())
+                    .rateUnlimited(flowTaskConfModel.getRateUnlimited())
+                    .rateConf(flowTaskConf.getRateConf())
+                    .replay(flowTaskConfModel.getReplay())
+                    .flowConf(flowTaskConf.getFlowConf())
+                    .build();
+            flowTaskStartList.add(flowTaskStart);
+        });
+
+        BatchStartFlowTaskRequest batchStartFlowTaskRequest = BatchStartFlowTaskRequest.builder()
+                .action(TaskActionEnum.START.toValue())
+                .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
+                .tasks(flowTaskStartList)
+                .build();
+
+        try {
+            String batchStartTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/v2/tasks/batch/action",
+                    JsonUtils.snakeStringify(batchStartFlowTaskRequest));
+            JSONObject batchStartTaskObj = JSONObject.parseObject(batchStartTaskRsp);
+            log.info("batch start task response:{}", batchStartTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(batchStartTaskObj)) {
+                log.info("batch start task success");
+
+                // 跟流量执行器建立ws连接，用于接收任务状态信息
+                FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+                wsClient.sendMessage(String.join(BaseConstants.COMMA, taskIds));
+
+                // 批量更新任务状态为运行中
+                flowTaskTaskService.batchUpdateTaskStatus(taskIds, TaskStatusEnum.RUNNING.toValue());
+                return ResultCommon.success(true);
+            } else {
+                log.error("batch start tasks failed");
+                return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("batch start tasks error");
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
     }
 

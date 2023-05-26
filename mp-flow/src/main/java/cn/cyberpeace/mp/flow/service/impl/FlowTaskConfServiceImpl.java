@@ -43,4 +43,11 @@ public class FlowTaskConfServiceImpl extends BaseModelServiceImpl<FlowTaskConfMo
         return null;
     }
 
+    @Override
+    public List<FlowTaskConfModel> listByTaskIds(List<String> taskIds) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(FlowTaskConfModel::getTaskId, taskIds.toArray());
+
+        return getModelMapper().list(condition);
+    }
 }
