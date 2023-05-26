@@ -60,6 +60,8 @@
         </encoder>
     </appender>
 
+    <contextListener class="cn.cyberpeace.mp.frontadminbusiness.config.LoggerStartupListener"/>
+
     <!-- 时间滚动输出日志 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_HOME}/mp.log</file>
