@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
+import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -176,6 +178,37 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         flowStatisticsInfo.setJitterList(jitterList);
         log.info("FlowTaskRecordServiceImpl.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
+    }
+
+    /**
+     * 同步执行记录
+     * @param jsonMessage
+     */
+    @Override
+    public void syncRecord(JSONObject jsonMessage) {
+        log.info("FlowTaskRecordServiceImpl.syncRecord start. jsonMessage:{}", jsonMessage);
+        if (jsonMessage == null || !"success".equals(jsonMessage.getString("msg"))) {
+            log.info("消息为空或为失败消息，不做处理");
+            return;
+        }
+        JSONObject data = jsonMessage.getJSONObject("flow_record");
+        FlowTaskRecordModel flowTaskRecordModel = new FlowTaskRecordModel();
+        flowTaskRecordModel.setTaskId(data.getString("task_uuid"));
+        flowTaskRecordModel.setTxBps(data.getLong("tx_bps"));
+        flowTaskRecordModel.setTxPps(data.getLong("tx_pps"));
+        flowTaskRecordModel.setLatency(data.getLong("latency"));
+        flowTaskRecordModel.setJitter(data.getLong("jitter"));
+        flowTaskRecordModel.setTotalTxL2(data.getLong("total_tx_L2"));
+        flowTaskRecordModel.setTotalTxL1(data.getLong("total_tx_L1"));
+        flowTaskRecordModel.setTotalPps(data.getLong("opackets"));
+        flowTaskRecordModel.setTotalRx(data.getLong("total_rx"));
+        flowTaskRecordModel.setQueueFull(data.getLong("queue_full"));
+        flowTaskRecordModel.setDropRate(data.getLong("drop_rate"));
+        flowTaskRecordModel.setRecordStatus(data.getInteger("status"));
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
+        this.getModelMapper().save(flowTaskRecordModel);
+        log.info("FlowTaskRecordServiceImpl.syncRecord end.");
     }
 
     /**
