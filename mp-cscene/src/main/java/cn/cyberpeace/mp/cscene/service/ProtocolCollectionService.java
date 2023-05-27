@@ -126,7 +126,10 @@ public class ProtocolCollectionService {
         //获取根节点信息
         for (MibFileInfo mf : mapTmp.values()) {
             String parentId = mf.getParent();
-            if(StringUtils.isEmpty(parentId)) {
+            if (StringUtils.isEmpty(parentId)) {
+                parentMibNode.add(mf);
+            } else if (!mapTmp.containsKey(parentId)) {
+                // todo 等底层保证没有这种不存在的parentId的时候,可以去掉
                 parentMibNode.add(mf);
             }
         }
