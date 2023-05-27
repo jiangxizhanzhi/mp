@@ -18,10 +18,10 @@
     </select>
 
     <select id="queryFlowSummary" resultType="cn.cyberpeace.mp.flow.bo.FlowSummary">
-        select count(1) as taskNum,sum(success_count) as successCount,sum(error_count) as errorCount,
-               sum(success_count+error_count) as runnedCount,count(distinct(node_id)) as totalNode,
-               (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) as runningTask,
-               (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) as runningNode
+        select if(count(1) is null, 0, count(1)) as taskNum,if(sum(success_count) is null, 0, sum(success_count)) as successCount,if(sum(error_count) is null, 0, sum(error_count)) as errorCount,
+               if(sum(success_count+error_count) is null, 0, sum(success_count+error_count)) as runnedCount,if(count(distinct(node_id)) is null, 0, count(distinct(node_id))) as totalNode,
+               if((SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) is null, 0, (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId})) as runningTask,
+               if((SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) is null, 0, (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId})) as runningNode
         from mp_flow_task_task t
         where scene_id=#{sceneId}
     </select>
