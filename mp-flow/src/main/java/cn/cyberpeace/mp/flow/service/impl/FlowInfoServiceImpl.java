@@ -106,7 +106,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 预制流量文件目录
      */
-    private static final String PRE_PATH = "/root/.mp/resources/flows/";
+    private static final String PRE_PATH = "/root/.mp/resources/flows";
 
     /**
      * 根据id集合查询列表
@@ -1272,7 +1272,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         String strProtocols;
-        String scriptPath = PRE_PATH.concat("protocol_analyse.py");
+        String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = "";
         OutputStream out = null;
         BufferedReader input = null;
@@ -1280,7 +1280,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + multipartFile.getOriginalFilename();
-            pcapPath = PRE_PATH.concat(fileName);
+            pcapPath = PRE_PATH.concat("/" + fileName);
             tmpFile = new File(pcapPath);
             out = new FileOutputStream(tmpFile);
             byte[] ss = multipartFile.getBytes();
@@ -1397,7 +1397,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return;
         }
         String outPcapPath = "";
-        String scriptPath = PRE_PATH.concat("protocol_filter.py");
+        String scriptPath = PRE_PATH.concat("/protocol_filter.py");
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
         BufferedReader input = null;
@@ -1409,7 +1409,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 下载原pcap文件
             byte[] pcapByte = FdfsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
-            String srcPcapPath = PRE_PATH.concat(fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + fileName);
             srcFile = new File(srcPcapPath);
             fos = new FileOutputStream(srcFile);
             bos = new BufferedOutputStream(fos);
