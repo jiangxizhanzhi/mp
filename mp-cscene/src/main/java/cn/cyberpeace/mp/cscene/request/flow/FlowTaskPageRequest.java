@@ -16,4 +16,10 @@ public class FlowTaskPageRequest extends PageRequest {
 
     @ApiModelProperty("场景实例id")
     private String id;
+
+    @ApiModelProperty("流量类型")
+    private String interactiveType;
+
+    @ApiModelProperty("目标设备id")
+    private String nodeId;
 }

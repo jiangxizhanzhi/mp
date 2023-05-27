@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -205,6 +206,21 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         csceneFlowService.batchStartTasks(request.getTaskIds());
         log.info("FlowInfoController.batchStartTasks end.");
         return ResultCommon.success();
+    }
+
+    /**
+     * 目标设备下拉选项
+     * @param id
+     * @return
+     */
+    @ApiOperation("目标设备下拉选项")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/node_option")
+    public ServiceResult<List<FlowTaskNode>> nodeOption(@RequestParam String id) {
+        log.info("FlowInfoController.nodeOption begin. id:{}", id);
+        List<FlowTaskNode> result = csceneFlowService.nodeOption(id);
+        log.info("FlowInfoController.nodeOption end. result:{}", result);
+        return ResultCommon.success(result);
     }
 
 }

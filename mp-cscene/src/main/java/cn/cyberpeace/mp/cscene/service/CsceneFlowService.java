@@ -296,6 +296,12 @@ public class CsceneFlowService {
                 .selectAs(FlowPcapModel::getPcapSize, FlowTaskPageResponse::getPcapSize)
                 .selectAs(FlowPcapModel::getPktNum, FlowTaskPageResponse::getPktNum)
                 .selectAs(FlowPcapModel::getProtocols, FlowTaskPageResponse::getProtocols);
+        if (StringUtils.isNotEmpty(request.getNodeId())) {
+            humanCondition.currentLink(FlowTaskTaskModel.class).filterEqual(FlowTaskTaskModel::getNodeId, request.getNodeId());
+        }
+        if (StringUtils.isNotEmpty(request.getInteractiveType())) {
+            humanCondition.currentLink(FlowTaskTaskModel.class).filterEqual(FlowTaskTaskModel::getInteractiveType, request.getInteractiveType());
+        }
         humanCondition.setLimit(request.getPerPage());
         humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
         // 查询符合条件的条数
@@ -510,6 +516,19 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStartTasks(taskIds);
         log.info("CsceneFlowService.batchStartTasks end.");
+    }
+
+    /**
+     * 根据场景id查询带有流量的节点id
+     * @param id
+     * @return
+     */
+    public List<FlowTaskNode> nodeOption(String id) {
+        log.info("CsceneFlowService.nodeOption begin. id:{}", id);
+        var sceneId = csceneInstanceService.getSceneId(id);
+        List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
+        log.info("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
+        return nodeList;
     }
 
     /**
