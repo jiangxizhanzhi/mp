@@ -112,6 +112,7 @@ public class ScreenrecordVO extends BaseModel {
             this.setUserName(record.getUsername());
             this.setUserOrgName(org);
         }
+        this.setUserId(record.getUsername());
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
         this.setHost(record.getHost());
