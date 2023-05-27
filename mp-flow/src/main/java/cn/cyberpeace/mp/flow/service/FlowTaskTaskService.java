@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 
 import java.util.List;
@@ -35,6 +36,13 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
      * @return
      */
     List<FlowTaskTaskModel> listByTaskIds(List<String> taskIds);
+
+    /**
+     * 根据场景id查询节点列表
+     * @param sceneId
+     * @return
+     */
+    List<FlowTaskNode> nodeList(String sceneId);
 
 }
 

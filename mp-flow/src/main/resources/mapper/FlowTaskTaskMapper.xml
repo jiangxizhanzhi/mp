@@ -2,4 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper">
 
+    <select id="nodeList" resultType="cn.cyberpeace.mp.flow.bo.FlowTaskNode">
+        select distinct(node_id) as nodeId, node_name as nodeName
+        from mp_flow_task_task
+        where scene_id=#{sceneId}
+    </select>
 </mapper>

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
@@ -48,5 +49,18 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         condition.filterIn(FlowTaskTaskModel::getId, taskIds.toArray());
 
         return getModelMapper().list(condition);
+    }
+
+    /**
+     * 根据场景id查询节点列表
+     * @param sceneId
+     * @return
+     */
+    @Override
+    public List<FlowTaskNode> nodeList(String sceneId) {
+        log.info("FlowTaskTaskServiceImpl.nodeList start. sceneId:{}", sceneId);
+        List<FlowTaskNode> nodeList = getModelMapper().nodeList(sceneId);
+        log.info("FlowTaskTaskServiceImpl.nodeList end. nodeList:{}", nodeList);
+        return nodeList;
     }
 }
