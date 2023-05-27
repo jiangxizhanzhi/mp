@@ -133,7 +133,10 @@ public class CsceneFlowService {
             throw new MpRuntimeException(CsceneErrorCode.NETWORKID_NOT_EXIST);
         }
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
-        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        String actuatorId = null;
+        if (flowScenePluginHandler == null) {
+            actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        }
         //流量执行器不存在则创建流量执行器
         if (StringUtils.isEmpty(actuatorId)) {
             String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
@@ -369,6 +372,9 @@ public class CsceneFlowService {
         String sceneId = csceneInstanceService.getSceneId(id);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
+        if (flowScenePluginHandler == null) {
+            return protocols;
+        }
         String actuatorId = flowScenePluginHandler.getScene().getExecutor();
         if (StringUtils.isNotEmpty(actuatorId)) {
             FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
