@@ -13,10 +13,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
-import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
-import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
-import cn.cyberpeace.mp.flow.bo.FlowSummary;
-import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
+import cn.cyberpeace.mp.flow.bo.*;
 import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -220,6 +217,21 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         log.info("FlowInfoController.nodeOption begin. id:{}", id);
         List<FlowTaskNode> result = csceneFlowService.nodeOption(id);
         log.info("FlowInfoController.nodeOption end. result:{}", result);
+        return ResultCommon.success(result);
+    }
+
+    /**
+     * 环境总速率
+     * @param id
+     * @return
+     */
+    @ApiOperation("环境总速率")
+    @ApiImplicitParam(name = "id", value = "环境总速率", dataTypeClass = String.class)
+    @GetMapping("/total_rate")
+    public ServiceResult<List<FlowStatisticsDetail>> totalRate(@RequestParam String id) {
+        log.info("FlowInfoController.totalRate begin. id:{}", id);
+        List<FlowStatisticsDetail> result = csceneFlowService.totalRate(id);
+        log.info("FlowInfoController.totalRate end. result:{}", result);
         return ResultCommon.success(result);
     }
 
