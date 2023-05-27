@@ -130,7 +130,17 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
     public FlowStatisticsInfo flowStatistics(String sceneId) {
         log.info("FlowTaskRecordServiceImpl.flowStatistics begin. id:{}", sceneId);
         FlowStatisticsInfo flowStatisticsInfo = new FlowStatisticsInfo();
+        flowStatisticsInfo.setTotalTxL2(0L);
+        flowStatisticsInfo.setTotalTxL1(0L);
+        flowStatisticsInfo.setTotalPps(0L);
+        flowStatisticsInfo.setTotalRx(0L);
+        flowStatisticsInfo.setQueueFull(0L);
+        flowStatisticsInfo.setDropRate(0L);
         List<FlowStatisticalCondition> conditionList = this.getCondition(sceneId);
+        if (CollectionUtils.isEmpty(conditionList)) {
+            log.info("没有执行记录");
+            return flowStatisticsInfo;
+        }
         List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(sceneId, conditionList);
         List<FlowStatisticsDetail> txBpsList = new ArrayList<>();
         List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
@@ -139,12 +149,12 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         if (CollectionUtils.isNotEmpty(tempList)) {
             for (FlowStatisticsTemp temp : tempList) {
                 if (temp.getOffsetValue() == 0) {
-                    flowStatisticsInfo.setTotalTxL2(temp.getTotalTxL2());
-                    flowStatisticsInfo.setTotalTxL1(temp.getTotalTxL1());
-                    flowStatisticsInfo.setTotalPps(temp.getTotalPps());
-                    flowStatisticsInfo.setTotalRx(temp.getTotalRx());
-                    flowStatisticsInfo.setQueueFull(temp.getQueueFull());
-                    flowStatisticsInfo.setDropRate(temp.getDropRate());
+                    flowStatisticsInfo.setTotalTxL2(temp.getTotalTxL2() == null ? 0 : temp.getTotalTxL2());
+                    flowStatisticsInfo.setTotalTxL1(temp.getTotalTxL1() == null ? 0 : temp.getTotalTxL1());
+                    flowStatisticsInfo.setTotalPps(temp.getTotalPps() == null ? 0 : temp.getTotalPps());
+                    flowStatisticsInfo.setTotalRx(temp.getTotalRx() == null ? 0 : temp.getTotalRx());
+                    flowStatisticsInfo.setQueueFull(temp.getQueueFull() == null ? 0 : temp.getQueueFull());
+                    flowStatisticsInfo.setDropRate(temp.getDropRate() == null ? 0 : temp.getDropRate());
                 }
                 FlowStatisticsDetail txBps = new FlowStatisticsDetail();
                 txBps.setStatisticalTime(temp.getStatisticalTime());
