@@ -532,6 +532,18 @@ public class CsceneFlowService {
     }
 
     /**
+     * 根据场景id查询环境总速率
+     * @return
+     */
+    public List<FlowStatisticsDetail> totalRate(String id) {
+        log.info("CsceneFlowService.totalRate begin. id:{}", id);
+        var sceneId = csceneInstanceService.getSceneId(id);
+        List<FlowStatisticsDetail> result = new ArrayList<>();
+        log.info("CsceneFlowService.totalRate end. result:{}", result);
+        return result;
+    }
+
+    /**
      * 获取实时速率统计条件
      * @return
      */
