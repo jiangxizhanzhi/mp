@@ -189,7 +189,8 @@ public class Device extends BaseCloudPlatformResult {
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
-        return tmpImport || tmpInternal;
+        boolean tmpInit = !Objects.isNull(isInit) && isInit;
+        return tmpImport || tmpInternal || tmpInit;
     }
 
     private Boolean supportExport;
