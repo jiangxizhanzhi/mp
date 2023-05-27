@@ -106,7 +106,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 预制流量文件目录
      */
-    private static final String PRE_PATH = "/root/.mp/resources/flows";
+    private static final String PRE_PATH = "/root/.mp/resources/flows/";
 
     /**
      * 根据id集合查询列表
