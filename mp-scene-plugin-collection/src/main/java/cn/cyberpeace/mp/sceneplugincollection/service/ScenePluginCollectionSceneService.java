@@ -15,6 +15,8 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
@@ -28,6 +30,8 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
@@ -1498,6 +1502,25 @@ public class ScenePluginCollectionSceneService {
             sceneAssets.add(asset);
         });
         return new ServiceResult<>(sceneAssets);
+    }
+
+    public ServiceResult<SceneConfigAssetBO> listSceneConfigAssets(String sceneConfigId) {
+        SceneConfigAssetBO sceneConfigAsset = new SceneConfigAssetBO();
+        sceneConfigAsset.setSceneId(sceneConfigId);
+        Map<Integer, SceneConfigCategoryGroupBO> category2CountInfo = new HashMap<>();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, null, null);
+        CloudSceneConfigPluginHandler cloudConfigPlugin = sceneConfigHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        sceneConfigAsset.setNodeCount(sceneConfigHandler.getElementMap().values().size());
+        sceneConfigHandler.getElementMap().values().forEach(e -> {
+            var cloudElement = cloudConfigPlugin.getElement(e.getId());
+            Integer category = cloudElement.getCategory();
+            if (!category2CountInfo.containsKey(category)) {
+                category2CountInfo.put(category, new SceneConfigCategoryGroupBO(category));
+            }
+            category2CountInfo.get(category).getElements().add(e);
+        });
+        sceneConfigAsset.setCategoryGroups(new ArrayList<>(category2CountInfo.values()));
+        return new ServiceResult<>(sceneConfigAsset);
     }
 
     /**

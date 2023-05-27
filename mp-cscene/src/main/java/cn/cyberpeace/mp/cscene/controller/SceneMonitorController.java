@@ -66,6 +66,14 @@ public class SceneMonitorController {
         return ResultCommon.success(basicInfoList);
     }
 
+    @ApiOperation(value = "查询场景模板所有节点列表")
+    @ApiImplicitParam(name = "id", value = "场景模板ID", dataTypeClass = String.class)
+    @GetMapping("/config/all_elements/{id}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String id, SceneAllElementsQueryRequest request) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneConfigElements(id, request);
+        return ResultCommon.success(basicInfoList);
+    }
+
 
     @ApiOperation(value = "查询场景所有IP列表")
     @GetMapping("/ips")
