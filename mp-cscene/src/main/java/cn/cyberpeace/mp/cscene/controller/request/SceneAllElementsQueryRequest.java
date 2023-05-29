@@ -9,4 +9,6 @@ public class SceneAllElementsQueryRequest {
     private String name;
     @ApiModelProperty(value = "设备类型")
     private Integer category;
+    @ApiModelProperty(value = "操作系统名称")
+    private String systemTypeName;
 }

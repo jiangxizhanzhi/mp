@@ -246,6 +246,11 @@ public class SceneMonitorService {
             basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
         }
 
+        // 根据操作系统名称筛选
+        if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
+            basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
+        }
+
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
             var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
