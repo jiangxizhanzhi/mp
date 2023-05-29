@@ -6,8 +6,10 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordBatchDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ScreenrecordConfigRequest;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.ScreenrecordQueryParams;
+import cn.cyberpeace.mp.devopscluster.vo.ScreenRecordRestoreConfigVO;
 import cn.cyberpeace.mp.devopscluster.vo.ScreenRecordUsedSpaceVO;
 import cn.cyberpeace.mp.devopscluster.vo.ScreenrecordVO;
 import cn.cyberpeace.mp.devopscluster.vo.SpaceStaticsVO;
@@ -20,12 +22,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Description 录屏文件管理controller
@@ -87,5 +88,20 @@ public class ScreenrecordController {
         return screenrecordService.getScreenRecordUrl(fileName);
     }
 
+    @ApiOperation("查询录屏空间上限配置")
+    @GetMapping("/get_restore_limit_config")
+    public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
+        return screenrecordService.getRestoreLimitConfig().asResult();
+    }
+
+    @ApiOperation("查询录屏空间上限配置")
+    @PostMapping("/update_restore_limit_config")
+    public ServiceResult<ScreenRecordRestoreConfigVO> updateRestoreLimitConfig(@RequestBody ScreenrecordConfigRequest request) {
+        screenrecordService.updateRestoreLimitConfig(request);
+        var result = new ScreenRecordRestoreConfigVO();
+        result.setFileLimitSpace(request.getFileLimitSpace());
+        result.setFileLimitTime(request.getFileLimitTime());
+        return new ServiceResult<>(result).asResult();
+    }
 
 }
