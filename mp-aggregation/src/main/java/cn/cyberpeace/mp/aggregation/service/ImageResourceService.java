@@ -102,8 +102,8 @@ public class ImageResourceService {
     }
 
     private String exportLogo(String logoPath, String imagePath) {
-        if (logoPath.startsWith("/fdfs") || logoPath.startsWith("group/")) {
-            String logoUrl = StringUtils.replaceOnce(logoPath, "/fdfs/", "");
+        if (FsCommon.isFileServerOuterUrl(logoPath)) {
+            String logoUrl = FsCommon.getFileKey(logoPath);
             byte[] content = FsCommon.downloadRawContent(logoUrl);
             // 判断图片文件类型
             if (this.isPng(content)) {
@@ -124,6 +124,16 @@ public class ImageResourceService {
                 log.error("failed to export logo {} , {}", logoPath, ExceptionUtils.getStackTrace(e));
                 throw new MpRuntimeException(BaseErrorCode.ERROR);
             }
+            if (this.isPng(content)) {
+                this.createFile(content, imagePath + "/logo.png");
+                return PNG;
+            } else {
+                this.createFile(content, imagePath + "/logo.jpg");
+                return JPG;
+            }
+        } else if (StringUtils.isNotEmpty(logoPath)) {
+            byte[] content = FsCommon.downloadRawContent(logoPath);
+            // 判断图片文件类型
             if (this.isPng(content)) {
                 this.createFile(content, imagePath + "/logo.png");
                 return PNG;
