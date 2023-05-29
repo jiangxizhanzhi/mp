@@ -39,9 +39,9 @@ public class DefaultImgUtil {
      */
     public static String pathToFdfsUrl(String path) {
         if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path)) {
-            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-            }
+//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+//            }
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
@@ -49,6 +49,9 @@ public class DefaultImgUtil {
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                 path = FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genFilePath(path);
         }
 
         return path;
