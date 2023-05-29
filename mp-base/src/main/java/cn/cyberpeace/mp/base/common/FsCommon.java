@@ -25,6 +25,9 @@ public class FsCommon {
     }
 
     public static String genHttpUrl(String fileKey) {
+        if (StringUtils.isEmpty(fileKey)) {
+            return fileKey;
+        }
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
             return FdfsCommon.genHttpUrl(fileKey);
         } else {
@@ -112,16 +115,4 @@ public class FsCommon {
             return StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
         }
     }
-
-    public static String genFilePath(String fileKey) {
-        if (StringUtils.isEmpty(fileKey)) {
-            return fileKey;
-        }
-        if ("fdfs".equals(BaseSingleton.baseAppConfig.getFileServer())) {
-            return String.join(BaseSingleton.baseAppConfig.getFdfsOuterHttpServer(), "/", fileKey);
-        } else {
-            return String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), fileKey);
-        }
-    }
-
 }

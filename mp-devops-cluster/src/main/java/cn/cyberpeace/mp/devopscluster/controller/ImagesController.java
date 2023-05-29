@@ -222,7 +222,7 @@ public class ImagesController {
         imagesByIdVO.setSecondCategory(model.getSubCategory());
         imagesByIdVO.setThirdCategory(model.getThirdCategory());
         imagesByIdVO.setRole(model.getRole());
-        imagesByIdVO.setLogo(FsCommon.genFilePath(model.getLogo()));
+        imagesByIdVO.setLogo(FsCommon.genHttpUrl(model.getLogo()));
         imagesByIdVO.setIsInternal(model.getIsInternal());
         imagesByIdVO.setIsInit(model.getIsInit());
         imagesByIdVO.setIsImport(model.getIsImport());

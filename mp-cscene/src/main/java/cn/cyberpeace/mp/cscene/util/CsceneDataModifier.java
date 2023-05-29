@@ -644,14 +644,14 @@ public class CsceneDataModifier {
         if (baseSceneDataBO.getTopology() != null) {
             BaseSceneBO scene = baseSceneDataBO.getTopology().getScene();
             if (scene != null && StringUtils.isNotEmpty(scene.getFile())) {
-                scene.setFile(FsCommon.genFilePath(scene.getFile()));
+                scene.setFile(FsCommon.genHttpUrl(scene.getFile()));
             }
             if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
                 baseSceneDataBO.getTopology().getElements().forEach(e -> {
                     BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
-                    sceneElement.setFile(FsCommon.genFilePath(sceneElement.getFile()));
-                    sceneElement.setIcon2(FsCommon.genFilePath(sceneElement.getIcon2()));
-                    sceneElement.setIcon3(FsCommon.genFilePath(sceneElement.getIcon3()));
+                    sceneElement.setFile(FsCommon.genHttpUrl(sceneElement.getFile()));
+                    sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
+                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {
                             if (p != null) {
@@ -659,7 +659,7 @@ public class CsceneDataModifier {
                                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                                     List<AccessMode> accessModes = port.getAccessModes();
                                     accessModes.forEach(accessMode -> {
-                                        String secretPath = FsCommon.genFilePath(accessMode.getPrivateKeyPath());
+                                        String secretPath = FsCommon.genHttpUrl(accessMode.getPrivateKeyPath());
                                         accessMode.setPrivateKeyPath(secretPath);
                                     });
                                 }
@@ -676,7 +676,7 @@ public class CsceneDataModifier {
                             List<Map> accessModes = (List<Map>) p.get("access_modes");
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("private_key_path") != null) {
-                                    accessMode.put("private_key_path", FsCommon.genFilePath(accessMode.get("private_key_path").toString()));
+                                    accessMode.put("private_key_path", FsCommon.genHttpUrl(accessMode.get("private_key_path").toString()));
                                 }
                             });
                         }
@@ -691,7 +691,7 @@ public class CsceneDataModifier {
                             List<Map> accessModes = (List<Map>) p.get("probes");
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("script_url") != null) {
-                                    accessMode.put("script_url", FsCommon.genFilePath(accessMode.get("script_url").toString()));
+                                    accessMode.put("script_url", FsCommon.genHttpUrl(accessMode.get("script_url").toString()));
                                 }
                             });
                         }
