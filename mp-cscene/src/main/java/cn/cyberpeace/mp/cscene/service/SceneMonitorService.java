@@ -208,6 +208,10 @@ public class SceneMonitorService {
             stream = topologyElements.stream().filter(e -> e.getName().contains(request.getName()));
         }
         List<String> nodeIds = stream.map(SceneElementBO::getId).collect(Collectors.toList());
+        // 根据节点id筛选
+        if (Objects.nonNull(request) && CollectionUtils.isNotEmpty(request.getElementIds())) {
+            nodeIds.retainAll(request.getElementIds());
+        }
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
@@ -245,7 +249,6 @@ public class SceneMonitorService {
         if (Objects.nonNull(request) && Objects.nonNull(request.getCategory())) {
             basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
         }
-
         // 根据操作系统名称筛选
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
             basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
