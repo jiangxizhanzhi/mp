@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -183,6 +184,7 @@ public class ImagesController {
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
+        request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
@@ -196,6 +198,7 @@ public class ImagesController {
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult update(@RequestBody ImageRequest request){
+        request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -219,7 +222,7 @@ public class ImagesController {
         imagesByIdVO.setSecondCategory(model.getSubCategory());
         imagesByIdVO.setThirdCategory(model.getThirdCategory());
         imagesByIdVO.setRole(model.getRole());
-        imagesByIdVO.setLogo(model.getLogo());
+        imagesByIdVO.setLogo(FsCommon.genFilePath(model.getLogo()));
         imagesByIdVO.setIsInternal(model.getIsInternal());
         imagesByIdVO.setIsInit(model.getIsInit());
         imagesByIdVO.setIsImport(model.getIsImport());

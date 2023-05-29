@@ -38,7 +38,7 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pathToFdfsUrl(String path) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path)) {
             if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
                 path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
             }
