@@ -78,10 +78,10 @@ public class BaseAppConfig {
     @Value("${mp.base.file_server:lfs}")
     private String fileServer;
 
-    @Value("${mp.base.lfs-inner-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    @Value("${mp.base.lfs-inner-http-url-template:/api/mp/file/%s}")
     private String lfsInnerHttpUrlTemplate;
 
-    @Value("${mp.base.lfs-outer-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    @Value("${mp.base.lfs-outer-http-url-template:/api/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
     @Value("${mp.base.home-dir:}")
