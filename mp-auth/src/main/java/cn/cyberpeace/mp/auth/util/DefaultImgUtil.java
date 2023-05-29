@@ -66,11 +66,12 @@ public class DefaultImgUtil {
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
         if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
-//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-//            }
-            String group = splitToGroup(path);
-            String name = splitToName(path);
+            String mayDefaultPath = path ;
+            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+                mayDefaultPath = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+            }
+            String group = splitToGroup(mayDefaultPath);
+            String name = splitToName(mayDefaultPath);
             Optional<LocalFileMappingModel> mappingModelOptional =
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
