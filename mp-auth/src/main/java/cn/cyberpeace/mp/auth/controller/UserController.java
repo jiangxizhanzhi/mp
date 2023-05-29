@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -137,6 +138,7 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> add(@RequestBody UserRequest createRequest) {
+        createRequest.setAvatar(FsCommon.getFileKey(createRequest.getAvatar()));
         UserModel userModel = userService.add(createRequest);
         return ResultCommon.success(userModel);
     }
@@ -146,6 +148,7 @@ public class UserController {
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
+        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
     }
