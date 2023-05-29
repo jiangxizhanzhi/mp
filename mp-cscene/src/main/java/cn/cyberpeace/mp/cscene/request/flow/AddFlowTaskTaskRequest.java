@@ -16,20 +16,14 @@ import java.util.List;
 public class AddFlowTaskTaskRequest {
 
     /**
-     * 流量id集合
+     * 详情
      */
-    @ApiModelProperty(value = "流量id集合")
-    private List<String> flowIds;
+    @ApiModelProperty(value = "详情")
+    private List<AddFlowTaskTaskDetail> details;
 
     /**
      * 场景实例ID
      */
     @ApiModelProperty(value = "场景实例ID")
     private String id;
-
-    /**
-     * 节点ID
-     */
-    @ApiModelProperty(value = "节点ID")
-    private String nodeId;
 }
