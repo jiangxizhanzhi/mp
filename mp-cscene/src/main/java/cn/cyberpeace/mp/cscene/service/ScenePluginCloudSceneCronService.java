@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.cscene.SceneCorrectService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.cscene.util.SceneLimitUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,8 @@ public class ScenePluginCloudSceneCronService {
             if (hour < 2) {
                 int count = csceneService.getActiveVirtualDeviceCount();
                 NodeLimitUtils.refreshCount(count);
+                var instance = csceneService.getRunningCscenes();
+                SceneLimitUtils.refreshCount(instance == null ? 0 : instance.size());
             }
         } catch (Exception e) {
             log.error("failed to refresh node limit count", e);

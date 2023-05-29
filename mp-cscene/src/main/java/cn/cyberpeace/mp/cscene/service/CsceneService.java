@@ -153,38 +153,39 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
-        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableNodeLimitDbCheck())) {
-            return;
-        }
-        var elementCount = 0;
-        if (cscene == null) {
-            var sceneConfigId = getSceneConfigId(csceneId);
-            elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
-        } else {
-            // TODO 获取需要虚拟化的节点数量
-            try {
-                var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
-                if (pluginElements != null) {
-                    for (var e : pluginElements.values()) {
-                        var virtualType = e.get("virtual_type");
-                        if (virtualType != null) {
-                            if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
-                            ) {
-                                elementCount++;
-                            }
-                        }
-                    }
-                }
-            } catch (NullPointerException e) {
-                // do nothing
-            } catch (Exception e) {
-                log.error("Get element count error: ", e);
-            }
-        }
-
-        checkSceneUsingNodeLimit(elementCount);
+        // haomi 项目改为对场景数量的限制
+//        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableNodeLimitDbCheck())) {
+//            return;
+//        }
+//        var elementCount = 0;
+//        if (cscene == null) {
+//            var sceneConfigId = getSceneConfigId(csceneId);
+//            elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
+//        } else {
+//            // TODO 获取需要虚拟化的节点数量
+//            try {
+//                var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+//                if (pluginElements != null) {
+//                    for (var e : pluginElements.values()) {
+//                        var virtualType = e.get("virtual_type");
+//                        if (virtualType != null) {
+//                            if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+//                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+//                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
+//                            ) {
+//                                elementCount++;
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (NullPointerException e) {
+//                // do nothing
+//            } catch (Exception e) {
+//                log.error("Get element count error: ", e);
+//            }
+//        }
+//
+//        checkSceneUsingNodeLimit(elementCount);
     }
 
     @Autowired

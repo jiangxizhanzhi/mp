@@ -43,8 +43,8 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
-import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.cscene.util.SceneLimitUtils;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -539,7 +539,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (ReentrantLockUtils.tryLock(id)) {
             try {
                 var instanceHandler = new CsceneInstanceHandler(id, context);
-                NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
+                SceneLimitUtils.substractLimitedSceneCount(instanceHandler);
                 String sceneId = this.getSceneId(id);
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
