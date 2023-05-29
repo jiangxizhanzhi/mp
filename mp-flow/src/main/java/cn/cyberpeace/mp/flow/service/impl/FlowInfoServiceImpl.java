@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -1407,7 +1406,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             // 下载原pcap文件
-            byte[] pcapByte = FdfsCommon.downloadRawContent(pcapPath);
+            byte[] pcapByte = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
             String srcPcapPath = PRE_PATH.concat("/" + fileName);
             srcFile = new File(srcPcapPath);
@@ -1438,7 +1437,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             dstFile = new File(dstPcapPath);
             // 上传新pcap包
-            outPcapPath = FdfsCommon.upload(dstPcapPath);
+            outPcapPath = FsCommon.upload(dstPcapPath);
 
             // 新增流量包数据
             FlowPcapModel flowPcapModel = FlowPcapModel.builder()
