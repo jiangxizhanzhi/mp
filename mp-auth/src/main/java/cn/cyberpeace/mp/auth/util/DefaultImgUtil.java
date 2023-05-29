@@ -48,7 +48,7 @@ public class DefaultImgUtil {
             }
         }
         if (!FsCommon.isFileServerOuterUrl(path)) {
-            path = FsCommon.genFilePath(path);
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;
@@ -61,11 +61,11 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX) &&
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
-            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-            }
+//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+//            }
             String group = splitToGroup(path);
             String name = splitToName(path);
             Optional<LocalFileMappingModel> mappingModelOptional =
@@ -74,6 +74,9 @@ public class DefaultImgUtil {
             if (mappingModelOptional.isPresent()) {
                 path = FdfsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;
