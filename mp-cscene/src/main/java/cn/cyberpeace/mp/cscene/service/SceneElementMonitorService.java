@@ -30,7 +30,10 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -334,6 +337,7 @@ public class SceneElementMonitorService {
             ElementPort port = new ElementPort();
             port.setIp(p.getIp());
             port.setName(p.getName());
+            port.setId(p.getId());
             port.setAccessModes(p.getAccessModes());
             return port;
         }).collect(Collectors.toList());

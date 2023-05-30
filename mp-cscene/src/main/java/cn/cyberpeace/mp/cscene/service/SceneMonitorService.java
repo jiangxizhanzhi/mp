@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -192,20 +194,19 @@ public class SceneMonitorService {
         }
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
+        var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
 
-        if (Objects.isNull(csceneInstanceBO)
-                || Objects.isNull(csceneInstanceBO.getScene())
-                || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
+        if (StringUtils.isEmpty(sceneInstanceId)) {
             return Collections.emptyList();
         }
 
-        var topology = csceneInstanceBO.getScene().getTopology();
-        var topologyElements = topology.getElements();
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 
         // 根据名称模糊筛选
-        var stream = topologyElements.stream();
+        var stream = sceneHandler.getElementMap().values().stream();
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
-            stream = topologyElements.stream().filter(e -> e.getName().contains(request.getName()));
+            stream = stream.filter(e -> e.getName().contains(request.getName()));
         }
         List<String> nodeIds = stream.map(SceneElementBO::getId).collect(Collectors.toList());
         // 根据节点id筛选
@@ -253,6 +254,12 @@ public class SceneMonitorService {
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
             basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
         }
+
+        // 添加云插件端口接入方式
+        basicInfos.forEach(basicInfo -> basicInfo.getPorts().forEach(p -> {
+            var cloudPort = cloudPlugin.getPort(p.getId());
+            p.setCloudAccessModes(cloudPort.getAccessModes());
+        }));
 
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
