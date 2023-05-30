@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -29,12 +30,15 @@ import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateResult;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -52,6 +56,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -121,13 +126,31 @@ public class CsceneFlowService {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         String actuatorId = null;
-        if (flowScenePluginHandler != null) {
-            actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        if (flowScenePluginHandler == null) {
+            ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
+            scenePluginDataBO.setScene(new HashMap<>());
+            scenePluginDataBO.setElementPorts(new HashMap<>());
+            scenePluginDataBO.setElements(new HashMap<>());
+            FlowPluginSceneElementBO elementBO = new FlowPluginSceneElementBO();
+            elementBO.setFlows(new ArrayList<>());
+            for (AddFlowTaskTaskDetail detail : request.getDetails()) {
+                scenePluginDataBO.getElements().put(detail.getNodeId(), JsonCommon.beanToSnakeMap(elementBO));
+            }
+            var scene = sceneHandler.toData();
+            scene.getPlugins().put(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, scenePluginDataBO);
+            SceneHandler sceneHandler2 = new SceneHandler(scene, null);
+            sceneHandler2.save();
+            sceneHandler = new SceneHandler(sceneId, null, false, null);
+            flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         }
+        actuatorId = flowScenePluginHandler.getScene().getExecutor();
         //流量执行器不存在则创建流量执行器
         if (StringUtils.isEmpty(actuatorId)) {
             String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
             actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
+            FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
+            scene.setExecutor(actuatorId);
+            flowScenePluginHandler.saveScene();
         }
         for (AddFlowTaskTaskDetail detail : request.getDetails()) {
             String nodeName = sceneHandler.getElement(detail.getNodeId()).getName();
