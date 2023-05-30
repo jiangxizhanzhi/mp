@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.util.remotefile.FileClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,9 @@ public class FsCommon {
     }
 
     public static String genHttpUrl(String fileKey) {
+        if (StringUtils.isEmpty(fileKey)) {
+            return fileKey;
+        }
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
             return FdfsCommon.genHttpUrl(fileKey);
         } else {
@@ -90,4 +95,24 @@ public class FsCommon {
         return fileClient.delete(fileKey);
     }
 
+    public static boolean isFileServerOuterUrl(String path) {
+        if ("fdfs".equals(BaseSingleton.baseAppConfig.getFileServer())) {
+            return StringUtils.startsWith(path, BaseSingleton.baseAppConfig.getFdfsOuterHttpServer());
+        } else {
+            String prefix = String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
+            return StringUtils.startsWith(path, prefix);
+        }
+    }
+
+    public static String getFileKey(String path) {
+        if (StringUtils.isEmpty(path)) {
+            return path;
+        }
+        if ("fdfs".equals(BaseSingleton.baseAppConfig.getFileServer())) {
+            return StringUtils.replaceOnce(path, BaseSingleton.baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY);
+        } else {
+            String prefix = String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
+            return StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
+        }
+    }
 }

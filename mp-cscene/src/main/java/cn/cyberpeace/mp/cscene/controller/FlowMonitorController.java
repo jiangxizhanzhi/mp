@@ -7,9 +7,15 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -20,13 +26,15 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
-import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -221,6 +229,41 @@ public class FlowMonitorController {
                     .build();
             responseList.add(response);
         });
+
+        return ResultCommon.success(responseList);
+    }
+
+    @ApiOperation(value = "场景模板资产统计", notes = "场景模板资产统计")
+    @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
+    @GetMapping("/scene_config/assets_statistics")
+    public ServiceResult<List<AssetsStatisticsResponse>> getSceneConfigAssetsStatistics(@RequestParam String id) {
+        log.info("assets_statistics params: {}", id);
+        String sceneConfigId = csceneCommonService.translateSceneConfigId(id);
+        if (sceneConfigId == null) {
+            log.error("translateSceneConfigId is null");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        SceneConfigAssetBO sceneConfigAsset = scenePluginCollectionSceneService.listSceneConfigAssets(sceneConfigId).getSource();
+        List<AssetsStatisticsResponse> responseList = new ArrayList<>();
+        // 统计资产数量
+        List<SceneConfigCategoryGroupBO> categoryGroups = sceneConfigAsset.getCategoryGroups();
+        // 操作系统
+        List<SceneConfigCategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
+        // 应用系统
+        List<SceneConfigCategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
+        // 网络设备
+        List<SceneConfigCategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
+        // 安全设备
+        List<SceneConfigCategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
+        AssetsStatisticsResponse response = AssetsStatisticsResponse.builder()
+                .sceneId(id)
+                .assetsTotal(sceneConfigAsset.getNodeCount())
+                .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
+                .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
+                .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
+                .build();
+        responseList.add(response);
 
         return ResultCommon.success(responseList);
     }

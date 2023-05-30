@@ -1171,6 +1171,15 @@ public class CreateHandler extends HandlerCommon {
                 if (port != null) {
                     port.setMacAddr(networkPort.getMacAddress());
                     getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
+                    var cloudPort = getPluginHandler().getPort(port.getId());
+                    if (cloudPort != null && cloudPort.getAccessModes() != null) {
+                        cloudPort.getAccessModes().forEach(a -> {
+                            if (AccessMode.Protocol.TELNET.equals(a.getProtocol())) {
+                                a.setAccessIp(result.getTelnetHost());
+                                a.setAccessPort(result.getTelnetPort());
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -1316,6 +1325,9 @@ public class CreateHandler extends HandlerCommon {
         List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
                 .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
                 .collect(Collectors.toList());
+        if (dynamicElements.isEmpty()) {
+            return;
+        }
 
         List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
             var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
@@ -1325,7 +1337,7 @@ public class CreateHandler extends HandlerCommon {
         runTasks(configDynamicIps);
 
         List<Runnable> configDynamicStaticRoutes = dynamicElements.stream().map(e -> (Runnable) () -> {
-            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            var list = DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler());
             // 下发配置
             vdClient.sendRule(e.getResourceId(), list);
         }).collect(Collectors.toList());

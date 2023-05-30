@@ -38,10 +38,10 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pathToFdfsUrl(String path) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
-            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-            }
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path)) {
+//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+//            }
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
@@ -49,6 +49,9 @@ public class DefaultImgUtil {
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                 path = FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;
@@ -61,19 +64,23 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX) &&
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
+            String mayDefaultPath = path ;
             if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+                mayDefaultPath = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
             }
-            String group = splitToGroup(path);
-            String name = splitToName(path);
+            String group = splitToGroup(mayDefaultPath);
+            String name = splitToName(mayDefaultPath);
             Optional<LocalFileMappingModel> mappingModelOptional =
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
             if (mappingModelOptional.isPresent()) {
                 path = FsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;

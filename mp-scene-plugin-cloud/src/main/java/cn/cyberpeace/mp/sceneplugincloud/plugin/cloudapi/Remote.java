@@ -181,6 +181,15 @@ public class Remote extends CloudClient {
         }
     }
 
+    public RecordRestoreLimitConfigResult getRecordRestoreLimitConfig() {
+        RecordRestoreLimitConfigResult result = getHttpClient().get(CloudUrlConstant.GET_RECORD_CLEAN_CONFIG, null, RecordRestoreLimitConfigResult.class);
+        return result;
+    }
+
+    public void updateRecordRestoreLimitConfig(RecordRestoreLimitConfigData data) {
+        getHttpClient().put(CloudUrlConstant.UPDATE_RECORD_CLEAN_CONFIG, data, null, Object.class);
+    }
+
     public void createFlavor() {
 
     }

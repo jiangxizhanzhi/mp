@@ -51,6 +51,8 @@ public class CloudUrlConstant {
     public static final String CONVERT_RECORDING_URL = "/cpcloud/guacamole/v1/convert_record";
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";
     public static final String GET_RECORDING_NAME_URL = "/cpcloud/guacamole/v1/recordfile";
+    public static final String GET_RECORD_CLEAN_CONFIG = "/cpcloud/guacamole/v1/record_clean_config";
+    public static final String UPDATE_RECORD_CLEAN_CONFIG = "/cpcloud/guacamole/v1/record_clean_config";
 
     public static final String CREATE_NPC_URL = "/cpcloud/npc_node/v1/node";
     public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";
@@ -108,6 +110,9 @@ public class CloudUrlConstant {
 
     public static final String CREATE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
     public static final String DELETE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
+    public static final String LIST_DYNAMIPS = "/cpcloud/device/v1/dynamips/instances";
+    public static final String STATISTICS_DYNAMIPS = "/cpcloud/device/v1/dynamips/statistics";
+    public static final String DYNAMIPS_SEND_RULE = "/cpcloud/device/v1/dynamips/instances/{instance_id}/send_rule";
     public static final String VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL = "/cpcloud/device/v1/dynamips/{instance_id}/action";
     public static final String GET_DYNAMIPS_INFO = "/cpcloud/device/v1/dynamips/type";
 

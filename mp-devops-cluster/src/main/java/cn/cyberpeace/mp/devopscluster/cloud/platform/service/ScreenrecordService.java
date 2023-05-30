@@ -13,9 +13,13 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScreenRecordData;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordBatchDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ScreenrecordConfigRequest;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.ScreenrecordQueryParams;
 import cn.cyberpeace.mp.devopscluster.vo.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigResult;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -298,6 +302,21 @@ public class ScreenrecordService extends BaseCpService {
             throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
         }
         return ResultCommon.success(data.getUrl());
+    }
+
+    public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
+        RecordRestoreLimitConfigResult result = new Remote().getRecordRestoreLimitConfig();
+        var config = new ScreenRecordRestoreConfigVO();
+        config.setFileLimitSpace(result.getCleanRecordFileLimitSpace());
+        config.setFileLimitTime(result.getCleanRecordFileLimitTime());
+        return new ServiceResult<>(config);
+    }
+
+    public void updateRestoreLimitConfig(ScreenrecordConfigRequest request){
+        RecordRestoreLimitConfigData data = new RecordRestoreLimitConfigData();
+        data.setCleanRecordFileLimitTime(request.getFileLimitTime());
+        data.setCleanRecordFileLimitSpace(request.getFileLimitSpace());
+        new Remote().updateRecordRestoreLimitConfig(data);
     }
 
 }

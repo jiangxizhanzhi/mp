@@ -10,17 +10,24 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -187,22 +194,25 @@ public class SceneMonitorService {
         }
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
+        var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
 
-        if (Objects.isNull(csceneInstanceBO)
-                || Objects.isNull(csceneInstanceBO.getScene())
-                || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
+        if (StringUtils.isEmpty(sceneInstanceId)) {
             return Collections.emptyList();
         }
 
-        var topology = csceneInstanceBO.getScene().getTopology();
-        var topologyElements = topology.getElements();
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 
         // 根据名称模糊筛选
-        var stream = topologyElements.stream();
+        var stream = sceneHandler.getElementMap().values().stream();
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
-            stream = topologyElements.stream().filter(e -> e.getName().contains(request.getName()));
+            stream = stream.filter(e -> e.getName().contains(request.getName()));
         }
         List<String> nodeIds = stream.map(SceneElementBO::getId).collect(Collectors.toList());
+        // 根据节点id筛选
+        if (Objects.nonNull(request) && CollectionUtils.isNotEmpty(request.getElementIds())) {
+            nodeIds.retainAll(request.getElementIds());
+        }
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
@@ -240,6 +250,16 @@ public class SceneMonitorService {
         if (Objects.nonNull(request) && Objects.nonNull(request.getCategory())) {
             basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
         }
+        // 根据操作系统名称筛选
+        if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
+            basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
+        }
+
+        // 添加云插件端口接入方式
+        basicInfos.forEach(basicInfo -> basicInfo.getPorts().forEach(p -> {
+            var cloudPort = cloudPlugin.getPort(p.getId());
+            p.setCloudAccessModes(cloudPort.getAccessModes());
+        }));
 
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
@@ -289,6 +309,65 @@ public class SceneMonitorService {
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
         return basicInfos;
+    }
+
+    public List<ElementMonitorBasicInfo> getAllSceneConfigElements(String id, SceneAllElementsQueryRequest request) {
+        String sceneConfigId = csceneCommonService.translateSceneConfigId(id);
+        if (sceneConfigId == null) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        List<ElementMonitorBasicInfo> res = new ArrayList<>();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, null, null);
+        CloudSceneConfigPluginHandler cloudConfigPlugin = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var stream = sceneConfigHandler.getElementMap().values().stream();
+        // 根据名称模糊筛选
+        if (StringUtils.isNotEmpty(request.getName())) {
+            stream = stream.filter(e -> e.getName().contains(request.getName()));
+        }
+        stream.forEach(e -> {
+            var cloudElement = cloudConfigPlugin.getElement(e.getId());
+            if (!isSupportedVirtualType(cloudElement.getVirtualType())) {
+                return;
+            }
+            ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
+            List<ElementPort> ports = new ArrayList<>();
+            basicInfo.setSceneId(id);
+            basicInfo.setEid(e.getEid());
+            basicInfo.setId(e.getId());
+            basicInfo.setName(e.getName());
+            basicInfo.setSystemType(e.getSystemType());
+            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(e.getSystemType()));
+            if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                e.getPorts().forEach(port -> {
+                    ElementPort elementPort = new ElementPort();
+                    elementPort.setIp(port.getIp());
+                    elementPort.setName(port.getName());
+                    elementPort.setAccessModes(port.getAccessModes());
+                    ports.add(elementPort);
+                });
+                basicInfo.setPorts(ports);
+            }
+
+            basicInfo.setHost(cloudElement.getHost());
+            String imageName;
+            if (StringUtils.contains(cloudElement.getImage(), cloudElement.getImageUuid())) {
+                imageName = cloudElement.getImage().replaceFirst(cloudElement.getImageUuid(), "");
+            } else {
+                imageName = cloudElement.getImage();
+            }
+            basicInfo.setImageName(imageName);
+            basicInfo.setCategory(cloudElement.getCategory());
+            basicInfo.setVirtualType(cloudElement.getVirtualType());
+            res.add(basicInfo);
+        });
+        List<ElementMonitorBasicInfo> result;
+        // 根据设备类型筛选
+        if (Objects.nonNull(request.getCategory())) {
+            result = res.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
+        } else {
+            result = res;
+        }
+        return result;
     }
 
     private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId, boolean fetchRealTimeHostState) {

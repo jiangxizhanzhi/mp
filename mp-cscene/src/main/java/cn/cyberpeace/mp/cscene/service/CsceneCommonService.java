@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,9 @@ import java.util.stream.Collectors;
 @Service
 @CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
 public class CsceneCommonService {
+
+    @Resource
+    private CsceneService csceneService;
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
@@ -58,6 +62,16 @@ public class CsceneCommonService {
     public String translateSceneId(String sceneId) {
         String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
         return translatedSceneId;
+    }
+
+    @Cacheable(value = "translate_scene_config_id")
+    public String translateSceneConfigId(String csceneId) {
+        var csceneResult = csceneService.get(csceneId).getSource();
+        if (csceneResult == null) {
+            return null;
+        }
+        var cscene = csceneResult.getObj();
+        return cscene.getSceneConfig();
     }
 
     /**

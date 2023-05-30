@@ -5,14 +5,19 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoItems;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsSendRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicActionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -83,8 +88,33 @@ public class VirtualDynamips extends CloudClient {
         return result;
     }
 
-    public void sendRule(String resourceId, List<String> cmds) {
+    public void sendRule(String instanceId, List<String> cmds) {
+        if (CollectionUtils.isEmpty(cmds)) {
+            return;
+        }
+        DynamipsSendRuleData data = new DynamipsSendRuleData();
+        data.setCmds(cmds);
+        getHttpClient().post(CloudUrlConstant.DYNAMIPS_SEND_RULE.replace("{instance_id}", instanceId), data, null, new TypeReference<Object>() {
+        });
+    }
 
+    public VirtualDynamipsListResult list() {
+        var result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, null,
+                new TypeReference<VirtualDynamipsListResult>() {
+                });
+        return result;
+    }
+
+    public VirtualDynamipsStatisticsResult statistics() {
+        var result = getHttpClient().get(CloudUrlConstant.STATISTICS_DYNAMIPS, null,
+                new TypeReference<VirtualDynamipsStatisticsResult>() {
+                });
+        if (result == null || result.getStatics() == null) {
+            result = new VirtualDynamipsStatisticsResult();
+            result.setStatics(new HashMap<>());
+            return result;
+        }
+        return result;
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {

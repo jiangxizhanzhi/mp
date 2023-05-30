@@ -65,16 +65,13 @@ public class DynamicCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
-            cmds.add(ENABLE);
-            cmds.add(CONFIGURE);
             for (var port : paramsWrapper.ports) {
                 cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
-                cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", port.getNetmask()));
+                IpParser ipParser = new IpParser(paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port).getCidr());
+                cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
                 cmds.add(START_INT);
                 cmds.add(EXIT);
             }
-            cmds.add(EXIT);
-            cmds.add(SAVE);
             return cmds;
         }
 
@@ -95,14 +92,10 @@ public class DynamicCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
-            cmds.add(ENABLE);
-            cmds.add(CONFIGURE);
             for (var staticRoute : paramsWrapper.element.getStaticRoutes()) {
                 IpParser ipParser = new IpParser(staticRoute.getDestination());
                 cmds.add(ADD_ROUTE.replace("${dest}", ipParser.getNet()).replace("${mask}", ipParser.getMask()).replace("${nexthop}", staticRoute.getNexthop()));
             }
-            cmds.add(EXIT);
-            cmds.add(SAVE);
             return cmds;
         }
 
