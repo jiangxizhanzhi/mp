@@ -51,6 +51,8 @@ public class CloudUrlConstant {
     public static final String CONVERT_RECORDING_URL = "/cpcloud/guacamole/v1/convert_record";
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";
     public static final String GET_RECORDING_NAME_URL = "/cpcloud/guacamole/v1/recordfile";
+    public static final String GET_RECORD_CLEAN_CONFIG = "/cpcloud/guacamole/v1/record_clean_config";
+    public static final String UPDATE_RECORD_CLEAN_CONFIG = "/cpcloud/guacamole/v1/record_clean_config";
 
     public static final String CREATE_NPC_URL = "/cpcloud/npc_node/v1/node";
     public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";

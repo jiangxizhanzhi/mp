@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import aj.org.objectweb.asm.TypeReference;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -28,6 +29,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutRe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeResult;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -201,6 +205,15 @@ public class Remote extends CloudClient {
             log.error("failed to exec guacamole logout , userId is {} , result is {}", userId, JsonCommon.stringify(result));
             return false;
         }
+    }
+
+    public RecordRestoreLimitConfigResult getRecordRestoreLimitConfig() {
+        RecordRestoreLimitConfigResult result = getHttpClient().get(CloudUrlConstant.GET_RECORD_CLEAN_CONFIG, null, RecordRestoreLimitConfigResult.class);
+        return result;
+    }
+
+    public void updateRecordRestoreLimitConfig(RecordRestoreLimitConfigData data) {
+        getHttpClient().put(CloudUrlConstant.UPDATE_RECORD_CLEAN_CONFIG, data, null, Object.class);
     }
 
     public void createFlavor() {
