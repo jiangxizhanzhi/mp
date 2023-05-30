@@ -94,7 +94,7 @@ public class ScreenrecordController {
         return screenrecordService.getRestoreLimitConfig().asResult();
     }
 
-    @ApiOperation("查询录屏空间上限配置")
+    @ApiOperation("更新录屏空间上限配置")
     @PostMapping("/update_restore_limit_config")
     public ServiceResult<ScreenRecordRestoreConfigVO> updateRestoreLimitConfig(@RequestBody ScreenrecordConfigRequest request) {
         screenrecordService.updateRestoreLimitConfig(request);
