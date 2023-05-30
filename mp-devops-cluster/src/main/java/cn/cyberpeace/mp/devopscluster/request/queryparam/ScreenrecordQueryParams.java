@@ -32,4 +32,7 @@ public class ScreenrecordQueryParams extends QueryParams {
     @ApiModelProperty(value = "节点id")
     private String nodeId;
 
+    @ApiModelProperty(value = "用户id")
+    private String userId;
+
 }
