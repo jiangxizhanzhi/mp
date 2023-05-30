@@ -51,6 +51,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
@@ -1333,7 +1334,7 @@ public class ScenePluginCollectionSceneService {
         return sysCollectorService.pagePorts(collectorBaseRequest);
     }
 
-    public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Process> listPageProcess(TimeListPageInfoQueryParams listPageInfoQueryParams) {
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
@@ -1346,8 +1347,16 @@ public class ScenePluginCollectionSceneService {
         wazuhRequest.setPageSize(1);
         // 默认24小时
         LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
-        wazuhRequest.setEndTime(endTime);
+        if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+            wazuhRequest.setStartTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime()));
+        } else {
+            wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
+        }
+        if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+            wazuhRequest.setEndTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime()));
+        } else {
+            wazuhRequest.setEndTime(endTime);
+        }
 
         if (wazuhRequest.getAgentNames().contains(null)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
