@@ -41,6 +41,7 @@ public class SnapshotHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess SNAPSHOT_VIRTUAL_MACHINE = new EventProcess("snapshot_virtual_machine", "sceneplugincloud.event.snapshot_virtual_machine");
         public static final EventProcess SNAPSHOT_CONTAINER = new EventProcess("snapshot_container", "sceneplugincloud.event.snapshot_container");
+        public static final EventProcess SNAPSHOT_DYNAMIPS = new EventProcess("snapshot_dynamips", "sceneplugincloud.event.snapshot_dynamips");
     }
 
     public SnapshotHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -63,6 +64,11 @@ public class SnapshotHandler extends HandlerCommon {
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
+                this.snapshot(element, snapshotId, snapshotName, description);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_DYNAMIPS));
+            runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_DYNAMIPS, () -> {
                 this.snapshot(element, snapshotId, snapshotName, description);
             });
         }
