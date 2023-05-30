@@ -6,31 +6,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeleteGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeleteGuacamoleRecordingResultData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleAssistanceData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleMonitorData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleAssistanceData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -205,5 +183,73 @@ public class Remote extends CloudClient {
 
     public void createFlavor() {
 
+    }
+
+    /**
+     * 通知云平台需要统计流量的端口
+     * @param portIds
+     * @return
+     */
+    public boolean addFlowPorts(List<String> portIds) {
+        log.info("Remote.addFlowPorts begin. portIds:{}", portIds);
+        boolean result = true;
+        NetworkFlowRateData networkFlowRateData = new NetworkFlowRateData();
+        networkFlowRateData.setPorts(portIds);
+        log.info("Call cpclould begin. posturl:{}, params:{}", CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData);
+        CloudResponse<Object> response = cloudPost(CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData, null, new TypeReference<CloudResponse<Object>>() {}, true);
+        log.info("Call cpclould end. posturl:{}, response:{}", CloudUrlConstant.NETWORK_FLOW_RATE, response);
+        if (response != null && Boolean.TRUE.equals(response.getSuccess())) {
+            result = true;
+        } else {
+            log.error("failed to addFlowPorts");
+            result = false;
+        }
+        log.info("Remote.addFlowPorts end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 通知云平台需要取消统计流量的端口
+     * @param portIds
+     * @return
+     */
+    public boolean deleteFlowPorts(List<String> portIds) {
+        log.info("Remote.deleteFlowPorts begin. portIds:{}", portIds);
+        boolean result = true;
+        NetworkFlowRateData networkFlowRateData = new NetworkFlowRateData();
+        networkFlowRateData.setPorts(portIds);
+        log.info("Call cpclould begin. deleteurl:{}, params:{}", CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData);
+        CloudResponse<Object> response = cloudDelete(CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData, null, new TypeReference<CloudResponse<Object>>() {}, true);
+        log.info("Call cpclould end. deleteurl:{}, response:{}", CloudUrlConstant.NETWORK_FLOW_RATE, response);
+        if (response != null && Boolean.TRUE.equals(response.getSuccess())) {
+            result = true;
+        } else {
+            log.error("failed to deleteFlowPorts");
+            result = false;
+        }
+        log.info("Remote.deleteFlowPorts end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 查询环境总速率
+     * @param portIds
+     * @param time
+     * @return
+     */
+    public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long time) {
+        log.info("Remote.networkFlowRate begin. portIds:{}, time:{}", portIds, time);
+        NetworkFlowRateParam networkFlowRateParam = new NetworkFlowRateParam();
+        networkFlowRateParam.setPorts(portIds);
+        networkFlowRateParam.setTime(time);
+        log.info("Call cpclould begin. geturl:{}, params:{}", CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateParam);
+        CloudResponse<NetworkFlowRateResult> response = cloudGet(CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateParam, new TypeReference<CloudResponse<NetworkFlowRateResult>>() {}, true);
+        log.info("Call cpclould end. geturl:{}, response:{}", CloudUrlConstant.NETWORK_FLOW_RATE, response);
+        if (response != null && Boolean.TRUE.equals(response.getSuccess())) {
+            return response.getData();
+        } else {
+            log.error("failed to get networkFlowRate.");
+            return null;
+        }
     }
 }

@@ -33,6 +33,8 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateResult;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -47,6 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +101,9 @@ public class CsceneFlowService {
 
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
+
+    @Autowired
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
     /**
      * 新增流量任务
@@ -550,14 +556,34 @@ public class CsceneFlowService {
         var sceneId = csceneInstanceService.getSceneId(id);
         List<FlowStatisticsDetail> result = new ArrayList<>();
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
-        List<String> portResourceIds = new ArrayList<>();
+        LocalDateTime createTime = sceneHandler.getScene().getCreateTime();
+        Long totalSecond = 0L;
+        if (createTime != null) {
+            LocalDateTime nowTime = LocalDateTime.now();
+            Duration duration = Duration.between(createTime, nowTime);
+            totalSecond = duration.toSeconds();
+        }
+        List<String> portIds = new ArrayList<>();
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, SceneElementPortBO> portMap = sceneHandler.getElementPortMap();
         portMap.forEach((key,value) -> {
             if (cloudPluginHandler.getPort(value.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(value.getId()).getResourceId())) {
-                portResourceIds.add(cloudPluginHandler.getPort(value.getId()).getResourceId());
+                portIds.add(cloudPluginHandler.getPort(value.getId()).getResourceId());
             }
         });
+        if (CollectionUtils.isNotEmpty(portIds) && totalSecond > 0) {
+            NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(portIds, totalSecond);
+            if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
+                Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size()-1) * networkFlowRateResult.getTimeInt();
+                for (Long value : networkFlowRateResult.getSumRateList()) {
+                    FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
+                    flowStatisticsDetail.setOffsetValue(offsetValue);
+                    flowStatisticsDetail.setValue(value);
+                    flowStatisticsDetail.setOffsetUnit("m");
+                    result.add(flowStatisticsDetail);
+                }
+            }
+        }
         log.info("CsceneFlowService.totalRate end. result:{}", result);
         return result;
     }
