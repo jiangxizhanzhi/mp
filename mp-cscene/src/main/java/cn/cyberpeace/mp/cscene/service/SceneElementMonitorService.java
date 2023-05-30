@@ -37,6 +37,7 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
@@ -827,13 +828,13 @@ public class SceneElementMonitorService {
         // 用户
         rtInfo.setUserCount(countNodeSessionUsers(baseRequest));
 
-        ListPageInfoQueryParams portsParams = new ListPageInfoQueryParams();
+        TimeListPageInfoQueryParams portsParams = new TimeListPageInfoQueryParams();
         portsParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
         portsParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<Port> portsResult = hostStateService.pagePorts(portsParams);
 
         // pagePorts内部有sceneId转换动作，这里pageProcesses不能共用一个param
-        ListPageInfoQueryParams processParams = new ListPageInfoQueryParams();
+        TimeListPageInfoQueryParams processParams = new TimeListPageInfoQueryParams();
         processParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
         processParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<Process> processesResult = hostStateService.pageProcesses(processParams);

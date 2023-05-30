@@ -115,7 +115,7 @@ public class HostStateController {
 
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
-    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
     }
 
@@ -127,9 +127,8 @@ public class HostStateController {
 
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
-    public ListObjServiceResult<Netiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
     }
-
 
 }

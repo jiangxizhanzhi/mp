@@ -84,7 +84,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
@@ -309,7 +309,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
             } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId) ||
                     ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId) || ProbeConstant.ProbeId.USERS_MODIFY.equals(probeId)) {
-                ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+                TimeListPageInfoQueryParams params = new TimeListPageInfoQueryParams();
                 params.setSceneIds(CollUtil.toList(sceneInstanceId));
                 params.setNodeIds(CollUtil.toList(nodeId));
                 params.setPage(queryParams.getPage());
