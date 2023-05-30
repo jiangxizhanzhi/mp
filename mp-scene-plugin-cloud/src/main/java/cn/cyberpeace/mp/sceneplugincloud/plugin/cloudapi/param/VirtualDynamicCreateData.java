@@ -20,6 +20,8 @@ public class VirtualDynamicCreateData implements CloudHttpData {
     private String instanceId;
     private Integer telnetPort;
     private String telnetHost;
+    private String createdAt;
+    private String status ;
 
     @Data
     public static class Network {

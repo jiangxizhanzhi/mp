@@ -115,6 +115,12 @@ public class HypervisorPageVO extends BaseVO {
     private Integer totalContainers;
 
     /**
+     * dynamips数量
+     */
+    @ApiModelProperty("dynamips数量")
+    private Integer totalDynamips;
+
+    /**
      * 权重
      */
     @ApiModelProperty("权重")
