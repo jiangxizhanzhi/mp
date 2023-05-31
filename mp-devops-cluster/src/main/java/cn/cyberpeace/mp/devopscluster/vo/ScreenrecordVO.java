@@ -123,7 +123,7 @@ public class ScreenrecordVO extends BaseModel {
             this.setUserName(record.getUsername());
             this.setUserOrgName(org);
         }
-        this.setPlayUrl(CloudSingleton.cloudAppConfig.getCpcloudServer() + String.format(CloudUrlConstant.RECORDING_PLAY_URL, this.getFile()));
+        this.setPlayUrl(CloudSingleton.cloudAppConfig.getCpcloudServer() + String.format(CloudUrlConstant.RECORDING_PLAY_URL, this.getFileName()));
         this.setUserId(record.getUsername());
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
