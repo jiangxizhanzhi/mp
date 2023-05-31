@@ -192,6 +192,7 @@ public class SceneMonitorService {
         if (Objects.isNull(fetchRealTimeHostState)) {
             fetchRealTimeHostState = true;
         }
+        boolean isAll = Objects.nonNull(request) && Objects.nonNull(request.getIsAll()) ? request.getIsAll() : Boolean.FALSE;
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
         var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
@@ -218,7 +219,7 @@ public class SceneMonitorService {
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
             // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
-            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false));
+            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
             cfList.add(cf);
         }
 
@@ -326,7 +327,7 @@ public class SceneMonitorService {
         }
         stream.forEach(e -> {
             var cloudElement = cloudConfigPlugin.getElement(e.getId());
-            if (!isSupportedVirtualType(cloudElement.getVirtualType())) {
+            if (!isSupportedVirtualType(cloudElement.getVirtualType()) && !Boolean.TRUE.equals(request.getIsAll())) {
                 return;
             }
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
@@ -371,11 +372,12 @@ public class SceneMonitorService {
         return result;
     }
 
-    private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId, boolean fetchRealTimeHostState) {
+    private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId,
+                                                            boolean fetchRealTimeHostState, boolean isAll) {
         ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
         basicInfo.setSceneId(sceneId);
         elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
-        if (isSupportedVirtualType(basicInfo.getVirtualType())) {
+        if (isSupportedVirtualType(basicInfo.getVirtualType()) || isAll) {
             elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
             return basicInfo;
         }
