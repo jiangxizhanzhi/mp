@@ -47,9 +47,6 @@ logging:
     max-file-size: 300MB
     max-total-size: 650MB
     max-row-length: 2000
-  logback:
-    rollingpolicy:
-      max-history: 15
 springfox:
   documentation:
     enabled: ${SWAGGER_DOC_ENABLED:true}

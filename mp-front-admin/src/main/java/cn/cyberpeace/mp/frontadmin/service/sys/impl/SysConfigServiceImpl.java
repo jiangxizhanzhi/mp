@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -16,8 +17,10 @@ import cn.cyberpeace.mp.frontadmin.event.ConfigEventPublisher;
 import cn.cyberpeace.mp.frontadmin.event.SysConfigUpdateEvent;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
+import cn.cyberpeace.mp.frontadmin.sender.ConfigRabbitmqSender;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysLogConfigService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +55,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Autowired
     private ConfigEventPublisher configEventPublisher;
+
+    @Autowired
+    private SysLogConfigService sysLogconfigService;
+
+    @Autowired
+    private ConfigRabbitmqSender messageSender;
 
 
     @Override
@@ -93,18 +102,42 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         sysConfigModel.setInitValue(null);
 
-        if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
+        if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.USER_AUDIT_KEY) && Objects.equals(sysConfigModel.getValue(), "0")) {
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
             List<UserModel> list = userService.listNotAudited();
             if (CollectionUtil.isNotEmpty(list)) {
                 throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
             }
         }
+
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, sysConfigModel.getKeyName());
         SysConfigModel newSysConfigModel = new SysConfigModel();
         newSysConfigModel.setValue(sysConfigModel.getValue());
-        getModelMapper().filterUpdate(newSysConfigModel, condition);
+        var res = getModelMapper().filterUpdate(newSysConfigModel, condition);
+
+        if (res > 0) {
+            if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY)) {
+                // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+                var old = getByKeyName(SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY);
+                if (!Objects.equals(sysConfigModel.getValue(), old.getValue())) {
+                    // send msg
+                    messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_LOG_FILE_MAX_HISTORY_UPDATE, null);
+                    //本地日志保存时间实时修改
+                    sysLogconfigService.setLogBackInfo(Integer.parseInt(sysConfigModel.getValue()));
+                }
+            }
+
+            if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY)) {
+                // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+                var old = getByKeyName(SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY);
+                if (!Objects.equals(sysConfigModel.getValue(), old.getValue())) {
+                    // send msg
+                    messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_BACKUP_INTERVAL_UPDATE, null);
+                }
+            }
+        }
+
         return true;
     }
 

@@ -14,8 +14,6 @@ import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessConstant;
 import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
-import cn.cyberpeace.mp.frontadminbusiness.service.SysLogConfigService;
-import cn.cyberpeace.mp.log.SetLogbackRequest;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
@@ -27,7 +25,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,9 +56,6 @@ public class SysConfigController {
 
     @Autowired
     private SysConfigCheckService checkService;
-
-    @Autowired
-    private SysLogConfigService sysLogConfigService;
 
     /**
      * 文件上传客户端
@@ -157,16 +151,7 @@ public class SysConfigController {
         if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.IMPORT_VPN_LIST)) {
             return ResultCommon.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
-
         return fileService.uploadFile(file);
-    }
-
-
-    @ApiOperation(value = "设置日志保存时间")
-    @PostMapping("/save_log_retention")
-    public ServiceResult queryLogMaxHistory(@RequestBody @Validated SetLogbackRequest setLogbackRequest) {
-        sysLogConfigService.setLogRetentionDays(setLogbackRequest);
-        return ResultCommon.success();
     }
 
 }

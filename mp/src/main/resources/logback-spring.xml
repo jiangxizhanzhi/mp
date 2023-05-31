@@ -31,7 +31,7 @@
     <!--日志级别-->
     <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
     <!--日志最大天数-->
-    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="15"/>
+    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="0"/>
     <!--日志最大容量-->
     <springProperty scope="context" name="LOG_FILE_MAX_SIZE" source="logging.file.max-file-size" defaultValue="300MB"/>
     <springProperty scope="context" name="LOG_FILE_TOTAL_SIZE" source="logging.file.max-total-size" defaultValue="950MB"/>
@@ -59,8 +59,6 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-
-    <contextListener class="cn.cyberpeace.mp.frontadminbusiness.config.LoggerStartupListener"/>
 
     <!-- 时间滚动输出日志 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
