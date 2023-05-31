@@ -34,6 +34,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-实例名称")
     private String name;
 
+    @ApiModelProperty(value = "节点基本信息-2d图标地址")
+    private String icon2;
+
     @ApiModelProperty(value = "节点基本信息-操作系统ID")
     private String systemType;
 

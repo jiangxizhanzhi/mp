@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -19,9 +21,12 @@ import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -91,6 +96,9 @@ public class HostStateService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
+    @Autowired
+    private CscenePluginDataRecordService dataRecordService;
+
 
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         List<CollectionHostStateBO> hostStateBOS = foo(agentName, startTime, endTime);
@@ -116,7 +124,6 @@ public class HostStateService {
 
         return hostStates;
     }
-
 
 
     private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -204,9 +211,7 @@ public class HostStateService {
             log.error("cp cloud ip or port is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        List<String> agentNames = getAgentNames().stream()
-                .filter(name -> Objects.nonNull(name) && name.contains("controller"))
-                .collect(Collectors.toList());
+        List<String> agentNames = getAgentNames().stream().filter(name -> Objects.nonNull(name) && name.contains("controller")).collect(Collectors.toList());
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
@@ -415,7 +420,7 @@ public class HostStateService {
         return hostStates;
     }
 
-    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
@@ -425,10 +430,30 @@ public class HostStateService {
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-        return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
+
+        if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+            LocalDateTime startTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            } else {
+                startTime = batchSceneHandler.getEarliestStartTime();
+            }
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            } else {
+                endTime = LocalDateTime.now();
+            }
+            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
+            var ports = dataModels.stream().map(d -> JsonCommon.parse(d.getData(), Port.class)).collect(Collectors.toList());
+            return new ListObjServiceResult(new ListObjResult<>(ports, ports.size()).asResult()).asResult();
+        } else {
+            return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
+        }
     }
 
-    public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
@@ -473,10 +498,11 @@ public class HostStateService {
 
     /**
      * 分页查询网卡信息
+     *
      * @param listPageInfoQueryParams
      * @return
      */
-    public ListObjServiceResult<Netiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
@@ -486,19 +512,29 @@ public class HostStateService {
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-        ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
-        //List<ElementNetiface> elementNetifaces = new ArrayList<>();
-        //if (Objects.nonNull(netifacesResult.getSource())) {
-        //    List<Netiface> netifaceList = netifacesResult.getSource().getList();
-        //    netifaceList.forEach(n -> {
-        //        ElementNetiface eNetiface = new ElementNetiface();
-        //        BeanUtils.copyProperties(n, eNetiface);
-        //        elementNetifaces.add(eNetiface);
-        //    });
-        //}
-
-        //return new ListObjServiceResult<>(new ListObjResult<>(elementNetifaces, netifacesResult.getSource().getTotal()).asResult()).asResult();
-        return netifacesResult;
+        if (listPageInfoQueryParams.getStartTime() != null || listPageInfoQueryParams.getEndTime() != null) {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+            LocalDateTime startTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                startTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime());
+            } else {
+                startTime = batchSceneHandler.getEarliestStartTime();
+            }
+            LocalDateTime endTime = null;
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                endTime = TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime());
+            } else {
+                endTime = LocalDateTime.now();
+            }
+            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
+            var netifaces = dataModels.stream().map(d -> {
+                return JsonCommon.parse(d.getData(), Netiface.class);
+            }).collect(Collectors.toList());
+            return new ListObjServiceResult(new ListObjResult<>(netifaces, netifaces.size()).asResult()).asResult();
+        } else {
+            ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
+            return netifacesResult;
+        }
     }
 
 
@@ -521,7 +557,7 @@ public class HostStateService {
             return new ArrayList<>();
         }
         Map<String, Object> resultMap = JsonCommon.parseMap(result);
-        Map<String, Object> data = (Map<String, Object>)resultMap.get("data");
+        Map<String, Object> data = (Map<String, Object>) resultMap.get("data");
         if (Objects.isNull(data) || !data.containsKey("list")) {
             return new ArrayList<>();
         }
