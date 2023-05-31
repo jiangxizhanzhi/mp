@@ -170,6 +170,13 @@ public class HypervisorStatisticsVO extends BaseVO {
     @Builder.Default
     private Integer totalFireWall = NumberUtils.INTEGER_ZERO;
 
+    /**
+     * dynamips 个数
+     */
+    @ApiModelProperty(value = "防火墙个数")
+    @Builder.Default
+    private Integer totalDynamips = NumberUtils.INTEGER_ZERO;
+
     public HypervisorStatisticsVO build(Integer cpus, Long memoryMb, Long localGb,
                                                                Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
                                                                Long freeRamMb, Long freeDiskGb) {

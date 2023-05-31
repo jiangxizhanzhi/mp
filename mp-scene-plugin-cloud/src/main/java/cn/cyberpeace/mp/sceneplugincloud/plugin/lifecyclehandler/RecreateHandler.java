@@ -6,12 +6,15 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @Description
@@ -20,6 +23,8 @@ import java.util.Arrays;
  */
 @Slf4j
 public class RecreateHandler extends HandlerCommon {
+
+    private final VirtualPort vpClient = new VirtualPort();
 
     public static class ElementProcess {
         public static final EventProcess RECREATE_VIRTUAL_ROUTER = new EventProcess("recreate_virtual_router", "sceneplugincloud.event.recreate_virtual_router");
@@ -86,6 +91,16 @@ public class RecreateHandler extends HandlerCommon {
                         cloudElement.getSrcElement().getId());
                 return;
             }
+            //通知云平台需要统计环境总速率的端口
+            List<String> portIds = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                for (var p : cloudElement.getSrcElement().getPorts()) {
+                    if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
+                        portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
+                    }
+                }
+            }
+            super.vpClient.syncFlowPortInfo(portIds, "delete");
 
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
@@ -182,11 +197,24 @@ public class RecreateHandler extends HandlerCommon {
                                 });
                             }
                             createContainer(cloudElement);
+                            cloudElement.getSrcElement().getPorts();
+                            getPluginHandler().getPort("").getResourceId();
                         });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
                         () -> createEntityNode(cloudElement));
             }
+
+            //通知云平台需要统计环境总速率的端口
+            List<String> portIds = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                for (var p : cloudElement.getSrcElement().getPorts()) {
+                    if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
+                        portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
+                    };
+                }
+            }
+            super.vpClient.syncFlowPortInfo(portIds, "add");
         }
     }
 }

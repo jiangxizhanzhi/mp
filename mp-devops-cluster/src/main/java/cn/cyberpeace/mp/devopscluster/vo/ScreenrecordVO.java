@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description: 录屏结果
  * @Author qiaokang
@@ -85,6 +87,9 @@ public class ScreenrecordVO extends BaseModel {
     @ApiModelProperty(value = "录屏时长")
     private Double recortime;
 
+
+    @ApiModelProperty(value = "录屏结束时间")
+    private LocalDateTime endTime;
     /**
      * 节点名称
      */
@@ -115,6 +120,7 @@ public class ScreenrecordVO extends BaseModel {
         this.setUserId(record.getUsername());
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
+        this.setEndTime(this.getCreateTime().plusSeconds(this.getRecortime().intValue()));
         this.setHost(record.getHost());
     }
 

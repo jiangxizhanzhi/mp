@@ -82,6 +82,9 @@ public class ScreenrecordService extends BaseCpService {
         if (StringUtils.isNotBlank(sceneId)) {
             getParams.append("&scene_id=").append(sceneId);
         }
+        if (StringUtils.isNotBlank(queryParams.getUserId())) {
+            getParams.append("&user_id=").append(queryParams.getUserId());
+        }
         if (StringUtils.isNotBlank(queryParams.getNodeId())) {
             getParams.append("&host_id=").append(queryParams.getNodeId());
         }

@@ -15,6 +15,6 @@ public class ScreenrecordConfigRequest {
     @ApiModelProperty("存储总空间上限(单位G)")
     private Integer fileLimitSpace;
 
-    @ApiModelProperty("单个文件存储时间上限(单位天)")
+    @ApiModelProperty("单个文件存储时间上限(单位月)")
     private Integer fileLimitTime;
 }

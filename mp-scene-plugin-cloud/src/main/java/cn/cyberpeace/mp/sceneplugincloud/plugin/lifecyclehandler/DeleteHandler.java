@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -36,6 +37,7 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualRouter vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
     private final VirtualFirewall vfClient = CloudApiProxyBuilder.build(new VirtualFirewall(), VirtualFirewall.class);
     private final VirtualMachine vmClient = CloudApiProxyBuilder.build(new VirtualMachine(), VirtualMachine.class);
+    protected final VirtualPort vpClient = CloudApiProxyBuilder.build(new VirtualPort(), VirtualPort.class);
     protected final Container containerClient = CloudApiProxyBuilder.build(new Container(), Container.class);
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
@@ -303,6 +305,13 @@ public class DeleteHandler extends HandlerCommon {
 
     public void delete() {
         prepareEventProcess();
+        //通知云平台需要统计环境总速率的端口
+        List<String> portIds = new ArrayList<>();
+        Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
+        portMap.forEach((key,value) -> {
+            portIds.add(value.getResourceId());
+        });
+        vpClient.syncFlowPortInfo(portIds, "delete");
         // 优先删除实体设备
         List<CloudPluginSceneElementBO> entities = new ArrayList<>();
         getPluginHandler().getElementMap().values().forEach(e -> {

@@ -51,6 +51,7 @@ import cn.cyberpeace.mp.devopscluster.vo.VirtualRealSwitchStatusVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Lists;
@@ -180,7 +181,19 @@ public class CloudPlatformMonitorController {
             finalResponse6.setTotalSwitch(totalNetworks);
         });
 
-        CompletableFuture allCf = CompletableFuture.allOf(totalInstanceCf, totalContainersCf, totalRealEquipmentsCf, totalRoutersCf, totalNpcsCf, totalFirewallsCf, totalNetworksCf);
+        // dynamips个数
+        HypervisorStatisticsVO finalResponse7 = response;
+        CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
+            var result = new VirtualDynamips().statistics();
+            int totalDynamips = 0;
+            for (var v : result.getStatics().values()) {
+                totalDynamips += v;
+            }
+            finalResponse7.setTotalDynamips(totalDynamips);
+        });
+
+        CompletableFuture allCf = CompletableFuture.allOf(totalInstanceCf, totalContainersCf, totalRealEquipmentsCf,
+                totalRoutersCf, totalNpcsCf, totalFirewallsCf, totalNetworksCf, totalDynamipsCf);
         allCf.join();
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
@@ -234,6 +247,12 @@ public class CloudPlatformMonitorController {
             }
         });
 
+        // 获取 dynamips 数量
+        VirtualDynamips virtualDynamips = new VirtualDynamips();
+        var result = virtualDynamips.statistics();
+        hypervisorPageRespons.forEach(v -> {
+            v.setTotalDynamips(result.getStatics().get(v.getName()));
+        });
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
 
