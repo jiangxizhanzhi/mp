@@ -194,20 +194,20 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 flowTaskConfModelList.add(flowTaskConfModel);
             }
             flowTaskConfService.bulkCreate(flowTaskConfModelList);
-            //上传pcap包虚拟机
-            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
-                    log.error("upload flow file info error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                }
-            }
-            //初始化网口
-            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
-                if (!initNetwork(macAddress, flowTaskTaskModel.getId(), detail.getNodeIp(), actuatorId)) {
-                    log.error("init network error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                }
-            }
+//            //初始化网口
+//            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+//                if (!initNetwork(macAddress, flowTaskTaskModel.getId(), detail.getNodeIp(), actuatorId)) {
+//                    log.error("init network error");
+//                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+//                }
+//            }
+//            //上传pcap包虚拟机
+//            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+//                if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
+//                    log.error("upload flow file info error");
+//                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+//                }
+//            }
         }
         log.info("FlowTaskTaskServiceImpl.addTask end.");
     }
