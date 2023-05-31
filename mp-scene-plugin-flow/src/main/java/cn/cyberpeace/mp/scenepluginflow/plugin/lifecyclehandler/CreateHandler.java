@@ -48,6 +48,7 @@ public class CreateHandler extends HandlerCommon {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
             List<FlowNetworkInfo> networkInfos = new ArrayList<>();
             var flowElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+            log.info("flowElements is:{}", flowElements);
             if (CollectionUtils.isNotEmpty(flowElements)) {
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 if (cloudPluginHandler != null) {
@@ -127,6 +128,7 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
             var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
+            log.info("executorId is:{}", executorId);
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
 

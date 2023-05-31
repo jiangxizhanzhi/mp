@@ -209,7 +209,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 }
             }
         }
-        log.info("CsceneFlowService.addTask end.");
+        log.info("FlowTaskTaskServiceImpl.addTask end.");
     }
 
 
@@ -220,7 +220,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
      * @return
      */
     public boolean uploadPcapToTrex(FlowInfoModel flowInfoModel, String actuatorId) {
-        log.info("CsceneFlowService.uploadPcapToTrex begin. flowInfoModel:{}, actuatorId:{}", flowInfoModel, actuatorId);
+        log.info("FlowTaskTaskServiceImpl.uploadPcapToTrex begin. flowInfoModel:{}, actuatorId:{}", flowInfoModel, actuatorId);
         if (flowInfoModel == null || StringUtils.isEmpty(actuatorId)) {
             return false;
         }
@@ -255,7 +255,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
             log.error("upload file to flow actuator platform error!", e);
             isSuccess = false;
         }
-        log.info("CsceneFlowService.uploadPcapToTrex end. isSuccess:{}", isSuccess);
+        log.info("FlowTaskTaskServiceImpl.uploadPcapToTrex end. isSuccess:{}", isSuccess);
         return isSuccess;
     }
 
@@ -268,7 +268,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
      * @return
      */
     public boolean initNetwork(String mac, String taskId, String targetIp, String actuatorId) {
-        log.info("CsceneFlowService.initNetwork begin. mac:{}, taskId:{}, targetIp:{}, actuatorId:{}", mac, taskId, targetIp, actuatorId);
+        log.info("FlowTaskTaskServiceImpl.initNetwork begin. mac:{}, taskId:{}, targetIp:{}, actuatorId:{}", mac, taskId, targetIp, actuatorId);
         if (StringUtils.isEmpty(mac) || StringUtils.isEmpty(taskId) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
             return false;
         }
@@ -295,7 +295,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
             log.error("init network error!", e);
             isSuccess = false;
         }
-        log.info("CsceneFlowService.initNetwork end. isSuccess:{}", isSuccess);
+        log.info("FlowTaskTaskServiceImpl.initNetwork end. isSuccess:{}", isSuccess);
         return isSuccess;
     }
 }
