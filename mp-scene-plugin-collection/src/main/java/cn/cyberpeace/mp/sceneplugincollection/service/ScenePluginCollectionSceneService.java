@@ -174,8 +174,36 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
+        if (CollectionUtils.isNotEmpty(queryParams.getSourceNodeIds())) {
+            List<String> ips = new ArrayList<>();
+            for (String nodeId : queryParams.getSourceNodeIds()) {
+                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                if (CollectionUtils.isNotEmpty(nodeIps)) {
+                    ips.addAll(nodeIps);
+                }
+            }
+            if (CollectionUtils.isEmpty(ips)) {
+                ips.addAll(queryParams.getSourceNodeIds());
+            }
+            queryParams.setSourceIps(ips);
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getTargetNodeIds())) {
+            List<String> ips = new ArrayList<>();
+            for (String nodeId : queryParams.getTargetNodeIds()) {
+                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                if (CollectionUtils.isNotEmpty(nodeIps)) {
+                    ips.addAll(nodeIps);
+                }
+            }
+            if (CollectionUtils.isEmpty(ips)) {
+                ips.addAll(queryParams.getTargetNodeIds());
+            }
+            queryParams.setTargetIps(ips);
+        }
+
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
+        request.setAttackTypes(queryParams.getAttackTypes());
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())) {
             request.setSourceIps(queryParams.getSourceIps());
         } else {
@@ -217,6 +245,9 @@ public class ScenePluginCollectionSceneService {
 
         if (StringUtils.isNotBlank(queryParams.getProtocol())) {
             request.setProtocols(CollectionUtil.toList(queryParams.getProtocol()));
+        }
+        if (StringUtils.isNotBlank(queryParams.getPort())) {
+            request.setPort(queryParams.getPort());
         }
 
 

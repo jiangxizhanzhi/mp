@@ -57,6 +57,9 @@ public class FlowAnalysisRequest {
     @ApiModelProperty("查询条件需要的分组,场景分组")
     private List<String> groupList;
 
+    @ApiModelProperty("目的端口或源端口")
+    private String port ;
+
     /**
      * 源IP集合
      */
@@ -134,6 +137,9 @@ public class FlowAnalysisRequest {
 
     @ApiModelProperty("队伍数据")
     private List<TeamBO> teamBOS;
+
+    @ApiModelProperty("攻击类型")
+    private List<String> attackTypes;
 
     public Integer getTopSize() {
         return (Objects.isNull(topSize) || topSize == 0) ? 10 : topSize;

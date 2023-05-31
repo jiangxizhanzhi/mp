@@ -184,7 +184,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 Collections.shuffle(classificationModels);
                 FlowTemplateBO.SuricataDTO suricata = flow.getSuricata();
                 FlowClassificationModel classificationModel = classificationModels.get(0);
-                suricata.setCategory(Arrays.asList(classificationModel.getCategoryEn()));
+                suricata.setCategory(Arrays.asList(classificationModel.getName()));
                 suricata.setSeverity(Arrays.asList(classificationModel.getSeverity()));
                 flow.setSuricata(suricata);
             }
@@ -825,6 +825,17 @@ public class FlowAnalysisService extends AbstractBaseService {
             List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
                     allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
+        }
+
+        if (Objects.nonNull(request.getAttackTypes())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
+        }
+
+        if (StringUtils.isNotEmpty(request.getPort())) {
+            BoolQueryBuilder bq = QueryBuilders.boolQuery();
+            bq.should(QueryBuilders.termsQuery("source.port", request.getPort()));
+            bq.should(QueryBuilders.termsQuery("destination.port", request.getPort()));
+            boolQueryBuilder.must(bq);
         }
 
         if (CollectionUtils.isNotEmpty(request.getHosts())){
