@@ -319,6 +319,8 @@ public class SceneElementMonitorService {
         basicInfo.setEid(sceneElementBO.getEid());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
+        // 图标
+        basicInfo.setIcon2(sceneElementBO.getIcon2());
 
         basicInfo.setEvent(sceneElementBO.getEvent());
         basicInfo.setEventStatus(sceneElementBO.getEventStatus());
