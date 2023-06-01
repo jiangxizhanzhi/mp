@@ -521,7 +521,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         List<CollectionHostEventTypeBO> result = new ArrayList<>();
         result.add(new CollectionHostEventTypeBO(FileEventType.PROCESS.name(), 1));
         result.add(new CollectionHostEventTypeBO(FileEventType.PORT.name(), 2));
-        result.add(new CollectionHostEventTypeBO(FileEventType.INTERNET_CONNECTION.name(), 3));
         result.add(new CollectionHostEventTypeBO(FileEventType.FILE.name(), 4));
         result.add(new CollectionHostEventTypeBO(FileEventType.USERS.name(), 5));
         return new ServiceResult<>(result).asResult();

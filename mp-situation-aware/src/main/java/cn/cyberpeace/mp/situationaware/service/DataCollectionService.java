@@ -1447,17 +1447,27 @@ public class DataCollectionService extends CollectionBaseService {
 
         builder.agentName(wazuhFileRoot.getAgent().getName()).agentId(wazuhFileRoot.getAgent().getId());
 
+        FileEventType fileEventType = null;
+        if (Objects.nonNull(wazuhFileRoot.getData())) {
+            String sicLaunchId = wazuhFileRoot.getData().getSicLaunchId();
+            if (SicLaunchConfig.LAUNCH_ID_PROCESSES.equals(sicLaunchId)) {
+                fileEventType = FileEventType.PROCESS;
+            } else if (SicLaunchConfig.LAUNCH_ID_NET_CONNS.equals(sicLaunchId)) {
+                fileEventType = FileEventType.PORT;
+            } else if (SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS.equals(sicLaunchId)) {
+                fileEventType = FileEventType.USERS;
+            }
+        }
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
             //区分文件还是注册表
             builder.description(wazuhFileRoot.getRule().getDescription())
                     //  .catagory()
-                    .level(wazuhFileRoot.getRule().getLevel())
-                    .ruleId(wazuhFileRoot.getRule().getId());
-            if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups())) {
-                builder.fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE);
+                    .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
+            if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
+                fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
             }
         }
-
+        builder.fileEventType(fileEventType);
         builder.content(processContent(wazuhFileRoot));
 
         return builder.updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp())).build();
