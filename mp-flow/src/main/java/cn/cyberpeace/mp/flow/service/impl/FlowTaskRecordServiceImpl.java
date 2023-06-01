@@ -5,13 +5,16 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -26,6 +29,9 @@ import java.util.Map;
 @Slf4j
 public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskRecordModel, FlowTaskRecordMapper, FlowTaskRecordFields,
         QueryParams> implements FlowTaskRecordService {
+
+    @Autowired
+    private FlowTaskTaskMapper flowTaskTaskMapper;
 
     public FlowTaskRecordServiceImpl(FlowTaskRecordMapper stuMapper, FlowTaskRecordFields stuFields) {
         setModelFields(stuFields);
@@ -201,6 +207,12 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             log.info("消息为空或为失败消息，不做处理");
             return;
         }
+        Integer status = jsonMessage.getInteger("status");
+        String taskId = jsonMessage.getString("task_id");
+        FlowTaskTaskModel flowTaskTaskModel = flowTaskTaskMapper.get(taskId);
+        flowTaskTaskModel.setTaskStatus(status);
+        flowTaskTaskMapper.update(flowTaskTaskModel);
+
         JSONObject data = jsonMessage.getJSONObject("flow_record");
         FlowTaskRecordModel flowTaskRecordModel = new FlowTaskRecordModel();
         flowTaskRecordModel.setTaskId(data.getString("task_uuid"));
