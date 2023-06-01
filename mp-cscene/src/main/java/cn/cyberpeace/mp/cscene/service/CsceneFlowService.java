@@ -94,7 +94,6 @@ public class CsceneFlowService {
      * 新增流量任务
      * @param request
      */
-    @Transactional
     public void addTask(AddFlowTaskTaskRequest request) {
         log.info("CsceneFlowService.addTask begin. request:{}", request);
         var sceneId = csceneInstanceService.getSceneId(request.getId());
