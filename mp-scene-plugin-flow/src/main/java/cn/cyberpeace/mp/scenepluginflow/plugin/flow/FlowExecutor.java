@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.flow.request.BatchActuatorTaskRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
+import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -37,6 +39,9 @@ public class FlowExecutor {
     private FlowTaskServiceImpl flowService3;
 
     @Autowired
+    private FlowTaskTaskService flowTaskTaskService;
+
+    @Autowired
     public FlowExecutor(AsyncPlatFlowTaskService flowService1, FlowActuatorService flowService2,
                         FlowTaskServiceImpl flowService3) {
         setFlowService1(flowService1);
@@ -46,6 +51,10 @@ public class FlowExecutor {
 
     public String createExecutor(String name, List<FlowNetworkInfo> networkInfos) {
         return flowService1.addExecutorSync(name, networkInfos);
+    }
+
+    public String startExecutor(String name) {
+        return flowService1.syncStartExecutor(name);
     }
 
     public void deleteExecutor(String executorId) {
@@ -208,6 +217,10 @@ public class FlowExecutor {
             DEFAULT_INSTANCE = new FlowTaskModel();
             DEFAULT_INSTANCE.initDefault();
         }
+    }
+
+    public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
+        flowTaskTaskService.addTask(details, sceneId, actuatorId);
     }
 
 }

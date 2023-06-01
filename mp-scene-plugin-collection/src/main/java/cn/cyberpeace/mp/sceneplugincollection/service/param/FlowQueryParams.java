@@ -26,6 +26,12 @@ public class FlowQueryParams extends QueryParams {
     @ApiModelProperty(value = "节点id列表")
     private List<String> nodeIds;
 
+    @ApiModelProperty("源主机")
+    private List<String> sourceNodeIds;
+
+    @ApiModelProperty("目的主机")
+    private List<String> targetNodeIds;
+
     @ApiModelProperty(value = "相邻数据间的时间间隔,单位：秒")
     private Integer interval;
 
@@ -34,6 +40,12 @@ public class FlowQueryParams extends QueryParams {
 
     @ApiModelProperty("目的端口")
     private String targetPort;
+
+    @ApiModelProperty("目的端口或源端口")
+    private String port;
+
+    @ApiModelProperty("攻击类型")
+    private List<String> attackTypes;
 
     /**
      * 源IP集合

@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
@@ -65,7 +66,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,6 +73,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,6 +86,7 @@ public class CreateHandler extends HandlerCommon {
     private final VirtualRouter vrClient = new VirtualRouter();
     private final VirtualFirewall vfClient = new VirtualFirewall();
     private final VirtualMachine vmClient = new VirtualMachine();
+    protected final VirtualPort vpClient = new VirtualPort();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
@@ -1296,6 +1298,15 @@ public class CreateHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.CONFIGURE, () -> {
             configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
         });
+        //通知云平台需要统计环境总速率的端口
+        List<String> portIds = new ArrayList<>();
+        Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
+        portMap.forEach((key,value) -> {
+            if (StringUtils.isNotEmpty(value.getResourceId())) {
+                portIds.add(value.getResourceId());
+            }
+        });
+        vpClient.syncFlowPortInfo(portIds, "add");
     }
 
     protected void prepareEventProcess() {

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
@@ -141,8 +142,17 @@ public class SceneHandlerUtils {
         return flowExecutor.createExecutor(name, networkInfos);
     }
 
+    public String startExecutor(String sceneEid) {
+        String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
+        return flowExecutor.startExecutor(name);
+    }
+
     public void deleteExecutor(String executorId) {
         flowExecutor.deleteExecutor(executorId);
+    }
+
+    public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
+        flowExecutor.addFlowTask(details, sceneId, actuatorId);
     }
 
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp, Runnable stopCallback,

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
@@ -35,6 +36,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
+import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -42,6 +44,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,6 +70,9 @@ public class FlowMonitorController {
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private FlowClassificationsService flowClassificationsService;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -178,11 +184,25 @@ public class FlowMonitorController {
         return ResultCommon.success(summary);
     }
 
+    @ApiOperation(value = "查询流量攻击类型列表")
+    @GetMapping("/attack_types")
+    public ServiceResult<FlowAttackConfigInfo> getFlowAttackType() {
+        var result = flowClassificationsService.findAll();
+        var list = result.stream().map(r -> {
+            FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
+            type.setValue(r.getName());
+            type.setSeverity(r.getSeverity());
+            // 国际化处理 todo
+            type.setName(r.getCategoryZh());
+            return type;
+        }).collect(Collectors.toList());
+        FlowAttackConfigInfo info = new FlowAttackConfigInfo();
+        info.setTypes(list);
+        return new ServiceResult<>(info).asResult();
+    }
 
     @ApiOperation(value = "流量分页接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/page")
     public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
         log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
@@ -207,8 +227,7 @@ public class FlowMonitorController {
         List<AssetsStatisticsResponse> responseList = new ArrayList<>();
         // 统计资产数量
         sceneIds.forEach(id -> {
-            SceneAssetsBO sceneAssetsBO =
-                    sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
+            SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
             List<CategoryGroupBO> categoryGroups = sceneAssetsBO.getCategoryGroups();
             // 操作系统
             List<CategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
@@ -218,15 +237,7 @@ public class FlowMonitorController {
             List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
             // 安全设备
             List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
-            AssetsStatisticsResponse response = AssetsStatisticsResponse.builder()
-                    .sceneId(id)
-                    .assetsTotal(sceneAssetsBO.getNodeCount())
-                    .ipTotal(sceneAssetsBO.getIpCount())
-                    .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
-                    .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
-                    .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
-                    .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
-                    .build();
+            AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneAssetsBO.getNodeCount()).ipTotal(sceneAssetsBO.getIpCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
             responseList.add(response);
         });
 
@@ -255,14 +266,7 @@ public class FlowMonitorController {
         List<SceneConfigCategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
         // 安全设备
         List<SceneConfigCategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
-        AssetsStatisticsResponse response = AssetsStatisticsResponse.builder()
-                .sceneId(id)
-                .assetsTotal(sceneConfigAsset.getNodeCount())
-                .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
-                .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
-                .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
-                .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
-                .build();
+        AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneConfigAsset.getNodeCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
         responseList.add(response);
 
         return ResultCommon.success(responseList);

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -10,7 +11,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -30,16 +30,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
@@ -319,6 +317,8 @@ public class SceneElementMonitorService {
         basicInfo.setEid(sceneElementBO.getEid());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
+        // 图标
+        basicInfo.setIcon2(FsCommon.genHttpUrl(sceneElementBO.getIcon2()));
 
         basicInfo.setEvent(sceneElementBO.getEvent());
         basicInfo.setEventStatus(sceneElementBO.getEventStatus());
@@ -831,13 +831,13 @@ public class SceneElementMonitorService {
         // 用户
         rtInfo.setUserCount(countNodeSessionUsers(baseRequest));
 
-        ListPageInfoQueryParams portsParams = new ListPageInfoQueryParams();
+        TimeListPageInfoQueryParams portsParams = new TimeListPageInfoQueryParams();
         portsParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
         portsParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<Port> portsResult = hostStateService.pagePorts(portsParams);
 
         // pagePorts内部有sceneId转换动作，这里pageProcesses不能共用一个param
-        ListPageInfoQueryParams processParams = new ListPageInfoQueryParams();
+        TimeListPageInfoQueryParams processParams = new TimeListPageInfoQueryParams();
         processParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
         processParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<Process> processesResult = hostStateService.pageProcesses(processParams);
