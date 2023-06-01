@@ -318,7 +318,7 @@ public class SceneElementMonitorService {
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
         // 图标
-        basicInfo.setIcon2(FsCommon.genHttpUrl(sceneElementBO.getIcon2()));
+        basicInfo.setIcon2(sceneElementBO.getIcon2());
 
         basicInfo.setEvent(sceneElementBO.getEvent());
         basicInfo.setEventStatus(sceneElementBO.getEventStatus());
