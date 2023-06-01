@@ -9,12 +9,15 @@ import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devopscluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
 import cn.cyberpeace.mp.devopscluster.vo.SerialPortVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeL2AllVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -51,6 +54,8 @@ public class TypeController {
     private final SerialPortConverter serialPortConverter;
 
     private final SwitchConverter switchConverter;
+
+    private final SysConfigService sysConfigService;
 
     /**
      * 查询所有分类
@@ -101,7 +106,20 @@ public class TypeController {
         TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
         TypeAllVO allResponse = new TypeAllVO();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
-        allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
+
+        List<TypeConvertModel> firstTypeList = null;
+        if (Objects.nonNull(l1AndL2AndL3Type)) {
+            firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
+            SysConfigModel model = sysConfigService.getByKeyName("system_type");
+            if (Objects.nonNull(model)) {
+                String systemType = model.getValue();
+                if ("工控".equals(systemType)) {
+                    firstTypeList.removeIf(firstType -> firstType.getId() == 6);
+                }
+            }
+        }
+
+        allResponse.setFirstTypeList(firstTypeList);
         allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
         allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
         allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
