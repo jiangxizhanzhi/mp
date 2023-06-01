@@ -142,6 +142,11 @@ public class SceneHandlerUtils {
         return flowExecutor.createExecutor(name, networkInfos);
     }
 
+    public String startExecutor(String sceneEid) {
+        String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
+        return flowExecutor.startExecutor(name);
+    }
+
     public void deleteExecutor(String executorId) {
         flowExecutor.deleteExecutor(executorId);
     }
