@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -25,8 +25,7 @@ public class FlowWebSocketClientUtil {
 
     public static Map<String, FlowWebSocketClientUtil> webSocketClientMap = new HashMap<>();
 
-    @Autowired
-    FlowTaskRecordService flowTaskRecordService;
+    private static FlowTaskRecordService flowTaskRecordService = BeanCommon.getBean(FlowTaskRecordService.class);
 
 //    public static void main(String[] args) throws URISyntaxException, IOException, DeploymentException {
 //        FlowWebSocketClientUtil client = FlowWebSocketClientUtil.getWebSocketClient("10.100.7.129");
