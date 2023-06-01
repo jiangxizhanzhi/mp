@@ -164,6 +164,7 @@ mp:
     license-remind-time: 30
     #定时任务
     cron-job-expression: 0 0 3 * * ?
+    deploy-log-path: /home/mp/logs/deploy.log
   # mp-front-business 模块
   frontbusiness:
     url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
