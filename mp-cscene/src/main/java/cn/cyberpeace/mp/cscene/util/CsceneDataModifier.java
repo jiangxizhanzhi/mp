@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -298,9 +299,9 @@ public class CsceneDataModifier {
                     if (StringUtils.isNotEmpty(e.getIcon2())) {
                         e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
                     }
-                    if (StringUtils.isNotEmpty(e.getIcon3())) {
-                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
-                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
                     if (CollectionUtils.isNotEmpty(e.getPorts())) {
                         e.getPorts().forEach(port -> {
                             if (port != null) {
@@ -332,6 +333,71 @@ public class CsceneDataModifier {
             }
             if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcollection") != null) {
                 ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(e -> {
+                        if (e.get("probes") != null) {
+                            List<Map> probes = (List<Map>) e.get("probes");
+                            probes.forEach(probe -> {
+                                if (probe.get("script_url") != null) {
+                                    probe.put("script_url", FsCommon.getFileKey(probe.get("script_url").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public static void removeFilePathPrefix(CsceneUpdateBO csceneBO) {
+        if (csceneBO.getUpdateScene() != null && csceneBO.getUpdateScene().getTopology() != null) {
+            SceneBO sceneConfig = csceneBO.getUpdateScene().getTopology().getScene();
+            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
+                sceneConfig.setFile(FsCommon.getFileKey(sceneConfig.getFile()));
+            }
+            List<SceneElementBO> elements = csceneBO.getUpdateScene().getTopology().getElements();
+            if (CollectionUtils.isNotEmpty(elements)) {
+                elements.stream().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile())) {
+                        e.setFile(FsCommon.getFileKey(e.getFile()));
+                    }
+                    if (StringUtils.isNotEmpty(e.getIcon2())) {
+                        e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
+                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
+                    if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                        e.getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        accessMode.setPrivateKeyPath(FsCommon.getFileKey(accessMode.getPrivateKeyPath()));
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            if (csceneBO.getUpdateScene().getPlugins() != null && csceneBO.getUpdateScene().getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getUpdateScene().getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("private_key_path") != null) {
+                                    accessMode.put("private_key_path", FsCommon.getFileKey(accessMode.get("private_key_path").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            if (csceneBO.getUpdateScene().getPlugins() != null && csceneBO.getUpdateScene().getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getUpdateScene().getPlugins().get("cpcollection");
                 if (scenePluginDataBO.getElements() != null) {
                     scenePluginDataBO.getElements().values().forEach(e -> {
                         if (e.get("probes") != null) {
@@ -651,7 +717,7 @@ public class CsceneDataModifier {
                     BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
                     sceneElement.setFile(FsCommon.genHttpUrl(sceneElement.getFile()));
                     sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
-                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
+//                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {
                             if (p != null) {

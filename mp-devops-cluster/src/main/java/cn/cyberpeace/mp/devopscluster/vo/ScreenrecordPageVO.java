@@ -68,6 +68,11 @@ public class ScreenrecordPageVO extends BaseCloudPlatformResult {
          * 节点名称
          */
         private String host;
+
+        /**
+         * 节点id
+         */
+        private String hostId;
     }
 
 }

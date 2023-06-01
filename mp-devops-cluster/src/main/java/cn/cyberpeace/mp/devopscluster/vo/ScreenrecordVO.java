@@ -129,6 +129,7 @@ public class ScreenrecordVO extends BaseModel {
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
         this.setEndTime(this.getCreateTime().plusSeconds(this.getRecortime().intValue()));
         this.setHost(record.getHost());
+        this.setNodeId(record.getHostId());
     }
 
 }
