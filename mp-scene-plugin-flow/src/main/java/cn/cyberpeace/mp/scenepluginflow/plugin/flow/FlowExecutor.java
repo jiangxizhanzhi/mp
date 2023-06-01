@@ -53,6 +53,10 @@ public class FlowExecutor {
         return flowService1.addExecutorSync(name, networkInfos);
     }
 
+    public String startExecutor(String name) {
+        return flowService1.syncStartExecutor(name);
+    }
+
     public void deleteExecutor(String executorId) {
         flowService2.delExecutor(executorId);
     }

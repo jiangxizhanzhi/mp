@@ -127,7 +127,8 @@ public class CreateHandler extends HandlerCommon {
                     });
                 }
             }
-            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
+//            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
+            var executorId = getHandlerUtils().startExecutor(getPluginHandler().getSourceSceneId());
             log.info("executorId is:{}", executorId);
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
