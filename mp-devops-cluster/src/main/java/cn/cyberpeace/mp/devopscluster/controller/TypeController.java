@@ -113,7 +113,7 @@ public class TypeController {
             SysConfigModel model = sysConfigService.getByKeyName("system_type");
             if (Objects.nonNull(model)) {
                 String systemType = model.getValue();
-                if ("工控".equals(systemType)) {
+                if (!"工控".equals(systemType)) {
                     firstTypeList.removeIf(firstType -> firstType.getId() == 6);
                 }
             }
