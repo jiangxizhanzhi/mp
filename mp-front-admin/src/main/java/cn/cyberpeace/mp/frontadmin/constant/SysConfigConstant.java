@@ -36,6 +36,10 @@ public class SysConfigConstant {
 
     public static final String ROUTING_KEY_BACKUP_INTERVAL_UPDATE = SYS_CONFIG_EXCHANGE_NAME + "backup_interval.update";
 
+    // cloud日志保存天数变更地址
+    public static final String CLOUD_LOG_CONF_URL = "/cpcloud/logger_app/v1/update_log_conf";
+
+
 
 
 

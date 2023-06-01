@@ -164,6 +164,7 @@ mp:
     #定时任务
     cron-job-expression: 0 0 3 * * ?
     deploy-log-path: /home/mp/logs/deploy.log
+    cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
   # mp-front-business 模块配置
   frontbusiness:
     url-ac-filter-enabled: true

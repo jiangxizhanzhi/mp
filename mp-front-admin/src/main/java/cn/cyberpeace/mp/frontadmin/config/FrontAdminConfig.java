@@ -27,4 +27,6 @@ public class FrontAdminConfig {
     private String cronJobExpression = "0 0 3 * * ?";
 
     private String deployLogPath;
+
+    private String cpUrl;
 }

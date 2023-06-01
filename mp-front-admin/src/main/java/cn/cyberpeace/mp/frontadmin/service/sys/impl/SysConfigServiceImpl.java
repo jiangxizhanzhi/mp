@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.SysConfigConstant;
@@ -23,6 +24,8 @@ import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysLogConfigService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Autowired
     private SysLogConfigService sysLogconfigService;
+
+    @Autowired
+    private FrontAdminConfig frontAdminConfig;
 
     @Autowired
     private ConfigRabbitmqSender messageSender;
@@ -110,6 +116,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             }
         }
 
+        SysConfigModel oldHistory = null;
+        if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY)) {
+            oldHistory = getByKeyName(SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY);
+        }
+
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, sysConfigModel.getKeyName());
         SysConfigModel newSysConfigModel = new SysConfigModel();
@@ -118,9 +129,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
         if (res > 0) {
             if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY)) {
-                // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
-                var old = getByKeyName(SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY);
-                if (!Objects.equals(sysConfigModel.getValue(), old.getValue())) {
+                if (Objects.isNull(oldHistory) || !Objects.equals(sysConfigModel.getValue(), oldHistory.getValue())) {
+                    // 通知云平台
+                    JSONObject paramObj = new JSONObject();
+                    paramObj.put("days", sysConfigModel.getValue());
+                    HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_LOG_CONF_URL, paramObj.toJSONString());
                     // send msg
                     messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_LOG_FILE_MAX_HISTORY_UPDATE, null);
                     //本地日志保存时间实时修改
