@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -336,7 +337,7 @@ public class SceneMonitorService {
             basicInfo.setEid(e.getEid());
             basicInfo.setId(e.getId());
             basicInfo.setName(e.getName());
-            basicInfo.setIcon2(e.getIcon2());
+            basicInfo.setIcon2(FsCommon.genHttpUrl(e.getIcon2()));
             basicInfo.setSystemType(e.getSystemType());
             basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(e.getSystemType()));
             if (CollectionUtils.isNotEmpty(e.getPorts())) {
