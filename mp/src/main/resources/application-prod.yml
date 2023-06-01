@@ -7,7 +7,6 @@ server:
       min-spare: ${MP_TOMCAT_MIN_POOL_SIZE:10}
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
 
-
 spring:
   datasource:
     url: jdbc:mysql://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/${MP_DB_DATABASE:mp}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
@@ -37,19 +36,19 @@ spring:
     resources:
       static-locations: file:/root/.mp/resources/default_img
 
-
 logging:
-  config: classpath:logback-spring-prod.xml
+  config: classpath:logback-spring.xml
   level:
     root: INFO
   file:
-    path: ${user.home}/logs
+    path: /home/mp/logs
     max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
     max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
     max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
   logback:
     rollingpolicy:
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}
+
 springfox:
   documentation:
     enabled: ${SWAGGER_DOC_ENABLED:false}
@@ -146,6 +145,7 @@ mp:
     mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
     log-db: ${MP_DEVOPS_LOG_DB:es} #日志存储数据库可以配置：es、sql
     es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+    dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
   # mp-auth 模块配置
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:1000}
@@ -246,25 +246,6 @@ kaptcha:
   text-producer:
     impl:
     character:
-      string: '123456789abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ'
+      string: ${MP_AUTH_TEXT_SECRET:'123456789abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ'}
       length: 4
       space: 10
----
-spring:
-  config:
-    activate:
-      on-profile: dev
-logging:
-  file:
-    path: ${user.home}/logs
-
-
-
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-logging:
-  file:
-    path: /home/mp/logs
