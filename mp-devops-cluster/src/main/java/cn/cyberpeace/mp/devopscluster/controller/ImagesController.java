@@ -529,8 +529,8 @@ public class ImagesController {
 
     @ApiOperation("查询dynamic相关的信息")
     @GetMapping("/dynamic_image_info")
-    public Result<DynamicImageInfo> getDynamicImageInfo() {
-        var info = dynamipsService.getInfo();
+    public Result<DynamicImageInfo> getDynamicImageInfo(@RequestParam(required = false) String platform) {
+        var info = dynamipsService.getInfo(platform);
         return new Result<>(info);
     }
 

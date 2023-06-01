@@ -11,12 +11,15 @@ import cn.cyberpeace.mp.devopscluster.model.common.TypeItemModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeItemNameModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeTreeItemModel;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
 public class TypeConverter {
 
     private final TypeService typeService;
+
+    private final SysConfigService sysConfigService;
 
     /**
      * 查询所有类型数据
@@ -273,10 +278,24 @@ public class TypeConverter {
      * @return
      */
     private TypeAllConvertModel convertTypeTreeItemModel(CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type){
+        boolean industriaControl = false;
+        SysConfigModel model = sysConfigService.getByKeyName("system_type");
+        if (Objects.nonNull(model)) {
+            String systemType = model.getValue();
+            if ("工控".equals(systemType)) {
+                industriaControl = true;
+            }
+        }
+
         List<TypeConvertModel> firstTypeList = new ArrayList<>();
         List<TypeConvertModel> secondTypeList = new ArrayList<>();
         List<TypeConvertModel> thirdTypeList = new ArrayList<>();
         for (TypeTreeItemModel item : l1AndL2AndL3Type.getList()){
+            // 非工控类型，过滤工控设备
+            if (!industriaControl && item.getL1Id() == 6) {
+                continue;
+            }
+
             TypeConvertModel typeConvertModel = new TypeConvertModel();
             typeConvertModel.setId(item.getL1Id());
             typeConvertModel.setName(item.getL1Name());
