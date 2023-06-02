@@ -1339,6 +1339,134 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         return protocolList;
     }
 
+    /**
+     * 初始化pcap包解析
+     */
+    public void initPcapAnalyse() {
+        log.info("start init pcap analyse");
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
+        List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
+        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+            List<Runnable> tasks = new ArrayList<>();
+            flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
+            TaskCommon.runTasks(tasks, true, true);
+        }
+        log.info("end init pcap analyse");
+    }
+
+    /**
+     * 初始化解析文件协议
+     * @param flowInfoModel
+     * @return
+     */
+    private void initPcapProtocols(FlowInfoModel flowInfoModel) {
+        log.info("start init pcap protocols for {}", flowInfoModel.getTitle());
+        List<ProtocolBO> protocolList = new ArrayList<>();
+        String strProtocols;
+        String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
+        String pcapPath = flowInfoModel.getPcapFile();
+        BufferedReader input = null;
+        File srcFile = null;
+        FileOutputStream fos = null;
+        BufferedOutputStream bos = null;
+
+        try {
+            byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
+            String fileName = FilenameUtils.getName(pcapPath);;
+            String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            srcFile = new File(srcPcapPath);
+            fos = new FileOutputStream(srcFile);
+            bos = new BufferedOutputStream(fos);
+            bos.write(flowBytes);
+
+            String pythonCmd = String.format("python3 %s %s", scriptPath, srcPcapPath);
+            log.info("============python analyse cmd: {}", pythonCmd);
+
+            Process process = Runtime.getRuntime().exec(pythonCmd);
+            process.waitFor();
+            strProtocols = "";
+            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            while ((line = input.readLine()) != null) {
+                strProtocols = line;
+            }
+            log.info("============init pcap analyse pcapRead result: {}", strProtocols);
+
+            String fileMd5 = DigestUtils.md5Hex(flowBytes);
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(strProtocols)) {
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(fileMd5)) {
+                    FlowCacheUtil.pcapAnalyseCache.put(fileMd5, strProtocols);
+                }
+
+                Map proMap = JSON.parseObject(strProtocols);
+                for (Object key : proMap.keySet()) {
+                    ProtocolBO protocol = new ProtocolBO();
+                    protocol.setProtocolName(key.toString());
+                    String desc = MessageCommonUtil.convertMessageWithNull(key.toString().toLowerCase());
+                    if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
+                        // 未知协议
+                        desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
+                    }
+                    protocol.setDesc(desc);
+                    protocol.setRate(new BigDecimal(proMap.get(key).toString()));
+                    protocolList.add(protocol);
+                }
+            }
+        } catch (Exception e) {
+            log.error("init pcap protocols exec error:", e);
+            return;
+        } finally {
+            org.apache.poi.util.IOUtils.closeQuietly(input);
+            org.apache.poi.util.IOUtils.closeQuietly(fos);
+            org.apache.poi.util.IOUtils.closeQuietly(bos);
+
+            if (Objects.nonNull(srcFile) && srcFile.exists()) {
+                try {
+                    srcFile.delete();
+                } catch (Exception e) {
+                    log.error("tmp pcap file delete error");
+                }
+            }
+        }
+
+        // 降序排列
+        this.sortProtocol(protocolList);
+
+        // 初始化保存流量协议
+        this.initSaveProtcols(protocolList, flowInfoModel.getId(), flowInfoModel.getPcapFile());
+        log.info("end init pcap protocols for {}", flowInfoModel.getTitle());
+    }
+
+    /**
+     * 初始化保存流量协议
+     * @param protocolList
+     * @param flowId
+     * @param filePath
+     */
+    private void initSaveProtcols(List<ProtocolBO> protocolList, String flowId, String filePath) {
+        if (CollectionUtils.isNotEmpty(protocolList)) {
+            List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
+
+            // 勾选协议
+            List<String> filterProtocols = new ArrayList<>();
+            // 批量新增流量协议
+            for (ProtocolBO flowProtocolBO : protocolList) {
+                FlowProtocolModel flowProtocolModel = new FlowProtocolModel();
+                BeanUtils.copyProperties(flowProtocolBO, flowProtocolModel);
+                flowProtocolModel.setFlowId(flowId);
+                flowProtocolModels.add(flowProtocolModel);
+
+                if (1 == flowProtocolBO.getMarked()) {
+                    filterProtocols.add(flowProtocolBO.getProtocolName());
+                }
+            }
+            flowProtocolService.bulkCreate(flowProtocolModels);
+
+            // 生成过滤包
+            this.pcapFilter(flowId, filePath, filterProtocols);
+        }
+    }
 
     private List<ProtocolBO> sortProtocol(List<ProtocolBO> protocolList) {
         if (CollectionUtils.isNotEmpty(protocolList)) {

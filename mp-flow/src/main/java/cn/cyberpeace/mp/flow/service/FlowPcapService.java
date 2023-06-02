@@ -11,5 +11,11 @@ import cn.cyberpeace.mp.flow.model.FlowPcapModel;
  */
 public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryParams> {
 
+    /**
+     * 统计流量包总数
+     * @return
+     */
+    int countAll();
+
 }
 
