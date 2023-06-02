@@ -24,8 +24,6 @@ import java.util.Set;
 public final class NodeLimitUtils {
     private static int NODE_COUNT = 0;
 
-    private static int SCENE_USING_NODE_LIMIT = -1;
-
     private static Set<Integer> NODE_LIMIT_TYPES = new HashSet<>() {{
         this.add(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
         this.add(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
@@ -70,6 +68,7 @@ public final class NodeLimitUtils {
         if (csceneAppConfig == null) {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
         }
+        int SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
         log.info("refresh node limit count , origin count: {} , {}", SCENE_USING_NODE_LIMIT, NODE_COUNT);
         SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
         NODE_COUNT = count;
@@ -77,11 +76,8 @@ public final class NodeLimitUtils {
     }
 
     private synchronized static UpdateResult updateElementCount(int count) {
-        if (SCENE_USING_NODE_LIMIT < 0) {
-            SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
-        }
-        log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, SCENE_USING_NODE_LIMIT);
-        if (NODE_COUNT + count > SCENE_USING_NODE_LIMIT) {
+        log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, csceneAppConfig.getSceneUsingNodeLimit());
+        if (NODE_COUNT + count > csceneAppConfig.getSceneUsingNodeLimit()) {
             UpdateResult updateResult = new UpdateResult();
             updateResult.setSuccess(false);
             updateResult.setLimitNode(csceneAppConfig.getSceneUsingNodeLimit());
