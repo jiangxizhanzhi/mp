@@ -162,6 +162,7 @@ public class FlowExecutor {
     }
 
     public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback) {
+//        var result = flowService1.startTask(taskId);
         var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
@@ -221,6 +222,11 @@ public class FlowExecutor {
 
     public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
         flowTaskTaskService.addTask(details, sceneId, actuatorId);
+    }
+
+    public String getTaskIdByNodeId() {
+
+        return null;
     }
 
 }

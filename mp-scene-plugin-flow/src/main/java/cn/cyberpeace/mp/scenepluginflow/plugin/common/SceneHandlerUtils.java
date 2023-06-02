@@ -6,8 +6,10 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
+import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
@@ -17,6 +19,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import cn.cyberpeace.mp.scenepluginflow.util.IFlowResourceName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -31,6 +34,8 @@ public class SceneHandlerUtils {
     private FlowScenePluginHandler pluginHandler;
 
     private FlowExecutor flowExecutor;
+
+    private FlowTaskTaskService flowTaskTaskService;
 
     private void successOnFLow(Flow flow) {
         log.info("flow success on,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
@@ -212,20 +217,25 @@ public class SceneHandlerUtils {
         }
 
         preparingFLow(flow);
-        final String flowNetworkId = networkId;
-        final String flowIp = ip;
-        String finalIp = ip;
+//        final String flowNetworkId = networkId;
+//        final String flowIp = ip;
+//        String finalIp = ip;
         String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
-        Callable<Boolean> start = () -> {
-            String flowTaskId;
-            try {
-                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, fromIps, flowIp, null, null, null, flow, finalIp);
-                log.info("flowExecutor createFlow success:[{}]", flowTaskId);
-            } catch (Exception e) {
-                errorFLow(flow, e.getMessage());
-                return false;
-            }
+        flow.setSourceIp(fromIps);
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getEid(), flowId);
 
+        Callable<Boolean> start = () -> {
+            String flowTaskId = "";
+            if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
+                flowTaskId = flowTaskTaskModels.get(0).getId();
+            }
+//            try {
+//                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, fromIps, flowIp, null, null, null, flow, finalIp);
+//                log.info("flowExecutor createFlow success:[{}]", flowTaskId);
+//            } catch (Exception e) {
+//                errorFLow(flow, e.getMessage());
+//                return false;
+//            }
             flow.setTaskId(flowTaskId);
             return startFlow(flow, stopCallback);
         };
