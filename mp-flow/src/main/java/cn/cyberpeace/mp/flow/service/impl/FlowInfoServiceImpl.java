@@ -56,6 +56,8 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -1348,10 +1350,15 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
         List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
         if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
-            List<Runnable> tasks = new ArrayList<>();
-            flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
-
-            TaskCommon.runTasks(tasks, true, true);
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            //            List<Runnable> tasks = new ArrayList<>();
+//            flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
+//            TaskCommon.runTasks(tasks, true, true);
+            flowInfoModelList.forEach(flowInfoModel -> {
+                executor.submit(() -> initPcapProtocols(flowInfoModel));
+            });
+            // 关闭线程池
+            executor.shutdown();
         }
         log.info("end init pcap analyse");
     }
