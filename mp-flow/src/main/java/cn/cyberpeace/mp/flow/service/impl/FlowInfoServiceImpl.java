@@ -1351,7 +1351,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             List<Runnable> tasks = new ArrayList<>();
             flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
 
-            TaskCommon.runTasks(tasks);
+            TaskCommon.runTasks(tasks, true, true);
         }
         log.info("end init pcap analyse");
     }
