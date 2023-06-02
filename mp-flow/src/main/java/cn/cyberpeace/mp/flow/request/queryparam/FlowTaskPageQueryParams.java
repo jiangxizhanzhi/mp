@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.cscene.request.flow;
+package cn.cyberpeace.mp.flow.request.queryparam;
 
-import cn.cyberpeace.mp.auth.request.common.PageRequest;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -8,18 +8,23 @@ import lombok.Data;
 /**
  * @Description: 查询流量任务列表请求体
  * @Author: guquan
- * @Date：2023/5/13 14:27
+ * @Date：2023/6/2 14:52
  */
 @Data
 @ApiModel("查询流量任务列表请求体")
-public class FlowTaskPageRequest extends PageRequest {
+public class FlowTaskPageQueryParams extends QueryParams {
 
     @ApiModelProperty("场景实例id")
     private String id;
+
+    @ApiModelProperty("sceneId")
+    private String sceneId;
 
     @ApiModelProperty("流量类型")
     private String interactiveType;
 
     @ApiModelProperty("目标设备id")
     private String nodeId;
+
+    private Integer offset;
 }
