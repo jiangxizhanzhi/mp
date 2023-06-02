@@ -6,10 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
-import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
-import cn.cyberpeace.mp.cscene.request.flow.FlowTaskBatchStartRequest;
-import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
+import cn.cyberpeace.mp.cscene.request.flow.*;
 import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
@@ -202,6 +199,35 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         log.info("FlowInfoController.batchStartTasks begin. request:{}", request);
         csceneFlowService.batchStartTasks(request.getTaskIds());
         log.info("FlowInfoController.batchStartTasks end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 流量任务停止
+     * @param taskId
+     * @return
+     */
+    @ApiOperation("流量任务停止")
+    @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
+    @PostMapping("/task/stop")
+    public ServiceResult stopTask(@RequestParam String taskId) {
+        log.info("FlowInfoController.stopTask begin. taskId:{}", taskId);
+        csceneFlowService.stopTask(taskId);
+        log.info("FlowInfoController.stopTask end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 流量任务批量停止
+     * @param request
+     * @return
+     */
+    @ApiOperation("流量任务批量停止")
+    @PostMapping("/task/batch_stop")
+    public ServiceResult batchStopTasks(@RequestBody FlowTaskBatchStopRequest request) {
+        log.info("FlowInfoController.batchStopTasks begin. request:{}", request);
+        csceneFlowService.batchStopTasks(request.getTaskIds());
+        log.info("FlowInfoController.batchStopTasks end.");
         return ResultCommon.success();
     }
 

@@ -809,6 +809,117 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
+     * 单个停止流量任务
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<Boolean> stopTask(String taskId) {
+        log.info("AsyncPlatFlowTaskService.stopTask begin. taskId:{}", taskId);
+        // 任务存在校验
+        ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
+        if (Objects.isNull(taskServiceResult.getSource()) || Objects.isNull(taskServiceResult.getSource().getObj())) {
+            log.error("task is not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 任务状态校验
+        FlowTaskTaskModel flowTaskTaskModel = taskServiceResult.getSource().getObj();
+        if (TaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus()) {
+            log.error("task is not running for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
+        }
+
+        // 流量执行器校验
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModel.getActuatorId());
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("stop task error, flowActuator not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+        StopFlowTaskRequest stopFlowTaskRequest = StopFlowTaskRequest.builder()
+                .action(TaskActionEnum.STOP.toValue())
+                .taskId(taskId)
+                .build();
+
+        try {
+            String stopTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/v2/tasks/action",
+                    JsonUtils.snakeStringify(stopFlowTaskRequest));
+            JSONObject stopTaskObj = JSONObject.parseObject(stopTaskRsp);
+            log.info("stop task response:{}", stopTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(stopTaskObj)) {
+                log.info("stop task success for {}", taskId);
+
+                // 更新任务状态为已停止
+                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.STOPED.toValue());
+                log.info("AsyncPlatFlowTaskService.stopTask end.");
+                return ResultCommon.success(true);
+            } else {
+                log.error("stop task failed for {}", taskId);
+                return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("stop task error for {}", taskId, e);
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+    }
+
+    /**
+     * 批量停止流量任务
+     * @param taskIds
+     * @return
+     */
+    public ServiceResult<Boolean> batchStopTasks(List<String> taskIds) {
+        log.info("AsyncPlatFlowTaskService.batchStopTasks begin. taskIds:{}", taskIds);
+        // 任务存在校验
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByTaskIds(taskIds);
+        if (CollectionUtils.isEmpty(flowTaskTaskModels) || flowTaskTaskModels.size() != taskIds.size()) {
+            log.error("tasks are not all exist");
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 任务状态校验
+        List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
+                TaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(notRunningTasks)) {
+            log.error("some tasks are not running");
+            throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
+        }
+
+        // 流量执行器校验
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModels.get(0).getActuatorId());
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("batch stop tasks error, flowActuator not exist");
+            throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
+        }
+
+        BatchStopFlowTaskRequest batchStopFlowTaskRequest = BatchStopFlowTaskRequest.builder()
+                .action(TaskActionEnum.STOP.toValue())
+                .taskIds(taskIds)
+                .build();
+
+        try {
+            String batchStopTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/v2/tasks/batch/action",
+                    JsonUtils.snakeStringify(batchStopFlowTaskRequest));
+            JSONObject batchStopTaskObj = JSONObject.parseObject(batchStopTaskRsp);
+            log.info("batch stop task response:{}", batchStopTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(batchStopTaskObj)) {
+                log.info("batch stop task success");
+
+                // 批量更新任务状态为运行中
+                flowTaskTaskService.batchUpdateTaskStatus(taskIds, TaskStatusEnum.STOPED.toValue());
+
+                log.info("AsyncPlatFlowTaskService.batchStopTasks end.");
+                return ResultCommon.success(true);
+            } else {
+                log.error("batch stop tasks failed");
+                return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("batch stop tasks error");
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+    }
+
+    /**
      * 校验trex服务状态
      * @param fixedIp
      * @param networkInfos
