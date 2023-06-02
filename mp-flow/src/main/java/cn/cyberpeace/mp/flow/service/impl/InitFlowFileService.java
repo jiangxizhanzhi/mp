@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -21,6 +22,9 @@ public class InitFlowFileService implements CommandLineRunner {
     @Autowired
     private FlowInfoServiceImpl flowInfoService;
 
+    @Autowired
+    private FlowPcapServiceImpl flowPcapService;
+
     @Override
     public void run(String... args) {
 
@@ -28,10 +32,17 @@ public class InitFlowFileService implements CommandLineRunner {
             FlowInfoModel flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             if (Objects.nonNull(flowInfoModel)) {
                 log.info("=========== no need to import flow file ===========");
-                return;
+            } else {
+                flowInfoService.batchImportFlowInfo();
             }
 
-            flowInfoService.batchImportFlowInfo();
+            int pcapCount = flowPcapService.countAll();
+            if (pcapCount > 0) {
+                log.info("=========== no need to init pcap analyse ===========");
+            } else {
+                // 初始化pcap包解析
+                TaskCommon.executeTask(() -> flowInfoService.initPcapAnalyse());
+            }
         } catch (Exception e) {
             log.error("import flow file error，{}", ExceptionUtils.getStackTrace(e));
         }
