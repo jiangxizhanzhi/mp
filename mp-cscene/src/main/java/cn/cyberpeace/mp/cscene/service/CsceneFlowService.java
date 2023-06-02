@@ -369,6 +369,26 @@ public class CsceneFlowService {
     }
 
     /**
+     * 流量任务停止
+     * @param taskId
+     */
+    public void stopTask(String taskId) {
+        log.info("CsceneFlowService.stopTask begin. taskId:{}", taskId);
+        asyncPlatFlowTaskService.stopTask(taskId);
+        log.info("CsceneFlowService.stopTask end.");
+    }
+
+    /**
+     * 流量任务批量停止
+     * @param taskIds
+     */
+    public void batchStopTasks(List<String> taskIds) {
+        log.info("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
+        asyncPlatFlowTaskService.batchStopTasks(taskIds);
+        log.info("CsceneFlowService.batchStopTasks end.");
+    }
+
+    /**
      * 根据场景id查询带有流量的节点id
      * @param id
      * @return
