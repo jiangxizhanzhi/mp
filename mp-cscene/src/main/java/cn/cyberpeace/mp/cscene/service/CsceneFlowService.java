@@ -435,6 +435,7 @@ public class CsceneFlowService {
                     flowStatisticsDetail.setValue(value);
                     flowStatisticsDetail.setOffsetUnit("m");
                     result.add(flowStatisticsDetail);
+                    offsetValue += networkFlowRateResult.getTimeInt();
                 }
             }
         }

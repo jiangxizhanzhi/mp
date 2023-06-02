@@ -228,13 +228,14 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         try {
             FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
             String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
-            byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
+            byte[] fileByte;
 
             JSONObject object = new JSONObject();
             object.put("flowId", flowInfoModel.getId());
-            object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
             // 判断是pcap包还是脚本
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+                fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
+                object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
                 List<FlowProtocolModel> flowProtocolModelList = flowProtocolService.selectByFlowId(flowInfoModel.getId());
                 if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
                     JSONObject protocolRate = new JSONObject();
@@ -243,6 +244,9 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     }
                     object.put("protocolRate", protocolRate);
                 }
+            } else {
+                fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
+                object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1]);
             }
             String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/upload", fileByte, "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
