@@ -204,6 +204,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         request.setAttackTypes(queryParams.getAttackTypes());
+        request.setAttackSeverities(queryParams.getSeverity());
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())) {
             request.setSourceIps(queryParams.getSourceIps());
         } else {
