@@ -62,6 +62,10 @@ public class ScreenrecordVO extends BaseModel {
     @DefaultStr
     private String userName;
 
+    @ApiModelProperty(value = "用户头像")
+    @DefaultStr
+    private String userAvatar;
+
     /**
      * 组织名称
      */
