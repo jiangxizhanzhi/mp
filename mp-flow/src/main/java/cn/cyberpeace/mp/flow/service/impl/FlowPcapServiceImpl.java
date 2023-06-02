@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.model.FlowPcapModel;
@@ -19,4 +20,8 @@ public class FlowPcapServiceImpl extends BaseModelServiceImpl<FlowPcapModel, Flo
         setModelMapper(stuMapper);
     }
 
+    @Override
+    public int countAll() {
+        return getModelMapper().total(new HumanCondition());
+    }
 }
