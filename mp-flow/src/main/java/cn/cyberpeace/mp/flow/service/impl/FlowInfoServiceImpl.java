@@ -1375,14 +1375,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = flowInfoModel.getPcapFile();
         BufferedReader input = null;
-        byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
-        String fileName = FilenameUtils.getName(pcapPath);;
-        String srcPcapPath = PRE_PATH.concat("/" + fileName);
         File srcFile = null;
         FileOutputStream fos = null;
         BufferedOutputStream bos = null;
 
         try {
+            byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
+            String fileName = FilenameUtils.getName(pcapPath);;
+            String srcPcapPath = PRE_PATH.concat("/" + fileName);
             srcFile = new File(srcPcapPath);
             fos = new FileOutputStream(srcFile);
             bos = new BufferedOutputStream(fos);
@@ -1423,6 +1423,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
         } catch (Exception e) {
             log.error("init pcap protocols exec error:", e);
+            return;
         } finally {
             org.apache.poi.util.IOUtils.closeQuietly(input);
             org.apache.poi.util.IOUtils.closeQuietly(fos);
