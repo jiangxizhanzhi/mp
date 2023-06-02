@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.response;
+package cn.cyberpeace.mp.flow.response;
 
 
 import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;

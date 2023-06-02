@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
@@ -10,15 +9,16 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskDetail;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
-import cn.cyberpeace.mp.cscene.request.flow.FlowTaskPageRequest;
-import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
-import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
+import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskConfService;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
@@ -204,44 +204,16 @@ public class CsceneFlowService {
      * @param request
      * @return
      */
-    public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageRequest request) {
+    public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageQueryParams request) {
         log.info("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.link(FlowTaskTaskModel.class, FlowInfoModel.class, FlowPcapModel.class)
-                .filterLink(FlowTaskTaskModel.class, FlowTaskTaskModel::getFlowId, FlowInfoModel.class, FlowInfoModel::getId)
-                .filterLink(FlowTaskTaskModel.class, FlowTaskTaskModel::getFlowId, FlowPcapModel.class, FlowPcapModel::getFlowId)
-                .currentLink(FlowTaskTaskModel.class)
-                .filterEqual(FlowTaskTaskModel::getSceneId, sceneId)
-                .selectAs(FlowTaskTaskModel::getId, FlowTaskPageResponse::getId)
-                .selectAs(FlowTaskTaskModel::getInteractiveType, FlowTaskPageResponse::getInteractiveType)
-                .selectAs(FlowTaskTaskModel::getNodeName, FlowTaskPageResponse::getNodeName)
-                .selectAs(FlowTaskTaskModel::getNodeIp, FlowTaskPageResponse::getNodeIp)
-                .selectAs(FlowTaskTaskModel::getSuccessCount, FlowTaskPageResponse::getSuccessCount)
-                .selectAs(FlowTaskTaskModel::getErrorCount, FlowTaskPageResponse::getErrorCount)
-                .selectAs(FlowTaskTaskModel::getErrorCount, FlowTaskPageResponse::getErrorCount)
-                .selectAs(FlowTaskTaskModel::getTaskStatus, FlowTaskPageResponse::getTaskStatus)
-                .currentLink(FlowInfoModel.class)
-                .selectAs(FlowInfoModel::getTitle, FlowTaskPageResponse::getTitle)
-                .currentLink(FlowPcapModel.class)
-                .selectAs(FlowPcapModel::getDuration, FlowTaskPageResponse::getDuration)
-                .selectAs(FlowPcapModel::getPcapSize, FlowTaskPageResponse::getPcapSize)
-                .selectAs(FlowPcapModel::getPktNum, FlowTaskPageResponse::getPktNum)
-                .selectAs(FlowPcapModel::getProtocols, FlowTaskPageResponse::getProtocols);
-        if (StringUtils.isNotEmpty(request.getNodeId())) {
-            humanCondition.currentLink(FlowTaskTaskModel.class).filterEqual(FlowTaskTaskModel::getNodeId, request.getNodeId());
-        }
-        if (StringUtils.isNotEmpty(request.getInteractiveType())) {
-            humanCondition.currentLink(FlowTaskTaskModel.class).filterEqual(FlowTaskTaskModel::getInteractiveType, request.getInteractiveType());
-        }
-        humanCondition.setLimit(request.getPerPage());
-        humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
+        request.setOffset((request.getPage() - 1) * request.getPerPage());
+        request.setSceneId(sceneId);
         // 查询符合条件的条数
-        int total = flowTaskTaskMapper.total(humanCondition);
-        List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.list(humanCondition, FlowTaskPageResponse.class);
+        int total = flowTaskTaskMapper.countBySceneId(request);
+        List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.pageBySceneId(request);
         //统计实时速率
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
-            flowTaskPageResponseList.stream().forEach(rsp -> rsp.setTotalCount(rsp.getSuccessCount()+rsp.getErrorCount()));
             List<String> ids = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getId).collect(Collectors.toList());
             List<FlowStatisticalCondition> conditions = this.getRealTimeCondition();
             Map<String, List<FlowRealTimeRate>> tealTimeRateMap = flowTaskRecordService.realTimeRate(ids, conditions);

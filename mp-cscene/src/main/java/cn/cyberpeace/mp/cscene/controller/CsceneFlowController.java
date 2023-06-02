@@ -6,11 +6,15 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.flow.*;
-import cn.cyberpeace.mp.cscene.response.FlowTaskPageResponse;
+import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
+import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTaskBatchStartRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTaskBatchStopRequest;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFlowService;
 import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
+import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -77,8 +81,9 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      */
     @ApiOperation("流量任务列表查询")
     @GetMapping("/task/list")
-    public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageRequest request) {
+    public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
         log.info("FlowInfoController.taskList begin. request:{}", request);
+        request.ensure();
         ListObjServiceResult<FlowTaskPageResponse> result = csceneFlowService.taskList(request);
         log.info("FlowInfoController.taskList end. result:{}", result);
         return result;
