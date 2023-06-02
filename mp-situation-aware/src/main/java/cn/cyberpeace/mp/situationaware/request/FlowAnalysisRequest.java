@@ -141,6 +141,9 @@ public class FlowAnalysisRequest {
     @ApiModelProperty("攻击类型")
     private List<String> attackTypes;
 
+    @ApiModelProperty("攻击等级")
+    private List<Integer> attackSeverities;
+
     public Integer getTopSize() {
         return (Objects.isNull(topSize) || topSize == 0) ? 10 : topSize;
     }

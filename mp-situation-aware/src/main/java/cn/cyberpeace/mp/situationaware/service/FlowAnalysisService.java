@@ -831,6 +831,10 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
         }
 
+        if (Objects.nonNull(request.getAttackSeverities())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", request.getAttackSeverities()));
+        }
+
         if (StringUtils.isNotEmpty(request.getPort())) {
             BoolQueryBuilder bq = QueryBuilders.boolQuery();
             bq.should(QueryBuilders.termsQuery("source.port", request.getPort()));

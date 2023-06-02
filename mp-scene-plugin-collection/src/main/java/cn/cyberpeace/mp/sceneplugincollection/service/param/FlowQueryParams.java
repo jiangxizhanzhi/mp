@@ -47,6 +47,9 @@ public class FlowQueryParams extends QueryParams {
     @ApiModelProperty("攻击类型")
     private List<String> attackTypes;
 
+    @ApiModelProperty("攻击等级")
+    private List<Integer> severity;
+
     /**
      * 源IP集合
      */
