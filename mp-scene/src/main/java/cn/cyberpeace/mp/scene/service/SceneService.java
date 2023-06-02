@@ -146,7 +146,10 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
+        // 场景信息目前只更新显示参数
+        String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
         updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
+        updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
         SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
         updatedSceneHandler.setRealTimeUpdate(true);
         if (updatedSceneHandler.getScene() != null) {
