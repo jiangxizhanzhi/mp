@@ -9,9 +9,15 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://10.100.7.1:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: root
-    password: cyberpeace@2020
+    ext-var:
+      db-ip: ${MP_DB_IP:10.100.7.1}
+      db-port: ${MP_DB_PORT:9306}
+      db-database: ${MP_DB_DATABASE:mp}
+      username: ${MP_DB_USERNAME:root}
+      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+    url: jdbc:mysql://${spring.datasource.ext-var.db-ip}:${spring.datasource.ext-var.db-port}/${spring.datasource.ext-var.db-database}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: ${spring.datasource.ext-var.username}
+    password: ${spring.datasource.ext-var.password}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -19,8 +25,10 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   flyway:
+    ext-var:
+      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
     clean-disabled: true
-    enabled: false
+    enabled: ${spring.flyway.ext-var.enabled}
   application:
     name: mp
   servlet:
@@ -28,10 +36,15 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: 10.100.7.1
-    port: 9672
-    username: cpcloud
-    password: MzhhMzU4NDQzNzU
+    ext-var:
+      host: ${RABBITMQ_IP:10.100.7.1}
+      port: ${RABBITMQ_PORT:9672}
+      username: ${RABBITMQ_USERNAME:cpcloud}
+      password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
+    host: ${spring.rabbitmq.ext-var.host}
+    port: ${spring.rabbitmq.ext-var.port}
+    username: ${spring.rabbitmq.ext-var.username}
+    password: ${spring.rabbitmq.ext-var.password}
   web:
     resources:
       static-locations: file:${user.home}/img
@@ -41,20 +54,27 @@ logging:
   level:
     root: INFO
   file:
+    ext-var:
+      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
     path: ${user.home}/logs
     max-file-size: 300MB
     max-total-size: 650MB
-    max-row-length: 2000
+    max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:
       max-history: 15
 
 springfox:
   documentation:
-    enabled: true
-    auto-startup: true
+    ext-var:
+      enabled: ${SWAGGER_DOC_ENABLED:true}
+      auto-startup: ${SWAGGER_DOC_STARTUP:true}
+      swagger-ui:
+        enabled: ${SWAGGER_DOC_UI:true}
+    enabled: ${springfox.documentation.ext-var.enabled}
+    auto-startup: ${springfox.documentation.ext-var.auto-startup}
     swagger-ui:
-      enabled: true
+      enabled: ${springfox.documentation.ext-var.swagger-ui.enabled}
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
@@ -76,18 +96,32 @@ management:
 
 # 中台各模块相关配置
 mp:
+  common: #公用配置
+    ext-var:
+      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
+      mp-port: ${MP_API_PORT:8001}
+      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+      cp-port: ${CP_PORT:11111}
   base:
+    ext-var:
+      fdfs-ip: ${FDFS_IP:10.100.7.1}
+      fdfs-tracker-port: ${FDFS_TRACKER_SERVERS_PORT:22122}
+      fdfs-inner-file-port: ${FDFS_INNER_FILE_SERVER_PORT:8888}
+      fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
+      file-server: ${FILE_SERVER:lfs}
+      lfs-inner-http-url: ${LFS_INNER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
+      lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
     fdfs-tracker-servers:
-      - 10.100.7.1:22122
-    fdfs-inner-http-server: http://http://10.100.7.1:8888
-    fdfs-outer-http-server: /fdfs
-    file-server: lfs
-    lfs-inner-http-url-template: http://10.100.7.1:8001/api/mp/file/%s
-    lfs-outer-http-url-template: http://10.100.7.1:8001/api/mp/file/%s
+      - ${mp.base.ext-var.fdfs-ip}:${mp.base.ext-var.fdfs-tracker-port}
+    fdfs-inner-http-server: http://${mp.base.ext-var.fdfs-ip}:${mp.base.ext-var.fdfs-inner-file-port}
+    fdfs-outer-http-server: ${mp.base.ext-var.fdfs-outer-http-server}
+    file-server: ${mp.base.ext-var.file-server}
+    lfs-inner-http-url-template: ${mp.base.ext-var.lfs-inner-http-url}
+    lfs-outer-http-url-template: ${mp.base.ext-var.lfs-outer-http-url}
     run-init: true
   # mp-devops-cluster模块
   devopscluster:
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
     public-net-proxy: false #公网开关
     public-net-proxy-ip: 10.100.7.1 #公网ip
     public-net-proxy-port: 11111 #公网端口
@@ -96,13 +130,24 @@ mp:
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
     disk-alarm-percent: 80 # 磁盘空间告警阈值
-    cp-ip: 10.100.7.1                # 云平台适配层接口地址
-    cp-port: 11111                # 云平台适配层接口地址
-    mp-ip: 10.100.1.12          # MP中台地址
-    mp-port: 8001          # MP中台地址
+    cp-ip: ${mp.common.ext-var.cp-ip}                # 云平台适配层接口地址
+    cp-port: ${mp.common.ext-var.cp-port}                # 云平台适配层接口地址
+    mp-ip: ${mp.common.ext-var.mp-ip}          # MP中台地址
+    mp-port: ${mp.common.ext-var.mp-port}           # MP中台地址
     allow-export: false
   # mp-situationaware 模块配置
   situationaware:
+    ext-var:
+      wazuh-ip: ${WAZUH_IP:10.100.7.1}
+      wazuh-port: ${WAZUH_PORT:15500}
+      wazuh-username: ${WAZUH_USERNAME:wazuh}
+      wazuh-password: ${WAZUH_PASSWORD:Abcd123#}
+      wazuh-es-ip: ${WAZUH_ES_IP:10.100.7.1}
+      wazuh-es-port: ${WAZUH_ES_PORT:9205}
+      wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+      arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
+      arkime-es-port: ${ARKIME_ES_PORT:9205}
+      arkime-disk: ${ARKIME_DISK:50}
     # monitor
     monitor-cp-cloud-interval:
     monitor-business-interval:
@@ -111,43 +156,52 @@ mp:
     monitor-cp-cloud-restart-restrict:
     monitor-business-restart-restrict:
     # arkime
-    arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
-    arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1
-    arkime-es-host: 10.100.7.1
-    arkime-es-port: 9205
+    arkime-cpcloud-container-create-url: http://${mp.common.ext-var.cp-ip}:11111/v1
+    arkime-cpcloud-network-mirror-url: http://${mp.common.ext-var.cp-ip}:11111/cpcloud/sdn_app/v1
+    arkime-es-host: ${mp.situationaware.ext-var.arkime-es-host}
+    arkime-es-port: ${mp.situationaware.ext-var.arkime-es-port}
     arkime-image-name: centos-arkime_arkime:v2
-    arkime-disk: 50
+    arkime-disk: ${mp.situationaware.ext-var.arkime-disk}
     arkime-username: api
     arkime-password: api
     #wazuh 开放接口地址用户名密码
-    wazuh-base-url: http://10.100.7.1:15500
-    wazuh-username: wazuh
-    wazuh-password: Abcd123#
-    wazuh-flow-table-url: http://10.100.7.1:9999/knapsack/probe/v1
+    wazuh-base-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.wazuh-port}
+    wazuh-username: ${mp.situationaware.ext-var.wazuh-username}
+    wazuh-password: ${mp.situationaware.ext-var.wazuh-password}
+    wazuh-flow-table-url: http://${mp.common.ext-var.cp-ip}:9999/knapsack/probe/v1
     # wazuh-probe-manager
     probe-mgr-url: http://10.100.0.111:8002
     probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
     probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
     probe-mgr-task-enable: false
     # wazuh es节点地址
-    wazuh-es-nodes: 10.100.7.1:9205
-    wazuh-es-max-page-size: 10000
+    wazuh-es-nodes: ${mp.situationaware.ext-var.wazuh-es-ip}:${mp.situationaware.ext-var.wazuh-es-port}
+    wazuh-es-max-page-size: ${mp.situationaware.ext-var.wazuh-es-max-page-size}
     # arkime es 地址
-    arkime-es-nodes: 10.100.7.1:9205
+    arkime-es-nodes: ${mp.situationaware.ext-var.arkime-es-host}:${mp.situationaware.ext-var.arkime-es-port}
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   # mp-log 模块
   log:
-    exclude-urls: /login
-    exclude-methods: OPTIONS
-    es-nodes: 10.100.0.101:9205
-    cp-url: http://10.100.7.1:11111 #云平台地址
-    mp-ip: 10.100.1.12:8001    # MP中台API地址
-    log-db: sql #日志存储数据库可以配置：es、sql
-    es-max-page-size: 10000
-    dynamic-level-keeping: true #动态日志级别保持
+    ext-var:
+      es-ip: ${LOG_ES_IP:10.100.7.1}
+      es-port: ${LOG_ES_PORT:9205}
+      es-max-page-size: ${mp.situationaware.ext-var.wazuh-es-max-page-size}
+      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+    exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
+    exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
+    es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
+    cp-url: http://${mp.common.ext-var.cp-ip}:11111 #云平台地址
+    mp-ip: ${mp.common.ext-var.mp-ip}    # MP中台API地址
+    log-db: ${mp.log.ext-var.log-db} #日志存储数据库可以配置：es、sql
+    es-max-page-size: ${mp.log.ext-var.es-max-page-size}
+    dynamic-level-keeping: ${mp.log.ext-var.dynamic-level-keeping} #动态日志级别保持
   # mp-auth 模块配置
   auth:
+    ext-var:
+      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:a668b6fec22144f38a6f72f8a5aa7326}
+      authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     max-import-user-size: 1000
     logout-reset-secret: true
     default-user-avatar: /api/mp/avatar/1.png
@@ -155,11 +209,11 @@ mp:
     # authenticate
     authenticate-cache-time: 30
     authenticate-use-individual-token-secret: true
-    authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
+    authenticate-jwt-secret: ${mp.auth.ext-var.authenticate-jwt-secret}
     authenticate-jwt-expires: 604800
     authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
-    authenticate-encoder-iterations: 10000
+    authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
   # mp-front-admin 模块配置
   frontadmin:
@@ -175,9 +229,9 @@ mp:
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
-    cp-url: 10.100.7.1:11111 #云平台地址
+    cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
   sceneplugincloud:
-    cpcloud-server: http://10.100.7.1:11111
+    cpcloud-server: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}
     delete-retry-times: 2
     default-core-router-name: Router
     enable-reallocate-ip-ports: false
@@ -202,15 +256,18 @@ mp:
     scene-create-install-unzip-apk: true
     dhcp-ip-allocate: true
   sceneplugincollection:
-    wazuh-server-host: 10.100.7.1
-    wazuh-api-server: http://10.100.7.1:15500
+    wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
+    wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500
     wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://10.100.7.1:9205
-    wazuh-godfs-server: http://10.100.7.1:11888
+    wazuh-es-server: http://${mp.situationaware.ext-var.wazuh-es-ip}:9205
+    wazuh-godfs-server: http://${mp.situationaware.ext-var.wazuh-ip}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
-    gns3-server: http://10.100.7.1:8088
+    ext-var:
+      gns3-ip: ${GNS3_IP:10.100.7.1}
+      gns3-port: ${GNS3_PORT:8088}
+    gns3-server: http://${mp.sceneplugingns3.ext-var.gns3-ip}:${mp.sceneplugingns3.ext-var.gns3-port}
     gns3-image-uuids: 854f7c24-060f-4dbd-b771-68eab207a071
   cscene:
     has-own-recording-set: 213,214,236
@@ -221,8 +278,8 @@ mp:
     enable-command-change: false
     cron-job-expression: 0 0/15 * * * ?
     enable-node-limit-db-check: true
-    cp-ip: 10.100.7.1
-    cp-port: 11111
+    cp-ip: ${mp.common.ext-var.cp-ip}
+    cp-port: ${mp.common.ext-var.cp-port}
   scene:
     scene-pool-size: 100
     scene-hold-size: 10000
@@ -244,8 +301,11 @@ kaptcha:
     width: 200
     height: 60
   text-producer:
+    ext-var:
+      character:
+        string: ${MP_AUTH_TEXT_SECRET:'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'}
     impl:
     character:
-      string: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      string: ${kaptcha.text-producer.ext-var.character.string}
       length: 4
       space: 10
