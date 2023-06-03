@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
@@ -211,6 +212,11 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         String taskId = jsonMessage.getString("task_id");
         FlowTaskTaskModel flowTaskTaskModel = flowTaskTaskMapper.get(taskId);
         flowTaskTaskModel.setTaskStatus(status);
+        if (TaskTaskStatusEnum.STOPPED.toValue() == status) {
+            flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
+        } else if (TaskTaskStatusEnum.ERROR.toValue() == status) {
+            flowTaskTaskModel.setErrorCount(flowTaskTaskModel.getErrorCount() + 1);
+        }
         flowTaskTaskMapper.update(flowTaskTaskModel);
 
         JSONObject data = jsonMessage.getJSONObject("flow_record");
