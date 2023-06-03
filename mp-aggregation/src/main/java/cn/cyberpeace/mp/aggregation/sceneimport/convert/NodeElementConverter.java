@@ -131,10 +131,14 @@ class NodeElementConverter implements IConverter {
                         StaticRoute staticRoute = new StaticRoute();
                         staticRoute.setDestination(s.getDestination());
                         staticRoute.setNexthop(s.getGateway());
+                        staticRoute.setNexthopPortId(s.getNexthopNode());
                         return staticRoute;
                     })
                     .collect(Collectors.toList());
             pluginElement.setStaticRoutes(routes);
+        }
+        if (StringUtils.isNotEmpty(node.getProtocols())) {
+            container.getNodeProtocols().put(node.getId(), node.getProtocols());
         }
 
         if (CollectionUtils.isEmpty(node.getNet())) {

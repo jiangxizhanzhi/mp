@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,9 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         var poolTasks = taskPool.runTasks(tasks);
         for (var poolTask : poolTasks) {
             if (poolTask.getException() != null) {
-                throw new MpRuntimeException(poolTask.getException().getMessage());
+                var e = new MpRuntimeException(poolTask.getException().getMessage());
+                e.setDetail(ExceptionUtils.getStackTrace(poolTask.getException()));
+                throw e;
             }
         }
     }

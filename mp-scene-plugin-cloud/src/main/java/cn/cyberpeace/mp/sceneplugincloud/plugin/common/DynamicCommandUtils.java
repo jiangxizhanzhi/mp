@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.hutool.core.net.Ipv4Util;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,11 +67,13 @@ public class DynamicCommandUtils {
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
             for (var port : paramsWrapper.ports) {
-                cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
-                IpParser ipParser = new IpParser(paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port).getCidr());
-                cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
-                cmds.add(START_INT);
-                cmds.add(EXIT);
+                if (StringUtils.isNotEmpty(port.getIp()) && paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port) != null) {
+                    cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
+                    IpParser ipParser = new IpParser(paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port).getCidr());
+                    cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
+                    cmds.add(START_INT);
+                    cmds.add(EXIT);
+                }
             }
             return cmds;
         }
