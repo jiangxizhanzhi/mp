@@ -28,7 +28,8 @@ public class VirtualDynamips extends CloudClient {
         heavyConcurrentWait();
         VirtualDynamicCreateData response = getHttpClient().post(CloudUrlConstant.CREATE_DYNAMIPS, createData, null, new TypeReference<>() {
         });
-        log.info("create dynamips ,request is {} , result is {}", JsonCommon.stringify(response));
+        log.info("create dynamips ,request is {} , result is {}", JsonCommon.stringify(createData),
+                JsonCommon.stringify(response));
         return response;
     }
 
