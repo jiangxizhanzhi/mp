@@ -81,7 +81,7 @@ public class SceneHandlerUtils {
                 if (stopCallback != null) {
                     stopCallback.run();
                 }
-            }, formatStopCallback);
+            }, formatStopCallback, flow.getSourceIp());
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
             errorFLow(flow, e.getMessage());

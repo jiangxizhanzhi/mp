@@ -161,16 +161,17 @@ public class FlowExecutor {
         return addFlowTaskRequest;
     }
 
-    public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback) {
-//        var result = flowService1.startTask(taskId);
-        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
+    public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback, String sourceIp) {
+        var result = flowService1.startTask(taskId, sourceIp);
+//        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
+//        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
+        var result = flowService1.stopTask(taskId);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }

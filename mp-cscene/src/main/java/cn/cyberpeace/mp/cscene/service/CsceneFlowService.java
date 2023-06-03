@@ -354,7 +354,7 @@ public class CsceneFlowService {
      */
     public void startTask(String taskId) {
         log.info("CsceneFlowService.startTask begin. taskId:{}", taskId);
-        asyncPlatFlowTaskService.startTask(taskId);
+        asyncPlatFlowTaskService.startTask(taskId, null);
         log.info("CsceneFlowService.startTask end.");
     }
 

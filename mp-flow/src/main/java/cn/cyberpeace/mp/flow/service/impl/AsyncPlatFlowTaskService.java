@@ -12,8 +12,7 @@ import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
-import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskStart;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -646,7 +645,7 @@ public class AsyncPlatFlowTaskService {
      * @param taskId
      * @return
      */
-    public ServiceResult<Boolean> startTask(String taskId) {
+    public ServiceResult<Boolean> startTask(String taskId, String sourceIp) {
         // 任务存在校验
         ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
         if (Objects.isNull(taskServiceResult.getSource()) || Objects.isNull(taskServiceResult.getSource().getObj())) {
@@ -677,6 +676,21 @@ public class AsyncPlatFlowTaskService {
 
         // 解析任务配置
         FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
+        if (StringUtils.isNotBlank(sourceIp)) {
+            // 兼容旧版，有sourceIp设置源ip
+            FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
+            if (Objects.nonNull(flowConf)) {
+                FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
+                if (Objects.nonNull(ipv4Conf)) {
+                    ipv4Conf.setSip(sourceIp);
+                }
+            }
+
+            FlowTaskCommonConf commonConf = flowTaskConf.getCommonConf();
+            if (Objects.nonNull(commonConf)) {
+                commonConf.setLatency(2000);
+            }
+        }
         // 封装流量任务配置参数
         FlowTaskStart flowTaskStart = FlowTaskStart.builder()
                 .taskId(flowTaskTaskModel.getId())
