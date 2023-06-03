@@ -52,6 +52,18 @@ public class FlowStatisticsInfo {
     private Long dropRate;
 
     /**
+     * 发包总大小(单位byte)
+     */
+    @ApiModelProperty(value = "发包总大小(单位byte)")
+    private Long obytes;
+
+    /**
+     * 发包错误数
+     */
+    @ApiModelProperty(value = "发包错误数")
+    private Long oerrors;
+
+    /**
      * 实时速率统计表
      */
     @ApiModelProperty(value = "实时速率统计表")
