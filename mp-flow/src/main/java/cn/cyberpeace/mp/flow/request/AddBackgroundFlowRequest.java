@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @Description: 新增背景流量请求
@@ -66,9 +64,9 @@ public class AddBackgroundFlowRequest {
     private String pcapFilePath;
 
     /**
-     * 流量协议集合
+     * 流量协议字符串
      */
-    @ApiModelProperty("流量协议集合")
-    private List<ProtocolBO> protocolList;
+    @ApiModelProperty("流量协议字符串")
+    private String protocols;
 
 }

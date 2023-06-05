@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -113,9 +112,9 @@ public class ModifyAttackFlowRequest {
     private String pcapFilePath;
 
     /**
-     * 流量协议集合
+     * 流量协议字符串
      */
-    @ApiModelProperty("流量协议集合")
-    private List<ProtocolBO> protocolList;
+    @ApiModelProperty("流量协议字符串")
+    private String protocols;
 
 }
