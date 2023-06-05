@@ -5,7 +5,7 @@ create table mp_menu_template_role
     `id`          varchar(64) NOT NULL COMMENT 'ID',
     `template_id` varchar(64) NOT NULL COMMENT 'ID',
     `role_id`     varchar(64) NOT NULL COMMENT 'ID',
-    PRIMARY KEY (`pk`),
+    PRIMARY KEY (`pk`)
 ) COMMENT ='角色关联菜单模板表';
 
 create table mp_menu_template_info
