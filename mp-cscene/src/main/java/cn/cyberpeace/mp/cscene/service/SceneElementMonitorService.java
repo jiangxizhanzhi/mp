@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -354,6 +353,8 @@ public class SceneElementMonitorService {
             imageName = cpSceneElementBO.getImage();
         }
         basicInfo.setImageName(imageName);
+        basicInfo.setImageType(cpSceneElementBO.getImageType());
+        basicInfo.setRole(cpSceneElementBO.getRole());
 
         // 物理节点
         basicInfo.setHost(cpSceneElementBO.getHost());

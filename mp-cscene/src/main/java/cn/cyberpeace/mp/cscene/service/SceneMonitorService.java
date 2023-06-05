@@ -360,6 +360,8 @@ public class SceneMonitorService {
                 imageName = cloudElement.getImage();
             }
             basicInfo.setImageName(imageName);
+            basicInfo.setImageType(cloudElement.getImageType());
+            basicInfo.setRole(cloudElement.getRole());
             basicInfo.setCategory(cloudElement.getCategory());
             basicInfo.setVirtualType(cloudElement.getVirtualType());
             res.add(basicInfo);
