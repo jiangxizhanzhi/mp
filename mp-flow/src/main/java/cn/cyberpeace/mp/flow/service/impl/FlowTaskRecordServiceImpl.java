@@ -143,6 +143,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         flowStatisticsInfo.setTotalRx(0L);
         flowStatisticsInfo.setQueueFull(0L);
         flowStatisticsInfo.setDropRate(0L);
+        flowStatisticsInfo.setObytes(0L);
+        flowStatisticsInfo.setOerrors(0L);
         List<FlowStatisticalCondition> conditionList = this.getCondition(sceneId);
         if (CollectionUtils.isEmpty(conditionList)) {
             log.info("没有执行记录");
@@ -162,6 +164,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                     flowStatisticsInfo.setTotalRx(temp.getTotalRx() == null ? 0 : temp.getTotalRx());
                     flowStatisticsInfo.setQueueFull(temp.getQueueFull() == null ? 0 : temp.getQueueFull());
                     flowStatisticsInfo.setDropRate(temp.getDropRate() == null ? 0 : temp.getDropRate());
+                    flowStatisticsInfo.setObytes(temp.getObytes() == null ? 0 : temp.getObytes());
+                    flowStatisticsInfo.setOerrors(temp.getOerrors() == null ? 0 : temp.getOerrors());
                 }
                 FlowStatisticsDetail txBps = new FlowStatisticsDetail();
                 txBps.setStatisticalTime(temp.getStatisticalTime());
@@ -226,6 +230,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         flowTaskRecordModel.setTxPps(data.getLong("tx_pps"));
         flowTaskRecordModel.setLatency(data.getLong("latency"));
         flowTaskRecordModel.setJitter(data.getLong("jitter"));
+        flowTaskRecordModel.setObytes(data.getLong("obytes"));
+        flowTaskRecordModel.setOerrors(data.getLong("oerrors"));
         flowTaskRecordModel.setTotalTxL2(data.getLong("total_tx_L2"));
         flowTaskRecordModel.setTotalTxL1(data.getLong("total_tx_L1"));
         flowTaskRecordModel.setTotalPps(data.getLong("opackets"));

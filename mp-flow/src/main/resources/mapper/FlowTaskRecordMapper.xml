@@ -36,7 +36,8 @@
             resultType="cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp">
         <foreach collection="conditions" item="item" open="" close="" separator="union">
             select #{item.endTime} as statisticalTime, #{item.offsetValue} as offsetValue, #{item.offsetUnit} as offsetUnit,
-            sum(tx_bps) as txBps, sum(tx_pps) as txPbs, CAST(avg(latency) as int) as latency, CAST(avg(jitter) as int) as jitter,
+            sum(tx_bps) as txBps, sum(tx_pps) as txPps, CAST(avg(latency) as int) as latency, CAST(avg(jitter) as int) as jitter,
+            sum(obytes) as txPps, sum(oerrors) as txPps,
             sum(total_tx_L2) as totalTxL2, sum(total_tx_L1) as totalTxL1, sum(total_pps) as totalPps, sum(total_rx) as totalRx, sum(queue_full) as queueFull, sum(drop_rate) as dropRate
             from mp_flow_task_record
             where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
