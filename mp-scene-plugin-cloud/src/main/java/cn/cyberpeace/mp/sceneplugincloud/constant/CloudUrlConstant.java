@@ -12,6 +12,7 @@ public class CloudUrlConstant {
     public static final String ENTITY_NODE_DELETE_URL = "/v1/scenarios/entity_node";
 
     public static final String VIRTUAL_FIREWALL_CREATE_URL = "/v1/scenarios/virtual_firewall";
+    public static final String VIRTUAL_FIREWALL_UPDATE_URL = "/v1/scenarios/update_virtual_firewall_rule";
     public static final String VIRTUAL_FIREWALL_DELETE_URL = "/v1/scenarios/virtual_firewall";
 
     public static final String VIRTUAL_ROUTER_CREATE_URL = "/v1/scenarios/virtual_router";
@@ -72,6 +73,8 @@ public class CloudUrlConstant {
 
     public static final String CREATE_PORTS = "/v1/ports";
     public static final String UPDATE_PORTS = "/v1/ports";
+
+    public static final String MODIFY_INSTANCE_IP = "/v1/scenarios/modify_instance_ip";
 
     public static final String GET_SERIAL_PORT_URL = "/v1/instances/{instance_id}/serial-port";
     public static final String ROUTER_CMD_SEND_URL = "/cpcloud/router/v1/send_rule";
