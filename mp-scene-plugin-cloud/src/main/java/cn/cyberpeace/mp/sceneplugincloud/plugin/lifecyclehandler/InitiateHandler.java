@@ -1055,7 +1055,8 @@ public class InitiateHandler extends HandlerCommon {
                             || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
                             || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
                             || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS))) {
                         Runnable task = () -> initiateElementPortsProcess(cloudElement);
                         Integer type = cloudElement.getSrcElement().getType();
                         // 防火墙也看作路由
