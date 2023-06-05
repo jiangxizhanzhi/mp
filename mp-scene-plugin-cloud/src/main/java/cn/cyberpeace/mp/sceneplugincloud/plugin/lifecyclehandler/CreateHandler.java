@@ -1226,6 +1226,26 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
+
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        // 同样ip、端口可能对应多个接入方式
+        if (cloudPorts != null) {
+            cloudPorts.forEach(cloudPort -> {
+                if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
+                    return;
+                }
+                var accessModes = cloudPort.getAccessModes();
+                if (accessModes == null) {
+                    return;
+                }
+                for (var accessMode : accessModes) {
+                    if (AccessMode.Protocol.TELNET.equals(accessMode.getProtocol())) {
+                        accessMode.setAvailable(true);
+                    }
+                }
+            });
+        }
+
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
@@ -1375,18 +1395,13 @@ public class CreateHandler extends HandlerCommon {
         }
 
         List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
-            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            List<String> commands = new ArrayList<>();
+            commands.addAll(DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler()));
+            commands.addAll(DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler()));
             // 下发配置
-            vdClient.sendRule(e.getResourceId(), list);
+            vdClient.sendRule(e.getResourceId(), commands);
         }).collect(Collectors.toList());
         runTasks(configDynamicIps);
-
-        List<Runnable> configDynamicStaticRoutes = dynamicElements.stream().map(e -> (Runnable) () -> {
-            var list = DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler());
-            // 下发配置
-            vdClient.sendRule(e.getResourceId(), list);
-        }).collect(Collectors.toList());
-        runTasks(configDynamicStaticRoutes);
     }
 
     /**
