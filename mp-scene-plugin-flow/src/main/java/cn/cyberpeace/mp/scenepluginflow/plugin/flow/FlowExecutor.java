@@ -4,18 +4,17 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
-import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
-import cn.cyberpeace.mp.flow.request.BatchActuatorTaskRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
+import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -162,6 +161,8 @@ public class FlowExecutor {
     }
 
     public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback, String sourceIp) {
+        FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + taskId, stopCallback);
+        FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + taskId, errorCallback);
         var result = flowService1.startTask(taskId, sourceIp);
 //        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {
@@ -178,22 +179,22 @@ public class FlowExecutor {
     }
 
     public void startFlows(List<String> taskIds, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
-        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-        request.setTaskIds(taskIds);
-        request.setRunType(runType);
-        request.setTaskAction(TaskActionEnum.START.toValue());
-        request.setCallbackConsumer(callbackConsumer);
-        var result = flowService3.batchActuator(request);
+//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
+//        request.setTaskIds(taskIds);
+//        request.setRunType(runType);
+//        request.setTaskAction(TaskActionEnum.START.toValue());
+//        request.setCallbackConsumer(callbackConsumer);
+        var result = flowService1.batchStartTasks(taskIds);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlows(List<String> taskIds) {
-        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-        request.setTaskAction(TaskActionEnum.STOP.toValue());
-        request.setTaskIds(taskIds);
-        var result = flowService3.batchActuator(request);
+//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
+//        request.setTaskAction(TaskActionEnum.STOP.toValue());
+//        request.setTaskIds(taskIds);
+        var result = flowService1.batchStopTasks(taskIds);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
@@ -211,7 +212,11 @@ public class FlowExecutor {
     }
 
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
-        return this.flowService3.queryFlowRecords(taskId);
+        return this.flowService3.queryFlowRecordsByTaskId(taskId);
+    }
+
+    public ServiceResult<FlowRecordsResponse> queryBatchFlowRecords(String sceneId) {
+        return this.flowService3.queryBatchFlowRecords(sceneId);
     }
 
     private synchronized void initDefaultInstance() {

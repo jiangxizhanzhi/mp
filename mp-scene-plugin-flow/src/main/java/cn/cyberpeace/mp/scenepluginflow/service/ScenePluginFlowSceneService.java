@@ -113,7 +113,7 @@ public class ScenePluginFlowSceneService {
         }
         ServiceResult<FlowRecordsResponse> result;
         if (Boolean.TRUE.equals(isBatch)) {
-            result = flowExecutor.queryFlowRecords(flowElement.getSrcElement().getEid());
+            result = flowExecutor.queryBatchFlowRecords(sceneId);
         } else {
             result = flowExecutor.queryFlowRecords(flow.getTaskId());
         }

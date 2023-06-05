@@ -61,5 +61,13 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
      */
     List<FlowTaskTaskModel> listByNodeIdAndFlowId(String nodeId, String flowId);
 
+    /**
+     * 根据场景id和运行状态查询
+     * @param nodeId
+     * @param taskStatus
+     * @return
+     */
+    List<FlowTaskTaskModel> listBySceneIdAndStatus(String nodeId, int taskStatus);
+
 }
 

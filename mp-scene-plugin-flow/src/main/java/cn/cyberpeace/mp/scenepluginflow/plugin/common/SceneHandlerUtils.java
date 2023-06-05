@@ -5,24 +5,25 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
-import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
-import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
+import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.util.IFlowResourceName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -115,6 +116,9 @@ public class SceneHandlerUtils {
                     }
                 }
             };
+
+            String sceneId = pluginHandler.getSourceSceneId();
+            FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, callbackConsumer);
             flowExecutor.startFlows(taskIds, callbackConsumer, runType);
         } catch (MpRuntimeException e) {
             log.error("start flows for taskIds:[{}] error", taskIds, e);
@@ -373,34 +377,34 @@ public class SceneHandlerUtils {
         String finalIp = ip;
         String nodeEid = flowElement.getSrcElement().getEid();
         Callable<Boolean> start = () -> {
-            List<FlowTaskModel> flowTaskModels;
-            // 构建批量创建流量任务参数
-            List<AddFlowTaskRequest> requests = new ArrayList<>();
-            newFlows.forEach(flow -> {
-                AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
-                        StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
-                        flow.getSourceIp(), nodeEid);
-                requests.add(request);
-            });
-            try {
-                flowTaskModels = flowExecutor.createFlows(requests);
-                log.info("flowExecutor createFlows success:[{}]", flowTaskModels);
-            } catch (Exception e) {
-                log.error("flow executor error", e);
-                newFlows.forEach(flow -> {
-                    errorFLow(flow.getFlow(), e.getMessage());
-                });
-                return false;
-            }
+//            List<FlowTaskModel> flowTaskModels;
+//            // 构建批量创建流量任务参数
+//            List<AddFlowTaskRequest> requests = new ArrayList<>();
+//            newFlows.forEach(flow -> {
+//                AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
+//                        StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
+//                        flow.getSourceIp(), nodeEid);
+//                requests.add(request);
+//            });
+//            try {
+//                flowTaskModels = flowExecutor.createFlows(requests);
+//                log.info("flowExecutor createFlows success:[{}]", flowTaskModels);
+//            } catch (Exception e) {
+//                log.error("flow executor error", e);
+//                newFlows.forEach(flow -> {
+//                    errorFLow(flow.getFlow(), e.getMessage());
+//                });
+//                return false;
+//            }
 
-            // 流量任务id与流量绑定
-            Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
-                    .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
-            executeFlows.forEach(flow -> {
-                if (StringUtils.isEmpty(flow.getTaskId())) {
-                    flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
-                }
-            });
+//            // 流量任务id与流量绑定
+//            Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
+//                    .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
+//            executeFlows.forEach(flow -> {
+//                if (StringUtils.isEmpty(flow.getTaskId())) {
+//                    flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
+//                }
+//            });
             return startFlows(executeFlows, stopCallback, runType);
         };
         if (async) {

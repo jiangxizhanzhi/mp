@@ -311,4 +311,13 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
         return flowTaskTaskModels;
     }
+
+    @Override
+    public List<FlowTaskTaskModel> listBySceneIdAndStatus(String sceneId, int taskStatus) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+        condition.filterEqual(FlowTaskTaskModel::getTaskStatus, taskStatus);
+        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
+        return flowTaskTaskModels;
+    }
 }

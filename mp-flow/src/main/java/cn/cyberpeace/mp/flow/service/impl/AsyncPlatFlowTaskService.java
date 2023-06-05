@@ -873,6 +873,10 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("stop task error for {}", taskId, e);
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        } finally {
+            // 清除任务回调缓存
+            FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
+            FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + taskId);
         }
     }
 
@@ -930,6 +934,9 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("batch stop tasks error");
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        } finally {
+            // 清除任务回调缓存
+            FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + flowTaskTaskModels.get(0).getSceneId());
         }
     }
 

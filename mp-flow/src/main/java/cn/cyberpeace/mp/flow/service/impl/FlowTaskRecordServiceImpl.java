@@ -5,12 +5,15 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
+import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
+import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +24,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
 @Service
 @Slf4j
@@ -214,11 +215,13 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         }
         Integer status = jsonMessage.getInteger("status");
         String taskId = jsonMessage.getString("task_id");
+        String msg = null;
         FlowTaskTaskModel flowTaskTaskModel = flowTaskTaskMapper.get(taskId);
         flowTaskTaskModel.setTaskStatus(status);
         if (TaskTaskStatusEnum.STOPPED.toValue() == status) {
             flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
         } else if (TaskTaskStatusEnum.ERROR.toValue() == status) {
+            msg = jsonMessage.getString("msg");
             flowTaskTaskModel.setErrorCount(flowTaskTaskModel.getErrorCount() + 1);
         }
         flowTaskTaskMapper.update(flowTaskTaskModel);
@@ -242,7 +245,71 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
         this.getModelMapper().save(flowTaskRecordModel);
+
+        // 任务回调处理
+        this.taskCallback(flowTaskTaskModel, msg);
         log.info("FlowTaskRecordServiceImpl.syncRecord end.");
+    }
+
+    /**
+     * 任务回调
+     * @param flowTaskTaskModel
+     * @param msg
+     */
+    private void taskCallback(FlowTaskTaskModel flowTaskTaskModel, String msg) {
+        String taskId = flowTaskTaskModel.getId();
+        Runnable taskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
+        if (Objects.nonNull(taskRunnable)) {
+            log.info("call task runnable for: {}", taskId);
+            taskRunnable.run();
+            FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
+        }
+
+        if (StringUtils.isNotBlank(msg)) {
+            // 有错误信息，代表执行异常
+            Consumer taskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + taskId);
+            if (Objects.nonNull(taskConsumer)) {
+                log.info("call task consumer for: {}", taskId);
+                taskConsumer.accept(msg);
+                FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + taskId);
+            }
+        }
+
+        // 批量执行校验
+        String scendId = flowTaskTaskModel.getSceneId();
+        Consumer batchTaskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + scendId);
+        if (Objects.nonNull(batchTaskConsumer)) {
+            // 判断任务任务是否都结束
+            HumanCondition condition = new HumanCondition();
+            condition.filterEqual(FlowTaskTaskModel::getSceneId, scendId);
+            List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
+            if (CollectionUtils.isNotEmpty(taskTaskModels)) {
+                int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
+                if (runningCount == 0) {
+                    if (Objects.nonNull(batchTaskConsumer)) {
+                        // 回调参数封装
+                        BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
+                        List<FlowTaskModel> successTaskModels = new ArrayList<>();
+                        List<FlowTaskModel> errorTaskModels = new ArrayList<>();
+                        taskTaskModels.forEach(taskTaskModel -> {
+                            FlowTaskModel flowTaskModel = new FlowTaskModel();
+                            flowTaskModel.setFlowId(taskTaskModel.getFlowId());
+                            flowTaskModel.setId(taskTaskModel.getId());
+                            if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
+                                successTaskModels.add(flowTaskModel);
+                            } else {
+                                errorTaskModels.add(flowTaskModel);
+                            }
+                        });
+                        batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
+                        batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
+
+                        batchTaskConsumer.accept(batchActuatorCallbackResponse);
+                        FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + scendId);
+                    }
+                }
+            }
+        }
     }
 
     /**
