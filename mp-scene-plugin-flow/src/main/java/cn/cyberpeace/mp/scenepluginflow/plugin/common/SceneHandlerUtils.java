@@ -144,6 +144,7 @@ public class SceneHandlerUtils {
     public SceneHandlerUtils(FlowScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
+        flowTaskTaskService = BeanCommon.getBean(FlowTaskTaskService.class);
     }
 
     public String createExecutor(String sceneEid, List<FlowNetworkInfo> networkInfos) {
