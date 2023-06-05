@@ -17,7 +17,10 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 操作日志实体类
@@ -94,6 +97,9 @@ public class OperationLogPageRequest extends BasePageRequest{
         String userNameOrOpTarget = this.getUserNameOrOpTarget();
         if (Objects.nonNull(moduleID)) {
             boolBuilder.must(QueryBuilders.termQuery("opModuleID", moduleID));
+        } else {
+            List<Integer> moduleIds = Arrays.stream(OpModuleEnums.values()).map(OpModuleEnums::ordinal).collect(Collectors.toList());
+            boolBuilder.must(QueryBuilders.termsQuery("opModuleID", moduleIds));
         }
         if (StringUtils.isNotBlank(userId)) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));
