@@ -681,7 +681,8 @@ public class InitiateHandler extends HandlerCommon {
         Integer virtualType = cloudElement.getVirtualType();
         var isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
 
         for (var srcPort : srcPorts) {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
