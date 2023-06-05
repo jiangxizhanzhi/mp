@@ -360,8 +360,7 @@ public class InitiateHandler extends HandlerCommon {
             // 处理网关
             if (StringUtils.isEmpty(network.getGateway())) {
                 String gatewayIp = null;
-                if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                if (ElementTypeUtils.isVirtualGateway(element)
                         || ElementTypeUtils.isCoreRouter(element) || ElementTypeUtils.isEntityGateway(element)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
@@ -425,8 +424,7 @@ public class InitiateHandler extends HandlerCommon {
             for (var port : connectedNetwork.getFromPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
                     if (!fromPortsAdd) {
-                        Integer virtualType = element.getVirtualType();
-                        if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                        if (ElementTypeUtils.isVirtualGateway(element)) {
                             gatewayCount++;
                         } else {
                             requireCount++;
@@ -439,8 +437,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             for (var port : connectedNetwork.getToPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
-                    Integer virtualType = getPluginHandler().getElement(port.getElement().getId()).getVirtualType();
-                    if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                    if (ElementTypeUtils.isVirtualGateway(getPluginHandler().getElement(port.getElement().getId()))) {
                         gatewayCount++;
                     } else {
                         requireCount++;
@@ -491,8 +488,7 @@ public class InitiateHandler extends HandlerCommon {
                     continue;
                 }
                 var pluginElement = getPluginHandler().getElement(port.getElement().getId());
-                Integer toVirtualType = pluginElement.getVirtualType();
-                if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                if (ElementTypeUtils.isVirtualGateway(pluginElement)) {
                     synchronized (ipPool) {
                         port.setIp(ipPool.remove(ipPool.size() - 1));
                     }
@@ -517,9 +513,7 @@ public class InitiateHandler extends HandlerCommon {
                 } else {
                     if (fromIp == null) {
                         var pluginElement = getPluginHandler().getElement(port.getElement().getId());
-                        Integer toVirtualType = pluginElement.getVirtualType();
-                        if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER ||
-                                this.isCoreRouter(cloudElement)) {
+                        if (ElementTypeUtils.isVirtualGateway(pluginElement) || this.isCoreRouter(cloudElement)) {
                             synchronized (ipPool) {
                                 if (fromIp == null) {
                                     fromIp = ipPool.remove(ipPool.size() - 1);
@@ -540,10 +534,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             if (noConnect) {
                 // 网络没有任何连线
-                Integer virtualType = cloudElement.getVirtualType();
-                if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
-                        || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
-                ) {
+                if (ElementTypeUtils.isVirtualGateway(cloudElement)) {
                     // 路由或网络处理多个口
                     for (var port : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isEmpty(port.getIp())) {
@@ -579,8 +570,7 @@ public class InitiateHandler extends HandlerCommon {
                     continue;
                 }
                 var pluginElement = getPluginHandler().getElement(port.getElement().getId());
-                Integer toVirtualType = pluginElement.getVirtualType();
-                if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                if (ElementTypeUtils.isVirtualGateway(pluginElement)) {
                     synchronized (ipPool) {
                         if (ipPool.size() > 0) {
                             port.setIp(ipPool.remove(ipPool.size() - 1));
@@ -679,10 +669,7 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         Integer virtualType = cloudElement.getVirtualType();
-        var isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
+        var isVirtualElement = ElementTypeUtils.isVirtualNode(cloudElement);
 
         for (var srcPort : srcPorts) {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
