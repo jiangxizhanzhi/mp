@@ -302,4 +302,22 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         log.info("FlowTaskTaskServiceImpl.initNetwork end. isSuccess:{}", isSuccess);
         return isSuccess;
     }
+
+    @Override
+    public List<FlowTaskTaskModel> listByNodeIdAndFlowId(String nodeId, String flowId) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
+        condition.filterEqual(FlowTaskTaskModel::getFlowId, flowId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
+        return flowTaskTaskModels;
+    }
+
+    @Override
+    public List<FlowTaskTaskModel> listBySceneIdAndStatus(String sceneId, int taskStatus) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+        condition.filterEqual(FlowTaskTaskModel::getTaskStatus, taskStatus);
+        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
+        return flowTaskTaskModels;
+    }
 }

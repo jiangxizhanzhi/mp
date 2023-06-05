@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.*;
@@ -23,7 +25,9 @@ import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
+import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
+import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
@@ -67,6 +71,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
     @Autowired
     private FlowPortService flowPortService;
+
+    @Autowired
+    private FlowTaskRecordService flowTaskRecordService;
+
+    @Autowired
+    private FlowTaskTaskService flowTaskTaskService;
 
 
     public FlowTaskServiceImpl(FlowTaskMapper stuMapper, FlowTaskFields stuFields) {
@@ -693,6 +703,72 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             response.setStatus(status);
             response.setResult(result);
         }
+
+        return ResultCommon.success(response);
+    }
+
+    /**
+     * 任务单个运行结果查询
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<FlowRecordsResponse> queryFlowRecordsByTaskId(String taskId) {
+        FlowRecordsResponse response = new FlowRecordsResponse();
+        List<FlowRecords> flowRecordsList = new ArrayList<>();
+        response.setFlowRecordsList(flowRecordsList);
+
+        List<FlowTaskRecordModel> flowTaskRecordModels = flowTaskRecordService.findByTaskId(taskId);
+        for (int i = 0; i < flowTaskRecordModels.size(); i++) {
+            FlowTaskRecordModel flowTaskRecordModel = flowTaskRecordModels.get(i);
+            FlowRecords flowRecords = new FlowRecords();
+            flowRecords.setTaskUuid(taskId);
+            flowRecords.setId(i + 1);
+            flowRecords.setSecond(i + 1);
+            flowRecords.setTxBps(flowTaskRecordModel.getTxBps().doubleValue());
+            flowRecords.setOpackets(flowTaskRecordModel.getTotalPps());
+            flowRecords.setObytes(flowTaskRecordModel.getObytes());
+            flowRecords.setOerrors(flowTaskRecordModel.getOerrors().intValue());
+            flowRecords.setCreateTime(TimeCommon.localDateTimeToString(flowTaskRecordModel.getCreateTime()));
+            flowRecordsList.add(flowRecords);
+        }
+
+        return ResultCommon.success(response);
+    }
+
+    /**
+     * 任务批量运行结果查询
+     * @param sceneId
+     * @return
+     */
+    public ServiceResult<FlowRecordsResponse> queryBatchFlowRecords(String sceneId) {
+        FlowRecordsResponse response = new FlowRecordsResponse();
+        List<FlowRecords> flowRecordsList = new ArrayList<>();
+        response.setFlowRecordsList(flowRecordsList);
+
+        FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
+        List<FlowStatisticsDetail> txBpsList = flowStatisticsInfo.getTxBpsList();
+        if (CollectionUtils.isNotEmpty(txBpsList)) {
+            for (int i = 0; i < txBpsList.size(); i++) {
+                FlowStatisticsDetail flowStatisticsDetail = txBpsList.get(i);
+                FlowRecords flowRecords = new FlowRecords();
+                flowRecords.setId(i + 1);
+                flowRecords.setSecond(i + 1);
+                flowRecords.setTxBps(flowStatisticsDetail.getValue().doubleValue());
+                flowRecords.setOpackets(flowStatisticsInfo.getTotalPps());
+                flowRecords.setObytes(flowStatisticsInfo.getObytes());
+                flowRecords.setOerrors(flowStatisticsInfo.getOerrors().intValue());
+                flowRecordsList.add(flowRecords);
+            }
+        }
+
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listBySceneIdAndStatus(sceneId,
+                TaskTaskStatusEnum.RUNNING.toValue());
+        if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
+            response.setStatus(TaskTaskStatusEnum.RUNNING.toValue());
+        } else {
+            response.setStatus(TaskTaskStatusEnum.STOPPED.toValue());
+        }
+        response.setResult(1);
 
         return ResultCommon.success(response);
     }
