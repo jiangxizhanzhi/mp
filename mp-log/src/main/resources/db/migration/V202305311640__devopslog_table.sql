@@ -1,4 +1,4 @@
-# v5.5
+# v5.4
 CREATE TABLE `mp_log_level`
 (
     `pk`           int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
