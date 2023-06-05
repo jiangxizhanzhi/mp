@@ -42,9 +42,9 @@ public class VirtualDynamips extends CloudClient {
     }
 
     public boolean restart(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.RESTART);
-        return doAction(instanceId, actionData);
+        this.stop(instanceId);
+        this.start(instanceId);
+        return true;
     }
 
     public boolean pause(String instanceId) {
