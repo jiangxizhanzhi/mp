@@ -223,7 +223,7 @@ public class SceneMonitorService {
         ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
         basicInfo.setSceneId(sceneId);
         elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
-        if (isSupportedVirtualType(basicInfo.getVirtualType(), basicInfo.getImageName())) {
+        if (isSupportedVirtualType(basicInfo.getVirtualType())) {
             elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
             return basicInfo;
         }
@@ -299,8 +299,8 @@ public class SceneMonitorService {
      * @param type
      * @return
      */
-    private boolean isSupportedVirtualType(Integer type, String image) {
-        if (Objects.isNull(type) || ElementTypeUtils.isCoreRouter(image)) {
+    private boolean isSupportedVirtualType(Integer type) {
+        if (Objects.isNull(type)) {
             return false;
         }
         boolean supported = false;
