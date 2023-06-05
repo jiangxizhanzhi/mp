@@ -117,8 +117,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         }
 
         SysConfigModel oldHistory = null;
+        SysConfigModel oldBackupInterval = null;
         if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY)) {
             oldHistory = getByKeyName(SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY);
+        }
+
+        if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY)) {
+            oldBackupInterval = getByKeyName(SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY);
         }
 
         HumanCondition condition = new HumanCondition()
@@ -143,9 +148,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
             if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY)) {
                 // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
-                var old = getByKeyName(SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY);
-                if (!Objects.equals(sysConfigModel.getValue(), old.getValue())) {
-                    // send msg
+                if (Objects.isNull(oldBackupInterval) || !Objects.equals(sysConfigModel.getValue(), oldBackupInterval.getValue())) {
+                    // 通知云平台
+                    JSONObject paramObj = new JSONObject();
+                    paramObj.put("days", sysConfigModel.getValue());
+                    var res1 = HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_FILE_BACKUP_URL, paramObj.toJSONString());
+
                     messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_BACKUP_INTERVAL_UPDATE, null);
                 }
             }
