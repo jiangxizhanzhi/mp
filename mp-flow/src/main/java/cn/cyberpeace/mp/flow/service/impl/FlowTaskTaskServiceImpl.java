@@ -313,6 +313,14 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     }
 
     @Override
+    public List<FlowTaskTaskModel> listByNodeId(String nodeId) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
+        return flowTaskTaskModels;
+    }
+
+    @Override
     public List<FlowTaskTaskModel> listBySceneIdAndStatus(String sceneId, int taskStatus) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);

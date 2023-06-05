@@ -231,7 +231,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                         getSceneHandler().updateSceneElementWithPlugins(nodeId);
                     }
                 },
-                runType);
+                runType, nodeId);
         asyncAckElementChanged(nodeId, true);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             getSceneHandler().updateSceneElementWithPlugins(nodeId);
