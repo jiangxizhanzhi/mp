@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -14,6 +14,15 @@ public class VirtualFirewall extends CloudClient {
         heavyConcurrentWait();
 
         CloudResponse<VirtualFirewallCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_FIREWALL_CREATE_URL, createData,
+                null, new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {
+                }, true);
+        return result.getData();
+    }
+
+    public VirtualFirewallCreateData update(VirtualFirewallUpdateData updateData) {
+        heavyConcurrentWait();
+
+        CloudResponse<VirtualFirewallCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_FIREWALL_UPDATE_URL, updateData,
                 null, new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {
                 }, true);
         return result.getData();
