@@ -227,7 +227,8 @@ public class SceneHandlerUtils {
 //        String finalIp = ip;
         String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
         flow.setSourceIp(fromIps);
-        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getEid(), flowId);
+        log.info("get flow task info by nodeId: {} and flowId: {}", srcElement.getId(), flowId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getId(), flowId);
 
         Callable<Boolean> start = () -> {
             String flowTaskId = "";
@@ -284,7 +285,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps, Runnable stopCallback,
-                              boolean async, Runnable asyncCallback, int runType) {
+                              boolean async, Runnable asyncCallback, int runType, String nodeId) {
         // 需要创建流量任务的流量
         var needCreateTaskFlows = flowWithSourceIps.stream()
                 .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
@@ -292,6 +293,24 @@ public class SceneHandlerUtils {
         var flows = flowWithSourceIps.stream()
                 .map(f -> f.getFlow())
                 .collect(Collectors.toList());
+
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeId(nodeId);
+        if (CollectionUtils.isEmpty(flowTaskTaskModels)) {
+            flows.forEach(flow -> {
+                errorFLow(flow, "FlowTask not exist");
+            });
+            return false;
+        } else {
+            // 设置taskId
+            flows.forEach(flow -> {
+                flowTaskTaskModels.forEach(flowTaskTaskModel -> {
+                    if (flow.getId().equals(flowTaskTaskModel.getFlowId())) {
+                        flow.setTaskId(flowTaskTaskModel.getId());
+                    }
+                });
+            });
+        }
+
         if (needCreateTaskFlows.isEmpty()) {
             return startFlows(flows, stopCallback, runType);
         } else {
@@ -373,39 +392,8 @@ public class SceneHandlerUtils {
         executeFlows.forEach(flow -> {
             preparingFLow(flow);
         });
-        final String flowNetworkId = networkId;
-        final String flowIp = ip;
-        String finalIp = ip;
-        String nodeEid = flowElement.getSrcElement().getEid();
-        Callable<Boolean> start = () -> {
-//            List<FlowTaskModel> flowTaskModels;
-//            // 构建批量创建流量任务参数
-//            List<AddFlowTaskRequest> requests = new ArrayList<>();
-//            newFlows.forEach(flow -> {
-//                AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
-//                        StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
-//                        flow.getSourceIp(), nodeEid);
-//                requests.add(request);
-//            });
-//            try {
-//                flowTaskModels = flowExecutor.createFlows(requests);
-//                log.info("flowExecutor createFlows success:[{}]", flowTaskModels);
-//            } catch (Exception e) {
-//                log.error("flow executor error", e);
-//                newFlows.forEach(flow -> {
-//                    errorFLow(flow.getFlow(), e.getMessage());
-//                });
-//                return false;
-//            }
 
-//            // 流量任务id与流量绑定
-//            Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
-//                    .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
-//            executeFlows.forEach(flow -> {
-//                if (StringUtils.isEmpty(flow.getTaskId())) {
-//                    flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
-//                }
-//            });
+        Callable<Boolean> start = () -> {
             return startFlows(executeFlows, stopCallback, runType);
         };
         if (async) {
