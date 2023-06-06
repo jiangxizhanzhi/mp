@@ -222,9 +222,6 @@ public class SceneHandlerUtils {
         }
 
         preparingFLow(flow);
-//        final String flowNetworkId = networkId;
-//        final String flowIp = ip;
-//        String finalIp = ip;
         String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
         flow.setSourceIp(fromIps);
         log.info("get flow task info by nodeId: {} and flowId: {}", srcElement.getId(), flowId);
