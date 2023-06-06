@@ -39,7 +39,7 @@ public class LogDynamicSettingController {
     @ApiOperation(value = "批量设置日志级别")
     public ServiceResult<List<LogLevelResponse>> setBatchLogLevel(@RequestBody LogLevelBatchRequest logLevelBatch) {
 
-        return logSettingService.setLogLevel(logLevelBatch.getLogLevelList());
+        return logSettingService.setBatchLogLevel(logLevelBatch.getLogLevelList());
     }
 
     @GetMapping("/logLevel/reset")

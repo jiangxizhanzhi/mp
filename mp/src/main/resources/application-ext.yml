@@ -1,0 +1,92 @@
+#外部配置
+spring:
+  datasource:
+    ext-var:
+      db-ip: ${MP_DB_IP:10.100.7.1}
+      db-port: ${MP_DB_PORT:9306}
+      db-database: ${MP_DB_DATABASE:mp}
+      username: ${MP_DB_USERNAME:root}
+      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+
+  flyway:
+    ext-var:
+      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
+
+  rabbitmq:
+    ext-var:
+      host: ${RABBITMQ_IP:10.100.7.1}
+      port: ${RABBITMQ_PORT:9672}
+      username: ${RABBITMQ_USERNAME:cpcloud}
+      password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
+
+springfox:
+  documentation:
+    ext-var:
+      enabled: ${SWAGGER_DOC_ENABLED:true}
+      auto-startup: ${SWAGGER_DOC_STARTUP:true}
+      swagger-ui:
+        enabled: ${SWAGGER_DOC_UI:true}
+
+# 中台各模块相关配置
+mp:
+  common: #公用配置
+    ext-var:
+      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
+      mp-port: ${MP_API_PORT:8001}
+      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+      cp-port: ${CP_PORT:11111}
+  base:
+    ext-var:
+      fdfs-ip: ${FDFS_IP:10.100.7.1}
+      fdfs-tracker-port: ${FDFS_TRACKER_SERVERS_PORT:22122}
+      fdfs-inner-file-port: ${FDFS_INNER_FILE_SERVER_PORT:8888}
+      fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
+      file-server: ${FILE_SERVER:lfs}
+      lfs-inner-http-url: ${LFS_INNER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
+      lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
+  # mp-situationaware 模块配置
+  situationaware:
+    ext-var:
+      wazuh-ip: ${WAZUH_IP:10.100.7.1}
+      wazuh-port: ${WAZUH_PORT:15500}
+      wazuh-username: ${WAZUH_USERNAME:wazuh}
+      wazuh-password: ${WAZUH_PASSWORD:Abcd123#}
+      wazuh-es-ip: ${WAZUH_ES_IP:10.100.7.1}
+      wazuh-es-port: ${WAZUH_ES_PORT:9205}
+      wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+      arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
+      arkime-es-port: ${ARKIME_ES_PORT:9205}
+      arkime-disk: ${ARKIME_DISK:50}
+  # mp-log 模块
+  log:
+    ext-var:
+      es-ip: ${LOG_ES_IP:10.100.7.1}
+      es-port: ${LOG_ES_PORT:9205}
+      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+      dynamic-level-keeping:  ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+  # mp-auth 模块配置
+  auth:
+    ext-var:
+      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:a668b6fec22144f38a6f72f8a5aa7326}
+      authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
+      logout-keep-secret-user: ${MP_AUTH_LOGOUT_KEEP_SECRET_USER:3cf215471268482c88a9986283e38c27}
+  sceneplugingns3:
+    ext-var:
+      gns3-ip: ${GNS3_IP:10.100.7.1}
+      gns3-port: ${GNS3_PORT:8088}
+
+# for kaptcha
+#kaptcha:
+#  text-producer:
+#    ext-var:
+#      character:
+
+logging:
+  #系统可能在运行时修改全局日志级别，顾单独提取到ext中，
+  level:
+    ext-var:
+      root: ${ROOT_LEVEL:INFO}
+  file:
+    ext-var:
+      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}

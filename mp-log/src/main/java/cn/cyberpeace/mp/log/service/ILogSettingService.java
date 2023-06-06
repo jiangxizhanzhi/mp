@@ -24,13 +24,13 @@ public interface ILogSettingService {
     ServiceResult<LogLevelResponse> setLogLevel(String logName, String logLevel);
 
     /**
-     * @description setLogLevel 
+     * @description setBatchLogLevel
      * @param logLevelRequestList 批量日志级别
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.util.List<cn.cyberpeace.mp.log.response.LogLevelResponse>>
      * @author wangssh
      * @date 2023/5/31
      */
-    ServiceResult<List<LogLevelResponse>> setLogLevel(List<LogLevelBO> logLevelRequestList);
+    ServiceResult<List<LogLevelResponse>> setBatchLogLevel(List<LogLevelBO> logLevelRequestList);
 
 
     /**

@@ -29,7 +29,9 @@ spring:
   profiles:
     active: dev
     group:
-      "dev": "std"
+      "dev": "std,ext"
+      "test": "std,ext,prop"
+      "prod": "std,ext,prop"
 
 ---
 spring:
@@ -50,7 +52,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: out
 
 server:
   servlet:
