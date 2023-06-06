@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
+import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -20,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
@@ -158,8 +159,24 @@ public class CreateHandler extends HandlerCommon {
                     addFlowTaskTaskInfo.setNodeName(nodeName);
                     addFlowTaskTaskInfo.setNodeIp(nodeIp);
                     addFlowTaskTaskInfo.setNetworkId(networkId);
-                    List<String> flowIds = flows.stream().map(e -> e.getId()).collect(Collectors.toList());
-                    addFlowTaskTaskInfo.setFlowIds(flowIds);
+                    List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
+                    for (Flow flow : flows) {
+                        AddFlowTaskFlowInfo addFlowTaskFlowInfo = new AddFlowTaskFlowInfo();
+                        addFlowTaskFlowInfo.setFlowId(flow.getId());
+                        if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
+                            List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
+                            for (Flow.FlowScriptParam flowScriptParam : flow.getScriptParamModels()) {
+                                FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                                flowTaskAttackConf.setConfValue(flowScriptParam.getParamValue());
+                                flowTaskAttackConf.setConfType(flowScriptParam.getParamType());
+                                flowTaskAttackConf.setConfKey(flowScriptParam.getParamKey());
+                                flowTaskAttackConf.setConfDesc(flowScriptParam.getParamDesc());
+                                attackConfs.add(flowTaskAttackConf);
+                            }
+                            addFlowTaskFlowInfo.setAttackConfs(attackConfs);
+                        }
+                    }
+                    addFlowTaskTaskInfo.setFlowInfos(flowInfos);
                     details.add(addFlowTaskTaskInfo);
                 }
             });

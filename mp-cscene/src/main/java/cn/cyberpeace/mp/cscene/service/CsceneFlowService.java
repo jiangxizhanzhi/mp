@@ -153,7 +153,7 @@ public class CsceneFlowService {
                 throw new MpRuntimeException(CsceneErrorCode.NETWORKID_NOT_EXIST);
             }
             AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
-            addFlowTaskTaskInfo.setFlowIds(detail.getFlowIds());
+            addFlowTaskTaskInfo.setFlowInfos(detail.getFlowInfos());
             addFlowTaskTaskInfo.setNodeId(detail.getNodeId());
             addFlowTaskTaskInfo.setNodeIp(nodeIp);
             addFlowTaskTaskInfo.setNodeName(nodeName);

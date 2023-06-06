@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.request.flow;
 
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,8 +23,8 @@ public class AddFlowTaskTaskDetail {
     private String nodeId;
 
     /**
-     * 流量id集合
+     * 流量集合
      */
-    @ApiModelProperty(value = "流量id集合")
-    private List<String> flowIds;
+    @ApiModelProperty(value = "流量集合")
+    private List<AddFlowTaskFlowInfo> flowInfos;
 }

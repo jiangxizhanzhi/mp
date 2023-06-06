@@ -40,8 +40,8 @@ public class AddFlowTaskTaskInfo {
     private String networkId;
 
     /**
-     * 流量id集合
+     * 流量集合
      */
-    @ApiModelProperty(value = "流量id集合")
-    private List<String> flowIds;
+    @ApiModelProperty(value = "流量集合")
+    private List<AddFlowTaskFlowInfo> flowInfos;
 }
