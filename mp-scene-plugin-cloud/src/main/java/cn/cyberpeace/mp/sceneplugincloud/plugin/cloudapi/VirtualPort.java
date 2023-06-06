@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortUpdateData;
@@ -36,6 +37,13 @@ public class VirtualPort extends CloudClient {
         heavyConcurrentWait();
 
         cloudPost(CloudUrlConstant.MODIFY_INSTANCE_IP, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+    public void updateQosRules(UpdateQosRuleData data) {
+        heavyConcurrentWait();
+
+        cloudPost(CloudUrlConstant.UPDATE_QOS_RULE, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 

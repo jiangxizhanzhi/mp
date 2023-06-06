@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetR
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerNewDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResizeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRetrieveParam;
@@ -49,6 +50,14 @@ public class Container extends CloudClient {
                 new TypeReference<CloudResponse<ContainerCreateData>>() {
                 }, true);
         return result.getData();
+    }
+
+    public void resize(String containerId, ContainerResizeData resizeData) {
+        heavyConcurrentWait();
+
+        cloudPatch(CloudUrlConstant.CONTAINER_RESIZE_URL.replace("{container_id}", containerId), resizeData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
     }
 
     public boolean delete(ContainerDeleteData deleteData) {

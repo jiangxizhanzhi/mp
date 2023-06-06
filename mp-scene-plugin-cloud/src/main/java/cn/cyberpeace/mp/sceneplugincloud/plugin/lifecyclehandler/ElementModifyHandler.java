@@ -5,19 +5,24 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResizeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
@@ -32,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +54,7 @@ public class ElementModifyHandler extends HandlerCommon {
     private CloudScenePluginHandler newCloudScenePluginHandler;
 
     private VirtualMachine virtualMachine = new VirtualMachine();
+    private Container container = new Container();
     private VirtualSwitch virtualSwitch = new VirtualSwitch();
     private VirtualRouter virtualRouter = new VirtualRouter();
     private VirtualFirewall virtualFirewall = new VirtualFirewall();
@@ -93,8 +100,11 @@ public class ElementModifyHandler extends HandlerCommon {
     private void modifyContainer(CloudPluginSceneElementBO newCloudElement) {
         CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
-            // 先创建flavor
-            String flavorId = this.createFlavor(newCloudElement);
+            ContainerResizeData resizeData = new ContainerResizeData();
+            resizeData.setCpu(newCloudElement.getSrcElement().getCpu());
+            resizeData.setRam(newCloudElement.getSrcElement().getRam());
+            resizeData.setDisk(newCloudElement.getSrcElement().getDisk());
+            container.resize(originCloudElement.getResourceId(), resizeData);
         }
     }
 
@@ -253,7 +263,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 var originPort = this.getPluginHandler().getPort(portId);
                 var newPort = this.newCloudScenePluginHandler.getPort(portId);
                 if (this.isQosRuleChange(newPort, originPort)) {
-                    this.doQosChange(newPort);
+                    this.doQosChange(newPort, originPort);
                 }
             }
         }
@@ -270,8 +280,40 @@ public class ElementModifyHandler extends HandlerCommon {
         return false;
     }
 
-    private void doQosChange(CloudPluginSceneElementPortBO newCloudPort) {
-
+    private void doQosChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        UpdateQosRuleData data = new UpdateQosRuleData();
+        data.setQosId(originCloudPort.getQosId());
+        data.setQosRules(new ArrayList<>());
+        var newSrcPort = newCloudPort.getSrcPort();
+        if (newSrcPort.getEgress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
+            VirtualNic.QosRule qosRule = new VirtualNic.QosRule();
+            if (newSrcPort.getEgress() > 0) {
+                qosRule.setMaxKbps(newSrcPort.getEgress());
+            }
+            if (newSrcPort.getDelay() > 0) {
+                qosRule.setDelayMs(newSrcPort.getDelay());
+            }
+            if (newSrcPort.getLoss() > 0) {
+                qosRule.setLossPercent(newSrcPort.getLoss());
+            }
+            qosRule.setDirection(QosRuleDirection.EGRESS);
+            data.getQosRules().add(qosRule);
+        }
+        if (newSrcPort.getIngress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
+            VirtualNic.QosRule qosRule = new VirtualNic.QosRule();
+            if (newSrcPort.getIngress() > 0) {
+                qosRule.setMaxKbps(newSrcPort.getIngress());
+            }
+            if (newSrcPort.getDelay() > 0) {
+                qosRule.setDelayMs(newSrcPort.getDelay());
+            }
+            if (newSrcPort.getLoss() > 0) {
+                qosRule.setLossPercent(newSrcPort.getLoss());
+            }
+            qosRule.setDirection(QosRuleDirection.INGRESS);
+            data.getQosRules().add(qosRule);
+        }
+        virtualPort.updateQosRules(data);
     }
 
     private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {

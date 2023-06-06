@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.constant;
 public class CloudUrlConstant {
     public static final String MACVLAN_CONTAINER_CREATE_URL = "/v1/scenarios/macvlan_container";
     public static final String CONTAINER_CREATE_URL = "/v1/scenarios/container";
+    public static final String CONTAINER_RESIZE_URL = "/v1/containers/{container_id}";
     public static final String CONTAINER_DELETE_URL = "/v1/scenarios/container";
     public static final String CONTAINER_GET_URL = "/v1/scenarios/container/%s";
     public static final String CONTAINER_COPY_FILE_URL = "/v1/containers/%s/archive";
@@ -75,6 +76,7 @@ public class CloudUrlConstant {
     public static final String UPDATE_PORTS = "/v1/ports";
 
     public static final String MODIFY_INSTANCE_IP = "/v1/scenarios/modify_instance_ip";
+    public static final String UPDATE_QOS_RULE = "/v1/scenarios/update_qos_rules";
 
     public static final String GET_SERIAL_PORT_URL = "/v1/instances/{instance_id}/serial-port";
     public static final String ROUTER_CMD_SEND_URL = "/cpcloud/router/v1/send_rule";
