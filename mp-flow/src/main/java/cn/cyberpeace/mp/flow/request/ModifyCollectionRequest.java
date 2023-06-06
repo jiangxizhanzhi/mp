@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: 更新流量集合请求
@@ -45,6 +49,14 @@ public class ModifyCollectionRequest {
     private Integer category;
 
     /**
+     * 流量集合分类  0背景流量，1攻击流量，2混合流量
+     */
+    @ApiModelProperty(value = "流量集合分类")
+    @NotNull(message = "typeFlag can not be empty")
+    @DefaultInt(2)
+    private Integer typeFlag;
+
+    /**
      * 背景流量数量
      */
     @ApiModelProperty(value = "背景流量数量")
@@ -55,5 +67,12 @@ public class ModifyCollectionRequest {
      */
     @ApiModelProperty(value = "攻击流量数量")
     private Integer attackFlowCount;
+
+    /**
+     * 流量id集合
+     */
+    @ApiModelProperty(value = "流量id集合")
+    @NotEmpty(message = "flowIds can not be empty")
+    private List<String> flowIds;
 
 }

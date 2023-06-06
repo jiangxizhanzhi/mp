@@ -9,15 +9,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.log.annotation.OperateLog;
-import cn.cyberpeace.mp.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
+import cn.cyberpeace.mp.flow.request.AddFlowCollectionRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.ModifyCollectionRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
@@ -25,6 +22,10 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowCollectionResponse;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
+import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -87,21 +88,28 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     @ApiOperation("查询指定id数据")
     @ApiImplicitParam(name = "id", value = "集合ID", dataTypeClass = String.class)
     @GetMapping("/bulk")
-    public ServiceResult<FlowCollectionModel> get(@RequestParam String id) {
+    public ServiceResult<FlowCollectionResponse> get(@RequestParam String id) {
+        FlowCollectionResponse response = new FlowCollectionResponse();
         FlowCollectionModel model = new FlowCollectionModel();
         ObjServiceResult<FlowCollectionModel> result = flowCollectionService.get(id);
         if (Objects.nonNull(result.getSource())) {
             model = result.getSource().asResult();
+            BeanUtils.copyProperties(model, response);
         }
-        return ResultCommon.success(model);
+
+        FlowCollectionRelQueryParams queryParams = new FlowCollectionRelQueryParams();
+        queryParams.setCollectionId(id);
+        List<FlowInfoModel> flowInfoModels = flowCollectionService.getFlowsByCollectionId(queryParams);
+        response.setFlowInfoList(flowInfoModels);
+        return ResultCommon.success(response);
     }
 
     @ApiOperation("新增流量集合信息")
     @ApiImplicitParam(name = "model", value = "新增集合请求", dataTypeClass = FlowCollectionModel.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/bulk")
-    public ServiceResult<FlowCollectionModel> add(@RequestBody @Validated FlowCollectionModel model) {
-        return flowCollectionService.addCollection(model);
+    public ServiceResult<FlowCollectionModel> add(@RequestBody @Validated AddFlowCollectionRequest request) {
+        return flowCollectionService.addCollection(request);
     }
 
     @ApiOperation("更新流量集合信息")

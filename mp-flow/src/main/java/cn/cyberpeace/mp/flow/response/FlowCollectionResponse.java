@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.flow.response;
 
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -29,5 +32,11 @@ public class FlowCollectionResponse extends FlowCollectionModel {
      */
     @ApiModelProperty(value = "描述")
     private String introduction;
+
+    /**
+     * 流量信息
+     */
+    @ApiModelProperty(value = "流量信息")
+    private List<FlowInfoModel> flowInfoList;
 
 }
