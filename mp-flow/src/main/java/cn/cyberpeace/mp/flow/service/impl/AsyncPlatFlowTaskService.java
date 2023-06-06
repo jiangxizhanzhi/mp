@@ -683,12 +683,26 @@ public class AsyncPlatFlowTaskService {
                 FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
                 if (Objects.nonNull(ipv4Conf)) {
                     ipv4Conf.setSip(sourceIp);
+                } else {
+                    ipv4Conf = new FlowTaskIpv4Conf();
+                    ipv4Conf.setSip(sourceIp);
+                    flowConf.setIpv4Conf(ipv4Conf);
                 }
+            } else {
+                flowConf = new FlowTaskFlowConf();
+                FlowTaskIpv4Conf ipv4Conf = new FlowTaskIpv4Conf();
+                ipv4Conf.setSip(sourceIp);
+                flowConf.setIpv4Conf(ipv4Conf);
+                flowTaskConf.setFlowConf(flowConf);
             }
 
             FlowTaskCommonConf commonConf = flowTaskConf.getCommonConf();
             if (Objects.nonNull(commonConf)) {
                 commonConf.setLatency(2000);
+            } else {
+                commonConf = new FlowTaskCommonConf();
+                commonConf.setLatency(2000);
+                flowTaskConf.setCommonConf(commonConf);
             }
         }
         // 封装流量任务配置参数
