@@ -175,6 +175,7 @@ public class CreateHandler extends HandlerCommon {
                             }
                             addFlowTaskFlowInfo.setAttackConfs(attackConfs);
                         }
+                        flowInfos.add(addFlowTaskFlowInfo);
                     }
                     addFlowTaskTaskInfo.setFlowInfos(flowInfos);
                     details.add(addFlowTaskTaskInfo);
