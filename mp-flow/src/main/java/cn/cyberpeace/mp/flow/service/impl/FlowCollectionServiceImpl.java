@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
+import cn.cyberpeace.mp.flow.request.AddFlowCollectionRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.ModifyCollectionRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
@@ -86,6 +87,26 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal())).asResult();
+    }
+
+    /**
+     * 查询集合关联流量信息
+     * @param queryParams
+     * @return
+     */
+    public List<FlowInfoModel> getFlowsByCollectionId(FlowCollectionRelQueryParams queryParams) {
+        List<FlowInfoModel> flowInfoModels = new ArrayList<>();
+        ListObjServiceResult<FlowCollectionRelModel> objServiceResult = flowCollectionRelService.list(queryParams);
+        if (Objects.nonNull(objServiceResult.getSource())) {
+            List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
+            if (CollectionUtils.isNotEmpty(relModels)) {
+                List<String> idList =
+                        relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+                flowInfoModels = flowInfoMapper.selectByFlowIds(idList);
+            }
+        }
+
+        return flowInfoModels;
     }
 
     /**
@@ -191,14 +212,22 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
     /**
      * 新增流量集合
-     * @param flowCollectionModel
+     * @param request
      * @return
      */
-    public ServiceResult<FlowCollectionModel> addCollection(FlowCollectionModel flowCollectionModel) {
-        if (!checkNameUnique(flowCollectionModel.getTitle(), StringUtils.EMPTY)) {
+    public ServiceResult<FlowCollectionModel> addCollection(AddFlowCollectionRequest request) {
+        if (!checkNameUnique(request.getTitle(), StringUtils.EMPTY)) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
+        FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
+        BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().create(flowCollectionModel);
+
+        // 新增集合关联信息
+        AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
+        relRequest.setCollectionId(flowCollectionModel.getId());
+        relRequest.setFlowIds(request.getFlowIds());
+        this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }
 
@@ -215,6 +244,12 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
         BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().update(flowCollectionModel);
+
+        // 新增集合关联信息
+        AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
+        relRequest.setCollectionId(request.getId());
+        relRequest.setFlowIds(request.getFlowIds());
+        this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }
 
