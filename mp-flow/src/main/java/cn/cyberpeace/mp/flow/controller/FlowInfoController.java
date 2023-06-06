@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
@@ -262,48 +263,49 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      */
     @ApiOperation("分页查询流量分类列表")
     @GetMapping("/page_categories")
-    public ListObjServiceResult<OptionModel> pageCategories(OptionQueryParams queryParams) {
+    public ListObjServiceResult<OptionModelBO> pageCategories(OptionQueryParams queryParams) {
         log.info("FlowInfoController.pageCategories begin. queryParams:{}", queryParams);
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             queryParams.setOrders(new String[]{"sort"});
         }
         queryParams.setType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
-        ListObjServiceResult<OptionModel> result = optionService.page(queryParams);
+        ListObjServiceResult<OptionModelBO> result = optionService.page(queryParams);
         log.info("FlowInfoController.pageCategories end. result:{}", result);
         return result;
     }
 
     /**
      * 新增流量分类
-     * @param optionModel
+     * @param optionModelBO
      * @return
      */
     @ApiOperation("新增流量分类")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
     @PostMapping("/add_category")
-    public ServiceResult addCategory(@RequestBody OptionModel optionModel) {
-        log.info("FlowInfoController.addCategory begin. optionModel:{}", optionModel);
-        optionModel.setType(FLOW_CATEGORY);
-        optionModel.setMeta("{\"activKeys\":\"no_auth\",\"visible\":1}");
-        optionModel.setCode(String.valueOf(optionService.getMaxCode(FLOW_CATEGORY) + 1));
-        optionModel.setSort(optionService.getMaxSort(FLOW_CATEGORY) + 1);
-        optionService.addOption(optionModel);
+    public ServiceResult addCategory(@RequestBody OptionModelBO optionModelBO) {
+        log.info("FlowInfoController.addCategory begin. optionModelBO:{}", optionModelBO);
+        optionModelBO.setType(FLOW_CATEGORY);
+        optionModelBO.setMeta("{\"activKeys\":\"no_auth\",\"visible\":1}");
+        optionModelBO.setCode(String.valueOf(optionService.getMaxCode(FLOW_CATEGORY) + 1));
+        optionModelBO.setSort(optionService.getMaxSort(FLOW_CATEGORY) + 1);
+        optionService.addOption(optionModelBO);
         log.info("FlowInfoController.addCategory end.");
         return ResultCommon.success();
     }
 
     /**
      * 编辑流量分类
-     * @param optionModel
+     * @param optionModelBO
      * @return
      */
     @ApiOperation("编辑流量分类")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "编辑流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
     @PostMapping("/edit_category")
-    public ServiceResult editCategory(@RequestBody OptionModel optionModel) {
-        log.info("FlowInfoController.editCategory begin. optionModel:{}", optionModel);
-        optionService.editOption(optionModel);
+    public ServiceResult editCategory(@RequestBody OptionModelBO optionModelBO) {
+        log.info("FlowInfoController.editCategory begin. optionModelBO:{}", optionModelBO);
+        optionModelBO.setType(FLOW_CATEGORY);
+        optionService.editOption(optionModelBO);
         log.info("FlowInfoController.editCategory end.");
         return ResultCommon.success();
     }
@@ -326,6 +328,20 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         optionService.deleteOptions(request.getIds());
         log.info("FlowInfoController.deleteCategories end");
         return ResultCommon.success();
+    }
+
+    /**
+     * 流量分类详情
+     * @param id
+     * @return
+     */
+    @ApiOperation("流量分类详情")
+    @ApiImplicitParam(name = "id", value = "分类id", dataTypeClass = String.class)
+    @GetMapping("/categories/detail")
+    public ServiceResult<OptionModelBO> findCategoriesById(@RequestParam String id){
+        log.info("FlowInfoController.findCategoriesById begin. id:{}", id);
+        OptionModelBO optionModelBO = optionService.findById(id);
+        return new ServiceResult<>(optionModelBO).asResult();
     }
 
 }

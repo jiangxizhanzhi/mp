@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 
@@ -46,25 +47,32 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
      * @param queryParams
      * @return
      */
-    ListObjServiceResult<OptionModel> page(OptionQueryParams queryParams);
+    ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams);
 
     /**
      * 新增选项
-     * @param optionModel
+     * @param optionModelBO
      */
-    void addOption(OptionModel optionModel);
+    void addOption(OptionModelBO optionModelBO);
 
     /**
      * 编辑选项
-     * @param optionModel
+     * @param optionModelBO
      */
-    void editOption(OptionModel optionModel);
+    void editOption(OptionModelBO optionModelBO);
 
     /**
      * 删除选项
      * @param ids
      */
     void deleteOptions(List<String> ids);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    OptionModelBO findById(String id);
 
     /**
      * 根据ids查询列表
