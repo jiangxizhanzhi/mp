@@ -64,5 +64,16 @@ public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowColle
         return ResultCommon.success(count);
     }
 
+    /**
+     * 根据collectionId删除
+     * @param collectionId
+     * @return
+     */
+    public Integer delByCollectionId(String collectionId) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowCollectionRelModel::getCollectionId, collectionId);
+        return getModelMapper().filterDelete(condition);
+    }
+
 
 }
