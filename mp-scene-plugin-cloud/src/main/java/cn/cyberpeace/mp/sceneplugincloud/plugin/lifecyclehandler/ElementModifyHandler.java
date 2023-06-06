@@ -324,7 +324,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 var originPort = this.getPluginHandler().getPort(portId);
                 var newPort = this.newCloudScenePluginHandler.getPort(portId);
                 if (this.isFirewallRuleChange(newPort, originPort)) {
-                    this.doFirewallRuleChange(newPort);
+                    this.doFirewallRuleChange(newPort, originPort);
                 }
             }
         }
@@ -342,9 +342,9 @@ public class ElementModifyHandler extends HandlerCommon {
         return !newFirewallRules.isEmpty();
     }
 
-    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort) {
+    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
         var updateData = new VirtualFirewallUpdateData();
-        updateData.setId(newCloudPort.getFirewallResourceId());
+        updateData.setId(originCloudPort.getFirewallResourceId());
         var portSrcRules = newCloudPort.getFirewallRules();
         if (portSrcRules != null && !portSrcRules.isEmpty()) {
             var cloudFirewallRules = CreateHandler.CloudFirewallRules.fromSrcRules(portSrcRules);
