@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -122,12 +121,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             return ResultCommon.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
         }
 
-        // 查询已有关联信息
-        List<FlowCollectionRelModel> relModels =
-                flowCollectionRelService.selectByCollectionIds(Collections.singletonList(addRequest.getCollectionId()));
-        List<String> oldFlowIds = relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
         List<String> addFlowIds = addRequest.getFlowIds();
-
         List<FlowInfoModel> existFlowInfos = flowInfoMapper.selectByFlowIds(addFlowIds);
         if (CollectionUtils.isNotEmpty(existFlowInfos)) {
             addFlowIds = existFlowInfos.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
@@ -136,8 +130,6 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             return ResultCommon.success(0);
         }
 
-        // 过滤已有关联信息
-        addFlowIds.removeAll(oldFlowIds);
         if (CollectionUtils.isNotEmpty(addFlowIds)) {
             List<FlowCollectionRelModel> addRelModels = new ArrayList<>();
             addFlowIds.forEach(flowId -> {
@@ -248,6 +240,8 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().update(flowCollectionModel);
 
+        // 删除原有关联信息
+        flowCollectionRelService.delByCollectionId(request.getId());
         // 更新集合关联信息
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(request.getId());
