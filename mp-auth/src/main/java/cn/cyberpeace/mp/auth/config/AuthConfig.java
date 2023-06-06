@@ -20,6 +20,9 @@ public class AuthConfig {
      * 退出登录后是否重置tokenSecret
      */
     private Boolean logoutResetSecret = true;
+
+    private String logoutKeepSecretUser;
+
     /**
      * 最大可通过excel导入的用户数量
      */

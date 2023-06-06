@@ -150,6 +150,7 @@ mp:
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:1000}
     logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
+    logout-keep-secret-user: ${MP_AUTH_LOGOUT_KEEP_SECRET_USER:3cf215471268482c88a9986283e38c27}
     default-user-avatar: ${MP_AUTH_DEFAULT_USER_AVATAR:/api/mp/avatar/1.png}
     mq-msg-timeout: ${MP_AUTH_MQ_MSG_TIMEOUT:3600000}
     # authenticate
