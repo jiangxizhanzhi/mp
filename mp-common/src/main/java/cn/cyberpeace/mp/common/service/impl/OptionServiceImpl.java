@@ -2,16 +2,20 @@ package cn.cyberpeace.mp.common.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -98,28 +102,43 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
      * @return
      */
     @Override
-    public ListObjServiceResult<OptionModel> page(OptionQueryParams queryParams) {
+    public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
         log.info("OptionServiceImpl.page begin. queryParams:{}", queryParams);
-        ListObjServiceResult<OptionModel> listObjServiceResult = list(queryParams);
-        log.info("OptionServiceImpl.page end. listObjServiceResult:{}", listObjServiceResult);
-        return listObjServiceResult.asResult();
+        ListObjServiceResult<OptionModel> listObjServiceResult = this.list(queryParams);
+        Locale locale = LocaleContextHolder.getLocale();
+        List<OptionModelBO> boList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(listObjServiceResult.getSource().getObjs())) {
+            for (OptionModel optionModel : listObjServiceResult.getSource().getObjs()) {
+                OptionModelBO optionModelBO = new OptionModelBO();
+                BeanUtils.copyProperties(optionModel, optionModelBO);
+                if (Objects.equals(Locale.US, locale)) {
+                    optionModelBO.setName(optionModel.getEnName());
+                } else {
+                    optionModelBO.setName(optionModel.getZhName());
+                }
+                boList.add(optionModelBO);
+            }
+        }
+        ListObjServiceResult<OptionModelBO> result = new ListObjServiceResult<>(new ListObjResult<>(boList, listObjServiceResult.getSource().getTotal())).asResult();
+        log.info("OptionServiceImpl.page end. result:{}", result);
+        return result;
     }
 
     /**
      * 新增选项
-     * @param optionModel
+     * @param optionModelBO
      */
     @Override
-    public void addOption(OptionModel optionModel) {
+    public void addOption(OptionModelBO optionModelBO) {
 
     }
 
     /**
      * 编辑选项
-     * @param optionModel
+     * @param optionModelBO
      */
     @Override
-    public void editOption(OptionModel optionModel) {
+    public void editOption(OptionModelBO optionModelBO) {
 
     }
 
@@ -130,6 +149,16 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     @Override
     public void deleteOptions(List<String> ids) {
 
+    }
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    @Override
+    public OptionModelBO findById(String id) {
+        return null;
     }
 
     /**
