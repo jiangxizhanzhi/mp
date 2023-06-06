@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 
@@ -56,5 +57,23 @@ public class ElementTypeUtils {
             return true;
         }
         return false;
+    }
+
+    public static boolean isVirtualGateway(CloudPluginSceneElementBO element) {
+        Integer type = element.getSrcElement().getType();
+        Integer virtualType = element.getVirtualType();
+        boolean isVirtualGateWayNode = virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
+                || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
+                || type == BaseSceneElementModel.Type.ROUTER;
+        return isVirtualGateWayNode;
+    }
+
+    public static boolean isVirtualNode(CloudPluginSceneElementBO element) {
+        Integer virtualType = element.getVirtualType();
+        var isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
+        return isVirtualElement;
     }
 }

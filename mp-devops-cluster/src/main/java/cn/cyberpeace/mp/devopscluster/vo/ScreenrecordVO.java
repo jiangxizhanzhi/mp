@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devopscluster.vo;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,6 +62,10 @@ public class ScreenrecordVO extends BaseModel {
     @DefaultStr
     private String userName;
 
+    @ApiModelProperty(value = "用户头像")
+    @DefaultStr
+    private String userAvatar;
+
     /**
      * 组织名称
      */
@@ -96,8 +102,12 @@ public class ScreenrecordVO extends BaseModel {
     @ApiModelProperty(value = "节点名称")
     private String host;
 
+    @ApiModelProperty(value = "录屏播放地址")
+    private String playUrl;
+
     /**
      * 结果转换
+     *
      * @param record
      */
     public void parseResult(ScreenrecordPageVO.Record record) {
@@ -117,11 +127,13 @@ public class ScreenrecordVO extends BaseModel {
             this.setUserName(record.getUsername());
             this.setUserOrgName(org);
         }
+        this.setPlayUrl(CloudSingleton.cloudAppConfig.getCpcloudServer() + String.format(CloudUrlConstant.RECORDING_PLAY_URL, this.getFileName()));
         this.setUserId(record.getUsername());
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
         this.setEndTime(this.getCreateTime().plusSeconds(this.getRecortime().intValue()));
         this.setHost(record.getHost());
+        this.setNodeId(record.getHostId());
     }
 
 }

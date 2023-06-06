@@ -222,12 +222,10 @@ public class SceneHandlerUtils {
         }
 
         preparingFLow(flow);
-//        final String flowNetworkId = networkId;
-//        final String flowIp = ip;
-//        String finalIp = ip;
         String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
         flow.setSourceIp(fromIps);
-        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getEid(), flowId);
+        log.info("get flow task info by nodeId: {} and flowId: {}", srcElement.getId(), flowId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getId(), flowId);
 
         Callable<Boolean> start = () -> {
             String flowTaskId = "";

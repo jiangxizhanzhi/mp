@@ -308,6 +308,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
         condition.filterEqual(FlowTaskTaskModel::getFlowId, flowId);
+        condition.orderBy("-createTime");
         List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
         return flowTaskTaskModels;
     }

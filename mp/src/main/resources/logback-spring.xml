@@ -44,8 +44,6 @@
     <!-- 异步输出文件日志 使用 %X{CALL_CHAIN_ID} 打印追踪id  -->
     <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %X{CALL_CHAIN_ID} | %.-${LOG_FILE_MAX_ROW_LENGTH}m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
-
-
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
     <property name="LOG_FILE_MAX_SIZE" value="${LOG_FILE_MAX_SIZE}"/>
@@ -95,12 +93,33 @@
         <appender-ref ref="FILE"/>
     </appender>
 
-    <!--日志输出级别-->
-    <root level="${LOG_LEVEL}">
-        <!-- 控制台输出 -->
-        <appender-ref ref="CONSOLE"/>
-        <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
-        <appender-ref ref="ASYNC"/>
-    </root>
+    <!--  开发环境和测试环境，日志输出到控制台  -->
+    <springProfile name="dev">
+        <!--日志输出级别-->
+        <root level="${LOG_LEVEL}">
+            <!-- 控制台输出 -->
+            <appender-ref ref="CONSOLE"/>
+            <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
+            <appender-ref ref="ASYNC"/>
+        </root>
+    </springProfile>
+
+    <!--  生产环境，日志输出到文件  -->
+    <springProfile name="std">
+        <!--日志输出级别-->
+        <root level="${LOG_LEVEL}">
+            <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
+            <appender-ref ref="ASYNC"/>
+        </root>
+    </springProfile>
+
+    <!--  生产环境，日志输出到文件  -->
+    <springProfile name="prod">
+        <!--日志输出级别-->
+        <root level="${LOG_LEVEL}">
+            <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
+            <appender-ref ref="ASYNC"/>
+        </root>
+    </springProfile>
 
 </configuration>

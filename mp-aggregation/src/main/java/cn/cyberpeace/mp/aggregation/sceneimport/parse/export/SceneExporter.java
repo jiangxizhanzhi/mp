@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ProtocolExportInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
@@ -23,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.security.core.parameters.P;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -74,6 +76,29 @@ public class SceneExporter {
                 if (StringUtils.isNotEmpty(n.getImages())) {
                     n.setImages(sceneNumber + n.getImages());
                 }
+                if (CollectionUtils.isNotEmpty(n.getStaticRouters())) {
+                    for (var sr : n.getStaticRouters()) {
+                        if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
+                            sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
+                        }
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(n.getStaticRoutes())) {
+                    for (var sr : n.getStaticRoutes()) {
+                        if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
+                            sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
+                        }
+                    }
+                }
+                if (StringUtils.isNotEmpty(n.getProtocols())) {
+                    ProtocolExportInfo protocolExportInfo = JsonCommon.parse(n.getProtocols(), ProtocolExportInfo.class);
+                    if (CollectionUtils.isNotEmpty(protocolExportInfo.getPortProtocols())) {
+                        for (var p : protocolExportInfo.getPortProtocols()) {
+                            p.setConnectNode(parseResult.getIdConvert().get(p.getConnectNode()));
+                        }
+                    }
+                    n.setProtocols(JsonCommon.stringify(protocolExportInfo));
+                }
             });
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
@@ -82,7 +107,7 @@ public class SceneExporter {
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
         if (!disableImageExport) {
-            this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(),sceneNumber);
+            this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(), sceneNumber);
         }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
@@ -96,7 +121,7 @@ public class SceneExporter {
         return exportResult;
     }
 
-    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices,String sceneNumber) {
+    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
                 String currentImageDir = null;
@@ -222,7 +247,7 @@ public class SceneExporter {
                 dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                 Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
-                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber+device.getImage());
+                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber + device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
                 content = StringUtils.replace(content, "privateKey", "private-key");
                 content = StringUtils.replace(content, "hasNoSystemServer", "");
@@ -240,7 +265,7 @@ public class SceneExporter {
         if (content == null || content.length < 8) {
             return false;
         }
-        int[] pngHeaders = new int[]{ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+        int[] pngHeaders = new int[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
         for (int i = 0; i < pngHeaders.length; i++) {
             if (Byte.toUnsignedInt(content[i]) != pngHeaders[i]) {
                 return false;

@@ -434,6 +434,8 @@ public class WazuhFileRoot {
 
         private Sca sca;
 
+        private String sicLaunchId;
+
         @Data
         public static class Win {
             private Eventdata eventdata;
