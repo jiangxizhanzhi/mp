@@ -28,7 +28,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.util.NumberUtil;
@@ -317,14 +316,23 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        if (this.isFirewallRuleChange(newCloudElement, originCloudElement)) {
-            this.doFirewallRuleChange(newCloudElement);
+        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        mayUpdatePortIds.retainAll(originPortIds);
+        if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
+            for (String portId : mayUpdatePortIds) {
+                var originPort = this.getPluginHandler().getPort(portId);
+                var newPort = this.newCloudScenePluginHandler.getPort(portId);
+                if (this.isFirewallRuleChange(newPort, originPort)) {
+                    this.doFirewallRuleChange(newPort);
+                }
+            }
         }
     }
 
-    private boolean isFirewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> newFirewallRules = newCloudElement.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
-        Set<String> originFirewallRules = originCloudElement.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
+    private boolean isFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        Set<String> newFirewallRules = newCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
+        Set<String> originFirewallRules = originCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
         // 数量不同
         if (newFirewallRules.size() != originFirewallRules.size()) {
             return true;
@@ -334,13 +342,12 @@ public class ElementModifyHandler extends HandlerCommon {
         return !newFirewallRules.isEmpty();
     }
 
-    private void doFirewallRuleChange(CloudPluginSceneElementBO newCloudElement) {
-        var srcElement = newCloudElement.getSrcElement();
+    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort) {
         var updateData = new VirtualFirewallUpdateData();
-        updateData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        var srcRules = newCloudElement.getFirewallRules();
-        if (srcRules != null && !srcRules.isEmpty()) {
-            var cloudFirewallRules = CreateHandler.CloudFirewallRules.fromSrcRules(srcRules);
+        updateData.setId(newCloudPort.getFirewallResourceId());
+        var portSrcRules = newCloudPort.getFirewallRules();
+        if (portSrcRules != null && !portSrcRules.isEmpty()) {
+            var cloudFirewallRules = CreateHandler.CloudFirewallRules.fromSrcRules(portSrcRules);
             updateData.setIngressRules(cloudFirewallRules.getIngressRules());
             updateData.setEgressRules(cloudFirewallRules.getEgressRules());
         }
