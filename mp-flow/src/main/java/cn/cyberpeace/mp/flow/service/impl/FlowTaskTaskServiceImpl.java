@@ -6,10 +6,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
-import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -34,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -147,7 +146,9 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 macAddress = flowTaskPortModel.getMac();
             }
             HumanCondition condition = new HumanCondition();
-            condition.filterIn(FlowInfoModel::getId, detail.getFlowIds().toArray());
+            List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
+            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+            condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
             List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
             //保存流量任务信息
             List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
@@ -176,18 +177,23 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 flowTaskConfModel.setRateUnlimited(1);
                 FlowTaskConf flowTaskConf = new FlowTaskConf();
                 if (ResourceTypeEnum.SCRIPT.toValue() == flowTaskTaskModel.getResourceType()) {
-                    List<FlowScriptParamModel> flowScriptParamModelList = flowScriptParamService.selectByFlowId(flowTaskTaskModel.getFlowId());
-                    if (CollectionUtils.isNotEmpty(flowScriptParamModelList)) {
-                        List<FlowTaskAttackConf> flowTaskAttackConfList = new ArrayList<FlowTaskAttackConf>();
-                        for (FlowScriptParamModel flowScriptParamModel : flowScriptParamModelList) {
-                            FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
-                            flowTaskAttackConf.setConfDesc(flowScriptParamModel.getParamDesc());
-                            flowTaskAttackConf.setConfType(flowScriptParamModel.getParamType());
-                            flowTaskAttackConf.setConfKey(flowScriptParamModel.getParamKey());
-                            flowTaskAttackConf.setConfValue(flowScriptParamModel.getParamValue());
-                            flowTaskAttackConfList.add(flowTaskAttackConf);
+                    List<FlowTaskAttackConf> attackConfs = addFlowTaskFlowInfoMap.get(flowTaskTaskModel.getFlowId()).getAttackConfs();
+                    if (CollectionUtils.isNotEmpty(attackConfs)) {
+                        flowTaskConf.setAttackConfs(attackConfs);
+                    } else {
+                        List<FlowScriptParamModel> flowScriptParamModelList = flowScriptParamService.selectByFlowId(flowTaskTaskModel.getFlowId());
+                        if (CollectionUtils.isNotEmpty(flowScriptParamModelList)) {
+                            List<FlowTaskAttackConf> flowTaskAttackConfList = new ArrayList<FlowTaskAttackConf>();
+                            for (FlowScriptParamModel flowScriptParamModel : flowScriptParamModelList) {
+                                FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                                flowTaskAttackConf.setConfDesc(flowScriptParamModel.getParamDesc());
+                                flowTaskAttackConf.setConfType(flowScriptParamModel.getParamType());
+                                flowTaskAttackConf.setConfKey(flowScriptParamModel.getParamKey());
+                                flowTaskAttackConf.setConfValue(flowScriptParamModel.getParamValue());
+                                flowTaskAttackConfList.add(flowTaskAttackConf);
+                            }
+                            flowTaskConf.setAttackConfs(flowTaskAttackConfList);
                         }
-                        flowTaskConf.setAttackConfs(flowTaskAttackConfList);
                     }
                 }
                 flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
