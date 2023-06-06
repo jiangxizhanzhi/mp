@@ -105,7 +105,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("新增流量集合信息")
-    @ApiImplicitParam(name = "model", value = "新增集合请求", dataTypeClass = FlowCollectionModel.class)
+    @ApiImplicitParam(name = "request", value = "新增集合请求", dataTypeClass = AddFlowCollectionRequest.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/bulk")
     public ServiceResult<FlowCollectionModel> add(@RequestBody @Validated AddFlowCollectionRequest request) {
