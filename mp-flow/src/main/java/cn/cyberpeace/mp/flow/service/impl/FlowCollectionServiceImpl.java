@@ -226,7 +226,10 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         // 新增集合关联信息
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(flowCollectionModel.getId());
-        relRequest.setFlowIds(request.getFlowIds());
+        if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
+            List<String> flowIds = request.getFlowInfoList().stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            relRequest.setFlowIds(flowIds);
+        }
         this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }
@@ -245,10 +248,13 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().update(flowCollectionModel);
 
-        // 新增集合关联信息
+        // 更新集合关联信息
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(request.getId());
-        relRequest.setFlowIds(request.getFlowIds());
+        if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
+            List<String> flowIds = request.getFlowInfoList().stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            relRequest.setFlowIds(flowIds);
+        }
         this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }

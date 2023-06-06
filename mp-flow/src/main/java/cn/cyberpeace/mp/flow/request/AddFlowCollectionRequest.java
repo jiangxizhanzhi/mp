@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.flow.request;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -67,10 +67,9 @@ public class AddFlowCollectionRequest {
     private Integer attackFlowCount;
 
     /**
-     * 流量id集合
+     * 流量信息
      */
-    @ApiModelProperty(value = "流量id集合")
-    @NotEmpty(message = "flowIds can not be empty")
-    private List<String> flowIds;
+    @ApiModelProperty(value = "流量信息")
+    private List<FlowInfoModel> flowInfoList;
 
 }
