@@ -50,7 +50,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         log.info("FlowTaskRecordServiceImpl.findByTaskId begin. taskId:{}", taskId);
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskRecordModel::getTaskId, taskId);
-        condition.orderBy("-createTime");
+        condition.orderBy("createTime");
         List<FlowTaskRecordModel> flowTaskConfModelList = getModelMapper().list(condition);
         log.info("FlowTaskRecordServiceImpl.findByTaskId end. flowTaskConfModelList:{}", flowTaskConfModelList);
         return flowTaskConfModelList;
