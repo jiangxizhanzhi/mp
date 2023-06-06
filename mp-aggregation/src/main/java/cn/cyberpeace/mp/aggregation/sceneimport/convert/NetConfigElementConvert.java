@@ -1,0 +1,83 @@
+package cn.cyberpeace.mp.aggregation.sceneimport.convert;
+
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ProtocolExportInfo;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @Description 将解析出的scene节点转成BO
+ * @Author maojun
+ * @Date 2021/10/12
+ */
+class NetConfigElementConvert implements IConverter {
+
+    public void convert2BO(ConvertDataContainer container) {
+        CsceneBO csceneBO = container.toCsceneBO();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), null);
+        CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        // 处理核心路由
+        for (var element : container.getAllElements()) {
+            var cloudElement = container.getCloudPluginElements().get(element.getId());
+            if (cloudElement == null) {
+                continue;
+            }
+            if (CollectionUtils.isNotEmpty(cloudElement.getStaticRoutes())) {
+                for (var sr : cloudElement.getStaticRoutes()) {
+                    // 这里 NexthopPortId 其实还是从yml里解析出来的节点id
+                    if (StringUtils.isNotEmpty(sr.getNexthopPortId())) {
+                        String realNexthopPortId = null;
+                        if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                            for (var p : element.getPorts()) {
+                                var connectedElement = sceneConfigHandler.getPortConnectedElement(p.getId());
+                                if (connectedElement != null && connectedElement.getId().equals(sr.getNexthopPortId())) {
+                                    realNexthopPortId = p.getId();
+                                    break;
+                                }
+                            }
+                            sr.setNexthopPortId(realNexthopPortId);
+                        }
+                    }
+                }
+            }
+            if (container.getNodeProtocols().containsKey(element.getId())) {
+                ProtocolExportInfo protocolExportInfo = JsonCommon.parse(container.getNodeProtocols().get(element.getId()), ProtocolExportInfo.class);
+                cloudElement.setOspfRouterId(protocolExportInfo.getOspfRouterId());
+                cloudElement.setRipLoopback(protocolExportInfo.getRipLoopback());
+                if (CollectionUtils.isNotEmpty(protocolExportInfo.getPortProtocols())) {
+                    Map<String, ProtocolExportInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
+                    for (var ps : protocolExportInfo.getPortProtocols()) {
+                        nodeId2Protocol.put(ps.getConnectNode(), ps);
+                    }
+                    if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                        for (var port : element.getPorts()) {
+                            var connectElement = sceneConfigHandler.getPortConnectedElement(port.getId());
+                            if (connectElement != null) {
+                                var portProtocol = nodeId2Protocol.get(connectElement.getId());
+                                if (portProtocol != null && container.getCloudPluginPorts().get(port.getId()) != null) {
+                                    var cloudPort = container.getCloudPluginPorts().get(port.getId());
+                                    cloudPort.setBgpAs(portProtocol.getBgpAs());
+                                    cloudPort.setBgpIp(portProtocol.getBgpIp());
+                                    cloudPort.setBgpPeer(portProtocol.getBgpPeer());
+                                    cloudPort.setBgpPeerAs(portProtocol.getBgpPeerAs());
+                                    cloudPort.setRipIp(portProtocol.getRipIp());
+                                    cloudPort.setRipPear(portProtocol.getRipPear());
+                                    cloudPort.setOspfArea(portProtocol.getOspfArea());
+                                    cloudPort.setOspfIp(portProtocol.getOspfIp());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}

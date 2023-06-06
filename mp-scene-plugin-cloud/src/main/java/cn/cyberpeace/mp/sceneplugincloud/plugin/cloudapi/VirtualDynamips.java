@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
@@ -27,6 +28,8 @@ public class VirtualDynamips extends CloudClient {
         heavyConcurrentWait();
         VirtualDynamicCreateData response = getHttpClient().post(CloudUrlConstant.CREATE_DYNAMIPS, createData, null, new TypeReference<>() {
         });
+        log.info("create dynamips ,request is {} , result is {}", JsonCommon.stringify(createData),
+                JsonCommon.stringify(response));
         return response;
     }
 
@@ -39,9 +42,9 @@ public class VirtualDynamips extends CloudClient {
     }
 
     public boolean restart(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.RESTART);
-        return doAction(instanceId, actionData);
+        this.stop(instanceId);
+        this.start(instanceId);
+        return true;
     }
 
     public boolean pause(String instanceId) {

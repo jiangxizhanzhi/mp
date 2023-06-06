@@ -62,6 +62,8 @@ class ConvertDataContainer {
 
     private String sceneFilePath;
 
+    private Map<String, String> nodeProtocols = new HashMap<>();
+
     private Set<String> simpleLayer3Switch = new HashSet<>();
 
     public void putImageInfo(String image, ImageInfoParseResult result) {

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -30,6 +31,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -192,6 +194,7 @@ public class SceneMonitorService {
         if (Objects.isNull(fetchRealTimeHostState)) {
             fetchRealTimeHostState = true;
         }
+        boolean isAll = Objects.nonNull(request) && Objects.nonNull(request.getIsAll()) ? request.getIsAll() : Boolean.FALSE;
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
         var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
@@ -218,7 +221,7 @@ public class SceneMonitorService {
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
             // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
-            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false));
+            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
             cfList.add(cf);
         }
 
@@ -326,7 +329,7 @@ public class SceneMonitorService {
         }
         stream.forEach(e -> {
             var cloudElement = cloudConfigPlugin.getElement(e.getId());
-            if (!isSupportedVirtualType(cloudElement.getVirtualType())) {
+            if (!isSupportedVirtualType(cloudElement.getVirtualType(), cloudElement.getImage()) && !Boolean.TRUE.equals(request.getIsAll())) {
                 return;
             }
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
@@ -335,7 +338,7 @@ public class SceneMonitorService {
             basicInfo.setEid(e.getEid());
             basicInfo.setId(e.getId());
             basicInfo.setName(e.getName());
-            basicInfo.setIcon2(e.getIcon2());
+            basicInfo.setIcon2(FsCommon.genHttpUrl(e.getIcon2()));
             basicInfo.setSystemType(e.getSystemType());
             basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(e.getSystemType()));
             if (CollectionUtils.isNotEmpty(e.getPorts())) {
@@ -357,6 +360,8 @@ public class SceneMonitorService {
                 imageName = cloudElement.getImage();
             }
             basicInfo.setImageName(imageName);
+            basicInfo.setImageType(cloudElement.getImageType());
+            basicInfo.setRole(cloudElement.getRole());
             basicInfo.setCategory(cloudElement.getCategory());
             basicInfo.setVirtualType(cloudElement.getVirtualType());
             res.add(basicInfo);
@@ -371,11 +376,12 @@ public class SceneMonitorService {
         return result;
     }
 
-    private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId, boolean fetchRealTimeHostState) {
+    private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId,
+                                                            boolean fetchRealTimeHostState, boolean isAll) {
         ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
         basicInfo.setSceneId(sceneId);
         elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
-        if (isSupportedVirtualType(basicInfo.getVirtualType())) {
+        if (isSupportedVirtualType(basicInfo.getVirtualType(), basicInfo.getImageName()) || isAll) {
             elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
             return basicInfo;
         }
@@ -448,17 +454,17 @@ public class SceneMonitorService {
 
     /**
      * 是否是需要的节点
-     * @param type
+     * @param virtualType
      * @return
      */
-    private boolean isSupportedVirtualType(Integer type) {
-        if (Objects.isNull(type)) {
+    private boolean isSupportedVirtualType(Integer virtualType, String image) {
+        if (Objects.isNull(virtualType) || ElementTypeUtils.isCoreRouter(image)) {
             return false;
         }
         boolean supported = false;
-        if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == type
-                || BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == type
-                || BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == type) {
+        if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == virtualType
+                || BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == virtualType
+                || BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == virtualType) {
             supported = true;
         }
         return supported;

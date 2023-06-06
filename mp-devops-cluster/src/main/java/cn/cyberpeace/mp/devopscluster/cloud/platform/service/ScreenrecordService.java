@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -38,8 +40,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @Description: 录屏service
@@ -59,6 +65,9 @@ public class ScreenrecordService extends BaseCpService {
 
     @Autowired
     private ScreenshotService screenshotService;
+
+    @Autowired
+    private UserService userService ;
 
     /**
      * 分页查询录屏文件
@@ -113,12 +122,29 @@ public class ScreenrecordService extends BaseCpService {
         Integer count = 0;
         if (Objects.nonNull(pageResponse) && CollectionUtils.isNotEmpty(pageResponse.getRecord())) {
             count = pageResponse.getTotalnum();
+            Set<String> existUserIds = new HashSet<>();
             pageResponse.getRecord().forEach(record -> {
                 // 结果转换
                 ScreenrecordVO response = new ScreenrecordVO();
                 response.parseResult(record);
                 responseList.add(response);
+                existUserIds.add(response.getUserId());
             });
+            // 处理头像
+            if (!existUserIds.isEmpty()) {
+                List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
+                if (CollectionUtils.isNotEmpty(users)) {
+                    Map<String, UserBo> userId2Bo = new HashMap<>();
+                    users.forEach(u -> userId2Bo.put(u.getId(), u));
+                    responseList.forEach(res -> {
+                        if (userId2Bo.containsKey(res.getUserId())) {
+                            var userBo = userId2Bo.get(res.getUserId());
+                            res.setUserName(userBo.getName());
+                            res.setUserAvatar(userBo.getAvatar());
+                        }
+                    });
+                }
+            }
         }
 
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();

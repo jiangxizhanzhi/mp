@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.util.*;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
+import cn.cyberpeace.mp.scene.util.SceneFileUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -21,9 +25,39 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DynamicCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -32,7 +66,16 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -1183,6 +1226,26 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
+
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        // 同样ip、端口可能对应多个接入方式
+        if (cloudPorts != null) {
+            cloudPorts.forEach(cloudPort -> {
+                if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
+                    return;
+                }
+                var accessModes = cloudPort.getAccessModes();
+                if (accessModes == null) {
+                    return;
+                }
+                for (var accessMode : accessModes) {
+                    if (AccessMode.Protocol.TELNET.equals(accessMode.getProtocol())) {
+                        accessMode.setAvailable(true);
+                    }
+                }
+            });
+        }
+
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
@@ -1259,7 +1322,9 @@ public class CreateHandler extends HandlerCommon {
         List<String> portIds = new ArrayList<>();
         Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
         portMap.forEach((key,value) -> {
-            portIds.add(value.getResourceId());
+            if (StringUtils.isNotEmpty(value.getResourceId())) {
+                portIds.add(value.getResourceId());
+            }
         });
         vpClient.syncFlowPortInfo(portIds, "add");
     }
@@ -1330,18 +1395,13 @@ public class CreateHandler extends HandlerCommon {
         }
 
         List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
-            var list = DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler());
+            List<String> commands = new ArrayList<>();
+            commands.addAll(DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler()));
+            commands.addAll(DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler()));
             // 下发配置
-            vdClient.sendRule(e.getResourceId(), list);
+            vdClient.sendRule(e.getResourceId(), commands);
         }).collect(Collectors.toList());
         runTasks(configDynamicIps);
-
-        List<Runnable> configDynamicStaticRoutes = dynamicElements.stream().map(e -> (Runnable) () -> {
-            var list = DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler());
-            // 下发配置
-            vdClient.sendRule(e.getResourceId(), list);
-        }).collect(Collectors.toList());
-        runTasks(configDynamicStaticRoutes);
     }
 
     /**
