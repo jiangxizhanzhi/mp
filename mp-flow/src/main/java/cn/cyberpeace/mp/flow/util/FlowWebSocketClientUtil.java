@@ -27,13 +27,6 @@ public class FlowWebSocketClientUtil {
 
     private static FlowTaskRecordService flowTaskRecordService = BeanCommon.getBean(FlowTaskRecordService.class);
 
-//    public static void main(String[] args) throws URISyntaxException, IOException, DeploymentException {
-//        FlowWebSocketClientUtil client = FlowWebSocketClientUtil.getWebSocketClient("10.100.7.129");
-//        client.sendMessage("taskid111,taskid222");
-//
-//        client.closeConnection("10.100.7.129");
-//    }
-
     /**
      * 获取客户端
      * @param ip 流量执行器ip
@@ -44,6 +37,10 @@ public class FlowWebSocketClientUtil {
         try {
             if (webSocketClientMap.containsKey(ip)) {
                 client = webSocketClientMap.get(ip);
+                if (!client.session.isOpen()) {
+                    WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+                    container.connectToServer(client, new URI("ws://"  + ip + ":8888/task_running"));
+                }
             } else {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 container.connectToServer(client, new URI("ws://"  + ip + ":8888/task_running"));
