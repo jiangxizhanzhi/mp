@@ -12,4 +12,5 @@ public class ModifyInstanceIpData implements CloudHttpData {
     private String portId;
     private String instanceId;
     private String fixedIp;
+    private String instanceType;
 }
