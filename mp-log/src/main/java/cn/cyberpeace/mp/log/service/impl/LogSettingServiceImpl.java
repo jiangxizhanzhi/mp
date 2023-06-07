@@ -58,11 +58,11 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Value("${logging.level.root:ERROR}")
     private String defaulLogLevel;
 
-    /**
-     * 是否记录动态日志级别设置
-     */
     @Value("${mp.log.dynamic-level-keeping:false}")
     private boolean dynamicLevelKeeping;
+
+    @Value("${logging.level.dynamic-level-only-root:true}")
+    private boolean dynamicLevelOnlyRoot;
 
     @Autowired
     private MpLogLevelPOMapper mpLogLevelMapper;
@@ -71,7 +71,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Override
     public ServiceResult<LogLevelResponse> setLogLevel(String logName, String logLevel) {
         if (StringUtils.isEmpty(logName) || StringUtils.isEmpty(logLevel)) {
-            return new ServiceResult<>((LogLevelResponse) null).asResult();
+            return new ServiceResult<>((LogLevelResponse) null, BaseErrorCode.PARAMS_INVALID).asResult();
+        }
+        if (dynamicLevelOnlyRoot && !ROOT.equalsIgnoreCase(logName)) {
+            return new ServiceResult<>((LogLevelResponse) null, BaseErrorCode.PARAMS_INVALID).asResult();
         }
         logName = getUpperLogNameIfRoot(logName);
         LogLevelBO loglevelBO = new LogLevelBO();
@@ -81,7 +84,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         List<LogLevelResponse> batchList = result.getData();
         if (CollectionUtils.isEmpty(batchList)) {
             log.error("logName {} is not valid", logName);
-            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+            throw new MpRuntimeException(result.getServiceCode());
         }
         return new ServiceResult<>(batchList.get(0)).asResult();
     }
@@ -109,12 +112,18 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ServiceResult<List<LogLevelResponse>> setBatchLogLevel(List<LogLevelBO> logLevelRequestList) {
+        if (logLevelRequestList.isEmpty()) {
+            new ServiceResult<>((List<LogLevelResponse>) null).asResult();
+        }
+        if (dynamicLevelOnlyRoot && (logLevelRequestList.size() > 1 || !ROOT.equalsIgnoreCase(logLevelRequestList.get(0).getLogName()))) {
+            return new ServiceResult<>((List<LogLevelResponse>) null, BaseErrorCode.PARAMS_INVALID).asResult();
+        }
         List<LogLevelResponse> logLevelList = new ArrayList<>();
         List<MpLogLevelPO> poList = new ArrayList<>();
         final String[] rootLevel = new String[]{""};
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext && !logLevelRequestList.isEmpty()) {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            matchBatchLogLevel(logLevelRequestList, logLevelList, poList, rootLevel, loggerContext);
+            batchSetLogLevel(logLevelRequestList, logLevelList, poList, rootLevel, loggerContext);
             if (dynamicLevelKeeping) {
                 //批量删除，再插入，事务
                 String[] ids = poList.stream().map(e -> e.getLogName()).collect(Collectors.toList()).toArray(new String[poList.size()]);
@@ -129,14 +138,14 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return new ServiceResult<>(logLevelList).asResult();
     }
 
-    private void matchBatchLogLevel(List<LogLevelBO> logLevelRequestList, List<LogLevelResponse> logLevelList, List<MpLogLevelPO> poList, String[] rootLevel, LoggerContext loggerContext) {
+    private void batchSetLogLevel(List<LogLevelBO> logLevelRequestList, List<LogLevelResponse> logLevelList, List<MpLogLevelPO> poList, String[] rootLevel, LoggerContext loggerContext) {
         for (Logger logger : loggerContext.getLoggerList()) {
             try {
                 logLevelRequestList.stream().filter(e -> logger.getName().equals(getUpperLogNameIfRoot(e.getLogName())))
                         .forEach(e -> {
                             logger.setLevel(getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger));
                             //设置查询设置结果
-                            String level = ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+                            String level = getLevelStr(logger);
                             if (ROOT.equalsIgnoreCase(logger.getName())) {
                                 rootLevel[0] = level;
                             }
@@ -166,10 +175,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
             try {
                 //重置只设置全局配置，其他配置为空
                 if (ROOT.equalsIgnoreCase(logger.getName())) {
-                    String level= ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
-                    if(!defaulLogLevel.equalsIgnoreCase(level)){
+                    String level = getLevelStr(logger);
+                    if (!defaulLogLevel.equalsIgnoreCase(level)) {
                         logger.setLevel(Level.toLevel(defaulLogLevel, Level.ERROR));
-                        level= ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+                        level = getLevelStr(logger);
                         setLogLevel2ExtenalConfig(level);
                     }
                 } else {
@@ -203,10 +212,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
             //后置星号模糊匹配
             boolean suffixBlurMatch = logName.endsWith("*") && logger.getName().startsWith(logName.substring(0, logName.length() - 1));
             if (logger.getName().equals(logName) || suffixBlurMatch) {
-                logLevelList.add(new LogLevelResponse(logger.getName(), ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : ""));
+                logLevelList.add(new LogLevelResponse(logger.getName(), getLevelStr(logger)));
             }
         } else {
-            logLevelList.add(new LogLevelResponse(logger.getName(), ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : ""));
+            logLevelList.add(new LogLevelResponse(logger.getName(), getLevelStr(logger)));
         }
     }
 
@@ -233,6 +242,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
+    private String getLevelStr(Logger logger) {
+        return ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+    }
+
     /**
      * @description: 更新外部配置文件日志级别
      * @param: rootLevel
@@ -240,7 +253,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
      * @author: wangssh
      * @date: 2023/6/5
      */
-    private void setLogLevel2ExtenalConfig(String rootLevel) {
+    private synchronized void setLogLevel2ExtenalConfig(String rootLevel) {
         if (StringUtils.isEmpty(rootLevel)) {
             return;
         }
@@ -258,7 +271,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
             }
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationExt())) {
             //如果前两者都不存在，配置application-ext.yml日志级别
-            setYamlRootLevel(rootLevel, EnvConfig.getApplicationExt());
+            setYamlRootLevel(rootLevel,  EnvConfig.getApplicationExt());
         }
     }
 
@@ -302,24 +315,26 @@ public class LogSettingServiceImpl implements ILogSettingService {
         updateLogLevel2ExtPropConfig(rootKey, rootLevel, file, logLevel, linkedList, rootLineNum);
     }
 
-    private String getRootKey(String line, String rootKey){
-        if(StringUtils.isEmpty(line)){
+    private String getRootKey(String line, String rootKey) {
+        if (StringUtils.isEmpty(line)) {
             return rootKey;
         }
-        if(line.trim().startsWith(ROOT_KEY_FOR_PROP)){
+        if (line.trim().startsWith(ROOT_KEY_FOR_PROP)) {
             //对应于application-prop.properties.template中 ROOT_LEVEL 变量
             return ROOT_KEY_FOR_PROP;
-        }else if(line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)){
+        } else if (line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)) {
             //对应于application-prop.properties.yml-template中 logging.level.ext-var.root 变量
             return LOGGING_LEVEL_EXT_VAR_ROOT;
         }
         return rootKey;
     }
 
-    private void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
+    private synchronized void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
         if (!rootLevel.equalsIgnoreCase(logLevel)) {
-            try (OutputStream outputStream = new FileOutputStream(new File(file))) {
+            if(rootLineNum >= 0 && rootLineNum < linkedList.size()){
                 linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
+            }
+            try (OutputStream outputStream = new FileOutputStream(new File(file))) {
                 IOUtils.writeLines(linkedList, null, outputStream, StandardCharsets.UTF_8);
                 log.info("set new ROOT log level :{}", rootLevel);
             } catch (FileNotFoundException ex) {
@@ -330,9 +345,8 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    private boolean setYamlRootLevel(String rootLevel, String file) {
+    private synchronized boolean setYamlRootLevel(String rootLevel, String file) {
         Map<String, Object> map = null;
-        String logLevel = "";
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(options);
@@ -340,21 +354,21 @@ public class LogSettingServiceImpl implements ILogSettingService {
             try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 map = yaml.loadAs(reader, Map.class);
                 YamlUtils.buildComment(file);
-                logLevel = getCurrentLogLevel(rootLevel, map, logLevel);
+                if (updateLogLevel2ExtYamlConfig(rootLevel, file, map, yaml)) {
+                    return true;
+                }
             } catch (FileNotFoundException ex) {
                 log.warn(ex.getMessage(), ex);
             } catch (IOException ex) {
                 log.warn(ex.getMessage(), ex);
             }
-            if (updateLogLevel2ExtYamlConfig(rootLevel, file, map, logLevel, yaml)) {
-                return true;
-            }
         }
         return false;
     }
 
-    private boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, String logLevel, Yaml yaml) {
-        if (!rootLevel.equalsIgnoreCase(logLevel)) {
+    private synchronized boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, Yaml yaml) {
+        String configLogLevel = setMapObjLogLevelAndGet(rootLevel, map);
+        if (!rootLevel.equalsIgnoreCase(configLogLevel)) {
             try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
                 yaml.dump(map, writer);
                 YamlUtils.addComment(file);
@@ -369,7 +383,8 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return false;
     }
 
-    private String getCurrentLogLevel(String rootLevel, Map<String, Object> map, String logLevel) {
+    private String setMapObjLogLevelAndGet(String rootLevel, Map<String, Object> map) {
+        String logLevel = "";
         Map<String, Object> subMap = (Map<String, Object>) map.get(LOGGING);
         if (subMap != null && subMap.containsKey(LEVEL)) {
             subMap = (Map<String, Object>) subMap.get(LEVEL);
@@ -378,8 +393,8 @@ public class LogSettingServiceImpl implements ILogSettingService {
                 if (subMap != null && subMap.containsKey(ROOT_KEY)) {
                     logLevel = (String) subMap.get(ROOT_KEY);
                     if (!rootLevel.equalsIgnoreCase(logLevel)) {
-                        subMap.put(ROOT_KEY, rootLevel);
                         log.info("current ROOT log level :{}", logLevel);
+                        subMap.put(ROOT_KEY, rootLevel.toUpperCase());
                     }
                 }
             }

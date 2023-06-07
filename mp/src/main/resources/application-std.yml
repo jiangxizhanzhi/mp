@@ -56,11 +56,12 @@ logging:
       root: ${ROOT_LEVEL:INFO}
     root: ${logging.level.ext-var.root}
   file:
-#    ext-var:
+    ext-var:
+      path: /home/mp/logs
 #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
-    path: ${user.home}/logs
     max-file-size: 300MB
     max-total-size: 650MB
+    path: ${logging.file.ext-var.path}
     max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:
@@ -179,12 +180,13 @@ mp:
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   # mp-log 模块
   log:
-#    ext-var:
+    ext-var:
 #      es-ip: ${LOG_ES_IP:10.100.7.1}
 #      es-port: ${LOG_ES_PORT:9205}
 #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
 #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
 #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+       dynamic-level-only-root: true;
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
@@ -193,6 +195,7 @@ mp:
     log-db: ${mp.log.ext-var.log-db} #日志存储数据库可以配置：es、sql
     es-max-page-size: ${mp.log.ext-var.es-max-page-size}
     dynamic-level-keeping: ${mp.log.ext-var.dynamic-level-keeping} #动态日志级别保持
+    dynamic-level-only-root: ${mp.log.ext-var.dynamic-level-only-root};
   # mp-auth 模块配置
   auth:
     ext-var:

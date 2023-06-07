@@ -61,6 +61,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-角色")
     private Integer role;
 
+    @ApiModelProperty(value = "节点基本信息-是否内置靶标")
+    private Boolean isBuildIn;
+
     @ApiModelProperty(value = "节点基本信息-物理节点")
     private String host;
 
