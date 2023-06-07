@@ -15,8 +15,6 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.hutool.core.collection.CollectionUtil;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,9 +25,12 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -49,8 +50,25 @@ public class MenuConfigService {
     @Resource
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
-    public void addMenuTemplate() {
-
+    public List<TargetBo> getUserTreeMenuBy(String userId, List<String> authorityMenuIds) {
+        String userMenuTemplateId = "1";
+        var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
+        if (CollectionUtils.isNotEmpty(roles)) {
+            String roleId = roles.get(0).getRole();
+            var roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
+            if (roleMenuTemplate != null) {
+                userMenuTemplateId = roleMenuTemplate.getTemplateId();
+            }
+        }
+        List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
+        Set<String> authorityMenuIdsSet = new HashSet<>(authorityMenuIds);
+        targets = targets.stream().filter(t -> authorityMenuIdsSet.contains(t.getIdentifier())).collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(targets)) {
+            return new ArrayList<>();
+        }
+        List<TargetBo> tree = toTree(targets);
+        sortTree(tree);
+        return tree;
     }
 
     public List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
@@ -95,6 +113,7 @@ public class MenuConfigService {
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
+            targetBo.setId(targetm.getMenuId());
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
@@ -128,32 +147,12 @@ public class MenuConfigService {
         return parentTargets;
     }
 
-    // 权限树排序
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
         });
-
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
-    }
-
-    @Data
-    public static class MenuTemplate {
-        @ApiModelProperty(value = "模板id")
-        private String id;
-        @ApiModelProperty(value = "模板名称")
-        private String name;
-        @ApiModelProperty(value = "模板里的菜单结构")
-        private List<TargetBo> menuTree;
-    }
-
-    @Data
-    public static class RoleTemplate {
-        @ApiModelProperty(value = "角色id")
-        private String roleId;
-        @ApiModelProperty(value = "模板id")
-        private String templateId;
     }
 }
