@@ -29,6 +29,7 @@ import java.util.Objects;
 @Table("mp_menu_template_info")
 @Builder
 public class MenuTemplateModel extends BaseModel {
+
     @ApiModelProperty(value = "模板id")
     private String templateId;
 
@@ -38,6 +39,9 @@ public class MenuTemplateModel extends BaseModel {
     @ApiModelProperty(value = "编号")
     @NotBlank(groups = AddGroup.class)
     private String identifier;
+
+    @ApiModelProperty(value = "菜单id")
+    private String menuId;
 
     @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
@@ -49,7 +53,7 @@ public class MenuTemplateModel extends BaseModel {
 
     @ApiModelProperty(value = "英文名称")
     @NotBlank(groups = AddGroup.class)
-    private String en_name;
+    private String enName;
 
     @ApiModelProperty(value = "路径")
     private String path;
