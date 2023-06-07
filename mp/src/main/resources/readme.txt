@@ -10,7 +10,7 @@
        log-db: ${mp.log.ext-var.log-db} #日志存储数据库可以配置：es、sql
 
 2. 开发环境(dev)模板默认为 application-std.yml 和 application-ext.yml组合配置
-3. application-prop.properties.template为外部短变量模板，application-prop.properties.yml-template为yml外部变量properties格式
+3. application-prop.properties.template为外部短变量模板，application-ext.properties.template为yml外部变量properties格式
 4. 对外部署启动时外部配置参数，可以此为模板设置实际参数（敏感信息最好不配置到外部），启动时加入spring.config.location=配置文件路径完整路径（文件名可以自定义命名）。如下：
    1).MP_ENV_PATH方式配置外部变量(文件模板为application-prop.properties.template)
       java -DMP_ENV_PATH=D:/WORKDIR/SNProject/mp.properties -jar mp-0.0.1.jar  --spring.profiles.active=prod
