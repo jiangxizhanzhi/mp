@@ -58,11 +58,11 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Value("${logging.level.root:ERROR}")
     private String defaulLogLevel;
 
-    /**
-     * 是否记录动态日志级别设置
-     */
     @Value("${mp.log.dynamic-level-keeping:false}")
     private boolean dynamicLevelKeeping;
+
+    @Value("${logging.level.dynamic-level-only-root:true}")
+    private boolean dynamicLevelOnlyRoot;
 
     @Autowired
     private MpLogLevelPOMapper mpLogLevelMapper;
@@ -71,7 +71,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Override
     public ServiceResult<LogLevelResponse> setLogLevel(String logName, String logLevel) {
         if (StringUtils.isEmpty(logName) || StringUtils.isEmpty(logLevel)) {
-            return new ServiceResult<>((LogLevelResponse) null).asResult();
+            return new ServiceResult<>((LogLevelResponse) null, BaseErrorCode.PARAMS_INVALID).asResult();
+        }
+        if (dynamicLevelOnlyRoot && !ROOT.equalsIgnoreCase(logName)) {
+            return new ServiceResult<>((LogLevelResponse) null, BaseErrorCode.PARAMS_INVALID).asResult();
         }
         logName = getUpperLogNameIfRoot(logName);
         LogLevelBO loglevelBO = new LogLevelBO();
@@ -81,7 +84,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         List<LogLevelResponse> batchList = result.getData();
         if (CollectionUtils.isEmpty(batchList)) {
             log.error("logName {} is not valid", logName);
-            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+            throw new MpRuntimeException(result.getServiceCode());
         }
         return new ServiceResult<>(batchList.get(0)).asResult();
     }
@@ -109,6 +112,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ServiceResult<List<LogLevelResponse>> setBatchLogLevel(List<LogLevelBO> logLevelRequestList) {
+        if (logLevelRequestList.isEmpty()) {
+            new ServiceResult<>((List<LogLevelResponse>) null).asResult();
+        }
+        if (dynamicLevelOnlyRoot && (logLevelRequestList.size() > 1 || !ROOT.equalsIgnoreCase(logLevelRequestList.get(0).getLogName()))) {
+            return new ServiceResult<>((List<LogLevelResponse>) null, BaseErrorCode.PARAMS_INVALID).asResult();
+        }
         List<LogLevelResponse> logLevelList = new ArrayList<>();
         List<MpLogLevelPO> poList = new ArrayList<>();
         final String[] rootLevel = new String[]{""};
@@ -136,7 +145,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
                         .forEach(e -> {
                             logger.setLevel(getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger));
                             //设置查询设置结果
-                            String level = ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+                            String level = getLevelStr(logger);
                             if (ROOT.equalsIgnoreCase(logger.getName())) {
                                 rootLevel[0] = level;
                             }
@@ -166,10 +175,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
             try {
                 //重置只设置全局配置，其他配置为空
                 if (ROOT.equalsIgnoreCase(logger.getName())) {
-                    String level= ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
-                    if(!defaulLogLevel.equalsIgnoreCase(level)){
+                    String level = getLevelStr(logger);
+                    if (!defaulLogLevel.equalsIgnoreCase(level)) {
                         logger.setLevel(Level.toLevel(defaulLogLevel, Level.ERROR));
-                        level= ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+                        level = getLevelStr(logger);
                         setLogLevel2ExtenalConfig(level);
                     }
                 } else {
@@ -203,10 +212,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
             //后置星号模糊匹配
             boolean suffixBlurMatch = logName.endsWith("*") && logger.getName().startsWith(logName.substring(0, logName.length() - 1));
             if (logger.getName().equals(logName) || suffixBlurMatch) {
-                logLevelList.add(new LogLevelResponse(logger.getName(), ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : ""));
+                logLevelList.add(new LogLevelResponse(logger.getName(), getLevelStr(logger)));
             }
         } else {
-            logLevelList.add(new LogLevelResponse(logger.getName(), ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : ""));
+            logLevelList.add(new LogLevelResponse(logger.getName(), getLevelStr(logger)));
         }
     }
 
@@ -233,6 +242,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
+    private String getLevelStr(Logger logger) {
+        return ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
+    }
+
     /**
      * @description: 更新外部配置文件日志级别
      * @param: rootLevel
@@ -240,7 +253,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
      * @author: wangssh
      * @date: 2023/6/5
      */
-    private void setLogLevel2ExtenalConfig(String rootLevel) {
+    private synchronized void setLogLevel2ExtenalConfig(String rootLevel) {
         if (StringUtils.isEmpty(rootLevel)) {
             return;
         }
@@ -302,21 +315,21 @@ public class LogSettingServiceImpl implements ILogSettingService {
         updateLogLevel2ExtPropConfig(rootKey, rootLevel, file, logLevel, linkedList, rootLineNum);
     }
 
-    private String getRootKey(String line, String rootKey){
-        if(StringUtils.isEmpty(line)){
+    private String getRootKey(String line, String rootKey) {
+        if (StringUtils.isEmpty(line)) {
             return rootKey;
         }
-        if(line.trim().startsWith(ROOT_KEY_FOR_PROP)){
+        if (line.trim().startsWith(ROOT_KEY_FOR_PROP)) {
             //对应于application-prop.properties.template中 ROOT_LEVEL 变量
             return ROOT_KEY_FOR_PROP;
-        }else if(line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)){
+        } else if (line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)) {
             //对应于application-prop.properties.yml-template中 logging.level.ext-var.root 变量
             return LOGGING_LEVEL_EXT_VAR_ROOT;
         }
         return rootKey;
     }
 
-    private void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
+    private synchronized void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
         if (!rootLevel.equalsIgnoreCase(logLevel)) {
             try (OutputStream outputStream = new FileOutputStream(new File(file))) {
                 linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
@@ -330,7 +343,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    private boolean setYamlRootLevel(String rootLevel, String file) {
+    private synchronized boolean setYamlRootLevel(String rootLevel, String file) {
         Map<String, Object> map = null;
         String logLevel = "";
         DumperOptions options = new DumperOptions();
@@ -353,7 +366,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return false;
     }
 
-    private boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, String logLevel, Yaml yaml) {
+    private synchronized boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, String logLevel, Yaml yaml) {
         if (!rootLevel.equalsIgnoreCase(logLevel)) {
             try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
                 yaml.dump(map, writer);
