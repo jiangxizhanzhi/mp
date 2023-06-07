@@ -724,10 +724,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             flowRecords.setTaskUuid(taskId);
             flowRecords.setId(i + 1);
             flowRecords.setSecond(i + 1);
-            flowRecords.setTxBps(flowTaskRecordModel.getTxBps().doubleValue());
-            flowRecords.setOpackets(flowTaskRecordModel.getTotalPps());
-            flowRecords.setObytes(flowTaskRecordModel.getObytes());
-            flowRecords.setOerrors(flowTaskRecordModel.getOerrors().intValue());
+            flowRecords.setTxBps(Objects.nonNull(flowTaskRecordModel.getTxBps()) ? flowTaskRecordModel.getTxBps().doubleValue() : 0);
+            flowRecords.setOpackets(Objects.nonNull(flowTaskRecordModel.getTotalPps()) ? flowTaskRecordModel.getTotalPps() : 0);
+            flowRecords.setObytes(Objects.nonNull(flowTaskRecordModel.getObytes()) ? flowTaskRecordModel.getObytes() : 0);
+            flowRecords.setOerrors(Objects.nonNull(flowTaskRecordModel.getOerrors()) ? flowTaskRecordModel.getOerrors().intValue() : 0);
             flowRecords.setCreateTime(TimeCommon.localDateTimeToString(flowTaskRecordModel.getCreateTime()));
             flowRecordsList.add(flowRecords);
         }
@@ -753,10 +753,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 FlowRecords flowRecords = new FlowRecords();
                 flowRecords.setId(i + 1);
                 flowRecords.setSecond(i + 1);
-                flowRecords.setTxBps(flowStatisticsDetail.getValue().doubleValue());
-                flowRecords.setOpackets(flowStatisticsInfo.getTotalPps());
-                flowRecords.setObytes(flowStatisticsInfo.getObytes());
-                flowRecords.setOerrors(flowStatisticsInfo.getOerrors().intValue());
+                flowRecords.setTxBps(Objects.nonNull(flowStatisticsDetail.getValue()) ? flowStatisticsDetail.getValue().doubleValue() : 0);
+                flowRecords.setOpackets(Objects.nonNull(flowStatisticsInfo.getTotalPps()) ? flowStatisticsInfo.getTotalPps() : 0);
+                flowRecords.setObytes(Objects.nonNull(flowStatisticsInfo.getObytes()) ? flowStatisticsInfo.getObytes() : 0);
+                flowRecords.setOerrors(Objects.nonNull(flowStatisticsInfo.getOerrors()) ? flowStatisticsInfo.getOerrors().intValue() : 0);
                 flowRecordsList.add(flowRecords);
             }
         }
