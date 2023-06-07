@@ -35,6 +35,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,6 +70,7 @@ public class MenuSetService {
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
     @Resource
+    @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
     @Resource

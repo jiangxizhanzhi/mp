@@ -25,6 +25,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class UserPermissionServiceImpl
     private RolePermissionModelService rolePermissionService;
 
     @Autowired
+    @Qualifier("templateTargetServiceImpl")
     private TargetService targetService;
 
     @Autowired

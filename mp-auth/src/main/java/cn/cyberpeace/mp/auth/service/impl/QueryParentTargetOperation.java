@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 public class QueryParentTargetOperation implements TargetOperation<TargetBo> {
 
     @Autowired
+    @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
 
