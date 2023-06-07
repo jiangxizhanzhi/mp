@@ -332,7 +332,9 @@ public class LogSettingServiceImpl implements ILogSettingService {
     private synchronized void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
         if (!rootLevel.equalsIgnoreCase(logLevel)) {
             try (OutputStream outputStream = new FileOutputStream(new File(file))) {
-                linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
+                if(rootLineNum >= 0 || rootLineNum < linkedList.size()){
+                    linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
+                }
                 IOUtils.writeLines(linkedList, null, outputStream, StandardCharsets.UTF_8);
                 log.info("set new ROOT log level :{}", rootLevel);
             } catch (FileNotFoundException ex) {
