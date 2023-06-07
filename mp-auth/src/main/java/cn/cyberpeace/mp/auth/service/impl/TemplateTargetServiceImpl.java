@@ -227,13 +227,15 @@ public class TemplateTargetServiceImpl implements TargetService {
 
     private String getUserTemplateId() {
         String userMenuTemplateId = "1";
-        String userId = UserUtils.getLoginUser().getId();
-        var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
-        if (CollectionUtils.isNotEmpty(roles)) {
-            String roleId = roles.get(0).getRole();
-            var roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
-            if (roleMenuTemplate != null) {
-                userMenuTemplateId = roleMenuTemplate.getTemplateId();
+        if (UserUtils.getLoginUser() != null) {
+            String userId = UserUtils.getLoginUser().getId();
+            var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
+            if (CollectionUtils.isNotEmpty(roles)) {
+                String roleId = roles.get(0).getRole();
+                var roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
+                if (roleMenuTemplate != null) {
+                    userMenuTemplateId = roleMenuTemplate.getTemplateId();
+                }
             }
         }
         return userMenuTemplateId;
