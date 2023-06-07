@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -148,6 +149,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listByTenantId(String tenantId) {
         ParamCheck.notBlank(tenantId, AuthBasei18nCode.TENANT_ID);
         HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible,true)
                 .filterEqual(RoleModel::getTenant, tenantId);
         List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;
@@ -158,6 +160,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listAll(RolePageRequest rolePageRequest) {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(RoleModel::getVisible, true);
         if (CollUtil.isNotEmpty(excludeRoleIds)) {
             humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }
@@ -178,6 +181,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible, true)
                 .filterEqual(RoleModel::getOrg, orgId);
         List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;
@@ -187,6 +191,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public RoleModel getByIdent(String ident) {
         ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
         HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible, true)
                 .filterEqual(RoleModel::getIdentifier, ident);
         RoleModel model = getModelMapper().first(humanCondition);
         return model;
@@ -197,6 +202,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
         HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible, true)
                 .filterEqual(RoleModel::getName, name);
         RoleModel model = getModelMapper().first(humanCondition);
         return model;
@@ -208,6 +214,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public List<RoleModel> listByNames(List<String> names) {
         ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
         HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible, true)
                 .filterIn(RoleModel::getName, names.toArray());
         List<RoleModel> roleModels = getModelMapper().list(humanCondition);
         return roleModels;
@@ -350,6 +357,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return updateResult.getSource().getObj();
     }
 
+    @Override
+    public List<String> getSystemUnVisibleRoleIds() {
+        var models = getModelMapper().list(new HumanCondition().filterEqual(RoleModel::getVisible, false));
+        if (CollectionUtils.isEmpty(models)) {
+            return new ArrayList<>();
+        }
+        return models.stream().map(m -> m.getId()).collect(Collectors.toList());
+    }
+
 
     private RoleBo roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
@@ -450,6 +466,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     public ListObjServiceResult listWithUserCnt(String roleName, List<String> orders, List<String> excludeRoleIds, int page, int pageSize) {
         HumanCondition roleCondition = new HumanCondition();
+        roleCondition.filterEqual(RoleModel::getVisible, true);
         if (CollUtil.isNotEmpty(excludeRoleIds)) {
             roleCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
         }

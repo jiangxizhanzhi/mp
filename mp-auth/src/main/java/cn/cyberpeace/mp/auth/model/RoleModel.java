@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -41,6 +42,10 @@ public class RoleModel extends BaseModel {
     @ApiModelProperty(value = "描述")
     @DefaultStr
     private String description;
+
+    @ApiModelProperty(value = "可见性 1：可见 0：不可见")
+    @DefaultInt(1)
+    private Integer visible;
 
 
     @Builder
