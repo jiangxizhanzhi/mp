@@ -355,6 +355,7 @@ public class SceneElementMonitorService {
         basicInfo.setImageName(imageName);
         basicInfo.setImageType(cpSceneElementBO.getImageType());
         basicInfo.setRole(cpSceneElementBO.getRole());
+        basicInfo.setIsBuildIn(cpSceneElementBO.getIsBuildIn());
 
         // 物理节点
         basicInfo.setHost(cpSceneElementBO.getHost());
