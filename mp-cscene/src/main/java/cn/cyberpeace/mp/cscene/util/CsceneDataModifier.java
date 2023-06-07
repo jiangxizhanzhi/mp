@@ -1,16 +1,20 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -37,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -296,18 +301,13 @@ public class CsceneDataModifier {
         }
     }
 
-    /**
-     * 纠正创建和更新场景模板时 文件字段 的地址 去除文件字段的前缀，只保留文件对应的key值
-     *
-     * @param csceneBO
-     */
-    public static void removeFilePathPrefix(CsceneBO csceneBO) {
-        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
-            SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
+    private static void removeFilePathPrefix(SceneDataBO sceneDataBO){
+        if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
+            SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
             if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
                 sceneConfig.setFile(FsCommon.getFileKey(sceneConfig.getFile()));
             }
-            List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
+            List<SceneElementBO> elements = sceneDataBO.getTopology().getElements();
             if (CollectionUtils.isNotEmpty(elements)) {
                 elements.stream().forEach(e -> {
                     if (StringUtils.isNotEmpty(e.getFile())) {
@@ -316,9 +316,9 @@ public class CsceneDataModifier {
                     if (StringUtils.isNotEmpty(e.getIcon2())) {
                         e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
                     }
-                    if (StringUtils.isNotEmpty(e.getIcon3())) {
-                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
-                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
                     if (CollectionUtils.isNotEmpty(e.getPorts())) {
                         e.getPorts().forEach(port -> {
                             if (port != null) {
@@ -333,8 +333,8 @@ public class CsceneDataModifier {
                     }
                 });
             }
-            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
-                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            if (sceneDataBO.getPlugins() != null && sceneDataBO.getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = sceneDataBO.getPlugins().get("cpcloud");
                 if (scenePluginDataBO.getElementPorts() != null) {
                     scenePluginDataBO.getElementPorts().values().forEach(p -> {
                         if (p.get("access_modes") != null) {
@@ -348,8 +348,8 @@ public class CsceneDataModifier {
                     });
                 }
             }
-            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcollection") != null) {
-                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcollection");
+            if (sceneDataBO.getPlugins() != null && sceneDataBO.getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = sceneDataBO.getPlugins().get("cpcollection");
                 if (scenePluginDataBO.getElements() != null) {
                     scenePluginDataBO.getElements().values().forEach(e -> {
                         if (e.get("probes") != null) {
@@ -467,10 +467,17 @@ public class CsceneDataModifier {
         if (csceneBO == null) {
             return;
         }
+        addFilePathPrefix(csceneBO);
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
+    }
+
+    private static void addFilePathPrefix(CsceneBO csceneBO) {
+        if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getLogo())) {
+            csceneBO.setLogo(FsCommon.genHttpUrl(csceneBO.getLogo()));
+        }
     }
 
     public static void correctVlanId(CsceneBO csceneBO) {
@@ -668,7 +675,13 @@ public class CsceneDataModifier {
                 baseSceneDataBO.getTopology().getElements().forEach(e -> {
                     BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
                     sceneElement.setFile(FsCommon.genHttpUrl(sceneElement.getFile()));
-                    sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
+                    if (StringUtils.isNotEmpty(sceneElement.getIcon2()) && sceneElement.getIcon2().startsWith("/api/mp") && !sceneElement.getIcon2().startsWith("/api/mp/file")) {
+                        List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
+                        var icon2 = DefaultImgUtil.pickPathToFdfsUrl(sceneElement.getIcon2(), mappingModelList);
+                        sceneElement.setIcon2(icon2);
+                    } else {
+                        sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
+                    }
                     sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {

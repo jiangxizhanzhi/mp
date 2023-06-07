@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.util;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -150,7 +151,7 @@ public class DefaultImgUtil {
      */
     public static String getGroupByPath(String path) {
         for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
-            if (imgDirEnum.getCurrentPath().equals(path)) {
+            if (imgDirEnum.getCurrentPath().equals(path) || imgDirEnum.getEndPathName().equals(path)) {
                 return imgDirEnum.getGroup();
             }
         }
