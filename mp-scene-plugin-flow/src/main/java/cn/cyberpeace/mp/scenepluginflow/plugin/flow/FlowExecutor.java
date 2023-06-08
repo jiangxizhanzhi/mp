@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
+import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
@@ -178,13 +179,13 @@ public class FlowExecutor {
         }
     }
 
-    public void startFlows(List<String> taskIds, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
+    public void startFlows(BatchStartTaskBO batchStartTaskBO, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
 //        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
 //        request.setTaskIds(taskIds);
 //        request.setRunType(runType);
 //        request.setTaskAction(TaskActionEnum.START.toValue());
 //        request.setCallbackConsumer(callbackConsumer);
-        var result = flowService1.batchStartTasks(taskIds);
+        var result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }

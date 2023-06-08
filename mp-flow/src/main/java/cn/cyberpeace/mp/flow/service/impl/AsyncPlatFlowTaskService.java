@@ -677,7 +677,12 @@ public class AsyncPlatFlowTaskService {
         // 解析任务配置
         FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
         if (StringUtils.isNotBlank(sourceIp)) {
+            // 有sourceIp，是靶场测评，不支持持续运行
+            flowTaskConfModel.setKeepRunning(0);
             // 兼容旧版，有sourceIp设置源ip
+            if ("127.0.0.1".equals(sourceIp)) {
+                sourceIp = "";
+            }
             FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
             if (Objects.nonNull(flowConf)) {
                 FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
@@ -753,7 +758,12 @@ public class AsyncPlatFlowTaskService {
      * @param taskIds
      * @return
      */
-    public ServiceResult<Boolean> batchStartTasks(List<String> taskIds) {
+    public ServiceResult<Boolean> batchStartTasks(List<String> taskIds, BatchStartTaskBO batchStartTaskBO) {
+        if (Objects.nonNull(batchStartTaskBO)) {
+            // 有batchStartTaskBO，是靶场测评调用
+            taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
+        }
+
         // 任务存在校验
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByTaskIds(taskIds);
         if (CollectionUtils.isEmpty(flowTaskTaskModels) || flowTaskTaskModels.size() != taskIds.size()) {
@@ -789,6 +799,45 @@ public class AsyncPlatFlowTaskService {
             FlowTaskConfModel flowTaskConfModel = flowTaskConfModels.stream().filter(taskConfModel ->
                     taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())).findFirst().get();
             FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
+
+            if (Objects.nonNull(batchStartTaskBO)) {
+                // 靶场测评，不支持持续运行
+                flowTaskConfModel.setKeepRunning(0);
+                TaskSipBO sipBO = batchStartTaskBO.getTaskSipList().stream().filter(taskSipBO ->
+                        flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())).findFirst().get();
+
+                // 设置源ip
+                String sourceIp = sipBO.getSourceIp();
+                if ("127.0.0.1".equals(sourceIp)) {
+                    sourceIp = "";
+                }
+                FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
+                if (Objects.nonNull(flowConf)) {
+                    FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
+                    if (Objects.nonNull(ipv4Conf)) {
+                        ipv4Conf.setSip(sourceIp);
+                    } else {
+                        ipv4Conf = new FlowTaskIpv4Conf();
+                        ipv4Conf.setSip(sourceIp);
+                        flowConf.setIpv4Conf(ipv4Conf);
+                    }
+                } else {
+                    flowConf = new FlowTaskFlowConf();
+                    FlowTaskIpv4Conf ipv4Conf = new FlowTaskIpv4Conf();
+                    ipv4Conf.setSip(sourceIp);
+                    flowConf.setIpv4Conf(ipv4Conf);
+                    flowTaskConf.setFlowConf(flowConf);
+                }
+
+                FlowTaskCommonConf commonConf = flowTaskConf.getCommonConf();
+                if (Objects.nonNull(commonConf)) {
+                    commonConf.setLatency(2);
+                } else {
+                    commonConf = new FlowTaskCommonConf();
+                    commonConf.setLatency(2);
+                    flowTaskConf.setCommonConf(commonConf);
+                }
+            }
 
             // 封装流量任务配置参数
             FlowTaskStart flowTaskStart = FlowTaskStart.builder()

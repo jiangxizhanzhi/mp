@@ -336,7 +336,7 @@ public class CsceneFlowService {
      */
     public void batchStartTasks(List<String> taskIds) {
         log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
-        asyncPlatFlowTaskService.batchStartTasks(taskIds);
+        asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
         log.info("CsceneFlowService.batchStartTasks end.");
     }
 
