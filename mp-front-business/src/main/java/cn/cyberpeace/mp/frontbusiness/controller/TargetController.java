@@ -33,7 +33,8 @@ import java.util.List;
 public class TargetController {
 
     @Autowired
-    @Qualifier("templateTargetServiceImpl")
+    @Qualifier("targetServiceImpl")
+//    @Qualifier("templateTargetServiceImpl")
     private TargetService targetService;
 
     @Autowired
