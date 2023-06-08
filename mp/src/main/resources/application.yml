@@ -27,7 +27,7 @@ management:
 
 spring:
   profiles:
-    active: prod
+    active: dev
     group:
       "dev": "std,ext,local"
       "test": "std,ext"
