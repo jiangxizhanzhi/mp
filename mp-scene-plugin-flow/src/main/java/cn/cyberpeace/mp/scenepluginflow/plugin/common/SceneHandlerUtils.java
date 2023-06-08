@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
+import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
+import cn.cyberpeace.mp.flow.bo.TaskSipBO;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
@@ -21,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,6 +98,17 @@ public class SceneHandlerUtils {
     }
 
     private boolean startFlows(List<Flow> flows, Runnable stopCallback, int runType) {
+        BatchStartTaskBO batchStartTaskBO = new BatchStartTaskBO();
+        List<TaskSipBO> taskSipBOList = new ArrayList<>();
+        flows.forEach(flow -> {
+            TaskSipBO taskSipBO = new TaskSipBO();
+            taskSipBO.setTaskId(flow.getTaskId());
+            taskSipBO.setSourceIp(flow.getSourceIp());
+            taskSipBOList.add(taskSipBO);
+        });
+        batchStartTaskBO.setTaskSipList(taskSipBOList);
+        batchStartTaskBO.setRunType(runType);
+
         var taskIds = flows.stream()
                 .map(f -> f.getTaskId())
                 .collect(Collectors.toList());
@@ -119,7 +133,7 @@ public class SceneHandlerUtils {
 
             String sceneId = pluginHandler.getSourceSceneId();
             FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, callbackConsumer);
-            flowExecutor.startFlows(taskIds, callbackConsumer, runType);
+            flowExecutor.startFlows(batchStartTaskBO, callbackConsumer, runType);
         } catch (MpRuntimeException e) {
             log.error("start flows for taskIds:[{}] error", taskIds, e);
             flows.forEach(flow -> {
@@ -222,7 +236,7 @@ public class SceneHandlerUtils {
         }
 
         preparingFLow(flow);
-        String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
+        String fromIps = sourceIp == null ? "127.0.0.1" : sourceIp;
         flow.setSourceIp(fromIps);
         log.info("get flow task info by nodeId: {} and flowId: {}", srcElement.getId(), flowId);
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getId(), flowId);
