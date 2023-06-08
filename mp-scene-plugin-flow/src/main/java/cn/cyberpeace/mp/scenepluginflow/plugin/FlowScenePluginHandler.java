@@ -17,11 +17,13 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModel
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -203,15 +205,24 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             flows.forEach(flow -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
                 flowWithSourceIp.setFlow(flow);
-                flowWithSourceIp.setSourceIp(flow.getSourceIp());
+                flowWithSourceIp.setSourceIp(StringUtils.isBlank(flow.getSourceIp()) ? "127.0.0.1" : flow.getSourceIp());
+                flow.setSourceIp(flowWithSourceIp.getSourceIp());
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         } else {
             var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
             flowId2Ips.forEach(flowId2Ip -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
-                flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
-                flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp() == null ? flowWithSourceIp.getFlow().getSourceIp() : flowId2Ip.getSourceIp());
+                Flow tmpFlow = flowMap.getOrDefault(flowId2Ip.getFlowId(), null);
+                flowWithSourceIp.setFlow(tmpFlow);
+                String sip = "127.0.0.1";
+                if (StringUtils.isNotBlank(flowWithSourceIp.getFlow().getSourceIp())) {
+                    sip = flowWithSourceIp.getFlow().getSourceIp();
+                }
+                if (Objects.nonNull(tmpFlow)) {
+                    tmpFlow.setSourceIp(sip);
+                }
+                flowWithSourceIp.setSourceIp(StringUtils.isBlank(flowId2Ip.getSourceIp()) ? sip : flowId2Ip.getSourceIp());
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         }

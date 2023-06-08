@@ -197,8 +197,6 @@ public class RecreateHandler extends HandlerCommon {
                                 });
                             }
                             createContainer(cloudElement);
-                            cloudElement.getSrcElement().getPorts();
-                            getPluginHandler().getPort("").getResourceId();
                         });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
