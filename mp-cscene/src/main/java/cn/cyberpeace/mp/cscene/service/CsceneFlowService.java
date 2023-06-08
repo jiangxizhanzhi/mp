@@ -451,7 +451,7 @@ public class CsceneFlowService {
             flowStatisticalCondition.setOffsetValue(offSet);
             queryList.add(flowStatisticalCondition);
             endTime = endTime.minusSeconds(5);
-            offSet -= 5;
+            offSet -= 10;
         }
         log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
         return queryList;

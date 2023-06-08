@@ -345,17 +345,17 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             totalDiff = 3600 * 12L;
             startTime = endTime.minusSeconds(3600 * 12);
         }
-        Integer diff = 2;
+        Integer diff = 5;
         String offsetUnit = "s";
         if (totalDiff <= 60) {
             diff = 5;
         } else if (totalDiff > 60 && totalDiff <= 300) {
-            diff = 10;
+            diff = 20;
         } else if (totalDiff > 300 && totalDiff <= 1800) {
-            diff = 1;
+            diff = 2;
             offsetUnit = "m";
         } else if (totalDiff > 1800 && totalDiff <= 3600*2) {
-            diff = 5;
+            diff = 10;
             offsetUnit = "m";
         } else {
             diff = 30;
