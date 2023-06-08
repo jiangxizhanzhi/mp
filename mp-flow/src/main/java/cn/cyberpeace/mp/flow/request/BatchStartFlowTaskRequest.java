@@ -34,4 +34,9 @@ public class BatchStartFlowTaskRequest {
      */
     private List<FlowTaskStart> tasks;
 
+    /**
+     * 执行方式：0 串行，1 并行
+     */
+    private Integer runType;
+
 }
