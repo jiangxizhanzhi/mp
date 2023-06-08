@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.log.service.ILogSettingService;
 import cn.cyberpeace.mp.log.utils.YamlUtils;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -337,6 +338,16 @@ public class LogSettingServiceImpl implements ILogSettingService {
             try (OutputStream outputStream = new FileOutputStream(new File(file))) {
                 IOUtils.writeLines(linkedList, null, outputStream, StandardCharsets.UTF_8);
                 log.info("set new ROOT log level :{}", rootLevel);
+
+                //MP_ENV_PATH模式下，mp.properties每次启动时都从mp_default.properties复制参数
+                if(file.endsWith("mp.properties")){
+                    String defFileStr = new File(file).getParent().concat(File.separator).concat("mp_default.properties");
+                    log.info("mp_default.properties path:{}", defFileStr);
+                    File defFile = new File(defFileStr);
+                    if(defFile.exists() && defFile.isFile()){
+                        FileUtils.copyFile(new File(file), defFile);
+                    }
+                }
             } catch (FileNotFoundException ex) {
                 log.warn(ex.getMessage(), ex);
             } catch (IOException ex) {
