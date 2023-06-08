@@ -20,7 +20,7 @@ public class LfsClient implements FileClient {
 
     public static final String DEFAULT_GROUP = "default";
 
-    public static final Pattern FILE_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9/\\\\]+(\\.[A-Za-z0-9]+)?$");
+    public static final Pattern FILE_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9/_\\\\]+(\\.[A-Za-z0-9]+)?$");
 
     @Getter
     private final String storeDir;
