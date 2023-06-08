@@ -4,9 +4,7 @@ import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +58,7 @@ public class ModifyHandler extends HandlerCommon {
         if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
             for (String elementId : mayUpdateNodeIds) {
                 CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement,newPlugin);
+                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement, newPlugin);
             }
         }
     }

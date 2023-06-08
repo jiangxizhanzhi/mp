@@ -294,11 +294,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void recreateElement(String nodeId) {
+    public void recreateElement(String nodeId, String image) {
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
+        element.setImage(image);
         new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
     }
 

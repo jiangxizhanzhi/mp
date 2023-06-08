@@ -148,7 +148,7 @@ public class UserController {
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
-        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
+//        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
     }

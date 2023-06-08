@@ -14,6 +14,8 @@ public enum ImageTypeEnum {
 
     VM,
 
+    DYNAMIPS,
+
     CONTAINER,
 
     ENTITY,

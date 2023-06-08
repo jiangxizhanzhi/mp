@@ -7,4 +7,6 @@ import lombok.Data;
 public class CsceneInstanceNodeActionRequest extends CsceneInstanceActionRequest {
     @ApiModelProperty(value = "节点id")
     private String nodeId;
+    @ApiModelProperty(value = "指定镜像")
+    private String image;
 }

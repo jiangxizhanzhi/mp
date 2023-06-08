@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +51,7 @@ public class ActivMenuService {
     private SysActivationService activationService;
 
     @Autowired
+    @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
     @Autowired

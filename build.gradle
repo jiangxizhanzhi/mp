@@ -96,6 +96,7 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-websocket'
         implementation 'org.springframework.security:spring-security-test'
         implementation 'com.jcraft:jsch:0.1.55'
+        implementation 'org.yaml:snakeyaml:1.28'
         annotationProcessor 'org.projectlombok:lombok'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'

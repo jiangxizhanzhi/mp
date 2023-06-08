@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,20 +39,23 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
     public List<String> getExcludeRoleIdsByLoginUserForSearchingUsers() {
 
+        List<String> result = new ArrayList<>();
+        result.addAll(roleService.getSystemUnVisibleRoleIds());
         boolean isSupserUser = isLoginUserSuperUser();
         if (isSupserUser) {
             // 超级用户不受限制
-            return Collections.emptyList();
+            return result;
         }
 
         boolean isAdmin = isLoginUserAdmin();
         if (isAdmin) {
             // 管理员可以查询同级管理员用户，但不能查询超级用户
-            return Collections.emptyList();
+            return result;
         }
 
         // 普通用户不可查询管理员和超级用户
-        return Arrays.asList(AuthConstant.ROLE_ADMIN_ID);
+        result.add(AuthConstant.ROLE_ADMIN_ID);
+        return result;
     }
 
     public List<String> getExcludeUserIdsByLoginUserForSearchingUsers() {

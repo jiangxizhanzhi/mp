@@ -6,10 +6,12 @@ import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerAddRouteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerArchiveData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeletePortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
@@ -17,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetR
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerNewDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResizeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRetrieveParam;
@@ -51,12 +54,36 @@ public class Container extends CloudClient {
         return result.getData();
     }
 
+    public void resize(String containerId, ContainerResizeData resizeData) {
+        heavyConcurrentWait();
+
+        cloudPatch(CloudUrlConstant.CONTAINER_RESIZE_URL.replace("{container_id}", containerId), resizeData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+    }
+
     public boolean delete(ContainerDeleteData deleteData) {
         heavyConcurrentWait();
 
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
+        return true;
+    }
+
+    public ContainerAddPortData addPort(ContainerAddPortData addPortData) {
+        heavyConcurrentWait();
+
+        CloudResponse<ContainerAddPortData> result = cloudPost(CloudUrlConstant.CONTAINER_ADD_PORT_URL, addPortData, null, new TypeReference<CloudResponse<ContainerAddPortData>>() {
+        }, true);
+        return result.getData();
+    }
+
+    public boolean deletePort(ContainerDeletePortData deletePortData) {
+        heavyConcurrentWait();
+
+        cloudPost(CloudUrlConstant.CONTAINER_DELETE_PORT_URL, deletePortData, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
         return true;
     }
 

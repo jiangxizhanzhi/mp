@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
-import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
+import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.service.MenuConfigService;
 import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -10,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +33,15 @@ import java.util.List;
 public class TargetController {
 
     @Autowired
+    @Qualifier("targetServiceImpl")
+//    @Qualifier("templateTargetServiceImpl")
     private TargetService targetService;
+
+    @Autowired
+    private MenuConfigService menuConfigService;
+
+    @Autowired
+    private UserPermissionService userPermissionService;
 
     @ApiOperation(value = "查询权限树", notes = "")
     @ApiImplicitParams({
@@ -42,4 +54,12 @@ public class TargetController {
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
+
+    @ApiOperation(value = "查询当前用户菜单")
+    @GetMapping("/current_user/tree")
+    public ServiceResult getTree() {
+        List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+        var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
+        return ServiceResult.builder().source(result).build().asResult();
+    }
 }

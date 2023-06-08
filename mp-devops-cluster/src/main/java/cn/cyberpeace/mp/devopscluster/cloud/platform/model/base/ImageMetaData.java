@@ -46,6 +46,12 @@ public class ImageMetaData implements Serializable {
     @ApiModelProperty("环境变量k-v格式")
     private Map<String, Object> environment;
 
+    @ApiModelProperty("容器interactive参数")
+    private Boolean interactive;
+
+    @ApiModelProperty("容器tty参数")
+    private Boolean tty;
+
     public void setEnvironmentStr(String environmentStr) {
         if (StringUtils.isNotEmpty(environmentStr)) {
             this.environmentStr = environmentStr;

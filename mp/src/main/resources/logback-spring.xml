@@ -105,9 +105,11 @@
     </springProfile>
 
     <!--  生产环境，日志输出到文件  -->
-    <springProfile name="std">
+    <springProfile name="test">
         <!--日志输出级别-->
         <root level="${LOG_LEVEL}">
+            <!-- 控制台输出 -->
+            <appender-ref ref="CONSOLE"/>
             <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
             <appender-ref ref="ASYNC"/>
         </root>

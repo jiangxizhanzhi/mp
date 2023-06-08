@@ -731,7 +731,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                   @RequestParam(value = "node_id", required = false) String nodeId,
                                                   @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
-        var result = modelService.recreateElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        var result =
+                modelService.recreateElement(request.getId(), request.getNodeId(), request.getImage(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
         return result;
     }

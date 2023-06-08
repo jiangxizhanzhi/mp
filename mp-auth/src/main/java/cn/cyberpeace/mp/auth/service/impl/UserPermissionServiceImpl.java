@@ -25,6 +25,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,8 @@ public class UserPermissionServiceImpl
     private RolePermissionModelService rolePermissionService;
 
     @Autowired
+    @Qualifier("targetServiceImpl")
+//    @Qualifier("templateTargetServiceImpl")
     private TargetService targetService;
 
     @Autowired
@@ -75,7 +78,7 @@ public class UserPermissionServiceImpl
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
 
-        // 用户绑定的所有角色绑定的target
+        // 用户绑定的所有角色
         List<RoleModel> roles = userRoleService.listByUserId(userId);
 
         // 是否是管理员
