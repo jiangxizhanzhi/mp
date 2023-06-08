@@ -759,8 +759,10 @@ public class AsyncPlatFlowTaskService {
      * @return
      */
     public ServiceResult<Boolean> batchStartTasks(List<String> taskIds, BatchStartTaskBO batchStartTaskBO) {
+        Integer runType = null;
         if (Objects.nonNull(batchStartTaskBO)) {
             // 有batchStartTaskBO，是靶场测评调用
+            runType = batchStartTaskBO.getRunType();
             taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
         }
 
@@ -858,6 +860,7 @@ public class AsyncPlatFlowTaskService {
                 .action(TaskActionEnum.START.toValue())
                 .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
                 .tasks(flowTaskStartList)
+                .runType(runType)
                 .build();
 
         try {
