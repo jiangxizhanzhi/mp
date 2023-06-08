@@ -30,8 +30,8 @@ mp.base.ext-var.fdfs-tracker-port=22122
 mp.base.ext-var.fdfs-inner-file-port=8888
 mp.base.ext-var.fdfs-outer-http-server=/fdfs
 mp.base.ext-var.file-server=lfs
-mp.base.ext-var.lfs-inner-http-url=http://10.100.7.1:8001/api/mp/file/%s
-mp.base.ext-var.lfs-outer-http-url=http://10.100.7.1:8001/api/mp/file/%s
+mp.base.ext-var.lfs-inner-http-url=/api/mp/file/%s
+mp.base.ext-var.lfs-outer-http-url=/api/mp/file/%s
 
 # mp-situationaware 模块配置
 mp.situationaware.ext-var.wazuh-ip=10.100.7.1

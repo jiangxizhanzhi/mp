@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.service.TargetOperation;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
 
     @Autowired
+    @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
 

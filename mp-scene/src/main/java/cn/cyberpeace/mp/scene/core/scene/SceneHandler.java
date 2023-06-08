@@ -44,6 +44,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -491,6 +492,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.initiate();
             }
         } catch (Exception e) {
+            log.error("failed to initiate scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.INITIATE, e.getMessage());
             return false;
         }
@@ -516,6 +518,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.create();
             }
         } catch (Exception e) {
+            log.error("failed to create scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.CREATE, e.getMessage());
             return false;
         }
@@ -550,6 +553,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.modify(originSceneHandler, updateElementIds);
             }
         } catch (Exception e) {
+            log.error("failed to modify scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.MODIFY, e.getMessage());
             return false;
         }
@@ -566,6 +570,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.pause();
             }
         } catch (Exception e) {
+            log.error("failed to pause scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.PAUSE, e.getMessage());
             return false;
         }
@@ -584,6 +589,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.unpause();
             }
         } catch (Exception e) {
+            log.error("failed to unpause scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.UNPAUSE, e.getMessage());
             return false;
         }
@@ -602,6 +608,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.suspend();
             }
         } catch (Exception e) {
+            log.error("failed to suspend scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.SUSPEND, e.getMessage());
             return false;
         }
@@ -620,6 +627,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.resume();
             }
         } catch (Exception e) {
+            log.error("failed to resume scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.RESUME, e.getMessage());
             return false;
         }
@@ -642,6 +650,7 @@ public class SceneHandler extends BaseSceneHandler<
                 getPlugins().get(i).delete();
             }
         } catch (Exception e) {
+            log.error("failed to delete scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.DELETE, e.getMessage());
             return false;
         }
@@ -661,6 +670,7 @@ public class SceneHandler extends BaseSceneHandler<
                 getPlugins().get(i).delete();
             }
         } catch (Exception e) {
+            log.error("failed to logicDelete scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
             errorScene(SceneModel.Event.DELETE, e.getMessage());
             return false;
         }
@@ -686,6 +696,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.initiateElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to initiateElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.INITIATE, e.getMessage());
             return;
         }
@@ -704,6 +715,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.createElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to createElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.CREATE, e.getMessage());
             return;
         }
@@ -722,6 +734,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.stopElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to stopElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.STOP, e.getMessage());
             return;
         }
@@ -743,6 +756,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.startElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to startElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.START, e.getMessage());
             return;
         }
@@ -762,6 +776,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.restartElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to restartElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.RESTART, e.getMessage());
             return;
         }
@@ -780,6 +795,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.pauseElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to pauseElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.PAUSE, e.getMessage());
             return;
         }
@@ -798,6 +814,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.unpauseElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to unpauseElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.UNPAUSE, e.getMessage());
             return;
         }
@@ -819,6 +836,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.deleteElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to deleteElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.DELETE, e.getMessage());
             return;
         }
@@ -868,6 +886,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.modifyElement(nodeId, updateHandler);
             }
         } catch (Exception e) {
+            log.error("failed to modifyElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.MODIFY, e.getMessage());
             return;
         }
@@ -875,15 +894,16 @@ public class SceneHandler extends BaseSceneHandler<
         updateSceneElementWithPlugins(nodeId);
     }
 
-    public void recreateElement(String nodeId) {
+    public void recreateElement(String nodeId,String image) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.RECREATE);
         startElementEvent(nodeId, SceneElementModel.Event.RECREATE);
         try {
             for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.recreateElement(nodeId);
+                plugin.recreateElement(nodeId,image);
             }
         } catch (Exception e) {
+            log.error("failed to recreateElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.RECREATE, e.getMessage());
             return;
         }
@@ -902,6 +922,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.suspendElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to suspendElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.SUSPEND, e.getMessage());
             return;
         }
@@ -920,6 +941,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.resumeElement(nodeId);
             }
         } catch (Exception e) {
+            log.error("failed to resumeElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.RESUME, e.getMessage());
             return;
         }
@@ -938,6 +960,7 @@ public class SceneHandler extends BaseSceneHandler<
                 getPlugins().get(i).snapshotElement(nodeId, snapshotId, snapshotName, description);
             }
         } catch (Exception e) {
+            log.error("failed to snapshotElement , sceneId is {} , nodeId is  , exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
             errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
             return;
         }

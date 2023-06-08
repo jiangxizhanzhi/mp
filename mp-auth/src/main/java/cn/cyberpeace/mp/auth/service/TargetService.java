@@ -14,13 +14,13 @@ import java.util.List;
  */
 public interface TargetService extends BaseModelService<TargetModel, QueryParams> {
 
-    TargetModel getByIdentifier(String identifier);
+    <T extends TargetModel> T getByIdentifier(String identifier);
 
 //    List<TargetModel> listByTenantId(String tenantId);
 
     boolean exists(String id);
 
-    List<TargetModel> listByParent(String parentId);
+    <T extends TargetModel> List<T> listByParent(String parentId);
 
     /**
      * 查询所有资源，visible=1
@@ -28,7 +28,7 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
      * @param type
      * @return
      */
-    List<TargetModel> listAll(String tenant, Integer type);
+    <T extends TargetModel> List<T> listAll(String tenant, Integer type);
 
     /**
      * 查询所有菜单，忽略visible=1的限制
@@ -36,9 +36,9 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
      * @param type
      * @return
      */
-    List<TargetModel> listAllIgnoreVisible(String tenant, Integer type);
+    <T extends TargetModel> List<T> listAllIgnoreVisible(String tenant, Integer type);
 
-    List<TargetModel> listByMultiTypes(String tenant, Integer[] types);
+    <T extends TargetModel> List<T> listByMultiTypes(String tenant, Integer[] types);
 
     List<TargetBo> getTree(String parentId, Integer type);
 
