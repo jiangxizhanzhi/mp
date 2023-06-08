@@ -115,7 +115,7 @@ mp:
     file-server: ${mp.base.ext-var.file-server}
     lfs-inner-http-url-template: ${mp.base.ext-var.lfs-inner-http-url}
     lfs-outer-http-url-template: ${mp.base.ext-var.lfs-outer-http-url}
-    run-init: true
+#    run-init: true
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址

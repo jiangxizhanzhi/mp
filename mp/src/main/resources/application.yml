@@ -27,41 +27,32 @@ management:
 
 spring:
   profiles:
-    active: dev
+    active: prod
     group:
-      "dev": "std,ext"
-      "test": "std,ext,prop"
-      "prod": "std,ext,prop"
+      "dev": "std,ext,local"
+      "test": "std,ext"
+      "prod": "std,ext"
 
 ---
 spring:
   config:
     activate:
       on-profile: std
-
-server:
-  servlet:
-    context-path: /api/mp
-  port: 8080
-  tomcat:
-    threads:
-      min-spare: 10
-      max: 200
+mp:
+  base:
+    run-init: true
 
 ---
 spring:
   config:
     activate:
-      on-profile: out
+      on-profile: ext
 
-server:
-  servlet:
-    context-path: /api/mp
-  port: 8080
-  tomcat:
-    threads:
-      min-spare: 10
-      max: 200
-
-
-
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+mp:
+  base:
+    run-init: false
