@@ -56,12 +56,10 @@ logging:
       root: ${ROOT_LEVEL:INFO}
     root: ${logging.level.ext-var.root}
   file:
-    ext-var:
-      path: /home/mp/logs
+#    ext-var:
 #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
     max-file-size: 300MB
     max-total-size: 650MB
-    path: ${logging.file.ext-var.path}
     max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:

@@ -38,6 +38,10 @@ spring:
   config:
     activate:
       on-profile: std
+
+logging:
+  file:
+    path: /home/mp/logs
 mp:
   base:
     run-init: true
@@ -53,6 +57,10 @@ spring:
   config:
     activate:
       on-profile: local
+
+logging:
+  file:
+    path: ${user.home}/logs
 mp:
   base:
     run-init: false
