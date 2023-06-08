@@ -166,9 +166,7 @@ public class MenuSetService {
             var headTargetBo = queue.remove(0);
             if (CollectionUtils.isNotEmpty(headTargetBo.getChildren())) {
                 for (var child : headTargetBo.getChildren()) {
-                    if (StringUtils.isEmpty(child.getParent())) {
-                        child.setParent(headTargetBo.getParent());
-                    }
+                    child.setParent(headTargetBo.getIdentifier());
                 }
                 queue.addAll(headTargetBo.getChildren());
             }
