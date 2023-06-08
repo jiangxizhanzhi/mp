@@ -149,6 +149,21 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     }
 
     /**
+     * 流量仿真所有统计（包括概况、统计、环境总速率、top5）
+     * @param id
+     * @return
+     */
+    @ApiOperation("流量仿真所有统计")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/statistics_all")
+    public ServiceResult<FlowStatisticsAll> flowStatisticsAll(@RequestParam String id) {
+        log.info("FlowInfoController.flowStatisticsAll begin. id:{}", id);
+        FlowStatisticsAll result = csceneFlowService.flowStatisticsAll(id);
+        log.info("FlowInfoController.flowStatisticsAll end. result:{}", result);
+        return ResultCommon.success(result);
+    }
+
+    /**
      * TOP5实时速率
      * @param id
      * @return

@@ -72,19 +72,31 @@ public class FlowStatisticsInfo {
     /**
      * 实时发包数统计表
      */
-    @ApiModelProperty(value = "实时速率统计表")
+    @ApiModelProperty(value = "实时发包数统计表")
     private List<FlowStatisticsDetail> txPpsList;
 
     /**
      * 延迟统计表
      */
-    @ApiModelProperty(value = "实时速率统计表")
+    @ApiModelProperty(value = "延迟统计表")
     private List<FlowStatisticsDetail> latencyList;
 
     /**
      * 抖动统计表
      */
-    @ApiModelProperty(value = "实时速率统计表")
+    @ApiModelProperty(value = "抖动统计表")
     private List<FlowStatisticsDetail> jitterList;
+
+    /**
+     * 发包大小统计表
+     */
+    @ApiModelProperty(value = "发包大小统计表")
+    private List<FlowStatisticsDetail> obytesList;
+
+    /**
+     * 发包错误数统计表
+     */
+    @ApiModelProperty(value = "发包错误数统计表")
+    private List<FlowStatisticsDetail> oerrorsList;
 
 }
