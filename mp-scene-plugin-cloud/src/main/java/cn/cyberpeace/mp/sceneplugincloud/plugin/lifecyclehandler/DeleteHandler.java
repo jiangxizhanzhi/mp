@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,7 +45,7 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualDynamips virtualDynamips = CloudApiProxyBuilder.build(new VirtualDynamips(), VirtualDynamips.class);
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
-    private final List<String> dynamipsIds = new ArrayList<>();
+    private final Set<String> dynamipsIds = new ConcurrentHashSet<>();
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -363,7 +364,7 @@ public class DeleteHandler extends HandlerCommon {
         }
         // 删除dynamips节点
         if (!this.dynamipsIds.isEmpty()) {
-            this.deleteVirtualDynamips(this.dynamipsIds);
+            this.deleteVirtualDynamips(new ArrayList<>(this.dynamipsIds));
         }
 
         // 删除辅助网络(包含虚拟交换机)
