@@ -80,12 +80,16 @@ public class SceneHandlerUtils {
 
         try {
             log.info("start flow for taskId:[{}]", taskId);
+            String sourceIp = flow.getSourceIp();
+            if (StringUtils.isBlank(sourceIp)) {
+                sourceIp = "127.0.0.1";
+            }
             flowExecutor.startFlow(taskId, () -> {
                 successOffFLow(flow);
                 if (stopCallback != null) {
                     stopCallback.run();
                 }
-            }, formatStopCallback, flow.getSourceIp());
+            }, formatStopCallback, sourceIp);
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
             errorFLow(flow, e.getMessage());
@@ -236,7 +240,7 @@ public class SceneHandlerUtils {
         }
 
         preparingFLow(flow);
-        String fromIps = sourceIp == null ? "127.0.0.1" : sourceIp;
+        String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
         flow.setSourceIp(fromIps);
         log.info("get flow task info by nodeId: {} and flowId: {}", srcElement.getId(), flowId);
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndFlowId(srcElement.getId(), flowId);
