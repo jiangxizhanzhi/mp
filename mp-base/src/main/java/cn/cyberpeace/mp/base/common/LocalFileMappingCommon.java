@@ -46,12 +46,15 @@ public class LocalFileMappingCommon {
     }
 
     public static List<LocalFileMappingModel> syncDir(String group, String localDir) {
+        log.info("sync file begin, group is {},dir is {}", group, localDir);
         List<String> fileNames = FileUtil.listFileNames(localDir);
         Map<String, String> namePathMap = new LinkedHashMap<>();
         fileNames.forEach(fileName -> {
             namePathMap.put(fileName, StringUtils.joinWith(FileUtil.FILE_SEPARATOR, localDir, fileName));
         });
-        return syncMap(group, namePathMap);
+        var result = syncMap(group, namePathMap);
+        log.info("sync file end, diff is {}", JsonCommon.stringify(result));
+        return result;
     }
 
     public static int deleteMappings(String group) {
