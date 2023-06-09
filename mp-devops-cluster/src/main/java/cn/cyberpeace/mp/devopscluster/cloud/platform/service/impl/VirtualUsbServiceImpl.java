@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformI
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.BaseCpService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.VirtualUsbService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.request.VirtualUsbDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.VirtualUsbQueryParams;
 import cn.cyberpeace.mp.devopscluster.utils.FileUtils;
@@ -45,6 +46,8 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbService {
 
     private static final String VIRTUAL_USB = "/virtual_usbs";
+
+    private static final Integer MAX_USB_COUNT = 10;
 
     public VirtualUsbServiceImpl(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -110,6 +113,14 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
     @Override
     public void add(VirtualUsbVO virtualUsbVO) {
         log.info("VirtualUsbServiceImpl.add begin. virtualUsbVO:{}", virtualUsbVO);
+        StringBuffer clouldParams = new StringBuffer("?");
+        clouldParams.append("limit=10").append("&offset=1");
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams, CloudPlatformItemsPageResult.class);
+        log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams + ". response: {}", pageResult);
+        super.checkResult(pageResult);
+        if (Objects.nonNull(pageResult) && pageResult.getTotal() >= MAX_USB_COUNT) {
+            throw new MpRuntimeException(DevopsClusterErrorCode.USB_NUM_EXCEEDS_LIMIT);
+        }
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
         super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.toUnderlineJSONString(virtualUsb), VirtualUsb.class);
