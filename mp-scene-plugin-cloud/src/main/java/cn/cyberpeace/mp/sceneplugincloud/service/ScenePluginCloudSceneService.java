@@ -441,7 +441,8 @@ public class ScenePluginCloudSceneService {
     public ServiceResult<NodeConnectionBO> disableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId) {
         var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
-            return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
+            // 不再抛出异常
+            return new ServiceResult<>(new NodeConnectionBO());
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
 //        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
