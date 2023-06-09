@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @Description: 流量任务启动对象
  * @Author qiaokang
@@ -60,5 +62,10 @@ public class FlowTaskStart {
      * 流配置
      */
     private FlowTaskFlowConf flowConf;
+
+    /**
+     * 攻击脚本参数
+     */
+    private List<FlowTaskAttackConf> attackConfs;
 
 }
