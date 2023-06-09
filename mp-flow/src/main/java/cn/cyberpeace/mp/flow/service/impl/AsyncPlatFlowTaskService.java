@@ -810,9 +810,6 @@ public class AsyncPlatFlowTaskService {
 
                 // 设置源ip
                 String sourceIp = sipBO.getSourceIp();
-                if ("127.0.0.1".equals(sourceIp)) {
-                    sourceIp = "";
-                }
                 FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
                 if (Objects.nonNull(flowConf)) {
                     FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
