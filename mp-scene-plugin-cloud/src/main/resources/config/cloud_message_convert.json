@@ -758,5 +758,41 @@
         "relation": "regx"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "element `{0}` start error"
+      },
+      {
+        "locale": "zh",
+        "message": "节点`{0}`启动错误,虚拟机启动创建卷失败"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^Object vm (.*) status error. Reason: Build of instance (.*) aborted: Volume (.*) did not finish being created even after we waited 0 seconds or 1 attempts. (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Flavor params is wrong"
+      },
+      {
+        "locale": "zh",
+        "message": "Flavor 参数设置超限"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "400 Bad Request Flavor's disk is smaller than the minimum size specified in image metadata",
+        "relation": "contains"
+      }
+    ]
   }
 ]
