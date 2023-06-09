@@ -375,26 +375,27 @@ public class ElementModifyHandler extends HandlerCommon {
             var addCloudPort = this.newCloudScenePluginHandler.getPort(addPortId);
             var addPort = this.newCloudScenePluginHandler.getPort(addPortId).getSrcPort();
             var net = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(addPort);
+            if (net != null) {
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+                    port.setFixedIp(addPort.getIp());
+                    port.setNetworkId(net.getResourceId());
+                    var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
 
-            if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                port.setFixedIp(addPort.getIp());
-                port.setNetworkId(net.getResourceId());
-                var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
+                    addPort.setIp(result.getFixedIp());
+                    addPort.setMacAddr(result.getMacAddress());
+                    addCloudPort.setResourceId(result.getPortId());
+                } else {
+                    ContainerAddPortData addPortData = new ContainerAddPortData();
+                    addPortData.setContainerId(originCloudElement.getResourceId());
+                    addPortData.setNetworkId(net.getResourceId());
+                    addPortData.setFixedIp(addPort.getIp());
+                    var result = container.addPort(addPortData);
 
-                addPort.setIp(result.getFixedIp());
-                addPort.setMacAddr(result.getMacAddress());
-                addCloudPort.setResourceId(result.getPortId());
-            } else {
-                ContainerAddPortData addPortData = new ContainerAddPortData();
-                addPortData.setContainerId(originCloudElement.getResourceId());
-                addPortData.setNetworkId(net.getResourceId());
-                addPortData.setFixedIp(addPort.getIp());
-                var result = container.addPort(addPortData);
-
-                addPort.setIp(result.getFixedIp());
-                addPort.setMacAddr(result.getMacAddress());
-                addCloudPort.setResourceId(result.getPortId());
+                    addPort.setIp(result.getFixedIp());
+                    addPort.setMacAddr(result.getMacAddress());
+                    addCloudPort.setResourceId(result.getPortId());
+                }
             }
         }
 
