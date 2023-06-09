@@ -31,13 +31,16 @@ public class DefaultImageInit implements ApplicationRunner {
         TaskCommon.executeTask(() -> {
             String startWithFile = "file:";
             String staticLocation = AggregationSingleton.aggregationConfig.getStaticLocation();
+            log.info("DefaultImageInit staticLocation value is {}", staticLocation);
             if (staticLocation.startsWith(startWithFile)) {
                 staticLocation = staticLocation.substring(5).trim();
             }
 
             for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
                 if (StringUtils.isNotBlank(imgDirEnum.getEndPathName())) {
+                    log.info("DefaultImageInit imgDirEnum value is {}", imgDirEnum.getEndPathName());
                     String path = staticLocation.concat(imgDirEnum.getEndPathName());
+                    log.info("DefaultImageInit path value is {}", path);
                     if (FileUtil.isDirectory(path)) {
                         LocalFileMappingCommon.syncDir(imgDirEnum.getGroup(), path);
                     }
