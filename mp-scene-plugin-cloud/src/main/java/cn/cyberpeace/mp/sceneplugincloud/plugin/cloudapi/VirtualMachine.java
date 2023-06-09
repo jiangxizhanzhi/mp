@@ -229,6 +229,7 @@ public class VirtualMachine extends CloudClient {
     public VirtualMachineAddPortResult addPort(String instanceId, VirtualMachineAddPortData port) {
         var response = cloudPost(CloudUrlConstant.ADD_VM_PORTS.replace("{instance_id}", instanceId), port, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
+        log.info("VirtualMachine add port response is {}", JsonCommon.stringify(response));
         return response.getData();
     }
 

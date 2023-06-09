@@ -382,9 +382,10 @@ public class ElementModifyHandler extends HandlerCommon {
                     port.setNetworkId(net.getResourceId());
                     var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
 
-                    addPort.setIp(result.getFixedIp());
+                    addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
+                    addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
                 } else {
                     ContainerAddPortData addPortData = new ContainerAddPortData();
                     addPortData.setContainerId(originCloudElement.getResourceId());
@@ -392,9 +393,10 @@ public class ElementModifyHandler extends HandlerCommon {
                     addPortData.setFixedIp(addPort.getIp());
                     var result = container.addPort(addPortData);
 
-                    addPort.setIp(result.getFixedIp());
+                    addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
+                    addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
                 }
             }
         }
