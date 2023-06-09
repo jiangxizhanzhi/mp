@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.PortConfig;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
@@ -79,11 +84,8 @@ class DeviceInfoConverter implements IConverter {
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
 
         if (StringUtils.isNotEmpty(device.getLogo())) {
-            if (!device.getLogo().contains("fdfs/") && !device.getLogo().startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                element.setIcon2(AuthConstant.DEFAULT_IMAGE_PREFIX + device.getLogo());
-            } else {
-                element.setIcon2(device.getLogo());
-            }
+            String logo = FsCommon.getFileKey(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+            element.setIcon2(logo);
         }
         element.setDescription(device.getDescription());
         pluginElement.setImageUuid(device.getUuid());
