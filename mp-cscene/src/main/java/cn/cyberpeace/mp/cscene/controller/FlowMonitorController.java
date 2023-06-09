@@ -43,6 +43,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -94,6 +95,9 @@ public class FlowMonitorController {
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
+        if (StringUtils.isEmpty(flowTrendRequest.getSceneId()) && CollectionUtils.isEmpty(flowTrendRequest.getElementIds())) {
+            ResultCommon.success(new ArrayList<>());
+        }
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
         return ResultCommon.success(flowTrends);
@@ -155,6 +159,9 @@ public class FlowMonitorController {
     @GetMapping("/attack_type_count")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
+        if (StringUtils.isEmpty(baseRequest.getSceneId()) && CollectionUtils.isEmpty(baseRequest.getElementIds())) {
+            ResultCommon.success(new ArrayList<>());
+        }
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
         return ResultCommon.success(attackTypeCounts);
