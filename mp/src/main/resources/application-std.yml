@@ -47,7 +47,7 @@ spring:
     password: ${spring.rabbitmq.ext-var.password}
   web:
     resources:
-      static-locations: file:${user.home}/img
+      static-locations: file:/root/.mp/resources/default_img
 
 logging:
   config: classpath:logback-spring.xml
