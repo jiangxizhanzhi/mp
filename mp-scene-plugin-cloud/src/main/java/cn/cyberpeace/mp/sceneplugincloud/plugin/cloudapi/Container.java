@@ -76,6 +76,7 @@ public class Container extends CloudClient {
 
         CloudResponse<ContainerAddPortData> result = cloudPost(CloudUrlConstant.CONTAINER_ADD_PORT_URL, addPortData, null, new TypeReference<CloudResponse<ContainerAddPortData>>() {
         }, true);
+        log.info("container add port result is {}", JsonCommon.stringify(result));
         return result.getData();
     }
 
