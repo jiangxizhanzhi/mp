@@ -153,7 +153,7 @@ public class DefaultImgUtil {
      */
     public static String getGroupByPath(String path) {
         for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
-            if (imgDirEnum.getCurrentPath().equals(path)) {
+            if (imgDirEnum.getCurrentPath().equals(path) || imgDirEnum.getEndPathName().equals(path)) {
                 return imgDirEnum.getGroup();
             }
         }
