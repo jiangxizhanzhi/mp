@@ -225,7 +225,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
     @Override
     public void syncRecord(JSONObject jsonMessage) {
         log.info("FlowTaskRecordServiceImpl.syncRecord start. jsonMessage:{}", jsonMessage);
-        if (jsonMessage == null || !"success".equals(jsonMessage.getString("msg"))) {
+        if (jsonMessage == null) {
             log.info("消息为空或为失败消息，不做处理");
             return;
         }
