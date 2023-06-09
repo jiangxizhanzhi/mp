@@ -16,7 +16,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateFlavorData implements CloudHttpData {
-    private String name;
     private Integer ram;
     private Integer cpu;
     private Integer disk;
