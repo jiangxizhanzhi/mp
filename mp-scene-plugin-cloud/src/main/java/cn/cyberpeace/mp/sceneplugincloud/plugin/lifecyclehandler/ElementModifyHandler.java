@@ -247,7 +247,6 @@ public class ElementModifyHandler extends HandlerCommon {
 
     private String createFlavor(CloudPluginSceneElementBO newCloudElement) {
         CreateFlavorData createFlavorData = new CreateFlavorData();
-        createFlavorData.setName(newCloudElement.getSrcElement().getEid().substring(0, 8));
         createFlavorData.setCpu(newCloudElement.getSrcElement().getCpu());
         createFlavorData.setRam(newCloudElement.getSrcElement().getRam());
         createFlavorData.setDisk(newCloudElement.getSrcElement().getDisk());
