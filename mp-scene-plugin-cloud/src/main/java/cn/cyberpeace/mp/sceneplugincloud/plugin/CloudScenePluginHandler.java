@@ -646,6 +646,29 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
+        // 更新前合并下数据
+        CloudScenePluginHandler originCloudPlugin = originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        for (var originEntry : originCloudPlugin.getElementMap().entrySet()) {
+            String nodeId = originEntry.getKey();
+            CloudPluginSceneElementBO originElement = originEntry.getValue();
+            CloudPluginSceneElementBO newElement = getElement(nodeId);
+            if (newElement != null && StringUtils.isEmpty(newElement.getResourceId())) {
+                newElement.setResourceId(originElement.getResourceId());
+            }
+        }
+        for (var originEntry : originCloudPlugin.getElementPortMap().entrySet()) {
+            String portId = originEntry.getKey();
+            CloudPluginSceneElementPortBO originPort = originEntry.getValue();
+            CloudPluginSceneElementPortBO newPort = getPort(portId);
+            if (newPort != null) {
+                if (StringUtils.isEmpty(newPort.getLogicNetworkId())) {
+                    newPort.setLogicNetworkId(originPort.getLogicNetworkId());
+                }
+                if (StringUtils.isEmpty(newPort.getResourceId())) {
+                    newPort.setResourceId(originPort.getResourceId());
+                }
+            }
+        }
         new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this, updateElementIds).modify();
     }
 
