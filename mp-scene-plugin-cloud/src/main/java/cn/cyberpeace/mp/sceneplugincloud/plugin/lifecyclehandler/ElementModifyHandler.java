@@ -369,7 +369,7 @@ public class ElementModifyHandler extends HandlerCommon {
 
         // 本次可能更新的端口
         Set<String> mayUpdatePortIds = new HashSet<>(newPortIds);
-        mayUpdatePortIds.retainAll(newPortIds);
+        mayUpdatePortIds.retainAll(originPortIds);
 
         for (String addPortId : addPortIds) {
             var addCloudPort = this.newCloudScenePluginHandler.getPort(addPortId);
