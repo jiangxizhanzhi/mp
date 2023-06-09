@@ -721,6 +721,7 @@ public class AsyncPlatFlowTaskService {
                 .rateConf(flowTaskConf.getRateConf())
                 .replay(flowTaskConfModel.getReplay())
                 .flowConf(flowTaskConf.getFlowConf())
+                .attackConfs(flowTaskConf.getAttackConfs())
                 .build();
         StartFlowTaskRequest startFlowTaskRequest = StartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
@@ -849,6 +850,7 @@ public class AsyncPlatFlowTaskService {
                     .rateConf(flowTaskConf.getRateConf())
                     .replay(flowTaskConfModel.getReplay())
                     .flowConf(flowTaskConf.getFlowConf())
+                    .attackConfs(flowTaskConf.getAttackConfs())
                     .build();
             flowTaskStartList.add(flowTaskStart);
         });
