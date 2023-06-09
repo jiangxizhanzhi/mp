@@ -156,6 +156,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
         List<FlowStatisticsDetail> latencyList = new ArrayList<>();
         List<FlowStatisticsDetail> jitterList = new ArrayList<>();
+        List<FlowStatisticsDetail> obytesList = new ArrayList<>();
+        List<FlowStatisticsDetail> oerrorsList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tempList)) {
             for (FlowStatisticsTemp temp : tempList) {
                 if (temp.getOffsetValue() == 0) {
@@ -192,12 +194,26 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                 jitter.setOffsetValue(temp.getOffsetValue());
                 jitter.setValue(temp.getJitter());
                 jitterList.add(jitter);
+                FlowStatisticsDetail obytes = new FlowStatisticsDetail();
+                obytes.setStatisticalTime(temp.getStatisticalTime());
+                obytes.setOffsetUnit(temp.getOffsetUnit());
+                obytes.setOffsetValue(temp.getOffsetValue());
+                obytes.setValue(temp.getObytes());
+                obytesList.add(obytes);
+                FlowStatisticsDetail oerrors = new FlowStatisticsDetail();
+                oerrors.setStatisticalTime(temp.getStatisticalTime());
+                oerrors.setOffsetUnit(temp.getOffsetUnit());
+                oerrors.setOffsetValue(temp.getOffsetValue());
+                oerrors.setValue(temp.getOerrors());
+                oerrorsList.add(oerrors);
             }
         }
         flowStatisticsInfo.setTxBpsList(txBpsList);
         flowStatisticsInfo.setTxPpsList(txPpsList);
         flowStatisticsInfo.setLatencyList(latencyList);
         flowStatisticsInfo.setJitterList(jitterList);
+        flowStatisticsInfo.setObytesList(obytesList);
+        flowStatisticsInfo.setOerrorsList(oerrorsList);
         log.info("FlowTaskRecordServiceImpl.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
     }
@@ -329,27 +345,42 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             totalDiff = 3600 * 12L;
             startTime = endTime.minusSeconds(3600 * 12);
         }
-        Integer diff = 2;
+        Integer diff = 5;
         String offsetUnit = "s";
         if (totalDiff <= 60) {
-            diff = 2;
-        } else if (totalDiff > 60 && totalDiff <= 300) {
             diff = 5;
-        } else if (totalDiff > 300 && totalDiff <= 1800) {
+        } else if (totalDiff > 60 && totalDiff <= 120) {
+            diff = 10;
+        } else if (totalDiff > 120 && totalDiff <= 300) {
             diff = 30;
-        } else if (totalDiff > 1800 && totalDiff <= 3600*2) {
-            diff = 2;
+        } else if (totalDiff > 300 && totalDiff <= 600) {
+            diff = 1;
             offsetUnit = "m";
-        } else {
+        } else if (totalDiff > 600 && totalDiff <= 1800) {
+            diff = 3;
+            offsetUnit = "m";
+        } else if (totalDiff > 1800 && totalDiff <= 3600) {
+            diff = 5;
+            offsetUnit = "m";
+        } else if (totalDiff > 3600 && totalDiff <= 3600*2) {
             diff = 10;
             offsetUnit = "m";
+        } else if (totalDiff > 3600*2 && totalDiff <= 3600*5) {
+            diff = 30;
+            offsetUnit = "m";
+        } else {
+            diff = 1;
+            offsetUnit = "h";
         }
         List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
         Integer offSet = 0;
         while (endTime.isAfter(startTime)) {
             FlowStatisticalCondition flowStatisticalCondition = new FlowStatisticalCondition();
             flowStatisticalCondition.setEndTime(endTime);
-            if ("m".equals(offsetUnit)) {
+            if ("h".equals(offsetUnit)) {
+                flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff * 3600));
+                endTime = endTime.minusSeconds(diff * 3600);
+            } else if ("m".equals(offsetUnit)) {
                 flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff * 60));
                 endTime = endTime.minusSeconds(diff * 60);
             } else if ("s".equals(offsetUnit)) {

@@ -321,6 +321,24 @@ public class CsceneFlowService {
     }
 
     /**
+     * 流量仿真统计(所有)
+     * @param id
+     * @return
+     */
+    public FlowStatisticsAll flowStatisticsAll(String id) {
+        log.info("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
+        FlowStatisticsAll flowStatisticsAll = new FlowStatisticsAll();
+        flowStatisticsAll.setFlowSummary(flowTaskRecordService.queryFlowSummary(sceneId));
+        flowStatisticsAll.setFlowStatisticsInfo(flowTaskRecordService.flowStatistics(sceneId));
+        flowStatisticsAll.setTop5NodeTxBpsList(this.top5NodeTxBps(id));
+        flowStatisticsAll.setTop5Protocols(this.top5Protocols(id));
+        flowStatisticsAll.setTotalRateList(this.totalRate(id));
+        log.info("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
+        return flowStatisticsAll;
+    }
+
+    /**
      * 流量任务启动
      * @param taskId
      */
@@ -433,7 +451,7 @@ public class CsceneFlowService {
             flowStatisticalCondition.setOffsetValue(offSet);
             queryList.add(flowStatisticalCondition);
             endTime = endTime.minusSeconds(5);
-            offSet -= 5;
+            offSet -= 10;
         }
         log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
         return queryList;

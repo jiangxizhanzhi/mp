@@ -23,7 +23,8 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     SCREEN_RECORD_ERROR("MP-110613", "screen_record_error"),
     REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR("MP-110614", "request_cloud_interface_business_error"),
     BUILD_IN_TARGET_NOT_ALLOWED_EXPORT("mp-110615", "build_in_target_not_allowed_export"),
-    ISO_REFERENCE_SCENE_WITH_NAME("mp-110616", "iso_reference_scene_with_name");
+    ISO_REFERENCE_SCENE_WITH_NAME("mp-110616", "iso_reference_scene_with_name"),
+    USB_NUM_EXCEEDS_LIMIT("MP-110617", "usb_num_exceeds_limit");
 
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);

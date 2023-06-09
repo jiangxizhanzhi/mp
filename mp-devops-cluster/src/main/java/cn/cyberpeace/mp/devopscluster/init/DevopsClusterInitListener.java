@@ -48,7 +48,11 @@ public class DevopsClusterInitListener implements ApplicationListener<Applicatio
             List<LocalFileMappingModel> mappings =
                     LocalFileMappingCommon.syncDir(WazuhCommon.BIZ_SCRIPTS_GROUP,
                             collectionAppConfig.getBizScriptsInstallerDir());
-            monitorScriptControlService.init(mappings);
+            try {
+                monitorScriptControlService.init(mappings);
+            } catch (Exception e) {
+                log.error("failed to init monitor script", e);
+            }
         });
     }
 }

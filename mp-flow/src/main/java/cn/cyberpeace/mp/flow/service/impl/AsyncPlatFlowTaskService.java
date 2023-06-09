@@ -721,6 +721,7 @@ public class AsyncPlatFlowTaskService {
                 .rateConf(flowTaskConf.getRateConf())
                 .replay(flowTaskConfModel.getReplay())
                 .flowConf(flowTaskConf.getFlowConf())
+                .attackConfs(flowTaskConf.getAttackConfs())
                 .build();
         StartFlowTaskRequest startFlowTaskRequest = StartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
@@ -759,8 +760,10 @@ public class AsyncPlatFlowTaskService {
      * @return
      */
     public ServiceResult<Boolean> batchStartTasks(List<String> taskIds, BatchStartTaskBO batchStartTaskBO) {
+        Integer runType = null;
         if (Objects.nonNull(batchStartTaskBO)) {
             // 有batchStartTaskBO，是靶场测评调用
+            runType = batchStartTaskBO.getRunType();
             taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
         }
 
@@ -808,9 +811,6 @@ public class AsyncPlatFlowTaskService {
 
                 // 设置源ip
                 String sourceIp = sipBO.getSourceIp();
-                if ("127.0.0.1".equals(sourceIp)) {
-                    sourceIp = "";
-                }
                 FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
                 if (Objects.nonNull(flowConf)) {
                     FlowTaskIpv4Conf ipv4Conf = flowConf.getIpv4Conf();
@@ -850,6 +850,7 @@ public class AsyncPlatFlowTaskService {
                     .rateConf(flowTaskConf.getRateConf())
                     .replay(flowTaskConfModel.getReplay())
                     .flowConf(flowTaskConf.getFlowConf())
+                    .attackConfs(flowTaskConf.getAttackConfs())
                     .build();
             flowTaskStartList.add(flowTaskStart);
         });
@@ -858,6 +859,7 @@ public class AsyncPlatFlowTaskService {
                 .action(TaskActionEnum.START.toValue())
                 .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
                 .tasks(flowTaskStartList)
+                .runType(runType)
                 .build();
 
         try {

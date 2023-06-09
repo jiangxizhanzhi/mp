@@ -47,7 +47,7 @@ spring:
     password: ${spring.rabbitmq.ext-var.password}
   web:
     resources:
-      static-locations: file:${user.home}/img
+      static-locations: file:/root/.mp/resources/default_img
 
 logging:
   config: classpath:logback-spring.xml
@@ -56,12 +56,10 @@ logging:
       root: ${ROOT_LEVEL:INFO}
     root: ${logging.level.ext-var.root}
   file:
-    ext-var:
-      path: /home/mp/logs
+#    ext-var:
 #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
     max-file-size: 300MB
     max-total-size: 650MB
-    path: ${logging.file.ext-var.path}
     max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:
@@ -115,7 +113,7 @@ mp:
     file-server: ${mp.base.ext-var.file-server}
     lfs-inner-http-url-template: ${mp.base.ext-var.lfs-inner-http-url}
     lfs-outer-http-url-template: ${mp.base.ext-var.lfs-outer-http-url}
-    run-init: true
+#    run-init: true
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
