@@ -349,24 +349,38 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         String offsetUnit = "s";
         if (totalDiff <= 60) {
             diff = 5;
-        } else if (totalDiff > 60 && totalDiff <= 300) {
-            diff = 20;
-        } else if (totalDiff > 300 && totalDiff <= 1800) {
-            diff = 2;
+        } else if (totalDiff > 60 && totalDiff <= 120) {
+            diff = 10;
+        } else if (totalDiff > 120 && totalDiff <= 300) {
+            diff = 30;
+        } else if (totalDiff > 300 && totalDiff <= 600) {
+            diff = 1;
             offsetUnit = "m";
-        } else if (totalDiff > 1800 && totalDiff <= 3600*2) {
+        } else if (totalDiff > 600 && totalDiff <= 1800) {
+            diff = 3;
+            offsetUnit = "m";
+        } else if (totalDiff > 1800 && totalDiff <= 3600) {
+            diff = 5;
+            offsetUnit = "m";
+        } else if (totalDiff > 3600 && totalDiff <= 3600*2) {
             diff = 10;
             offsetUnit = "m";
-        } else {
+        } else if (totalDiff > 3600*2 && totalDiff <= 3600*5) {
             diff = 30;
             offsetUnit = "m";
+        } else {
+            diff = 1;
+            offsetUnit = "h";
         }
         List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
         Integer offSet = 0;
         while (endTime.isAfter(startTime)) {
             FlowStatisticalCondition flowStatisticalCondition = new FlowStatisticalCondition();
             flowStatisticalCondition.setEndTime(endTime);
-            if ("m".equals(offsetUnit)) {
+            if ("h".equals(offsetUnit)) {
+                flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff * 3600));
+                endTime = endTime.minusSeconds(diff * 3600);
+            } else if ("m".equals(offsetUnit)) {
                 flowStatisticalCondition.setStartTime(endTime.minusSeconds(diff * 60));
                 endTime = endTime.minusSeconds(diff * 60);
             } else if ("s".equals(offsetUnit)) {
