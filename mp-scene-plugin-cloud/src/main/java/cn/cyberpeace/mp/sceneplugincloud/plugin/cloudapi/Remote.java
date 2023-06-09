@@ -130,7 +130,8 @@ public class Remote extends CloudClient {
                 new DisableGuacamoleRecordingData(connectionId), null,
                 DisableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
-            throw new MpRuntimeException(result.getMessages());
+            // 不再抛出异常
+            return StringUtils.EMPTY;
         }
         return result.getRecordingName();
     }
