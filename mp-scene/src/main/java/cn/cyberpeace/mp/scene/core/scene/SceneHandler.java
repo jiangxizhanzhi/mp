@@ -881,6 +881,7 @@ public class SceneHandler extends BaseSceneHandler<
             element.setName(newElement.getName());
             element.setIcon2(newElement.getIcon2());
             element.setIcon3(newElement.getIcon3());
+            element.setMaxPortNumber(newElement.getMaxPortNumber());
             // 插件数据 modify
             for (ScenePluginHandler plugin : getPlugins()) {
                 plugin.modifyElement(nodeId, updateHandler);
