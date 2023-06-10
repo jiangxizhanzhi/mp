@@ -137,8 +137,8 @@ class NodeElementConverter implements IConverter {
                     .collect(Collectors.toList());
             pluginElement.setStaticRoutes(routes);
         }
-        if (StringUtils.isNotEmpty(node.getProtocols())) {
-            container.getNodeProtocols().put(node.getId(), node.getProtocols());
+        if (node.getExtInfo() != null) {
+            container.getExtNodeInfos().put(node.getId(), node.getExtInfo());
         }
 
         if (CollectionUtils.isEmpty(node.getNet())) {

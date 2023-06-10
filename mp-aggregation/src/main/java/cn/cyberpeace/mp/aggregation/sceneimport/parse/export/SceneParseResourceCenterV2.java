@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.AclsInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ProtocolExportInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementShape;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.StaticRoutesResult;
@@ -22,8 +22,6 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -367,15 +365,15 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                 nodeElementParseResult.getStaticRouters().add(result);
             });
         }
-        ProtocolExportInfo protocolExportInfo = new ProtocolExportInfo();
-        protocolExportInfo.setRipLoopback(pluginElement.getRipLoopback());
-        protocolExportInfo.setOspfRouterId(pluginElement.getOspfRouterId());
-        protocolExportInfo.setPortProtocols(new ArrayList<>());
+        ExtNodeInfo protocolExtNodeInfo = new ExtNodeInfo();
+        protocolExtNodeInfo.setRipLoopback(pluginElement.getRipLoopback());
+        protocolExtNodeInfo.setOspfRouterId(pluginElement.getOspfRouterId());
+        protocolExtNodeInfo.setPortProtocols(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(e.getPorts())) {
             CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             for (var p : e.getPorts()) {
                 var cloudPort = cloudSceneConfigPluginHandler.getPort(p.getId());
-                ProtocolExportInfo.PortProtocolExportInfo exportInfo = new ProtocolExportInfo.PortProtocolExportInfo();
+                ExtNodeInfo.PortProtocolExportInfo exportInfo = new ExtNodeInfo.PortProtocolExportInfo();
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setBgpIp(cloudPort.getBgpIp());
                 exportInfo.setBgpPeer(cloudPort.getBgpPeer());
@@ -389,12 +387,14 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                     exportInfo.setConnectNode(sceneHandler.getPortConnectedElement(p.getId()).getId());
                 }
                 if (exportInfo.isNotEmpty()) {
-                    protocolExportInfo.getPortProtocols().add(exportInfo);
+                    protocolExtNodeInfo.getPortProtocols().add(exportInfo);
                 }
             }
         }
-        if (protocolExportInfo.isNotEmpty()) {
-            nodeElementParseResult.setProtocols(JsonCommon.stringify(protocolExportInfo));
+        if (protocolExtNodeInfo.isNotEmpty()) {
+            nodeElementParseResult.setExtInfo(protocolExtNodeInfo);
+        } else {
+            nodeElementParseResult.setExtInfo(new ExtNodeInfo());
         }
         return nodeElementParseResult;
     }
