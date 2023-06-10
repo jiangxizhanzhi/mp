@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -62,7 +63,7 @@ class ConvertDataContainer {
 
     private String sceneFilePath;
 
-    private Map<String, String> nodeProtocols = new HashMap<>();
+    private Map<String, ExtNodeInfo> extNodeInfos = new HashMap<>();
 
     private Set<String> simpleLayer3Switch = new HashSet<>();
 

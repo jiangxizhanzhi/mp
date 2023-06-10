@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ProtocolExportInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
@@ -24,7 +24,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.security.core.parameters.P;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -90,14 +89,13 @@ public class SceneExporter {
                         }
                     }
                 }
-                if (StringUtils.isNotEmpty(n.getProtocols())) {
-                    ProtocolExportInfo protocolExportInfo = JsonCommon.parse(n.getProtocols(), ProtocolExportInfo.class);
-                    if (CollectionUtils.isNotEmpty(protocolExportInfo.getPortProtocols())) {
-                        for (var p : protocolExportInfo.getPortProtocols()) {
+                if (n.getExtInfo() != null) {
+                    ExtNodeInfo extNodeInfo = n.getExtInfo();
+                    if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
+                        for (var p : extNodeInfo.getPortProtocols()) {
                             p.setConnectNode(parseResult.getIdConvert().get(p.getConnectNode()));
                         }
                     }
-                    n.setProtocols(JsonCommon.stringify(protocolExportInfo));
                 }
             });
         }
@@ -345,6 +343,7 @@ public class SceneExporter {
         result.put("targetIP", "target-iP");
         result.put("targetPort", "target-port");
         result.put("virtualPlatform", "virtual-platform");
+        result.put("extInfo", "ext-info");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_EMPTY, "");
@@ -386,6 +385,10 @@ public class SceneExporter {
                     }
                 } else if (property.getType().isAssignableFrom(List.class)) {
                     if (memberValue != null && CollectionUtils.isNotEmpty((List) memberValue)) {
+                        filterProperties.add(property);
+                    }
+                } else if (property.getType().isAssignableFrom(ExtNodeInfo.class)) {
+                    if (memberValue != null) {
                         filterProperties.add(property);
                     }
                 } else {
