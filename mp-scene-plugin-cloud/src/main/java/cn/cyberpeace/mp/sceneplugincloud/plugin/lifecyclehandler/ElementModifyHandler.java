@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpD
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
@@ -376,32 +377,26 @@ public class ElementModifyHandler extends HandlerCommon {
             var addPort = this.newCloudScenePluginHandler.getPort(addPortId).getSrcPort();
             var net = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(addPort);
             if (net != null) {
+                // 虚拟机容器分开处理
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                    VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                    port.setFixedIp(addPort.getIp());
-                    port.setNetworkId(net.getResourceId());
-                    var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
+                    var result = this.vmAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp(), null);
 
                     addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
-                    addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
                 } else {
-                    ContainerAddPortData addPortData = new ContainerAddPortData();
-                    addPortData.setContainerId(originCloudElement.getResourceId());
-                    addPortData.setNetworkId(net.getResourceId());
-                    addPortData.setFixedIp(addPort.getIp());
-                    var result = container.addPort(addPortData);
+                    var result = this.containerAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp());
 
                     addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
-                    addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
                 }
+                addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
             }
         }
 
         for (String delPortId : delPortIds) {
+            // 虚拟机容器分开处理
             if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                 virtualMachine.deletePort(originCloudElement.getResourceId(), delPortId);
             } else {
@@ -409,11 +404,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 var deletePort = deleteCloudPort.getSrcPort();
                 var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
 
-                ContainerDeletePortData deletePortData = new ContainerDeletePortData();
-                deletePortData.setContainerId(originCloudElement.getResourceId());
-                deletePortData.setNetworkId(originNet.getResourceId());
-                deletePortData.setPortId(deleteCloudPort.getResourceId());
-                container.deletePort(deletePortData);
+                this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
             }
         }
 
@@ -432,42 +423,61 @@ public class ElementModifyHandler extends HandlerCommon {
             if (newNet == null && originNet == null) {
                 // do nothing
             } else if (newNet == null) {
+                // 虚拟机容器分开处理
                 // 去掉旧的
-                virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
+                } else {
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                }
             } else if (originNet == null) {
-                // 添加新的
-                VirtualPortCreateData portCreateData = new VirtualPortCreateData();
-                portCreateData.setFixedIp(newIp);
-                portCreateData.setMacAddress(originPort.getMacAddr());
-                portCreateData.setNetworkId(newNet.getResourceId());
-                var newPortResult = virtualPort.create(portCreateData);
-                VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                port.setFixedIp(newIp);
-                port.setPortId(newPortResult.getId());
-                port.setNetworkId(newNet.getResourceId());
-                var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
-                // 保存
-                newPort.setIp(result.getFixedIp());
-                newPort.setMacAddr(result.getMacAddress());
-                newCloudPort.setResourceId(result.getPortId());
+                // 虚拟机容器分开处理
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    // 添加新的
+                    VirtualPortCreateData portCreateData = new VirtualPortCreateData();
+                    portCreateData.setFixedIp(newIp);
+                    portCreateData.setMacAddress(originPort.getMacAddr());
+                    portCreateData.setNetworkId(newNet.getResourceId());
+                    var newPortResult = virtualPort.create(portCreateData);
+                    var result = this.vmAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newIp, newPortResult.getId());
+                    // 保存
+                    newPort.setIp(result.getFixedIp());
+                    newPort.setMacAddr(result.getMacAddress());
+                    newCloudPort.setResourceId(result.getPortId());
+                } else {
+                    var result = this.containerAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newPort.getIp());
+
+                    newPort.setIp(newPort.getIp());
+                    newPort.setMacAddr(result.getMacAddress());
+                    newCloudPort.setResourceId(result.getPortId());
+                }
+                newCloudPort.setAuxiliaryNetworkId(newNet.getResourceId());
             } else if (!StringUtils.equals(newNet.getResourceId(), originNet.getResourceId())) {
-                // 去掉旧的
-                virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
-                // 添加新的
-                VirtualPortCreateData portCreateData = new VirtualPortCreateData();
-                portCreateData.setFixedIp(newIp);
-                portCreateData.setMacAddress(originPort.getMacAddr());
-                portCreateData.setNetworkId(newNet.getResourceId());
-                var newPortResult = virtualPort.create(portCreateData);
-                VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                port.setFixedIp(newIp);
-                port.setPortId(newPortResult.getId());
-                port.setNetworkId(newNet.getResourceId());
-                var result = virtualMachine.addPort(originCloudElement.getResourceId(), port);
-                // 保存
-                newPort.setIp(result.getFixedIp());
-                newPort.setMacAddr(result.getMacAddress());
-                newCloudPort.setResourceId(result.getPortId());
+                // 虚拟机容器分开处理
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    // 去掉旧的
+                    virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
+                    // 添加新的
+                    VirtualPortCreateData portCreateData = new VirtualPortCreateData();
+                    portCreateData.setFixedIp(newIp);
+                    portCreateData.setMacAddress(originPort.getMacAddr());
+                    portCreateData.setNetworkId(newNet.getResourceId());
+                    var newPortResult = virtualPort.create(portCreateData);
+                    var result = this.vmAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newIp, newPortResult.getId());
+                    // 保存
+                    newPort.setIp(result.getFixedIp());
+                    newPort.setMacAddr(result.getMacAddress());
+                    newCloudPort.setResourceId(result.getPortId());
+                } else {
+                    // 去掉旧的
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                    // 添加新的
+                    var result = this.containerAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newPort.getIp());
+
+                    newPort.setIp(newPort.getIp());
+                    newPort.setMacAddr(result.getMacAddress());
+                    newCloudPort.setResourceId(result.getPortId());
+                }
             } else if (ipChange) {
                 ModifyInstanceIpData data = new ModifyInstanceIpData();
                 data.setPortId(originCloudPort.getResourceId());
@@ -481,5 +491,29 @@ public class ElementModifyHandler extends HandlerCommon {
                 virtualPort.modifyInstanceIp(data);
             }
         }
+    }
+
+    private VirtualMachineAddPortResult vmAddPort(String elementResourceId, String networkResourceId, String fixedIp, String portResourceId) {
+        VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+        port.setFixedIp(fixedIp);
+        port.setPortId(portResourceId);
+        port.setNetworkId(networkResourceId);
+        return virtualMachine.addPort(elementResourceId, port);
+    }
+
+    private ContainerAddPortData containerAddPort(String elementResourceId, String networkResourceId, String fixedIp) {
+        ContainerAddPortData addPortData = new ContainerAddPortData();
+        addPortData.setContainerId(elementResourceId);
+        addPortData.setNetworkId(networkResourceId);
+        addPortData.setFixedIp(fixedIp);
+        return container.addPort(addPortData);
+    }
+
+    private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId) {
+        ContainerDeletePortData deletePortData = new ContainerDeletePortData();
+        deletePortData.setContainerId(elementResourceId);
+        deletePortData.setNetworkId(networkResourceId);
+        deletePortData.setPortId(portResourceId);
+        return container.deletePort(deletePortData);
     }
 }
