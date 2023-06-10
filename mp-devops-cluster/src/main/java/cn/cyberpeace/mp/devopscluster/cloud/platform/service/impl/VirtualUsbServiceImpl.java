@@ -123,7 +123,8 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         }
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
-        super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.toUnderlineJSONString(virtualUsb), VirtualUsb.class);
+        BaseCloudPlatformResult result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
+        super.checkResult(result);
         log.info("VirtualUsbServiceImpl.add end.");
     }
 
@@ -136,7 +137,8 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.update begin. virtualUsbVO:{}", virtualUsbVO);
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
-        super.sendPut(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + virtualUsbVO.getUuid(), JsonUtils.toUnderlineJSONString(virtualUsb), VirtualUsb.class);
+        BaseCloudPlatformResult result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + virtualUsbVO.getUuid(), JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
+        super.checkResult(result);
         log.info("VirtualUsbServiceImpl.update end.");
     }
 

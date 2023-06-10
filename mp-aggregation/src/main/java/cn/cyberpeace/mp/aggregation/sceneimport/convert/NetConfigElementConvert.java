@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ProtocolExportInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -47,13 +47,13 @@ class NetConfigElementConvert implements IConverter {
                     }
                 }
             }
-            if (container.getNodeProtocols().containsKey(element.getId())) {
-                ProtocolExportInfo protocolExportInfo = JsonCommon.parse(container.getNodeProtocols().get(element.getId()), ProtocolExportInfo.class);
-                cloudElement.setOspfRouterId(protocolExportInfo.getOspfRouterId());
-                cloudElement.setRipLoopback(protocolExportInfo.getRipLoopback());
-                if (CollectionUtils.isNotEmpty(protocolExportInfo.getPortProtocols())) {
-                    Map<String, ProtocolExportInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
-                    for (var ps : protocolExportInfo.getPortProtocols()) {
+            if (container.getExtNodeInfos().containsKey(element.getId())) {
+                ExtNodeInfo extNodeInfo = container.getExtNodeInfos().get(element.getId());
+                cloudElement.setOspfRouterId(extNodeInfo.getOspfRouterId());
+                cloudElement.setRipLoopback(extNodeInfo.getRipLoopback());
+                if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
+                    Map<String, ExtNodeInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
+                    for (var ps : extNodeInfo.getPortProtocols()) {
                         nodeId2Protocol.put(ps.getConnectNode(), ps);
                     }
                     if (CollectionUtils.isNotEmpty(element.getPorts())) {
