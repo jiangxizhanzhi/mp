@@ -429,12 +429,12 @@ public class ElementModifyHandler extends HandlerCommon {
             boolean ipChange = !StringUtils.equals(newIp, originIp);
             var newNet = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(newPort);
             var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(originPort);
-            if (newNet == null || originNet == null) {
+            if (newNet == null && originNet == null) {
                 // do nothing
-            } else if ((newNet == null && originNet != null)) {
+            } else if (newNet == null) {
                 // 去掉旧的
                 virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
-            } else if (newNet != null && originNet == null) {
+            } else if (originNet == null) {
                 // 添加新的
                 VirtualPortCreateData portCreateData = new VirtualPortCreateData();
                 portCreateData.setFixedIp(newIp);
