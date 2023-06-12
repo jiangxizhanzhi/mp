@@ -29,7 +29,7 @@ spring:
     name: mp
   servlet:
     multipart:
-      max-file-size: 1000MB
+      max-file-size: 1024MB
       max-request-size: 10000MB
   rabbitmq:
     host: ${ip.rabbitmq}
