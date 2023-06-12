@@ -742,7 +742,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
         log.info("modify_element params,request:{}", JsonCommon.snakeStringify(elementModifyBO));
         CsceneDataModifier.removeFilePathPrefix(elementModifyBO);
-        modelService.modifyElement(elementModifyBO,new CsceneContextBO());
+        modelService.modifyElement(elementModifyBO,elementModifyBO.getContext());
         return new ServiceResult<>(new ElementModifyBO()).asResult();
     }
 
