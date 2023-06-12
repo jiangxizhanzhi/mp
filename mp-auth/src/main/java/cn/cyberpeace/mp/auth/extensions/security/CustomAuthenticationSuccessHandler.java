@@ -127,8 +127,18 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 result = ServiceResult.builder().source(loginResp).build();
 
                 // 首次登陆，需要修改密码, 返回code:MP-110005 提示前端弹出修改初始密码的页面
-                if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
+                if (user.getInitCheck() == UserModel.INT_CHECK_YES
+                        && user.getAgreePrivacyPolicyTime() != UserModel.NEED_AGREE_PRIVACY_POLICY) {
+                    // 此时需要弹出更新密码界面但不弹出同意用户协议界面
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
+                } else if (user.getInitCheck() == UserModel.INT_CHECK_YES
+                        && user.getAgreePrivacyPolicyTime() == UserModel.NEED_AGREE_PRIVACY_POLICY) {
+                    // 此时需要弹出更新密码界面和同意用户协议界面
+                    result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_AGREE_PRIVACY_POLICY_AND_UPDATE_CREDENTIALS).build();
+                } else if (user.getInitCheck() != UserModel.INT_CHECK_YES
+                        && user.getAgreePrivacyPolicyTime() == UserModel.NEED_AGREE_PRIVACY_POLICY) {
+                    // 此时需要弹出同意用户协议界面但不弹出更新密码界面
+                    result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_AGREE_PRIVACY_POLICY).build();
                 }
                 String pwdErrorCountCacheKey = AuthConstant.PASSWORD_ERROR_COUNT_KEY + ":" + user.getUsername();
                 loginFailureCache.invalidate(pwdErrorCountCacheKey);

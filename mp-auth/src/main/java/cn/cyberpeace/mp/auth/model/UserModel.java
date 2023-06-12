@@ -41,6 +41,8 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
+    public static final int NEED_AGREE_PRIVACY_POLICY = -1;
+
     @ApiModelProperty(value = "主键")
     @DefaultInt(0)
     private Integer pk;
@@ -121,6 +123,10 @@ public class UserModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "1：已审核 0：待审核")
     @DefaultInt(1)
     private Integer isAudited;
+
+    @ApiModelProperty(value = "-1：提醒 -2：永不提醒 ")
+    @DefaultInt(-1)
+    private Integer agreePrivacyPolicyTime;
 
 
     @ApiModelProperty(value = "加入时间")
