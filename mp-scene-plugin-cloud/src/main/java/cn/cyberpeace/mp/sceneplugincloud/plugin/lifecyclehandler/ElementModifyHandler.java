@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -40,6 +42,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +55,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ElementModifyHandler extends HandlerCommon {
+
+    public static class ElementProcess {
+        public static final EventProcess UPDATE_NODE = new EventProcess("update_node", "sceneplugincloud.event.update_node");
+    }
 
     private CloudScenePluginHandler newCloudScenePluginHandler;
 
@@ -68,25 +75,28 @@ public class ElementModifyHandler extends HandlerCommon {
 
     public void modifyElement(CloudPluginSceneElementBO newCloudElement, CloudScenePluginHandler newCloudScenePluginHandler) {
         this.newCloudScenePluginHandler = newCloudScenePluginHandler;
-        // todo 优化 去掉role这个业务字段
-        if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
-            // 更新网络
-            this.modifyVirtualSwitch(newCloudElement);
-        } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
-            // 更新虚拟路由
-            this.modifyVirtualRouter(newCloudElement);
-        } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL) {
-            // 更新虚拟防护墙
-            this.modifyVirtualFirewall(newCloudElement);
-        } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
-            if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                // 更新虚拟机终端
-                this.modifyVirtualMachine(newCloudElement);
-            } else if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
-                // 更新容器终端
-                this.modifyContainer(newCloudElement);
+        getPluginHandler().getSceneHandler().prepareElementProcess(newCloudElement.getSrcElement().getId(), SceneElementModel.Event.MODIFY, Arrays.asList(ElementProcess.UPDATE_NODE));
+        runElementProgress(newCloudElement.getSrcElement().getId(), ElementProcess.UPDATE_NODE, () -> {
+            // todo 优化 去掉role这个业务字段
+            if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                // 更新网络
+                this.modifyVirtualSwitch(newCloudElement);
+            } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
+                // 更新虚拟路由
+                this.modifyVirtualRouter(newCloudElement);
+            } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL) {
+                // 更新虚拟防护墙
+                this.modifyVirtualFirewall(newCloudElement);
+            } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
+                if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    // 更新虚拟机终端
+                    this.modifyVirtualMachine(newCloudElement);
+                } else if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                    // 更新容器终端
+                    this.modifyContainer(newCloudElement);
+                }
             }
-        }
+        });
     }
 
     private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement) {

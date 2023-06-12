@@ -740,6 +740,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("更新节点")
     @PostMapping("/modify_element")
     public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
+        log.info("modify_element params,request:{}", JsonCommon.snakeStringify(elementModifyBO));
         CsceneDataModifier.removeFilePathPrefix(elementModifyBO);
         modelService.modifyElement(elementModifyBO,new CsceneContextBO());
         return new ServiceResult<>(new ElementModifyBO()).asResult();
