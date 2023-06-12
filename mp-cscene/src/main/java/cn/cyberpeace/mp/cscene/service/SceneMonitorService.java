@@ -211,7 +211,10 @@ public class SceneMonitorService {
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().contains(request.getName()));
         }
-        List<String> nodeIds = stream.map(SceneElementBO::getId).collect(Collectors.toList());
+        List<String> nodeIds = stream
+                .filter(n -> !Boolean.TRUE.equals(n.getIsAuxiliary()))
+                .map(SceneElementBO::getId)
+                .collect(Collectors.toList());
         // 根据节点id筛选
         if (Objects.nonNull(request) && CollectionUtils.isNotEmpty(request.getElementIds())) {
             nodeIds.retainAll(request.getElementIds());
@@ -259,10 +262,17 @@ public class SceneMonitorService {
         }
 
         // 添加云插件端口接入方式
-        basicInfos.forEach(basicInfo -> basicInfo.getPorts().forEach(p -> {
-            var cloudPort = cloudPlugin.getPort(p.getId());
-            p.setCloudAccessModes(cloudPort.getAccessModes());
-        }));
+        if (CollectionUtils.isNotEmpty(basicInfos)) {
+            for (var basicInfo : basicInfos) {
+                if (CollectionUtils.isEmpty(basicInfo.getPorts())) {
+                    continue;
+                }
+                for (var p : basicInfo.getPorts()) {
+                    var cloudPort = cloudPlugin.getPort(p.getId());
+                    p.setCloudAccessModes(cloudPort.getAccessModes());
+                }
+            }
+        }
 
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
