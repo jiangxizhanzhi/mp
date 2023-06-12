@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
@@ -56,6 +57,14 @@ public class CreateHandler extends HandlerCommon {
                         }
                     }
                     flowElements.forEach(element -> {
+                        var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
+                        if (cloudElement == null || cloudElement.getVirtualType() == null) {
+                            return;
+                        }
+                        if (!cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                                && !cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                            return;
+                        }
                         if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
                             element.getSrcElement().getPorts().forEach(port -> {
                                 var network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);

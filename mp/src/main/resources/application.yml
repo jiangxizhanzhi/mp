@@ -151,7 +151,7 @@ mp:
     authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
     authenticate-jwt-expires: 604800
     authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
-    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public
+    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip
     authenticate-encoder-iterations: 10000
     authenticate-encoder-hash-width: 256
   # mp-front-admin 模块配置
@@ -170,7 +170,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
-    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health
+    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.service.RestCpcloudAllIpsService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
 import io.swagger.annotations.Api;
@@ -30,6 +31,9 @@ public class RestCpcloudAllIpsController {
     @Resource
     private RestCpcloudAllIpsService modelService;
 
+    @Resource
+    private CloudAppConfig config;
+
     @ApiOperation("删除所有运行中的场景和靶标示例")
     @DeleteMapping("/clear_all")
     public ServiceResult<Boolean> clearAll() {
@@ -40,6 +44,10 @@ public class RestCpcloudAllIpsController {
     @ApiOperation("重新设置环境所有Ip")
     @PostMapping("/reset_all_ip")
     public ServiceResult<Boolean> resetAllIp(@RequestBody ResetCplcoudAllIpsData request) {
+        // 单ip模式下 不支持修改
+        if(Boolean.TRUE.equals(config.getPublicNetProxy())){
+            return new ServiceResult<>(false);
+        }
         return modelService.resetAllIps(request);
     }
 
