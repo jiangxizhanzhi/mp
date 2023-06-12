@@ -318,7 +318,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
-        element.setImage(image);
+        if (StringUtils.isNotEmpty(image)) {
+            element.setImage(image);
+        }
         new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
     }
 
