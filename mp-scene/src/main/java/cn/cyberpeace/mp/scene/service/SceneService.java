@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart,Runnable callback) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback) {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
@@ -307,11 +308,30 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneHandler updateHandler, SceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(false);
+    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneDataBO newDataBO, SceneContextBO context) {
+        SceneHandler originHandler = new SceneHandler(id, null, false, context);
+        newDataBO.getTopology().setScene(originHandler.getScene());
+        SceneHandler updateHandler = new SceneHandler(newDataBO, context);
+
+        var originElement = originHandler.getElement(nodeId);
+        var newElement = updateHandler.getElement(nodeId);
+        newElement.setEid(originElement.getEid());
+        newElement.setEvent(originElement.getEvent());
+        newElement.setEventStatus(originElement.getEventStatus());
+        newElement.setProcess(originElement.getProcess());
+        newElement.setProcessMessage(originElement.getProcessMessage());
+        newElement.setProcessStatus(originElement.getProcessStatus());
+        if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
+            for (var newPort : newElement.getPorts()) {
+                var originPort = originHandler.getPort(newPort.getId());
+                if (originPort != null) {
+                    newPort.setEid(originPort.getEid());
+                }
+            }
+        }
+
         ElementTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.modifyElement(nodeId, updateHandler);
+            updateHandler.modifyElement(nodeId, originHandler);
         });
         return new ServiceResult<>(true);
     }

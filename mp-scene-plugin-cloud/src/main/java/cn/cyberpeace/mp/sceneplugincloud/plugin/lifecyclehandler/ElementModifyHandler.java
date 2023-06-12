@@ -61,6 +61,7 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private CloudScenePluginHandler newCloudScenePluginHandler;
+    private CloudScenePluginHandler originCloudScenePluginHandler;
 
     private VirtualMachine virtualMachine = new VirtualMachine();
     private Container container = new Container();
@@ -69,8 +70,8 @@ public class ElementModifyHandler extends HandlerCommon {
     private VirtualFirewall virtualFirewall = new VirtualFirewall();
     private VirtualPort virtualPort = new VirtualPort();
 
-    public ElementModifyHandler(CloudScenePluginHandler pluginHandler, int event) {
-        super(pluginHandler, RecreateTaskPool.getInstance(), event);
+    public ElementModifyHandler(CloudScenePluginHandler newHandler, int event) {
+        super(newHandler, RecreateTaskPool.getInstance(), event);
     }
 
     public void modifyElement(CloudPluginSceneElementBO newCloudElement, CloudScenePluginHandler newCloudScenePluginHandler) {
@@ -80,27 +81,57 @@ public class ElementModifyHandler extends HandlerCommon {
             // todo 优化 去掉role这个业务字段
             if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
                 // 更新网络
-                this.modifyVirtualSwitch(newCloudElement);
+                this.modifyVirtualSwitch(newCloudElement, getPluginHandler().getElement(newCloudElement.getSrcElement().getId()));
             } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
                 // 更新虚拟路由
-                this.modifyVirtualRouter(newCloudElement);
+                this.modifyVirtualRouter(newCloudElement, getPluginHandler().getElement(newCloudElement.getSrcElement().getId()));
             } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL) {
                 // 更新虚拟防护墙
-                this.modifyVirtualFirewall(newCloudElement);
+                this.modifyVirtualFirewall(newCloudElement, getPluginHandler().getElement(newCloudElement.getSrcElement().getId()));
             } else if (newCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
                 if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                     // 更新虚拟机终端
-                    this.modifyVirtualMachine(newCloudElement);
+                    this.modifyVirtualMachine(newCloudElement, getPluginHandler().getElement(newCloudElement.getSrcElement().getId()));
                 } else if (newCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
                     // 更新容器终端
-                    this.modifyContainer(newCloudElement);
+                    this.modifyContainer(newCloudElement, getPluginHandler().getElement(newCloudElement.getSrcElement().getId()));
                 }
             }
         });
     }
 
-    private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement) {
-        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+    public void modifyElementV2(CloudPluginSceneElementBO originCloudElement, CloudScenePluginHandler originCloudScenePluginHandler) {
+        this.newCloudScenePluginHandler = this.getPluginHandler();
+        this.originCloudScenePluginHandler = originCloudScenePluginHandler;
+
+        String nodeId = originCloudElement.getSrcElement().getId();
+        var newCloudElement = getPluginHandler().getElement(nodeId);
+
+        getPluginHandler().getSceneHandler().prepareElementProcess(originCloudElement.getSrcElement().getId(), SceneElementModel.Event.MODIFY, Arrays.asList(ElementProcess.UPDATE_NODE));
+        runElementProgress(originCloudElement.getSrcElement().getId(), ElementProcess.UPDATE_NODE, () -> {
+            // todo 优化 去掉role这个业务字段
+            if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                // 更新网络
+                this.modifyVirtualSwitch(newCloudElement, originCloudElement);
+            } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
+                // 更新虚拟路由
+                this.modifyVirtualRouter(newCloudElement, originCloudElement);
+            } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL) {
+                // 更新虚拟防护墙
+                this.modifyVirtualFirewall(newCloudElement, originCloudElement);
+            } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                    // 更新虚拟机终端
+                    this.modifyVirtualMachine(newCloudElement, originCloudElement);
+                } else if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                    // 更新容器终端
+                    this.modifyContainer(newCloudElement, originCloudElement);
+                }
+            }
+        });
+    }
+
+    private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
             String flavorId = this.createFlavor(newCloudElement);
@@ -109,8 +140,7 @@ public class ElementModifyHandler extends HandlerCommon {
         this.changeConnect(newCloudElement, originCloudElement);
     }
 
-    private void modifyContainer(CloudPluginSceneElementBO newCloudElement) {
-        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+    private void modifyContainer(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             ContainerResizeData resizeData = new ContainerResizeData();
             resizeData.setCpu(newCloudElement.getSrcElement().getCpu());
@@ -121,8 +151,7 @@ public class ElementModifyHandler extends HandlerCommon {
         this.changeConnect(newCloudElement, originCloudElement);
     }
 
-    private void modifyVirtualSwitch(CloudPluginSceneElementBO newCloudElement) {
-        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+    private void modifyVirtualSwitch(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (CollectionUtils.isEmpty(originCloudElement.getDeriveNetworks())) {
             return;
         }
@@ -142,16 +171,14 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
-    private void modifyVirtualRouter(CloudPluginSceneElementBO newCloudElement) {
-        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+    private void modifyVirtualRouter(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
         // 端口qos变更
         this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
-    private void modifyVirtualFirewall(CloudPluginSceneElementBO newCloudElement) {
-        CloudPluginSceneElementBO originCloudElement = this.getPluginHandler().getElement(newCloudElement.getSrcElement().getId());
+    private void modifyVirtualFirewall(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
         // 端口qos变更
