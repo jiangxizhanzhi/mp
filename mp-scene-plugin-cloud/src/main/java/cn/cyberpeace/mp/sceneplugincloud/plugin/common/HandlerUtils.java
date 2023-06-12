@@ -76,6 +76,12 @@ public class HandlerUtils {
         this.portId2network.put(port.getId(), network);
     }
 
+    public void setPortNetworks(Map<String, CloudPluginSceneElementNetworkBO> portId2network) {
+        portId2network.forEach((k, v) -> {
+            this.portId2network.put(k, v);
+        });
+    }
+
     public HandlerUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
     }
