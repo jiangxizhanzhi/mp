@@ -871,34 +871,14 @@ public class SceneHandler extends BaseSceneHandler<
         new SceneHandler(scene, null).save();
     }
 
-    public void modifyElement(String nodeId, SceneHandler updateHandler) {
-        var originElement = getElement(nodeId);
-        var newElement = updateHandler.getElement(nodeId);
-        newElement.setEid(originElement.getEid());
-        newElement.setEvent(originElement.getEvent());
-        newElement.setEventStatus(originElement.getEventStatus());
-        newElement.setProcess(originElement.getProcess());
-        newElement.setProcessMessage(originElement.getProcessMessage());
-        newElement.setProcessStatus(originElement.getProcessStatus());
-        if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
-            for (var newPort : newElement.getPorts()) {
-                var originPort = getPort(newPort.getId());
-                if (originPort != null) {
-                    newPort.setEid(originPort.getEid());
-                }
-            }
-        }
-        getElementMap().put(nodeId, newElement);
-
-
+    public void modifyElement(String nodeId, SceneHandler originHandler) {
         var element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.MODIFY);
         startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
         try {
-
             // 插件数据 modify
             for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.modifyElement(nodeId, updateHandler);
+                plugin.modifyElement(nodeId, originHandler);
             }
         } catch (Exception e) {
             log.error("failed to modifyElement , sceneId is {} , nodeId is {}, exception is {}", getSceneId(),

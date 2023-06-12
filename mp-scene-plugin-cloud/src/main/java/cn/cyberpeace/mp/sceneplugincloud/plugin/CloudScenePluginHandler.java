@@ -323,20 +323,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void modifyElement(String nodeId, SceneHandler updateHandler) {
-        CloudScenePluginHandler updateCloudHandler = updateHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        setScene(updateCloudHandler.getScene());
-        var newCloudElement = updateCloudHandler.getElement(nodeId);
-        getElementMap().put(nodeId, newCloudElement);
-        for (var newPort : updateCloudHandler.getElementPortMap().entrySet()) {
-            getElementPortMap().put(newPort.getKey(), newPort.getValue());
-        }
-
+    public void modifyElement(String nodeId, SceneHandler originHandler) {
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
-        new ElementModifyHandler(this, SceneElementModel.Event.MODIFY).modifyElement(updateCloudHandler.getElement(nodeId), updateCloudHandler);
+        CloudScenePluginHandler originCloudHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        new ElementModifyHandler(this, SceneElementModel.Event.MODIFY).modifyElementV2(originCloudHandler.getElement(nodeId), originCloudHandler);
     }
 
     @Override
