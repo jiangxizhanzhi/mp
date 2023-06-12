@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
@@ -335,7 +336,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
-        new ElementModifyHandler(this, getSceneHandler().getScene().getEvent()).modifyElement(updateCloudHandler.getElement(nodeId), updateCloudHandler);
+        new ElementModifyHandler(this, SceneElementModel.Event.MODIFY).modifyElement(updateCloudHandler.getElement(nodeId), updateCloudHandler);
     }
 
     @Override
