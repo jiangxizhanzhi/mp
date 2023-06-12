@@ -304,6 +304,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
             if (CollectionUtils.isNotEmpty(taskTaskModels)) {
                 int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
+                log.info("batch tasks runningCount is {}", runningCount);
                 if (runningCount == 0) {
                     if (Objects.nonNull(batchTaskConsumer)) {
                         // 回调参数封装
@@ -331,6 +332,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             } else {
                 log.error("no batch tasks for sceneId: {}", sceneId);
             }
+        } else {
+            log.info("batch tasks batchTaskConsumer is null");
         }
     }
 
