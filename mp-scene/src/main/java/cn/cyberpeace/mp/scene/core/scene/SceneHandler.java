@@ -874,11 +874,20 @@ public class SceneHandler extends BaseSceneHandler<
     public void modifyElement(String nodeId, SceneHandler updateHandler) {
         var originElement = getElement(nodeId);
         var newElement = updateHandler.getElement(nodeId);
+        newElement.setEid(originElement.getEid());
         newElement.setEvent(originElement.getEvent());
         newElement.setEventStatus(originElement.getEventStatus());
         newElement.setProcess(originElement.getProcess());
         newElement.setProcessMessage(originElement.getProcessMessage());
         newElement.setProcessStatus(originElement.getProcessStatus());
+        if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
+            for (var newPort : newElement.getPorts()) {
+                var originPort = getPort(newPort.getId());
+                if (originPort != null) {
+                    newPort.setEid(originPort.getEid());
+                }
+            }
+        }
         getElementMap().put(nodeId, newElement);
 
 
