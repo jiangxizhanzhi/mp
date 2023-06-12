@@ -46,7 +46,7 @@ public class ModifyHandler extends HandlerCommon {
             originNodeIds.addAll(updateElementIds);
         }
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
-        this.elementModifyHandler = new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent());
+        this.elementModifyHandler = new ElementModifyHandler(newPlugin, originPlugin, originPlugin.getSceneHandler().getScene().getEvent());
         this.newPlugin = newPlugin;
         this.originPlugin = originPlugin;
     }
@@ -58,7 +58,8 @@ public class ModifyHandler extends HandlerCommon {
         if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
             for (String elementId : mayUpdateNodeIds) {
                 CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                new ElementModifyHandler(originPlugin, originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement, newPlugin);
+                new ElementModifyHandler(newPlugin, originPlugin,
+                        originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
             }
         }
     }

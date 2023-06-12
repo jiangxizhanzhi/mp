@@ -329,7 +329,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
         CloudScenePluginHandler originCloudHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        new ElementModifyHandler(this, SceneElementModel.Event.MODIFY).modifyElementV2(originCloudHandler.getElement(nodeId), originCloudHandler);
+        this.getHandlerUtils().setPortNetworks(originCloudHandler.getHandlerUtils().getPortId2network());
+        new ElementModifyHandler(this, originCloudHandler, SceneElementModel.Event.MODIFY).modifyElement(nodeId);
     }
 
     @Override
