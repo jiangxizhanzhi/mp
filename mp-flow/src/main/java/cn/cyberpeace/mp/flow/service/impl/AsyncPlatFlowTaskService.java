@@ -703,10 +703,10 @@ public class AsyncPlatFlowTaskService {
 
             FlowTaskCommonConf commonConf = flowTaskConf.getCommonConf();
             if (Objects.nonNull(commonConf)) {
-                commonConf.setLatency(2);
+                commonConf.setIpg(2);
             } else {
                 commonConf = new FlowTaskCommonConf();
-                commonConf.setLatency(2);
+                commonConf.setIpg(2);
                 flowTaskConf.setCommonConf(commonConf);
             }
         }
