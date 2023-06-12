@@ -527,10 +527,17 @@ public class ImagesController {
         return new Result<>(flavorList);
     }
 
-    @ApiOperation("查询dynamic相关的信息")
+    @ApiOperation("查询dynamips 相关的信息")
     @GetMapping("/dynamic_image_info")
     public Result<DynamicImageInfo> getDynamicImageInfo(@RequestParam(required = false) String platform) {
         var info = dynamipsService.getInfo(platform);
+        return new Result<>(info);
+    }
+
+    @ApiOperation("查询dynamips flavor 相关的信息")
+    @GetMapping("/dynamic_type_info")
+    public Result<Map<String, Object>> getDynamicTypeInfo() {
+        var info = dynamipsService.getTypeInfo();
         return new Result<>(info);
     }
 
