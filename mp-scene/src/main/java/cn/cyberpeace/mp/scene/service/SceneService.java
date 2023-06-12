@@ -309,7 +309,7 @@ public class SceneService {
 
     public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneHandler updateHandler, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.setRealTimeUpdate(false);
         ElementTaskPool.getInstance().executeTask(() -> {
             sceneHandler.modifyElement(nodeId, updateHandler);
         });

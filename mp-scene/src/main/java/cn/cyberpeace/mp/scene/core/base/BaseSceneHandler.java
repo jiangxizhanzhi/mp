@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.*;
 import cn.cyberpeace.mp.scene.repository.base.*;
 import lombok.Getter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1471,13 +1472,24 @@ public abstract class BaseSceneHandler<
 
         List<P> elementPortBOs = elementBO.getPorts();
         if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
-            List<P0> ports = elementPortBOs.stream().map(elementPortBO -> {
+            List<P0> addPorts = new ArrayList<>();
+            List<P0> updatePorts = new ArrayList<>();
+            for (var elementPortBO : elementPortBOs) {
                 P0 port = elementPortBO.toModel();
                 port.setScene(sceneId);
                 port.setSceneElement(element.getId());
-                return port;
-            }).collect(Collectors.toList());
-            sceneElementPortMapper.bulkUpdate(ports);
+                if (port.getId() == null) {
+                    addPorts.add(port);
+                } else {
+                    updatePorts.add(port);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(addPorts)) {
+                sceneElementPortMapper.bulkCreate(addPorts);
+            }
+            if (CollectionUtils.isNotEmpty(updatePorts)) {
+                sceneElementPortMapper.bulkUpdate(updatePorts);
+            }
         }
     }
 
