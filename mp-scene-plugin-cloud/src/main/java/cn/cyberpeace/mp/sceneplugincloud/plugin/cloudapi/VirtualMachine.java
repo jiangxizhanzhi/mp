@@ -178,7 +178,14 @@ public class VirtualMachine extends CloudClient {
     public boolean resize(String instanceId, String flavorId) {
         VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
         resizeData.setFlavorId(flavorId);
-        return doAction(instanceId, resizeData);
+        try {
+            return doAction(instanceId, resizeData);
+        } catch (Exception e) {
+            if (e.getMessage().contains("instances must change flavor!")) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {

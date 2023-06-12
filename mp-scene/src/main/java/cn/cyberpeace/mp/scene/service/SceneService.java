@@ -308,8 +308,10 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneHandler updateHandler, SceneContextBO context) {
+    public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneDataBO newDataBO, SceneContextBO context) {
         SceneHandler originHandler = new SceneHandler(id, null, false, context);
+        newDataBO.getTopology().setScene(originHandler.getScene());
+        SceneHandler updateHandler = new SceneHandler(newDataBO, context);
 
         var originElement = originHandler.getElement(nodeId);
         var newElement = updateHandler.getElement(nodeId);
