@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoItems;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsSendRuleData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsTypeInfoItems;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicActionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicDeleteData;
@@ -83,10 +84,19 @@ public class VirtualDynamips extends CloudClient {
         return doAction(instanceId, actionData);
     }
 
-    public DynamipsInfoItems getInfo() {
+    public DynamipsInfoItems getPortInfo() {
         DynamipsInfoParam type = new DynamipsInfoParam();
         type.setType("port");
         var result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type, new TypeReference<DynamipsInfoItems>() {
+        });
+        return result;
+    }
+
+    public DynamipsTypeInfoItems getTypeInfo() {
+        DynamipsInfoParam type = new DynamipsInfoParam();
+        type.setType("flavor");
+        var result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type,
+                new TypeReference<DynamipsTypeInfoItems>() {
         });
         return result;
     }
