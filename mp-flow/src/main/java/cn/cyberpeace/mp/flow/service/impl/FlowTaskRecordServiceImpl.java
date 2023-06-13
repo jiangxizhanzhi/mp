@@ -304,30 +304,27 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
             if (CollectionUtils.isNotEmpty(taskTaskModels)) {
                 int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
-                log.info("batch tasks runningCount is {}", runningCount);
                 if (runningCount == 0) {
-                    if (Objects.nonNull(batchTaskConsumer)) {
-                        // 回调参数封装
-                        BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
-                        List<FlowTaskModel> successTaskModels = new ArrayList<>();
-                        List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                        taskTaskModels.forEach(taskTaskModel -> {
-                            FlowTaskModel flowTaskModel = new FlowTaskModel();
-                            flowTaskModel.setFlowId(taskTaskModel.getFlowId());
-                            flowTaskModel.setId(taskTaskModel.getId());
-                            if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
-                                successTaskModels.add(flowTaskModel);
-                            } else {
-                                errorTaskModels.add(flowTaskModel);
-                            }
-                        });
-                        batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
-                        batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
+                    // 回调参数封装
+                    BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
+                    List<FlowTaskModel> successTaskModels = new ArrayList<>();
+                    List<FlowTaskModel> errorTaskModels = new ArrayList<>();
+                    taskTaskModels.forEach(taskTaskModel -> {
+                        FlowTaskModel flowTaskModel = new FlowTaskModel();
+                        flowTaskModel.setFlowId(taskTaskModel.getFlowId());
+                        flowTaskModel.setId(taskTaskModel.getId());
+                        if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
+                            successTaskModels.add(flowTaskModel);
+                        } else {
+                            errorTaskModels.add(flowTaskModel);
+                        }
+                    });
+                    batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
+                    batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
 
-                        log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
-                        batchTaskConsumer.accept(batchActuatorCallbackResponse);
-                        FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
-                    }
+                    log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
+                    batchTaskConsumer.accept(batchActuatorCallbackResponse);
+                    FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
                 }
             } else {
                 log.error("no batch tasks for sceneId: {}", sceneId);

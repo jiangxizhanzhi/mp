@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
         Object.class,
 })
 @Component
+@Slf4j
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
 public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO,
@@ -221,11 +223,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         var flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
+                    log.info("batch tasks run stopCallback");
                     asyncAckElementChanged(nodeId, true);
                     if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
                         getSceneHandler().updateSceneElementWithPlugins(nodeId);
                     }
                 }, async, () -> {
+                    log.info("batch tasks run asyncCallback");
                     asyncAckElementChanged(nodeId, true);
                     if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
                         getSceneHandler().updateSceneElementWithPlugins(nodeId);
