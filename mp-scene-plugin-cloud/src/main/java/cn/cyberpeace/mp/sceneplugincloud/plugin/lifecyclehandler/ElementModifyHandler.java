@@ -516,6 +516,11 @@ public class ElementModifyHandler extends HandlerCommon {
                     // 保存
                     newPort.setIp(result.getFixedIp());
                     newPort.setMacAddr(result.getMacAddress());
+                    if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
+                        for (var a : newCloudPort.getAccessModes()) {
+                            a.setAccessIp(newIp);
+                        }
+                    }
                     newCloudPort.setResourceId(result.getPortId());
                 } else {
                     var result = this.containerAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newPort.getIp());
@@ -562,6 +567,13 @@ public class ElementModifyHandler extends HandlerCommon {
                     data.setInstanceType(BaseCloudPluginSceneElementModel.ImageType.CONTAINER);
                 }
                 virtualPort.modifyInstanceIp(data);
+                if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
+                    for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.equals(a.getAccessIp(), originIp)) {
+                            a.setAccessIp(newIp);
+                        }
+                    }
+                }
             }
         }
     }
