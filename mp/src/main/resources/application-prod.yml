@@ -189,9 +189,9 @@ mp:
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
     gateway-types: ${GATEWAY_TYPES:2,3}
     cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
-    initiate-pool-size: ${MP_INITIATE_POOL_SIZE:10}
+    initiate-pool-size: ${MP_INITIATE_POOL_SIZE:100}
     initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
-    create-pool-size: ${MP_CREATE_POOL_SIZE:10}
+    create-pool-size: ${MP_CREATE_POOL_SIZE:100}
     create-hold-size: ${MP_CREATE_HOLD_SIZE:20000}
     cloud-heavy-concurrent-delay-enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
     cloud-heavy-concurrent-delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
