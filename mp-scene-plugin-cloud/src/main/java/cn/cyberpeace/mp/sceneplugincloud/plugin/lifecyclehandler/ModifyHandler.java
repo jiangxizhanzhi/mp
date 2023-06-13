@@ -33,7 +33,6 @@ public class ModifyHandler extends HandlerCommon {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
         Set<String> originNodeIds = new HashSet<>(originPlugin.getSceneHandler().getElementMap().keySet());
         Set<String> createdNodeIds = new HashSet<>(originNodeIds);
-        createdNodeIds.removeAll(updateElementIds);
         this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, getTaskPool());
         this.modifyCreateHandler = new ModifyCreateHandler(createdNodeIds, newPlugin, getTaskPool());
         Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
@@ -43,7 +42,7 @@ public class ModifyHandler extends HandlerCommon {
 
         originNodeIds.removeAll(newNodeIds);
         if (CollectionUtils.isNotEmpty(updateElementIds)) {
-            originNodeIds.addAll(updateElementIds);
+            mayUpdateNodeIds.addAll(updateElementIds);
         }
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
         this.elementModifyHandler = new ElementModifyHandler(newPlugin, originPlugin, originPlugin.getSceneHandler().getScene().getEvent());

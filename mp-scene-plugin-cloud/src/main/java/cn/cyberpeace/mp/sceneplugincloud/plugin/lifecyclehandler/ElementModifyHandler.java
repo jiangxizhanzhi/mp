@@ -133,11 +133,7 @@ public class ElementModifyHandler extends HandlerCommon {
             }
         }
         List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler);
-        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
-            log.error("no network config , element id is {} ", originCloudElement.getSrcElement().getId());
-            return;
-        }
-        cmds.add("delete protocols");
+        cmds.add(0, "delete protocols");
         var buildNetwork = new RouterConfigCmdData();
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
