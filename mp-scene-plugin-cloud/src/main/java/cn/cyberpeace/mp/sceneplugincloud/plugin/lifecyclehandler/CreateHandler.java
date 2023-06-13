@@ -645,12 +645,12 @@ public class CreateHandler extends HandlerCommon {
             extraCommands.add(CommandUtils.linuxMkDir(elementUnzipDir));
         }
 
-        // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
-        try {
-            ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
-        } catch (Exception e) {
-            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
-        }
+//        // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
+//        try {
+//            ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
+//        } catch (Exception e) {
+//            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e.getMessage());
+//        }
 
         if (!StringUtils.isEmpty(sceneFileUrl)) {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, standardSystemType, sceneUnzipDir, true);
@@ -1024,7 +1024,7 @@ public class CreateHandler extends HandlerCommon {
             var container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
             cloudElement.setResourceId(container.getId());
             cloudElement.setHost(container.getHost());
-//            execContainerInitCommand(cloudElement);
+            execContainerInitCommand(cloudElement);
             receiveVirtualPortInfo(cloudElement);
         } else {
             createData.setNetworks(CollectionUtils.emptyNull(
@@ -1039,7 +1039,7 @@ public class CreateHandler extends HandlerCommon {
 //            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
 //                containerClient.addRoute(cloudElement.getResourceId());
 //            }
-//            execContainerInitCommand(cloudElement);
+            execContainerInitCommand(cloudElement);
 
             checkAccessModes(cloudElement);
         }
