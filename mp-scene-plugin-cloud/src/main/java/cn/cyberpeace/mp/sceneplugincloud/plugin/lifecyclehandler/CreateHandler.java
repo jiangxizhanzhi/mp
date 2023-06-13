@@ -1445,7 +1445,12 @@ public class CreateHandler extends HandlerCommon {
         for (int i = 0; i < tryTimes; i++) {
             // 先等2s,等待串口可用
             waitSeconds(2000);
-            openDhcpResult = vmRouter.createConfig(openDhcp);
+            try {
+                openDhcpResult = vmRouter.createConfig(openDhcp);
+            } catch (Exception e) {
+                log.error("failed to open dhcp , try time {}", i, e);
+                openDhcpResult = false;
+            }
             // 失败可能是串口仍不可用,需要重试
             if (!openDhcpResult) {
                 continue;

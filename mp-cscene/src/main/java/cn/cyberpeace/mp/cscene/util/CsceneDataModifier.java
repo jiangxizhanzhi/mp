@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
 import lombok.Setter;
@@ -971,6 +972,29 @@ public class CsceneDataModifier {
                         }
                     }
                 });
+            }
+        }
+    }
+
+    public static void removeInvalidPlugin(CsceneBO csceneBO) {
+        List<String> nodeIds = new ArrayList<>();
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            if (elements.getElements() != null) {
+                elements.getElements().forEach((k, v) -> {
+                    // 核心路由器移除流量插件
+                    if (v.get("image") != null && ElementTypeUtils.isCoreRouter(v.get("image").toString())) {
+                        nodeIds.add(k);
+                    }
+                });
+            }
+        }
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpflow") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpflow");
+            if (elements.getElements() != null) {
+                for (String nodeId : nodeIds) {
+                    elements.getElements().remove(nodeId);
+                }
             }
         }
     }
