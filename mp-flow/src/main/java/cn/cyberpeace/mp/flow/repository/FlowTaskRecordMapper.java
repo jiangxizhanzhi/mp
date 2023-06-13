@@ -52,6 +52,14 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
     List<FlowStatisticsTemp> statisticsTaskId(@Param("sceneId") String sceneId, @Param("conditions") List<FlowStatisticalCondition> conditions);
 
     /**
+     * 根据任务id统计总数据(某些字段需要统计已经停止的任务)
+     * @param sceneId
+     * @param conditions
+     * @return
+     */
+    List<FlowStatisticsTemp> statisticsTaskIdContainOld(@Param("sceneId") String sceneId, @Param("conditions") List<FlowStatisticalCondition> conditions);
+
+    /**
      * 查询节点实时速率，按照速率倒序排列
      * @param sceneId
      * @return
