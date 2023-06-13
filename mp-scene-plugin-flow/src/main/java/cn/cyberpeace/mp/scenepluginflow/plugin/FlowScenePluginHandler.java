@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -213,7 +214,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             flowId2Ips.forEach(flowId2Ip -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
                 flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
-                flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp() == null ? flowWithSourceIp.getFlow().getSourceIp() : flowId2Ip.getSourceIp());
+                flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp() == null ? Objects.nonNull(flowWithSourceIp.getFlow()) ? flowWithSourceIp.getFlow().getSourceIp() : null : flowId2Ip.getSourceIp());
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         }
