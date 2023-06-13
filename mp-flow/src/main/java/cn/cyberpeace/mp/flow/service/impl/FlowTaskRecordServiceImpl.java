@@ -152,6 +152,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             return flowStatisticsInfo;
         }
         List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(sceneId, conditionList);
+        List<FlowStatisticsTemp> tempContainOldList = this.getModelMapper().statisticsTaskIdContainOld(sceneId, conditionList);
         List<FlowStatisticsDetail> txBpsList = new ArrayList<>();
         List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
         List<FlowStatisticsDetail> latencyList = new ArrayList<>();
@@ -163,12 +164,9 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                 if (temp.getOffsetValue() == 0) {
                     flowStatisticsInfo.setTotalTxL2(temp.getTotalTxL2() == null ? 0 : temp.getTotalTxL2());
                     flowStatisticsInfo.setTotalTxL1(temp.getTotalTxL1() == null ? 0 : temp.getTotalTxL1());
-                    flowStatisticsInfo.setTotalPps(temp.getTotalPps() == null ? 0 : temp.getTotalPps());
                     flowStatisticsInfo.setTotalRx(temp.getTotalRx() == null ? 0 : temp.getTotalRx());
                     flowStatisticsInfo.setQueueFull(temp.getQueueFull() == null ? 0 : temp.getQueueFull());
                     flowStatisticsInfo.setDropRate(temp.getDropRate() == null ? 0 : temp.getDropRate());
-                    flowStatisticsInfo.setObytes(temp.getObytes() == null ? 0 : temp.getObytes());
-                    flowStatisticsInfo.setOerrors(temp.getOerrors() == null ? 0 : temp.getOerrors());
                 }
                 FlowStatisticsDetail txBps = new FlowStatisticsDetail();
                 txBps.setStatisticalTime(temp.getStatisticalTime());
@@ -194,6 +192,15 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                 jitter.setOffsetValue(temp.getOffsetValue());
                 jitter.setValue(temp.getJitter());
                 jitterList.add(jitter);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(tempContainOldList)) {
+            for (FlowStatisticsTemp temp : tempContainOldList) {
+                if (temp.getOffsetValue() == 0) {
+                    flowStatisticsInfo.setTotalPps(temp.getTotalPps() == null ? 0 : temp.getTotalPps());
+                    flowStatisticsInfo.setObytes(temp.getObytes() == null ? 0 : temp.getObytes());
+                    flowStatisticsInfo.setOerrors(temp.getOerrors() == null ? 0 : temp.getOerrors());
+                }
                 FlowStatisticsDetail obytes = new FlowStatisticsDetail();
                 obytes.setStatisticalTime(temp.getStatisticalTime());
                 obytes.setOffsetUnit(temp.getOffsetUnit());
