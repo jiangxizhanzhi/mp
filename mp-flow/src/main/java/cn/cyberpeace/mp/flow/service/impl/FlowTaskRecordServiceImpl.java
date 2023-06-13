@@ -325,6 +325,13 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                     log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
                     batchTaskConsumer.accept(batchActuatorCallbackResponse);
                     FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
+
+                    Runnable batchTaskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
+                    if (Objects.nonNull(batchTaskRunnable)) {
+                        log.info("batch tasks run runnable");
+                        batchTaskRunnable.run();
+                        FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
+                    }
                 }
             } else {
                 log.error("no batch tasks for sceneId: {}", sceneId);
