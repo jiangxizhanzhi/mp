@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -101,7 +102,16 @@ public class TypeController {
         TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
         TypeAllVO allResponse = new TypeAllVO();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
-        allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
+        var firstTypeList = Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null;
+        if (CollectionUtils.isNotEmpty(firstTypeList)) {
+            for (int i = 0; i < firstTypeList.size(); i++) {
+                if (firstTypeList.get(i).getId() == 5) {
+                    firstTypeList.remove(i);
+                    break;
+                }
+            }
+        }
+        allResponse.setFirstTypeList(firstTypeList);
         allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
         allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
         allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
