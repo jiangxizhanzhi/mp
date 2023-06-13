@@ -1024,7 +1024,7 @@ public class CreateHandler extends HandlerCommon {
             var container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
             cloudElement.setResourceId(container.getId());
             cloudElement.setHost(container.getHost());
-            execContainerInitCommand(cloudElement);
+//            execContainerInitCommand(cloudElement);
             receiveVirtualPortInfo(cloudElement);
         } else {
             createData.setNetworks(CollectionUtils.emptyNull(
@@ -1036,10 +1036,10 @@ public class CreateHandler extends HandlerCommon {
 
             receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
-                containerClient.addRoute(cloudElement.getResourceId());
-            }
-            execContainerInitCommand(cloudElement);
+//            if (StringUtils.isNotEmpty(cloudElement.getResourceId())) {
+//                containerClient.addRoute(cloudElement.getResourceId());
+//            }
+//            execContainerInitCommand(cloudElement);
 
             checkAccessModes(cloudElement);
         }
