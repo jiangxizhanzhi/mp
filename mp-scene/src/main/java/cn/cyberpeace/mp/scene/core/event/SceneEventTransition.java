@@ -91,7 +91,7 @@ public class SceneEventTransition {
                             SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
                     ),
                     EventTransition.genKey(SceneModel.Event.CREATE, EventStatus.ABNORMAL), List.of(
-                            SceneModel.Event.CREATE, SceneModel.Event.DELETE
+                            SceneModel.Event.CREATE, SceneModel.Event.DELETE, SceneModel.Event.MODIFY
                     ),
 
                     // 启动事件
