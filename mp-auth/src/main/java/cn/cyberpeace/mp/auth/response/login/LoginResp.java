@@ -24,4 +24,10 @@ public class LoginResp {
 //    private Object orgs;
     private Object menus;
 
+    @ApiModelProperty(value = "是否需要同意隐私政策")
+    private Boolean isNeedAgreePrivacyPolicy;
+
+    @ApiModelProperty(value = "是否需要修改密码")
+    private Boolean isNeedUpdatePassword;
+
 }
