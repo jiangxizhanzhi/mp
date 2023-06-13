@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class VyosNetworkCommandUtils {
 
     private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>();
+    private static List<NetworkingCmdBuilder> modifyBuilderChains = new ArrayList<>();
 
     static {
         builderChains.add(new StaticRouteCmdBuilder());
@@ -38,6 +39,13 @@ public class VyosNetworkCommandUtils {
         builderChains.add(new RouterNameCmdBuilder());
         builderChains.add(new RIPCmdBuilder());
         builderChains.add(new QosCmdBuilder());
+    }
+
+    static {
+        modifyBuilderChains.add(new StaticRouteCmdBuilder());
+        modifyBuilderChains.add(new OSPFCmdBuilder());
+        modifyBuilderChains.add(new BGPCmdBuilder());
+        modifyBuilderChains.add(new RIPCmdBuilder());
     }
 
     public static List<String> genOpenDhcpCommands(int ethSize) {
@@ -52,6 +60,17 @@ public class VyosNetworkCommandUtils {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
         for (var builder : builderChains) {
+            List<String> cmds = builder.build(paramsWrapper);
+            result.addAll(cmds);
+        }
+        return result;
+    }
+
+    public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
+        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
+        List<String> result = new ArrayList<>();
+        result.add("delete protocols");
+        for (var builder : modifyBuilderChains) {
             List<String> cmds = builder.build(paramsWrapper);
             result.addAll(cmds);
         }
