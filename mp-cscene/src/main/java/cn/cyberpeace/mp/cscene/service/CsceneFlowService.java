@@ -98,7 +98,7 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.addTask begin. request:{}", request);
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
@@ -207,6 +207,9 @@ public class CsceneFlowService {
     public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageQueryParams request) {
         log.info("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         request.setOffset((request.getPage() - 1) * request.getPerPage());
         request.setSceneId(sceneId);
         // 查询符合条件的条数
@@ -250,6 +253,9 @@ public class CsceneFlowService {
     public FlowSummary queryFlowSummary(String id) {
         log.info("CsceneFlowService.queryFlowSummary begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         FlowSummary flowSummary = flowTaskRecordService.queryFlowSummary(sceneId);
         log.info("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
         return flowSummary;
@@ -263,6 +269,9 @@ public class CsceneFlowService {
     public List<FlowNodeTxBps> top5NodeTxBps(String id) {
         log.info("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         List<FlowNodeTxBps> flowNodeTxBpsList = flowTaskRecordService.queryNodeTxBps(sceneId);
         if (CollectionUtils.isNotEmpty(flowNodeTxBpsList) && flowNodeTxBpsList.size() > 5) {
             flowNodeTxBpsList = flowNodeTxBpsList.subList(0, 5);
@@ -280,6 +289,9 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
         JSONArray protocols = new JSONArray();
         String sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         if (flowScenePluginHandler == null) {
@@ -315,6 +327,9 @@ public class CsceneFlowService {
     public FlowStatisticsInfo flowStatistics(String id) {
         log.info("CsceneFlowService.flowStatistics begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
         log.info("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
@@ -328,6 +343,9 @@ public class CsceneFlowService {
     public FlowStatisticsAll flowStatisticsAll(String id) {
         log.info("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         FlowStatisticsAll flowStatisticsAll = new FlowStatisticsAll();
         flowStatisticsAll.setFlowSummary(flowTaskRecordService.queryFlowSummary(sceneId));
         flowStatisticsAll.setFlowStatisticsInfo(flowTaskRecordService.flowStatistics(sceneId));
@@ -398,6 +416,9 @@ public class CsceneFlowService {
     public List<FlowStatisticsDetail> totalRate(String id) {
         log.info("CsceneFlowService.totalRate begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
         List<FlowStatisticsDetail> result = new ArrayList<>();
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         LocalDateTime createTime = sceneHandler.getScene().getCreateTime();

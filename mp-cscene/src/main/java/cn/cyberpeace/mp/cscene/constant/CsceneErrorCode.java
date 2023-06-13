@@ -19,6 +19,7 @@ public enum CsceneErrorCode implements ErrorCode {
     SAME_USB_HAS_USED("MP-110211", "same_usb_has_used"),
     ENTITY_USB_HAS_USD("MP-110212", "entity_usb_has_used"),
     ENTITY_USB_HOST_NOT_SAME("MP-110213", "entity_usb_host_not_same"),
+    SCENE_NOT_STARTED("MP-110214", "scene_not_started"),
 
     NODEIP_NOT_EXIST("MP-110210", "nodeip_not_exist"),
     NETWORKID_NOT_EXIST("MP-110211", "networkid_not_exist"),
