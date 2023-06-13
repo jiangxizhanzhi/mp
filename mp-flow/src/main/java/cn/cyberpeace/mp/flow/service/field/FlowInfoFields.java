@@ -21,5 +21,5 @@ public class FlowInfoFields extends BaseModelFields {
             FlowInfoModel::getInteractiveType, FlowInfoModel::getResourceType, FlowInfoModel::getPcapFile,
             FlowInfoModel::getScriptFile);
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(allFields);
 }
