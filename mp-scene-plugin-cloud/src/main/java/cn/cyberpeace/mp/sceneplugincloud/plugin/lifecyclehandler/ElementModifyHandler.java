@@ -17,12 +17,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeletePortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResizeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
@@ -34,7 +36,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpda
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -70,6 +74,7 @@ public class ElementModifyHandler extends HandlerCommon {
     private VirtualRouter virtualRouter = new VirtualRouter();
     private VirtualFirewall virtualFirewall = new VirtualFirewall();
     private VirtualPort virtualPort = new VirtualPort();
+    private VmRouter vmRouter = new VmRouter();
 
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
@@ -86,10 +91,16 @@ public class ElementModifyHandler extends HandlerCommon {
         runElementProgress(originCloudElement.getSrcElement().getId(), ElementProcess.UPDATE_NODE, () -> {
             if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
                 // 更新网络
-                this.modifyVirtualSwitch(newCloudElement, originCloudElement);
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                    this.modifyVirtualSwitch(newCloudElement, originCloudElement);
+                }
             } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
                 // 更新虚拟路由
-                this.modifyVirtualRouter(newCloudElement, originCloudElement);
+                if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                    this.modifyVirtualRouter(newCloudElement, originCloudElement);
+                } else if (ElementTypeUtils.isCoreRouter(originCloudElement)) {
+                    this.modifyCoreRoute(newCloudElement, originCloudElement);
+                }
             } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL) {
                 // 更新虚拟防护墙
                 this.modifyVirtualFirewall(newCloudElement, originCloudElement);
@@ -103,6 +114,57 @@ public class ElementModifyHandler extends HandlerCommon {
                 }
             }
         });
+    }
+
+    private void modifyCoreRoute(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(newCloudElement.getSrcElement().getPorts())) {
+            return;
+        }
+
+        boolean isChange = this.isStaticRouteChange(newCloudElement.getStaticRoutes(), originCloudElement.getStaticRoutes()) || VyosNetworkCommandUtils.isProtocolsChange(originCloudElement, originCloudScenePluginHandler, newCloudElement, newCloudScenePluginHandler);
+        if (!isChange) {
+            return;
+        }
+        // 拼接组网命令
+        var defaultPort = this.originCloudScenePluginHandler.getPort(originCloudElement.getSrcElement().getPorts().get(0).getId());
+        if (CollectionUtils.isNotEmpty(newCloudElement.getSrcElement().getPorts())) {
+            for (int i = 0; i < newCloudElement.getSrcElement().getPorts().size(); i++) {
+                newCloudElement.getSrcElement().getPorts().get(i).setOrder(i + 1);
+            }
+        }
+        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler);
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
+            log.error("no network config , element id is {} ", originCloudElement.getSrcElement().getId());
+            return;
+        }
+        cmds.add("delete protocols");
+        var buildNetwork = new RouterConfigCmdData();
+        buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        buildNetwork.setCmds(cmds);
+
+        boolean buildNetworkResult = false;
+        int tryTimes = 5;
+        Exception exception = null;
+        for (int i = 0; i < tryTimes; i++) {
+            // 发送拼接网络的命令
+            try {
+                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+            } catch (Exception e) {
+                log.error("failed to build network , try time {}", i);
+                exception = e;
+                buildNetworkResult = false;
+            }
+            if (buildNetworkResult) {
+                break;
+            }
+        }
+        if (buildNetworkResult == false) {
+            log.error("build vyos network failed , buildNetwork {} , resource id is {} ", buildNetwork, originCloudElement.getResourceId());
+            if (exception != null) {
+                log.error("failed to build network ", exception);
+            }
+        }
     }
 
     private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {

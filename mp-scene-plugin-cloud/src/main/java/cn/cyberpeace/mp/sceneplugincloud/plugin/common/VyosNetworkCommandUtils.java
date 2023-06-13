@@ -12,10 +12,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +99,7 @@ public class VyosNetworkCommandUtils {
      */
     private static class StaticRouteCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_NEXT_HOP = "set protocols static route %s next-hop %s ";
-        private static String SET_NEXT_HOP_INTERFACE = "next-hop-interface eth%s";
+        private static String SET_NEXT_HOP_INTERFACE = "interface eth%s";
         private static String SET_ROUTER_ID = "set protocols ospf parameters router-id %s";
 
         @Override
@@ -322,5 +326,72 @@ public class VyosNetworkCommandUtils {
             });
             return result;
         }
+    }
+
+    public static boolean isProtocolsChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
+        return isProtocolsChange(new ConfigParamsWrapper(originElement, originPluginHandler),
+                new ConfigParamsWrapper(newElement, newPluginHandler));
+    }
+
+    private static boolean isProtocolsChange(ConfigParamsWrapper originWrapper, ConfigParamsWrapper newWrapper) {
+        var originCloudElement = originWrapper.element;
+        var newCloudElement = newWrapper.element;
+        if (!StringUtils.equals(originCloudElement.getOspfRouterId(), newCloudElement.getOspfRouterId())) {
+            return true;
+        }
+        var originPorts = originWrapper.pluginPorts;
+        var newPorts = newWrapper.pluginPorts;
+        return isProtocolsChange(originPorts, newPorts);
+    }
+
+    private static boolean isProtocolsChange(List<CloudPluginSceneElementPortBO> originPorts, List<CloudPluginSceneElementPortBO> newPorts) {
+        if (CollectionUtils.isEmpty(originPorts) && CollectionUtils.isEmpty(newPorts)) {
+            // 都没有端口
+            return false;
+        } else if (CollectionUtils.isEmpty(originPorts) || CollectionUtils.isEmpty(newPorts)) {
+            // 只有一个没有端口
+            return true;
+        } else if (originPorts.size() != newPorts.size()) {
+            // 都有端口但是端口数不同
+            return true;
+        } else {
+            // 都有端口,需要看端口里的配置有没有变化
+            Set<String> originKeys = keys(originPorts);
+            Set<String> newKeys = keys(newPorts);
+            if (originKeys.size() != newKeys.size()) {
+                return true;
+            }
+            originKeys.retainAll(newKeys);
+            if (originKeys.size() > 0) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private static Set<String> keys(List<CloudPluginSceneElementPortBO> ports) {
+        Set<String> keys = new HashSet<>();
+        for (var p : ports) {
+            keys.add(ospfKey(p));
+            keys.add(ripKey(p));
+            keys.add(bgpKey(p));
+        }
+        return keys;
+    }
+
+    private static String ripKey(CloudPluginSceneElementPortBO portBO) {
+        var result = Arrays.asList("rip", Optional.of(portBO.getRipIp()).orElse(StringUtils.EMPTY), Optional.of(portBO.getRipPear()).orElse(StringUtils.EMPTY));
+        return StringUtils.join(result, "_");
+    }
+
+
+    private static String ospfKey(CloudPluginSceneElementPortBO portBO) {
+        var result = Arrays.asList("ospf", Optional.of(portBO.getOspfArea()).orElse(StringUtils.EMPTY), Optional.of(portBO.getOspfIp()).orElse(StringUtils.EMPTY));
+        return StringUtils.join(result, "_");
+    }
+
+    private static String bgpKey(CloudPluginSceneElementPortBO portBO) {
+        var result = Arrays.asList("bgp", Optional.of(portBO.getBgpAs()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpPeer()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpIp()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpPeerAs()).orElse(StringUtils.EMPTY));
+        return StringUtils.join(result, "_");
     }
 }
