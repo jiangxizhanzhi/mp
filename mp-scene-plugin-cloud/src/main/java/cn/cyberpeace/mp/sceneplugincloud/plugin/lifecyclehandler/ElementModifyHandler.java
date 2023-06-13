@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.util.NumberUtil;
@@ -337,7 +338,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 var originPort = this.originCloudScenePluginHandler.getPort(portId);
                 var newPort = this.newCloudScenePluginHandler.getPort(portId);
                 if (this.isFirewallRuleChange(newPort, originPort)) {
-                    this.doFirewallRuleChange(newPort, originPort);
+                    this.doFirewallRuleChange(newPort, originPort, originCloudElement);
                 }
             }
         }
@@ -355,8 +356,9 @@ public class ElementModifyHandler extends HandlerCommon {
         return !newFirewallRules.isEmpty();
     }
 
-    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+    private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort, CloudPluginSceneElementBO originCloudElement) {
         var updateData = new VirtualFirewallUpdateData();
+        updateData.setName(HandlerUtils.genResourceName(originCloudElement.getSrcElement().getEid()));
         updateData.setId(originCloudPort.getFirewallResourceId());
         var portSrcRules = newCloudPort.getFirewallRules();
         if (portSrcRules != null && !portSrcRules.isEmpty()) {
