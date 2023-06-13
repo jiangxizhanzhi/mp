@@ -291,8 +291,8 @@ public class TypeConverter {
         List<TypeConvertModel> secondTypeList = new ArrayList<>();
         List<TypeConvertModel> thirdTypeList = new ArrayList<>();
         for (TypeTreeItemModel item : l1AndL2AndL3Type.getList()){
-            // 非工控类型，过滤工控设备
-            if (!industriaControl && item.getL1Id() == 6) {
+            // 非工控类型，过滤工控设备 硬件外设也过滤掉
+            if ((!industriaControl && item.getL1Id() == 6) || item.getL1Id() == 5) {
                 continue;
             }
 
