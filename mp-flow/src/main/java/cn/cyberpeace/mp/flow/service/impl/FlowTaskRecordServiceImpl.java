@@ -302,12 +302,14 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
 
         // 批量执行校验
         String sceneId = flowTaskTaskModel.getSceneId();
+        String nodeId = flowTaskTaskModel.getNodeId();
         log.info("batch tasks run for sceneId: {}", sceneId);
         Consumer batchTaskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
         if (Objects.nonNull(batchTaskConsumer)) {
-            // 判断任务任务是否都结束
+            // 判断任务是否都结束
             HumanCondition condition = new HumanCondition();
             condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+            condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
             List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
             if (CollectionUtils.isNotEmpty(taskTaskModels)) {
                 int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();

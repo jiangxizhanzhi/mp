@@ -310,7 +310,8 @@ public class SceneHandlerUtils {
                 .map(f -> f.getFlow())
                 .collect(Collectors.toList());
 
-        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeId(nodeId);
+        String sceneId = pluginHandler.getSourceSceneId();
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndSceneId(nodeId, sceneId);
         if (CollectionUtils.isEmpty(flowTaskTaskModels)) {
             flows.forEach(flow -> {
                 errorFLow(flow, "FlowTask not exist");
