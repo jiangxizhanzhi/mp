@@ -123,6 +123,7 @@ public class SceneHandlerUtils {
             Consumer<BatchActuatorCallbackResponse> callbackConsumer = new Consumer<BatchActuatorCallbackResponse>() {
                 @Override
                 public void accept(BatchActuatorCallbackResponse batchActuatorCallbackResponse) {
+                    log.info("batch tasks run callbackConsumer");
                     batchActuatorCallbackResponse.getErrorTaskModels().forEach(flowTaskModel -> {
                         errorFLow(flowMap.get(flowTaskModel.getFlowId()), "Flow execute error");
                     });
