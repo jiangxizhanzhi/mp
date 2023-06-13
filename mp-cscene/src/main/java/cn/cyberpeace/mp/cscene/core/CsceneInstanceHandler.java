@@ -257,10 +257,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        var context = generateSceneContext();
-        var updateHandler = new SceneHandler(element.getUpdate(), context);
-        var nodeId = new ArrayList<>(updateHandler.getElementMap().values()).get(0).getId();
-        return this.sceneService.modifyElement(sceneId, nodeId, updateHandler, generateSceneContext()).getSource();
+        String nodeId = element.getUpdate().getTopology().getElements().get(0).getId();
+        return this.sceneService.modifyElement(sceneId, nodeId, element.getUpdate(), generateSceneContext()).getSource();
     }
 
     public boolean deleteElement(String nodeId) {

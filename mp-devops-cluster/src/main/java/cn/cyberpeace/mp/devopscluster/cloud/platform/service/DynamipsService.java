@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Flavor
@@ -25,8 +26,12 @@ public class DynamipsService {
         virtualDynamips = new VirtualDynamips();
     }
 
+    public Map<String, Object> getTypeInfo() {
+        return virtualDynamips.getTypeInfo().getItems();
+    }
+
     public DynamicImageInfo getInfo(String platform) {
-        var result = virtualDynamips.getInfo();
+        var result = virtualDynamips.getPortInfo();
         DynamicImageInfo imageInfo = new DynamicImageInfo();
         imageInfo.setPlatforms(new ArrayList<>());
         imageInfo.setDetails(new ArrayList<>());

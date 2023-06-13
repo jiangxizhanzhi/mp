@@ -25,6 +25,8 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
         CsceneInstanceBO> {
     @ApiModelProperty(value = "所属场景模板id")
     private String cscene;
+    @ApiModelProperty(value = "场景模板logo")
+    private String logo;
     @ApiModelProperty(value = "场景实例类型")
     private Integer type;
     @ApiModelProperty(value = "场景实例引用类型")

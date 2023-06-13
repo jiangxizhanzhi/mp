@@ -26,6 +26,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,7 +93,12 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      */
     private void changeServiceName(List<SystemAlarmModel> systemAlarmModels) {
         if (CollectionUtils.isNotEmpty(systemAlarmModels)) {
-            systemAlarmModels.forEach(model -> model.setServername(MessageCommon.get(model.getServername())));
+            systemAlarmModels.forEach(model -> {
+                String originServerName = model.getServername();
+                String newName = MessageCommon.get(model.getServername());
+                model.setServername(newName);
+                model.setAlarmMsg(StringUtils.replaceOnce(model.getAlarmMsg(), originServerName, newName));
+            });
         }
     }
 
