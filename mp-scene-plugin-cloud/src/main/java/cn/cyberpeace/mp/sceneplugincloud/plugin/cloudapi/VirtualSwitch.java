@@ -22,7 +22,7 @@ public class VirtualSwitch extends CloudClient {
     public VirtualSwitch() {
         CloudHttpClient cloudHttpClient = new CloudHttpClient(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                 CloudSingleton.cloudAppConfig.getCpcloudServerTimeout(),
-                100);
+                CloudSingleton.cloudAppConfig.getCpcloudHttpPoolSize());
         this.setHttpClient(cloudHttpClient);
     }
 
