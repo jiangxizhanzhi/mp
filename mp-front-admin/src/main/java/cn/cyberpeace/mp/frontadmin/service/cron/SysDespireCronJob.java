@@ -131,7 +131,7 @@ public class SysDespireCronJob implements SchedulingConfigurer {
                 .link(UserModel.class, UserRoleModel.class)
                 .filterLink(UserModel.class, UserModel::getId, UserRoleModel.class, UserRoleModel::getUser)
                 .currentLink(UserModel.class)
-                .filterGreaterThanOrEqual(UserModel::getDelayRemindLicenseTime, 0)
+                .filterEqual(UserModel::getDelayRemindLicenseTime, -1)
                 .currentLink(UserRoleModel.class)
                 .filterEqual(UserRoleModel::getRole, AuthConstant.ROLE_ADMIN_ID);
         var users = userMapper.list(humanCondition);
@@ -146,7 +146,6 @@ public class SysDespireCronJob implements SchedulingConfigurer {
                         .type(NoticeTypeEnum.LICENSE.getCode())
                         .isPublic(0)
                         .publisher(AuthConstant.ROOT_USER_ID)
-                        .roleIds(Lists.newArrayList(AuthConstant.ROLE_ADMIN_ID))
                         .userIds(userIds).build();
         //新增系统通过公告，提醒用户范围：具有管理员权限的用户均收到提醒
         noticeService.add(sysNoticeRequest);
