@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
@@ -315,6 +316,9 @@ public class SceneHandler extends BaseSceneHandler<
                     .filter(p -> !Boolean.TRUE.equals(p.getIsAuxiliary()))
                     .collect(Collectors.toList());
             sceneElement.setPorts(ports);
+        }
+        if (StringUtils.isNotEmpty(sceneElement.getIcon2()) && !FsCommon.isFileServerOuterUrl(sceneElement.getIcon2())) {
+            sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
         }
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();
