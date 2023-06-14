@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -153,6 +154,12 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer parentSystemType;
 
+    /**
+     * 排序字段（当前只支持name）
+     */
+    @ApiModelProperty(value = "排序字段（当前只支持name，正序：name，倒序-name）")
+    private String orders;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -186,6 +193,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setLikeName(request.getLikeName());
         this.setIsHide(Boolean.FALSE);
         this.setVmStarted(request.getVmStarted());
+        this.setOrders(request.getOrders());
     }
 
     /**

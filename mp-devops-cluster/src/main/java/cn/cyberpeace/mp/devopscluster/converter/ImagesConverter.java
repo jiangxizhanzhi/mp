@@ -122,7 +122,11 @@ public class ImagesConverter implements BaseConverter{
                 }
             }
         }
-
+        if ("name".equals(dto.getOrders())) {
+            modelList = modelList.stream().sorted(Comparator.comparing(ImageConvertModel::getName)).collect(Collectors.toList());
+        } else if ("-name".equals(dto.getOrders())) {
+            modelList = modelList.stream().sorted(Comparator.comparing(ImageConvertModel::getName).reversed()).collect(Collectors.toList());
+        }
         imageConvertPageModel.setList(modelList);
         return imageConvertPageModel;
     }

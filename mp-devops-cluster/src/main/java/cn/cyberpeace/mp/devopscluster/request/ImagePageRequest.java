@@ -95,6 +95,12 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty("已启动镜像")
     private Boolean vmStarted;
 
+    /**
+     * 排序字段（当前只支持name）
+     */
+    @ApiModelProperty(value = "排序字段（当前只支持name，正序：name，倒序-name）")
+    private String orders;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
