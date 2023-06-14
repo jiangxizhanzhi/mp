@@ -96,7 +96,7 @@ public class FlowMonitorController {
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
         if (StringUtils.isEmpty(flowTrendRequest.getSceneId())) {
-            ResultCommon.success(new ArrayList<>());
+            return ResultCommon.success(new ArrayList<>());
         }
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
@@ -160,7 +160,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
         if (StringUtils.isEmpty(baseRequest.getSceneId())) {
-            ResultCommon.success(new ArrayList<>());
+            return ResultCommon.success(new ArrayList<>());
         }
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
