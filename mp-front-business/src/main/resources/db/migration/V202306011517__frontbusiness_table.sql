@@ -5,6 +5,8 @@ create table mp_menu_template_role
     `id`          varchar(64) NOT NULL COMMENT 'ID',
     `template_id` varchar(64) NOT NULL COMMENT 'ID',
     `role_id`     varchar(64) NOT NULL COMMENT 'ID',
+    `create_time` datetime    NOT NULL COMMENT '创建时间',
+    `update_time` datetime    NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`)
 ) COMMENT ='角色关联菜单模板表';
 
