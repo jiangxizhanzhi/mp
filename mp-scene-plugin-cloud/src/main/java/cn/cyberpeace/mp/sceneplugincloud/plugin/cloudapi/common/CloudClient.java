@@ -18,9 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 public abstract class CloudClient {
 
-    private final CloudHttpClient httpClient = new CloudHttpClient();
+    private CloudHttpClient httpClient = new CloudHttpClient();
 
     private static final Object syncObj = new Object();
+
+    public void setHttpClient(CloudHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
     private <T> CloudResponse<T> checkResponse(CloudResponse<T> response, boolean throwException) {
         if (throwException && !response.isSuccess()) {
