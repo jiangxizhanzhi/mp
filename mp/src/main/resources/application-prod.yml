@@ -193,6 +193,7 @@ mp:
     initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
     create-pool-size: ${MP_CREATE_POOL_SIZE:100}
     create-hold-size: ${MP_CREATE_HOLD_SIZE:20000}
+    delete_pool_size: ${MP_DELETE_POOL_SIZE:100}
     cloud-heavy-concurrent-delay-enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
     cloud-heavy-concurrent-delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
     scene-create-install-unzip-apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
