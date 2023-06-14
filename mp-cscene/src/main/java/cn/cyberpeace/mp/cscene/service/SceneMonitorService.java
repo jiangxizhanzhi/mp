@@ -447,9 +447,18 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true, new SceneAllElementsQueryRequest());
 
         // cpu
-        Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> e.getHostState().getCpuPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
-        Comparator<ElementMonitorBasicInfo> sortByMemory = Comparator.comparing(e -> e.getHostState().getMemoryPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
-        Comparator<ElementMonitorBasicInfo> sortByDisk = Comparator.comparing(e -> e.getHostState().getDiskPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> {
+            HostState hostState = e.getHostState();
+            return hostState != null ? hostState.getCpuPercent() : null;
+        }, Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByMemory = Comparator.comparing(e -> {
+            HostState hostState = e.getHostState();
+            return hostState != null ? hostState.getMemoryPercent() : null;
+        }, Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByDisk = Comparator.comparing(e -> {
+            HostState hostState = e.getHostState();
+            return hostState != null ? hostState.getDiskPercent() : null;
+        }, Comparator.nullsFirst(Comparator.naturalOrder()));
 
         List<ElementMonitorBasicInfo> sortByCpuList = list.stream().sorted(sortByCpu.reversed()).limit(topCount).collect(Collectors.toList());
         List<ElementMonitorBasicInfo> sortByMemoryList = list.stream().sorted(sortByMemory.reversed()).limit(topCount).collect(Collectors.toList());
