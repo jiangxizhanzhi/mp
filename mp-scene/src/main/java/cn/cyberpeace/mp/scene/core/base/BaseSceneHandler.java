@@ -1466,7 +1466,7 @@ public abstract class BaseSceneHandler<
     /**
      * 单独保存基础场景节点数据
      */
-    public void updateSceneElement(String nodeId) {
+    public List<String> updateSceneElement(String nodeId) {
         var elementBO = getElement(nodeId);
         E0 element = elementBO.toModel();
         element.setScene(sceneId);
@@ -1492,10 +1492,19 @@ public abstract class BaseSceneHandler<
             if (CollectionUtils.isNotEmpty(updatePorts)) {
                 sceneElementPortMapper.bulkUpdate(updatePorts);
             }
+            return new ArrayList<>();
         } else {
             // 此时说明把端口都删除了
-            sceneElementPortMapper.filterDelete(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneId)
+            var list = sceneElementPortMapper
+                    .list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneId)
                     .filterEqual(SceneElementPortModel::getSceneElement, element.getId()));
+            if (CollectionUtils.isEmpty(list)) {
+                return new ArrayList<>();
+            }
+            var result = list.stream().map(p -> p.getPortId()).collect(Collectors.toList());
+            var deleteIds = list.stream().map(p -> p.getId()).collect(Collectors.toList());
+            sceneElementPortMapper.bulkDelete(deleteIds.toArray(new String[]{}));
+            return result;
         }
     }
 
@@ -1503,13 +1512,15 @@ public abstract class BaseSceneHandler<
      * 单独保存基础场景节点数据及其插件数据
      */
     public void updateSceneElementWithPlugins(String nodeId) {
-        updateSceneElement(nodeId);
+        var list = updateSceneElement(nodeId);
 
         List<P> elementPortBOs = getElement(nodeId).getPorts();
         for (var plugin : plugins) {
             plugin.updateElements(nodeId);
             if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
                 plugin.updateElementPorts(elementPortBOs.stream().map(BaseSceneElementPortBO::getId).toArray(String[]::new));
+            }else if(CollectionUtils.isNotEmpty(list)){
+                plugin.deleteElementPorts(list.toArray(new String[]{}));
             }
         }
     }
