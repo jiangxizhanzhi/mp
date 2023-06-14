@@ -510,6 +510,7 @@ public class SceneHandler extends BaseSceneHandler<
     public boolean create() {
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        save();
         try {
             for (var plugin : getPlugins()) {
                 plugin.create();
