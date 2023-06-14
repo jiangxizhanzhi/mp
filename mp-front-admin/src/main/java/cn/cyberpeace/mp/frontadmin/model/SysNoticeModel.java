@@ -45,7 +45,7 @@ public class SysNoticeModel extends BaseModel {
     private String publisher;
 
     // 1:系统  2:课程  3:练习  4:考试
-    @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
+    @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试 5:license到期提醒")
     @DefaultInt(1)
     private Integer type;
 

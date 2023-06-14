@@ -16,6 +16,7 @@ public enum NoticeTypeEnum {
     COURSE(2, "course"),
     EXERCISE(3, "exercise"),
     EXAM(4, "exam"),
+    LICENSE(5, "license"),
     ;
 
     private int code;

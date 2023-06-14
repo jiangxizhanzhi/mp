@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.service.cron;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.enums.NoticeTypeEnum;
@@ -13,6 +17,7 @@ import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -25,7 +30,10 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.frontadmin.service.cron
@@ -60,6 +68,9 @@ public class SysDespireCronJob implements SchedulingConfigurer {
 
     @Resource
     private SysNoticeService noticeService;
+
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -109,16 +120,34 @@ public class SysDespireCronJob implements SchedulingConfigurer {
      * @param daysBetween 剩余到期天数
      * @return void
      */
-    private void remindAction(Integer daysBetween) {
+    public void remindAction(Integer daysBetween) {
         //获取系统名称
         SysConfigModel sysConfigModel = sysConfigService.getByKeyName("system_name");
         String sysName = !Objects.isNull(sysConfigModel) && StringUtils.isNotEmpty(sysConfigModel.getValue())?sysConfigModel.getValue():DEFAULT_SYS_NAME;
         //激活到期前提醒内容
         String remindContent = String.format(LICENSE_REMIND_CONTENT, sysName, daysBetween);
+        // 设置了延期提醒的用户不通知
+        var humanCondition = new HumanCondition()
+                .link(UserModel.class, UserRoleModel.class)
+                .filterLink(UserModel.class, UserModel::getId, UserRoleModel.class, UserRoleModel::getUser)
+                .currentLink(UserModel.class)
+                .filterGreaterThanOrEqual(UserModel::getDelayRemindLicenseTime, 0)
+                .currentLink(UserRoleModel.class)
+                .filterEqual(UserRoleModel::getRole, AuthConstant.ROLE_ADMIN_ID);
+        var users = userMapper.list(humanCondition);
+        List<String> userIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(users)) {
+            userIds = users.stream().map(UserModel::getId).collect(Collectors.toList());
+        }
         SysNoticeRequest sysNoticeRequest =
-            SysNoticeRequest.builder().title(LICENSE_REMIND_TITLE).content(remindContent)
-                .type(NoticeTypeEnum.SYSTEM.getCode()).isPublic(0).publisher(AuthConstant.ROOT_USER_ID)
-                .roleIds(Lists.newArrayList(AuthConstant.ROLE_ADMIN_ID)).build();
+                SysNoticeRequest.builder()
+                        .title(LICENSE_REMIND_TITLE)
+                        .content(remindContent)
+                        .type(NoticeTypeEnum.LICENSE.getCode())
+                        .isPublic(0)
+                        .publisher(AuthConstant.ROOT_USER_ID)
+                        .roleIds(Lists.newArrayList(AuthConstant.ROLE_ADMIN_ID))
+                        .userIds(userIds).build();
         //新增系统通过公告，提醒用户范围：具有管理员权限的用户均收到提醒
         noticeService.add(sysNoticeRequest);
     }

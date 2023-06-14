@@ -18,25 +18,25 @@ import java.time.LocalDateTime;
  */
 @Service
 @Slf4j
-public class UserAgreePrivacyPolicyTimeService {
+public class UserDelayRemindLicenseTimeService {
     @Autowired
     private UserMapper userMapper;
 
     @Scheduled(cron = "0 0 0 * * ?")
     private void updateUserAgreePrivacyPolicyTime() {
-        log.info("start update user agree privacy policy time,now time is {}", LocalDateTime.now());
+        log.info("start update user delay remind license time,now time is {}", LocalDateTime.now());
         var users = userMapper.list(new HumanCondition()
-                .filterGreaterThanOrEqual(UserModel::getAgreePrivacyPolicyTime, 0));
+                .filterGreaterThanOrEqual(UserModel::getDelayRemindLicenseTime, 0));
         if (CollectionUtil.isNotEmpty(users)) {
             try {
                 users.forEach(u -> {
-                    u.setAgreePrivacyPolicyTime(u.getAgreePrivacyPolicyTime() - 1);
+                    u.setDelayRemindLicenseTime(u.getDelayRemindLicenseTime() - 1);
                 });
                 userMapper.bulkUpdate(users);
             } catch (Exception e) {
-                log.error("update user agree privacy policy time error", e);
+                log.error("update user delay remind license time error", e);
             }
         }
-        log.info("end update user agree privacy policy time,now time is {}", LocalDateTime.now());
+        log.info("end update user delay remind license time,now time is {}", LocalDateTime.now());
     }
 }
