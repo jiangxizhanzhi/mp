@@ -17,11 +17,13 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,6 +50,9 @@ public class HostStateController {
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
+        if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
+            ResultCommon.success(new ArrayList<>());
+        }
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
 
         return ResultCommon.success(hostStates);
