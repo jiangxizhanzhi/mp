@@ -877,21 +877,26 @@ public class SceneHandler extends BaseSceneHandler<
 
     public void modifyElement(String nodeId, SceneHandler originHandler) {
         var element = getElement(nodeId);
-        prepareElementEvent(element, SceneElementModel.Event.MODIFY);
-        startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
-        try {
-            // 插件数据 modify
-            for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.modifyElement(nodeId, originHandler);
+        if (element.getProcessStatus() != SceneElementModel.Event.STOP) {
+            prepareElementEvent(element, SceneElementModel.Event.MODIFY);
+            startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+            try {
+                // 插件数据 modify
+                for (ScenePluginHandler plugin : getPlugins()) {
+                    plugin.modifyElement(nodeId, originHandler);
+                }
+            } catch (Exception e) {
+                log.error("failed to modifyElement , sceneId is {} , nodeId is {}, exception is {}", getSceneId(),
+                        nodeId, ExceptionUtils.getStackTrace(e));
+                errorElement(nodeId, SceneElementModel.Event.MODIFY, e.getMessage());
+                return;
             }
-        } catch (Exception e) {
-            log.error("failed to modifyElement , sceneId is {} , nodeId is {}, exception is {}", getSceneId(),
-                    nodeId, ExceptionUtils.getStackTrace(e));
-            errorElement(nodeId, SceneElementModel.Event.MODIFY, e.getMessage());
-            return;
+            overElementEvent(nodeId, SceneElementModel.Event.MODIFY);
+            updateSceneElementWithPlugins(nodeId);
+        } else {
+            // 只更新拓扑信息，但是不更新插件信息
+            updateSceneElement(nodeId);
         }
-        overElementEvent(nodeId, SceneElementModel.Event.MODIFY);
-        updateSceneElementWithPlugins(nodeId);
     }
 
     public void recreateElement(String nodeId,String image) {
