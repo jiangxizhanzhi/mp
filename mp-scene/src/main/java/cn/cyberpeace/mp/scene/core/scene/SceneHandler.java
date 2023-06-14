@@ -528,6 +528,12 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    @Override
+    public void save() {
+        log.info("save scene , scene id is {} , event is {} , event_status is {}", getSceneId(), getScene().getEvent(), getScene().getEventStatus());
+        super.save();
+    }
+
     public void start() {
     }
 
