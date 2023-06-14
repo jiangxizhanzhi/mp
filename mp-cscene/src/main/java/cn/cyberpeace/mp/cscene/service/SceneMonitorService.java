@@ -209,7 +209,7 @@ public class SceneMonitorService {
         // 根据名称模糊筛选
         var stream = sceneHandler.getElementMap().values().stream();
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
-            stream = stream.filter(e -> e.getName().contains(request.getName()));
+            stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
         List<String> nodeIds = stream
                 .filter(n -> !Boolean.TRUE.equals(n.getIsAuxiliary()))
@@ -335,7 +335,7 @@ public class SceneMonitorService {
         var stream = sceneConfigHandler.getElementMap().values().stream();
         // 根据名称模糊筛选
         if (StringUtils.isNotEmpty(request.getName())) {
-            stream = stream.filter(e -> e.getName().contains(request.getName()));
+            stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
         stream.forEach(e -> {
             var cloudElement = cloudConfigPlugin.getElement(e.getId());
