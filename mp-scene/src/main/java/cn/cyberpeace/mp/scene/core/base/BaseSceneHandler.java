@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.base.*;
 import cn.cyberpeace.mp.scene.repository.base.*;
 import lombok.Getter;
@@ -1493,8 +1494,8 @@ public abstract class BaseSceneHandler<
             }
         } else {
             // 此时说明把端口都删除了
-            sceneElementPortMapper.filterDelete(new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId)
-                    .filterEqual(SceneElementModel::getNodeId, nodeId));
+            sceneElementPortMapper.filterDelete(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneId)
+                    .filterEqual(SceneElementPortModel::getSceneElement, element.getId()));
         }
     }
 
