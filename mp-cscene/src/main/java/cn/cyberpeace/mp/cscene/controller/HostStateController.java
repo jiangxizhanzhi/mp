@@ -51,7 +51,7 @@ public class HostStateController {
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
-            ResultCommon.success(new ArrayList<>());
+            return ResultCommon.success(new ArrayList<>());
         }
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
 
