@@ -191,8 +191,16 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformResult result = super.sendGet(URL_VERSION + "/hypervisors", CloudPlatformResult.class);
         super.checkResult(result);
         List<Hypervisor> hypervisorList = JSONObject.parseArray(JSONObject.toJSONString(((JSONObject)result.getData()).getJSONArray("list")), Hypervisor.class);
-        log.info("RealEquipmentService.hypervisorList end. hypervisorList:{}", hypervisorList);
-        return hypervisorList;
+        List<Hypervisor> rtnList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(hypervisorList)) {
+            for (Hypervisor hypervisor : hypervisorList) {
+                if (!"disabled".equals(hypervisor.getStatus())) {
+                    rtnList.add(hypervisor);
+                }
+            }
+        }
+        log.info("RealEquipmentService.hypervisorList end. rtnList:{}", rtnList);
+        return rtnList;
     }
 
     /**
