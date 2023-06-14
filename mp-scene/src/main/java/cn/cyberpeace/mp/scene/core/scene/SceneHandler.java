@@ -877,7 +877,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public void modifyElement(String nodeId, SceneHandler originHandler) {
         var element = getElement(nodeId);
-        if (element.getProcessStatus() != SceneElementModel.Event.STOP) {
+        if (element.getEvent() != SceneElementModel.Event.STOP) {
             prepareElementEvent(element, SceneElementModel.Event.MODIFY);
             startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
             try {
