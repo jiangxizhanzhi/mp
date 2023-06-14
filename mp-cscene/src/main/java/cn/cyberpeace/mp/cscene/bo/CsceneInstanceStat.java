@@ -25,6 +25,8 @@ public class CsceneInstanceStat {
     private Boolean deleted;
     @ApiModelProperty(value = "虚拟机数量")
     private Integer vmCount;
+    @ApiModelProperty(value = "dynamips数量")
+    private Integer dynamipsCount;
     @ApiModelProperty(value = "容器数量")
     private Integer containerCount;
     @ApiModelProperty(value = "实装数量")

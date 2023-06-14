@@ -429,7 +429,10 @@ public class CsceneSpecialService {
                             CsceneInstanceStat::getContainerCount)
                     .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
                                     .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
-                            CsceneInstanceStat::getEntityCount);
+                            CsceneInstanceStat::getEntityCount)
+                    .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                                    .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS),
+                            CsceneInstanceStat::getDynamipsCount);
             var dataInfos = csceneInstanceMapper.list(humanCondition2, CsceneInstanceStat.class);
             if (CollectionUtils.isNotEmpty(dataInfos)) {
                 Map<String, CsceneInstanceStat> infos = new HashMap<>();
@@ -445,6 +448,7 @@ public class CsceneSpecialService {
                         d.setVmCount(info.getVmCount());
                         d.setContainerCount(info.getContainerCount());
                         d.setEntityCount(info.getEntityCount());
+                        d.setDynamipsCount(info.getDynamipsCount());
                         if (info.getContainerCount() != null) {
                             d.setCpu(d.getCpu() + info.getContainerCount());
                             d.setRam(d.getRam() + info.getContainerCount() * 512);
@@ -457,6 +461,7 @@ public class CsceneSpecialService {
                         d.setVmCount(0);
                         d.setContainerCount(0);
                         d.setEntityCount(0);
+                        d.setDynamipsCount(0);
                     }
                 }
             }
