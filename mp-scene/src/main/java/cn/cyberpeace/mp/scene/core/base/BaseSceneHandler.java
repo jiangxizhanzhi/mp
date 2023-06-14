@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.*;
 import cn.cyberpeace.mp.scene.repository.base.*;
@@ -1490,6 +1491,10 @@ public abstract class BaseSceneHandler<
             if (CollectionUtils.isNotEmpty(updatePorts)) {
                 sceneElementPortMapper.bulkUpdate(updatePorts);
             }
+        } else {
+            // 此时说明把端口都删除了
+            sceneElementPortMapper.filterDelete(new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId)
+                    .filterEqual(SceneElementModel::getNodeId, nodeId));
         }
     }
 
