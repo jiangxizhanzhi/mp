@@ -206,7 +206,14 @@ public class CreateHandler extends HandlerCommon {
                     .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(containerElements)) {
                 Container container = new Container();
-                var addRouterTasks = containerElements.stream()
+                var addRouterTasks = containerElements.stream().filter(c -> {
+                            var cloudElement = cloudPluginHandler.getElement(c.getSrcElement().getId());
+                            if (cloudElement != null && StringUtils.isNotEmpty(cloudElement.getResourceId())) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        })
                         .map(e -> {
                             var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
                             return (Runnable) () -> container.addRoute(cloudElement.getResourceId());
