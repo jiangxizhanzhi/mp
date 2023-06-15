@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -196,6 +197,10 @@ public class Container extends CloudClient {
             }, true);
             return true;
         } catch (Exception e) {
+            log.info("change container state but it is already that state", ExceptionUtil.stacktraceToString(e));
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                return true;
+            }
             throw new MpRuntimeException(e.getMessage());
         }
     }
