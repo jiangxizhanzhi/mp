@@ -698,14 +698,14 @@ public class ScenePluginCloudSceneService {
         }
     }
 
-    public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command) {
+    public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command, String user) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var result = container.executeCommand(node.getResourceId(), command);
+                var result = container.executeCommand(node.getResourceId(), command,user);
                 if (result.getExitCode() != null && result.getExitCode() == 0) {
                     ElementCommandExecBO execRes = new ElementCommandExecBO();
                     execRes.setOutput(result.getOutput());
