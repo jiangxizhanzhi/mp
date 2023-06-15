@@ -1136,9 +1136,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<ElementCommandExecResult> execElement(String id, String nodeId, String command, CsceneContextBO context) {
+    public ServiceResult<ElementCommandExecResult> execElement(String id, String nodeId, String command,
+                                                               String user, CsceneContextBO context) {
         String sceneId = getSceneId(id);
-        var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command).getSource();
+        var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command,user).getSource();
         var result = new ElementCommandExecResult();
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());
