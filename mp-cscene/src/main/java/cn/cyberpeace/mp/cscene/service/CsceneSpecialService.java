@@ -581,6 +581,35 @@ public class CsceneSpecialService {
         return new ServiceResult<>(deviceReferCsceneStats);
     }
 
+    /**
+     * 查询引用了实体usb的场景模板
+     *
+     * @param uuid
+     * @return
+     */
+    public ServiceResult<List<DeviceReferCsceneStat>> statEntityUsbReferCscenes(String uuid) {
+        var referCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
+                .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
+                .selectAs(CsceneModel::getCreateUsername, DeviceReferCsceneStat::getCreateUsername)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterContains(CloudPluginSceneConfigElementModel::getEntityUsbs, uuid)
+                .distinct();
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneInstanceMapper.list(referCondition,
+                DeviceReferCsceneStat.class);
+        return new ServiceResult<>(deviceReferCsceneStats);
+    }
+
 
     /**
      * 统计iso文件 对应 引用了iso文件的场景模板

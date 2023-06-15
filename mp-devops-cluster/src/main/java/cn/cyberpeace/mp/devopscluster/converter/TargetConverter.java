@@ -180,6 +180,18 @@ public class TargetConverter{
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(sceneName));
         }
+        for (String uuid : uuids) {
+            ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbReferCscenes(uuid);
+            List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
+            if (CollectionUtils.isNotEmpty(referStateUsbList)) {
+                List<String> sceneUsbNames = referStateUsbList.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
+                throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneUsbName));
+            }
+        }
     }
 
     public void validTargetCanMerge(List<String> uuids) {
