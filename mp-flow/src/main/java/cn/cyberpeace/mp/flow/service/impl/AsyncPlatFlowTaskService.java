@@ -775,16 +775,20 @@ public class AsyncPlatFlowTaskService {
         }
 
         // 任务状态校验
-        List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskTaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus() || TaskTaskStatusEnum.PREPARING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(runningTasks)) {
+        List<String> notRunningTaskIds = new ArrayList<>();
+        List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
+                TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(notRunningTasks)) {
             log.error("some tasks are already running");
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+        } else {
+            notRunningTaskIds = notRunningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            flowTaskTaskModels = flowTaskTaskService.listByTaskIds(notRunningTaskIds);
         }
 
         // 任务配置校验
-        List<FlowTaskConfModel> flowTaskConfModels = flowTaskConfService.listByTaskIds(taskIds);
-        if (CollectionUtils.isEmpty(flowTaskConfModels) || flowTaskConfModels.size() != taskIds.size()) {
+        List<FlowTaskConfModel> flowTaskConfModels = flowTaskConfService.listByTaskIds(notRunningTaskIds);
+        if (CollectionUtils.isEmpty(flowTaskConfModels) || flowTaskConfModels.size() != notRunningTaskIds.size()) {
             log.error("not all tasks config exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
@@ -872,10 +876,10 @@ public class AsyncPlatFlowTaskService {
 
                 // 跟流量执行器建立ws连接，用于接收任务状态信息
                 FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
-                wsClient.sendMessage(String.join(BaseConstants.COMMA, taskIds));
+                wsClient.sendMessage(String.join(BaseConstants.COMMA, notRunningTaskIds));
 
                 // 批量更新任务状态为运行中
-                flowTaskTaskService.batchUpdateTaskStatus(taskIds, TaskStatusEnum.RUNNING.toValue());
+                flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskStatusEnum.RUNNING.toValue());
                 return ResultCommon.success(true);
             } else {
                 log.error("batch start tasks failed");
@@ -959,14 +963,6 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        // 任务状态校验
-        List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(notRunningTasks)) {
-            log.error("some tasks are not running");
-            throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
-        }
-
         // 流量执行器校验
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModels.get(0).getActuatorId());
         if (Objects.isNull(flowActuatorModel)) {
@@ -974,9 +970,20 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
+        List<String> runningTaskIds = new ArrayList<>();
+        // 任务状态校验
+        List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
+                TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(runningTasks)) {
+            log.error("some tasks are not running");
+            throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
+        } else {
+            runningTaskIds = runningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+        }
+
         BatchStopFlowTaskRequest batchStopFlowTaskRequest = BatchStopFlowTaskRequest.builder()
                 .action(TaskActionEnum.STOP.toValue())
-                .taskIds(taskIds)
+                .taskIds(runningTaskIds)
                 .build();
 
         try {
@@ -988,7 +995,7 @@ public class AsyncPlatFlowTaskService {
                 log.info("batch stop task success");
 
                 // 批量更新任务状态为运行中
-                flowTaskTaskService.batchUpdateTaskStatus(taskIds, TaskStatusEnum.STOPED.toValue());
+                flowTaskTaskService.batchUpdateTaskStatus(runningTaskIds, TaskStatusEnum.STOPED.toValue());
 
                 log.info("AsyncPlatFlowTaskService.batchStopTasks end.");
                 return ResultCommon.success(true);
