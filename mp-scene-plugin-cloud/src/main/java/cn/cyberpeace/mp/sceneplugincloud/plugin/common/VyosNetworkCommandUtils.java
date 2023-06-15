@@ -399,18 +399,26 @@ public class VyosNetworkCommandUtils {
     }
 
     private static String ripKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("rip", Optional.of(portBO.getRipIp()).orElse(StringUtils.EMPTY), Optional.of(portBO.getRipPear()).orElse(StringUtils.EMPTY));
+        var result = Arrays.asList("rip",
+                Optional.ofNullable(portBO.getRipIp()).orElse(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getRipPear()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
     }
 
 
     private static String ospfKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("ospf", Optional.of(portBO.getOspfArea()).orElse(StringUtils.EMPTY), Optional.of(portBO.getOspfIp()).orElse(StringUtils.EMPTY));
+        var result = Arrays.asList("ospf",
+                Optional.ofNullable(portBO.getOspfArea()).ofNullable(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getOspfIp()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
     }
 
     private static String bgpKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("bgp", Optional.of(portBO.getBgpAs()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpPeer()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpIp()).orElse(StringUtils.EMPTY), Optional.of(portBO.getBgpPeerAs()).orElse(StringUtils.EMPTY));
+        var result = Arrays.asList("bgp",
+                Optional.ofNullable(portBO.getBgpAs()).orElse(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getBgpPeer()).orElse(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getBgpIp()).orElse(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getBgpPeerAs()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
     }
 }
