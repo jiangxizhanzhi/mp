@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -61,7 +62,9 @@ import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregat
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -79,6 +82,7 @@ import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
@@ -88,10 +92,12 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -109,6 +115,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -131,6 +138,9 @@ public class ScenePluginCollectionSceneService {
         public static final String EVENT_TYPE = "eventType";
         public static final String NODE_NAME = "nodeName";
     }
+
+    @Autowired
+    private FlowClassificationsService flowClassificationsService;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -262,8 +272,31 @@ public class ScenePluginCollectionSceneService {
             EsHttpUtil.updateDataMaxQueryNum(batchSceneHandler.getFlowCollectors().get(0), flowLogBOSResult.getTotal());
         }
 
+        var flowLogBOS = flowLogBOSResult.getObjs();
+        Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
+        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
+            if (MapUtils.isNotEmpty(allCategoryDicMap)){
+                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
+                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
+                flowLogBO.getSuricata().setCategory(categoryList);
+            }
+        });
+
         List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
+    }
+
+    private String globalizedWithAttackWay(String attackWay,Map<String, FlowClassificationModel> allCategoryDicMap){
+        if (MapUtils.isEmpty(allCategoryDicMap)){
+            return attackWay;
+        }
+        FlowClassificationModel model = allCategoryDicMap.get(attackWay);
+        String globalized = attackWay;
+        if (Objects.nonNull(model)) {
+            globalized = MessageCommon.getOrDefault(SituationalAwareConstant.ERROR_CODE_PREFIX + model.getName(),
+                    attackWay);
+        }
+        return globalized;
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
