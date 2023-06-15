@@ -4,6 +4,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.VirtualUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.VirtualUsbDownload;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.VirtualUsbStorage;
@@ -23,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -52,6 +57,9 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
     public VirtualUsbServiceImpl(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
 
     /**
      * 分页查询虚拟USB列表
@@ -152,6 +160,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         if (CollectionUtils.isEmpty(request.getUuids())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        this.validUsbCanDelete(request.getUuids());
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", request.getUuids());
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
@@ -245,5 +254,24 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/file/" + fileName + ". response: {}", virtualUsbDownload);
         log.info("VirtualUsbServiceImpl.downloadFile end. virtualUsbDownload:{}", virtualUsbDownload);
         return virtualUsbDownload.getNginxFileUrl();
+    }
+
+    /**
+     * 验证sub是否可删除
+     * @param uuids
+     */
+    private void validUsbCanDelete(List<String> uuids) {
+        for (String uuid : uuids) {
+            ServiceResult<List<DeviceReferCsceneStat>> referStateServiceResult = csceneSpecialService.statVirtualUsbReferCscenes(uuid);
+            List<DeviceReferCsceneStat> referStateList = referStateServiceResult.getSource();
+            if (CollectionUtils.isNotEmpty(referStateList)) {
+                List<String> sceneNames = referStateList.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                String sceneName = StringUtils.join(sceneNames, ",");
+                throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneName));
+            }
+        }
     }
 }
