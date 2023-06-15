@@ -138,6 +138,7 @@ public class ModifyHandler extends HandlerCommon {
                                 loadProperties2NetworkV1(network, e);
                                 ConnectedNetworkBO defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
                                 defaultConnectedNetwork.addPort(p, null, true);
+                                e.getDeriveNetworks().add(defaultConnectedNetwork);
                             }
                         }
                     });
