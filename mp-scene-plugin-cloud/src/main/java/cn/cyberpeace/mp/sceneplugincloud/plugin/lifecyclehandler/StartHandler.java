@@ -8,10 +8,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler
@@ -72,6 +76,13 @@ public class StartHandler extends HandlerCommon{
             runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
                 //启动
                 virtualMachine.start(instanceId);
+                //挂载一下usb
+                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getVirtualUsbs())) {
+                    this.attachVirtualUsbs(element);
+                }
+                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getEntityUsbs())) {
+                    this.attachEntityUsbs(element);
+                }
                 //检查接入方式是否可用
                 checkAccessModes(element);
             });
@@ -98,5 +109,20 @@ public class StartHandler extends HandlerCommon{
         }
     }
 
+    private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachVirtualUsbsData data = new AttachVirtualUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setVirtualUsbUuids(usbUuids);
+        virtualMachine.attachVirtualUsbs(data);
+    }
+
+    private void attachEntityUsbs(CloudPluginSceneElementBO cloudElement) {
+        AttachEntityUsbsData data = new AttachEntityUsbsData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        data.setEntityUsbUuids(usbUuids);
+        virtualMachine.attachEntityUsbs(data);
+    }
 
 }
