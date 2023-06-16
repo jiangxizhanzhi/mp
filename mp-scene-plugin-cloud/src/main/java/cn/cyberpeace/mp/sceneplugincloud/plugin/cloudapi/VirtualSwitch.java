@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.PortMappingCreateData;
@@ -14,11 +14,14 @@ import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class VirtualSwitch extends CloudClient {
+
+    private static final Logger log = LoggerFactory.getLogger(VirtualSwitch.class);
 
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
         heavyConcurrentWait();
@@ -51,8 +54,11 @@ public class VirtualSwitch extends CloudClient {
     }
 
     public PortMappingCreateResult createPortMapping(PortMappingCreateData portMappingCreateData) {
-        return getHttpClient().post(CloudUrlConstant.CREATE_PORT_MAPPING, portMappingCreateData, null,
+        var result = getHttpClient().post(CloudUrlConstant.CREATE_PORT_MAPPING, portMappingCreateData, null,
                 PortMappingCreateResult.class);
+
+        log.info("portMapping result is {}", JsonCommon.stringify(result));
+        return result;
     }
 
     @Getter
