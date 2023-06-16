@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
@@ -43,8 +44,11 @@ import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -655,6 +659,15 @@ public class SceneHandler extends BaseSceneHandler<
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             save();
+        }
+        String dir = "/tmp/mp/" + getSceneId();
+        try {
+            File file = new File(dir);
+            if (file.exists()) {
+                FileUtils.cleanDirectory(file);
+            }
+        } catch (IOException e) {
+            log.error("failed to delete dir , {} ", dir, e);
         }
         return super.delete();
     }

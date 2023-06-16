@@ -767,23 +767,15 @@ public class ScenePluginCloudSceneService {
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                String dir = "/tmp/mp/" + sceneId + "_" + nodeId;
-                String tmpZipFilepath = dir + "/" + filename;
+                String dir = "/tmp/mp/" + sceneId;
+                String tmpZipFilepath = dir + "/" + TextUtils.uuid() + "/" + filename;
                 File file = new File(dir);
                 if (!file.exists()) {
                     file.mkdir();
                 }
-                try {
-                    FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
-                    var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
-                    return new ServiceResult<>(result);
-                } finally {
-                    try {
-                        FileUtils.delete(new File(tmpZipFilepath));
-                    } catch (Exception e) {
-                        log.error("failed to delete dir , {} ", tmpZipFilepath, e);
-                    }
-                }
+                FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
+                var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+                return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
                 var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
