@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -70,6 +71,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -764,7 +766,13 @@ public class ScenePluginCloudSceneService {
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
+                String dir = "/tmp/mp/" + sceneId + "_" + nodeId;
+                String tmpZipFilepath = dir + "/" + filename;
+                File file = new File(dir);
+                if (!file.exists()) {
+                    file.mkdir();
+                }
+                FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
