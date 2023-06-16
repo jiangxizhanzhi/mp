@@ -36,8 +36,8 @@
             resultType="cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp">
         <foreach collection="conditions" item="item" open="" close="" separator="union">
             select #{item.endTime} as statisticalTime, #{item.offsetValue} as offsetValue, #{item.offsetUnit} as offsetUnit,
-            sum(tx_bps) as txBps, sum(tx_pps) as txPps, CAST(avg(latency) as int) as latency, CAST(avg(jitter) as int) as jitter,
-            sum(total_tx_L2) as totalTxL2, sum(total_tx_L1) as totalTxL1, sum(total_rx) as totalRx, sum(queue_full) as queueFull, sum(drop_rate) as dropRate
+            ifnull(sum(tx_bps),0) as txBps, ifnull(sum(tx_pps),0) as txPps, ifnull(CAST(avg(latency) as int),0) as latency, ifnull(CAST(avg(jitter) as int),0) as jitter,
+            ifnull(sum(total_tx_L2),0) as totalTxL2, ifnull(sum(total_tx_L1),0) as totalTxL1, ifnull(sum(total_rx),0) as totalRx, ifnull(sum(queue_full),0) as queueFull, ifnull(sum(drop_rate),0) as dropRate
             from mp_flow_task_record
             where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
             and create_time=(
@@ -54,7 +54,7 @@
             resultType="cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp">
         <foreach collection="conditions" item="item" open="" close="" separator="union">
             select #{item.endTime} as statisticalTime, #{item.offsetValue} as offsetValue, #{item.offsetUnit} as offsetUnit,
-            sum(obytes) as obytes, sum(oerrors) as oerrors, sum(total_pps) as totalPps
+            ifnull(sum(obytes),0) as obytes, ifnull(sum(oerrors),0) as oerrors, ifnull(sum(total_pps),0) as totalPps
             from mp_flow_task_record
             where (task_id,create_time) in
             (select task_id,max(create_time)
