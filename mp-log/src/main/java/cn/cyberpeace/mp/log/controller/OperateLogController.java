@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -82,7 +83,14 @@ public class OperateLogController {
     @ApiOperation(value = "下载操作日志")
     @GetMapping("/download")
     public void download(OperationLogPageRequest request, HttpServletResponse response) {
-        request.ensure();
+        request.setPage(null);
+        request.setPerPage(null);
+        if (Objects.isNull(request.getEndDate())) {
+            request.setEndDate(LocalDateTime.now());
+        }
+        if (Objects.isNull(request.getStartDate())) {
+            request.setStartDate(request.getEndDate().minusDays(100L));
+        }
         var result = operateLogService.search(request).getSource().getObjs();
         String header = "用户名,模块,操作类型,操作对象,操作时间,内容";
         File file = new File("audit_logs.csv");

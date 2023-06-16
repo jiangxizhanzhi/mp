@@ -160,8 +160,10 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         humanCondition.orderBy("-" + createTime);
 
         // 设置分页条件、查询
-        humanCondition.setLimit(request.getPerPage());
-        humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
+        if ((request.getPage() != null) && (request.getPerPage() != null)) {
+            humanCondition.setLimit(request.getPerPage());
+            humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
+        }
         List<OperateLogSqlModel> models = getModelMapper().list(humanCondition);
 
         List<OperationLogPageResponse> list = opModel2Response(models, locale);
