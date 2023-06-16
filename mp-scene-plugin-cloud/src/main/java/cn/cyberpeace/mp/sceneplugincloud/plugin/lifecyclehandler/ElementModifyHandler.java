@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -24,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResizeDa
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateFlavorResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.PortMappingCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
@@ -449,18 +451,37 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 虚拟机容器分开处理
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                     var result = this.vmAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp(), null);
-
                     addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 } else {
                     var result = this.containerAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp());
-
-                    addPort.setIp(addPort.getIp());
+                    addPort.setIp(result.getFixedIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 }
                 addCloudPort.setAuxiliaryNetworkId(net.getResourceId());
+                // 新增端口映射
+                if (CollectionUtils.isNotEmpty(addCloudPort.getAccessModes())) {
+                    for (var a : addCloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            continue;
+                        }
+                        PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
+                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setHost(originCloudElement.getHost());
+                        portMappingCreateData.setInstanceIp(addPort.getIp());
+                        portMappingCreateData.setInstancePort(a.getPort());
+                        portMappingCreateData.setNetworkId(addCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
+                                newCloudElement.getSrcElement().getId(), net.getId()
+                        ));
+                        var portMapping = virtualSwitch.createPortMapping(portMappingCreateData);
+                        a.setAvailable(true);
+                        a.setAccessIp(portMapping.getHost());
+                        a.setAccessPort(portMapping.getHostPort());
+                    }
+                }
             }
         }
 
@@ -530,6 +551,29 @@ public class ElementModifyHandler extends HandlerCommon {
                     newCloudPort.setResourceId(result.getPortId());
                 }
                 newCloudPort.setAuxiliaryNetworkId(newNet.getResourceId());
+
+                // 新增端口映射
+                if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
+                    for (var a : newCloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            continue;
+                        }
+                        PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
+                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setHost(originCloudElement.getHost());
+                        portMappingCreateData.setInstanceIp(newPort.getIp());
+                        portMappingCreateData.setInstancePort(a.getPort());
+                        portMappingCreateData.setNetworkId(newCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
+                                newCloudElement.getSrcElement().getId(), newNet.getId()
+                        ));
+                        var portMapping = virtualSwitch.createPortMapping(portMappingCreateData);
+                        a.setAvailable(true);
+                        a.setAccessIp(portMapping.getHost());
+                        a.setAccessPort(portMapping.getHostPort());
+                    }
+                }
+
             } else if (!StringUtils.equals(newNet.getResourceId(), originNet.getResourceId())) {
                 // 虚拟机容器分开处理
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
@@ -556,6 +600,29 @@ public class ElementModifyHandler extends HandlerCommon {
                     newPort.setMacAddr(result.getMacAddress());
                     newCloudPort.setResourceId(result.getPortId());
                 }
+
+                // 新增端口映射
+                if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
+                    for (var a : newCloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            continue;
+                        }
+                        PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
+                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setHost(originCloudElement.getHost());
+                        portMappingCreateData.setInstanceIp(newPort.getIp());
+                        portMappingCreateData.setInstancePort(a.getPort());
+                        portMappingCreateData.setNetworkId(newCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
+                                newCloudElement.getSrcElement().getId(), newNet.getId()
+                        ));
+                        var portMapping = virtualSwitch.createPortMapping(portMappingCreateData);
+                        a.setAvailable(true);
+                        a.setAccessIp(portMapping.getHost());
+                        a.setAccessPort(portMapping.getHostPort());
+                    }
+                }
+
             } else if (ipChange) {
                 ModifyInstanceIpData data = new ModifyInstanceIpData();
                 data.setPortId(originCloudPort.getResourceId());
@@ -574,6 +641,28 @@ public class ElementModifyHandler extends HandlerCommon {
                         }
                     }
                 }
+
+                // 新增端口映射
+                if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
+                    for (var a : newCloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            continue;
+                        }
+                        PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
+                        portMappingCreateData.setHost(originCloudElement.getHost());
+                        portMappingCreateData.setInstanceIp(newPort.getIp());
+                        portMappingCreateData.setInstancePort(a.getPort());
+                        portMappingCreateData.setNetworkId(newCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
+                                newCloudElement.getSrcElement().getId(), newNet.getId()
+                        ));
+                        var portMapping = virtualSwitch.createPortMapping(portMappingCreateData);
+                        a.setAvailable(true);
+                        a.setAccessIp(portMapping.getHost());
+                        a.setAccessPort(portMapping.getHostPort());
+                    }
+                }
+
             }
         }
     }
