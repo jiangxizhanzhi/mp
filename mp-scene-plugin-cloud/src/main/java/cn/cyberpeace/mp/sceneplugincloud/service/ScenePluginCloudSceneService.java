@@ -763,8 +763,9 @@ public class ScenePluginCloudSceneService {
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                String tmpZipFilepath = sceneId + "_" + nodeId + "/" + filename;
-                File file = new File(sceneId + "_" + nodeId);
+                String dir = "/tmp/mp" + sceneId + "_" + nodeId;
+                String tmpZipFilepath = dir + "/" + filename;
+                File file = new File(dir);
                 if (!file.exists()) {
                     file.mkdir();
                 }
