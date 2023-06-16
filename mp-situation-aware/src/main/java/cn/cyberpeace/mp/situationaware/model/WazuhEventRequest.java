@@ -95,4 +95,7 @@ public class WazuhEventRequest {
     @ApiModelProperty(value = "事件触发标识id")
     private String sicLaunchId;
 
+    @ApiModelProperty("事件类型 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户")
+    private Integer type;
+
 }

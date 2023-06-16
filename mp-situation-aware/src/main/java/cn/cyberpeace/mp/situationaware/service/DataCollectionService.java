@@ -1587,6 +1587,22 @@ public class DataCollectionService extends CollectionBaseService {
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
 
+        if (Objects.nonNull(wazuhEventRequest.getType()) && wazuhEventRequest.getType() != 0) {
+            if (wazuhEventRequest.getType() == 1) {
+                // 进程
+                boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES));
+            } else if (wazuhEventRequest.getType() == 2 || wazuhEventRequest.getType() == 3) {
+                // 端口、网络连接
+                boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_NET_CONNS));
+            } else if (wazuhEventRequest.getType() == 5) {
+                // 用户
+                boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
+            } else {
+                // 文件
+                boolQueryBuilder.mustNot(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES, SicLaunchConfig.LAUNCH_ID_NET_CONNS, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
+            }
+        }
+
     }
 
     private void buildRuleIdsQuery(List<String> ruleIds, BoolQueryBuilder boolQueryBuilder) {
@@ -1623,7 +1639,14 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
+        boolean lowLevel = levels.get(0) <= 4;
+        if (lowLevel) {
+            // level为空的数据默认为低等级
+            boolQueryBuilder.should(QueryBuilders.termsQuery("rule.level", levels))
+                    .should(QueryBuilders.existsQuery("rule.level").boost(0));
+        } else {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
+        }
     }
 
     /**

@@ -91,7 +91,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 return;
             }
             super.initiateElementBasePropertiesProcess(cloudElement);
@@ -132,13 +132,6 @@ public class ModifyHandler extends HandlerCommon {
                                         e.getAccessNetworks().add(connectedNetworkBO);
                                     }
                                 }
-                            } else if (StringUtils.isEmpty(pluginPort.getLogicNetworkId()) && to == null) {
-                                // 新加的端口（比如虚拟机不连其他节点，直接加个网卡）
-                                var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), e.getSrcElement().getId());
-                                loadProperties2NetworkV1(network, e);
-                                ConnectedNetworkBO defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
-                                defaultConnectedNetwork.addPort(p, null, true);
-                                e.getDeriveNetworks().add(defaultConnectedNetwork);
                             }
                         }
                     });
@@ -149,18 +142,6 @@ public class ModifyHandler extends HandlerCommon {
             }
         }
 
-        private void loadProperties2NetworkV1(CloudPluginSceneElementNetworkBO network, CloudPluginSceneElementBO element) {
-            network.setAllocationPools(element.getAllocationPools());
-            network.setDnsNameservers(element.getDnsNameservers());
-            network.setGateway(element.getGateway());
-            network.setGatewayOff(element.getGatewayOff());
-            network.setCidr(element.getCidr());
-            network.setHostRoutes(element.getHostRoutes());
-            network.setVlan(element.getVlan());
-            network.setVlanId(element.getVlanId());
-            network.setDhcp(element.getDhcp());
-            network.setNetMode(element.getNetMode());
-        }
     }
 
     private static class ModifyCreateHandler extends CreateHandler {
@@ -175,7 +156,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 return;
             }
             super.createAuxiliaryNetwork(cloudElement);
@@ -188,7 +169,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }
@@ -197,7 +178,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }
@@ -206,7 +187,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }
@@ -215,7 +196,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createContainer(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }
@@ -224,7 +205,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }
@@ -233,7 +214,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
-            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
                 // 已存在的节点无需再次创建
                 return;
             }

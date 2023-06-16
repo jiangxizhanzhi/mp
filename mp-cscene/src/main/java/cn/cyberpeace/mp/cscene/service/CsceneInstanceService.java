@@ -416,6 +416,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 hostEventBO.setSystemTypeName(SystemTypeUtils.getStandardSystemType(element.getSystemType()));
                 hostEventBO.setType(type);
                 hostEventBO.setProbeName(probeId2Name.get(probeId));
+                if (Objects.isNull(hostEventBO.getLevel())) {
+                    // 默认等级
+                    hostEventBO.setLevel(3);
+                }
                 Map<String, Object> map = JsonCommon.beanToMap(r);
                 var time = map.get("time");
                 if (Objects.nonNull(time)) {
@@ -751,8 +755,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
+        boolean lowLevel = true;
+        List<Integer> levels = queryParams.getLevels();
+        if (CollectionUtils.isNotEmpty(levels)) {
+            lowLevel = levels.get(0) <= 4;
+        }
+
         // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
-        if (Objects.nonNull(queryParams.getType())) {
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0 && lowLevel) {
             // 传入的sceneId不需要提前转
             if (queryParams.getType().equals(1)) {
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO,

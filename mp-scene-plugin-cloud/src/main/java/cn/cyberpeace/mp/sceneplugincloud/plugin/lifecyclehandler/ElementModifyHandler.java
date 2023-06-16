@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,8 @@ public class ElementModifyHandler extends HandlerCommon {
     private VirtualFirewall virtualFirewall = new VirtualFirewall();
     private VirtualPort virtualPort = new VirtualPort();
     private VmRouter vmRouter = new VmRouter();
+
+    private static final String TCP = "tcp";
 
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
@@ -429,8 +433,18 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> newPortIds;
+        Set<String> originPortIds;
+        if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
+            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());;
+        } else {
+            newPortIds = new ConcurrentHashSet<>();
+        }
+        if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
+            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        } else {
+            originPortIds = new ConcurrentHashSet<>();
+        }
         // 本次新增的端口
         Set<String> addPortIds = new HashSet<>(newPortIds);
         addPortIds.removeAll(originPortIds);
@@ -468,7 +482,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(addPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -559,7 +573,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -608,7 +622,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());

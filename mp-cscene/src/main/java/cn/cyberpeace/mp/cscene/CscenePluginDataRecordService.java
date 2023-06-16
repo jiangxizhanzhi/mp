@@ -48,7 +48,7 @@ public class CscenePluginDataRecordService {
     public void action() {
         var instances = csceneService.getRunningCscenes();
         for (var instance : instances) {
-            if (instance.getReferenceType() == null ) {
+            if (instance.getReferenceType() == null || (BaseCsceneModel.ReferenceType.READ_VS_BLUE != instance.getReferenceType() && BaseCsceneModel.ReferenceType.TEAM_TRAINING != instance.getReferenceType())) {
                 continue;
             }
             try {
