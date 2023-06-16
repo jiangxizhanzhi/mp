@@ -85,7 +85,6 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerGns3Router(csceneBO);
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
-        CsceneDataModifier.removeInvalidPlugin(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
