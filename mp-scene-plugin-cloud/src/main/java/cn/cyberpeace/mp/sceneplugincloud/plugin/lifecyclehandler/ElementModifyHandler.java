@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -429,7 +431,7 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> newPortIds = Objects.isNull(newCloudElement) ? new ConcurrentHashSet<>() : newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
         Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
         // 本次新增的端口
         Set<String> addPortIds = new HashSet<>(newPortIds);
