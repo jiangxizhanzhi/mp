@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.PortMappingCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.PortMappingCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
@@ -46,6 +48,11 @@ public class VirtualSwitch extends CloudClient {
     public boolean forceDelete(VirtualSwitchDeleteData deleteData) {
         ForceReleaseResourceUtils.forceDeleteNetwork(deleteData.getIds());
         return true;
+    }
+
+    public PortMappingCreateResult createPortMapping(PortMappingCreateData portMappingCreateData) {
+        return getHttpClient().post(CloudUrlConstant.CREATE_PORT_MAPPING, portMappingCreateData, null,
+                PortMappingCreateResult.class);
     }
 
     @Getter
