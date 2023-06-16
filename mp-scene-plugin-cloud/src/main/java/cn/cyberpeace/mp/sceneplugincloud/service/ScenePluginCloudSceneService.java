@@ -762,7 +762,8 @@ public class ScenePluginCloudSceneService {
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
+                String tmpZipFilepath = sceneId + "/" + filename;
+                FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
