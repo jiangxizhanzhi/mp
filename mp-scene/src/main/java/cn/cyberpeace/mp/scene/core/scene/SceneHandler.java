@@ -666,7 +666,7 @@ public class SceneHandler extends BaseSceneHandler<
             if (file.exists()) {
                 FileUtils.cleanDirectory(file);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("failed to delete dir , {} ", dir, e);
         }
         return super.delete();
