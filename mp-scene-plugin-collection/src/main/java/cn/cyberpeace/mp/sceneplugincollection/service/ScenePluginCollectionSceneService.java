@@ -550,6 +550,9 @@ public class ScenePluginCollectionSceneService {
         if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
             request.setScroll(true);
         }
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
+            request.setType(queryParams.getType());
+        }
 
         return request;
     }
