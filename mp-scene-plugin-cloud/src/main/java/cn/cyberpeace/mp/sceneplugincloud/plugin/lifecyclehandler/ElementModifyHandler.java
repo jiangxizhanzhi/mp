@@ -80,6 +80,8 @@ public class ElementModifyHandler extends HandlerCommon {
     private VirtualPort virtualPort = new VirtualPort();
     private VmRouter vmRouter = new VmRouter();
 
+    private static final String TCP = "tcp";
+
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
         this.newCloudScenePluginHandler = newHandler;
@@ -480,7 +482,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(addPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -571,7 +573,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -620,7 +622,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
