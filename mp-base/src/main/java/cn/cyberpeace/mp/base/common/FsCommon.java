@@ -30,6 +30,8 @@ public class FsCommon {
         }
         if ("fdfs".equals(BeanCommon.getBean(BaseAppConfig.class).getFileServer())) {
             return FdfsCommon.genHttpUrl(fileKey);
+        } else if (fileKey.startsWith(String.format(LfsCommon.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY))){
+            return fileKey;
         } else {
             return LfsCommon.genHttpUrl(fileKey);
         }
