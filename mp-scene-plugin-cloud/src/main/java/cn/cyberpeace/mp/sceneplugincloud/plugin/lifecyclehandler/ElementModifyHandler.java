@@ -652,7 +652,7 @@ public class ElementModifyHandler extends HandlerCommon {
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
-                        portMappingCreateData.setNetworkId(newCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setNetworkId(originCloudPort.getAuxiliaryNetworkId());
                         portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
                                 newCloudElement.getSrcElement().getId(), newNet.getId()
                         ));
