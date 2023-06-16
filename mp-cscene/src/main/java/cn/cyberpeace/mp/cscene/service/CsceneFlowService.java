@@ -306,8 +306,8 @@ public class CsceneFlowService {
             FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
             if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getIp())) {
                 try {
-                    log.info("top5Protocols url is:{}", CommonUtil.getHostUrl("flowActuatorModel.getIp()") + "/tasks/protocols/top5");
-                    String rsp = HttpUtils.sendPost(CommonUtil.getHostUrl("flowActuatorModel.getIp()") + "/tasks/protocols/top5", "{}");
+                    log.info("top5Protocols url is:{}", CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/protocols/top5");
+                    String rsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/protocols/top5", "{}");
                     log.info("top5Protocols rsp is:{}", rsp);
                     JSONObject rspObj = JSONObject.parseObject(rsp);
                     log.info("query top5 protocols response:{}", rspObj.toJSONString());
