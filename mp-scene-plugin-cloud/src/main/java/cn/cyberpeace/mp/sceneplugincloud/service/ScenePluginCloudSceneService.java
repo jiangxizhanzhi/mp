@@ -779,7 +779,7 @@ public class ScenePluginCloudSceneService {
                     return new ServiceResult<>(result);
                 } finally {
                     try {
-                        FileUtils.deleteDirectory(file);
+//                        FileUtils.deleteDirectory(file);
                     } catch (Exception e) {
                         log.error("failed to delete dir , {} ", tmpZipFilepath, e);
                     }
