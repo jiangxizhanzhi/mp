@@ -765,7 +765,7 @@ public class ScenePluginCloudSceneService {
                 Container container = new Container();
                 String tmpZipFilepath = sceneId + "_" + nodeId + "/" + filename;
                 File file = new File(sceneId + "_" + nodeId);
-                if (file.exists()) {
+                if (!file.exists()) {
                     file.mkdir();
                 }
                 FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
