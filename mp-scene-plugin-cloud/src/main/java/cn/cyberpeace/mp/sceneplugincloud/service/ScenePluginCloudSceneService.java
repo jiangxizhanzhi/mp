@@ -768,11 +768,16 @@ public class ScenePluginCloudSceneService {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
                 String dir = "/tmp/mp/" + sceneId;
-                String tmpZipFilepath = dir + "/" + TextUtils.uuid() + "/" + filename;
-                File file = new File(dir);
-                if (!file.exists()) {
-                    file.mkdirs();
+                File dir1 = new File(dir);
+                if (!dir1.exists()) {
+                    dir1.mkdir();
                 }
+                dir = dir + "/" + TextUtils.uuid();
+                File dir2 = new File(dir);
+                if (!dir2.exists()) {
+                    dir2.mkdir();
+                }
+                String tmpZipFilepath = dir + "/" + TextUtils.uuid() + "/" + filename;
                 FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
