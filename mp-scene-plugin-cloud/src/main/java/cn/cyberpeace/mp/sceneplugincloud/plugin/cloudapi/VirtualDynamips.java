@@ -43,8 +43,8 @@ public class VirtualDynamips extends CloudClient {
     }
 
     public boolean restart(String instanceId) {
-        this.stop(instanceId);
-        this.start(instanceId);
+        this.suspend(instanceId);
+        this.resume(instanceId);
         return true;
     }
 
