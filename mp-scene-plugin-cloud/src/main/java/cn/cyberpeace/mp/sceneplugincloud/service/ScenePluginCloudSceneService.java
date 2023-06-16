@@ -63,6 +63,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -763,6 +764,12 @@ public class ScenePluginCloudSceneService {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
                 String tmpZipFilepath = sceneId + "/" + filename;
+                synchronized (this) {
+                    File file = new File(sceneId);
+                    if (file.exists()) {
+                        file.mkdir();
+                    }
+                }
                 FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
