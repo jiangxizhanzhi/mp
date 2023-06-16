@@ -777,7 +777,7 @@ public class ScenePluginCloudSceneService {
                 if (!dir2.exists()) {
                     dir2.mkdir();
                 }
-                String tmpZipFilepath = dir + "/" + TextUtils.uuid() + "/" + filename;
+                String tmpZipFilepath = dir + "/" + filename;
                 FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
