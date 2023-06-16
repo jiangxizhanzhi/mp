@@ -66,6 +66,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
@@ -772,9 +773,17 @@ public class ScenePluginCloudSceneService {
                 if (!file.exists()) {
                     file.mkdir();
                 }
-                FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
-                var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
-                return new ServiceResult<>(result);
+                try {
+                    FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
+                    var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+                    return new ServiceResult<>(result);
+                } finally {
+                    try {
+                        FileUtils.deleteDirectory(file);
+                    } catch (Exception e) {
+                        log.error("failed to delete dir , {} ", tmpZipFilepath, e);
+                    }
+                }
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
                 var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
