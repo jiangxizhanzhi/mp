@@ -96,6 +96,7 @@ public class Container extends CloudClient {
         CloudResponse<Object> result = cloudPost(requestUrl, data, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
+        log.info("copy file ,container is {},filepath is {} ,result is {} ", containerId, filepath, JsonCommon.stringify(result));
         return true;
     }
 
