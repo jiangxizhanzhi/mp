@@ -431,8 +431,18 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> newPortIds = Objects.isNull(newCloudElement) ? new ConcurrentHashSet<>() : newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> newPortIds;
+        Set<String> originPortIds;
+        if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
+            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());;
+        } else {
+            newPortIds = new ConcurrentHashSet<>();
+        }
+        if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
+            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        } else {
+            originPortIds = new ConcurrentHashSet<>();
+        }
         // 本次新增的端口
         Set<String> addPortIds = new HashSet<>(newPortIds);
         addPortIds.removeAll(originPortIds);
