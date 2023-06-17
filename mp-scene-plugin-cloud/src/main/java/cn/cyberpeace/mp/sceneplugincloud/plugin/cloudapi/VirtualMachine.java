@@ -109,6 +109,9 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineRestartData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                if (e.getMessage().contains("reboot") && e.getMessage().contains("stopped")) {
+                    return start(instanceId);
+                }
                 return true;
             }
             throw e;

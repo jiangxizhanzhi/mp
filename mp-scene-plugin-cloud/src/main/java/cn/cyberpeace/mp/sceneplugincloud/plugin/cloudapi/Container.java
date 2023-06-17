@@ -200,6 +200,8 @@ public class Container extends CloudClient {
             log.info("change container state but it is already that state", ExceptionUtil.stacktraceToString(e));
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 return true;
+            } else if (e.getMessage() != null && e.getMessage().contains("has stopped")) {
+                return start(instanceId);
             }
             throw new MpRuntimeException(e.getMessage());
         }
