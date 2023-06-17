@@ -513,7 +513,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (deleteCloudPort != null && StringUtils.isNotEmpty(deleteCloudPort.getResourceId())) {
                     var deletePort = deleteCloudPort.getSrcPort();
                     var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                    if (originNet != null) {
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                    }
                 }
             }
         }
