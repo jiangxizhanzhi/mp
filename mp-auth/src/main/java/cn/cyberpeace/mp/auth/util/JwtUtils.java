@@ -168,8 +168,10 @@ public class JwtUtils {
                 throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
             }
         } catch (TokenExpiredException e) {
-            log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
+                log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
+                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+            }
         } catch (InvalidClaimException e) {
             throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
         } catch (JWTDecodeException e) {
