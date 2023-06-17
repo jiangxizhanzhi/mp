@@ -128,10 +128,12 @@ public class SceneElementEventTransition {
                     SceneElementModel.Event.STOP, SceneElementModel.Event.DELETE
             ),
                     EventTransition.genKey(SceneElementModel.Event.STOP, EventStatus.OVER), List.of(
-                    SceneElementModel.Event.START, SceneElementModel.Event.DELETE, SceneElementModel.Event.RECREATE
+                    SceneElementModel.Event.START, SceneElementModel.Event.DELETE, SceneElementModel.Event.RECREATE,
+                    SceneElementModel.Event.RESTART
             ),
                     EventTransition.genKey(SceneElementModel.Event.STOP, EventStatus.ABNORMAL), List.of(
-                    SceneElementModel.Event.STOP, SceneElementModel.Event.DELETE, SceneElementModel.Event.RECREATE
+                    SceneElementModel.Event.STOP, SceneElementModel.Event.DELETE, SceneElementModel.Event.RECREATE,
+                    SceneElementModel.Event.RESTART
             ),
 
                     // 重启事件
