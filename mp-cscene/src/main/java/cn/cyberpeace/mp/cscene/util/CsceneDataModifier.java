@@ -921,10 +921,10 @@ public class CsceneDataModifier {
                                 p.setEgress(-1);
                             }
                             if (p.getDelay() == null) {
-                                p.setDelay(0);
+                                p.setDelay(-1);
                             }
                             if (p.getLoss() == null) {
-                                p.setLoss(0);
+                                p.setLoss(-1);
                             }
                         });
                     }
