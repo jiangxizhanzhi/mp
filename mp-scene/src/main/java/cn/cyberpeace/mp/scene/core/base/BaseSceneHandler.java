@@ -1498,6 +1498,14 @@ public abstract class BaseSceneHandler<
             var list = sceneElementPortMapper
                     .list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneId)
                     .filterEqual(SceneElementPortModel::getSceneElement, element.getId()));
+            // 连线也删除一下
+            var connections = sceneElementPortConnectionMapper
+                    .filterDelete(new HumanCondition()
+                            .filterEqual(SceneElementPortConnectionModel::getScene, sceneId)
+                            .filterOrStart()
+                            .orEqual(SceneElementPortConnectionModel::getSourceElement, element.getId())
+                            .orEqual(SceneElementPortConnectionModel::getTargetElement, element.getId())
+                            .filterOrEnd());
             if (CollectionUtils.isEmpty(list)) {
                 return new ArrayList<>();
             }
