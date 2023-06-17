@@ -17,5 +17,11 @@ public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryPa
      */
     int countAll();
 
+    /**
+     * 删除所有数据
+     * @return
+     */
+    int deleteAll();
+
 }
 

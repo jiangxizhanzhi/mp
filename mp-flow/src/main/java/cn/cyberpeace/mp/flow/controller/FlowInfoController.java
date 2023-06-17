@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.response.PcapAnalyseResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
+import cn.cyberpeace.mp.flow.service.FlowPcapService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
@@ -66,6 +67,9 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Autowired
+    private FlowPcapService flowPcapService;
 
     /**
      * 删除流量信息

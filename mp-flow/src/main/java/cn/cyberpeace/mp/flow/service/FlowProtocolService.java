@@ -26,5 +26,11 @@ public interface FlowProtocolService extends BaseModelService<FlowProtocolModel,
      */
     void deleteByFlowId(String flowId);
 
+    /**
+     * 删除所有数据
+     * @return
+     */
+    int deleteAll();
+
 }
 

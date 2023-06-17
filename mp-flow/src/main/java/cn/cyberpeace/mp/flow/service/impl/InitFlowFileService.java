@@ -37,7 +37,7 @@ public class InitFlowFileService implements CommandLineRunner {
             }
 
             int pcapCount = flowPcapService.countAll();
-            if (pcapCount > 0) {
+            if (pcapCount > 135) {
                 log.info("=========== no need to init pcap analyse ===========");
             } else {
                 // 初始化pcap包解析

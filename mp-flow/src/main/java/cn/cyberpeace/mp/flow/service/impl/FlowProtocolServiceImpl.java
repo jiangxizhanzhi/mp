@@ -45,4 +45,9 @@ public class FlowProtocolServiceImpl extends BaseModelServiceImpl<FlowProtocolMo
         condition.filterEqual("flowId", flowId);
         getModelMapper().filterDelete(condition);
     }
+
+    @Override
+    public int deleteAll() {
+        return getModelMapper().filterDelete(new HumanCondition());
+    }
 }
