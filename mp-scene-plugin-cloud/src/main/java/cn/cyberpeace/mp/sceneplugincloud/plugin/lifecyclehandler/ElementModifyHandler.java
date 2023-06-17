@@ -494,6 +494,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
             }
@@ -585,6 +587,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 
@@ -634,6 +638,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 
@@ -674,6 +680,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 
