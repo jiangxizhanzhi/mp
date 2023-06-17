@@ -332,14 +332,17 @@ public class SceneElementMonitorService {
 
         // ip, 用户名，登录方式
         var ports = sceneElementBO.getPorts();
-        List<ElementPort> ePorts = ports.stream().map(p -> {
-            ElementPort port = new ElementPort();
-            port.setIp(p.getIp());
-            port.setName(p.getName());
-            port.setId(p.getId());
-            port.setAccessModes(p.getAccessModes());
-            return port;
-        }).collect(Collectors.toList());
+        List<ElementPort> ePorts = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(ports)) {
+            ePorts = ports.stream().map(p -> {
+                ElementPort port = new ElementPort();
+                port.setIp(p.getIp());
+                port.setName(p.getName());
+                port.setId(p.getId());
+                port.setAccessModes(p.getAccessModes());
+                return port;
+            }).collect(Collectors.toList());
+        }
         basicInfo.setPorts(ePorts);
 
     }
