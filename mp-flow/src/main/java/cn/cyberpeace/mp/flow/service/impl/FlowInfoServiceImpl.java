@@ -1352,6 +1352,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public void initPcapAnalyse() {
         log.info("start init pcap analyse");
+        // 清空原数据
+        flowPcapService.deleteAll();
+        flowProtocolService.deleteAll();
+
         ExecutorService executor = Executors.newFixedThreadPool(10);
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());

@@ -24,4 +24,9 @@ public class FlowPcapServiceImpl extends BaseModelServiceImpl<FlowPcapModel, Flo
     public int countAll() {
         return getModelMapper().total(new HumanCondition());
     }
+
+    @Override
+    public int deleteAll() {
+        return getModelMapper().filterDelete(new HumanCondition());
+    }
 }
