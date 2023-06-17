@@ -1387,7 +1387,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
+    protected void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
         List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
                 .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
                 .collect(Collectors.toList());
