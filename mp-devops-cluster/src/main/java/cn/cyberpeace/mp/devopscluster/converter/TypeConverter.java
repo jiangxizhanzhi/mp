@@ -282,7 +282,8 @@ public class TypeConverter {
         SysConfigModel model = sysConfigService.getByKeyName("system_type");
         if (Objects.nonNull(model)) {
             String systemType = model.getValue();
-            if ("工控".equals(systemType)) {
+            // 工控:2
+            if ("2".equals(systemType)) {
                 industriaControl = true;
             }
         }
