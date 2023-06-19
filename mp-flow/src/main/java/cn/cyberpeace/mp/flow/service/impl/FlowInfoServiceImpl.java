@@ -1366,6 +1366,29 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     }
 
     /**
+     * 更新flowPcap的pcapFile
+     */
+    public void replacePcapPath() {
+        log.info("start init pcap replace path");
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
+        List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
+        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+            // 批量更新flowPcap的pcapFile
+            List<FlowPcapModel> flowPcapModels = flowPcapService.listAll();
+            if (CollectionUtils.isNotEmpty(flowPcapModels)) {
+                flowPcapModels.forEach(flowPcapModel -> flowInfoModelList.forEach(flowInfoModel -> {
+                    if (flowPcapModel.getFlowId().equals(flowInfoModel.getId())) {
+                        flowPcapModel.setPcapFile(flowInfoModel.getPcapFile());
+                    }
+                }));
+                flowPcapService.bulkUpdate(flowPcapModels);
+            }
+        }
+        log.info("end init pcap replace path");
+    }
+
+    /**
      * 初始化解析文件协议
      * @param flowInfoModel
      * @return
