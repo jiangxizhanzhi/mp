@@ -55,6 +55,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1616,16 +1617,28 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 上传新pcap包
             outPcapPath = FsCommon.upload(dstPcapPath);
 
-            // 新增流量包数据
-            FlowPcapModel flowPcapModel = FlowPcapModel.builder()
-                    .flowId(flowId)
-                    .pcapFile(outPcapPath)
-                    .pcapSize(pcapSize)
-                    .pktNum(pktNum.longValue())
-                    .duration(Math.round(duration * 1000))
-                    .protocols(String.join(BaseConstants.COMMA, protocolList))
-                    .build();
-            flowPcapService.create(flowPcapModel);
+            FlowPcapModel pcapModel = flowPcapService.getByFlowId(flowId);
+            if (Objects.nonNull(pcapModel)) {
+                pcapModel.setPcapFile(outPcapPath);
+                pcapModel.setPcapSize(pcapSize);
+                pcapModel.setPktNum(pktNum.longValue());
+                pcapModel.setDuration(Math.round(duration * 1000));
+                pcapModel.setProtocols(String.join(BaseConstants.COMMA, protocolList));
+                pcapModel.setUpdateTime(LocalDateTime.now());
+                flowPcapService.update(pcapModel);
+            } else {
+                // 新增流量包数据
+                FlowPcapModel flowPcapModel = FlowPcapModel.builder()
+                        .flowId(flowId)
+                        .pcapFile(outPcapPath)
+                        .pcapSize(pcapSize)
+                        .pktNum(pktNum.longValue())
+                        .duration(Math.round(duration * 1000))
+                        .protocols(String.join(BaseConstants.COMMA, protocolList))
+                        .build();
+                flowPcapService.create(flowPcapModel);
+            }
+
         } catch (Exception e) {
             log.error("pcap file filter error", e);
         } finally {
