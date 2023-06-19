@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +34,20 @@ public class InitFlowFileService implements CommandLineRunner {
                 log.info("=========== no need to import flow file ===========");
             } else {
                 flowInfoService.batchImportFlowInfo();
+                flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             }
 
-            int pcapCount = flowPcapService.countAll();
-            if (pcapCount > 135) {
-                log.info("=========== no need to init pcap analyse ===========");
-            } else {
-                // 初始化pcap包解析
-                TaskCommon.executeTask(() -> flowInfoService.initPcapAnalyse());
+//            int pcapCount = flowPcapService.countAll();
+//            if (pcapCount > 135) {
+//                log.info("=========== no need to init pcap analyse ===========");
+//            } else {
+//                // 初始化pcap包解析
+//                TaskCommon.executeTask(() -> flowInfoService.initPcapAnalyse());
+//            }
+
+            FlowPcapModel flowPcapModel = flowPcapService.getByFlowId(flowInfoModel.getId());
+            if (Objects.isNull(flowPcapModel) || !flowInfoModel.getPcapFile().equals(flowPcapModel.getPcapFile())) {
+                flowInfoService.replacePcapPath();
             }
         } catch (Exception e) {
             log.error("import flow file error，{}", ExceptionUtils.getStackTrace(e));

@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.flow.service.fields.FlowPcapFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class FlowPcapServiceImpl extends BaseModelServiceImpl<FlowPcapModel, FlowPcapMapper, FlowPcapFields,
@@ -28,5 +30,17 @@ public class FlowPcapServiceImpl extends BaseModelServiceImpl<FlowPcapModel, Flo
     @Override
     public int deleteAll() {
         return getModelMapper().filterDelete(new HumanCondition());
+    }
+
+    @Override
+    public FlowPcapModel getByFlowId(String flowId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(FlowPcapModel::getFlowId, flowId);
+        return getModelMapper().first(humanCondition);
+    }
+
+    @Override
+    public List<FlowPcapModel> listAll() {
+        return getModelMapper().list(new HumanCondition());
     }
 }
