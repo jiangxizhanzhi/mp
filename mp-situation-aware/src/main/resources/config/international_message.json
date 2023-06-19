@@ -2291,11 +2291,6 @@
     "en_name": "Xiaozhi Dual Core Browser"
   },
   {
-    "key": "ftp",
-    "zh_name": "ftp",
-    "en_name": "ftp"
-  },
-  {
     "key": "简书网页",
     "zh_name": "简书网页",
     "en_name": "Jianshu webpage"
@@ -2374,11 +2369,6 @@
     "key": "小度WiFi",
     "zh_name": "小度WiFi",
     "en_name": "Xiaodu WiFi"
-  },
-  {
-    "key": "dns",
-    "zh_name": "dns",
-    "en_name": "dns"
   },
   {
     "key": "Internet_Download_Manager",

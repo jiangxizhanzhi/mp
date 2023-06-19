@@ -296,7 +296,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         String fileName = flowInfoModel.getFileName();
         if (fileName.endsWith(".pcap")) {
             fileName = fileName.substring(0, fileName.length() - 5);
-            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+            if (!"ftp".equalsIgnoreCase(fileName) && !"dns".equalsIgnoreCase(fileName)) {
+                flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+            }
         } else if (fileName.endsWith(".py")) {
             fileName = fileName.substring(0, fileName.length() - 3);
             flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".py"));
