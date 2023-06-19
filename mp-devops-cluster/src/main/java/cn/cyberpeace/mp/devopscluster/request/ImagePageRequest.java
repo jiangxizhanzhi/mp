@@ -99,6 +99,12 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty("靶标创建用户名称")
     private String createUserName;
 
+    /**
+     * 排序字段
+     */
+    @ApiModelProperty(value = "排序字段")
+    private String orders;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

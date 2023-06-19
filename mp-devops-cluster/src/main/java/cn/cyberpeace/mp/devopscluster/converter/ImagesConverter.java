@@ -89,6 +89,12 @@ public class ImagesConverter implements BaseConverter{
         deviceTargetPOS.stream().forEach(d -> {
             supportExports.put(d.getUuid(), d);
         });
+        Map<String, Integer> orderMap = new HashMap<String, Integer>();
+        if (CollectionUtils.isNotEmpty(deviceTargetPOS)) {
+            for (int i=0; i<deviceTargetPOS.size(); i++) {
+                orderMap.put(deviceTargetPOS.get(i).getUuid(), i);
+            }
+        }
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -96,6 +102,15 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
+        if (CollectionUtils.isNotEmpty(deviceList)) {
+            deviceList = deviceList.stream().sorted((o1, o2) -> {
+                if (orderMap.get(o1.getUuid()) > orderMap.get(o2.getUuid())) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }).collect(Collectors.toList());
+        }
         POLogoUtils.changeLogoPathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){
