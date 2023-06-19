@@ -467,7 +467,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtcols(addRequest.getProtocols(), serviceResult.getSource().getObj().getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(addRequest.getProtocols(), serviceResult.getSource().getObj().getId(), serviceResult.getSource().getObj().getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -481,6 +481,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param filePath
      */
     private void batchSaveProtcols(String strProtocols, String flowId, String filePath) {
+        log.info("batch save protocols for flowId:{} on filePath: {} with protocols: {}", flowId, filePath, strProtocols);
         if (StringUtils.isNotBlank(strProtocols)) {
             List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
             JSONArray protocolsArray = JSONArray.parseArray(strProtocols);
@@ -648,7 +649,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             FlowInfoModel resultModel = serviceResult.getSource().getObj();
 
             // 保存流量关联协议信息
-            this.batchSaveProtcols(addRequest.getProtocols(), resultModel.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(addRequest.getProtocols(), resultModel.getId(), resultModel.getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -706,7 +707,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), serviceResult.getSource().getObj().getPcapFile());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -865,7 +866,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
             // 保存流量关联协议信息
-            this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), serviceResult.getSource().getObj().getPcapFile());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
