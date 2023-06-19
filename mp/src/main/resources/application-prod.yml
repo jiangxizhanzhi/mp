@@ -41,7 +41,7 @@ spring:
 logging:
   config: classpath:logback-spring-prod.xml
   level:
-    root: INFO
+    root: ${MP_LOGFILE_LEVEL:info}
   file:
     path: ${user.home}/logs
     max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
