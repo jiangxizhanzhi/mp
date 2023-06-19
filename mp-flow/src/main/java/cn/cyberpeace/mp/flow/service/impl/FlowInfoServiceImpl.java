@@ -297,10 +297,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             needInternational = false;
         } else {
             title = MessageCommonUtil.convertMessage(flowInfoModel.getTitle());
+            flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
         }
 
         flowInfoModel.setTitle(title);
-        flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
         String fileName = flowInfoModel.getFileName();
         if (fileName.endsWith(".pcap")) {
             fileName = fileName.substring(0, fileName.length() - 5);
