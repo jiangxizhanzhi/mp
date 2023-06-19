@@ -47,7 +47,7 @@ public class InitFlowFileService implements CommandLineRunner {
 
             FlowPcapModel flowPcapModel = flowPcapService.getByFlowId(flowInfoModel.getId());
             if (Objects.isNull(flowPcapModel) || (!flowInfoModel.getPcapFile().equals(flowPcapModel.getPcapFile())
-                    && "tcp,bootp,ssl,http,stp,ssdp,mdns,arp,dns,eth,other".equals(flowPcapModel.getProtocols()))) {
+                    && flowPcapModel.getCreateTime().equals(flowPcapModel.getUpdateTime()))) {
                 flowInfoService.replacePcapPath();
             } else {
                 log.info("=========== no need to init pcap analyse ===========");
