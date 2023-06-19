@@ -983,7 +983,7 @@ public class AsyncPlatFlowTaskService {
 
         BatchStopFlowTaskRequest batchStopFlowTaskRequest = BatchStopFlowTaskRequest.builder()
                 .action(TaskActionEnum.STOP.toValue())
-                .taskIds(runningTaskIds)
+                .taskIds(taskIds)
                 .build();
 
         try {

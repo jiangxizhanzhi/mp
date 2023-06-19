@@ -31,7 +31,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
-import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -43,15 +42,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -339,7 +330,7 @@ public class SceneMonitorService {
         }
         stream.forEach(e -> {
             var cloudElement = cloudConfigPlugin.getElement(e.getId());
-            if (!isSupportedVirtualType(cloudElement.getVirtualType(), cloudElement.getImage()) && !Boolean.TRUE.equals(request.getIsAll())) {
+            if (!isSupportedVirtualType(cloudElement.getVirtualType()) && !Boolean.TRUE.equals(request.getIsAll())) {
                 return;
             }
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
@@ -392,7 +383,7 @@ public class SceneMonitorService {
         ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
         basicInfo.setSceneId(sceneId);
         elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
-        if (isSupportedVirtualType(basicInfo.getVirtualType(), basicInfo.getImageName()) || isAll) {
+        if (isSupportedVirtualType(basicInfo.getVirtualType()) || isAll) {
             elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
             return basicInfo;
         }
@@ -477,8 +468,8 @@ public class SceneMonitorService {
      * @param virtualType
      * @return
      */
-    private boolean isSupportedVirtualType(Integer virtualType, String image) {
-        if (Objects.isNull(virtualType) || ElementTypeUtils.isCoreRouter(image)) {
+    private boolean isSupportedVirtualType(Integer virtualType) {
+        if (Objects.isNull(virtualType)) {
             return false;
         }
         boolean supported = false;

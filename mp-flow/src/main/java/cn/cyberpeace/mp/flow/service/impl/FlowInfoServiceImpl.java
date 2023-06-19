@@ -55,9 +55,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -293,12 +292,22 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param flowInfoModel
      */
     private void internationalize(FlowInfoModel flowInfoModel) {
-        flowInfoModel.setTitle(MessageCommonUtil.convertMessage(flowInfoModel.getTitle()));
-        flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
+        String title = flowInfoModel.getTitle();
+        boolean needInternational = true;
+        if ("ftp".equalsIgnoreCase(title) || "dns".equalsIgnoreCase(title)) {
+            needInternational = false;
+        } else {
+            title = MessageCommonUtil.convertMessage(flowInfoModel.getTitle());
+            flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
+        }
+
+        flowInfoModel.setTitle(title);
         String fileName = flowInfoModel.getFileName();
         if (fileName.endsWith(".pcap")) {
             fileName = fileName.substring(0, fileName.length() - 5);
-            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+            if (needInternational) {
+                flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+            }
         } else if (fileName.endsWith(".py")) {
             fileName = fileName.substring(0, fileName.length() - 3);
             flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".py"));
@@ -459,7 +468,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtcols(addRequest.getProtocols(), serviceResult.getSource().getObj().getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(addRequest.getProtocols(), serviceResult.getSource().getObj().getId());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -470,10 +479,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 批量保存流量协议
      * @param flowId
-     * @param filePath
      */
-    private void batchSaveProtcols(String strProtocols, String flowId, String filePath) {
+    private void batchSaveProtcols(String strProtocols, String flowId) {
+        log.info("batch save protocols for flowId:{} with protocols: {}", flowId, strProtocols);
         if (StringUtils.isNotBlank(strProtocols)) {
+            FlowInfoModel flowInfoModel = getModelMapper().get(flowId);
+            if (Objects.isNull(flowInfoModel)) {
+                log.error("flow info is empty");
+                return;
+            }
+            String filePath = flowInfoModel.getPcapFile();
             List<FlowProtocolModel> flowProtocolModels = new ArrayList<>();
             JSONArray protocolsArray = JSONArray.parseArray(strProtocols);
             for (Object obj : protocolsArray) {
@@ -640,7 +655,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             FlowInfoModel resultModel = serviceResult.getSource().getObj();
 
             // 保存流量关联协议信息
-            this.batchSaveProtcols(addRequest.getProtocols(), resultModel.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(addRequest.getProtocols(), resultModel.getId());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -698,7 +713,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
         // 保存流量关联协议信息
-        this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+        this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId());
 
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
@@ -857,7 +872,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
             // 保存流量关联协议信息
-            this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId(), flowInfoModel.getPcapFile());
+            this.batchSaveProtcols(modifyRequest.getProtocols(), modifyRequest.getId());
 
             String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
             // 转换返回对象
@@ -1352,16 +1367,42 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public void initPcapAnalyse() {
         log.info("start init pcap analyse");
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        // 清空原数据
+        flowPcapService.deleteAll();
+        flowProtocolService.deleteAll();
+
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
         List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
         if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
-            flowInfoModelList.forEach(flowInfoModel -> executor.submit(() -> initPcapProtocols(flowInfoModel)));
+            List<Runnable> tasks = new ArrayList<>();
+            flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
+            TaskCommon.runTasks(tasks, true, true);
         }
-        // 关闭线程池
-        executor.shutdown();
         log.info("end init pcap analyse");
+    }
+
+    /**
+     * 更新flowPcap的pcapFile
+     */
+    public void replacePcapPath() {
+        log.info("start init pcap replace path");
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
+        List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
+        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+            // 批量更新flowPcap的pcapFile
+            List<FlowPcapModel> flowPcapModels = flowPcapService.listAll();
+            if (CollectionUtils.isNotEmpty(flowPcapModels)) {
+                flowPcapModels.forEach(flowPcapModel -> flowInfoModelList.forEach(flowInfoModel -> {
+                    if (flowPcapModel.getFlowId().equals(flowInfoModel.getId())) {
+                        flowPcapModel.setPcapFile(flowInfoModel.getPcapFile());
+                    }
+                }));
+                flowPcapService.bulkUpdate(flowPcapModels);
+            }
+        }
+        log.info("end init pcap replace path");
     }
 
     /**
@@ -1576,16 +1617,28 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 上传新pcap包
             outPcapPath = FsCommon.upload(dstPcapPath);
 
-            // 新增流量包数据
-            FlowPcapModel flowPcapModel = FlowPcapModel.builder()
-                    .flowId(flowId)
-                    .pcapFile(outPcapPath)
-                    .pcapSize(pcapSize)
-                    .pktNum(pktNum.longValue())
-                    .duration(Math.round(duration * 1000))
-                    .protocols(String.join(BaseConstants.COMMA, protocolList))
-                    .build();
-            flowPcapService.create(flowPcapModel);
+            FlowPcapModel pcapModel = flowPcapService.getByFlowId(flowId);
+            if (Objects.nonNull(pcapModel)) {
+                pcapModel.setPcapFile(outPcapPath);
+                pcapModel.setPcapSize(pcapSize);
+                pcapModel.setPktNum(pktNum.longValue());
+                pcapModel.setDuration(Math.round(duration * 1000));
+                pcapModel.setProtocols(String.join(BaseConstants.COMMA, protocolList));
+                pcapModel.setUpdateTime(LocalDateTime.now());
+                flowPcapService.update(pcapModel);
+            } else {
+                // 新增流量包数据
+                FlowPcapModel flowPcapModel = FlowPcapModel.builder()
+                        .flowId(flowId)
+                        .pcapFile(outPcapPath)
+                        .pcapSize(pcapSize)
+                        .pktNum(pktNum.longValue())
+                        .duration(Math.round(duration * 1000))
+                        .protocols(String.join(BaseConstants.COMMA, protocolList))
+                        .build();
+                flowPcapService.create(flowPcapModel);
+            }
+
         } catch (Exception e) {
             log.error("pcap file filter error", e);
         } finally {

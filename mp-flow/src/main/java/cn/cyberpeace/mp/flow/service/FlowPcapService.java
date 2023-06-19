@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 
+import java.util.List;
+
 /**
  * @Description 流量包service
  * @Author qiaokang
@@ -16,6 +18,25 @@ public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryPa
      * @return
      */
     int countAll();
+
+    /**
+     * 删除所有数据
+     * @return
+     */
+    int deleteAll();
+
+    /**
+     * 根据flowId查询
+     * @param flowId
+     * @return
+     */
+    FlowPcapModel getByFlowId(String flowId);
+
+    /**
+     * 查询所有流量包
+     * @return
+     */
+    List<FlowPcapModel> listAll();
 
 }
 
