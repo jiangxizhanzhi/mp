@@ -293,7 +293,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     private void internationalize(FlowInfoModel flowInfoModel) {
         String title = flowInfoModel.getTitle();
         boolean needInternational = true;
-        if (!"ftp".equalsIgnoreCase(title) && !"dns".equalsIgnoreCase(title)) {
+        if ("ftp".equalsIgnoreCase(title) || "dns".equalsIgnoreCase(title)) {
             needInternational = false;
         } else {
             title = MessageCommonUtil.convertMessage(flowInfoModel.getTitle());
