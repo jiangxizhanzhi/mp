@@ -84,6 +84,12 @@ public class VirtualDynamips extends CloudClient {
         return doAction(instanceId, actionData);
     }
 
+    public boolean reboot(String instanceId) {
+        var actionData = new VirtualDynamicActionData();
+        actionData.setAction(VirtualDynamicActionData.REBOOT);
+        return doAction(instanceId, actionData);
+    }
+
     public DynamipsInfoItems getPortInfo() {
         DynamipsInfoParam type = new DynamipsInfoParam();
         type.setType("port");
