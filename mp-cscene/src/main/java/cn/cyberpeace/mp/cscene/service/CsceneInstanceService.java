@@ -99,6 +99,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,6 +179,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
+
+    @Resource
+    private CsceneFileService csceneFileService;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1149,6 +1153,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> uploadElementFileV2(String id, String nodeId, InputStream inputStream, String filename, String destPath, CsceneContextBO context) {
+        String sceneId = getSceneId(id);
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        var node = pluginHandler.getElement(nodeId);
+        if (node != null && node.getVirtualType() != null) {
+            if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
+                String finalPath = csceneFileService.upload(inputStream).getSource();
+                scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, finalPath, filename, destPath);
+            } else if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
+                scenePluginCloudSceneService.uploadContainerFile(node, sceneId, nodeId, inputStream, filename, destPath);
+            }
+        } else {
+            log.error("unsupport node type ,sceneId is {},nodeId is {}", sceneId, nodeId);
+        }
         return new ServiceResult<>(true);
     }
 

@@ -73,6 +73,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -797,6 +799,40 @@ public class ScenePluginCloudSceneService {
             }
         }
         return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> uploadVmFile(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node, String sceneId, String nodeId, String finalPath, String filename, String destPath) {
+        var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+        var standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
+        var uploadInfoData = new VirtualMachineUploadFileData();
+        BeanUtils.copyProperties(param, uploadInfoData);
+        uploadInfoData.setFile(finalPath);
+        uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
+        VirtualMachine virtualMachine = new VirtualMachine();
+        virtualMachine.uploadFile(uploadInfoData);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> uploadContainerFile(CloudPluginSceneElementBO node, String sceneId, String nodeId, InputStream inputStream, String filename, String destPath) {
+        Container container = new Container();
+        String dir = "/tmp/mp/" + sceneId;
+        File dir1 = new File(dir);
+        if (!dir1.exists()) {
+            dir1.mkdir();
+        }
+        dir = dir + "/" + TextUtils.uuid();
+        File dir2 = new File(dir);
+        if (!dir2.exists()) {
+            dir2.mkdir();
+        }
+        String tmpZipFilepath = dir + "/" + filename;
+        try {
+            FileUtils.copyInputStreamToFile(inputStream, new File(tmpZipFilepath));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+        return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {

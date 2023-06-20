@@ -767,8 +767,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @RequestParam(value = "dest_path") String destPath) throws IOException {
         log.info("upload_element_file,id is {},node_id is {},filename is {}", id, nodeId, filename);
         if (file != null && !file.isEmpty()) {
-            String fdfs = csceneFileService.upload(file.getInputStream()).getSource();
-            return modelService.uploadElementFile(id, nodeId, fdfs, filename, destPath, null).asResult();
+            return modelService.uploadElementFileV2(id, nodeId, file.getInputStream(), filename, destPath, null).asResult();
         } else {
             return modelService.uploadElementFile(id, nodeId, filePath, filename, destPath, null).asResult();
         }
