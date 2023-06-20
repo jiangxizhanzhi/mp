@@ -407,21 +407,26 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 根据流量id查询脚本参数
             List<FlowScriptParamModel> flowScriptParamModels =
                     flowScriptParamService.selectByFlowId(flowInfoModel.getId());
-            flowScriptParamModels.stream().map(scriptParam -> {
-                // ip、port的参数说明进行国际化处理
-                if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
-                    scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
-                } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
-                    scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
-                }
+            if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
+                flowScriptParamModels.stream().map(scriptParam -> {
+                    // ip、port的参数说明进行国际化处理
+                    if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
+                        scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
+                    } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
+                        scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
+                    }
 
-                return scriptParam;
-            }).collect(Collectors.toList());
+                    return scriptParam;
+                }).collect(Collectors.toList());
+            }
+
             response = new AttackFlowResponse(flowInfoModel, prefixUrl, flowScriptParamModels);
 
             // 下载攻击脚本
-            String code = FsCommon.downloadContent(flowInfoModel.getScriptFile());
-            response.setCode(code);
+            if (StringUtils.isNotBlank(flowInfoModel.getScriptFile())) {
+                String code = FsCommon.downloadContent(flowInfoModel.getScriptFile());
+                response.setCode(code);
+            }
         } else {
             return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
