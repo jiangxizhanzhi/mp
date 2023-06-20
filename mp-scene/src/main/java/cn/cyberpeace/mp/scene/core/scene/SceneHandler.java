@@ -689,6 +689,16 @@ public class SceneHandler extends BaseSceneHandler<
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             save();
         }
+        String dir = "/tmp/mp/" + getSceneId();
+        try {
+            log.info("delete scene file dir {}", dir);
+            File file = new File(dir);
+            if (file.exists()) {
+                FileUtils.cleanDirectory(file);
+            }
+        } catch (Exception e) {
+            log.error("failed to delete dir , {} ", dir, e);
+        }
         return super.logicDelete();
     }
 
