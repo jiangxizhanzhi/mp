@@ -266,7 +266,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void delete() {
-//        deleteHandler.delete();
+        deleteHandler.delete();
     }
 
     @Override
