@@ -24,17 +24,16 @@ import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -332,7 +331,23 @@ public class CsceneHandler extends BaseCsceneHandler<
                         String image = e.get("image").toString();
                         var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
                         if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
-                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
+                            Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = serviceResult.getSource();
+                            List<String> sceneNames = new ArrayList<>();
+                            String sceneName = StringUtils.EMPTY;
+                            if (MapUtils.isNotEmpty(useStateMap)) {
+                                useStateMap.forEach((k, v) -> {
+                                    var names = v.stream()
+                                            .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
+                                            .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
+                                            .collect(Collectors.toList());
+                                    sceneNames.addAll(names);
+                                });
+                                if (CollectionUtils.isNotEmpty(sceneNames)) {
+                                    List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+                                    sceneName = StringUtils.join(names, ",");
+                                }
+                                throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image), sceneName));
+                            }
                         }
                     }
                     if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0) {
