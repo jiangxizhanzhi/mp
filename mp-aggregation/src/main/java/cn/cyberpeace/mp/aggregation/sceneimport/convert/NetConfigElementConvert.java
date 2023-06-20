@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -53,6 +52,7 @@ class NetConfigElementConvert implements IConverter {
                 cloudElement.setRipLoopback(extNodeInfo.getRipLoopback());
                 if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
                     Map<String, ExtNodeInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
+                    Map<String, ExtNodeInfo.PortProtocolExportInfo> portId2Protocol = new HashMap<>();
                     for (var ps : extNodeInfo.getPortProtocols()) {
                         nodeId2Protocol.put(ps.getConnectNode(), ps);
                     }
@@ -71,9 +71,11 @@ class NetConfigElementConvert implements IConverter {
                                     cloudPort.setRipPear(portProtocol.getRipPear());
                                     cloudPort.setOspfArea(portProtocol.getOspfArea());
                                     cloudPort.setOspfIp(portProtocol.getOspfIp());
+                                    portId2Protocol.put(port.getId(), portProtocol);
                                 }
                             }
                         }
+                        container.getPortId2Protocol().putAll(portId2Protocol);
                     }
                 }
             }

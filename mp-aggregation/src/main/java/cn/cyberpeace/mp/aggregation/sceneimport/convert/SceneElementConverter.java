@@ -32,6 +32,8 @@ class SceneElementConverter implements IConverter {
         SceneConfigBO sceneConfigBO = new SceneConfigBO();
         sceneConfigBO.setName(scene.getName());
         sceneConfigBO.setDescription(scene.getDesc());
+        // 传递场景信息
+        sceneConfigBO.setDisplayContext(scene.getDisplayContext());
         return sceneConfigBO;
     }
 }

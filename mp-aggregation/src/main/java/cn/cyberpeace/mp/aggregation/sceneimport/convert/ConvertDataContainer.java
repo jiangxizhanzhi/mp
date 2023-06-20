@@ -65,6 +65,7 @@ class ConvertDataContainer {
 
     private Map<String, ExtNodeInfo> extNodeInfos = new HashMap<>();
 
+    private Map<String, ExtNodeInfo.PortProtocolExportInfo> portId2Protocol = new HashMap<>();
     private Set<String> simpleLayer3Switch = new HashSet<>();
 
     public void putImageInfo(String image, ImageInfoParseResult result) {
