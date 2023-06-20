@@ -1173,8 +1173,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             int diffCount = 0;
             if (!isContainType) {
                 diffCount = 2;
-                // 默认类型：测试测量
-                flowInfoModel.setCategory(0);
+                // 默认类型：网络管理
+                flowInfoModel.setCategory(2);
             } else {
                 String categoryName = readmeList.get(11);
                 flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
