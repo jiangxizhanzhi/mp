@@ -1230,6 +1230,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 if (CollectionUtils.isNotEmpty(scriptParamModelList)) {
                     flowScriptParamService.bulkCreate(scriptParamModelList);
                 }
+            } else {
+                TaskCommon.executeTask(() -> this.initPcapProtocols(flowInfoModel));
             }
         } else {
             log.error("file floder is not exist");
