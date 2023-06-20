@@ -662,6 +662,7 @@ public class SceneHandler extends BaseSceneHandler<
         }
         String dir = "/tmp/mp/" + getSceneId();
         try {
+            log.info("delete scene file dir {}", dir);
             File file = new File(dir);
             if (file.exists()) {
                 FileUtils.cleanDirectory(file);
