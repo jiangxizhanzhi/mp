@@ -60,6 +60,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.URLUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
@@ -831,7 +832,17 @@ public class ScenePluginCloudSceneService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+        Boolean result = null;
+        for (int i = 0; i < 3; i++) {
+            try {
+                result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+            } catch (Exception e) {
+                log.error("failed to copy file at {} time, sceneId is {},nodeId is {},exception is ", i, sceneId, nodeId, ExceptionUtils.getStackTrace(e));
+                if (i == 2) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         return new ServiceResult<>(result);
     }
 
