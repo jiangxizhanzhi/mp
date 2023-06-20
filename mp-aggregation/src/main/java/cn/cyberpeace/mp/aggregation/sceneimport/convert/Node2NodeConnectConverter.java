@@ -63,6 +63,10 @@ class Node2NodeConnectConverter implements IConverter {
             connectionBO.setId(TextUtils.uuid());
             connectionBO.setSource(portFrom.getId());
             connectionBO.setTarget(portTo.getId());
+            // 传递连线的前端属性
+            if (container.getPortId2Protocol().get(portFrom.getId()) != null) {
+                connectionBO.setDisplayContext(container.getPortId2Protocol().get(portFrom.getId()).getDisplayContext());
+            }
             connectionBO.setName(portFrom.getName() + "_" + portTo.getName());
             container.addConnection(connectionBO);
         }

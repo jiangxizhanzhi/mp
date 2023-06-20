@@ -28,6 +28,7 @@ public class NodeElementParseResult {
     private List<StaticRoutesResult> staticRouters;
     private List<InitCommandParseResult> initCommands;
     private ExtNodeInfo extInfo;
+    private String displayContext;
 
     public String getImage() {
         return StringUtils.isNotEmpty(image) ? image : images;
