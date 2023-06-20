@@ -1470,11 +1470,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
                 .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, nodeId)
                 .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+        List<AccessUserBO> accessUsers = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(connections)) {
             Set<String> userIds = connections.stream().map(CloudPluginSceneConnectionModel::getAccessUser).collect(Collectors.toSet());
             Map<String, UserModel> userId2User = UserCommon.getUsers(new ArrayList<>(userIds)).stream()
                     .collect(Collectors.toMap(userModel -> userModel.getId(), userModel -> userModel));
-            List<AccessUserBO> accessUsers = new ArrayList<>();
             connections.stream().distinct().forEach(connection -> {
                 var userModel = userId2User.get(connection.getAccessUser());
                 if (userModel != null) {
@@ -1484,10 +1484,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     accessUsers.add(accessUser);
                 }
             });
-            CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
-            csceneElementCommon.setNodeId(nodeId);
-            csceneElementCommon.setData(accessUsers);
-            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
         }
+        CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
+        csceneElementCommon.setNodeId(nodeId);
+        csceneElementCommon.setData(accessUsers);
+        CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
     }
 }
