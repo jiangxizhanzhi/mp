@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -44,6 +45,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
@@ -84,6 +86,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
@@ -116,6 +119,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -186,6 +190,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
+
+    @Resource
+    private FlowMonitorService flowMonitorService;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -741,6 +748,54 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         queryParams.setNodeIds(null);
         return scenePluginCollectionSceneService.mapHostStatesByAgentNames(agentNames, queryParams);
+    }
+
+    public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
+        Map<String, Integer> count = new ConcurrentHashMap<>();
+        List<Runnable> tasks = new ArrayList<>();
+
+        // 事件类
+        tasks.add(() -> {
+            ElementMonitorRequest request = new ElementMonitorRequest();
+            request.setSceneId(params.getSceneId());
+            request.setElementIds(params.getNodeIds());
+            request.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
+            var fileCount = sceneElementMonitorService.getModifyData(request, CsceneBizConstant.FILE_MODIFY_GROUP,
+                    null).getSource().getTotal();
+            var registryCount = sceneElementMonitorService.getModifyData(request, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
+                    null).getSource().getTotal();
+            count.put("event", fileCount + registryCount);
+        });
+        // 信息类
+        tasks.add(() -> {
+            // 网络端口
+            TimeListPageInfoQueryParams infoParams = new TimeListPageInfoQueryParams();
+            infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
+            infoParams.setNodeIds(params.getNodeIds());
+            infoParams.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
+            var netCount = hostStateService.pageNetifaces(infoParams).getSource().getTotal();
+            // 端口列表
+            var portCount = hostStateService.pagePorts(infoParams).getSource().getTotal();
+            // 进程列表
+            var processCount = hostStateService.pageProcesses(infoParams).getSource().getTotal();
+            count.put("info",netCount+portCount+processCount);
+        });
+        // 日志类
+        tasks.add(()->{
+            HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+            hostEventQueryParams.setNodeIds(params.getNodeIds());
+            var result = listHostEvents(params.getSceneId(), hostEventQueryParams);
+            count.put("log", result.getSource().getTotal());
+        });
+        // 流量类
+        tasks.add(()->{
+            FlowQueryParams flowQueryParams = new FlowQueryParams();
+            flowQueryParams.setTargetNodeIds(params.getNodeIds());
+            var flowCount = flowMonitorService.pageFlow(params.getSceneId(), flowQueryParams).getSource().getTotal();
+            count.put("flow", flowCount);
+        });
+        TaskCommon.runTasks(tasks);
+        return new ServiceResult<>(count);
     }
 
     /**

@@ -496,6 +496,7 @@ public class HostStateService {
         return listResult;
     }
 
+
     /**
      * 分页查询网卡信息
      *
@@ -536,7 +537,6 @@ public class HostStateService {
             return netifacesResult;
         }
     }
-
 
     private void checkListPageParams(ListPageInfoQueryParams params) {
         List<String> sceneIds = params.getSceneIds();
