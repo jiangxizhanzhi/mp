@@ -52,6 +52,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import io.swagger.annotations.Api;
@@ -514,6 +515,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                       HostEventQueryParams queryParams) {
         handleQueryParams("listHostEvents", queryParams);
         return modelService.listHostEvents(id, queryParams).asResult();
+    }
+
+    @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
+    @GetMapping(value = "/query_data_count")
+    public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
+        return getModelService().queryCollectionDataCount(params).asResult();
     }
 
     @ApiOperation("查询场景实例事件类型")
