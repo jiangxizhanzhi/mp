@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.cscene.repository.CsceneInstanceUserCountMapper">
+
+    <update id="increaseCount">
+        update mp_cscene_instance_user_count
+        set count = count + 1
+        where user_id = #{userId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="decreaseCount">
+        update mp_cscene_instance_user_count
+        set count = count - 1
+        where user_id = #{userId,jdbcType=VARCHAR}
+        and count > 0
+    </update>
+
+</mapper>

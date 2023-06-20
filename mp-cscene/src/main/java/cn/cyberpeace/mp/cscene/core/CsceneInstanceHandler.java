@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.core;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -17,16 +19,16 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -47,6 +49,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceBO, CsceneInstanceMapper, CsceneInstanceRoleMapper> {
 
     private SceneService sceneService;
+
+    private CsceneInstanceUserCountService csceneInstanceUserCountService;
 
     private SceneContextBO generateSceneContext() {
         var context = getContext();
@@ -88,9 +92,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     public void initBase() {
         super.initBase();
         sceneService = BeanCommon.getBean(SceneService.class);
+        csceneInstanceUserCountService = BeanCommon.getBean(CsceneInstanceUserCountService.class);
     }
 
     public void create() {
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (Objects.nonNull(loginUser)) {
+            csceneInstanceUserCountService.increaseCount(loginUser.getId());
+        }
         var cscene = getCscene();
         // 先保存设置id
         save();
@@ -119,6 +128,10 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (Objects.nonNull(loginUser)) {
+            csceneInstanceUserCountService.decreaseCount(loginUser.getId());
+        }
         var sceneData = csceneBO.getScene();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
