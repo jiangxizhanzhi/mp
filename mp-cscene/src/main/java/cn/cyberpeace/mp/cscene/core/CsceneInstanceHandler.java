@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.cscene.core;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -28,7 +26,6 @@ import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -96,10 +93,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     public void create() {
-        UserModel loginUser = UserUtils.getLoginUser();
-        if (Objects.nonNull(loginUser)) {
-            csceneInstanceUserCountService.increaseCount(loginUser.getId());
-        }
+        csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
         var cscene = getCscene();
         // 先保存设置id
         save();
@@ -128,10 +122,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
-        UserModel loginUser = UserUtils.getLoginUser();
-        if (Objects.nonNull(loginUser)) {
-            csceneInstanceUserCountService.decreaseCount(loginUser.getId());
-        }
+        csceneInstanceUserCountService.decreaseCount(getContext().getAccessUserId());
         var sceneData = csceneBO.getScene();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
