@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -260,6 +261,21 @@ public class Remote extends CloudClient {
         } else {
             log.error("failed to get networkFlowRate.");
             return null;
+        }
+    }
+
+    public List<String> activeConnection(List<String> connectionIdList) {
+        log.info("Remote.activeConnection begin. connectionIdList:{},", connectionIdList);
+        ActiveConnectionParam activeConnectionParam = new ActiveConnectionParam();
+        activeConnectionParam.setConnectionIds(connectionIdList);
+        log.info("Call cpclould begin. url:{}, params:{}", CloudUrlConstant.ACTIVE_CONNECTION_URL, activeConnectionParam);
+        ActiveConnectionData activeConnectionData = getHttpClient().post(CloudUrlConstant.ACTIVE_CONNECTION_URL, activeConnectionParam, null, ActiveConnectionData.class);
+        log.info("Call cpclould end. url:{}, response:{}", CloudUrlConstant.ACTIVE_CONNECTION_URL, activeConnectionData);
+        if (activeConnectionData != null && Boolean.TRUE.equals(activeConnectionData.getSuccess()) && CollectionUtils.isNotEmpty(activeConnectionData.getCurrentConnections())) {
+            return activeConnectionData.getCurrentConnections();
+        } else {
+            log.error("failed to get activeConnection.");
+            return new ArrayList<>();
         }
     }
 }

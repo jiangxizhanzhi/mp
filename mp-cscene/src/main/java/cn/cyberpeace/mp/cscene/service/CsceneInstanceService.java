@@ -1518,7 +1518,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return result;
     }
 
-    private void reportElementAccessUser(String sceneId, String nodeId) {
+    public void reportElementAccessUser(String sceneId, String nodeId) {
         var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
                 .select(CloudPluginSceneConnectionModel::getAccessUser)
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
