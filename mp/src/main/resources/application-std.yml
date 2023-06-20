@@ -184,7 +184,7 @@ mp:
 #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
 #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
 #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
-       dynamic-level-only-root: true;
+       dynamic-level-only-root: false;
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
