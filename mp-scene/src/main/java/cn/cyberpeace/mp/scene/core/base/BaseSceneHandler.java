@@ -1706,6 +1706,7 @@ public abstract class BaseSceneHandler<
     public C getPortBelongConnection(String portId) {
         var connectionModel = portId != null
                 ? (SceneConfigElementPortConnectionModel) sceneElementPortConnectionMapper.first(new HumanCondition()
+                .filterEqual(SceneElementPortConnectionModel::getScene, sceneId)
                 .filterOrStart()
                 .orEqual(SceneElementPortConnectionModel::getSourcePortId, portId)
                 .orEqual(SceneElementPortConnectionModel::getTargetPortId, portId)
