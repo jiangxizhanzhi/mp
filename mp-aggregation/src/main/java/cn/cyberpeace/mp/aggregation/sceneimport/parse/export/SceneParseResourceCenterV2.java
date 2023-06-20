@@ -378,8 +378,10 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                 var cloudPort = cloudSceneConfigPluginHandler.getPort(p.getId());
                 ExtNodeInfo.PortProtocolExportInfo exportInfo = new ExtNodeInfo.PortProtocolExportInfo();
                 // 设置下连线的属性信息
-                if (sceneHandler.getPortBelongConnection(p.getId()) != null) {
-                    exportInfo.setDisplayContext(sceneHandler.getPortBelongConnection(p.getId()).getDisplayContext());
+                var connection = sceneHandler.getPortBelongConnection(p.getId());
+                if (connection != null) {
+                    exportInfo.setDisplayContext(connection.getDisplayContext());
+                    exportInfo.setType(connection.getType());
                 }
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setBgpIp(cloudPort.getBgpIp());
