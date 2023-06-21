@@ -39,13 +39,11 @@
             ifnull(sum(tx_bps),0) as txBps, ifnull(sum(tx_pps),0) as txPps, ifnull(CAST(avg(latency) as int),0) as latency, ifnull(CAST(avg(jitter) as int),0) as jitter,
             ifnull(sum(total_tx_L2),0) as totalTxL2, ifnull(sum(total_tx_L1),0) as totalTxL1, ifnull(sum(total_rx),0) as totalRx, ifnull(sum(queue_full),0) as queueFull, ifnull(sum(drop_rate),0) as dropRate
             from mp_flow_task_record
-            where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
-            and create_time=(
-            select max(create_time)
+            where (task_id,create_time) in
+            (select task_id,max(create_time)
             from mp_flow_task_record
             where task_id in (select id from mp_flow_task_task where scene_id=#{sceneId})
-            and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime}
-            )
+            and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime} group by task_id)
         </foreach>
         order by statisticalTime
     </select>
@@ -69,9 +67,9 @@
         select node_name as nodeName,sum(tx_bps) as txBps
         from mp_flow_task_task t,mp_flow_task_record r
         where t.id=r.task_id and scene_id=#{sceneId} and task_status='1'
-          and r.create_time=(
-            select max(r.create_time) from mp_flow_task_task t,mp_flow_task_record r
-            where t.id=r.task_id and scene_id=#{sceneId} and task_status='1')
+          and (r.task_id,r.create_time) in(
+            select task_id,max(r1.create_time) as create_time from mp_flow_task_task t1,mp_flow_task_record r1
+            where t1.id=r1.task_id and scene_id=#{sceneId} and task_status='1' group by task_id)
         group by nodeName
         order by txBps desc
     </select>
