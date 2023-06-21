@@ -267,7 +267,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             flowTaskRecordModel.setDropRate(data.getLong("drop_rate"));
             flowTaskRecordModel.setRecordStatus(data.getInteger("status"));
             DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
+            flowTaskRecordModel.setCreateTime(LocalDateTime.parse(data.getString("record_time"), df));
+            //flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
             this.getModelMapper().save(flowTaskRecordModel);
         }
 
