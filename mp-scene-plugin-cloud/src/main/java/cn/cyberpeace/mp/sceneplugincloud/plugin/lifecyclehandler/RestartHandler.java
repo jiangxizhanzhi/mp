@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
@@ -47,7 +49,14 @@ public class RestartHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
                 closeAccessModes(element);
-                virtualMachine.restart(instanceId);
+                // 先判断下虚拟机的真实状态
+                var info = virtualMachine.getConsoleInfo(instanceId, element.getHost());
+                if (StringUtils.isNotEmpty(info.getPort()) && Integer.parseInt(info.getPort()) < 0) {
+                    virtualMachine.stop(instanceId);
+                    virtualMachine.start(instanceId);
+                } else {
+                    virtualMachine.restart(instanceId);
+                }
                 checkAccessModes(element);
             });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
