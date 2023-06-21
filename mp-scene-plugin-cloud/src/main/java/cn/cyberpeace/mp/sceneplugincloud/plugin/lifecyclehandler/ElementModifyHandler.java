@@ -144,12 +144,18 @@ public class ElementModifyHandler extends HandlerCommon {
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         buildNetwork.setCmds(cmds);
 
+        var clearNetwork = new RouterConfigCmdData();
+        clearNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        clearNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        clearNetwork.setCmds(Arrays.asList("delete protocols"));
+
         boolean buildNetworkResult = false;
         int tryTimes = 5;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 发送拼接网络的命令
             try {
+                vmRouter.createConfig(clearNetwork);
                 buildNetworkResult = vmRouter.createConfig(buildNetwork);
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
