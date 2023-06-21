@@ -1,7 +1,13 @@
 package cn.cyberpeace.mp.cscene.service.cron;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
@@ -39,6 +45,9 @@ public class ConnectionJob {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
+
     @Scheduled(cron = "*/5 * * * * ?")
     public void execute() {
         log.info("ConnectionJob.execute begin.");
@@ -75,6 +84,21 @@ public class ConnectionJob {
             return;
         }
         for (CloudPluginSceneConnectionModel connectionModel : disConnectionList) {
+            HumanCondition csceneInstanceHumanCondition = new HumanCondition();
+            csceneInstanceHumanCondition.filterEqual(CsceneInstanceModel::getScene, connectionModel.getScene());
+            CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.first(csceneInstanceHumanCondition);
+            if (csceneInstanceModel == null) {
+                log.info("cscene not exist.");
+                continue;
+            }
+            CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
+            CsceneContextHolder.setCsceneInstanceId(csceneInstanceModel.getId());
+            CsceneContextBO context = new CsceneContextBO();
+            if (context.getPassThrough() == null) {
+                CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
+                csceneInstance.fromModel(csceneInstanceModel);
+            }
+            context.loadTransparentContext();
             scenePluginCloudSceneService.disableRemoteRecording(connectionModel.getScene(), connectionModel.getSceneElement(), connectionModel.getAccessUser(), connectionModel.getConnectionId());
             csceneInstanceService.reportElementAccessUser(connectionModel.getScene(), connectionModel.getSceneElement());
         }
