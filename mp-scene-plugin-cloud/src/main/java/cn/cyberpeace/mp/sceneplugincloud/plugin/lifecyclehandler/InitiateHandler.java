@@ -835,8 +835,15 @@ public class InitiateHandler extends HandlerCommon {
             if (StringUtils.isEmpty(cidrDivideIp)) {
                 // 未设置ip值,使用默认网段的网络
                 boolean isCoreRouter = this.isCoreRouter(cloudElement);
+                boolean isDynamips = this.isDynamips(cloudElement);
                 if (isCoreRouter) {
                     // 如果是核心路由器 每个端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                } else if (isDynamips && connectPort != null) {
+                    // 如果是dynamips 每个连了线的端口分配一个网络
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, true);
@@ -925,6 +932,12 @@ public class InitiateHandler extends HandlerCommon {
         boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
                 && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
         return isCoreRouter;
+    }
+
+    private boolean isDynamips(CloudPluginSceneElementBO cloudElement) {
+        boolean isDynamips = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+                && BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType());
+        return isDynamips;
     }
 
     public void initCoreType(CloudPluginSceneElementBO element) {

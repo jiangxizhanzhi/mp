@@ -1209,17 +1209,10 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
-        VirtualDynamicCreateData result = null;
-        try {
-            result = vdClient.create(createData);
-        } catch (Exception e) {
-            log.error("create dynamips failed", e);
-            if (result == null) {
-                throw new MpRuntimeException(CloudErrorCode.NODE_CREATE_TIMEOUT.format(cloudElement.getSrcElement().getName()));
-            }
-        }
-        cloudElement.setResourceId(result != null ? result.getId() : null);
-        if (result != null && result.getNetworks() != null) {
+        var result = vdClient.create(createData);
+
+        cloudElement.setResourceId(result.getId());
+        if (result.getNetworks() != null) {
             for (var networkPort : result.getNetworks()) {
                 var port = portName2Port.get(networkPort.getSlotPort());
                 if (port != null) {
@@ -1227,11 +1220,10 @@ public class CreateHandler extends HandlerCommon {
                     getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
                     var cloudPort = getPluginHandler().getPort(port.getId());
                     if (cloudPort != null && cloudPort.getAccessModes() != null) {
-                        VirtualDynamicCreateData finalResult = result;
                         cloudPort.getAccessModes().forEach(a -> {
                             if (AccessMode.Protocol.TELNET.equals(a.getProtocol())) {
-                                a.setAccessIp(finalResult.getTelnetHost());
-                                a.setAccessPort(finalResult.getTelnetPort());
+                                a.setAccessIp(result.getTelnetHost());
+                                a.setAccessPort(result.getTelnetPort());
                             }
                         });
                     }
