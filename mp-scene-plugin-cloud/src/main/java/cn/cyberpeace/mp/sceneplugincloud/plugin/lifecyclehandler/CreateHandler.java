@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
@@ -1207,9 +1209,17 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
-        var result = vdClient.create(createData);
-        cloudElement.setResourceId(result.getId());
-        if (result.getNetworks() != null) {
+        VirtualDynamicCreateData result = null;
+        try {
+            result = vdClient.create(createData);
+        } catch (Exception e) {
+            log.error("create dynamips failed", e);
+            if (result == null) {
+                throw new MpRuntimeException(CloudErrorCode.NODE_CREATE_TIMEOUT.format(cloudElement.getSrcElement().getName()));
+            }
+        }
+        cloudElement.setResourceId(result != null ? result.getId() : null);
+        if (result != null && result.getNetworks() != null) {
             for (var networkPort : result.getNetworks()) {
                 var port = portName2Port.get(networkPort.getSlotPort());
                 if (port != null) {
@@ -1217,10 +1227,11 @@ public class CreateHandler extends HandlerCommon {
                     getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
                     var cloudPort = getPluginHandler().getPort(port.getId());
                     if (cloudPort != null && cloudPort.getAccessModes() != null) {
+                        VirtualDynamicCreateData finalResult = result;
                         cloudPort.getAccessModes().forEach(a -> {
                             if (AccessMode.Protocol.TELNET.equals(a.getProtocol())) {
-                                a.setAccessIp(result.getTelnetHost());
-                                a.setAccessPort(result.getTelnetPort());
+                                a.setAccessIp(finalResult.getTelnetHost());
+                                a.setAccessPort(finalResult.getTelnetPort());
                             }
                         });
                     }
