@@ -119,6 +119,8 @@ CREATE TABLE `mp_flow_task_record`
     `update_time`   datetime            NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE KEY `id` (`id`),
-    KEY `task_id` (`task_id`)
+    KEY `task_id` (`task_id`),
+    KEY `create_time` (`create_time`),
+    KEY `task_id_and_create_time` (`task_id`, `create_time`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='流量任务记录表';
