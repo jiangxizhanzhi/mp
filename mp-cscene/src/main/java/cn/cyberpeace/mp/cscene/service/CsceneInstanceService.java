@@ -109,6 +109,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1290,6 +1291,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, InputStream inputStream, String filename, String destPath, CsceneContextBO context) {
+        String sceneId = getSceneId(id);
+        scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, inputStream, filename, destPath);
         return new ServiceResult<>(true);
     }
 
