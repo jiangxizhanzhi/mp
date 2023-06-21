@@ -2,9 +2,14 @@ package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
+import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementPortBO;
@@ -19,6 +24,8 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -122,6 +129,57 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     @Override
     public void delete() {
         deleteHandler.delete();
+    }
+
+    @Override
+    public void createElement(String nodeId) {
+        String sceneId = getSourceSceneId();
+        List<AddFlowTaskTaskInfo> details = new ArrayList<>();
+        List<Flow> flows = getElement(nodeId).getFlows();
+        if (CollectionUtils.isNotEmpty(flows)) {
+            String nodeName = getSceneHandler().getElement(nodeId).getName();
+            String nodeIp = "";
+            String networkId = "";
+            if (CollectionUtils.isNotEmpty(getSceneHandler().getElement(nodeId).getPorts())) {
+                CloudScenePluginHandler cloudPluginHandler = getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                for (var p : getSceneHandler().getElement(nodeId).getPorts()) {
+                    nodeIp = p.getIp();
+                    if (StringUtils.isNotEmpty(nodeIp)) {
+                        CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
+                        networkId = cloudPluginSceneElementNetworkBO.getResourceId();
+                        break;
+                    }
+                }
+            }
+            AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
+            addFlowTaskTaskInfo.setNodeId(nodeId);
+            addFlowTaskTaskInfo.setNodeName(nodeName);
+            addFlowTaskTaskInfo.setNodeIp(nodeIp);
+            addFlowTaskTaskInfo.setNetworkId(networkId);
+            List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
+            for (Flow flow : flows) {
+                AddFlowTaskFlowInfo addFlowTaskFlowInfo = new AddFlowTaskFlowInfo();
+                addFlowTaskFlowInfo.setFlowId(flow.getId());
+                if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
+                    List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
+                    for (Flow.FlowScriptParam flowScriptParam : flow.getScriptParamModels()) {
+                        FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                        flowTaskAttackConf.setConfValue(flowScriptParam.getParamValue());
+                        flowTaskAttackConf.setConfType(flowScriptParam.getParamType());
+                        flowTaskAttackConf.setConfKey(flowScriptParam.getParamKey());
+                        flowTaskAttackConf.setConfDesc(flowScriptParam.getParamDesc());
+                        attackConfs.add(flowTaskAttackConf);
+                    }
+                    addFlowTaskFlowInfo.setAttackConfs(attackConfs);
+                }
+                flowInfos.add(addFlowTaskFlowInfo);
+            }
+            addFlowTaskTaskInfo.setFlowInfos(flowInfos);
+            details.add(addFlowTaskTaskInfo);
+        }
+        if (CollectionUtils.isNotEmpty(details)) {
+            getHandlerUtils().addFlowTask(details, sceneId, getScene().getExecutor());
+        }
     }
 
     public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
