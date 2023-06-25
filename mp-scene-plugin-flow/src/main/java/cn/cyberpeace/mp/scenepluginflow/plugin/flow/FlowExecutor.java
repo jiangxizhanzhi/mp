@@ -166,6 +166,20 @@ public class FlowExecutor {
         }
     }
 
+    public void pauseFlow(String taskId) {
+        var result = flowService3.pauseTask(taskId);
+        if (!result.judgeSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
+    }
+
+    public void resumeFlow(String taskId) {
+        var result = flowService3.resumeTask(taskId);
+        if (!result.judgeSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
+    }
+
     public void startFlows(List<String> taskIds, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
         BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
         request.setTaskIds(taskIds);

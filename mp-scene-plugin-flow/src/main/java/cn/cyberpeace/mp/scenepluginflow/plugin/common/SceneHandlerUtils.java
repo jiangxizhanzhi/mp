@@ -43,6 +43,12 @@ public class SceneHandlerUtils {
         flow.setStatusText(null);
     }
 
+    private void successPauseFLow(Flow flow) {
+        log.info("flow success pause,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
+        flow.setStatus(Flow.Status.PAUSE);
+        flow.setStatusText(null);
+    }
+
     private void errorFLow(Flow flow, String error) {
         log.info("flow error,flowId is {},taskId is {},error is {}", flow.getId(), flow.getTaskId(), error);
         flow.setStatus(Flow.Status.ERROR);
@@ -255,6 +261,40 @@ public class SceneHandlerUtils {
             return false;
         }
         successOffFLow(flow);
+        return true;
+    }
+
+    public boolean pauseFlow(Flow flow) {
+        var taskId = flow.getTaskId();
+        if (StringUtils.isEmpty(taskId)) {
+            errorFLow(flow, "Empty task id");
+            return false;
+        }
+
+        try {
+            flowExecutor.pauseFlow(taskId);
+        } catch (Exception e) {
+            errorFLow(flow, e.getMessage());
+            return false;
+        }
+        successPauseFLow(flow);
+        return true;
+    }
+
+    public boolean resumeFlow(Flow flow) {
+        var taskId = flow.getTaskId();
+        if (StringUtils.isEmpty(taskId)) {
+            errorFLow(flow, "Empty task id");
+            return false;
+        }
+
+        try {
+            flowExecutor.resumeFlow(taskId);
+        } catch (Exception e) {
+            errorFLow(flow, e.getMessage());
+            return false;
+        }
+        successOnFLow(flow);
         return true;
     }
 

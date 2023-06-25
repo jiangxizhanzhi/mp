@@ -865,6 +865,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext());
     }
 
+    public ServiceResult<Boolean> pauseFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_PAUSE_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context != null) {
+            context.loadTransparentContext();
+        }
+
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.pauseFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
+    }
+
+    public ServiceResult<Boolean> resumeFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_RESUME_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context != null) {
+            context.loadTransparentContext();
+        }
+
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.resumeFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
+    }
+
     public ServiceResult<Boolean> updateFlowParams(String id, String nodeId, String flowId, String sourceIp, CsceneContextBO context) {
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {

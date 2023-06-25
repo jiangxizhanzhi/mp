@@ -39,6 +39,20 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> pauseFlow(String sceneId, String nodeId, String flowId, SceneContextBO context) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, context);
+        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var result = pluginHandler.pauseFlow(nodeId, flowId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> resumeFlow(String sceneId, String nodeId, String flowId, SceneContextBO context) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, context);
+        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var result = pluginHandler.resumeFlow(nodeId, flowId);
+        return new ServiceResult<>(result);
+    }
+
     @Transactional
     public ServiceResult<Boolean> updateFlowParams(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);

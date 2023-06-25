@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.flow.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 任务操作枚举类：1 start， 2 stop, 3 reset
+ * 任务操作枚举类：1 start， 2 stop, 3 reset, 4 pause, 5 resume
  */
 public enum TaskActionEnum {
 
@@ -13,7 +13,11 @@ public enum TaskActionEnum {
 
     STOP("STOP"),
 
-    RESET("RESET");
+    RESET("RESET"),
+
+    PAUSE("PAUSE"),
+
+    RESUME("RESUME");
 
     private final String action;
 

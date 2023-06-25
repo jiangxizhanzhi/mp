@@ -696,6 +696,134 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     }
 
     /**
+     * 暂停任务
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<Boolean> pauseTask(String taskId) {
+        FlowTaskModel flowTaskModel = this.getModelMapper().get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("pause task info not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        FlowInfoModel flowInfoModel = null;
+        ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+        if (Objects.nonNull(flowInfoObjResult)) {
+            flowInfoModel = flowInfoObjResult.asResult();
+        } else {
+            log.error("pause task flow info not exist for {}", flowTaskModel.getFlowId());
+            throw new MpRuntimeException(FlowErrorCode.FLOW_NOT_EXIST);
+        }
+
+        // 流量执行器信息查询
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("pause task flowActuatorModel is not exist for {}", actuatorId);
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+
+        // 执行任务地址
+        String urlPath = "";
+        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+            // pcap流量
+            urlPath = "/tasks/action";
+        } else {
+            // 脚本流量
+            urlPath = "/tasks/standards/action";
+        }
+
+        // 执行任务参数
+        JSONObject object = new JSONObject();
+        object.put("uuid", taskId);
+        object.put("action", TaskActionEnum.PAUSE);
+
+        try {
+            String actuatorTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath,
+                    JSONObject.toJSONString(object));
+            JSONObject actuatorTaskObj = JSONObject.parseObject(actuatorTaskRsp);
+            log.info("pause task response:{}", actuatorTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(actuatorTaskObj)) {
+                log.info("pause task success for task: {}", taskId);
+            } else {
+                log.error("pause task failed for task: {}", taskId);
+                return ResultCommon.fail("pause task failed");
+            }
+        } catch (IOException e) {
+            log.error("pause task failed for task: {}", taskId, e);
+            return ResultCommon.fail("pause task failed");
+        }
+
+        return ResultCommon.success(true);
+    }
+
+    /**
+     * 恢复任务
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<Boolean> resumeTask(String taskId) {
+        FlowTaskModel flowTaskModel = this.getModelMapper().get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("resume task info not exist for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        FlowInfoModel flowInfoModel = null;
+        ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+        if (Objects.nonNull(flowInfoObjResult)) {
+            flowInfoModel = flowInfoObjResult.asResult();
+        } else {
+            log.error("resume task flow info not exist for {}", flowTaskModel.getFlowId());
+            throw new MpRuntimeException(FlowErrorCode.FLOW_NOT_EXIST);
+        }
+
+        // 流量执行器信息查询
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("resume task flowActuatorModel is not exist for {}", actuatorId);
+            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+
+        // 执行任务地址
+        String urlPath = "";
+        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+            // pcap流量
+            urlPath = "/tasks/action";
+        } else {
+            // 脚本流量
+            urlPath = "/tasks/standards/action";
+        }
+
+        // 执行任务参数
+        JSONObject object = new JSONObject();
+        object.put("uuid", taskId);
+        object.put("action", TaskActionEnum.PAUSE);
+        object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
+
+        try {
+            String actuatorTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath,
+                    JSONObject.toJSONString(object));
+            JSONObject actuatorTaskObj = JSONObject.parseObject(actuatorTaskRsp);
+            log.info("resume task response:{}", actuatorTaskObj.toJSONString());
+            if (ResponseUtils.checkResponse(actuatorTaskObj)) {
+                log.info("resume task success for task: {}", taskId);
+            } else {
+                log.error("resume task failed for task: {}", taskId);
+                return ResultCommon.fail("resume task failed");
+            }
+        } catch (IOException e) {
+            log.error("resume task failed for task: {}", taskId, e);
+            return ResultCommon.fail("resume task failed");
+        }
+
+        return ResultCommon.success(true);
+    }
+
+
+    /**
      * 查询流量任务状态
      *
      * @param thirdTaskIds

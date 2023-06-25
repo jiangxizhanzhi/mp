@@ -185,6 +185,59 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    public boolean pauseFlow(String nodeId, String flowId) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flow = flowMap.getOrDefault(flowId, null);
+        if (flow == null) {
+            return false;
+        }
+
+        var flag = handlerUtils.pauseFlow(flow);
+        asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
+        return flag;
+    }
+
+    public boolean resumeFlow(String nodeId, String flowId) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flow = flowMap.getOrDefault(flowId, null);
+        if (flow == null) {
+            return false;
+        }
+
+        var flag = handlerUtils.resumeFlow(flow);
+        asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
+        return flag;
+    }
+
+
     public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {

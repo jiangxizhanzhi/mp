@@ -287,6 +287,44 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("场景实例暂停节点流量")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeFlowActionRequest.class),
+    })
+    @PostMapping(value = "/pause_flow")
+    public ServiceResult<Boolean> pauseFlow(@RequestParam(required = false) String id,
+                                           @RequestParam(required = false) String nodeId,
+                                           @RequestParam(required = false) String flowId,
+                                           @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
+        request = formatNodeFlowActionRequest(request, id, nodeId, flowId, null);
+        var result = modelService.pauseFlow(request.getId(), request.getNodeId(), request.getFlowId(),
+                request.getContext()).asResult();
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.PAUSE, CsceneLogUtils.STOP_FLOW, request.getContext());
+        return result;
+    }
+
+    @ApiOperation("场景实例恢复节点流量")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeFlowActionRequest.class),
+    })
+    @PostMapping(value = "/resume_flow")
+    public ServiceResult<Boolean> resumeFlow(@RequestParam(required = false) String id,
+                                           @RequestParam(required = false) String nodeId,
+                                           @RequestParam(required = false) String flowId,
+                                           @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
+        request = formatNodeFlowActionRequest(request, id, nodeId, flowId, null);
+        var result = modelService.resumeFlow(request.getId(), request.getNodeId(), request.getFlowId(),
+                request.getContext()).asResult();
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.PAUSE, CsceneLogUtils.PAUSE_FLOW, request.getContext());
+        return result;
+    }
+
     @ApiOperation("场景更新流量任务参数")
     @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = CsceneInstanceNodeFlowActionRequest.class)
     @PostMapping(value = "/update_flow_params")
@@ -296,7 +334,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         }
         var result = modelService.updateFlowParams(request.getId(), request.getNodeId(),
                 request.getFlowId(), request.getSourceIp(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.RECOVER, CsceneLogUtils.RESUME_FLOW, request.getContext());
         return result;
     }
 
