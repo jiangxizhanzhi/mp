@@ -85,10 +85,15 @@ public class RealEquipmentController {
 
         List<RealEquipmentPageVO> list = model.getList().stream().map(v -> {
             ExtEntity extEntity = v.getExtEntity();
+            var connection = realEquipmentService.connection(v.getUuid());
+            Boolean loginEnable = false;
+            if (connection != null && CollectionUtils.isNotEmpty(connection.getList())) {
+                loginEnable = true;
+            }
             RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
-                    .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).build();
+                    .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).build();
             if (Objects.nonNull(l1AndL2AndL3Type)){
                List<String> firstTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList()) ?
                             null : l1AndL2AndL3Type.getFirstTypeList().stream()
