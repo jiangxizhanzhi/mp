@@ -77,13 +77,15 @@ public final class NodeLimitUtils {
 
     private synchronized static UpdateResult updateElementCount(int count) {
         log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, csceneAppConfig.getSceneUsingNodeLimit());
-        if (NODE_COUNT + count > csceneAppConfig.getSceneUsingNodeLimit()) {
-            UpdateResult updateResult = new UpdateResult();
-            updateResult.setSuccess(false);
-            updateResult.setLimitNode(csceneAppConfig.getSceneUsingNodeLimit());
-            updateResult.setCurrentNode(count);
-            updateResult.setExistNode(NODE_COUNT);
-            return updateResult;
+        if (count > 0) {
+            if (NODE_COUNT + count > csceneAppConfig.getSceneUsingNodeLimit()) {
+                UpdateResult updateResult = new UpdateResult();
+                updateResult.setSuccess(false);
+                updateResult.setLimitNode(csceneAppConfig.getSceneUsingNodeLimit());
+                updateResult.setCurrentNode(count);
+                updateResult.setExistNode(NODE_COUNT);
+                return updateResult;
+            }
         }
         NODE_COUNT = NODE_COUNT + count;
         if (NODE_COUNT < 0) {
