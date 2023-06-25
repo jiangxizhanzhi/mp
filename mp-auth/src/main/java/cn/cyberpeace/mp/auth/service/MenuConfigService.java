@@ -19,17 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -110,9 +104,13 @@ public class MenuConfigService {
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
+        Locale locale = LocaleContextHolder.getLocale();
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
+            if (Objects.equals(Locale.US, locale)) {
+                targetBo.setName(targetm.getEnName());
+            }
             targetBo.setId(targetm.getMenuId());
             mapTmp.put(targetBo.getId(), targetBo);
         }

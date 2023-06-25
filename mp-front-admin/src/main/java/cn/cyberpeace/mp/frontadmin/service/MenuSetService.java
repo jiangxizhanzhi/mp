@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,17 +44,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -179,17 +170,21 @@ public class MenuSetService {
         MenuTemplate menuTemplate = new MenuTemplate();
         menuTemplate.setTemplateId(templateId);
         menuTemplate.setMenuTree(inputTreeTargets);
+        Locale locale = LocaleContextHolder.getLocale();
         List<MenuTemplateModel> models = listTargets.stream().map(t -> {
             MenuTemplateModel model = new MenuTemplateModel();
             model.setTemplateId(menuTemplate.templateId);
-            model.setName(t.getName());
+            if (Objects.equals(Locale.US, locale)) {
+                model.setEnName(t.getName());
+            } else {
+                model.setName(t.getName());
+            }
             model.setParent(t.getParent());
             model.setIdentifier(t.getIdentifier());
             model.setMenuId(t.getIdentifier());
             model.setPath(t.getPath());
             model.setType(t.getType());
             model.setVisible(t.getVisible());
-            model.setEnName(t.getName());
             model.setTenant(t.getTenant());
             return model;
         }).collect(Collectors.toList());
@@ -248,9 +243,13 @@ public class MenuSetService {
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
+        Locale locale = LocaleContextHolder.getLocale();
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
+            if (Objects.equals(Locale.US, locale)) {
+                targetBo.setName(targetm.getEnName());
+            }
             targetBo.setId(targetm.getMenuId());
             mapTmp.put(targetBo.getId(), targetBo);
         }
