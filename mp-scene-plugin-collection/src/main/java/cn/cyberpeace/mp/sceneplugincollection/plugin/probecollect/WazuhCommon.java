@@ -168,7 +168,7 @@ public class WazuhCommon {
                 // 下载按需安装脚本并执行
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
-                        String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                        String.format("sudo sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
                 // 给下载安装包的脚本添加参数
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
