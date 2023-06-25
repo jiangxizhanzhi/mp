@@ -961,6 +961,11 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostCpuPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds) {
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalSeconds, (state) -> state.getCpuPercent());
+        return new ServiceResult<>(result);
+    }
+
     /**
      * 时间区间统计主机内存占用平均值
      *
@@ -973,6 +978,11 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent());
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostMemoryPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent());
         return new ServiceResult<>(result);
     }
 
@@ -989,6 +999,12 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
         // todo 主机磁盘使用率
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostDiskPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
+        // todo 主机磁盘使用率
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
         return new ServiceResult<>(result);
     }
 
@@ -1024,7 +1040,27 @@ public class ScenePluginCollectionSceneService {
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
-        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult);
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
+    }
+
+    /**
+     * 查询每个周期内最新的数据
+     * @param sceneIds
+     * @param nodeIds
+     * @param startTime
+     * @param endTime
+     * @param intervalSeconds
+     * @param execCal
+     * @return
+     */
+    public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalLatestBy(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
+        HostStateQueryParams params = new HostStateQueryParams();
+        params.setNodeIds(nodeIds);
+        // 为计算平均值,往前多取一个周期的数据
+        params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
+        params.setEndTime(endTime);
+        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult,true);
     }
 
 
@@ -1035,10 +1071,10 @@ public class ScenePluginCollectionSceneService {
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStatesByAgentNames(agentNames, params).getSource();
-        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult);
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
-    private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult) {
+    private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult , Boolean latestData) {
         if (queryResult == null || CollectionUtils.isEmpty(queryResult.getObjs())) {
             return new ArrayList<>();
         }
@@ -1056,8 +1092,13 @@ public class ScenePluginCollectionSceneService {
                 // 数据属于当前周期,计算结果并指向下一个数据
                 index++;
                 double value = execCal.apply(state);
-                tmpValue = Optional.ofNullable(tmpValue).orElse(BigDecimal.ZERO).add(BigDecimal.valueOf(value));
-                tmpSize = Optional.ofNullable(tmpSize).orElse(BigDecimal.ZERO).add(BigDecimal.ONE);
+                if (Boolean.TRUE.equals(latestData)) {
+                    tmpValue = BigDecimal.valueOf(value);
+                    tmpSize = BigDecimal.ONE;
+                } else {
+                    tmpValue = Optional.ofNullable(tmpValue).orElse(BigDecimal.ZERO).add(BigDecimal.valueOf(value));
+                    tmpSize = Optional.ofNullable(tmpSize).orElse(BigDecimal.ZERO).add(BigDecimal.ONE);
+                }
             } else {
                 // 数据不属于当前周期,记录当前周期结果,并指向下一个周期
                 // 当前周期有数据则记录
