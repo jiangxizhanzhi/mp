@@ -123,7 +123,7 @@ public class InstallerUtils {
     /**
      * linux文件下载
      */
-    public static final String LINUX_FILE_DOWNLOAD = "curl -o \"%s\" %s";
+    public static final String LINUX_FILE_DOWNLOAD = "sudo curl -o \"%s\" %s";
 
     /**
      * linux rpm默认安装
