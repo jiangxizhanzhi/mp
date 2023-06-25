@@ -133,6 +133,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
     @Override
     public void createElement(String nodeId) {
+        log.info("FlowScenePluginHandler.createElement begin. nodeId:{}", nodeId);
         String sceneId = getSourceSceneId();
         List<AddFlowTaskTaskInfo> details = new ArrayList<>();
         List<Flow> flows = getElement(nodeId).getFlows();
@@ -180,6 +181,11 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         if (CollectionUtils.isNotEmpty(details)) {
             getHandlerUtils().addFlowTask(details, sceneId, getScene().getExecutor());
         }
+    }
+
+    @Override
+    public void startElement(String nodeId) {
+        log.info("FlowScenePluginHandler.startElement begin. nodeId:{}", nodeId);
     }
 
     public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
