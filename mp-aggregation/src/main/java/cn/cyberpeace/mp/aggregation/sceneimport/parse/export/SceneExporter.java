@@ -344,6 +344,7 @@ public class SceneExporter {
         result.put("targetPort", "target-port");
         result.put("virtualPlatform", "virtual-platform");
         result.put("extInfo", "ext-info");
+        result.put("displayContext", "display-context");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
         result.put(BaseSceneParseResourceCenter.SPECIAL_STR_EMPTY, "");

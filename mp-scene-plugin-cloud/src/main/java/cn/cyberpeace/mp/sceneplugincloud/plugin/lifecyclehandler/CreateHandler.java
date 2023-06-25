@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
@@ -1208,6 +1210,7 @@ public class CreateHandler extends HandlerCommon {
             }
         }
         var result = vdClient.create(createData);
+
         cloudElement.setResourceId(result.getId());
         if (result.getNetworks() != null) {
             for (var networkPort : result.getNetworks()) {
@@ -1387,7 +1390,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
+    protected void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
         List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
                 .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
                 .collect(Collectors.toList());

@@ -83,6 +83,8 @@ class NodeElementConverter implements IConverter {
         } else {
             sceneConfigElementBO.setType(BaseSceneElementModel.Type.ROUTER);
         }
+        // 传递节点的前端属性
+        sceneConfigElementBO.setDisplayContext(node.getDisplayContext());
         List<SceneConfigElementPortBO> portBOS = new ArrayList<>();
         sceneConfigElementBO.setPorts(portBOS);
         // 处理节点附件

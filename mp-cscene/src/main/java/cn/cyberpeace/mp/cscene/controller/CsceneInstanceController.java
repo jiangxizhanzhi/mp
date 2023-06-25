@@ -52,6 +52,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import io.swagger.annotations.Api;
@@ -516,6 +517,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostEvents(id, queryParams).asResult();
     }
 
+    @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
+    @GetMapping(value = "/query_data_count")
+    public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
+        return getModelService().queryCollectionDataCount(params).asResult();
+    }
+
     @ApiOperation("查询场景实例事件类型")
     @GetMapping(value = "/list_host_events_type")
     public ServiceResult<List<CollectionHostEventTypeBO>> listHostEvents() {
@@ -839,8 +847,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @RequestParam(value = "filename") String filename,
             @RequestParam(value = "dest_path") String destPath) throws IOException {
         if (file != null && !file.isEmpty()) {
-            String fdfs = csceneFileService.upload(file.getInputStream()).getSource();
-            return modelService.uploadElementFile(id, nodeId, fdfs, filename, destPath, null).asResult();
+            return modelService.uploadElementFile(id, nodeId, file.getInputStream(), filename, destPath, null).asResult();
         } else {
             return modelService.uploadElementFile(id, nodeId, filePath, filename, destPath, null).asResult();
         }

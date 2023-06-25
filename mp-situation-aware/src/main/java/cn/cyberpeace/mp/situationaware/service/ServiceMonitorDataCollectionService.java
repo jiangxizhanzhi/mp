@@ -37,7 +37,8 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
-            dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
+            var result = doQueryServiceMonitorDto(hostname, launchIds) ;
+            dtos.addAll(result);
         }
         return dtos;
     }
@@ -74,7 +75,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
             SearchResponse response = dataCollectionService.querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, launchId);
             JSONObject jsonObject = dataCollectionService.processBaseRawOutput(response);
             if (Objects.isNull(jsonObject)) {
-                return Collections.emptyList();
+                continue;
             }
 
             dtos.addAll(jsonObj2ServiceMonitorDtos(jsonObject, launchId));

@@ -42,6 +42,8 @@ public class ExtNodeInfo {
         private String ospfIp;
         private String ripIp;
         private String ripPear;
+        private String displayContext;
+        private String type;
 
         public boolean isNotEmpty() {
             return StringUtils.isNotEmpty(bgpAs)
@@ -51,7 +53,9 @@ public class ExtNodeInfo {
                     || StringUtils.isNotEmpty(ospfArea)
                     || StringUtils.isNotEmpty(ospfIp)
                     || StringUtils.isNotEmpty(ripIp)
-                    || StringUtils.isNotEmpty(ripPear);
+                    || StringUtils.isNotEmpty(ripPear)
+                    || StringUtils.isNotEmpty(displayContext)
+                    || StringUtils.isNotEmpty(type);
         }
     }
 }

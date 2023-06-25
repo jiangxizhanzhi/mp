@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,8 @@ public class ElementModifyHandler extends HandlerCommon {
     private VirtualFirewall virtualFirewall = new VirtualFirewall();
     private VirtualPort virtualPort = new VirtualPort();
     private VmRouter vmRouter = new VmRouter();
+
+    private static final String TCP = "tcp";
 
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
@@ -140,12 +144,18 @@ public class ElementModifyHandler extends HandlerCommon {
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         buildNetwork.setCmds(cmds);
 
+        var clearNetwork = new RouterConfigCmdData();
+        clearNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        clearNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        clearNetwork.setCmds(Arrays.asList("delete protocols"));
+
         boolean buildNetworkResult = false;
         int tryTimes = 5;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 发送拼接网络的命令
             try {
+                vmRouter.createConfig(clearNetwork);
                 buildNetworkResult = vmRouter.createConfig(buildNetwork);
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
@@ -429,8 +439,18 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> newPortIds;
+        Set<String> originPortIds;
+        if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
+            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());;
+        } else {
+            newPortIds = new ConcurrentHashSet<>();
+        }
+        if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
+            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        } else {
+            originPortIds = new ConcurrentHashSet<>();
+        }
         // 本次新增的端口
         Set<String> addPortIds = new HashSet<>(newPortIds);
         addPortIds.removeAll(originPortIds);
@@ -468,7 +488,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(addPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -480,6 +500,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
             }
@@ -497,7 +519,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (deleteCloudPort != null && StringUtils.isNotEmpty(deleteCloudPort.getResourceId())) {
                     var deletePort = deleteCloudPort.getSrcPort();
                     var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                    if (originNet != null) {
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                    }
                 }
             }
         }
@@ -559,7 +583,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -571,6 +595,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 
@@ -608,7 +634,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
-                        portMappingCreateData.setProto(a.getProtocol());
+                        portMappingCreateData.setProto(TCP);
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
@@ -620,6 +646,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 
@@ -652,7 +680,7 @@ public class ElementModifyHandler extends HandlerCommon {
                         portMappingCreateData.setHost(originCloudElement.getHost());
                         portMappingCreateData.setInstanceIp(newPort.getIp());
                         portMappingCreateData.setInstancePort(a.getPort());
-                        portMappingCreateData.setNetworkId(newCloudPort.getAuxiliaryNetworkId());
+                        portMappingCreateData.setNetworkId(originCloudPort.getAuxiliaryNetworkId());
                         portMappingCreateData.setFwdnsInterfaceIp(this.newCloudScenePluginHandler.getHandlerUtils().getFwdnsInterfaceIp(
                                 newCloudElement.getSrcElement().getId(), newNet.getId()
                         ));
@@ -660,6 +688,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+
+                        checkAccessModes(newCloudElement);
                     }
                 }
 

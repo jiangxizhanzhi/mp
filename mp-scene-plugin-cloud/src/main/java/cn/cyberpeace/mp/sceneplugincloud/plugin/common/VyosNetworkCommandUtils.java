@@ -69,7 +69,6 @@ public class VyosNetworkCommandUtils {
     public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
-        result.add("delete protocols");
         for (var builder : modifyBuilderChains) {
             List<String> cmds = builder.build(paramsWrapper);
             result.addAll(cmds);
@@ -118,7 +117,7 @@ public class VyosNetworkCommandUtils {
      */
     private static class StaticRouteCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_NEXT_HOP = "set protocols static route %s next-hop %s ";
-        private static String SET_NEXT_HOP_INTERFACE = "interface eth%s";
+        private static String SET_NEXT_HOP_INTERFACE = "next-hop-interface eth%s";
         private static String SET_ROUTER_ID = "set protocols ospf parameters router-id %s";
 
         @Override

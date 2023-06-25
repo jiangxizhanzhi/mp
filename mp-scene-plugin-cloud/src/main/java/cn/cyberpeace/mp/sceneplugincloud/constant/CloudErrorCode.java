@@ -13,7 +13,8 @@ public enum CloudErrorCode implements ErrorCode {
     SNAPSHOT_BE_USED("MP-110707", "snapshot_be_used"),
     UN_SUPPORT_MULTI_NET("MP-110708", "un_support_multi_net"),
 
-    IP_CONFLICT_WITH_SERVER("MP-110708", "ip_conflict_with_server");
+    IP_CONFLICT_WITH_SERVER("MP-110708", "ip_conflict_with_server"),
+    NODE_CREATE_TIMEOUT("MP-110709", "node_create_timeout");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

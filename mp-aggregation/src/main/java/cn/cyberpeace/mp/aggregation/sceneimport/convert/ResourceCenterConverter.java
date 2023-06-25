@@ -51,6 +51,7 @@ public class ResourceCenterConverter {
         converters.add(new DefaultValueConverter());
         converters.add(new SceneElementShapeConverter(parseResult.getShape()));
         converters.add(new NetConfigElementConvert());
+        converters.add(new ConnectionDisplayElementConvert());
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 

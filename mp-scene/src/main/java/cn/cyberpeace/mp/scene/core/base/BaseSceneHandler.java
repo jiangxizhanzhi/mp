@@ -10,12 +10,13 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.base.*;
@@ -1498,6 +1499,14 @@ public abstract class BaseSceneHandler<
             var list = sceneElementPortMapper
                     .list(new HumanCondition().filterEqual(SceneElementPortModel::getScene, sceneId)
                     .filterEqual(SceneElementPortModel::getSceneElement, element.getId()));
+            // 连线也删除一下
+            var connections = sceneElementPortConnectionMapper
+                    .filterDelete(new HumanCondition()
+                            .filterEqual(SceneElementPortConnectionModel::getScene, sceneId)
+                            .filterOrStart()
+                            .orEqual(SceneElementPortConnectionModel::getSourceElement, element.getId())
+                            .orEqual(SceneElementPortConnectionModel::getTargetElement, element.getId())
+                            .filterOrEnd());
             if (CollectionUtils.isEmpty(list)) {
                 return new ArrayList<>();
             }
@@ -1688,6 +1697,28 @@ public abstract class BaseSceneHandler<
     public E getPortConnectedElement(String portId) {
         var connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPortElement(connectedPortId);
+    }
+
+    /**
+     * 获取源端口所属的连线
+     * @param portId 端口id
+     */
+    public C getPortBelongConnection(String portId) {
+        var connectionModel = portId != null
+                ? (SceneConfigElementPortConnectionModel) sceneElementPortConnectionMapper.first(new HumanCondition()
+                .filterEqual(SceneElementPortConnectionModel::getScene, sceneId)
+                .filterOrStart()
+                .orEqual(SceneElementPortConnectionModel::getSourcePortId, portId)
+                .orEqual(SceneElementPortConnectionModel::getTargetPortId, portId)
+                .filterOrEnd())
+                : null;
+        BaseSceneElementPortConnectionBO baseSceneElementPortConnectionBO = new SceneConfigElementPortConnectionBO();
+        if (connectionModel != null) {
+            baseSceneElementPortConnectionBO.fromModel(connectionModel);
+        } else {
+            baseSceneElementPortConnectionBO = null;
+        }
+        return (C) baseSceneElementPortConnectionBO;
     }
 
     public void addElementPlugin(String pluginKey, String nodeId, Map<String, Object> pluginElement) {

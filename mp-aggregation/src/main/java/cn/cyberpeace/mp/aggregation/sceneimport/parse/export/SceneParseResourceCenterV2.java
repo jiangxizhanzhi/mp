@@ -122,6 +122,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         } else {
             sceneElementParseResult.setDesc(SPECIAL_STR_EMPTY);
         }
+        sceneElementParseResult.setDisplayContext(sceneHandler.getScene().getDisplayContext());
         return sceneElementParseResult;
     }
 
@@ -316,6 +317,8 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setImage(pluginElement.getImage());
         nodeElementParseResult.setName(e.getName());
         nodeElementParseResult.setInitCommands(new ArrayList<>());
+        // 设置下节点的前端展示属性
+        nodeElementParseResult.setDisplayContext(e.getDisplayContext());
         if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
             e.getInitCommands().forEach(c -> {
                 InitCommandParseResult result = new InitCommandParseResult();
@@ -374,6 +377,12 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
             for (var p : e.getPorts()) {
                 var cloudPort = cloudSceneConfigPluginHandler.getPort(p.getId());
                 ExtNodeInfo.PortProtocolExportInfo exportInfo = new ExtNodeInfo.PortProtocolExportInfo();
+                // 设置下连线的属性信息
+                var connection = sceneHandler.getPortBelongConnection(p.getId());
+                if (connection != null) {
+                    exportInfo.setDisplayContext(connection.getDisplayContext());
+                    exportInfo.setType(connection.getType());
+                }
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setBgpIp(cloudPort.getBgpIp());
                 exportInfo.setBgpPeer(cloudPort.getBgpPeer());
