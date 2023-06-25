@@ -114,7 +114,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点文件变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
+            @ApiImplicitParam(name = "intervalMinutes", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/file_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer intervalMinutes,
@@ -143,7 +143,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
+            @ApiImplicitParam(name = "intervalMinutes", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/registry_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer intervalMinutes,
