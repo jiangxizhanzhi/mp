@@ -53,4 +53,8 @@ public class DynamipsService {
         return imageInfo;
     }
 
+    public void reboot(String instanceId) {
+        var result = virtualDynamips.reboot(instanceId);
+        log.info("reboot {} dynamips result is {}", instanceId, result);
+    }
 }

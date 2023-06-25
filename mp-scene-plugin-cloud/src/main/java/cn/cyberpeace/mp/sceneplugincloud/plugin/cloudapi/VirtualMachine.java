@@ -109,6 +109,9 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineRestartData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                if (e.getMessage().contains("reboot") && e.getMessage().contains("stopped")) {
+                    return start(instanceId);
+                }
                 return true;
             }
             throw e;
@@ -167,7 +170,7 @@ public class VirtualMachine extends CloudClient {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是暂停状态
                 var instance = this.get(instanceId);
-                if (instance != null && VirtualMachineGetResult.Status.PAUSED.equalsIgnoreCase(instance.getStatus())) {
+                if (instance != null && VirtualMachineGetResult.Status.SHUTOFF.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
             }

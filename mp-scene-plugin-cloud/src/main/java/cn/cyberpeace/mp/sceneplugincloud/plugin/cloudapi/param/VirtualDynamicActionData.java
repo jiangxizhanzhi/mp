@@ -13,6 +13,7 @@ public class VirtualDynamicActionData implements CloudHttpData {
     public final static String SUSPEND = "suspend";
     public final static String PAUSE = "pause";
     public final static String UNPAUSE = "unpause";
+    public final static String REBOOT = "reboot";
 
     private String action;
 }

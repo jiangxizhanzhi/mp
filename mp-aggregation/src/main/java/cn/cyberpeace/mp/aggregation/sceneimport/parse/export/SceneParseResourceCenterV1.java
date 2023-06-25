@@ -95,6 +95,8 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         }else{
             sceneElementParseResult.setDesc(SPECIAL_STR_EMPTY);
         }
+        // 设置下场景的前端展示信息
+        sceneElementParseResult.setDisplayContext(sceneHandler.getScene().getDisplayContext());
         return sceneElementParseResult;
     }
 

@@ -160,36 +160,40 @@ public class CreateHandler extends HandlerCommon {
                             nodeIp = p.getIp();
                             if (StringUtils.isNotEmpty(nodeIp)) {
                                 CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
-                                networkId = cloudPluginSceneElementNetworkBO.getResourceId();
-                                break;
+                                if (cloudPluginSceneElementNetworkBO != null) {
+                                    networkId = cloudPluginSceneElementNetworkBO.getResourceId();
+                                    break;
+                                }
                             }
                         }
                     }
-                    AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
-                    addFlowTaskTaskInfo.setNodeId(nodeId);
-                    addFlowTaskTaskInfo.setNodeName(nodeName);
-                    addFlowTaskTaskInfo.setNodeIp(nodeIp);
-                    addFlowTaskTaskInfo.setNetworkId(networkId);
-                    List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
-                    for (Flow flow : flows) {
-                        AddFlowTaskFlowInfo addFlowTaskFlowInfo = new AddFlowTaskFlowInfo();
-                        addFlowTaskFlowInfo.setFlowId(flow.getId());
-                        if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
-                            List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
-                            for (Flow.FlowScriptParam flowScriptParam : flow.getScriptParamModels()) {
-                                FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
-                                flowTaskAttackConf.setConfValue(flowScriptParam.getParamValue());
-                                flowTaskAttackConf.setConfType(flowScriptParam.getParamType());
-                                flowTaskAttackConf.setConfKey(flowScriptParam.getParamKey());
-                                flowTaskAttackConf.setConfDesc(flowScriptParam.getParamDesc());
-                                attackConfs.add(flowTaskAttackConf);
+                    if (StringUtils.isNotEmpty(networkId)) {
+                        AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
+                        addFlowTaskTaskInfo.setNodeId(nodeId);
+                        addFlowTaskTaskInfo.setNodeName(nodeName);
+                        addFlowTaskTaskInfo.setNodeIp(nodeIp);
+                        addFlowTaskTaskInfo.setNetworkId(networkId);
+                        List<AddFlowTaskFlowInfo> flowInfos = new ArrayList<>();
+                        for (Flow flow : flows) {
+                            AddFlowTaskFlowInfo addFlowTaskFlowInfo = new AddFlowTaskFlowInfo();
+                            addFlowTaskFlowInfo.setFlowId(flow.getId());
+                            if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
+                                List<FlowTaskAttackConf> attackConfs = new ArrayList<>();
+                                for (Flow.FlowScriptParam flowScriptParam : flow.getScriptParamModels()) {
+                                    FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                                    flowTaskAttackConf.setConfValue(flowScriptParam.getParamValue());
+                                    flowTaskAttackConf.setConfType(flowScriptParam.getParamType());
+                                    flowTaskAttackConf.setConfKey(flowScriptParam.getParamKey());
+                                    flowTaskAttackConf.setConfDesc(flowScriptParam.getParamDesc());
+                                    attackConfs.add(flowTaskAttackConf);
+                                }
+                                addFlowTaskFlowInfo.setAttackConfs(attackConfs);
                             }
-                            addFlowTaskFlowInfo.setAttackConfs(attackConfs);
+                            flowInfos.add(addFlowTaskFlowInfo);
                         }
-                        flowInfos.add(addFlowTaskFlowInfo);
+                        addFlowTaskTaskInfo.setFlowInfos(flowInfos);
+                        details.add(addFlowTaskTaskInfo);
                     }
-                    addFlowTaskTaskInfo.setFlowInfos(flowInfos);
-                    details.add(addFlowTaskTaskInfo);
                 }
             });
             if (CollectionUtils.isNotEmpty(details)) {

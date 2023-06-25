@@ -32,6 +32,7 @@ public class RecreateHandler extends HandlerCommon {
         public static final EventProcess RECREATE_VIRTUAL_MACHINE = new EventProcess("recreate_virtual_machine", "sceneplugincloud.event.recreate_virtual_machine");
         public static final EventProcess RECREATE_CONTAINER = new EventProcess("recreate_container", "sceneplugincloud.event.recreate_container");
         public static final EventProcess RECREATE_ENTITY_NODE = new EventProcess("recreate_entity_node", "sceneplugincloud.event.recreate_entity_node");
+        public static final EventProcess RECREATE_DYNAMIPS = new EventProcess("recreate_dynamips", "sceneplugincloud.event.recreate_dynamips");
     }
 
     private DeleteInRecreateHandler deleteHandler;
@@ -145,6 +146,12 @@ public class RecreateHandler extends HandlerCommon {
                             deleteEntityNode(cloudElement);
                             super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                         });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
+                        () -> {
+                            deleteVirtualDynamips(List.of(cloudElement.getResourceId()));
+                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
             }
         }
     }
@@ -201,6 +208,12 @@ public class RecreateHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
                         () -> createEntityNode(cloudElement));
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
+                        () -> {
+                            createVirtualDynamips(cloudElement);
+                            configDynamic(List.of(cloudElement));
+                        } );
             }
 
             //通知云平台需要统计环境总速率的端口

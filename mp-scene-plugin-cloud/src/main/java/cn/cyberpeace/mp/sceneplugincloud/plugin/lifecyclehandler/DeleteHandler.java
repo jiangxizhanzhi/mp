@@ -525,7 +525,7 @@ public class DeleteHandler extends HandlerCommon {
         vmClient.deleteEntityUsbs(data);
     }
 
-    private void deleteVirtualDynamips(List<String> ids) {
+    protected void deleteVirtualDynamips(List<String> ids) {
         virtualDynamips.delete(ids);
     }
 }

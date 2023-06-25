@@ -13,4 +13,5 @@ import lombok.Setter;
 public class SceneElementParseResult {
     private String name;
     private String desc;
+    private String displayContext;
 }

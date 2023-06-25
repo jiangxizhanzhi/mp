@@ -58,6 +58,8 @@ public class ImagesConverter implements BaseConverter{
 
     private final ContainerService containerService;
 
+    private final DynamipsService dynamipsService;
+
     private final DevopsTargetService devopsTargetService;
 
     private final UserService userService;
@@ -312,6 +314,8 @@ public class ImagesConverter implements BaseConverter{
             model.setAction("reboot");
             model.setWaitForStatus(Boolean.TRUE);
             containerService.action(model, request.getInstanceId());
+        } else if (ImageTypeEnum.DYNAMIPS.toValue().equals(request.getImageType())) {
+            dynamipsService.reboot(request.getInstanceId());
         }
     }
 
