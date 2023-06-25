@@ -648,11 +648,15 @@ public class CsceneSpecialService {
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
             String[] imageNames) {
         var deviceReferCondition = new HumanCondition()
-                .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class)
+                .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class, SceneElementModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
                         SceneModel.class, SceneModel::getId)
                 .filterLink(SceneModel.class, SceneModel::getId,
+                        SceneElementModel.class, SceneElementModel::getScene)
+                .filterLink(SceneModel.class, SceneModel::getId,
                         CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .filterLink(SceneElementModel.class, SceneElementModel::getNodeId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getSceneElement)
                 .currentLink(CsceneInstanceModel.class)
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
                 .selectAs(CsceneInstanceModel::getId, DeviceReferCsceneInstanceStat::getCsceneId)
