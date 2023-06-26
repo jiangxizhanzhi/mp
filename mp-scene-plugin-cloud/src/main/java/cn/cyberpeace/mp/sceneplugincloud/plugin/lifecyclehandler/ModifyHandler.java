@@ -65,6 +65,8 @@ public class ModifyHandler extends HandlerCommon {
 
     public void modify() {
         prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
+
+        getPluginHandler().getSceneHandler().reportSceneUpdated();
         runSceneProgress(SceneProcess.MODIFY_DELETE_NODES, () -> {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             this.modifyDeleteHandler.delete();
