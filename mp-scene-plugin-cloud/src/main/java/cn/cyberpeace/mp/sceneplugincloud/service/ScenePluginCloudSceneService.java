@@ -831,6 +831,7 @@ public class ScenePluginCloudSceneService {
                 for (int i = 0; i < 3; i++) {
                     try {
                         result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+                        break;
                     } catch (Exception e) {
                         log.error("failed to copy file at {} time, sceneId is {},nodeId is {},exception is ", i, sceneId, nodeId, ExceptionUtils.getStackTrace(e));
                         if (i == 2) {

@@ -197,9 +197,8 @@ public class FlowMonitorController {
         var result = flowClassificationsService.findAll();
         var list = result.stream().map(r -> {
             FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
-            type.setValue(r.getName());
+            type.setValue(r.getCategoryEn());
             type.setSeverity(r.getSeverity());
-            // 国际化处理 todo
             type.setName(r.getCategoryZh());
             return type;
         }).collect(Collectors.toList());

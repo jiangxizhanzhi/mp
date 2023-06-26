@@ -1012,6 +1012,8 @@ public class InitiateHandler extends HandlerCommon {
         // 根据节点的类型排序,这个顺序直接影响组网的结果
         Collections.sort(allCloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
 
+        this.afterOrderElements(allCloudElements);
+
         List<CloudPluginSceneElementBO> cloudElements = new ArrayList<>();
         List<CloudPluginSceneElementBO> noEventElements = new ArrayList<>();
         for (var e : allCloudElements) {
@@ -1339,6 +1341,10 @@ public class InitiateHandler extends HandlerCommon {
         network.setVlanId(element.getVlanId());
         network.setDhcp(element.getDhcp());
         network.setNetMode(element.getNetMode());
+    }
+
+    protected void afterOrderElements(List<CloudPluginSceneElementBO> allElements) {
+
     }
 
     private void reallocateIpPorts(List<CloudPluginSceneElementBO> networkElements) {
