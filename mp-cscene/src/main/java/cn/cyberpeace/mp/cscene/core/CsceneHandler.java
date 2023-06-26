@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -25,6 +26,8 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -354,6 +357,28 @@ public class CsceneHandler extends BaseCsceneHandler<
                         var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
                         if (CollectionUtils.isNotEmpty(result)) {
                             throw new MpRuntimeException(CsceneErrorCode.VLANID_HAS_BEEN_USED.format(String.valueOf(e.get("vlan_id")), JsonCommon.stringify(result.get(0).getName())));
+                        }
+                    }
+
+                    if (e.get("entity_usbs")!= null) {
+                        List<String> entityUsbUuids = new ArrayList<>();
+                        JSONArray entityUsbJson = JSONArray.parseArray(String.valueOf(e.get("entity_usbs")));
+                        for (int i=0; i<entityUsbJson.size(); i++) {
+                            entityUsbUuids.add(String.valueOf(JSONObject.parseObject(String.valueOf(entityUsbJson.get(i))).get("uuid")));
+                        }
+                        if (CollectionUtils.isNotEmpty(entityUsbUuids)) {
+                            for (String uuid : entityUsbUuids) {
+                                ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbUsedCscenes(uuid);
+                                List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
+                                if (CollectionUtils.isNotEmpty(referStateUsbList)) {
+                                    List<String> sceneUsbNames = referStateUsbList.stream()
+                                            .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                                            .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                                            .collect(Collectors.toList());
+                                    String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
+                                    throw new MpRuntimeException(CsceneErrorCode.USB_USED_SCENE.format(sceneUsbName));
+                                }
+                            }
                         }
                     }
                 });
