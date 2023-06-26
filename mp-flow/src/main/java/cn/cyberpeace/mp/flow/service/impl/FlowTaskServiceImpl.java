@@ -737,7 +737,8 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 执行任务参数
         JSONObject object = new JSONObject();
         object.put("uuid", flowTaskModel.getThirdTaskId());
-        object.put("action", TaskActionEnum.PAUSE);
+        object.put("action", TaskActionEnum.PAUSE.toValue());
+        object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
 
         try {
             String actuatorTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath,
@@ -800,7 +801,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 执行任务参数
         JSONObject object = new JSONObject();
         object.put("uuid", flowTaskModel.getThirdTaskId());
-        object.put("action", TaskActionEnum.PAUSE);
+        object.put("action", TaskActionEnum.RESUME.toValue());
         object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
 
         try {
