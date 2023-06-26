@@ -6,7 +6,8 @@ public enum SceneErrorCode implements ErrorCode {
     SCENE_NOT_EXIST("MP-110400", "scene_not_exist"),
     ENTER_EVENT_FAILED("MP-110401", "enter_event_failed"),
     ELEMENT_NOT_EXIST("MP-110402", "scene_element_not_exist"),
-    SCENE_DOES_NOT_ALLOW_OPERATION("MP-110403", "scene_does_not_allow_operation");
+    SCENE_DOES_NOT_ALLOW_OPERATION("MP-110403", "scene_does_not_allow_operation"),
+    IP_DUPLICATE("MP-110404", "ip_duplicate");
 
     SceneErrorCode(String code, String message) {
         setCode(code, "scene.error_code." + message);
