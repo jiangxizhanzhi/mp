@@ -560,11 +560,15 @@ public class CsceneSpecialService {
      */
     public ServiceResult<List<DeviceReferCsceneStat>> statVirtualUsbReferCscenes(String uuid) {
         var referCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .link(CsceneModel.class, SceneConfigModel.class, SceneConfigElementModel.class, CloudPluginSceneConfigElementModel.class)
                 .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
                         SceneConfigModel.class, SceneConfigModel::getId)
                 .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        SceneConfigElementModel.class, SceneConfigElementModel::getScene)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
                         CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .filterLink(SceneConfigElementModel.class, SceneConfigElementModel::getNodeId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getSceneElement)
                 .currentLink(CsceneModel.class)
                 .filterEqual(CsceneModel::getDeleted, false)
                 .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
@@ -589,11 +593,15 @@ public class CsceneSpecialService {
      */
     public ServiceResult<List<DeviceReferCsceneStat>> statEntityUsbReferCscenes(String uuid) {
         var referCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .link(CsceneModel.class, SceneConfigModel.class, SceneConfigElementModel.class, CloudPluginSceneConfigElementModel.class)
                 .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
                         SceneConfigModel.class, SceneConfigModel::getId)
                 .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        SceneConfigElementModel.class, SceneConfigElementModel::getScene)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
                         CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .filterLink(SceneConfigElementModel.class, SceneConfigElementModel::getNodeId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getSceneElement)
                 .currentLink(CsceneModel.class)
                 .filterEqual(CsceneModel::getDeleted, false)
                 .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
