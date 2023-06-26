@@ -450,7 +450,7 @@ public class CsceneFlowService {
                     FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
                     flowStatisticsDetail.setOffsetValue(offsetValue);
                     flowStatisticsDetail.setValue(value);
-                    flowStatisticsDetail.setOffsetUnit("m");
+                    flowStatisticsDetail.setOffsetUnit(networkFlowRateResult.getUnit());
                     result.add(flowStatisticsDetail);
                     offsetValue += networkFlowRateResult.getTimeInt();
                 }
