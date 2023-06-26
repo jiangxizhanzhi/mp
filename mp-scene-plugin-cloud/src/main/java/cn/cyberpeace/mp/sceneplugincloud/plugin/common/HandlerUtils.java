@@ -428,4 +428,14 @@ public class HandlerUtils {
         return getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
     }
 
+    public boolean isAddedPort(String portId, CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler) {
+        var newPorts = newHandler.getElementPortMap().keySet();
+        var originPorts = originHandler.getElementPortMap().keySet();
+        if (newPorts.contains(portId) && !originPorts.contains(portId)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
