@@ -4,8 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
  * @Description: 实体USB对象
  * @Author: guquan
@@ -13,9 +11,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel("实体USB对象")
-public class EntityUsb implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class EntityUsb {
 
     /**
      * UUID
