@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -22,6 +23,16 @@ import java.util.Set;
 
 @Slf4j
 public class ModifyHandler extends HandlerCommon {
+
+    public static class SceneProcess {
+        public static final EventProcess MODIFY_DELETE_NODES = new EventProcess("modify_delete_nodes", "sceneplugincloud.event.modify_delete_node");
+        public static final EventProcess MODIFY_CREATE_NODES = new EventProcess("modify_create_nodes", "sceneplugincloud.event.modify_create_node");
+        public static final EventProcess MODIFY_NODES = new EventProcess("modify_nodes", "sceneplugincloud.event.modify_node");
+    }
+
+    public static class ElementProcess {
+
+    }
 
     private ModifyInitiateHandler modifyInitiateHandler;
     private ModifyCreateHandler modifyCreateHandler;
@@ -53,18 +64,30 @@ public class ModifyHandler extends HandlerCommon {
     }
 
     public void modify() {
-        this.modifyDeleteHandler.delete();
-        this.modifyInitiateHandler.initiate();
-        this.modifyCreateHandler.create();
-        if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
-            for (String elementId : mayUpdateNodeIds) {
-                CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
-                    new ElementModifyHandler(newPlugin, originPlugin,
-                            originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+        prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
+        runSceneProgress(SceneProcess.MODIFY_DELETE_NODES, () -> {
+            getPluginHandler().getSceneHandler().addProgressPercentage(10);
+            this.modifyDeleteHandler.delete();
+            getPluginHandler().getSceneHandler().addProgressPercentage(10);
+        });
+        runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
+            getPluginHandler().getSceneHandler().addProgressPercentage(10);
+            this.modifyInitiateHandler.initiate();
+            this.modifyCreateHandler.create();
+            getPluginHandler().getSceneHandler().addProgressPercentage(10);
+        });
+        runSceneProgress(SceneProcess.MODIFY_NODES, () -> {
+            getPluginHandler().getSceneHandler().addProgressPercentage(10);
+            if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
+                for (String elementId : mayUpdateNodeIds) {
+                    CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                    if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                        new ElementModifyHandler(newPlugin, originPlugin,
+                                originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                    }
                 }
             }
-        }
+        });
     }
 
     private static class ModifyInitiateHandler extends InitiateHandler {
