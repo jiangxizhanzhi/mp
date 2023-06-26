@@ -175,9 +175,11 @@ public class MenuSetService {
             MenuTemplateModel model = new MenuTemplateModel();
             model.setTemplateId(menuTemplate.templateId);
             if (Objects.equals(Locale.US, locale)) {
+                model.setName("");
                 model.setEnName(t.getName());
             } else {
                 model.setName(t.getName());
+                model.setEnName("");
             }
             model.setParent(t.getParent());
             model.setIdentifier(t.getIdentifier());
