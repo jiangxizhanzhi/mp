@@ -520,7 +520,7 @@ public class DeleteHandler extends HandlerCommon {
         log.info("CreateHandler.deleteEntityUsbs begin. cloudElement:{}", cloudElement);
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String>  usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String>  usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setEntityUsbUuids(usbUuids);
         vmClient.deleteEntityUsbs(data);
     }
