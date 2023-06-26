@@ -1387,6 +1387,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
+        // 暂不支持采集和发生插件的修改 保留原有配置
+        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
+        var plugins = originHandler.toData().getScene().getPlugins();
+        for (var plugin : plugins.entrySet()) {
+            if (!cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(plugin.getKey())) {
+                instance.getScene().getPlugins().put(plugin.getKey(), plugin.getValue());
+            }
+        }
+
         var instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
         instanceHandler.update();
         return new ServiceResult<>(instanceHandler.toData());
