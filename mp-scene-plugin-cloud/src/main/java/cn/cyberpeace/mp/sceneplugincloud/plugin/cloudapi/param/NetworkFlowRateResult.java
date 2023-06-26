@@ -19,8 +19,13 @@ public class NetworkFlowRateResult implements CloudHttpData {
     private List<Long> sumRateList;
 
     /**
-     * 时间间隔，单位分钟
+     * 时间间隔
      */
     private Integer timeInt;
+
+    /**
+     * 单位
+     */
+    private String unit;
 
 }
