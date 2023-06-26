@@ -23,9 +23,11 @@ import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -41,6 +43,7 @@ import java.util.List;
         CsceneInstanceMapper.class,
         CsceneInstanceRoleMapper.class,
 })
+@Slf4j
 public class CsceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
         CsceneInstanceBO, CsceneInstanceMapper, CsceneInstanceRoleMapper> {
@@ -93,7 +96,9 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     public void create() {
-        csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
+        if (Objects.nonNull(getContext())) {
+            csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
+        }
         var cscene = getCscene();
         // 先保存设置id
         save();
@@ -122,7 +127,10 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
-        csceneInstanceUserCountService.decreaseCount(getContext().getAccessUserId());
+        log.info("=======delete scene getContext(): {}", getContext());
+        if (Objects.nonNull(getContext())) {
+            csceneInstanceUserCountService.decreaseCount(getContext().getAccessUserId());
+        }
         var sceneData = csceneBO.getScene();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
