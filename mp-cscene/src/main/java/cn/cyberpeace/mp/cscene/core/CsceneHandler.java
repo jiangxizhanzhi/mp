@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -357,31 +358,27 @@ public class CsceneHandler extends BaseCsceneHandler<
                         }
                     }
 
-//                    if (e.get("entity_usbs")!= null) {
-//                        List<String> entityUsbUuids = new ArrayList<>();
-//                        log.info("entity_usb is :{}", String.valueOf(e.get("entity_usbs")));
-////                        JSONArray entityUsbJson = JSONArray.parseArray(String.valueOf(e.get("entity_usbs")));
-//                        List<EntityUsb> entityUsbs = (List<EntityUsb>)e.get("entity_usbs");
-//                        log.info("entityUsbs is :{}", entityUsbs);
-//                        for (EntityUsb entityUsb : entityUsbs) {
-//                            String uuid = entityUsb.getUuid();
-//                            entityUsbUuids.add(uuid);
-//                        }
-//                        if (CollectionUtils.isNotEmpty(entityUsbUuids)) {
-//                            for (String uuid : entityUsbUuids) {
-//                                ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbUsedCscenes(uuid);
-//                                List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
-//                                if (CollectionUtils.isNotEmpty(referStateUsbList)) {
-//                                    List<String> sceneUsbNames = referStateUsbList.stream()
-//                                            .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-//                                            .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-//                                            .collect(Collectors.toList());
-//                                    String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
-//                                    throw new MpRuntimeException(CsceneErrorCode.USB_USED_SCENE.format(sceneUsbName));
-//                                }
-//                            }
-//                        }
-//                    }
+                    if (e.get("entity_usbs")!= null) {
+                        List<String> entityUsbUuids = new ArrayList<>();
+                        List<Map<String, Object>> entityUsbMap = (List<Map<String, Object>>)e.get("entity_usbs");
+                        for (Map<String, Object> tmp : entityUsbMap) {
+                            entityUsbUuids.add(String.valueOf(tmp.get("uuid")));
+                        }
+                        if (CollectionUtils.isNotEmpty(entityUsbUuids)) {
+                            for (String uuid : entityUsbUuids) {
+                                ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbUsedCscenes(uuid);
+                                List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
+                                if (CollectionUtils.isNotEmpty(referStateUsbList)) {
+                                    List<String> sceneUsbNames = referStateUsbList.stream()
+                                            .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                                            .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                                            .collect(Collectors.toList());
+                                    String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
+                                    throw new MpRuntimeException(CsceneErrorCode.USB_USED_SCENE.format(sceneUsbName));
+                                }
+                            }
+                        }
+                    }
                 });
             }
         }
