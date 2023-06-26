@@ -363,7 +363,9 @@ public class CsceneHandler extends BaseCsceneHandler<
                     if (e.get("entity_usbs")!= null) {
                         List<String> entityUsbUuids = new ArrayList<>();
                         log.info("entity_usb is :{}", String.valueOf(e.get("entity_usbs")));
-                        JSONArray entityUsbJson = JSONArray.parseArray(String.valueOf(e.get("entity_usbs")));
+//                        JSONArray entityUsbJson = JSONArray.parseArray(String.valueOf(e.get("entity_usbs")));
+                        JSONArray entityUsbJson = (JSONArray)e.get("entity_usbs");
+                        log.info("entityUsbJson is :{}", entityUsbJson);
                         for (int i=0; i<entityUsbJson.size(); i++) {
                             entityUsbUuids.add(String.valueOf(JSONObject.parseObject(String.valueOf(entityUsbJson.get(i))).get("uuid")));
                         }
