@@ -43,7 +43,7 @@ public abstract class BaseSimpleMessageSender {
 
     public <T> void send(T data, String type, Map<String, Object> context, Long timeout) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
-        log.info("mq content:{}", JsonCommon.stringify(formatMessage));
+        log.debug("mq content:{}", JsonCommon.stringify(formatMessage));
 
         BaseSimpleMessagePostProcessor messagePostProcessor = null;
         if (timeout != null) {
