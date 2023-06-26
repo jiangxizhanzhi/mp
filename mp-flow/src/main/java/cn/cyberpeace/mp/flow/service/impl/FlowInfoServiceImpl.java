@@ -1610,8 +1610,24 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             while ((line = input.readLine()) != null) {
                 filterResult = line;
             }
+
+
             // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
             log.info("============pcap filter result: {}", filterResult);
+
+            if (StringUtils.isBlank(filterResult)) {
+                StringBuilder errorBuilder = new StringBuilder();
+                try (InputStream errorStream = process.getErrorStream();
+                     InputStreamReader isr = new InputStreamReader(errorStream);
+                     BufferedReader br = new BufferedReader(isr)) {
+                    String errorResult;
+                    while ((errorResult = br.readLine()) != null) {
+                        errorBuilder.append(errorResult + " ");
+                    }
+                    log.error("pcap file filter failed: {}", errorBuilder);
+                    return;
+                }
+            }
 
             // 保存mp_flow_pcap表数据
             JSONObject filterObj = JSONObject.parseObject(filterResult);
