@@ -557,7 +557,8 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.modify(originSceneHandler, updateElementIds);
             }
         } catch (Exception e) {
-            log.error("failed to modify scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            log.error("failed to modify scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e), e);
+            log.error("scene modify failed", e);
             errorScene(SceneModel.Event.MODIFY, e.getMessage());
             return false;
         }

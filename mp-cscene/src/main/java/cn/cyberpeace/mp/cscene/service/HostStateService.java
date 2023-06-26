@@ -217,6 +217,7 @@ public class HostStateService {
 
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
+        LocalDateTime sceneStartTime = null ;
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
             if (CollectionUtils.isNotEmpty(sceneIds)) {
@@ -224,12 +225,19 @@ public class HostStateService {
                 if (!result.getSource().isRunning() && result.getSource().getSceneModel() != null) {
                     endTime = result.getSource().getSceneModel().getUpdateTime();
                 }
+                if (result.getSource().getSceneModel() != null) {
+                    sceneStartTime = result.getSource().getSceneModel().getCreateTime();
+                }
             }
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔24小时
-            startTime = endTime.minusHours(hoursRange);
+            if (sceneStartTime != null) {
+                startTime = sceneStartTime;
+            } else {
+                // todo 默认时间间隔24小时
+                startTime = endTime.minusHours(hoursRange);
+            }
         }
 
         if (Objects.isNull(segmentCount)) {
@@ -240,9 +248,9 @@ public class HostStateService {
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalLatestHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalLatestHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalLatestHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
 
         return listHostStates(timeList, cpuResult, memResult, diskResult);
     }

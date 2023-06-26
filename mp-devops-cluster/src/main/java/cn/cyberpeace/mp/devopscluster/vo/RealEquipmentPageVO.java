@@ -132,4 +132,10 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("实体USB")
     private EntityUsb extEntityUsb;
+
+    /**
+     * 是否可登录
+     */
+    @ApiModelProperty("是否可登录")
+    private Boolean loginEnable;
 }

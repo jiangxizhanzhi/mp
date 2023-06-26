@@ -2,8 +2,10 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
@@ -33,7 +35,7 @@ public class ModifyHandler extends HandlerCommon {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
         Set<String> originNodeIds = new HashSet<>(originPlugin.getSceneHandler().getElementMap().keySet());
         Set<String> createdNodeIds = new HashSet<>(originNodeIds);
-        this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, getTaskPool());
+        this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, originPlugin, getTaskPool());
         this.modifyCreateHandler = new ModifyCreateHandler(createdNodeIds, newPlugin, getTaskPool());
         Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
 
@@ -57,25 +59,30 @@ public class ModifyHandler extends HandlerCommon {
         if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
             for (String elementId : mayUpdateNodeIds) {
                 CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                new ElementModifyHandler(newPlugin, originPlugin,
-                        originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                    new ElementModifyHandler(newPlugin, originPlugin,
+                            originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                }
             }
         }
     }
 
     private static class ModifyInitiateHandler extends InitiateHandler {
         private Set<String> createdNodeIds;
+        private CloudScenePluginHandler newPlugin;
+        private CloudScenePluginHandler originPlugin;
 
-        public ModifyInitiateHandler(Set<String> createdNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
-            super(pluginHandler);
+        public ModifyInitiateHandler(Set<String> createdNodeIds, CloudScenePluginHandler newPluginHandler, CloudScenePluginHandler originPluginHandler, TaskPool taskPool) {
+            super(newPluginHandler);
             setTaskPool(taskPool);
             setEvent(SceneModel.Event.MODIFY);
             this.createdNodeIds = createdNodeIds;
+            this.newPlugin = newPluginHandler;
+            this.originPlugin = originPluginHandler;
         }
 
         @Override
         public void initiate() {
-            this.initiateNetwork();
             super.initiate();
         }
 
@@ -97,7 +104,8 @@ public class ModifyHandler extends HandlerCommon {
             super.initiateElementBasePropertiesProcess(cloudElement);
         }
 
-        public void initiateNetwork() {
+        @Override
+        protected void afterOrderElements(List<CloudPluginSceneElementBO> allElements) {
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
             Map<String, ConnectedNetworkBO> networkBOMap = new HashMap<>();
             networks.forEach(network -> {
@@ -111,9 +119,11 @@ public class ModifyHandler extends HandlerCommon {
                 getPluginHandler().getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
             });
             // 处理加入的网络
-            getPluginHandler().getElementMap().values().forEach(e -> {
+            for (var e : allElements) {
                 if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
-                    e.getSrcElement().getPorts().forEach(p -> {
+                    Set<String> findedNetPortIds = new HashSet<>();
+                    CloudPluginSceneElementPortBO defaultCreatedNetPluginPort = null;
+                    for (var p : e.getSrcElement().getPorts()) {
                         var pluginPort = getPluginHandler().getPort(p.getId());
                         var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                         if (pluginPort != null) {
@@ -121,6 +131,8 @@ public class ModifyHandler extends HandlerCommon {
                                 // 自己构建网络直接加入
                                 if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
                                     networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                                    findedNetPortIds.add(p.getId());
+                                    defaultCreatedNetPluginPort = pluginPort;
                                 }
                             } else if (to != null) {
                                 // 未构建网络看对端端口
@@ -130,13 +142,31 @@ public class ModifyHandler extends HandlerCommon {
                                         ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
                                         connectedNetworkBO.addPort(p, to, false);
                                         e.getAccessNetworks().add(connectedNetworkBO);
+                                        findedNetPortIds.add(p.getId());
                                     }
                                 }
                             }
                         }
-                    });
+                    }
+                    if (defaultCreatedNetPluginPort != null) {
+                        for (var p : e.getSrcElement().getPorts()) {
+                            if (findedNetPortIds.contains(p.getId())) {
+                                continue;
+                            }
+                            boolean isAddedPort = getHandlerUtils().isAddedPort(p.getId(), newPlugin, originPlugin);
+                            if (isAddedPort && (e.getSrcElement().getType() == BaseSceneElementModel.Type.SWITCH
+                                    || e.getSrcElement().getType() == BaseSceneElementModel.Type.ROUTER
+                                    || e.getSrcElement().getType() == BaseSceneElementModel.Type.FIREWALL)) {
+                                // 网关设备新增的端口 需要加到原有的网络上
+                                var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                                var pluginPort = getPluginHandler().getPort(p.getId());
+                                pluginPort.setLogicNetworkId(defaultCreatedNetPluginPort.getLogicNetworkId());
+                                networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                            }
+                        }
+                    }
                 }
-            });
+            }
             for (var net : networks) {
                 getHandlerUtils().getCreatedNetworks().add(net.getId());
             }
