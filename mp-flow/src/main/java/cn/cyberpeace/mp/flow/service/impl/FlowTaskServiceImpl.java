@@ -736,7 +736,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 执行任务参数
         JSONObject object = new JSONObject();
-        object.put("uuid", taskId);
+        object.put("uuid", flowTaskModel.getThirdTaskId());
         object.put("action", TaskActionEnum.PAUSE);
 
         try {
@@ -799,7 +799,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 执行任务参数
         JSONObject object = new JSONObject();
-        object.put("uuid", taskId);
+        object.put("uuid", flowTaskModel.getThirdTaskId());
         object.put("action", TaskActionEnum.PAUSE);
         object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
 
