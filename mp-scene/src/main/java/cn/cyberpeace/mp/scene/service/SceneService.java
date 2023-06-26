@@ -152,7 +152,7 @@ public class SceneService {
         }
     }
 
-    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
         // 场景信息目前只更新显示参数
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
@@ -205,6 +205,8 @@ public class SceneService {
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
             proxy.modify(originSceneHandler, updateElementIds);
+            //W:Refresh scene after updating
+            runner.run();
         });
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
