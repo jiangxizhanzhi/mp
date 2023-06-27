@@ -543,9 +543,15 @@ public class CsceneDataModifier {
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
+        correctReturnCsceneData(csceneInstanceBO, true);
+    }
+
+    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO,boolean handlerHidden) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
-        handlerHiddenElement(csceneInstanceBO.getScene());
+        if (handlerHidden) {
+            handlerHiddenElement(csceneInstanceBO.getScene());
+        }
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
     }
 
