@@ -886,7 +886,7 @@ public class AsyncPlatFlowTaskService {
                 return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
             }
         } catch (Exception e) {
-            log.error("batch start tasks error", e);
+            log.error("batch start tasks error", e.getMessage());
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
     }
