@@ -121,9 +121,11 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             "sudo sh /opt/wazuha/stop.sh",
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
-                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            String.format("echo \"SIC_WAZUH_MANAGER_IP=%s\" >> /etc/profile", wazuhHost),
+                            String.format("echo \"SIC_WAZUH_AGENT_NAME=%s\" >> /etc/profile", agentName),
+                            String.format("echo \"SIC_WAZUH_MANAGER_REMOTE_PORT=%d\" >> /etc/profile", getWazuhRemotePort()),
+                            String.format("echo \"SIC_WAZUH_MANAGER_AUTH_PORT=%d\" >> /etc/profile", getWazuhAuthPort()),
+                            "source /etc/profile",
                             "restart_again=false;",
                             String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/bin/tools"),
                             //"sh /opt/wazuha/uninstall.sh",
