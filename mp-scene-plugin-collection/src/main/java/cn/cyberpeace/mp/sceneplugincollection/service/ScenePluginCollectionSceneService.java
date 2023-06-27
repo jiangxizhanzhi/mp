@@ -1052,6 +1052,8 @@ public class ScenePluginCollectionSceneService {
         BigDecimal tmpSize = null;
         List<IntervalSizeBO<LocalDateTime, Double>> result = new ArrayList<>();
         int index = 0;
+        BigDecimal tmpLastValue = null;
+        BigDecimal tmpLastSize = null;
         while (index < list.size()) {
             CollectionHostStateBO state = list.get(index);
             if (state.getTime().isBefore(tmpMaxTime)) {
@@ -1070,9 +1072,13 @@ public class ScenePluginCollectionSceneService {
                 // 当前周期有数据则记录
                 if (tmpValue != null) {
                     result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
+                } else if (tmpLastValue != null) {
+                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpLastValue.divide(tmpLastSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
                 }
                 // 进入下一个周期
                 tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
+                tmpLastSize = tmpSize;
+                tmpLastValue = tmpValue;
                 tmpSize = null;
                 tmpValue = null;
             }
