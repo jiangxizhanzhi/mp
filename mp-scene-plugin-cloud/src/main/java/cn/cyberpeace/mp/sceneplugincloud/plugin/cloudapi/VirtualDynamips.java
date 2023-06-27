@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsTypeInfoI
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicActionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
@@ -117,10 +118,10 @@ public class VirtualDynamips extends CloudClient {
         });
     }
 
-    public VirtualDynamipsListResult list() {
-        var result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, null,
+    public VirtualDynamipsListResult list(VirtualDynamipsListParam param) {
+        var result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, param,
                 new TypeReference<VirtualDynamipsListResult>() {
-                });
+        });
         return result;
     }
 
