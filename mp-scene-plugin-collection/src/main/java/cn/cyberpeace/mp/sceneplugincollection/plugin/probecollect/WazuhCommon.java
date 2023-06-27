@@ -150,6 +150,15 @@ public class WazuhCommon {
                             "if [ restart_again ]; then",
                             "sleep 100",
                             "sudo sh start.sh",
+                            "fi",
+                            String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/logs/ossec.log"),
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && echo 200 || (sudo sh config.sh && sudo sh start.sh)",
+                            "sleep 25",
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && echo 200 || (sudo sh config.sh && sudo sh start.sh)",
+                            "sleep 25",
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && echo 200 || (sudo sh config.sh && sudo sh start.sh)",
+                            "else",
+                            "echo 200",
                             "fi"
                     ));
         }
