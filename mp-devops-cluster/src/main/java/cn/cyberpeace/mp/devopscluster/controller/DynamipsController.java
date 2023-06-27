@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
-import cn.cyberpeace.mp.devopscluster.request.InstancePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
@@ -61,7 +61,7 @@ public class DynamipsController {
      */
     @ApiOperation("分页查询dynamips信息")
     @GetMapping("/page")
-    public PageResult<InstancePageVO> page(InstancePageRequest request) {
+    public PageResult<InstancePageVO> page(DynamipsInstancePageRequest request) {
         var result = dynamipsConverter.page(request);
         var pageVos = convertBOToPageVO(result);
         return new PageResult<>(pageVos, result.getTotal());
