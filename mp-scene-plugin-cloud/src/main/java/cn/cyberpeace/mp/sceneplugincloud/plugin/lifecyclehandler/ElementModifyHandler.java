@@ -402,14 +402,37 @@ public class ElementModifyHandler extends HandlerCommon {
     private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort, CloudPluginSceneElementBO originCloudElement) {
         var updateData = new VirtualFirewallUpdateData();
         updateData.setName(HandlerUtils.genResourceName(originCloudElement.getSrcElement().getEid()));
-        updateData.setId(originCloudPort.getFirewallResourceId());
+        if (StringUtils.isNotEmpty(originCloudPort.getFirewallResourceId())) {
+            updateData.setId(originCloudPort.getFirewallResourceId());
+        } else {
+            Set<String> targetPorts = new HashSet<>();
+            var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(originCloudElement.getSrcElement().getId());
+            for (var connectedSrcPort : connectedSrcPorts) {
+                var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
+                if (connectedCloudPort == null || StringUtils.isEmpty(connectedCloudPort.getResourceId())) {
+                    continue;
+                }
+                var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
+                var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+                if (connectedCloudElement == null || connectedCloudElement.getVirtualType() == null
+                        || !connectedCloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                    continue;
+                }
+                targetPorts.add(connectedCloudPort.getResourceId());
+            }
+            updateData.setPorts(cn.cyberpeace.mp.base.util.basic.CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
+        }
         var portSrcRules = newCloudPort.getFirewallRules();
         if (portSrcRules != null && !portSrcRules.isEmpty()) {
             var cloudFirewallRules = CreateHandler.CloudFirewallRules.fromSrcRules(portSrcRules);
             updateData.setIngressRules(cloudFirewallRules.getIngressRules());
             updateData.setEgressRules(cloudFirewallRules.getEgressRules());
         }
-        virtualFirewall.update(updateData);
+        if (StringUtils.isNotEmpty(originCloudPort.getFirewallResourceId())) {
+            virtualFirewall.update(updateData);
+        } else {
+            virtualFirewall.create(updateData);
+        }
     }
 
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
