@@ -232,11 +232,10 @@ public class HostStateService {
         }
 
         if (Objects.isNull(startTime)) {
-            if (sceneStartTime != null) {
+            // todo 默认时间间隔24小时
+            startTime = endTime.minusHours(hoursRange);
+            if (sceneStartTime != null && sceneStartTime.isAfter(startTime)) {
                 startTime = sceneStartTime;
-            } else {
-                // todo 默认时间间隔24小时
-                startTime = endTime.minusHours(hoursRange);
             }
         }
 
