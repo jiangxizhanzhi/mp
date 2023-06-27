@@ -406,19 +406,8 @@ public class ElementModifyHandler extends HandlerCommon {
             updateData.setId(originCloudPort.getFirewallResourceId());
         } else {
             Set<String> targetPorts = new HashSet<>();
-            var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(originCloudElement.getSrcElement().getId());
-            for (var connectedSrcPort : connectedSrcPorts) {
-                var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
-                if (connectedCloudPort == null || StringUtils.isEmpty(connectedCloudPort.getResourceId())) {
-                    continue;
-                }
-                var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
-                var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-                if (connectedCloudElement == null || connectedCloudElement.getVirtualType() == null
-                        || !connectedCloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                    continue;
-                }
-                targetPorts.add(connectedCloudPort.getResourceId());
+            if (StringUtils.isNotEmpty(newCloudPort.getResourceId())) {
+                targetPorts.add(newCloudPort.getResourceId());
             }
             updateData.setPorts(cn.cyberpeace.mp.base.util.basic.CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
         }
@@ -431,7 +420,8 @@ public class ElementModifyHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(originCloudPort.getFirewallResourceId())) {
             virtualFirewall.update(updateData);
         } else {
-            virtualFirewall.create(updateData);
+            var virtualFirewallCreateData = virtualFirewall.create(updateData);
+            newCloudPort.setFirewallResourceId(virtualFirewallCreateData.getId());
         }
     }
 
