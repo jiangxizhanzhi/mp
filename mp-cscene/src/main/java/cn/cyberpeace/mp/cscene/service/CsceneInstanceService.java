@@ -54,6 +54,7 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -1387,12 +1388,46 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
-        // 暂不支持采集和发生插件的修改 保留原有配置
         CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
-        var plugins = originHandler.toData().getScene().getPlugins();
+        // 保留隐藏节点和隐藏端口
+        var originData = originHandler.toDataWithHidden().getScene();
+        Set<String> hiddenElementIds = new HashSet<>();
+        Set<String> hiddenPortIds = new HashSet<>();
+        for (var e : originData.getTopology().getElements()) {
+            if (Boolean.TRUE.equals(e.getIsAuxiliary())) {
+                csceneBO.getUpdateScene().getTopology().getElements().add(e);
+                hiddenElementIds.add(e.getId());
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    for (var p : e.getPorts()) {
+                        hiddenPortIds.add(p.getId());
+                    }
+                }
+            }
+        }
+        for (var c : originData.getTopology().getConnections()) {
+            if (hiddenPortIds.contains(c.getSource()) || hiddenPortIds.contains(c.getTarget())) {
+                instance.getScene().getTopology().getConnections().add(c);
+            }
+        }
+
+        var plugins = originData.getPlugins();
         for (var plugin : plugins.entrySet()) {
             if (!cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(plugin.getKey())) {
+                // 暂不支持采集和发生插件的修改 保留原有配置
                 instance.getScene().getPlugins().put(plugin.getKey(), plugin.getValue());
+            } else {
+                // 保留插件的隐藏节点和隐藏端口
+                var newPlugin = instance.getScene().getPlugins().get(plugin.getKey());
+                for (var e : plugin.getValue().getElements().entrySet()) {
+                    if (hiddenElementIds.contains(e.getKey())) {
+                        newPlugin.getElements().put(e.getKey(), e.getValue());
+                    }
+                }
+                for (var p : plugin.getValue().getElementPorts().entrySet()) {
+                    if (hiddenPortIds.contains(p.getKey())) {
+                        newPlugin.getElementPorts().put(p.getKey(), p.getValue());
+                    }
+                }
             }
         }
 
