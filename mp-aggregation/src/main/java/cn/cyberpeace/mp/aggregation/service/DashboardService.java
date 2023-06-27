@@ -206,6 +206,7 @@ public class DashboardService {
         userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
+        userResource.setDynamips(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L).intValue());
         return userResource;
     }
 

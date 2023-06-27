@@ -27,4 +27,7 @@ public class UserResourceResponse {
     @ApiModelProperty("虚拟机数量")
     private Integer vmCount;
 
+    @ApiModelProperty("dynamips数量")
+    private Integer dynamips;
+
 }
