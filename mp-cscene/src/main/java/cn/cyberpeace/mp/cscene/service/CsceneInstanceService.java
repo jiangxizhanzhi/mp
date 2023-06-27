@@ -1393,6 +1393,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
         Set<String> hiddenPortIds = new HashSet<>();
+        Map<String, List<SceneElementPortBO>> hiddenPorts = new HashMap<>();
         for (var e : originData.getTopology().getElements()) {
             if (Boolean.TRUE.equals(e.getIsAuxiliary())) {
                 csceneBO.getUpdateScene().getTopology().getElements().add(e);
@@ -1400,6 +1401,29 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
                     for (var p : e.getPorts()) {
                         hiddenPortIds.add(p.getId());
+                    }
+                }
+            } else if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                for (var p : e.getPorts()) {
+                    if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                        hiddenPortIds.add(p.getId());
+                        if (!hiddenPorts.containsKey(e.getId())) {
+                            hiddenPorts.put(e.getId(), new ArrayList<>());
+                        }
+                        hiddenPorts.get(e.getId()).add(p);
+                    }
+                }
+            }
+        }
+        if (!hiddenPorts.isEmpty()) {
+            for (var e : instance.getScene().getTopology().getElements()) {
+                if (hiddenPorts.containsKey(e.getId())) {
+                    var hiddenPostList = hiddenPorts.get(e.getId());
+                    for (int i = hiddenPostList.size() - 1; i >= 0; i--) {
+                        if (e.getPorts() == null) {
+                            e.setPorts(new ArrayList<>());
+                        }
+                        e.getPorts().add(0, hiddenPostList.get(i));
                     }
                 }
             }
