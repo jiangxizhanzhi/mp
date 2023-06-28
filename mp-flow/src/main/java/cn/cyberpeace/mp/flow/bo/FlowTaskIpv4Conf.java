@@ -23,7 +23,7 @@ public class FlowTaskIpv4Conf {
      * DSCP
      */
     @ApiModelProperty("DSCP")
-    private Integer dscp;
+    private String dscp;
 
     /**
      * 源IP
