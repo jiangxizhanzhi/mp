@@ -58,6 +58,10 @@ public class UnpauseHandler extends HandlerCommon {
                     element.getSrcElement().getId());
             return;
         }
+        if (element.getSrcElement().getEvent() != null && element.getSrcElement().getEvent() == SceneElementModel.Event.DEFAULT) {
+            // 未启动状态无需暂停
+            return;
+        }
         String instanceId = element.getResourceId();
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VIRTUAL_MACHINE));
