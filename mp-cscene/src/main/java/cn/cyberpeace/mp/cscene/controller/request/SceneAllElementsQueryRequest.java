@@ -17,4 +17,6 @@ public class SceneAllElementsQueryRequest {
     private List<String> elementIds;
     @ApiModelProperty(value = "是否返回场景全部节点（包括简易型）")
     private Boolean isAll;
+    @ApiModelProperty(value = "是否采集")
+    private Boolean isCollect;
 }
