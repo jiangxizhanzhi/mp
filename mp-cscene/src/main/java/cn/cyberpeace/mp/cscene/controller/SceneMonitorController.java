@@ -10,11 +10,13 @@ import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +66,15 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
-        return ResultCommon.success(basicInfoList);
+        List<ElementMonitorBasicInfo> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(basicInfoList)) {
+            for (var e : basicInfoList) {
+                if (e.getEvent() != null && e.getEvent() != SceneElementModel.Event.DELETE) {
+                    result.add(e);
+                }
+            }
+        }
+        return ResultCommon.success(result);
     }
 
     @ApiOperation(value = "查询场景模板所有节点列表")
