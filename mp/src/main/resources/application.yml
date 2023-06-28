@@ -39,6 +39,12 @@ spring:
     activate:
       on-profile: std
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, env
+
 logging:
   file:
     path: /home/mp/logs
