@@ -616,7 +616,7 @@ public class CreateHandler extends HandlerCommon {
 
         boolean isWindows = SystemTypeCommandUtils.isWindows(standardSystemType);
         if (!isWindows && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-            commands.add("echo “169.254.169.254     res.cr.com” >>/etc/hosts");
+            commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
         // TODO: 应用安装
