@@ -75,8 +75,11 @@ public class ActivMenuController {
     @ApiOperation(value = "新增一套模板,可以同时关联到某个角色")
     @PostMapping("/menu/add_template")
     public ServiceResult addMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
-        var result = menuSetService.addTemplate(template.getMenuTree());
-        if (StringUtils.isNotEmpty(template.getRoleId())) {
+        MenuSetService.MenuTemplate result;
+        if (StringUtils.isEmpty(template.getRoleId())) {
+            result = menuSetService.refreshTemplate(template.getMenuTree(), "1");
+        } else {
+            result = menuSetService.addTemplate(template.getMenuTree());
             menuSetService.updateRoleMenuTemplate(template.getRoleId(), result.getTemplateId());
         }
         return new ServiceResult(result).asResult();
