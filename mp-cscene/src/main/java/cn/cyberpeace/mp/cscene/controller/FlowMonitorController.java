@@ -98,9 +98,13 @@ public class FlowMonitorController {
         if (StringUtils.isEmpty(flowTrendRequest.getSceneId())) {
             return ResultCommon.success(new ArrayList<>());
         }
-        List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
-
-        return ResultCommon.success(flowTrends);
+        if (CollectionUtils.isNotEmpty(flowTrendRequest.getElementIds())) {
+            List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
+            return ResultCommon.success(flowTrends);
+        } else {
+            List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
+            return ResultCommon.success(flowTrends);
+        }
     }
 
     /**
