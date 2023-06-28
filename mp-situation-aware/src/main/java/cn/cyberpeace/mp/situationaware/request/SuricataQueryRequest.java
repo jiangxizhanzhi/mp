@@ -34,13 +34,20 @@ public class SuricataQueryRequest {
     @ApiModelProperty(value = "每页数量")
     private Integer pageSize;
 
+    @ApiModelProperty(value = "每页数量(兼容前端)")
+    private Integer perPage;
+
     public void ensure() {
         // 默认值
         if (Objects.isNull(page)) {
             page = 1;
         }
         if (Objects.isNull(pageSize)) {
-            pageSize = 10;
+            if (Objects.nonNull(perPage)) {
+                pageSize = perPage;
+            } else {
+                pageSize = 10;
+            }
         }
     }
 
