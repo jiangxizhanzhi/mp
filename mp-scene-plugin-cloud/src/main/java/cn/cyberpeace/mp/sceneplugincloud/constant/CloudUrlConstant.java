@@ -115,7 +115,7 @@ public class CloudUrlConstant {
     public static final String RESET_CPCLOUD_ALL_IPS = "/cpcloud/info/v1/revise_ip";
     public static final String NETWORK_FLOW_RATE = "/cpcloud/info/v1/network_flow_rate";
 
-    public static final String CREATE_FLAVOR = "/v1/flavors";
+    public static final String CREATE_FLAVOR = "/v1/scenarios/flavor";
 
     public static final String CREATE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
     public static final String DELETE_DYNAMIPS = "/cpcloud/device/v1/dynamips/vm";
