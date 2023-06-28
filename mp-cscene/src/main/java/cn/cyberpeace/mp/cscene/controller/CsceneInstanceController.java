@@ -518,7 +518,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
-    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping(value = "/query_data_count")
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
         return getModelService().queryCollectionDataCount(params).asResult();
