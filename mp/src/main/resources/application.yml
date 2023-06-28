@@ -80,4 +80,4 @@ mp:
   auth:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**,/actuator/**
   frontbusiness:
-    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**
+    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/gmp/file/**,/api/mp/actuator/**
