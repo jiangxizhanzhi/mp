@@ -66,9 +66,12 @@ public class ElementModifyHandler extends HandlerCommon {
         this.newCloudScenePluginHandler.getSceneHandler().prepareElementProcess(originCloudElement.getSrcElement().getId(), SceneElementModel.Event.MODIFY, Arrays.asList(ElementProcess.UPDATE_NODE));
 
         runElementProgress(originCloudElement.getSrcElement().getId(), ElementProcess.UPDATE_NODE, () -> {
-            if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+            if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH
+                    || originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
                 // 更新网络
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                    this.modifyVirtualSwitch(newCloudElement, originCloudElement);
+                } else if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
                     this.modifyVirtualSwitch(newCloudElement, originCloudElement);
                 }
             } else if (originCloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
@@ -285,7 +288,7 @@ public class ElementModifyHandler extends HandlerCommon {
         currentElementNetwork.setDhcp(newCloudElement.getDhcp());
         currentElementNetwork.setAllocationPools(newCloudElement.getAllocationPools());
         currentElementNetwork.setDnsNameservers(newCloudElement.getDnsNameservers());
-        getPluginHandler().updateElementNetworks(newCloudElement.getSrcElement().getId());
+        this.originCloudScenePluginHandler.updateElementNetworks(newCloudElement.getSrcElement().getId());
     }
 
     private boolean isFlavorChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {

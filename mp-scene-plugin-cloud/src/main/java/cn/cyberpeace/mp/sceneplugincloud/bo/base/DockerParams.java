@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -16,7 +18,7 @@ public class DockerParams {
     private Boolean tty;
 
     public void setEnvironmentStr(String environmentStr) {
-        if (StringUtils.isNotEmpty(environmentStr)) {
+        if (this.environment == null || this.environment.isEmpty()) {
             this.environmentStr = environmentStr;
             this.environment = new HashMap<>();
             if (StringUtils.isNotEmpty(environmentStr)) {
@@ -32,14 +34,14 @@ public class DockerParams {
     }
 
     public void setEnvironment(Map<String, String> environment) {
-        if (StringUtils.isEmpty(this.environmentStr)) {
-            this.environment = environment;
-            this.environmentStr = StringUtils.EMPTY;
-            if (this.environment != null) {
-                for (var e : this.environment.entrySet()) {
-                    this.environmentStr += String.join(e.getKey(), e.getValue().toString());
-                }
+        this.environment = environment;
+        this.environmentStr = StringUtils.EMPTY;
+        if (this.environment != null) {
+            List<String> enStrs = new ArrayList<>();
+            for (var e : this.environment.entrySet()) {
+                enStrs.add(e.getKey() + "=" + e.getValue());
             }
+            this.environmentStr = StringUtils.join(enStrs, ",");
         }
     }
 }

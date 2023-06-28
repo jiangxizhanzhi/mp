@@ -4,8 +4,9 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
-import cn.cyberpeace.mp.devopscluster.request.InstancePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +32,15 @@ public class DynamipsConverter implements BaseConverter {
      *
      * @return
      */
-    public BasePageBO<InstanceBO> page(InstancePageRequest request) {
+    public BasePageBO<InstanceBO> page(DynamipsInstancePageRequest request) {
         VirtualDynamips virtualDynamips = new VirtualDynamips();
-        var result = virtualDynamips.list();
+        VirtualDynamipsListParam param = new VirtualDynamipsListParam();
+        param.setIp(request.getAddr());
+        param.setLimit(request.getLimit());
+        param.setOffset(request.getOffset());
+        param.setSortKey(request.getOrder());
+        param.setSortDir(request.getSort());
+        var result = virtualDynamips.list(param);
         if (result == null || CollectionUtils.isEmpty(result.getItems())) {
             BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
             convertModel.setList(new ArrayList<>());

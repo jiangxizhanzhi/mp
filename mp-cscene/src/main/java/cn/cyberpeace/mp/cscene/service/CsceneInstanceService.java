@@ -54,6 +54,7 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -1386,6 +1387,73 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setId(csceneBO.getId());
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
+
+        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
+        // 保留隐藏节点和隐藏端口
+        var originData = originHandler.toDataWithHidden().getScene();
+        Set<String> hiddenElementIds = new HashSet<>();
+        Set<String> hiddenPortIds = new HashSet<>();
+        Map<String, List<SceneElementPortBO>> hiddenPorts = new HashMap<>();
+        for (var e : originData.getTopology().getElements()) {
+            if (Boolean.TRUE.equals(e.getIsAuxiliary())) {
+                csceneBO.getUpdateScene().getTopology().getElements().add(e);
+                hiddenElementIds.add(e.getId());
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    for (var p : e.getPorts()) {
+                        hiddenPortIds.add(p.getId());
+                    }
+                }
+            } else if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                for (var p : e.getPorts()) {
+                    if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                        hiddenPortIds.add(p.getId());
+                        if (!hiddenPorts.containsKey(e.getId())) {
+                            hiddenPorts.put(e.getId(), new ArrayList<>());
+                        }
+                        hiddenPorts.get(e.getId()).add(p);
+                    }
+                }
+            }
+        }
+        if (!hiddenPorts.isEmpty()) {
+            for (var e : instance.getScene().getTopology().getElements()) {
+                if (hiddenPorts.containsKey(e.getId())) {
+                    var hiddenPostList = hiddenPorts.get(e.getId());
+                    for (int i = hiddenPostList.size() - 1; i >= 0; i--) {
+                        if (e.getPorts() == null) {
+                            e.setPorts(new ArrayList<>());
+                        }
+                        e.getPorts().add(0, hiddenPostList.get(i));
+                    }
+                }
+            }
+        }
+        for (var c : originData.getTopology().getConnections()) {
+            if (hiddenPortIds.contains(c.getSource()) || hiddenPortIds.contains(c.getTarget())) {
+                instance.getScene().getTopology().getConnections().add(c);
+            }
+        }
+
+        var plugins = originData.getPlugins();
+        for (var plugin : plugins.entrySet()) {
+            if (!cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(plugin.getKey())) {
+                // 暂不支持采集和发生插件的修改 保留原有配置
+                instance.getScene().getPlugins().put(plugin.getKey(), plugin.getValue());
+            } else {
+                // 保留插件的隐藏节点和隐藏端口
+                var newPlugin = instance.getScene().getPlugins().get(plugin.getKey());
+                for (var e : plugin.getValue().getElements().entrySet()) {
+                    if (hiddenElementIds.contains(e.getKey())) {
+                        newPlugin.getElements().put(e.getKey(), e.getValue());
+                    }
+                }
+                for (var p : plugin.getValue().getElementPorts().entrySet()) {
+                    if (hiddenPortIds.contains(p.getKey())) {
+                        newPlugin.getElementPorts().put(p.getKey(), p.getValue());
+                    }
+                }
+            }
+        }
 
         var instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
         instanceHandler.update();

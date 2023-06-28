@@ -374,7 +374,7 @@ public class InitiateHandler extends HandlerCommon {
                     String gateway = null;
                     List<String> excludeIps = new ArrayList<>(existIps);
                     for (int i = 0; i < 5; i++) {
-                        gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
+                        gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, element.getAllocationPools()).get(0);
                         excludeIps.add(gateway);
                         List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, network.getCidr());
                         if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
@@ -397,7 +397,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && !Boolean.FALSE.equals(network.getDhcp())) {
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && !Boolean.FALSE.equals(element.getDhcp())) {
                 List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway(), network.getCidr());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
@@ -407,7 +407,7 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
                 if (StringUtils.isEmpty(network.getDhcpIp())) {
-                    List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(network.getDhcp()));
+                    List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(element.getDhcp()));
                     if (CollectionUtils.isNotEmpty(ipPool)) {
                         network.setDhcpIp(ipPool.get(0));
                         existIps.add(ipPool.get(0));
@@ -450,14 +450,14 @@ public class InitiateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 gatewayCount++;
             }
-            List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
+            List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), element.getAllocationPools());
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
             if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
                 existIps.addAll(gatewayIpPool);
             }
-            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
+            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), element.getAllocationPools(), BoolUtils.bool(element.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
                 // 网关未分配 则放入地址池的最后等待分配

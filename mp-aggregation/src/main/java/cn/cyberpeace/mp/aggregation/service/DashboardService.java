@@ -132,8 +132,11 @@ public class DashboardService {
         // npc暂时只有1个
         all.put("npc", 1);
         targetStatics.put("all", all);
-        targetStatics.put("entity",devopsTargetService.countEntityTarget());
-        targetStatics.put("virtual",devopsTargetService.countVmTarget());
+        int npc = all.get("npc") == null ? 0 : Integer.parseInt(all.get("npc").toString());
+        int dynamips = all.get("dynamips") == null ? 0 : Integer.parseInt(all.get("dynamips").toString());
+        all.put("other", npc + dynamips);
+        targetStatics.put("entity", devopsTargetService.countEntityTarget());
+        targetStatics.put("virtual", devopsTargetService.countVmTarget());
         response.setTargetStatics(targetStatics);
         List<CsceneInstanceCountByReferenceTypeBO> sceneStatics = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
         response.setSceneStatics(sceneStatics);
@@ -206,6 +209,7 @@ public class DashboardService {
         userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
+        userResource.setDynamips(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L).intValue());
         return userResource;
     }
 

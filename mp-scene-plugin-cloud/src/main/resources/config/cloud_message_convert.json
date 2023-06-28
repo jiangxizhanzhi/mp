@@ -794,5 +794,41 @@
         "relation": "contains"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "The uploaded bin file must match the platform of the dynamips virtual type (c1700, c3600, etc.)."
+      },
+      {
+        "locale": "zh",
+        "message": "上传的bin文件必须和dynamips虚拟类型的platform（c1700、c3600等）一致"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "Upload Bin File Must Consistency With Platform",
+        "relation": "contains"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "The uploaded bin file must match the platform of the dynamips virtual type (c1700, c3600, etc.)."
+      },
+      {
+        "locale": "zh",
+        "message": "上传的bin文件必须和dynamips虚拟类型的platform（c1700、c3600等）一致"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "上传的Bin文件须和platform一致",
+        "relation": "contains"
+      }
+    ]
   }
 ]

@@ -749,7 +749,7 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
-    public void startElement(String nodeId){
+    public void startElement(String nodeId) {
         //获取节点的网元数据
         SceneElementBO element = getElement(nodeId);
         //节点前置事件
@@ -897,6 +897,7 @@ public class SceneHandler extends BaseSceneHandler<
         } else {
             // 只更新拓扑信息，但是不更新插件信息
             updateSceneElement(nodeId);
+            asyncAckElementChanged(nodeId, false, false);
         }
     }
 

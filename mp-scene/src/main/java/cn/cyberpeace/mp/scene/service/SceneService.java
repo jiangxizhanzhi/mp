@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
@@ -21,15 +22,21 @@ import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -145,13 +152,34 @@ public class SceneService {
         }
     }
 
-    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
         // 场景信息目前只更新显示参数
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
         updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
         updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
         SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
+
+        Queue<SceneElementBO> allElements = new ArrayDeque<>(updatedSceneHandler.getElementMap().values());
+        while (!allElements.isEmpty()) {
+            var element = allElements.poll();
+            if (element != null) {
+                var connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
+                if (CollectionUtils.isNotEmpty(connectPorts)) {
+                    Set<String> ips = new HashSet<>();
+                    for (var p : connectPorts) {
+                        if (StringUtils.isNotEmpty(p.getIp())) {
+                            if (ips.contains(p.getIp())) {
+                                throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
+                            } else {
+                                ips.add(p.getIp());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         updatedSceneHandler.setRealTimeUpdate(true);
         if (updatedSceneHandler.getScene() != null) {
             updatedSceneHandler.getScene().setCreateTime(null);
@@ -177,6 +205,8 @@ public class SceneService {
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
             proxy.modify(originSceneHandler, updateElementIds);
+            //W:Refresh scene after updating
+            runner.run();
         });
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
