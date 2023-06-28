@@ -1079,6 +1079,11 @@ public class ScenePluginCollectionSceneService {
                 }
             }
         }
+        if (CollectionUtils.isEmpty(flowBO.getAttackInfos())) {
+            List<AttackInfo> attackInfos = new ArrayList<>();
+            attackInfos.add(new AttackInfo(3, "Misc activity"));
+            flowBO.setAttackInfos(attackInfos);
+        }
         if (flowLogBO.getNetwork() != null) {
             flowBO.setSize(flowLogBO.getNetwork().getBytes());
         }
