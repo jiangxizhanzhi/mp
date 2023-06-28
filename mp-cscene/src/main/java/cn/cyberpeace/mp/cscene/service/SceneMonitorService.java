@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -225,7 +226,13 @@ public class SceneMonitorService {
             basicInfos = finalCF.join();
 
             if (CollectionUtil.isNotEmpty(basicInfos)) {
-                basicInfos = basicInfos.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                if (Boolean.TRUE.equals(request.getIsCollect())) {
+                    basicInfos = basicInfos.stream().filter(basicInfo -> Objects.nonNull(basicInfo)
+                            && !ElementTypeUtils.isCoreRouter(basicInfo.getImageName())
+                            && !BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(basicInfo.getImageType())).collect(Collectors.toList());
+                } else {
+                    basicInfos = basicInfos.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                }
                 Collections.sort(basicInfos, (o1, o2) -> {
                     int o1i = 0;
                     int o2i = 0;
