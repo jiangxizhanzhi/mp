@@ -45,6 +45,10 @@ logging:
 mp:
   base:
     run-init: true
+  auth:
+    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
+  frontbusiness:
+    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**
 
 ---
 spring:
@@ -58,9 +62,22 @@ spring:
     activate:
       on-profile: local
 
+management:
+  endpoints:
+    health:
+      show-details: always
+    web:
+      exposure:
+        include: "*"
+
 logging:
   file:
     path: ${user.home}/logs
+
 mp:
   base:
     run-init: false
+  auth:
+    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**,/actuator/**
+  frontbusiness:
+    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**

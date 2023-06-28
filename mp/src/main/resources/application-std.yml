@@ -78,10 +78,10 @@ springfox:
       enabled: ${springfox.documentation.ext-var.swagger-ui.enabled}
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health, info
   info:
     git:
       mode: simple
@@ -211,7 +211,7 @@ mp:
     authenticate-jwt-secret: ${mp.auth.ext-var.authenticate-jwt-secret}
     authenticate-jwt-expires: 604800
     authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
-    authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
+    #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
   # mp-front-admin 模块配置
@@ -224,7 +224,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
-    url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**
+    #url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
