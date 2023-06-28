@@ -328,6 +328,20 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         return flowTaskTaskModels;
     }
 
+    /**
+     * 根据节点id、scendId删除任务
+     * @param nodeId
+     * @param sceneId
+     * @return
+     */
+    @Override
+    public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
+        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+        getModelMapper().filterDelete(condition);
+    }
+
     @Override
     public List<FlowTaskTaskModel> listBySceneIdAndStatus(String sceneId, int taskStatus) {
         HumanCondition condition = new HumanCondition();

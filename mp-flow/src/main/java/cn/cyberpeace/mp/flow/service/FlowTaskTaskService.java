@@ -70,6 +70,14 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
     List<FlowTaskTaskModel> listByNodeIdAndSceneId(String nodeId, String sceneId);
 
     /**
+     * 根据节点id、scendId删除任务
+     * @param nodeId
+     * @param sceneId
+     * @return
+     */
+    void deleteByNodeIdAndSceneId(String nodeId, String sceneId);
+
+    /**
      * 根据场景id和运行状态查询
      * @param nodeId
      * @param taskStatus
