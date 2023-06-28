@@ -762,9 +762,12 @@ public class CreateHandler extends HandlerCommon {
                         } catch (Exception e) {
                             log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
                         }
-                        continue;
+                    } else if (command.contains("/opt/wazuha/stop.sh")) {
+                        // 安装探针失败要重试
+                        containerClient.executeCommand(containerId, command, 2);
+                    } else {
+                        containerClient.executeCommand(containerId, command);
                     }
-                    containerClient.executeCommand(containerId, command);
                 }
             }
         }
