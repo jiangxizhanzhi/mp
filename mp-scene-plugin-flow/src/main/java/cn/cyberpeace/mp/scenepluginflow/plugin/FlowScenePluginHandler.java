@@ -182,6 +182,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
     }
 
+    @Override
+    public void deleteElement(String nodeId) {
+        String sceneId = getSourceSceneId();
+        getHandlerUtils().deleteByNodeIdAndSceneId(nodeId, sceneId);
+    }
+
     public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {

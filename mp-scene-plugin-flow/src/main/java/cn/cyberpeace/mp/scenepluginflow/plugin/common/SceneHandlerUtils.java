@@ -184,6 +184,10 @@ public class SceneHandlerUtils {
         flowExecutor.addFlowTask(details, sceneId, actuatorId);
     }
 
+    public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
+        flowExecutor.deleteByNodeIdAndSceneId(nodeId, sceneId);
+    }
+
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp, Runnable stopCallback,
                              boolean async, Runnable asyncCallback) {
         var taskId = flow.getTaskId();
