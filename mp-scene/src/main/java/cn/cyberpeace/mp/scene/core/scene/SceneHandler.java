@@ -568,6 +568,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean pause() {
+        for (var e : getElementMap().values()) {
+            if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                this.addExcludeHandleNode(e.getId());
+            }
+        }
         prepareAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         startAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         try {
@@ -587,6 +592,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean unpause() {
+        for (var e : getElementMap().values()) {
+            if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                this.addExcludeHandleNode(e.getId());
+            }
+        }
         prepareAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
         startAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
         try {
