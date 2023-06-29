@@ -43,7 +43,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, metrics, env
+        include: health, info, metrics
+
+knife4j:
+  production: true # 开启屏蔽文档资源
 
 logging:
   file:
