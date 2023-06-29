@@ -882,8 +882,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isNotEmpty(request.getFilterDestinationIps())) {
             boolQueryBuilder.mustNot(QueryBuilders.termsQuery("destination.ip", request.getFilterDestinationIps()));
         }
-        if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
-                && request.getStartDateTime().isBefore(request.getEndDateTime())){
+        if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
             rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
