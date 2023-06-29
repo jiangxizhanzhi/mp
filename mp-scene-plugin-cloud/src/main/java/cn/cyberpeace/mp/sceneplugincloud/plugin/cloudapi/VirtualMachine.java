@@ -296,9 +296,14 @@ public class VirtualMachine extends CloudClient {
      */
     public void attachEntityUsbs(AttachEntityUsbsData data) {
         log.info("VirtualMachine.attachEntityUsbs begin. data:{}", data);
-        CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-        log.info("调用云平台挂载实体USB接口, response:{}", response);
+        //外设挂载失败，不影响场景启动
+        try {
+            CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
+            log.info("调用云平台挂载实体USB接口, response:{}", response);
+        } catch (Exception e) {
+            log.error("attachEntityUsbs error. e:{}", e);
+        }
         log.info("VirtualMachine.attachEntityUsbs end.");
     }
 
