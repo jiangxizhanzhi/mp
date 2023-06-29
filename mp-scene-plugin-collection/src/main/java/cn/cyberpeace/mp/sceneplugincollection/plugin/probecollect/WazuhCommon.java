@@ -120,7 +120,7 @@ public class WazuhCommon {
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            "sudo sh /opt/wazuha/stop.sh",
+                            "sh /opt/wazuha/stop.sh",
                             String.format("echo \"export SIC_WAZUH_MANAGER_IP=%s\" >> /etc/profile", wazuhHost),
                             String.format("echo \"export SIC_WAZUH_AGENT_NAME=%s\" >> /etc/profile", agentName),
                             String.format("echo \"export SIC_WAZUH_MANAGER_REMOTE_PORT=%d\" >> /etc/profile", getWazuhRemotePort()),
@@ -129,18 +129,18 @@ public class WazuhCommon {
                             "restart_again=false;",
                             String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/bin/tools"),
                             //"sh /opt/wazuha/uninstall.sh",
-                            String.format("sudo unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                            String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux_aarch", linuxInstallDir),
-                            "sudo sh install.sh",
+                            "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
-                            "sudo rm -rf agent-installer",
-                            String.format("sudo rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+                            "rm -rf agent-installer",
+                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
                             "else",
                             "restart_again=true;",
-                            String.format("sudo rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/client.keys"),
-                            String.format("sudo rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
-                            String.format("sudo rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf.st"),
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/client.keys"),
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
+                            String.format("rm -rf %s%s", LINUX_INSTALL_DIR, "/etc/ossec.conf.st"),
                             "fi",
                             "cd /opt/wazuha",
                             "sh config.sh",
@@ -149,48 +149,45 @@ public class WazuhCommon {
                             "sh start.sh",
 
                             // 改变下cpu探针的内容
-                            "if [ ! -d /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py ]; then",
+                            "if [ -f /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py ]; then",
                             "sed -i \"s/freq.*=.*/freq=1600/g\" /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py",
                             "fi",
 
-                            "sleep 25",
-                            String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/logs/ossec.log"),
-                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && restart_again=false || restart_again=true",
+                            "sleep 5",
+                            String.format("if [ -f %s%s ]; then", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/etc/ossec.conf && restart_again=false || restart_again=true",
                             "if [ restart_again ]; then",
                             "source /etc/profile",
                             "sh config.sh",
                             probeCommand,
-                            "sleep 10",
                             "sh start.sh",
                             "fi",
                             "fi",
 
-                            "sleep 25",
-                            String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/logs/ossec.log"),
-                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && restart_again=false || restart_again=true",
+                            String.format("if [ -f %s%s ]; then", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
+                            "sleep 5",
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/etc/ossec.conf && restart_again=false || restart_again=true",
                             "if [ restart_again ]; then",
                             "source /etc/profile",
                             "sh config.sh",
                             probeCommand,
-                            "sleep 10",
                             "sh start.sh",
                             "fi",
                             "fi",
 
-                            "sleep 25",
-                            String.format("if [ ! -d %s%s ]; then", LINUX_INSTALL_DIR, "/logs/ossec.log"),
-                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/logs/ossec.log && restart_again=false || restart_again=true",
+                            String.format("if [ -f %s%s ]; then", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
+                            "sleep 5",
+                            "grep -w $SIC_WAZUH_MANAGER_IP /var/ossec/etc/ossec.conf && restart_again=false || restart_again=true",
                             "if [ restart_again ]; then",
                             "source /etc/profile",
                             "sh config.sh",
                             probeCommand,
-                            "sleep 10",
                             "sh start.sh",
                             "fi",
                             "fi",
 
                             // 改变下cpu探针的内容,保险
-                            "if [ ! -d /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py ]; then",
+                            "if [ -f /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py ]; then",
                             "sed -i \"s/freq.*=.*/freq=1600/g\" /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py",
                             "fi"
                     ));
@@ -212,7 +209,7 @@ public class WazuhCommon {
                 // 下载按需安装脚本并执行
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
-                        String.format("sudo sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                        String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
                 // 给下载安装包的脚本添加参数
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
