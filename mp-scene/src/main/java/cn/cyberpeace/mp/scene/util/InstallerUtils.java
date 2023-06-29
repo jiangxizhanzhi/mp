@@ -450,7 +450,7 @@ public class InstallerUtils {
                         installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpFile), installerDir));
                 var checkCommands = SystemTypeCommandUtils.joinCommands(systemType,
                         new String[]{
-                                "timeout /t 600",
+                                "timeout /t 10",
                                 "SET CheckFile=C:\\ossec-agent\\bin\\tools\\eda72998ba654c8d8625f61eaa918eb3.py",
                                 "if not exist %CheckFile% (   rd/s/q C:\\Users\\Public\\agent-installer   call install.bat ) else ( echo ok )"
                         });
