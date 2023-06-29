@@ -882,11 +882,16 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isNotEmpty(request.getFilterDestinationIps())) {
             boolQueryBuilder.mustNot(QueryBuilders.termsQuery("destination.ip", request.getFilterDestinationIps()));
         }
-        if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
-                && request.getStartDateTime().isBefore(request.getEndDateTime())){
+        if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
             rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-            rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            //如果开始开始时间和节数时间的时分秒都为0、则认为前端传入的是日期，需修正结束时间
+            if (request.getStartDateTime().getHour() == 0 && request.getStartDateTime().getMinute() == 0 && request.getStartDateTime().getSecond() == 0
+            && request.getEndDateTime().getHour() == 0 && request.getEndDateTime().getMinute() == 0 && request.getEndDateTime().getSecond() == 0) {
+                rangeQueryBuilder.lte(request.getEndDateTime().plusDays(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - 1);
+            } else {
+                rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            }
             boolQueryBuilder.must(rangeQueryBuilder);
         }
 
