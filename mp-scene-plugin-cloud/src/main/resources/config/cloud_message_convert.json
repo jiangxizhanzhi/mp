@@ -830,5 +830,41 @@
         "relation": "contains"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "This target Not Support This operation"
+      },
+      {
+        "locale": "zh",
+        "message": "此靶标不支持该操作"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "This Platform Not Support",
+        "relation": "contains"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "This target Not Support This operation"
+      },
+      {
+        "locale": "zh",
+        "message": "此靶标不支持该操作"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "此平台不支持",
+        "relation": "contains"
+      }
+    ]
   }
 ]

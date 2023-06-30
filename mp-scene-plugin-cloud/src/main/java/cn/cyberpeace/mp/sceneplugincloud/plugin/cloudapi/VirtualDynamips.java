@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoItems;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsLi
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -138,12 +140,14 @@ public class VirtualDynamips extends CloudClient {
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {
-        try {
-            cloudPost(CloudUrlConstant.VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            return true;
-        } catch (Exception e) {
-            throw new MpRuntimeException(e.getMessage());
+        var result = cloudPost(CloudUrlConstant.VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
+        }, false);
+        if (result != null && !result.getSuccess()) {
+            if (result.getMessage() != null) {
+                String convertMessage = CloudMessageConvertUtil.getMessage(result.getMessage());
+                throw new MpRuntimeException(CloudErrorCode.OPERATING_ERRORS.format(convertMessage));
+            }
         }
+        return true;
     }
 }
