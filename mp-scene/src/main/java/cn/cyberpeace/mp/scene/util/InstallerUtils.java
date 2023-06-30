@@ -57,6 +57,14 @@ public class InstallerUtils {
     };
 
     /**
+     * windows校验脚本安装
+     */
+    public static final String[] WINDOWS_CHECK_SCRIPT_INSTALL = {
+            "curl -o \"%s\\custom_install\\check.bat\" %s",
+            "call \"%s\\custom_install\\check.bat\"",
+    };
+
+    /**
      * windows文件下载
      */
     public static final String WINDOWS_FILE_DOWNLOAD = "curl -o \"%s\" %s";
@@ -440,6 +448,21 @@ public class InstallerUtils {
             if (tmpFile != null) {
                 installCommands.add(String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_MAKE_SCRIPT_INSTALL),
                         installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpFile), installerDir));
+                var checkCommands = SystemTypeCommandUtils.joinCommands(systemType,
+                        new String[]{
+                                "timeout /t 10",
+                                "SET CheckFile=C:\\ossec-agent\\bin\\tools\\eda72998ba654c8d8625f61eaa918eb3.py",
+                                "if not exist %CheckFile% (   rd/s/q C:\\Users\\Public\\agent-installer   call install.bat ) else ( echo ok )"
+                        });
+                String tmpCheckFile = null;
+                try {
+                    tmpCheckFile = FsCommon.uploadContent(checkCommands);
+                } catch (Exception e) {
+                    log.error("Upload windows check script error: ", e);
+                    installCommands.addAll(subInstallCommands);
+                }
+                installCommands.add(String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_CHECK_SCRIPT_INSTALL),
+                        installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpCheckFile), installerDir));
             }
         } else {
             installCommands.addAll(subInstallCommands);

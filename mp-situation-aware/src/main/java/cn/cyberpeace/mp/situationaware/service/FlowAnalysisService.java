@@ -184,7 +184,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 Collections.shuffle(classificationModels);
                 FlowTemplateBO.SuricataDTO suricata = flow.getSuricata();
                 FlowClassificationModel classificationModel = classificationModels.get(0);
-                suricata.setCategory(Arrays.asList(classificationModel.getName()));
+                suricata.setCategory(Arrays.asList(classificationModel.getCategoryEn()));
                 suricata.setSeverity(Arrays.asList(classificationModel.getSeverity()));
                 flow.setSuricata(suricata);
             }

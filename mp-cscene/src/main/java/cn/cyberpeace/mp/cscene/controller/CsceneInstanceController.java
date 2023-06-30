@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -41,7 +42,10 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -593,10 +597,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/pause")
     public ServiceResult<Boolean> pauseScene(@RequestParam(required = false) String id,
                                              @RequestBody(required = false) CsceneInstanceActionRequest request) {
-        request = formatActionRequest(request, id);
-        var result = modelService.pause(request.getId(), request.getContext()).asResult();
+        if (ReentrantLockUtils.tryLock("pause" + id)) {
+            try {
+                request = formatActionRequest(request, id);
+                var result = modelService.pause(request.getId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_PAUSE, request.getContext());
-        return result;
+                return result;
+            } finally {
+                ReentrantLockUtils.unLock("pause" + id);
+            }
+        } else {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        }
     }
 
     @ApiOperation("(从暂停)恢复场景实例")
@@ -607,10 +619,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/unpause")
     public ServiceResult<Boolean> unpauseScene(@RequestParam(required = false) String id,
                                                @RequestBody(required = false) CsceneInstanceActionRequest request) {
-        request = formatActionRequest(request, id);
-        var result = modelService.unpause(request.getId(), request.getContext()).asResult();
+        if (ReentrantLockUtils.tryLock("pause" + id)) {
+            try {
+                request = formatActionRequest(request, id);
+                var result = modelService.unpause(request.getId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
-        return result;
+                return result;
+            } finally {
+                ReentrantLockUtils.unLock("pause" + id);
+            }
+        }else {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        }
     }
 
     @ApiOperation("挂起场景实例")
