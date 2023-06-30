@@ -218,16 +218,16 @@ public class ScenePluginCollectionSceneService {
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         ListObjResult<FlowLogBO> flowLogBOSResult = flowAnalysisService.flowLogWithTotal(request);
-        request.setSeverityEnum(null);
-        request.setProtocols(List.of("icmp"));
-        ListObjResult<FlowLogBO> flowLogBOSResult1 = flowAnalysisService.flowLogWithTotal(request);
-        if (CollectionUtils.isNotEmpty(flowLogBOSResult.getObjs())) {
-            if (CollectionUtils.isNotEmpty(flowLogBOSResult1.getObjs())) {
-                flowLogBOSResult.getObjs().addAll(flowLogBOSResult1.getObjs());
-            }
-        } else {
-            flowLogBOSResult.setObjs(flowLogBOSResult1.getObjs());
-        }
+//        request.setSeverityEnum(null);
+//        request.setProtocols(List.of("icmp"));
+//        ListObjResult<FlowLogBO> flowLogBOSResult1 = flowAnalysisService.flowLogWithTotal(request);
+//        if (CollectionUtils.isNotEmpty(flowLogBOSResult.getObjs())) {
+//            if (CollectionUtils.isNotEmpty(flowLogBOSResult1.getObjs())) {
+//                flowLogBOSResult.getObjs().addAll(flowLogBOSResult1.getObjs());
+//            }
+//        } else {
+//            flowLogBOSResult.setObjs(flowLogBOSResult1.getObjs());
+//        }
         if (CollectionUtils.isEmpty(flowLogBOSResult.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
@@ -1079,11 +1079,11 @@ public class ScenePluginCollectionSceneService {
                 }
             }
         }
-        if (CollectionUtils.isEmpty(flowBO.getAttackInfos())) {
-            List<AttackInfo> attackInfos = new ArrayList<>();
-            attackInfos.add(new AttackInfo(3, "Misc activity"));
-            flowBO.setAttackInfos(attackInfos);
-        }
+//        if (CollectionUtils.isEmpty(flowBO.getAttackInfos())) {
+//            List<AttackInfo> attackInfos = new ArrayList<>();
+//            attackInfos.add(new AttackInfo(3, "Misc activity"));
+//            flowBO.setAttackInfos(attackInfos);
+//        }
         if (flowLogBO.getNetwork() != null) {
             flowBO.setSize(flowLogBO.getNetwork().getBytes());
         }
