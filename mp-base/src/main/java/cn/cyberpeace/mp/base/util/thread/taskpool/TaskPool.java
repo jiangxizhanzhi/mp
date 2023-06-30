@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
+import cn.hutool.cron.task.Task;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
-import java.util.List;
+import javax.annotation.concurrent.Immutable;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -12,6 +16,33 @@ import java.util.stream.Collectors;
 public class TaskPool {
 
     private final ExecutorService executor;
+
+    public static final Set<TaskPool> TASK_POOL_INSTANCE_CACHE = new CopyOnWriteArraySet();
+
+    public static Set<TaskPool> getTaskPoolInstanceCache(){
+        return Collections.unmodifiableSet(TASK_POOL_INSTANCE_CACHE);
+    }
+
+    public ThreadPoolExecutor getExecutorService(){
+        return (ThreadPoolExecutor)executor;
+    }
+
+    /**
+     * @description: 线程工厂
+     * @param: threadName
+     * @return: java.util.concurrent.ThreadFactory
+     * @date: 2023/6/29
+     */
+    public ThreadFactory createNameThreadFactory(String threadName){
+        if(StringUtils.isEmpty(threadName)){
+            //如果不传，使用当前调用类名作为线程池前缀
+            threadName = this.getClass().getName().toLowerCase().concat("-");
+        }
+        if(!threadName.endsWith("-")){
+            threadName = threadName.concat("-");
+        }
+        return new CustomizableThreadFactory(threadName);
+    }
 
     public static <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
         if (poolTask.getStatus() == null) {
@@ -104,9 +135,16 @@ public class TaskPool {
         this(poolSize, holdSize, 0L);
     }
 
+    public TaskPool(int poolSize, int holdSize, long keepAliveTime, ThreadFactory factory) {
+        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(holdSize - poolSize), factory);
+        TASK_POOL_INSTANCE_CACHE.add(this);
+    }
+
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize));
+                new LinkedBlockingQueue<>(holdSize - poolSize), createNameThreadFactory(""));
+        TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
     public TaskPool(ExecutorService executor) {
@@ -159,4 +197,21 @@ public class TaskPool {
         return invokePoolTasks(poolTasks, independent, format);
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TaskPool taskPool = (TaskPool) o;
+        return executor.equals(taskPool.executor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(executor);
+    }
 }

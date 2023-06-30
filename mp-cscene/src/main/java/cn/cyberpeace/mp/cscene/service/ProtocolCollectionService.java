@@ -172,12 +172,12 @@ public class ProtocolCollectionService {
         CloudPluginSceneElementBO cloudPluginSceneElementBO = elementMap.get(mibInfoQueryRequest.getElementId());
         //获取snmp配置信息
         SnmpConfig snmpConfig = cloudPluginSceneElementBO.getSnmpConfig();
-        //配置了snmp对应的ip
-        if(StringUtils.isNotEmpty(snmpConfig.getIp())){
+        // 优先获取端口映射的IP
+        if (StringUtils.isNotEmpty(snmpConfig.getSceneIp())) {
+            paramBuilder = paramBuilder.ip(snmpConfig.getSceneIp()).port(snmpConfig.getScenePort());
+        } else {
             //只传递此ip，无需获取生成的ip和端口
             paramBuilder = paramBuilder.ip(snmpConfig.getIp());
-        }else{
-            paramBuilder = paramBuilder.ip(snmpConfig.getSceneIp()).port(snmpConfig.getScenePort());
         }
         MibNodeQueryParam mibNodeQueryParam =
             paramBuilder.communityName(mibInfoQueryRequest.getCommunityName()).version(mibInfoQueryRequest.getVersion())

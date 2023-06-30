@@ -54,6 +54,9 @@ public class SegmentCount2IntervalSecondsUtil {
             log.info(" i:{}, intervalSeconds:{}, timeSegs:{}", i, intervalSeconds, timeSegs.get(i));
         }*/
 
+        if (intervalSeconds == 0) {
+            return 1L;
+        }
         return intervalSeconds;
     }
 
