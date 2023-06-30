@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -266,8 +265,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             flowTaskRecordModel.setQueueFull(data.getLong("queue_full"));
             flowTaskRecordModel.setDropRate(data.getLong("drop_rate"));
             flowTaskRecordModel.setRecordStatus(1);
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            flowTaskRecordModel.setCreateTime(LocalDateTime.parse(data.getString("record_time"), df));
+            LocalDateTime localDateTime = LocalDateTime.now().withNano(0);
+            flowTaskRecordModel.setCreateTime(localDateTime);
             //flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
             this.getModelMapper().save(flowTaskRecordModel);
         }
