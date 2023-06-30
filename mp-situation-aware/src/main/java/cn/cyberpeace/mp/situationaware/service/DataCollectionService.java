@@ -13,27 +13,10 @@ import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.enums.LaunchStatusEnum;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.Launch;
+import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -102,19 +85,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -1601,6 +1572,14 @@ public class DataCollectionService extends CollectionBaseService {
                 // 文件
                 boolQueryBuilder.mustNot(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES, SicLaunchConfig.LAUNCH_ID_NET_CONNS, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
             }
+        } else {
+            boolQueryBuilder.should(QueryBuilders.boolQuery().mustNot((QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS))));
+            boolQueryBuilder.should(QueryBuilders.boolQuery().filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS))
+                    .filter(QueryBuilders.rangeQuery("data.sic_launch_id.modified_count").gte(0))
+                    .filter(QueryBuilders.rangeQuery("data.sic_launch_id.changed_count").gte(0))
+                    .filter(QueryBuilders.rangeQuery("data.sic_launch_id.added_count").gte(0))
+                    .filter(QueryBuilders.rangeQuery("data.sic_launch_id.deleted_count").gte(0)));
+            boolQueryBuilder.minimumShouldMatch(1);
         }
 
     }
@@ -1641,9 +1620,13 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
         boolean lowLevel = levels.get(0) <= 4;
         if (lowLevel) {
-            // level为空的数据默认为低等级
-            boolQueryBuilder.should(QueryBuilders.termsQuery("rule.level", levels))
-                    .should(QueryBuilders.existsQuery("rule.level").boost(0));
+            // 规则级别匹配条件
+            boolQueryBuilder.should(QueryBuilders.termsQuery("rule.level", levels));
+
+            // 规则级别字段不存在条件：级别字段不存在，默认为低等级
+            ExistsQueryBuilder ruleLevelExistsQuery = QueryBuilders.existsQuery("rule.level");
+            boolQueryBuilder.should(QueryBuilders.boolQuery().mustNot(ruleLevelExistsQuery));
+            boolQueryBuilder.minimumShouldMatch(1);
         } else {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
         }
