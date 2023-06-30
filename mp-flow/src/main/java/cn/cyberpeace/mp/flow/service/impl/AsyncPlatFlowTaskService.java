@@ -887,6 +887,9 @@ public class AsyncPlatFlowTaskService {
             }
         } catch (Exception e) {
             log.error("batch start tasks error: {}", ExceptionUtils.getStackTrace(e));
+//            if (ExceptionUtils.getStackTrace(e).contains("504 Gateway Time-out")) {
+//
+//            }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
     }
