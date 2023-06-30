@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
+import cn.cyberpeace.mp.scene.util.SceneEventUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -212,7 +213,15 @@ public class SceneService {
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
+        if (SceneEventUtils.hasProcessingScene(SceneModel.Event.UNPAUSE, id)) {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        }
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
+        if (sceneHandler.getScene().getEvent() == SceneModel.Event.PAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        } else if (sceneHandler.getScene().getEvent() == SceneModel.Event.PAUSE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
+            return new ServiceResult<>(true);
+        }
         sceneHandler.getElementMap().values().forEach(e -> {
             var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
                     EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
@@ -221,7 +230,14 @@ public class SceneService {
                 throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
             }
         });
-        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.pause());
+        SceneEventUtils.addProcessingScene(SceneModel.Event.PAUSE, id);
+        SceneTaskPool.getInstance().executeTask(() -> {
+            try {
+                sceneHandler.pause();
+            } finally {
+                SceneEventUtils.removeProcessingScene(SceneModel.Event.PAUSE, id);
+            }
+        });
         return new ServiceResult<>(true);
     }
 
@@ -229,7 +245,19 @@ public class SceneService {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
-        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.unpause());
+        if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        } else if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
+            return new ServiceResult<>(true);
+        }
+        SceneEventUtils.addProcessingScene(SceneModel.Event.UNPAUSE, id);
+        SceneTaskPool.getInstance().executeTask(() -> {
+            try {
+                sceneHandler.unpause();
+            } finally {
+                SceneEventUtils.removeProcessingScene(SceneModel.Event.UNPAUSE, id);
+            }
+        });
         return new ServiceResult<>(true);
     }
 
