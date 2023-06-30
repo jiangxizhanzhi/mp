@@ -1573,7 +1573,7 @@ public class DataCollectionService extends CollectionBaseService {
                 boolQueryBuilder.mustNot(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES, SicLaunchConfig.LAUNCH_ID_NET_CONNS, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
             }
         } else {
-            if (CollectionUtils.isEmpty(wazuhEventRequest.getLevels()) || wazuhEventRequest.getLevels().get(0) > 4) {
+            if (CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
                 boolQueryBuilder.should(QueryBuilders.boolQuery().mustNot((QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS))));
                 boolQueryBuilder.should(QueryBuilders.boolQuery().filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS))
                         .filter(QueryBuilders.rangeQuery("data.sic_launch_id.modified_count").gte(0))
