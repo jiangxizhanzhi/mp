@@ -337,6 +337,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setPageSize(queryParams.getPageSize());
                 params.setStartTime(queryParams.getStartTime());
                 params.setEndTime(queryParams.getEndTime());
+                params.setLevels(queryParams.getLevels());
                 ListObjServiceResult<CollectionHostEventBO> r;
                 if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     // 文件变更信息
