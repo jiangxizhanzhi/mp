@@ -15,6 +15,9 @@ import java.util.List;
 @Data
 public class TargetBo extends TargetModel {
 
+    @ApiModelProperty(value = "英文名称")
+    private String enName;
+
     @ApiModelProperty(value = "上级组织")
     TargetBo parentTarget;
 

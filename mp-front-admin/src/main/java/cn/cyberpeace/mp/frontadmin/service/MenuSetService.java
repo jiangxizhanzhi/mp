@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -170,17 +169,11 @@ public class MenuSetService {
         MenuTemplate menuTemplate = new MenuTemplate();
         menuTemplate.setTemplateId(templateId);
         menuTemplate.setMenuTree(inputTreeTargets);
-        Locale locale = LocaleContextHolder.getLocale();
         List<MenuTemplateModel> models = listTargets.stream().map(t -> {
             MenuTemplateModel model = new MenuTemplateModel();
             model.setTemplateId(menuTemplate.templateId);
-            if (Objects.equals(Locale.US, locale)) {
-                model.setName("");
-                model.setEnName(t.getName());
-            } else {
-                model.setName(t.getName());
-                model.setEnName("");
-            }
+            model.setName(t.getName());
+            model.setEnName(t.getEnName());
             model.setParent(t.getParent());
             model.setIdentifier(t.getIdentifier());
             model.setMenuId(t.getIdentifier());
@@ -245,13 +238,9 @@ public class MenuSetService {
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
-        Locale locale = LocaleContextHolder.getLocale();
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
-            if (Objects.equals(Locale.US, locale)) {
-                targetBo.setName(targetm.getEnName());
-            }
             targetBo.setId(targetm.getMenuId());
             mapTmp.put(targetBo.getId(), targetBo);
         }
