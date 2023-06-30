@@ -935,8 +935,9 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private boolean isDynamips(CloudPluginSceneElementBO cloudElement) {
-        boolean isDynamips = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
-                && BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType());
+        boolean isDynamips = (BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType())
+                && cloudElement.getCoreType() != null
+                && !cloudElement.getCoreType().equals(CoreType.TERMINAL));
         return isDynamips;
     }
 
