@@ -146,12 +146,11 @@ public class WazuhCommon {
                             "sh config.sh",
                             probeCommand,
                             "sleep 10",
-                            "sh start.sh",
-
                             // 改变下cpu探针的内容
                             "if [ -f /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py ]; then",
                             "sed -i \"s/freq.*=.*/freq=1600/g\" /var/ossec/bin/tools/eda72998ba654c8d8625f61eaa918eb3.py",
                             "fi",
+                            "sh start.sh",
 
                             String.format("if [ -f %s%s ]; then", LINUX_INSTALL_DIR, "/etc/ossec.conf"),
                             "source /etc/profile",
