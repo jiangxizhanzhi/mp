@@ -10,8 +10,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +78,9 @@ public class StartHandler extends HandlerCommon{
             runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
                 //启动
                 virtualMachine.start(instanceId);
+                if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
+                    this.attachISO(element);
+                }
                 //挂载一下usb
                 if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getVirtualUsbs())) {
                     this.attachVirtualUsbs(element);
@@ -107,6 +112,14 @@ public class StartHandler extends HandlerCommon{
             runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_NODE, () -> {
             });
         }
+    }
+
+    private void attachISO(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        data.setFileName(cloudElement.getIsoAttachFilename());
+        data.setTmpdirUuid(cloudElement.getIsoTmpdirUuid());
+        virtualMachine.attachISO(data);
     }
 
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
