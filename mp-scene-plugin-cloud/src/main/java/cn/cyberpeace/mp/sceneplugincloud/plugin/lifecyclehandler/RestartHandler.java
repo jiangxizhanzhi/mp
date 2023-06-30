@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -9,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +57,9 @@ public class RestartHandler extends HandlerCommon {
                 } else {
                     virtualMachine.restart(instanceId);
                 }
+                if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
+                    this.attachISO(element);
+                }
                 checkAccessModes(element);
             });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
@@ -74,5 +77,13 @@ public class RestartHandler extends HandlerCommon {
                 virtualDynamips.restart(instanceId);
             });
         }
+    }
+
+    private void attachISO(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
+        data.setInstanceUuid(cloudElement.getResourceId());
+        data.setFileName(cloudElement.getIsoAttachFilename());
+        data.setTmpdirUuid(cloudElement.getIsoTmpdirUuid());
+        virtualMachine.attachISO(data);
     }
 }
