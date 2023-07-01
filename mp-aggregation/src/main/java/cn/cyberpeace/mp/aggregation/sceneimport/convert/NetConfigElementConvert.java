@@ -50,7 +50,7 @@ class NetConfigElementConvert implements IConverter {
             if (container.getExtNodeInfos().containsKey(element.getId())) {
                 ExtNodeInfo extNodeInfo = container.getExtNodeInfos().get(element.getId());
                 cloudElement.setOspfRouterId(extNodeInfo.getOspfRouterId());
-                cloudElement.setRipLoopback(extNodeInfo.getRipLoopback());
+//                cloudElement.setRipLoopback(extNodeInfo.getRipLoopback());
                 if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
                     Map<String, ExtNodeInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
                     for (var ps : extNodeInfo.getPortProtocols()) {
@@ -67,8 +67,8 @@ class NetConfigElementConvert implements IConverter {
                                     cloudPort.setBgpIp(portProtocol.getBgpIp());
                                     cloudPort.setBgpPeer(portProtocol.getBgpPeer());
                                     cloudPort.setBgpPeerAs(portProtocol.getBgpPeerAs());
-                                    cloudPort.setRipIp(portProtocol.getRipIp());
-                                    cloudPort.setRipPear(portProtocol.getRipPear());
+//                                    cloudPort.setRipIp(portProtocol.getRipIp());
+//                                    cloudPort.setRipPear(portProtocol.getRipPear());
                                     cloudPort.setOspfArea(portProtocol.getOspfArea());
                                     cloudPort.setOspfIp(portProtocol.getOspfIp());
                                 }

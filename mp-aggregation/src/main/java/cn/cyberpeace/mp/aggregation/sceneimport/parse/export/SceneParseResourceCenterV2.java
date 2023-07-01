@@ -366,7 +366,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
             });
         }
         ExtNodeInfo protocolExtNodeInfo = new ExtNodeInfo();
-        protocolExtNodeInfo.setRipLoopback(pluginElement.getRipLoopback());
+//        protocolExtNodeInfo.setRipLoopback(pluginElement.getRipLoopback());
         protocolExtNodeInfo.setOspfRouterId(pluginElement.getOspfRouterId());
         protocolExtNodeInfo.setPortProtocols(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(e.getPorts())) {
@@ -381,8 +381,8 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setOspfIp(cloudPort.getOspfIp());
                 exportInfo.setOspfArea(cloudPort.getOspfArea());
-                exportInfo.setRipIp(cloudPort.getRipIp());
-                exportInfo.setRipPear(cloudPort.getRipPear());
+//                exportInfo.setRipIp(cloudPort.getRipIp());
+//                exportInfo.setRipPear(cloudPort.getRipPear());
                 if (sceneHandler.getPortConnectedElement(p.getId()) != null) {
                     exportInfo.setConnectNode(sceneHandler.getPortConnectedElement(p.getId()).getId());
                 }
