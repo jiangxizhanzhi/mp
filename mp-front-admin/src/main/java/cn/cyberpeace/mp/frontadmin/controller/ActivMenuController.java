@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,7 +58,8 @@ public class ActivMenuController {
     public ServiceResult getTree(@RequestParam(required = false) List<String> actives) {
         Set<String> visibleMenuIds = null;
         if (CollectionUtils.isEmpty(actives)) {
-            visibleMenuIds = menuSetService.getSystemAllVisibleMenuIds();
+//            visibleMenuIds = menuSetService.getSystemAllVisibleMenuIds();
+            return new ServiceResult(new ArrayList<>()).asResult();
         } else {
             visibleMenuIds = menuSetService.getVisibleMenuIdsBy(actives);
         }
