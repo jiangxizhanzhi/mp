@@ -154,7 +154,7 @@ public class ElementModifyHandler extends HandlerCommon {
             // 先创建flavor
             log.info("createFlavor begin.");
             String flavorId = this.createFlavor(newCloudElement);
-            log.info("createFlavor end. flavorId:{}");
+            log.info("createFlavor end. flavorId:{}", flavorId);
             virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
             log.info("resize end.");
         }
