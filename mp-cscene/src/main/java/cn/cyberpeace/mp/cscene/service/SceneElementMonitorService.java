@@ -366,6 +366,7 @@ public class SceneElementMonitorService {
 
         // 实例类型
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
+        basicInfo.setExternal(cpSceneElementBO.getExternal());
 
         // 设备类型
         basicInfo.setCategory(cpSceneElementBO.getCategory());

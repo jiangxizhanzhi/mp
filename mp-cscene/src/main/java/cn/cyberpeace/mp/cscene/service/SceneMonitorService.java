@@ -374,6 +374,7 @@ public class SceneMonitorService {
             basicInfo.setIsBuildIn(cloudElement.getIsBuildIn());
             basicInfo.setCategory(cloudElement.getCategory());
             basicInfo.setVirtualType(cloudElement.getVirtualType());
+            basicInfo.setExternal(cloudElement.getExternal());
             res.add(basicInfo);
         });
         List<ElementMonitorBasicInfo> result;
