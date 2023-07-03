@@ -149,14 +149,10 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        log.info("modifyVirtualMachine begin.");
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
-            log.info("createFlavor begin.");
             String flavorId = this.createFlavor(newCloudElement);
-            log.info("createFlavor end. flavorId:{}", flavorId);
             virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
-            log.info("resize end.");
         }
         this.changeConnect(newCloudElement, originCloudElement);
     }
