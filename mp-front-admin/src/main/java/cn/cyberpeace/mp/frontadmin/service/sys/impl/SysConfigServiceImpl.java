@@ -136,25 +136,36 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.LOG_FILE_MAX_HISTORY_KEY)) {
                 if (Objects.isNull(oldHistory) || !Objects.equals(sysConfigModel.getValue(), oldHistory.getValue())) {
                     // 通知云平台
-                    JSONObject paramObj = new JSONObject();
-                    paramObj.put("days", sysConfigModel.getValue());
-                    HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_LOG_CONF_URL, paramObj.toJSONString());
-                    // send msg
-                    messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_LOG_FILE_MAX_HISTORY_UPDATE, null);
-                    //本地日志保存时间实时修改
-                    sysLogconfigService.setLogBackInfo(Integer.parseInt(sysConfigModel.getValue()));
+                    try {
+                        JSONObject paramObj = new JSONObject();
+                        paramObj.put("days", sysConfigModel.getValue());
+                        var result = HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_LOG_CONF_URL, paramObj.toJSONString());
+                        log.info("cpcloud url is {}, param is {}, result is {}", frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_LOG_CONF_URL,
+                                paramObj.toJSONString(), JsonCommon.stringify(result));
+                        // send msg
+                        messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_LOG_FILE_MAX_HISTORY_UPDATE, null);
+                        //本地日志保存时间实时修改
+                        sysLogconfigService.setLogBackInfo(Integer.parseInt(sysConfigModel.getValue()));
+                    } catch (Exception e) {
+                        log.error("update log_file_max_history failed", e);
+                    }
                 }
             }
 
             if (Objects.equals(sysConfigModel.getKeyName(), SysConfigConstant.SYSTEM_BACKUP_INTERVAL_KEY)) {
                 // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
                 if (Objects.isNull(oldBackupInterval) || !Objects.equals(sysConfigModel.getValue(), oldBackupInterval.getValue())) {
-                    // 通知云平台
-                    JSONObject paramObj = new JSONObject();
-                    paramObj.put("days", sysConfigModel.getValue());
-                    var res1 = HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_FILE_BACKUP_URL, paramObj.toJSONString());
-
-                    messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_BACKUP_INTERVAL_UPDATE, null);
+                    try {
+                        // 通知云平台
+                        JSONObject paramObj = new JSONObject();
+                        paramObj.put("days", sysConfigModel.getValue());
+                        var res1 = HttpUtil.post(frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_FILE_BACKUP_URL, paramObj.toJSONString());
+                        log.info("cpcloud url is {}, param is {}, result is {}", frontAdminConfig.getCpUrl() + SysConfigConstant.CLOUD_FILE_BACKUP_URL,
+                                paramObj.toJSONString(), JsonCommon.stringify(res1));
+                        messageSender.send(JsonCommon.stringify(sysConfigModel), SysConfigConstant.MSG_TYPE_SYS_CONFIG_UPDATE, SysConfigConstant.ROUTING_KEY_BACKUP_INTERVAL_UPDATE, null);
+                    } catch (Exception e) {
+                        log.error("update system_backup_interval failed", e);
+                    }
                 }
             }
         }

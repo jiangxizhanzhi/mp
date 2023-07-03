@@ -39,7 +39,7 @@ public class SysConfigConstant {
     // cloud日志保存天数变更地址
     public static final String CLOUD_LOG_CONF_URL = "/cpcloud/logger_app/v1/update_log_conf";
     // 数据库备份周期url
-    public static final String CLOUD_FILE_BACKUP_URL = "/knapsack/logger_app/v1/file_backup";
+    public static final String CLOUD_FILE_BACKUP_URL = "/cpcloud/logger_app/v1/file_backup";
 
 
 
