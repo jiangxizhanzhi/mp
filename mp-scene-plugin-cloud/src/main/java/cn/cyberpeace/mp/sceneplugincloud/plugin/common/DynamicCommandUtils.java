@@ -69,8 +69,13 @@ public class DynamicCommandUtils {
             for (var port : paramsWrapper.ports) {
                 if (StringUtils.isNotEmpty(port.getIp()) && paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port) != null) {
                     cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
-                    IpParser ipParser = new IpParser(paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port).getCidr());
-                    cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
+                    var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port);
+                    if (StringUtils.isNotEmpty(net.getCidr())) {
+                        IpParser ipParser = new IpParser(net.getCidr());
+                        cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
+                    } else {
+                        cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", "255.255.255.0"));
+                    }
                     cmds.add(START_INT);
                     cmds.add(EXIT);
                 }
