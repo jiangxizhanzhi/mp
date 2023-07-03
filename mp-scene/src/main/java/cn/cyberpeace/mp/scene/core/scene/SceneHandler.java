@@ -22,10 +22,12 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
+import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
+import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -47,6 +49,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -571,6 +574,13 @@ public class SceneHandler extends BaseSceneHandler<
         for (var e : getElementMap().values()) {
             if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
                 this.addExcludeHandleNode(e.getId());
+            } else {
+                var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                        EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
+                );
+                if (!validEvents.contains(SceneElementModel.Event.PAUSE)) {
+                    this.addExcludeHandleNode(e.getId());
+                }
             }
         }
         prepareAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
@@ -595,6 +605,13 @@ public class SceneHandler extends BaseSceneHandler<
         for (var e : getElementMap().values()) {
             if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
                 this.addExcludeHandleNode(e.getId());
+            } else {
+                var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                        EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
+                );
+                if (!validEvents.contains(SceneElementModel.Event.UNPAUSE)) {
+                    this.addExcludeHandleNode(e.getId());
+                }
             }
         }
         prepareAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);

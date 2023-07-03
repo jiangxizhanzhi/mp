@@ -45,6 +45,7 @@ public class UnpauseHandler extends HandlerCommon {
     public void unpause() {
         prepareEventProcess(SceneModel.Event.UNPAUSE, SceneProcess.class, ElementProcess.class);
         List<Runnable> tasks = getPluginHandler().getElementMap().values().stream()
+                .filter(e -> this.getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId()))
                 .map(element -> (Runnable) () -> this.unpauseElement(element))
                 .collect(Collectors.toList());
         runSceneProgress(SceneProcess.UNPAUSE_TERMINALS, () -> runTasks(tasks));
