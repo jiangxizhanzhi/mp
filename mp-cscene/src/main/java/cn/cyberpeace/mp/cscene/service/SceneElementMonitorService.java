@@ -321,6 +321,7 @@ public class SceneElementMonitorService {
 
         basicInfo.setEvent(sceneElementBO.getEvent());
         basicInfo.setEventStatus(sceneElementBO.getEventStatus());
+        basicInfo.setType(sceneElementBO.getType());
 
         // 操作系统
         // 参考SystemTypeUtils

@@ -1443,6 +1443,43 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
 
+        Map<String,SceneElementPortBO> newPorts = new HashMap<>();
+        for (var newElement : instance.getScene().getTopology().getElements()) {
+            if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
+                for (var p : newElement.getPorts()) {
+                    newPorts.put(p.getId(), p);
+                }
+            }
+        }
+
+        SceneHandler originSceneHandler = new SceneHandler(originData, null);
+        SceneHandler newSceneHandler = new SceneHandler(instance.getScene(), null);
+        for (String portId : newPorts.keySet()) {
+            var originConnectPort = originSceneHandler.getPortConnectedPort(portId);
+            var newConnectPort = newSceneHandler.getPortConnectedPort(portId);
+            if (originConnectPort == null && newConnectPort != null) {
+                // 赋值一个新的id
+                var p = newPorts.get(portId);
+                p.setId(portId + "0");
+                for (var connect : instance.getScene().getTopology().getConnections()) {
+                    if (portId.equals(connect.getSource())) {
+                        connect.setSource(p.getId());
+                    }
+                    if (portId.equals(connect.getTarget())) {
+                        connect.setTarget(p.getId());
+                    }
+                }
+                for (var plugin : instance.getScene().getPlugins().values()) {
+                    var pluginPort = plugin.getElementPorts().get(portId);
+                    if (pluginPort != null) {
+                        pluginPort.remove("logic_network_id");
+                        pluginPort.remove("resource_id");
+                        plugin.getElementPorts().put(p.getId(), pluginPort);
+                    }
+                }
+            }
+        }
+
         var instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
         instanceHandler.update();
         return new ServiceResult<>(instanceHandler.toData());

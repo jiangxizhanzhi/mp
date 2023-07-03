@@ -224,14 +224,6 @@ public class SceneService {
         } else if (sceneHandler.getScene().getEvent() == SceneModel.Event.PAUSE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
             return new ServiceResult<>(true);
         }
-        sceneHandler.getElementMap().values().forEach(e -> {
-            var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
-                    EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
-            );
-            if (!validEvents.contains(SceneElementModel.Event.PAUSE)) {
-                throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
-            }
-        });
         SceneEventUtils.addProcessingScene(SceneModel.Event.PAUSE, id);
         SceneTaskPool.getInstance().executeTask(() -> {
             try {

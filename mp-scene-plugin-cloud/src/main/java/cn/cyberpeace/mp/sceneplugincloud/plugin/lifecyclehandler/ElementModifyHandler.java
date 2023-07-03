@@ -155,6 +155,7 @@ public class ElementModifyHandler extends HandlerCommon {
             virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
         }
         this.changeConnect(newCloudElement, originCloudElement);
+        this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
     private void modifyContainer(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
@@ -166,6 +167,7 @@ public class ElementModifyHandler extends HandlerCommon {
             container.resize(originCloudElement.getResourceId(), resizeData);
         }
         this.changeConnect(newCloudElement, originCloudElement);
+        this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
     private void modifyVirtualSwitch(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
