@@ -17,7 +17,6 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class ConnectionJob {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
-    @Scheduled(cron = "*/5 * * * * ?")
+//    @Scheduled(cron = "*/5 * * * * ?")
     public void execute() {
         log.info("ConnectionJob.execute begin.");
         HumanCondition humanCondition = new HumanCondition();
