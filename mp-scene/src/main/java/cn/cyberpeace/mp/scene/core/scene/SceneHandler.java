@@ -549,6 +549,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
+        for (var e : getElementMap().values()) {
+            if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                this.addExcludeHandleNode(e.getId());
+            }
+        }
         prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
 
