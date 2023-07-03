@@ -820,19 +820,19 @@ public class FlowAnalysisService extends AbstractBaseService {
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
-        if (Objects.nonNull(request.getSeverityEnum())){
-            List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
-            List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
-                    allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
-        }
-
         if (Objects.nonNull(request.getAttackTypes())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
         }
 
         if (Objects.nonNull(request.getAttackSeverities())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", request.getAttackSeverities()));
+        } else {
+            if (Objects.nonNull(request.getSeverityEnum())){
+                List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
+                List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
+                        allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
+                boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
+            }
         }
 
         if (StringUtils.isNotEmpty(request.getPort())) {
