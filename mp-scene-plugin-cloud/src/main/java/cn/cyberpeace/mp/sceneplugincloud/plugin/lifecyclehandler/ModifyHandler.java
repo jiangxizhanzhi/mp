@@ -82,10 +82,12 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
                 for (String elementId : mayUpdateNodeIds) {
-                    CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                    if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
-                        new ElementModifyHandler(newPlugin, originPlugin,
-                                originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                    if(getPluginHandler().getSceneHandler().isHandleNode(elementId)){
+                        CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                        if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                            new ElementModifyHandler(newPlugin, originPlugin,
+                                    originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                        }
                     }
                 }
             }
