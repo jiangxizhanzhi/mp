@@ -33,4 +33,14 @@ public class ThreadPoolInfo {
     @ApiModelProperty(value = "活跃线程数")
     private int activeThreadSize;
 
+    @ApiModelProperty(value = "峰值线程数")
+    private int largestPoolSize;
+
+    @ApiModelProperty(value = "任务队列大小")
+    private int taskQueueSize;
+
+    @ApiModelProperty(value = "总任务数")
+    private long taskCount;
+
+
 }

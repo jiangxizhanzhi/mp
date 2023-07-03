@@ -40,6 +40,9 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
                 int currentSize = pool.getExecutorService().getPoolSize();
                 int activeSize = pool.getExecutorService().getActiveCount();
                 int maxSize = pool.getExecutorService().getMaximumPoolSize();
+                int largestPoolSize= pool.getExecutorService().getLargestPoolSize();
+                int taskQueueSize = pool.getExecutorService().getQueue().size();
+                long taskCount = pool.getExecutorService().getTaskCount();
                 ThreadFactory factory = pool.getExecutorService().getThreadFactory();
                 String name = pool.getClass().getName();
                 if (factory != null && factory instanceof CustomizableThreadFactory) {
@@ -51,8 +54,15 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
                 this.setThreadPoolName(name);
                 this.setCoreThreadSize(coreSize);
                 this.setCurrentThreadSize(currentSize);
-                this.setMaxThreadSize(maxSize);
                 this.setActiveThreadSize(activeSize);
+                this.setMaxThreadSize(maxSize);
+                //峰值线程数
+                this.setLargestPoolSize(largestPoolSize);
+                //任务队列数
+                this.setTaskQueueSize(taskQueueSize);
+                //总任务数
+
+                this.setTaskCount(taskCount);
             }
         }).collect(Collectors.toList());
         log.info("MP threadpool information:{}", list);
