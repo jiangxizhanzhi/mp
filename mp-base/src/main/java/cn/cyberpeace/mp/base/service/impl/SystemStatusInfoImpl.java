@@ -61,7 +61,6 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
                 //任务队列数
                 this.setTaskQueueSize(taskQueueSize);
                 //总任务数
-
                 this.setTaskCount(taskCount);
             }
         }).collect(Collectors.toList());
