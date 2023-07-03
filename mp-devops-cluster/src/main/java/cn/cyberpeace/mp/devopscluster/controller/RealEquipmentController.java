@@ -156,6 +156,14 @@ public class RealEquipmentController {
             return response;
         }).collect(Collectors.toList());
 
+        for (var l : list) {
+            if (l.getExtSystemInfo() != null && "USB".equals(l.getExtSystemInfo().getSystemTypeName())) {
+                l.getExtSystemInfo().setSystemArchitecture(null);
+                l.getExtSystemInfo().setSystemArchitectureName(null);
+                l.getExtSystemInfo().setLanguage(null);
+                l.getExtSystemInfo().setLanguageName(null);
+            }
+        }
         return new PageResult<>(list,model.getTotal());
     }
 
@@ -310,6 +318,14 @@ public class RealEquipmentController {
         if (Objects.nonNull(connection)){
             response.setConnections(connection.getList());
         }
+
+        if (response.getExtSystemInfo() != null && "USB".equals(response.getExtSystemInfo().getSystemTypeName())) {
+            response.getExtSystemInfo().setSystemArchitecture(null);
+            response.getExtSystemInfo().setSystemArchitectureName(null);
+            response.getExtSystemInfo().setLanguage(null);
+            response.getExtSystemInfo().setLanguageName(null);
+        }
+
         return new Result<>(response);
     }
 

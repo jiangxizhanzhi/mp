@@ -348,6 +348,7 @@ public class SceneMonitorService {
             basicInfo.setName(e.getName());
             basicInfo.setIcon2(FsCommon.genHttpUrl(e.getIcon2()));
             basicInfo.setSystemType(e.getSystemType());
+            basicInfo.setType(e.getType());
             basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(e.getSystemType()));
             if (CollectionUtils.isNotEmpty(e.getPorts())) {
                 e.getPorts().forEach(port -> {

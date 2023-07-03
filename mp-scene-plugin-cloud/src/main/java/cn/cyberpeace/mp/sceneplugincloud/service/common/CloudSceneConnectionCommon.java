@@ -113,8 +113,7 @@ public class CloudSceneConnectionCommon {
             if (consoleInfo != null) {
                 var latestConsoleIp = consoleInfo.getIpAddress();
                 var latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
-                if (latestConsoleIp != null
-                        && (!latestConsoleIp.equals(accessIp) || !latestConsolePort.equals(accessPort))) {
+                if (latestConsoleIp != null) {
                     sceneConnection = null;
                     accessIp = latestConsoleIp;
                     accessPort = latestConsolePort;
