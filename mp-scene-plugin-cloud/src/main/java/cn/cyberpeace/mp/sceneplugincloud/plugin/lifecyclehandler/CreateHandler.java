@@ -1225,6 +1225,7 @@ public class CreateHandler extends HandlerCommon {
             for (var networkPort : result.getNetworks()) {
                 var port = portName2Port.get(networkPort.getSlotPort());
                 if (port != null) {
+                    port.setIp(networkPort.getFixedIp());
                     port.setMacAddr(networkPort.getMacAddress());
                     getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
                     var cloudPort = getPluginHandler().getPort(port.getId());
