@@ -194,15 +194,22 @@ public class SceneService {
             }
         });
         SceneTaskPool.getInstance().executeTask(() -> {
-            updatedSceneHandler.getElementMap().values().forEach(e -> {
-                e.setEvent(SceneElementModel.Event.DEFAULT);
-                e.setEventStatus(EventStatus.INITIAL);
+            originSceneHandler.getElementMap().values().forEach(e -> {
+                if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                    updatedSceneHandler.addExcludeHandleNode(e.getId());
+                    originSceneHandler.addExcludeHandleNode(e.getId());
+                } else {
+                    e.setEvent(SceneElementModel.Event.DEFAULT);
+                    e.setEventStatus(EventStatus.INITIAL);
+                }
             });
 
-            originSceneHandler.getElementMap().values().forEach(e -> {
-                e.setEvent(SceneElementModel.Event.DEFAULT);
-                e.setEventStatus(EventStatus.INITIAL);
-            });
+            for (var e : updatedSceneHandler.getElementMap().values()) {
+                if (updatedSceneHandler.isHandleNode(e.getId())) {
+                    e.setEvent(SceneElementModel.Event.DEFAULT);
+                    e.setEventStatus(EventStatus.INITIAL);
+                }
+            }
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
             proxy.modify(originSceneHandler, updateElementIds);
