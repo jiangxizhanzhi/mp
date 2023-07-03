@@ -242,8 +242,15 @@ public class ScenePluginCollectionSceneService {
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
         flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
             if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
-                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
+                List<String> categoryList;
+                if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
+                    categoryList = flowLogBO.getSuricata().getCategory().stream()
+                            .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
+                } else {
+                    categoryList = flowLogBO.getSuricata().getCategory().stream()
+                            .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
+                }
+
                 flowLogBO.getSuricata().setCategory(categoryList);
             }
         });
