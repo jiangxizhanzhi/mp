@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskDetail;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
@@ -231,6 +234,26 @@ public class CsceneFlowService {
         ListObjServiceResult<FlowTaskPageResponse> result = new ListObjServiceResult(new ListObjResult<>(flowTaskPageResponseList, total).asResult()).asResult();
         log.info("CsceneFlowService.taskList end. result:{}", result);
         return result;
+    }
+
+    /**
+     * 根据场景实例id查询任务id集合
+     * @param request
+     * @return
+     */
+    public ServiceResult<List<String>> getTaskIdsBySceneId(FlowTaskPageQueryParams request) {
+        String sceneId = csceneInstanceService.getSceneId(request.getId());
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
+        }
+
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listBySceneId(sceneId);
+        List<String> taskIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
+            taskIds = flowTaskTaskModels.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+        }
+
+        return ResultCommon.success(taskIds);
     }
 
     /**
