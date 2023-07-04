@@ -147,7 +147,7 @@ public class Container extends CloudClient {
         return result.getData();
     }
 
-    public ContainerExecuteResult executeCommand(String containerId, String command, Integer retryTimes) {
+    public ContainerExecuteResult executeCommand(String containerId, String command, Runnable action, Integer retryTimes) {
         var data = new ContainerExecuteData();
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
@@ -156,6 +156,16 @@ public class Container extends CloudClient {
         var result = new CloudResponse<ContainerExecuteResult>();
         int times = retryTimes != null ? retryTimes : 1;
         for (int i = 0; i < times; i++) {
+            if (i > 0) {
+                if (action != null) {
+                    action.run();
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             try {
                 result = cloudPost(requestUrl, data, null, new TypeReference<>() {
                 }, true);
