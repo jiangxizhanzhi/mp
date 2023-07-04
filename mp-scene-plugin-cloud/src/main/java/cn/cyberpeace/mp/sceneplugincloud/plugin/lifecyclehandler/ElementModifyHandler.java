@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -392,10 +393,10 @@ public class ElementModifyHandler extends HandlerCommon {
             newSrcPort.setIngress(-1);
         }
         if (newSrcPort.getDelay() == null) {
-            newSrcPort.setDelay(0);
+            newSrcPort.setDelay(-1);
         }
         if(newSrcPort.getLoss() == null){
-            newSrcPort.setLoss(0);
+            newSrcPort.setLoss(-1);
         }
         boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
         boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
@@ -554,6 +555,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(addCloudPort.getAccessModes())) {
                     for (var a : addCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -649,6 +653,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -700,6 +707,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -743,6 +753,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
