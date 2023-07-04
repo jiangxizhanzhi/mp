@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -97,16 +98,65 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void modifyCoreRoute(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
+        // 核心路由的端口要注意排序 辅助网络的端口排第一个
+        {
+            var ports = newCloudElement.getSrcElement().getPorts();
+            SceneElementPortBO defaultPort = null;
+            List<SceneElementPortBO> orderedPorts = new ArrayList<>();
+            for (var p : ports) {
+                if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                    defaultPort = p;
+                } else {
+                    orderedPorts.add(p);
+                }
+            }
+            if (defaultPort != null) {
+                orderedPorts.add(0, defaultPort);
+            }
+            for (int i = 0; i < orderedPorts.size(); i++) {
+                orderedPorts.get(i).setOrder(i + 1);
+            }
+            newCloudElement.getSrcElement().setPorts(orderedPorts);
+        }
+
+        {
+            var ports = originCloudElement.getSrcElement().getPorts();
+            SceneElementPortBO defaultPort = null;
+            List<SceneElementPortBO> orderedPorts = new ArrayList<>();
+            for (var p : ports) {
+                if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                    defaultPort = p;
+                } else {
+                    orderedPorts.add(p);
+                }
+            }
+            if (defaultPort != null) {
+                orderedPorts.add(0, defaultPort);
+            }
+            for (int i = 0; i < orderedPorts.size(); i++) {
+                orderedPorts.get(i).setOrder(i + 1);
+            }
+            originCloudElement.getSrcElement().setPorts(orderedPorts);
+        }
+
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(newCloudElement.getSrcElement().getPorts())) {
             return;
         }
 
-        boolean isChange = this.isStaticRouteChange(newCloudElement.getStaticRoutes(), originCloudElement.getStaticRoutes()) || VyosNetworkCommandUtils.isProtocolsChange(originCloudElement, originCloudScenePluginHandler, newCloudElement, newCloudScenePluginHandler);
+        boolean staticRouteChange = this.isStaticRouteChange(newCloudElement.getStaticRoutes(), originCloudElement.getStaticRoutes());
+        boolean protocolChange = VyosNetworkCommandUtils.isProtocolsChange(originCloudElement, originCloudScenePluginHandler, newCloudElement, newCloudScenePluginHandler);
+        boolean qosChange = VyosNetworkCommandUtils.isQosChange(originCloudElement, originCloudScenePluginHandler, newCloudElement, newCloudScenePluginHandler);
+        boolean isChange = staticRouteChange || protocolChange || qosChange;
         if (!isChange) {
             return;
         }
         // 拼接组网命令
         var defaultPort = this.originCloudScenePluginHandler.getPort(originCloudElement.getSrcElement().getPorts().get(0).getId());
+        for (var p : originCloudElement.getSrcElement().getPorts()) {
+            if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                defaultPort = this.originCloudScenePluginHandler.getPort(p.getId());
+            }
+        }
         if (CollectionUtils.isNotEmpty(newCloudElement.getSrcElement().getPorts())) {
             for (int i = 0; i < newCloudElement.getSrcElement().getPorts().size(); i++) {
                 newCloudElement.getSrcElement().getPorts().get(i).setOrder(i + 1);
@@ -123,6 +173,11 @@ public class ElementModifyHandler extends HandlerCommon {
         clearNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         clearNetwork.setCmds(Arrays.asList("delete protocols"));
 
+        var clearTraffic = new RouterConfigCmdData();
+        clearTraffic.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        clearTraffic.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        clearTraffic.setCmds(Arrays.asList("delete traffic-policy"));
+
         boolean buildNetworkResult = false;
         int tryTimes = 5;
         Exception exception = null;
@@ -130,6 +185,7 @@ public class ElementModifyHandler extends HandlerCommon {
             // 发送拼接网络的命令
             try {
                 vmRouter.createConfig(clearNetwork);
+                vmRouter.createConfig(clearTraffic);
                 buildNetworkResult = vmRouter.createConfig(buildNetwork);
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
@@ -328,6 +384,19 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private boolean isQosRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        var newSrcPort = newCloudPort.getSrcPort();
+        if (newSrcPort.getEgress() == null) {
+            newSrcPort.setEgress(-1);
+        }
+        if (newSrcPort.getIngress() == null) {
+            newSrcPort.setIngress(-1);
+        }
+        if (newSrcPort.getDelay() == null) {
+            newSrcPort.setDelay(0);
+        }
+        if(newSrcPort.getLoss() == null){
+            newSrcPort.setLoss(0);
+        }
         boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
         boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
         boolean delayChange = newCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay();
@@ -343,6 +412,18 @@ public class ElementModifyHandler extends HandlerCommon {
         data.setQosId(originCloudPort.getQosId());
         data.setQosRules(new ArrayList<>());
         var newSrcPort = newCloudPort.getSrcPort();
+        if (newSrcPort.getEgress() == null) {
+            newSrcPort.setEgress(-1);
+        }
+        if (newSrcPort.getIngress() == null) {
+            newSrcPort.setIngress(-1);
+        }
+        if (newSrcPort.getDelay() == null) {
+            newSrcPort.setDelay(0);
+        }
+        if(newSrcPort.getLoss() == null){
+            newSrcPort.setLoss(0);
+        }
         if (newSrcPort.getEgress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
             VirtualNic.QosRule qosRule = new VirtualNic.QosRule();
             if (newSrcPort.getEgress() > 0) {

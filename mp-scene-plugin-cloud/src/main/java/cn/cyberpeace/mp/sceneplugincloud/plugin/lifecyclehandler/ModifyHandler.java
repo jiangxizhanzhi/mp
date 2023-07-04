@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,12 @@ public class ModifyHandler extends HandlerCommon {
             this.modifyDeleteHandler.delete();
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
         });
+        // 更新时不处理DYNAMIPS节点
+        this.modifyCreateHandler.getPluginHandler().getElementMap().forEach((k, v) -> {
+            if (v != null && v.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
+                this.modifyCreateHandler.getPluginHandler().getElementMap().remove(k);
+            }
+        });
         runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             this.modifyInitiateHandler.initiate();
@@ -82,10 +89,12 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
                 for (String elementId : mayUpdateNodeIds) {
-                    CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
-                    if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
-                        new ElementModifyHandler(newPlugin, originPlugin,
-                                originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                    if(getPluginHandler().getSceneHandler().isHandleNode(elementId)){
+                        CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                        if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                            new ElementModifyHandler(newPlugin, originPlugin,
+                                    originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                        }
                     }
                 }
             }

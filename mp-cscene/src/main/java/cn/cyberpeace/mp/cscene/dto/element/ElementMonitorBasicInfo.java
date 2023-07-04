@@ -74,6 +74,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-实例类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 终端")
     private Integer type;
 
+    @ApiModelProperty(value = "是否外部引用资源")
+    private Boolean external;
+
     @ApiModelProperty(value = "节点资源配置信息")
     private HostState hostState;
 

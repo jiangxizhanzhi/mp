@@ -194,15 +194,22 @@ public class SceneService {
             }
         });
         SceneTaskPool.getInstance().executeTask(() -> {
-            updatedSceneHandler.getElementMap().values().forEach(e -> {
-                e.setEvent(SceneElementModel.Event.DEFAULT);
-                e.setEventStatus(EventStatus.INITIAL);
+            originSceneHandler.getElementMap().values().forEach(e -> {
+                if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                    updatedSceneHandler.addExcludeHandleNode(e.getId());
+                    originSceneHandler.addExcludeHandleNode(e.getId());
+                } else {
+                    e.setEvent(SceneElementModel.Event.DEFAULT);
+                    e.setEventStatus(EventStatus.INITIAL);
+                }
             });
 
-            originSceneHandler.getElementMap().values().forEach(e -> {
-                e.setEvent(SceneElementModel.Event.DEFAULT);
-                e.setEventStatus(EventStatus.INITIAL);
-            });
+            for (var e : updatedSceneHandler.getElementMap().values()) {
+                if (updatedSceneHandler.isHandleNode(e.getId())) {
+                    e.setEvent(SceneElementModel.Event.DEFAULT);
+                    e.setEventStatus(EventStatus.INITIAL);
+                }
+            }
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
             proxy.modify(originSceneHandler, updateElementIds);
@@ -238,6 +245,9 @@ public class SceneService {
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
+        if (SceneEventUtils.hasProcessingScene(SceneModel.Event.PAUSE, id)) {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        }
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);

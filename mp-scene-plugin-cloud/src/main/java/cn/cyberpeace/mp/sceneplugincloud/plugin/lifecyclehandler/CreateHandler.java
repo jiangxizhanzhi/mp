@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -236,14 +237,20 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             // 默认开启dhcp
             var dhcp = connectedNetwork.network.getDhcp();
-            subnet.setEnableDhcp(dhcp == null || dhcp);
+            if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
+                subnet.setEnableDhcp(dhcp == null || dhcp);
+            } else {
+                subnet.setEnableDhcp(true);
+            }
 
             var srcAllocationPools = connectedNetwork.network.getAllocationPools();
             if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
                 List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
                 srcAllocationPools.forEach(srcAllocationPool -> {
-                    allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
-                            srcAllocationPool.getEnd()));
+                    if (StringUtils.isNotEmpty(srcAllocationPool.getStart()) && StringUtils.isNotEmpty(srcAllocationPool.getEnd())) {
+                        allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
+                                srcAllocationPool.getEnd()));
+                    }
                 });
                 subnet.setAllocationPools(allocationPools);
             }
@@ -1206,15 +1213,19 @@ public class CreateHandler extends HandlerCommon {
         createData.setPortSum(cloudElement.getWanPortNumber());
         Map<String, SceneElementPortBO> portName2Port = new HashMap<>();
         if (srcElement.getPorts() != null) {
+            Set<String> netIds = new HashSet<>();
             for (var port : srcElement.getPorts()) {
                 portName2Port.put(port.getName(), port);
                 var net = getHandlerUtils().getNetworkByPort(port);
-                if (net != null && StringUtils.isNotEmpty(net.getResourceId())) {
+                if (net != null && StringUtils.isNotEmpty(net.getResourceId()) && !netIds.contains(net.getResourceId())) {
                     VirtualDynamicCreateData.Network network = new VirtualDynamicCreateData.Network();
                     network.setNetworkId(net.getResourceId());
                     network.setSlotPort(port.getName());
                     network.setFixedIp(port.getIp());
                     networks.add(network);
+                    netIds.add(net.getResourceId());
+                } else {
+                    port.setIp(StringUtils.EMPTY);
                 }
             }
         }
