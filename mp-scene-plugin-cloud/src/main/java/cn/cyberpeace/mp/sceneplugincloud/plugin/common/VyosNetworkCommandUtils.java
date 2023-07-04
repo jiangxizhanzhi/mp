@@ -46,6 +46,7 @@ public class VyosNetworkCommandUtils {
         modifyBuilderChains.add(new OSPFCmdBuilder());
         modifyBuilderChains.add(new BGPCmdBuilder());
         modifyBuilderChains.add(new RIPCmdBuilder());
+        modifyBuilderChains.add(new QosCmdBuilder());
     }
 
     public static List<String> genOpenDhcpCommands(int ethSize) {
