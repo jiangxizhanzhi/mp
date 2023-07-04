@@ -114,104 +114,109 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     @Transactional
     public void addTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
         log.info("FlowTaskTaskServiceImpl.addTask begin. details:{}, sceneId:{}", details, sceneId);
-        for (AddFlowTaskTaskInfo detail : details) {
-            //网口信息，如果不存在则创建网口
-            FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(detail.getNetworkId(), actuatorId);
-            String macAddress = "";
-            if (flowTaskPortModel == null) {
-                flowTaskPortModel = new FlowTaskPortModel();
-                FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
-                if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getInstanceId())) {
-                    JSONObject addPortReq = new JSONObject();
-                    addPortReq.put("network_id", detail.getNetworkId());
-                    try {
-                        String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
-                                flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
-                        JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
-                        log.info("add client port response:{}", addTrexClientObj.toJSONString());
-                        if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
-                            JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                            macAddress = clientDataObj.getString("mac_address");
-                            flowTaskPortModel.setMac(macAddress);
-                            flowTaskPortModel.setActuatorId(actuatorId);
-                            flowTaskPortModel.setNetworkId(detail.getNetworkId());
-                            flowTaskPortService.create(flowTaskPortModel);
-                        }
-                    } catch (IOException e) {
-                        log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), detail.getNetworkId(), e);
-                        throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                    }
-                }
-            } else {
-                macAddress = flowTaskPortModel.getMac();
-            }
-            HumanCondition condition = new HumanCondition();
-            List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
-            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
-            condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
-            List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
-            //保存流量任务信息
-            List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
-            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
-                flowTaskTaskModel.setSceneId(sceneId);
-                flowTaskTaskModel.setActuatorId(actuatorId);
-                flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
-                flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
-                flowTaskTaskModel.setFlowId(flowInfoModel.getId());
-                flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
-                flowTaskTaskModel.setNodeId(detail.getNodeId());
-                flowTaskTaskModel.setNodeIp(detail.getNodeIp());
-                flowTaskTaskModel.setNodeName(detail.getNodeName());
-                flowTaskTaskModelList.add(flowTaskTaskModel);
-            }
-            this.bulkCreate(flowTaskTaskModelList);
+        if (CollectionUtils.isNotEmpty(details)) {
+            // 统计任务总数
+            int total = details.stream().mapToInt(detail -> detail.getFlowInfos().size()).sum();
 
-            //保存流量任务配置信息
-            List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();
-            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
-                FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
-                flowTaskConfModel.setTaskId(flowTaskTaskModel.getId());
-                flowTaskConfModel.setKeepRunning(1);
-                flowTaskConfModel.setReplay(1);
-                flowTaskConfModel.setRateUnlimited(1);
-                FlowTaskConf flowTaskConf = new FlowTaskConf();
-                if (ResourceTypeEnum.SCRIPT.toValue() == flowTaskTaskModel.getResourceType()) {
-                    List<FlowTaskAttackConf> attackConfs = addFlowTaskFlowInfoMap.get(flowTaskTaskModel.getFlowId()).getAttackConfs();
-                    if (CollectionUtils.isNotEmpty(attackConfs)) {
-                        flowTaskConf.setAttackConfs(attackConfs);
-                    } else {
-                        List<FlowScriptParamModel> flowScriptParamModelList = flowScriptParamService.selectByFlowId(flowTaskTaskModel.getFlowId());
-                        if (CollectionUtils.isNotEmpty(flowScriptParamModelList)) {
-                            List<FlowTaskAttackConf> flowTaskAttackConfList = new ArrayList<FlowTaskAttackConf>();
-                            for (FlowScriptParamModel flowScriptParamModel : flowScriptParamModelList) {
-                                FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
-                                flowTaskAttackConf.setConfDesc(flowScriptParamModel.getParamDesc());
-                                flowTaskAttackConf.setConfType(flowScriptParamModel.getParamType());
-                                flowTaskAttackConf.setConfKey(flowScriptParamModel.getParamKey());
-                                flowTaskAttackConf.setConfValue(flowScriptParamModel.getParamValue());
-                                flowTaskAttackConfList.add(flowTaskAttackConf);
+            for (AddFlowTaskTaskInfo detail : details) {
+                //网口信息，如果不存在则创建网口
+                FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(detail.getNetworkId(), actuatorId);
+                String macAddress = "";
+                if (flowTaskPortModel == null) {
+                    flowTaskPortModel = new FlowTaskPortModel();
+                    FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+                    if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getInstanceId())) {
+                        JSONObject addPortReq = new JSONObject();
+                        addPortReq.put("network_id", detail.getNetworkId());
+                        try {
+                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
+                                    flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+                            JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                            log.info("add client port response:{}", addTrexClientObj.toJSONString());
+                            if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                                JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+                                macAddress = clientDataObj.getString("mac_address");
+                                flowTaskPortModel.setMac(macAddress);
+                                flowTaskPortModel.setActuatorId(actuatorId);
+                                flowTaskPortModel.setNetworkId(detail.getNetworkId());
+                                flowTaskPortService.create(flowTaskPortModel);
                             }
-                            flowTaskConf.setAttackConfs(flowTaskAttackConfList);
+                        } catch (IOException e) {
+                            log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), detail.getNetworkId(), e);
+                            throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                         }
                     }
+                } else {
+                    macAddress = flowTaskPortModel.getMac();
                 }
-                flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
-                flowTaskConfModelList.add(flowTaskConfModel);
-            }
-            flowTaskConfService.bulkCreate(flowTaskConfModelList);
-            //初始化网口
-            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
-                if (!initNetwork(macAddress, flowTaskTaskModel.getId(), detail.getNodeIp(), actuatorId)) {
-                    log.error("init network error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+                HumanCondition condition = new HumanCondition();
+                List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
+                Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+                condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
+                List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
+                //保存流量任务信息
+                List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
+                for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                    FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+                    flowTaskTaskModel.setSceneId(sceneId);
+                    flowTaskTaskModel.setActuatorId(actuatorId);
+                    flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
+                    flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
+                    flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+                    flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
+                    flowTaskTaskModel.setNodeId(detail.getNodeId());
+                    flowTaskTaskModel.setNodeIp(detail.getNodeIp());
+                    flowTaskTaskModel.setNodeName(detail.getNodeName());
+                    flowTaskTaskModelList.add(flowTaskTaskModel);
                 }
-            }
-            //上传pcap包虚拟机
-            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
-                    log.error("upload flow file info error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+                this.bulkCreate(flowTaskTaskModelList);
+
+                //保存流量任务配置信息
+                List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();
+                for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+                    FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
+                    flowTaskConfModel.setTaskId(flowTaskTaskModel.getId());
+                    flowTaskConfModel.setKeepRunning(1);
+                    flowTaskConfModel.setReplay(1);
+                    flowTaskConfModel.setRateUnlimited(1);
+                    FlowTaskConf flowTaskConf = new FlowTaskConf();
+                    if (ResourceTypeEnum.SCRIPT.toValue() == flowTaskTaskModel.getResourceType()) {
+                        List<FlowTaskAttackConf> attackConfs = addFlowTaskFlowInfoMap.get(flowTaskTaskModel.getFlowId()).getAttackConfs();
+                        if (CollectionUtils.isNotEmpty(attackConfs)) {
+                            flowTaskConf.setAttackConfs(attackConfs);
+                        } else {
+                            List<FlowScriptParamModel> flowScriptParamModelList = flowScriptParamService.selectByFlowId(flowTaskTaskModel.getFlowId());
+                            if (CollectionUtils.isNotEmpty(flowScriptParamModelList)) {
+                                List<FlowTaskAttackConf> flowTaskAttackConfList = new ArrayList<FlowTaskAttackConf>();
+                                for (FlowScriptParamModel flowScriptParamModel : flowScriptParamModelList) {
+                                    FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                                    flowTaskAttackConf.setConfDesc(flowScriptParamModel.getParamDesc());
+                                    flowTaskAttackConf.setConfType(flowScriptParamModel.getParamType());
+                                    flowTaskAttackConf.setConfKey(flowScriptParamModel.getParamKey());
+                                    flowTaskAttackConf.setConfValue(flowScriptParamModel.getParamValue());
+                                    flowTaskAttackConfList.add(flowTaskAttackConf);
+                                }
+                                flowTaskConf.setAttackConfs(flowTaskAttackConfList);
+                            }
+                        }
+                    }
+                    flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
+                    flowTaskConfModelList.add(flowTaskConfModel);
+                }
+                flowTaskConfService.bulkCreate(flowTaskConfModelList);
+                //初始化网口
+                for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+                    if (!initNetwork(macAddress, flowTaskTaskModel.getId(), detail.getNodeIp(), actuatorId, total)) {
+                        log.error("init network error");
+                        throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+                    }
+                }
+                //上传pcap包虚拟机
+                for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                    if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
+                        log.error("upload flow file info error");
+                        throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+                    }
                 }
             }
         }
@@ -275,9 +280,10 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
      * @param taskId
      * @param targetIp
      * @param actuatorId
+     * @param total
      * @return
      */
-    public boolean initNetwork(String mac, String taskId, String targetIp, String actuatorId) {
+    public boolean initNetwork(String mac, String taskId, String targetIp, String actuatorId, int total) {
         log.info("FlowTaskTaskServiceImpl.initNetwork begin. mac:{}, taskId:{}, targetIp:{}, actuatorId:{}", mac, taskId, targetIp, actuatorId);
         if (StringUtils.isEmpty(mac) || StringUtils.isEmpty(taskId) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
             return false;
@@ -292,6 +298,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
             network.put("mac", mac);
             network.put("task_id", taskId);
             network.put("target_ip", targetIp);
+            network.put("total", total);
             networks.add(network);
             object.put("network_infos", networks);
             String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
