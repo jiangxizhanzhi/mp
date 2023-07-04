@@ -27,15 +27,17 @@ public enum CsceneErrorCode implements ErrorCode {
     FLOW_NOT_EXIST("MP-110212", "flow_not_exist"),
 
     // validation-api params
-    PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),
-    PARAMS_SHOULD_NOT_EMPTY("MP-110292", "params_should_not_empty"),
-    PARAMS_FLOWS_DATA_TOO_LONG("MP-110293", "params_flows_data_too_long"),
-    PARAMS_FIRE_RULES_OUT_OF_LIMIT("MP-110294", "params_fire_rules_out_of_limit"),
-    PARAMS_NAME_TOO_LONG("MP-110295", "params_name_too_long"),
-    PARAMS_DESCRIPTION_TOO_LONG("MP-110296", "params_description_too_long"),
-    SCENE_INSTANCE_IS_CLEARING("MP-110297", "scene_instance_is_clearing"),
-    SCENE_INSTANCE_NEED_CLEAR("MP-110298", "scene_instance_need_clear"),
-    SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110299", "scene_instance_still_need_clear"),
+    PARAMS_SHOULD_NOT_NULL("MP-110281", "params_should_not_null"),
+    PARAMS_SHOULD_NOT_EMPTY("MP-110282", "params_should_not_empty"),
+    PARAMS_FLOWS_DATA_TOO_LONG("MP-110283", "params_flows_data_too_long"),
+    PARAMS_FIRE_RULES_OUT_OF_LIMIT("MP-110284", "params_fire_rules_out_of_limit"),
+    PARAMS_NAME_TOO_LONG("MP-110285", "params_name_too_long"),
+    PARAMS_DESCRIPTION_TOO_LONG("MP-110286", "params_description_too_long"),
+    PARAMS_SAME_CIDR_FOR_COLLECTION("MP-110287", "params_same_cidr_for_collection"),
+
+    SCENE_INSTANCE_IS_CLEARING("MP-110291", "scene_instance_is_clearing"),
+    SCENE_INSTANCE_NEED_CLEAR("MP-110292", "scene_instance_need_clear"),
+    SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110293", "scene_instance_still_need_clear"),
     PARAMS_FIELD_ERROR("MP-110300", "params_field_error");
 
     CsceneErrorCode(String code, String message) {

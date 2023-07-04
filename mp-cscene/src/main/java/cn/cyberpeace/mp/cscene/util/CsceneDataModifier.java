@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,6 +37,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class CsceneDataModifier {
+
+    public static final String ENABLE_FLOW_COLLECT = "enable_flow_collect";
+    public static final String CIDR = "cidr";
+
     /**
      * 端口中补充协议
      */
@@ -360,7 +366,7 @@ public class CsceneDataModifier {
         }
     }
 
-    private static void removeFilePathPrefix(SceneDataBO sceneDataBO){
+    private static void removeFilePathPrefix(SceneDataBO sceneDataBO) {
         if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
             SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
             if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
@@ -549,7 +555,7 @@ public class CsceneDataModifier {
         correctReturnCsceneData(csceneInstanceBO, true);
     }
 
-    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO,boolean handlerHidden) {
+    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
         if (handlerHidden) {
@@ -806,6 +812,45 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkSameCidrForCpcollection(CsceneBO csceneBO) {
+        SceneConfigDataBO sceneConfigDataBO = csceneBO.getSceneConfig();
+        if (sceneConfigDataBO != null && sceneConfigDataBO.getPlugins() != null && sceneConfigDataBO.getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY) != null) {
+            ScenePluginDataBO collctionPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY);
+            var sceneSwitchMap = collctionPluginDataBO.getScene();
+            boolean checkCidr = Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_FLOW_COLLECT));
+            if(!checkCidr){
+                var elements = collctionPluginDataBO.getElements();
+                if (elements != null && !elements.isEmpty()) {
+                    for(Map<String, Object> map : elements.values()){
+                        if (Boolean.TRUE.toString().equals(map.containsKey(ENABLE_FLOW_COLLECT))) {
+                            checkCidr = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(!checkCidr){
+                return;
+            }
+            //检查cpcloud下是否有相同cidr
+            ScenePluginDataBO cloudPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            var elements = cloudPluginDataBO.getElements();
+            Set<String> cidrSet = new HashSet();
+            if (elements != null && !elements.isEmpty()) {
+                for(Map<String, Object> map : elements.values()){
+                    if (!ObjectUtils.isEmpty(map.get(CIDR))) {
+                       String cidr = String.valueOf(map.get(CIDR));
+                       if(cidrSet.contains(cidr)){
+                           throw new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+                       }
+                       cidrSet.add(cidr);
+                    }
+                }
+            }
+        }
+    }
+
+
     public static void checkFirewallRules(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             var ports = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElementPorts();
@@ -838,7 +883,7 @@ public class CsceneDataModifier {
             for (var entry : elements.entrySet()) {
                 CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
                 if (CollectionUtils.isNotEmpty(elementBO.getVirtualUsbs())) {
-                    int maxUsbNums = 4 ;
+                    int maxUsbNums = 4;
                     if (elementBO.getVirtualUsbs().size() > maxUsbNums) {
                         String name = "";
                         for (var srcElement : csceneBO.getSceneConfig().getTopology().getElements()) {
