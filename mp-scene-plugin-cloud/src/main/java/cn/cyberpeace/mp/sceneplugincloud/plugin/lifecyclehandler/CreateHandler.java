@@ -247,8 +247,10 @@ public class CreateHandler extends HandlerCommon {
             if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
                 List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
                 srcAllocationPools.forEach(srcAllocationPool -> {
-                    allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
-                            srcAllocationPool.getEnd()));
+                    if (StringUtils.isNotEmpty(srcAllocationPool.getStart()) && StringUtils.isNotEmpty(srcAllocationPool.getEnd())) {
+                        allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
+                                srcAllocationPool.getEnd()));
+                    }
                 });
                 subnet.setAllocationPools(allocationPools);
             }
