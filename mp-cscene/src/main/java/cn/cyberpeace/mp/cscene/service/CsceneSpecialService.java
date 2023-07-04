@@ -586,6 +586,39 @@ public class CsceneSpecialService {
     }
 
     /**
+     * 查询使用虚拟usb的场景实例
+     *
+     * @param uuid
+     * @return
+     */
+    public ServiceResult<List<DeviceReferCsceneStat>> statVirtualUsbUsedCscenes(String uuid) {
+        var referCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class, SceneElementModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        SceneElementModel.class, SceneElementModel::getScene)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .filterLink(SceneElementModel.class, SceneElementModel::getNodeId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getSceneElement)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .selectAs(CsceneInstanceModel::getId, DeviceReferCsceneInstanceStat::getCsceneId)
+                .selectAs(CsceneInstanceModel::getCreateUser, DeviceReferCsceneInstanceStat::getCreateUser)
+                .selectAs(CsceneInstanceModel::getCreateUsername, DeviceReferCsceneInstanceStat::getCreateUsername)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .selectAs(SceneModel::getName, DeviceReferCsceneInstanceStat::getName)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterContains(CloudPluginSceneElementModel::getVirtualUsbs, uuid)
+                .distinct();
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneInstanceMapper.list(referCondition,
+                DeviceReferCsceneStat.class);
+        return new ServiceResult<>(deviceReferCsceneStats);
+    }
+
+    /**
      * 查询引用了实体usb的场景模板
      *
      * @param uuid
