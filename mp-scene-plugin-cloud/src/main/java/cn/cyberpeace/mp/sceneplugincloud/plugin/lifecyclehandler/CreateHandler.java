@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -236,7 +237,11 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             // 默认开启dhcp
             var dhcp = connectedNetwork.network.getDhcp();
-            subnet.setEnableDhcp(dhcp == null || dhcp);
+            if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
+                subnet.setEnableDhcp(dhcp == null || dhcp);
+            } else {
+                subnet.setEnableDhcp(true);
+            }
 
             var srcAllocationPools = connectedNetwork.network.getAllocationPools();
             if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {

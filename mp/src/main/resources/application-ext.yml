@@ -75,6 +75,9 @@ mp:
     ext-var:
       gns3-ip: ${GNS3_IP:10.100.7.1}
       gns3-port: ${GNS3_PORT:8088}
+  scene:
+    ext-var:
+      dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
 
 # for kaptcha
 #kaptcha:
