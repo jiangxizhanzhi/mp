@@ -1024,28 +1024,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
-        CsceneContextHolder.setCsceneInstanceId(id);
-        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
-        if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
-            return new ServiceResult<>(null);
-        }
-        if (context.getPassThrough() == null) {
-            CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
-            var csceneInstanceModel = getModelMapper().get(id);
-            csceneInstance.fromModel(csceneInstanceModel);
-        }
-        context.loadTransparentContext();
+        try {
+            CsceneContextHolder.setCsceneInstanceId(id);
+            CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
+            if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
+                return new ServiceResult<>(null);
+            }
+            if (context.getPassThrough() == null) {
+                CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
+                var csceneInstanceModel = getModelMapper().get(id);
+                csceneInstance.fromModel(csceneInstanceModel);
+            }
+            context.loadTransparentContext();
 
-        var sceneId = getSceneId(id);
-        if (StringUtils.isEmpty(sceneId)) {
-            return new ServiceResult<>(null);
-        }
-        var cloudScenePluginContext = context.toCloudScenePluginContext();
-        var result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
-                context.getAccessUserId(), cloudScenePluginContext);
+            var sceneId = getSceneId(id);
+            if (StringUtils.isEmpty(sceneId)) {
+                return new ServiceResult<>(null);
+            }
+            var cloudScenePluginContext = context.toCloudScenePluginContext();
+            var result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
+                    context.getAccessUserId(), cloudScenePluginContext);
 
-        this.reportElementAccessUser(sceneId, nodeId);
-        return result;
+            this.reportElementAccessUser(sceneId, nodeId);
+            return result;
+        } finally {
+            CsceneContextHolder.resetContext();
+        }
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
@@ -1074,25 +1078,29 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<NodeConnectionBO> disableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
-        CsceneContextHolder.setCsceneInstanceId(id);
-        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
-        if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
-            return new ServiceResult<>(null);
-        }
-        if (context.getPassThrough() == null) {
-            CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
-            var csceneInstanceModel = getModelMapper().get(id);
-            csceneInstance.fromModel(csceneInstanceModel);
-        }
-        context.loadTransparentContext();
+        try {
+            CsceneContextHolder.setCsceneInstanceId(id);
+            CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
+            if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
+                return new ServiceResult<>(null);
+            }
+            if (context.getPassThrough() == null) {
+                CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
+                var csceneInstanceModel = getModelMapper().get(id);
+                csceneInstance.fromModel(csceneInstanceModel);
+            }
+            context.loadTransparentContext();
 
-        var sceneId = getSceneId(id);
-        if (StringUtils.isEmpty(sceneId)) {
-            return new ServiceResult<>(null);
+            var sceneId = getSceneId(id);
+            if (StringUtils.isEmpty(sceneId)) {
+                return new ServiceResult<>(null);
+            }
+            var result = scenePluginCloudSceneService.disableRemoteRecording(sceneId, nodeId, context.getAccessUserId(), connectionId);
+            this.reportElementAccessUser(sceneId, nodeId);
+            return result;
+        } finally {
+            CsceneContextHolder.resetContext();
         }
-        var result = scenePluginCloudSceneService.disableRemoteRecording(sceneId, nodeId, context.getAccessUserId(), connectionId);
-        this.reportElementAccessUser(sceneId, nodeId);
-        return result;
     }
 
     /**
