@@ -133,6 +133,10 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
     @Override
     public void createElement(String nodeId) {
+        var element = getElement(nodeId);
+        if (element == null) {
+            return;
+        }
         String sceneId = getSourceSceneId();
         List<AddFlowTaskTaskInfo> details = new ArrayList<>();
         List<Flow> flows = getElement(nodeId).getFlows();
