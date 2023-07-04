@@ -245,6 +245,9 @@ public class SceneService {
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
+        if (SceneEventUtils.hasProcessingScene(SceneModel.Event.PAUSE, id)) {
+            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
+        }
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
