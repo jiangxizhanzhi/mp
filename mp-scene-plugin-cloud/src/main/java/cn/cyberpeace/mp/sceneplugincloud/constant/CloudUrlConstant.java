@@ -79,6 +79,7 @@ public class CloudUrlConstant {
 
     public static final String CREATE_PORTS = "/v1/ports";
     public static final String UPDATE_PORTS = "/v1/ports";
+    public static final String DELETE_PORTS = "/v1/ports/{port_id}";
 
     public static final String MODIFY_INSTANCE_IP = "/v1/scenarios/modify_instance_ip";
     public static final String UPDATE_QOS_RULE = "/v1/scenarios/update_qos_rules";
