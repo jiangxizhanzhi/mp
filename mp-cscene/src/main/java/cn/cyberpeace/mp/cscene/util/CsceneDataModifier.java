@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CsceneDataModifier {
 
-    public static final String ENABLE_FLOW_COLLECT = "enable_flow_collect";
+    public static final String ENABLE_PROBE_COLLECT = "enable_probe_collect";
     public static final String CIDR = "cidr";
 
     /**
@@ -817,12 +816,12 @@ public class CsceneDataModifier {
         if (sceneConfigDataBO != null && sceneConfigDataBO.getPlugins() != null && sceneConfigDataBO.getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY) != null) {
             ScenePluginDataBO collctionPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY);
             var sceneSwitchMap = collctionPluginDataBO.getScene();
-            boolean checkCidr = Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_FLOW_COLLECT));
+            boolean checkCidr = sceneSwitchMap.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_PROBE_COLLECT).toString());
             if(!checkCidr){
                 var elements = collctionPluginDataBO.getElements();
                 if (elements != null && !elements.isEmpty()) {
                     for(Map<String, Object> map : elements.values()){
-                        if (Boolean.TRUE.toString().equals(map.containsKey(ENABLE_FLOW_COLLECT))) {
+                        if (map.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(map.get(ENABLE_PROBE_COLLECT).toString())) {
                             checkCidr = true;
                             break;
                         }
@@ -841,7 +840,9 @@ public class CsceneDataModifier {
                     if (!ObjectUtils.isEmpty(map.get(CIDR))) {
                        String cidr = String.valueOf(map.get(CIDR));
                        if(cidrSet.contains(cidr)){
-                           throw new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
+                           throw ex;
                        }
                        cidrSet.add(cidr);
                     }
