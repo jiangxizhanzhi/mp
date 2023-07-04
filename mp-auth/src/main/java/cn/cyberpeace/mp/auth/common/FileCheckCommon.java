@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -72,6 +73,10 @@ public class FileCheckCommon {
 
     public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
         String type = FileTypeUtil.getType(inputStream);
+        if (StringUtils.isBlank(type)) {
+            // 无法获取文件头信息，直接返回true
+            return true;
+        }
         return magicHeaderList.stream().anyMatch(x -> x.equalsIgnoreCase(type));
     }
 
