@@ -97,18 +97,22 @@ public class ConnectionJob {
                 log.info("cscene not exist.");
                 continue;
             }
-            CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
-            CsceneContextHolder.setCsceneInstanceId(csceneInstanceModel.getId());
-            CsceneContextBO context = new CsceneContextBO();
-            context.setPassThrough(StringUtils.isEmpty(csceneInstanceModel.getPassThrough()) ? new HashMap<>() : JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
-            }));
-            if (context.getPassThrough() == null) {
-                CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
-                csceneInstance.fromModel(csceneInstanceModel);
+            try {
+                CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
+                CsceneContextHolder.setCsceneInstanceId(csceneInstanceModel.getId());
+                CsceneContextBO context = new CsceneContextBO();
+                context.setPassThrough(StringUtils.isEmpty(csceneInstanceModel.getPassThrough()) ? new HashMap<>() : JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
+                }));
+                if (context.getPassThrough() == null) {
+                    CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
+                    csceneInstance.fromModel(csceneInstanceModel);
+                }
+                context.loadTransparentContext();
+                scenePluginCloudSceneService.disableRemoteRecording(connectionModel.getScene(), connectionModel.getSceneElement(), connectionModel.getAccessUser(), connectionModel.getConnectionId());
+                csceneInstanceService.reportElementAccessUser(connectionModel.getScene(), connectionModel.getSceneElement());
+            } finally {
+                CsceneContextHolder.resetContext();
             }
-            context.loadTransparentContext();
-            scenePluginCloudSceneService.disableRemoteRecording(connectionModel.getScene(), connectionModel.getSceneElement(), connectionModel.getAccessUser(), connectionModel.getConnectionId());
-            csceneInstanceService.reportElementAccessUser(connectionModel.getScene(), connectionModel.getSceneElement());
         }
         log.info("ConnectionJob.execute end.");
     }
