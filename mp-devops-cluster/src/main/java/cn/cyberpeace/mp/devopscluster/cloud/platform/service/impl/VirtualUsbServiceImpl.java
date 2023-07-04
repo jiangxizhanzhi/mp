@@ -263,13 +263,27 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
     private void validUsbCanDelete(List<String> uuids) {
         for (String uuid : uuids) {
             ServiceResult<List<DeviceReferCsceneStat>> referStateServiceResult = csceneSpecialService.statVirtualUsbReferCscenes(uuid);
+            ServiceResult<List<DeviceReferCsceneStat>> usedStateServiceResult = csceneSpecialService.statVirtualUsbUsedCscenes(uuid);
             List<DeviceReferCsceneStat> referStateList = referStateServiceResult.getSource();
+            List<DeviceReferCsceneStat> usedStateList = usedStateServiceResult.getSource();
+            List<String> names = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(referStateList)) {
                 List<String> sceneNames = referStateList.stream()
                         .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
                         .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
                         .collect(Collectors.toList());
-                String sceneName = StringUtils.join(sceneNames, ",");
+                names.addAll(sceneNames);
+            }
+            if (CollectionUtils.isNotEmpty(usedStateList)) {
+                List<String> sceneNames = usedStateList.stream()
+                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
+                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
+                        .collect(Collectors.toList());
+                names.addAll(sceneNames);
+            }
+            if (CollectionUtils.isNotEmpty(names)) {
+                names = names.stream().distinct().collect(Collectors.toList());
+                String sceneName = StringUtils.join(names, ",");
                 throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneName));
             }
         }
