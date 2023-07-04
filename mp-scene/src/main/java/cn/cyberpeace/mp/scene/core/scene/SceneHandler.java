@@ -749,6 +749,7 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             log.error("failed to createElement , sceneId is {} , nodeId is {}, exception is {}", getSceneId(), nodeId, ExceptionUtils.getStackTrace(e));
+            log.error("failed to createElement", e);
             errorElement(nodeId, SceneElementModel.Event.CREATE, e.getMessage());
             return;
         }
