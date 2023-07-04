@@ -5,14 +5,17 @@
     <select id="realTimeRateByTaskId" parameterType="java.util.Map"
             resultType="cn.cyberpeace.mp.flow.bo.FlowRealTimeRate">
         <foreach collection="conditions" item="item" open="" close="" separator="union">
-            select task_id as taskId, #{item.endTime} as statisticalTime, #{item.offsetValue} as second, avg(tx_bps) as txBps
-            from mp_flow_task_record
-            where task_id in
+            select r.task_id as taskId, #{item.endTime} as statisticalTime, #{item.offsetValue} as second, avg(r.tx_bps)
+            as txBps
+            from mp_flow_task_record r
+            left join mp_flow_task_task t on t.id = r.task_id
+            where t.task_status = 1
+              and r.task_id in
             <foreach collection="taskIds" item="record" open="(" close=")" separator=",">
                 #{record}
             </foreach>
-            and create_time &lt;= #{item.endTime} and create_time &gt; #{item.startTime}
-            group by task_id
+            and r.create_time &lt;= #{item.endTime} and r.create_time &gt; #{item.startTime}
+            group by r.task_id
         </foreach>
         order by taskId,statisticalTime
     </select>
