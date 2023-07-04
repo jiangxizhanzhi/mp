@@ -384,6 +384,19 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private boolean isQosRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
+        var newSrcPort = newCloudPort.getSrcPort();
+        if (newSrcPort.getEgress() == null) {
+            newSrcPort.setEgress(-1);
+        }
+        if (newSrcPort.getIngress() == null) {
+            newSrcPort.setIngress(-1);
+        }
+        if (newSrcPort.getDelay() == null) {
+            newSrcPort.setDelay(0);
+        }
+        if(newSrcPort.getLoss() == null){
+            newSrcPort.setLoss(0);
+        }
         boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
         boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
         boolean delayChange = newCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay();
@@ -399,6 +412,18 @@ public class ElementModifyHandler extends HandlerCommon {
         data.setQosId(originCloudPort.getQosId());
         data.setQosRules(new ArrayList<>());
         var newSrcPort = newCloudPort.getSrcPort();
+        if (newSrcPort.getEgress() == null) {
+            newSrcPort.setEgress(-1);
+        }
+        if (newSrcPort.getIngress() == null) {
+            newSrcPort.setIngress(-1);
+        }
+        if (newSrcPort.getDelay() == null) {
+            newSrcPort.setDelay(0);
+        }
+        if(newSrcPort.getLoss() == null){
+            newSrcPort.setLoss(0);
+        }
         if (newSrcPort.getEgress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
             VirtualNic.QosRule qosRule = new VirtualNic.QosRule();
             if (newSrcPort.getEgress() > 0) {
