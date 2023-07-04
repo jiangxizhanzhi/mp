@@ -526,6 +526,7 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             log.error("failed to create scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            log.error("failed to create scene", e);
             errorScene(SceneModel.Event.CREATE, e.getMessage());
             return false;
         }
