@@ -33,6 +33,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_DEL_SNAPSHOT_URL = "/v1/scenarios/device_snapshot";
 
     public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/v1/instances/{instance_id}/action";
+    public static final String VIRTUAL_MACHINE_RESIZE_URL = "/v1/scenarios/instance_resize";
     public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/containers/{instance_id}/action";
 
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
