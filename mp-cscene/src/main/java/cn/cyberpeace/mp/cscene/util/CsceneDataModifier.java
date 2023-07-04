@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -730,7 +733,13 @@ public class CsceneDataModifier {
                 baseSceneDataBO.getTopology().getElements().forEach(e -> {
                     BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
                     sceneElement.setFile(FsCommon.genHttpUrl(sceneElement.getFile()));
-                    sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
+                    if (StringUtils.isNotEmpty(sceneElement.getIcon2()) && sceneElement.getIcon2().startsWith("/api/mp") && !sceneElement.getIcon2().startsWith("/api/mp/file")) {
+                        List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
+                        var icon2 = DefaultImgUtil.pickPathToFdfsUrl(sceneElement.getIcon2(), mappingModelList);
+                        sceneElement.setIcon2(icon2);
+                    } else {
+                        sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
+                    }
 //                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {
