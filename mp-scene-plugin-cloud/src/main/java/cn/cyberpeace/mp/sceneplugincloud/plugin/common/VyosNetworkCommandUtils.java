@@ -346,6 +346,34 @@ public class VyosNetworkCommandUtils {
         }
     }
 
+    public static boolean isQosChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
+        var originWrapper = new ConfigParamsWrapper(originElement, originPluginHandler);
+        var newWrapper = new ConfigParamsWrapper(newElement, newPluginHandler);
+        Set<String> originKeys = new HashSet<>();
+        Set<String> newKeys = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(originWrapper.pluginPorts)) {
+            var ports = originWrapper.pluginPorts;
+            for (var p : ports) {
+                Integer delay = p.getSrcPort().getDelay();
+                Integer loss = p.getSrcPort().getLoss();
+                originKeys.add(p.getSrcPort().getId() + "_" + (delay == null ? "0" : delay) + "_" + (loss == null ? "0" : loss));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(newWrapper.pluginPorts)) {
+            var ports = newWrapper.pluginPorts;
+            for (var p : ports) {
+                Integer delay = p.getSrcPort().getDelay();
+                Integer loss = p.getSrcPort().getLoss();
+                newKeys.add(p.getSrcPort().getId() + "_" + (delay == null ? "0" : delay) + "_" + (loss == null ? "0" : loss));
+            }
+        }
+        if (originKeys.size() != newKeys.size()) {
+            return true;
+        }
+        originKeys.removeAll(newKeys);
+        return originKeys.size() == 0;
+    }
+
     public static boolean isProtocolsChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
         return isProtocolsChange(new ConfigParamsWrapper(originElement, originPluginHandler),
                 new ConfigParamsWrapper(newElement, newPluginHandler));
