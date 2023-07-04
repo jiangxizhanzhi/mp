@@ -19,10 +19,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachineResizeData implements CloudHttpData {
-    private Boolean waitForStatus = true;
-    private Map<String, String> resize = new HashMap<>();
-
-    public void setFlavorId(String flavorId) {
-        this.resize.put("flavor", flavorId);
-    }
+    private String flavor;
+    private String instanceId;
 }

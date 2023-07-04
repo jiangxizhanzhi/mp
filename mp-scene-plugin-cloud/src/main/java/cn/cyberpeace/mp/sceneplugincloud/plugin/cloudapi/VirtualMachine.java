@@ -180,9 +180,10 @@ public class VirtualMachine extends CloudClient {
 
     public boolean resize(String instanceId, String flavorId) {
         VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
-        resizeData.setFlavorId(flavorId);
+        resizeData.setFlavor(flavorId);
+        resizeData.setInstanceId(instanceId);
         try {
-            return doAction(instanceId, resizeData);
+            return instanceResize(resizeData);
         } catch (Exception e) {
             if (e.getMessage().contains("instances must change flavor!")) {
                 return true;
@@ -210,6 +211,16 @@ public class VirtualMachine extends CloudClient {
     private boolean doAction(String instanceId, CloudHttpData httpData) {
         try {
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
+            return true;
+        } catch (Exception e) {
+            throw new MpRuntimeException(e.getMessage());
+        }
+    }
+
+    private boolean instanceResize(VirtualMachineResizeData httpData) {
+        try {
+            cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             return true;
         } catch (Exception e) {
