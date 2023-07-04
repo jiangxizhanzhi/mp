@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.cron;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -14,14 +15,18 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -85,6 +90,7 @@ public class ConnectionJob {
         }
         for (CloudPluginSceneConnectionModel connectionModel : disConnectionList) {
             HumanCondition csceneInstanceHumanCondition = new HumanCondition();
+            csceneInstanceHumanCondition.filterEqual(CsceneInstanceModel::getDeleted, false);
             csceneInstanceHumanCondition.filterEqual(CsceneInstanceModel::getScene, connectionModel.getScene());
             CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.first(csceneInstanceHumanCondition);
             if (csceneInstanceModel == null) {
@@ -94,6 +100,8 @@ public class ConnectionJob {
             CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
             CsceneContextHolder.setCsceneInstanceId(csceneInstanceModel.getId());
             CsceneContextBO context = new CsceneContextBO();
+            context.setPassThrough(StringUtils.isEmpty(csceneInstanceModel.getPassThrough()) ? new HashMap<>() : JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
+            }));
             if (context.getPassThrough() == null) {
                 CsceneInstanceBO csceneInstance = new CsceneInstanceBO();
                 csceneInstance.fromModel(csceneInstanceModel);
