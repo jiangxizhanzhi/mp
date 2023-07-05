@@ -672,6 +672,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestParam(value = "node_id", required = false) String nodeId,
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
+        modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.restartElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
         return result;
@@ -684,6 +685,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/start_element")
     public ServiceResult<Boolean> startElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         return result;
     }
@@ -695,6 +697,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/stop_element")
     public ServiceResult<Boolean> stopElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         return result;
     }
@@ -758,6 +761,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                   @RequestParam(value = "node_id", required = false) String nodeId,
                                                   @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
+        modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result =
                 modelService.recreateElement(request.getId(), request.getNodeId(), request.getImage(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
