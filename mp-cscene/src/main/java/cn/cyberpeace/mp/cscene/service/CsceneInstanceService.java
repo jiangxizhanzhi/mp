@@ -798,46 +798,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        boolean lowLevel = true;
-        List<Integer> levels = queryParams.getLevels();
-        if (CollectionUtils.isNotEmpty(levels)) {
-            lowLevel = levels.get(0) <= 4;
-        }
-
         // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
-        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
-            if (lowLevel) {
-                // 传入的sceneId不需要提前转
-                if (queryParams.getType().equals(1)) {
-                    return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO,
-                            queryParams, FileEventType.PROCESS.name());
-                }
-
-                if (queryParams.getType().equals(2)) {
-                    return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
-                            FileEventType.PORT.name());
-                }
-
-                if (queryParams.getType().equals(3)) {
-                    // 网络连接同端口
-                    return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
-                            FileEventType.INTERNET_CONNECTION.name());
-                }
-
-                if (queryParams.getType().equals(4)) {
-                    // 文件变动
-                    return getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY, queryParams,
-                            FileEventType.FILE.name());
-                }
-
-                if (queryParams.getType().equals(5)) {
-                    // 用户变动
-                    return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams,
-                            FileEventType.USERS.name());
-                }
+        if (Objects.nonNull(queryParams.getType())) {
+            // 传入的sceneId不需要提前转
+            if (queryParams.getType().equals(1)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO,
+                        queryParams, FileEventType.PROCESS.name());
             }
 
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            if (queryParams.getType().equals(2)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
+                        FileEventType.PORT.name());
+            }
+
+            if (queryParams.getType().equals(3)) {
+                // 网络连接同端口
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
+                        FileEventType.INTERNET_CONNECTION.name());
+            }
+
+            if (queryParams.getType().equals(4)) {
+                // 文件变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY, queryParams,
+                        FileEventType.FILE.name());
+            }
+
+            if (queryParams.getType().equals(5)) {
+                // 用户变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams,
+                        FileEventType.USERS.name());
+            }
         }
 
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
