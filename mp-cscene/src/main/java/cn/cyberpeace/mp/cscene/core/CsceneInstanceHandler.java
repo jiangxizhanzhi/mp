@@ -309,7 +309,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.snapshotElementSync(sceneId, nodeId, snapshotId, snapshotName, description, generateSceneContext()).getSource();
     }
 
-    private String getSceneId() {
+    public String getSceneId() {
         if (this.initLazy) {
             CsceneInstanceModel instance = readCscene();
             return instance == null ? null : instance.getScene();
