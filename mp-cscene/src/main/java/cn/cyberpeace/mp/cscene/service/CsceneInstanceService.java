@@ -1160,12 +1160,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
-     * @param sceneId 场景id
+     * @param csceneId 场景id
      * @param nodeId 节点id
      */
-    public void unSupportedOperation(String sceneId,String nodeId) {
+    public void unSupportedOperation(String csceneId, String nodeId) {
+        CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneId, null, true);
+        String sceneId = csceneInstanceHandler.getSceneId();
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-        CloudPluginSceneElementBO cloudElement =sceneHandler.getPluginElement("cpcloud", nodeId);
+        CloudPluginSceneElementBO cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
         if (cloudElement != null && cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
             throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
         }
