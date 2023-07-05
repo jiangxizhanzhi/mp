@@ -581,12 +581,6 @@ public class ElementModifyHandler extends HandlerCommon {
                         checkAccessModes(newCloudElement);
                     }
                 }
-                // 加完端口后补充下网络信息
-                CloudPluginSceneElementNetworkModel cloudPluginSceneElementNetworkModel = net.toModel();
-                var networkModel = BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class).get(cloudPluginSceneElementNetworkModel.getResourceId());
-                if (networkModel == null) {
-                    BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class).create(cloudPluginSceneElementNetworkModel);
-                }
             }
         }
 
@@ -602,8 +596,12 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (deleteCloudPort != null && StringUtils.isNotEmpty(deleteCloudPort.getResourceId())) {
                     var deletePort = deleteCloudPort.getSrcPort();
                     var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
+                    var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
+                    var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
                     if (originNet != null) {
                         this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                    } else if (originNet1 != null) {
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId());
                     }
                 }
             }
