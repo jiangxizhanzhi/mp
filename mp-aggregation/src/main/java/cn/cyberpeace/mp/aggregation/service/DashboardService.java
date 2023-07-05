@@ -180,6 +180,7 @@ public class DashboardService {
                 .vmCount(0)
                 .entityCount(0)
                 .sceneCount(0)
+                .dynamips(0)
                 .build();
         var user = UserCommon.getCurrentUser();
         if (user == null) {
