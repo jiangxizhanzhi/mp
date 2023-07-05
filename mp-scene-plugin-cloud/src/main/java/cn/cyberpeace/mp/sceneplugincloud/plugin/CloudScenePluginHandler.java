@@ -319,8 +319,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
-        } else if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
         }
         if (StringUtils.isNotEmpty(image)) {
             element.setImage(image);
@@ -378,8 +376,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
-        } else if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
         }
         //节点启动处理类执行启动节点
         new StartHandler(this, getSceneHandler().getScene().getEvent()).startElement(element);
@@ -390,8 +386,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
-        } else if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
         }
         //节点启动处理类执行启动节点
         new StopHandler(this, getSceneHandler().getScene().getEvent()).stopElement(element);
@@ -402,8 +396,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
-        } else if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
         }
         new RestartHandler(this, getSceneHandler().getScene().getEvent()).restartElement(element);
     }
