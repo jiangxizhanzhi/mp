@@ -771,6 +771,9 @@ public class AsyncPlatFlowTaskService {
             }
         } catch (Exception e) {
             log.error("start task error for {}", taskId, e);
+            if (ExceptionUtils.getStackTrace(e).contains("504 Gateway Time-out")) {
+                reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+            }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
     }
@@ -909,12 +912,7 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("batch start tasks error: {}", ExceptionUtils.getStackTrace(e));
             if (ExceptionUtils.getStackTrace(e).contains("504 Gateway Time-out")) {
-                String command = "python3 /opt/project_dirs/traffic_generators/utils/trex_reload.py";
-                SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
-                serverInfo.setHost(flowActuatorModel.getIp());
-                serverInfo.setUser("root");
-                serverInfo.setPassword("111111");
-                SshUtil.execCommand(serverInfo, command);
+                reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
             }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
@@ -970,6 +968,9 @@ public class AsyncPlatFlowTaskService {
             }
         } catch (Exception e) {
             log.error("stop task error for {}", taskId, e);
+            if (ExceptionUtils.getStackTrace(e).contains("504 Gateway Time-out")) {
+                reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+            }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         } finally {
             // 清除任务回调缓存
@@ -1034,11 +1035,28 @@ public class AsyncPlatFlowTaskService {
             }
         } catch (Exception e) {
             log.error("batch stop tasks error");
+            if (ExceptionUtils.getStackTrace(e).contains("504 Gateway Time-out")) {
+                reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+            }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         } finally {
             // 清除任务回调缓存
             FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + flowTaskTaskModels.get(0).getSceneId());
         }
+    }
+
+    /**
+     * 重启trex服务
+     * @param trexIp
+     */
+    private void reloadTrex(String trexIp) {
+        log.info("reload trex server");
+        String command = "python3 /opt/project_dirs/traffic_generators/utils/trex_reload.py";
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(trexIp);
+        serverInfo.setUser("root");
+        serverInfo.setPassword("111111");
+        SshUtil.execCommand(serverInfo, command);
     }
 
     /**
