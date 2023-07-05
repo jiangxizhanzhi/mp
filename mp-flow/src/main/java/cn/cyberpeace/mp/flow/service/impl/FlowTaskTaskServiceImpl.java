@@ -176,7 +176,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
                     FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
                     flowTaskConfModel.setTaskId(flowTaskTaskModel.getId());
-                    flowTaskConfModel.setKeepRunning(1);
+                    flowTaskConfModel.setKeepRunning(0);
                     flowTaskConfModel.setReplay(1);
                     flowTaskConfModel.setRateUnlimited(1);
                     FlowTaskConf flowTaskConf = new FlowTaskConf();
