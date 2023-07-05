@@ -88,6 +88,9 @@ public class AsyncPlatFlowTaskService {
     @Autowired
     private FlowTaskConfService flowTaskConfService;
 
+    @Autowired
+    private FlowTaskRecordService flowTaskRecordService;
+
     /**
      * tgn代码目录
      */
@@ -674,6 +677,9 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
+        // 将之前流量记录状态设为无效
+        flowTaskRecordService.batchUpdateStatus(0, Collections.singletonList(taskId));
+
         // 解析任务配置
         FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
         if (StringUtils.isNotBlank(sourceIp)) {
@@ -802,6 +808,9 @@ public class AsyncPlatFlowTaskService {
             log.error("batch start tasks error, flowActuator not exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
+
+        // 批量更新任务之前记录状态为无效
+        flowTaskRecordService.batchUpdateStatus(0, taskIds);
 
         List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
         flowTaskTaskModels.forEach(flowTaskTaskModel -> {
