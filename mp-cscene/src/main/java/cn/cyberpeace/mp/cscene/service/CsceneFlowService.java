@@ -131,7 +131,7 @@ public class CsceneFlowService {
         //流量执行器不存在则创建流量执行器
         if (StringUtils.isEmpty(actuatorId)) {
             String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
-            actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
+            actuatorId = asyncPlatFlowTaskService.asyncStartExecutor(trexName);
             FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
             scene.setExecutor(actuatorId);
             flowScenePluginHandler.saveScene();
