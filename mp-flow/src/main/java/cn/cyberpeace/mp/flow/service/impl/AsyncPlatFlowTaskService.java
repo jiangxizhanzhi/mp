@@ -445,27 +445,6 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
-     * 异步启动流量执行器
-     * @param trexName
-     * @return
-     */
-    public String asyncStartExecutor(String trexName) {
-        String uuid = TextUtils.uuid();
-        this.asyncStartExecutor(uuid, trexName);
-        return uuid;
-    }
-
-    /**
-     * 启动trex虚拟机
-     * @param uuid
-     * @param trexName
-     */
-    @Async
-    public void asyncStartExecutor(String uuid, String trexName) {
-        this.startExecutor(uuid, trexName);
-    }
-
-    /**
      * 异步新增虚拟机、添加网口
      *
      */
