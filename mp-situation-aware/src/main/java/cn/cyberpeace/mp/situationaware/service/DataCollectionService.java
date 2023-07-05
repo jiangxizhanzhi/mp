@@ -1571,6 +1571,19 @@ public class DataCollectionService extends CollectionBaseService {
             } else {
                 // 文件
                 boolQueryBuilder.mustNot(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES, SicLaunchConfig.LAUNCH_ID_NET_CONNS, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
+                if(CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
+                    // 文件查询没有等级时，只查询低等级和等级为空的数据
+                    BoolQueryBuilder levelBoolQurey = QueryBuilders.boolQuery();
+                    // 规则级别匹配条件
+                    List<Integer> levels = Arrays.asList(0, 1, 2, 3, 4);
+                    levelBoolQurey.should(QueryBuilders.termsQuery("rule.level", levels));
+
+                    // 规则级别字段不存在条件：级别字段不存在，默认为低等级
+                    ExistsQueryBuilder ruleLevelExistsQuery = QueryBuilders.existsQuery("rule.level");
+                    levelBoolQurey.should(QueryBuilders.boolQuery().mustNot(ruleLevelExistsQuery));
+                    levelBoolQurey.minimumShouldMatch(1);
+                    boolQueryBuilder.filter(levelBoolQurey);
+                }
             }
         } else {
             BoolQueryBuilder userBoolQurey = QueryBuilders.boolQuery();
