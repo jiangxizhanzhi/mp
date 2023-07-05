@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -542,7 +542,9 @@ public class ElementModifyHandler extends HandlerCommon {
         // 本次可能更新的端口
         Set<String> mayUpdatePortIds = new HashSet<>(newPortIds);
         mayUpdatePortIds.retainAll(originPortIds);
-
+        log.debug("newCloudElement is {}, originCloudElement is {}, addPortIds is {}, delPortIds is {}, mayUpdatePortIds is {}",
+                JsonCommon.stringify(newCloudElement), JsonCommon.stringify(originCloudElement),
+                JsonCommon.stringify(addPortIds), JsonCommon.stringify(delPortIds), JsonCommon.stringify(mayUpdatePortIds));
         for (String addPortId : addPortIds) {
             var addCloudPort = this.newCloudScenePluginHandler.getPort(addPortId);
             var addPort = this.newCloudScenePluginHandler.getPort(addPortId).getSrcPort();
