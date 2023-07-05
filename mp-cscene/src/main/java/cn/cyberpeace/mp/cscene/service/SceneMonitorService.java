@@ -484,7 +484,8 @@ public class SceneMonitorService {
         boolean supported = false;
         if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == virtualType
                 || BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == virtualType
-                || BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == virtualType) {
+                || BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == virtualType
+                || BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS == virtualType) {
             supported = true;
         }
         return supported;
