@@ -557,10 +557,6 @@ public class ElementModifyHandler extends HandlerCommon {
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 } else {
-                    VirtualPortCreateData portCreateData = new VirtualPortCreateData();
-                    portCreateData.setFixedIp(addPort.getIp());
-                    portCreateData.setNetworkId(net.getResourceId());
-                    var newPortResult = virtualPort.create(portCreateData);
                     var result = this.containerAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp());
                     addPort.setIp(result.getFixedIp());
                     addPort.setMacAddr(result.getMacAddress());
