@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.hutool.core.net.Ipv4Util;
 import lombok.Getter;
@@ -71,7 +73,7 @@ public class DynamicCommandUtils {
                     cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
                     var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port);
                     if (StringUtils.isNotEmpty(net.getCidr())) {
-                        IpParser ipParser = new IpParser(net.getCidr());
+                        IpParser ipParser = new IpParser(net.getCidr(), paramsWrapper.element);
                         cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
                     } else {
                         cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", "255.255.255.0"));
@@ -101,7 +103,7 @@ public class DynamicCommandUtils {
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
             for (var staticRoute : paramsWrapper.element.getStaticRoutes()) {
-                IpParser ipParser = new IpParser(staticRoute.getDestination());
+                IpParser ipParser = new IpParser(staticRoute.getDestination(), paramsWrapper.element);
                 cmds.add(ADD_ROUTE.replace("${dest}", ipParser.getNet()).replace("${mask}", ipParser.getMask()).replace("${nexthop}", staticRoute.getNexthop()));
             }
             return cmds;
@@ -117,16 +119,20 @@ public class DynamicCommandUtils {
         private int maskBit;
         private String net;
 
-        IpParser(String ipWithMask) {
+        IpParser(String ipWithMask, CloudPluginSceneElementBO elementBO) {
+            String elementName = elementBO == null ? "" : elementBO.getSrcElement().getName();
             this.ipWithMask = ipWithMask;
             String[] info = ipWithMask.split("/");
             this.ip = info[0];
             this.maskBit = Integer.parseInt(info[1]);
             this.mask = Ipv4Util.getMaskByMaskBit(this.maskBit);
-
-            long maskIpLong = Ipv4Util.ipv4ToLong(mask);
-            long ipLong = Ipv4Util.ipv4ToLong(ip);
-            this.net = Ipv4Util.longToIpv4(ipLong & maskIpLong);
+            try {
+                long maskIpLong = Ipv4Util.ipv4ToLong(mask);
+                long ipLong = Ipv4Util.ipv4ToLong(ip);
+                this.net = Ipv4Util.longToIpv4(ipLong & maskIpLong);
+            } catch (Exception e) {
+                throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_STATIC_ROUTE.format(elementName, mask));
+            }
         }
 
     }
