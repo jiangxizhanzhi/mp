@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class SituationAwareCommonConfigUtil {
         }
         for (String config : CONFIGS) {
             try {
-                Resource resource = new ClassPathResource("config/" + config + CONFIG_PATH_SUFFIX);
+                Resource resource = new ClassPathResource(URLDecoder.decode("config/" + config + CONFIG_PATH_SUFFIX, "UTF-8"));
                 String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
                 CONFIG_MAP.put(config, content);
             } catch (Exception e) {
