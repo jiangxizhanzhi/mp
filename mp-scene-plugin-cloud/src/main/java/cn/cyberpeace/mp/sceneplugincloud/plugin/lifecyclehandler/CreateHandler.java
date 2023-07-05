@@ -779,7 +779,8 @@ public class CreateHandler extends HandlerCommon {
                         }
                     } else if (command.contains("/opt/wazuha/stop.sh")) {
                         // 安装探针失败要重试
-                        containerClient.executeCommand(containerId, command, runnable, 3);
+                        containerClient.executeCommand(containerId, "echo \"" + command + "\" >> /tmp/tmp_installers/install_wazuh.sh");
+                        containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/install_wazuh.sh");
                     } else {
                         containerClient.executeCommand(containerId, command);
                     }
