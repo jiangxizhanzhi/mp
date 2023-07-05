@@ -10,6 +10,7 @@
             from mp_flow_task_record r
             left join mp_flow_task_task t on t.id = r.task_id
             where t.task_status = 1
+              and r.record_status = 1
               and r.task_id in
             <foreach collection="taskIds" item="record" open="(" close=")" separator=",">
                 #{record}
