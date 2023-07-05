@@ -64,5 +64,12 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
      */
     void syncRecord(JSONObject jsonMessage);
 
+    /**
+     * 批量更新任务状态
+     * @param status
+     * @param taskIds
+     */
+    void batchUpdateStatus(int status, List<String> taskIds);
+
 }
 
