@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +68,7 @@ public class ConnectionJob {
         HumanCondition humanConditionConnection = new HumanCondition();
         humanConditionConnection.filterIn(CloudPluginSceneConnectionModel::getScene, idList.toArray());
         humanConditionConnection.filterEqual(CloudPluginSceneConnectionModel::getDisable, false);
+        humanConditionConnection.filterLessThan(CloudPluginSceneConnectionModel::getUpdateTime, LocalDateTime.now().minusSeconds(5));
         List<CloudPluginSceneConnectionModel> cloudPluginSceneConnectionModelList = CloudPluginSceneConnectionMapper.list(humanConditionConnection);
         if (CollectionUtils.isEmpty(cloudPluginSceneConnectionModelList)) {
             log.info("CloudPluginSceneConnectionModelList is empty. No connection should been send.");
