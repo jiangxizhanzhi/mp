@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -18,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.collection.ConcurrentHashSet;
@@ -395,7 +398,7 @@ public class ElementModifyHandler extends HandlerCommon {
         if (newSrcPort.getDelay() == null) {
             newSrcPort.setDelay(-1);
         }
-        if(newSrcPort.getLoss() == null){
+        if (newSrcPort.getLoss() == null) {
             newSrcPort.setLoss(-1);
         }
         boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
@@ -422,7 +425,7 @@ public class ElementModifyHandler extends HandlerCommon {
         if (newSrcPort.getDelay() == null) {
             newSrcPort.setDelay(0);
         }
-        if(newSrcPort.getLoss() == null){
+        if (newSrcPort.getLoss() == null) {
             newSrcPort.setLoss(0);
         }
         if (newSrcPort.getEgress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
@@ -513,7 +516,7 @@ public class ElementModifyHandler extends HandlerCommon {
         Set<String> newPortIds;
         Set<String> originPortIds;
         if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
-            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());;
+            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
         } else {
             newPortIds = new ConcurrentHashSet<>();
         }
@@ -577,6 +580,12 @@ public class ElementModifyHandler extends HandlerCommon {
 
                         checkAccessModes(newCloudElement);
                     }
+                }
+                // 加完端口后补充下网络信息
+                CloudPluginSceneElementNetworkModel cloudPluginSceneElementNetworkModel = net.toModel();
+                var networkModel = BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class).get(cloudPluginSceneElementNetworkModel.getResourceId());
+                if (networkModel == null) {
+                    BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class).create(cloudPluginSceneElementNetworkModel);
                 }
             }
         }
