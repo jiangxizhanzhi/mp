@@ -131,7 +131,7 @@ public class DynamicCommandUtils {
                 long ipLong = Ipv4Util.ipv4ToLong(ip);
                 this.net = Ipv4Util.longToIpv4(ipLong & maskIpLong);
             } catch (Exception e) {
-                throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_STATIC_ROUTE.format(elementName, mask));
+                throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_STATIC_ROUTE.format(elementName, ipWithMask));
             }
         }
 
