@@ -205,11 +205,13 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 }
                 flowTaskConfService.bulkCreate(flowTaskConfModelList);
                 //初始化网口
+                List<String> taskIdList = new ArrayList<>();
                 for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
-                    if (!initNetwork(macAddress, flowTaskTaskModel.getId(), detail.getNodeIp(), actuatorId, total)) {
-                        log.error("init network error");
-                        throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                    }
+                    taskIdList.add(flowTaskTaskModel.getId());
+                }
+                if (!initNetwork(macAddress, taskIdList, detail.getNodeIp(), actuatorId, total)) {
+                    log.error("init network error");
+                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
                 }
                 //上传pcap包虚拟机
                 for (FlowInfoModel flowInfoModel : flowInfoModelList) {
@@ -277,15 +279,15 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     /**
      * 初始化网口
      * @param mac
-     * @param taskId
+     * @param taskIdList
      * @param targetIp
      * @param actuatorId
      * @param total
      * @return
      */
-    public boolean initNetwork(String mac, String taskId, String targetIp, String actuatorId, int total) {
-        log.info("FlowTaskTaskServiceImpl.initNetwork begin. mac:{}, taskId:{}, targetIp:{}, actuatorId:{}", mac, taskId, targetIp, actuatorId);
-        if (StringUtils.isEmpty(mac) || StringUtils.isEmpty(taskId) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
+    public boolean initNetwork(String mac, List<String> taskIdList, String targetIp, String actuatorId, int total) {
+        log.info("FlowTaskTaskServiceImpl.initNetwork begin. mac:{}, taskIdList:{}, targetIp:{}, actuatorId:{}", mac, taskIdList, targetIp, actuatorId);
+        if (StringUtils.isEmpty(mac) || CollectionUtils.isEmpty(taskIdList) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
             return false;
         }
         boolean isSuccess = true;
@@ -294,12 +296,14 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
             String hostUrl = CommonUtil.getHostUrl(flowActuatorModel.getIp());
             JSONObject object = new JSONObject();
             JSONArray networks = new JSONArray();
-            JSONObject network = new JSONObject();
-            network.put("mac", mac);
-            network.put("task_id", taskId);
-            network.put("target_ip", targetIp);
-            network.put("total", total);
-            networks.add(network);
+            for (String taskId : taskIdList) {
+                JSONObject network = new JSONObject();
+                network.put("mac", mac);
+                network.put("task_id", taskId);
+                network.put("target_ip", targetIp);
+                network.put("total", total);
+                networks.add(network);
+            }
             object.put("network_infos", networks);
             String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
