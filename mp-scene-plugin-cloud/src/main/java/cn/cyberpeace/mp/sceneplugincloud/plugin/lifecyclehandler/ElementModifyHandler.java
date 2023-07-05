@@ -373,8 +373,14 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void qosRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> mayUpdatePortIds = new ConcurrentHashSet<>();
+        Set<String> originPortIds = new ConcurrentHashSet<>();
+        if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
+            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        }
+        if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
+            mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        }
         mayUpdatePortIds.retainAll(originPortIds);
         if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
             for (String portId : mayUpdatePortIds) {
