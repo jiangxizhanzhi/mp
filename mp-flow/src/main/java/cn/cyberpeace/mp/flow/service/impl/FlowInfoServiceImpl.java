@@ -460,6 +460,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             String filePath = null;
             try {
                 filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+                log.info("{} upload result path: {} with suffix: {}", addRequest.getPcapFile().getOriginalFilename(), filePath, suffix);
             } catch (IOException e) {
                 log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
@@ -706,6 +707,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             String filePath = null;
             try {
                 filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
+                log.info("{} upload result path: {} with suffix: {}", modifyRequest.getPcapFile().getOriginalFilename(), filePath, suffix);
             } catch (IOException e) {
                 log.error("upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
