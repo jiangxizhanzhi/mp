@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -35,6 +36,8 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
@@ -649,5 +652,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         csceneAuthMapper.bulkDelete(csceneAuthMapper.list(humanCondition).stream()
                 .map(m -> m.getId())
                 .toArray(String[]::new));
+    }
+
+    public List<String> getOneSceneInstanceAllElementIds(String sceneId) {
+        List<String> ids = new ArrayList<>();
+        var sceneElementModels = BeanCommon.getBean(SceneElementMapper.class).list(new HumanCondition()
+                .filterEqual(SceneElementModel::getScene, sceneId));
+        if (CollectionUtils.isNotEmpty(sceneElementModels)) {
+            ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
+        }
+        return ids;
     }
 }
