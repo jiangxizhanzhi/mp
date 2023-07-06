@@ -19,4 +19,6 @@ public class SceneAllElementsQueryRequest {
     private Boolean isAll;
     @ApiModelProperty(value = "是否采集")
     private Boolean isCollect;
+    @ApiModelProperty(value = "是否包含删除中的节点")
+    private Boolean includeDeleting;
 }
