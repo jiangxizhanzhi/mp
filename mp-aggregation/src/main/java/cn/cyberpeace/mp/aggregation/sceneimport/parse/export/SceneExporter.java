@@ -149,7 +149,7 @@ public class SceneExporter {
                 }
 
                 // 下载图片
-                if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
+                if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/") || device.getLogo().startsWith("group1/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = FsCommon.downloadRawContent(logoUrl);
                     // 判断图片文件类型
