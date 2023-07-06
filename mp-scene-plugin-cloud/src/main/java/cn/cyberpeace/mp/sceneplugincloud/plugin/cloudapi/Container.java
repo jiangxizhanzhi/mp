@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
@@ -27,6 +28,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStartDat
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStopData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleDeleteConnectionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.MacvlanContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
@@ -81,13 +83,28 @@ public class Container extends CloudClient {
         return result.getData();
     }
 
-    public boolean deletePort(ContainerDeletePortData deletePortData) {
+    public boolean deletePort(ContainerDeletePortData deletePortData, CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO) {
         heavyConcurrentWait();
 
         cloudPost(CloudUrlConstant.CONTAINER_DELETE_PORT_URL, deletePortData, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
         cloudDelete(CloudUrlConstant.DELETE_PORTS.replace("{port_id}", deletePortData.getPortId()), null, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+        if (cloudPluginSceneElementPortBO != null && CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
+            // 删除原来创建的端口映射 以及原来的接入连接
+            cloudPluginSceneElementPortBO.getAccessModes().forEach(a -> {
+                if (a.getFwdId() != null) {
+                    cloudDelete(CloudUrlConstant.DELETE_PORT_MAPPING.replace("{fwd_id}", a.getFwdId()), null, null, new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+                }
+                if (a.getConnectionId() != null) {
+                    GuacamoleDeleteConnectionData guacamoleDeleteConnectionData = new GuacamoleDeleteConnectionData();
+                    guacamoleDeleteConnectionData.setConnectionId(a.getConnectionId());
+                    cloudDelete(CloudUrlConstant.DELETE_CONNECTION_URL, guacamoleDeleteConnectionData, null, new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+                }
+            });
+        }
         return true;
     }
 

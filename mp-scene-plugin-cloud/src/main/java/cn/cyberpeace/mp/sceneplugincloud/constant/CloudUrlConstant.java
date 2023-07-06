@@ -44,6 +44,7 @@ public class CloudUrlConstant {
     public static final String COM_INFO_GET_URL = "/cpcloud/instance_control/v1/telnet";
 
     public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
+    public static final String DELETE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String EXPIRE_ALL_CONNECT = "/cpcloud/guacamole/v1/logout";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
@@ -76,6 +77,7 @@ public class CloudUrlConstant {
     public static final String ADD_VM_PORTS = "/v1/instances/{instance_id}/interfaces";
     public static final String DELETE_VM_PORTS = "/v1/instances/{instance_id}/interfaces/{port_id}";
     public static final String CREATE_PORT_MAPPING = "/cpcloud/fwd_app/v1/";
+    public static final String DELETE_PORT_MAPPING = "/cpcloud/fwd_app/v1/{fwd_id}";
 
     public static final String CREATE_PORTS = "/v1/ports";
     public static final String UPDATE_PORTS = "/v1/ports";
