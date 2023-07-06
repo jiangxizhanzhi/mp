@@ -585,6 +585,7 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+                        a.setFwdId(portMapping.getId());
 
                         checkAccessModes(newCloudElement);
                     }
@@ -607,9 +608,9 @@ public class ElementModifyHandler extends HandlerCommon {
                     var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
                     var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
                     if (originNet != null) {
-                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
                     } else if (originNet1 != null) {
-                        this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId());
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
                     }
                 }
             }
@@ -635,7 +636,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                     virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
                 } else {
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId(), originCloudPort);
                 }
             } else if (originNet == null) {
                 // 虚拟机容器分开处理
@@ -710,7 +711,7 @@ public class ElementModifyHandler extends HandlerCommon {
                     newCloudPort.setResourceId(result.getPortId());
                 } else {
                     // 去掉旧的
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId(), originCloudPort);
                     // 添加新的
                     var result = this.containerAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newPort.getIp());
 
@@ -811,11 +812,11 @@ public class ElementModifyHandler extends HandlerCommon {
         return container.addPort(addPortData);
     }
 
-    private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId) {
+    private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId, CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO) {
         ContainerDeletePortData deletePortData = new ContainerDeletePortData();
         deletePortData.setContainerId(elementResourceId);
         deletePortData.setNetworkId(networkResourceId);
         deletePortData.setPortId(portResourceId);
-        return container.deletePort(deletePortData);
+        return container.deletePort(deletePortData, cloudPluginSceneElementPortBO);
     }
 }
