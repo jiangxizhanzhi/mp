@@ -980,7 +980,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public List<FlowInfoModel> selectByFlowIds(List<String> flowIds) {
-        return getModelMapper().selectByFlowIds(flowIds);
+        List<FlowInfoModel> flowInfoModels = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(flowIds)) {
+            flowInfoModels = getModelMapper().selectByFlowIds(flowIds);
+        }
+        return flowInfoModels;
     }
 
     /**

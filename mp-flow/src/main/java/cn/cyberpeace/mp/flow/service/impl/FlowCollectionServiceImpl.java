@@ -81,7 +81,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
                         relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
-                flowInfoModels = flowInfoMapper.selectByFlowIds(idList);
+                flowInfoModels = this.selectByFlowIds(idList);
             }
         }
 
@@ -101,7 +101,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
                         relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
-                flowInfoModels = flowInfoMapper.selectByFlowIds(idList);
+                flowInfoModels = this.selectByFlowIds(idList);
             }
         }
 
@@ -122,7 +122,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         }
 
         List<String> addFlowIds = addRequest.getFlowIds();
-        List<FlowInfoModel> existFlowInfos = flowInfoMapper.selectByFlowIds(addFlowIds);
+        List<FlowInfoModel> existFlowInfos = this.selectByFlowIds(addFlowIds);
         if (CollectionUtils.isNotEmpty(existFlowInfos)) {
             addFlowIds = existFlowInfos.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
         } else {
@@ -180,7 +180,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      */
     private void updateRelFlowCount(FlowCollectionModel collectionModel, List<String> flowIds, boolean isIncrease) {
         // 更新关联流量数量
-        List<FlowInfoModel> flowInfoModels = flowInfoMapper.selectByFlowIds(flowIds);
+        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(flowIds);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
             // 背景流量数量
             int backgroundCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.BACKGROUND.toValue() == model.getInteractiveType()).count();
@@ -200,6 +200,19 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         } else {
             log.warn("关联流量信息不存在");
         }
+    }
+
+    /**
+     * 根据流量id查询流量信息
+     * @param flowIds
+     * @return
+     */
+    private List<FlowInfoModel> selectByFlowIds(List<String> flowIds) {
+        List<FlowInfoModel> flowInfoModels = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(flowIds)) {
+            flowInfoModels = flowInfoMapper.selectByFlowIds(flowIds);
+        }
+        return flowInfoModels;
     }
 
     /**
