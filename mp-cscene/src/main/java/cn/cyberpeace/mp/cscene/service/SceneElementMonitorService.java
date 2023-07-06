@@ -822,6 +822,7 @@ public class SceneElementMonitorService {
 
         connectionState.setDescription(model.getDescription());
         connectionState.setTime(model.getTime());
+        connectionState.setLevel(model.getLevel());
 
         return connectionState;
     }

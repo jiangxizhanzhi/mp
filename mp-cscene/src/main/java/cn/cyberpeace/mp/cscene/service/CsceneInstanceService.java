@@ -411,11 +411,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 hostEventBO.setSystemTypeName(SystemTypeUtils.getStandardSystemType(element.getSystemType()));
                 hostEventBO.setType(type);
                 hostEventBO.setProbeName(probeId2Name.get(probeId));
-                if (Objects.isNull(hostEventBO.getLevel())) {
+                Map<String, Object> map = JsonCommon.beanToMap(r);
+                if (Objects.nonNull(map.get("level"))) {
+                    hostEventBO.setLevel((Integer) map.get("level"));
+                } else {
                     // 默认等级
                     hostEventBO.setLevel(3);
                 }
-                Map<String, Object> map = JsonCommon.beanToMap(r);
                 var time = map.get("time");
                 if (Objects.nonNull(time)) {
                     hostEventBO.setTime(TimeUtils.stringToLocalDateTime(time.toString()));

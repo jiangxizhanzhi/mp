@@ -1947,6 +1947,7 @@ public class ScenePluginCollectionSceneService {
         process.setName(wazuhProcess.getName());
         process.setDescription(wazuhProcess.getDescription());
         process.setTime(wazuhProcess.getTime());
+        process.setLevel(wazuhProcess.getLevel());
         return process;
     }
 

@@ -38,4 +38,7 @@ public class WazuhSystemUserModel {
     private String description;
 
     private LocalDateTime time;
+
+    @JSONField(name = "level")
+    private int level;
 }
