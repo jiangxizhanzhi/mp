@@ -238,6 +238,11 @@ public class DataCollectionService extends CollectionBaseService {
                 if(rawOutput == null) {
                     continue;
                 }
+                // 获取等级信息
+                Integer level = null;
+                if (Objects.nonNull(json.getJSONObject("rule"))) {
+                    level = json.getJSONObject("rule").getInteger("level");
+                }
 
                 String agentName = json.getJSONObject("agent").getString("name");
                 String utcTime = json.getString("timestamp");
@@ -249,6 +254,7 @@ public class DataCollectionService extends CollectionBaseService {
                     m.setFilePath((String) f);
                     m.setAgentId(agentName);
                     m.setUpdateTime(time);
+                    m.setLevel(level);
                     fileEventModels.add(m);
                 }
             }
