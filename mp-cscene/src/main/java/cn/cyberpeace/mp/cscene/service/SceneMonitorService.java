@@ -20,11 +20,13 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -174,6 +176,43 @@ public class SceneMonitorService {
         return sceneMonitorInfo;
     }
 
+    public List<ElementMonitorBasicInfo> getSceneElements(String sceneId, Boolean supportProbe, Boolean supportFlow) {
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
+
+        List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
+        for (var element : csceneInstanceBO.getScene().getTopology().getElements()) {
+            ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
+            elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, element.getId());
+            basicInfos.add(basicInfo);
+        }
+        if (Boolean.TRUE.equals(supportProbe)) {
+            basicInfos = basicInfos.stream().filter(element -> {
+                if (element.getVirtualType() == null) {
+                    return false;
+                }
+                // 容器  非核心路由器的虚拟机支持采集
+                boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+                boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+                boolean isCoreRouter = ElementTypeUtils.isCoreRouter(element.getImageName());
+                if ((isVm || isContainer) && !isCoreRouter) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }).collect(Collectors.toList());
+        }
+        if (Boolean.TRUE.equals(supportFlow)) {
+            basicInfos = basicInfos.stream().filter(element -> {
+                boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+                boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+                boolean isEntity = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE;
+                boolean isDynamips = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS;
+                return isVm || isContainer || isEntity || isDynamips;
+            }).collect(Collectors.toList());
+        }
+        return basicInfos;
+    }
 
     /**
      * 查询场景中所有的节点列表
