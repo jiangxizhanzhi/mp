@@ -36,4 +36,7 @@ public class SystemUser {
 
     @ApiModelProperty(value = "描述")
     private String description;
+
+    @ApiModelProperty(value = "级别")
+    private int level;
 }

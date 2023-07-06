@@ -684,6 +684,9 @@ public class DataCollectionService extends CollectionBaseService {
             if (Objects.nonNull(jsonObject.get("time"))) {
                 netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
             }
+            if (Objects.nonNull(jsonObject.get("level"))) {
+                netConnModel.setLevel(jsonObject.getInteger("level"));
+            }
             netConnModel.setDescription("CMD LAUNCH LOG");
             list.add(netConnModel);
         }
@@ -720,6 +723,9 @@ public class DataCollectionService extends CollectionBaseService {
             if (Objects.nonNull(jsonObject.get("time"))) {
                 processModel.setTime((LocalDateTime) jsonObject.get("time"));
             }
+            if (Objects.nonNull(jsonObject.get("level"))) {
+                processModel.setLevel(jsonObject.getIntValue("level"));
+            }
             processModel.setDescription("PROCESS");
             list.add(processModel);
         }
@@ -754,6 +760,9 @@ public class DataCollectionService extends CollectionBaseService {
             WazuhSystemUserModel userModel = JSONObject.toJavaObject(data, WazuhSystemUserModel.class);
             if (Objects.nonNull(jsonObject.get("time"))) {
                 userModel.setTime((LocalDateTime) jsonObject.get("time"));
+            }
+            if (Objects.nonNull(jsonObject.get("level"))) {
+                userModel.setLevel(jsonObject.getInteger("level"));
             }
             userModel.setDescription("USER MODIFIED");
             list.add(userModel);
@@ -935,7 +944,10 @@ public class DataCollectionService extends CollectionBaseService {
                 byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
-
+                // 添加level信息
+                if (Objects.nonNull(launchModel.getRule())) {
+                    jsonObject.put("level", launchModel.getRule().getLevel());
+                }
                 Date date = launchModel.getTimestamp();
                 if (Objects.nonNull(date)) {
                     jsonObject.put("time", date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());

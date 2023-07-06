@@ -38,4 +38,7 @@ public class WazuhNetworkConnectionModel {
     private String description;
 
     private LocalDateTime time;
+
+    @JSONField(name = "level")
+    private int level;
 }

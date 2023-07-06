@@ -113,4 +113,8 @@ public class Process {
 
     @ApiModelProperty(value = "时间")
     private LocalDateTime time;
+
+    @ApiModelProperty(value = "级别")
+    private int level;
+
 }

@@ -41,4 +41,7 @@ public class ConnectionState {
 
     @ApiModelProperty("时间")
     private LocalDateTime time;
+
+    @ApiModelProperty("级别")
+    private int level;
 }
