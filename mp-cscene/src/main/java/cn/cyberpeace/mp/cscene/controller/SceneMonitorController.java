@@ -68,6 +68,9 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return ResultCommon.success(basicInfoList);
+        }
         List<ElementMonitorBasicInfo> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(basicInfoList)) {
             for (var e : basicInfoList) {
