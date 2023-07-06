@@ -31,6 +31,9 @@ public class WazuhMonitorEventsRequest {
     @ApiModelProperty(value = "agentName列表", required = false)
     private List<String> agentNames;
 
+    @ApiModelProperty(value = "rule级别集合 范围 0 ~ 15")
+    private List<Integer> levels;
+
     /**
      * 开始时间
      */
