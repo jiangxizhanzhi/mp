@@ -947,7 +947,10 @@ public class AsyncPlatFlowTaskService {
                 log.info("stop task success for {}", taskId);
 
                 // 更新任务状态为已停止
-                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.STOPED.toValue());
+                flowTaskTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
+                flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
+                flowTaskTaskService.update(flowTaskTaskModel);
+//                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.STOPED.toValue());
                 log.info("AsyncPlatFlowTaskService.stopTask end.");
                 return ResultCommon.success(true);
             } else {
@@ -1012,8 +1015,14 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(batchStopTaskObj)) {
                 log.info("batch stop task success");
 
-                // 批量更新任务状态为运行中
-                flowTaskTaskService.batchUpdateTaskStatus(runningTaskIds, TaskStatusEnum.STOPED.toValue());
+                // 批量更新任务状态为已停止
+                List<FlowTaskTaskModel> runningFlowTaskTaskModels = flowTaskTaskService.listByTaskIds(runningTaskIds);
+                for (FlowTaskTaskModel flowTaskTaskModel : runningFlowTaskTaskModels) {
+                    flowTaskTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
+                    flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
+                }
+                flowTaskTaskService.bulkUpdate(runningFlowTaskTaskModels);
+//                flowTaskTaskService.batchUpdateTaskStatus(runningTaskIds, TaskStatusEnum.STOPED.toValue());
 
                 log.info("AsyncPlatFlowTaskService.batchStopTasks end.");
                 return ResultCommon.success(true);

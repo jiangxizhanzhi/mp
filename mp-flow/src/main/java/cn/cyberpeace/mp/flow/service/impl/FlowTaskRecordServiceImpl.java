@@ -239,10 +239,12 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         String taskId = jsonMessage.getString("task_id");
         String msg = null;
         FlowTaskTaskModel flowTaskTaskModel = flowTaskTaskMapper.get(taskId);
+        Integer oldStatus = flowTaskTaskModel.getTaskStatus();
         flowTaskTaskModel.setTaskStatus(status);
-        if (TaskTaskStatusEnum.STOPPED.toValue() == status) {
+        //防止多次推送次数多加，防止手动停止后多加次数
+        if (TaskTaskStatusEnum.STOPPED.toValue() == status && TaskTaskStatusEnum.STOPPED.toValue() != oldStatus) {
             flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
-        } else if (TaskTaskStatusEnum.ERROR.toValue() == status) {
+        } else if (TaskTaskStatusEnum.ERROR.toValue() == status && TaskTaskStatusEnum.ERROR.toValue() != oldStatus) {
             msg = jsonMessage.getString("msg");
             flowTaskTaskModel.setErrorCount(flowTaskTaskModel.getErrorCount() + 1);
         }
