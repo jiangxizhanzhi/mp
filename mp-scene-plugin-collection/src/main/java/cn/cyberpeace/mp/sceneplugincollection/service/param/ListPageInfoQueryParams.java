@@ -15,6 +15,9 @@ public class ListPageInfoQueryParams extends BasePageRequest {
     @ApiModelProperty(value = "节点id")
     private List<String> nodeIds;
 
+    @ApiModelProperty(value = "rule级别集合 范围 0 ~ 15")
+    private List<Integer> levels;
+
     @ApiModelProperty(value = "场景关闭情况下是否仍然查询数据，默认false，表示不查询")
     private Boolean fetchIfSceneInstanceShutdown = false;
 
