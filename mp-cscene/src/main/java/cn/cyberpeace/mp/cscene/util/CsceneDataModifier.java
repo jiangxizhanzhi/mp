@@ -531,6 +531,7 @@ public class CsceneDataModifier {
         if (csceneBO == null) {
             return;
         }
+        addFilePathPrefix(csceneBO);
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
@@ -720,6 +721,12 @@ public class CsceneDataModifier {
                     }
                 });
             }
+        }
+    }
+
+    private static void addFilePathPrefix(CsceneBO csceneBO) {
+        if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getLogo())) {
+            csceneBO.setLogo(FsCommon.genHttpUrl(csceneBO.getLogo()));
         }
     }
 
