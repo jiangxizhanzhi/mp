@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.service.*;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
@@ -366,6 +367,20 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     public List<FlowTaskTaskModel> listBySceneId(String sceneId) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
+        return flowTaskTaskModels;
+    }
+
+    @Override
+    public List<FlowTaskTaskModel> listByCondition(FlowTaskPageQueryParams request) {
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getSceneId, request.getSceneId());
+        if (StringUtils.isNotBlank(request.getNodeId())) {
+            condition.filterEqual(FlowTaskTaskModel::getNodeIp, request.getNodeId());
+        }
+        if (StringUtils.isNotBlank(request.getInteractiveType())) {
+            condition.filterEqual(FlowTaskTaskModel::getInteractiveType, request.getInteractiveType());
+        }
         List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
         return flowTaskTaskModels;
     }

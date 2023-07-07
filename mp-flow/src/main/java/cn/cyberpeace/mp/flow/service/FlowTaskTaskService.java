@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 
 import java.util.List;
 
@@ -91,6 +92,13 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
      * @return
      */
     List<FlowTaskTaskModel> listBySceneId(String sceneId);
+
+    /**
+     * 条件查询任务
+     * @param request
+     * @return
+     */
+    List<FlowTaskTaskModel> listByCondition(FlowTaskPageQueryParams request);
 
 }
 
