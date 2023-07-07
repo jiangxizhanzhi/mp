@@ -237,17 +237,17 @@ public class CsceneFlowService {
     }
 
     /**
-     * 根据场景实例id查询任务id集合
+     * 条件查询任务id集合
      * @param request
      * @return
      */
-    public ServiceResult<List<String>> getTaskIdsBySceneId(FlowTaskPageQueryParams request) {
+    public ServiceResult<List<String>> getTaskIds(FlowTaskPageQueryParams request) {
         String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
-
-        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listBySceneId(sceneId);
+        request.setSceneId(sceneId);
+        List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByCondition(request);
         List<String> taskIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
             taskIds = flowTaskTaskModels.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
