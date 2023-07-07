@@ -90,15 +90,15 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     }
 
     /**
-     * 根据场景实例id查询任务id集合
+     * 条件查询任务id集合
      * @param request
      * @return
      */
-    @ApiOperation("根据场景实例id查询任务id集合")
+    @ApiOperation("条件查询任务id集合")
     @GetMapping("/task_ids/list")
     public ServiceResult<List<String>> taskIdsList(FlowTaskPageQueryParams request) {
         request.ensure();
-        return csceneFlowService.getTaskIdsBySceneId(request);
+        return csceneFlowService.getTaskIds(request);
     }
 
     /**
