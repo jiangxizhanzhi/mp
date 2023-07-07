@@ -54,7 +54,7 @@ public class HostStateController {
         if (StringUtils.isEmpty(hostStateTrendRequest.getSceneId())) {
             return ResultCommon.success(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(hostStateTrendRequest.getElementIds())) {
+        if (CollectionUtils.isNotEmpty(hostStateTrendRequest.getElementIds())) {
             List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
             return ResultCommon.success(hostStates);
         } else {
