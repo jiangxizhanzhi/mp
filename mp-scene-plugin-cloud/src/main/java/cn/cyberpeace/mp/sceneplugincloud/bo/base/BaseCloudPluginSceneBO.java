@@ -11,4 +11,6 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         T extends BaseCloudPluginSceneBO<M, T, S>, S extends BaseSceneBO<?, S>> extends BasePluginSceneBO<M, T, S> {
     @ApiModelProperty(value = "是否开启录屏")
     private Boolean enableRecording;
+    @ApiModelProperty(value = "是否开启环境总速率统计")
+    private Boolean enableRate;
 }

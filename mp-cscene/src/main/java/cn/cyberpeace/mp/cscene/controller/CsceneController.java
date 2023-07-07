@@ -76,6 +76,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
         CsceneDataModifier.assembleInitCommands(csceneBO);
         CsceneDataModifier.handlerInputEnableRecording(csceneBO);
+        CsceneDataModifier.handlerEnableRate(csceneBO);
         CsceneDataModifier.checkFlowNum(csceneBO);
         //check cidr not same when enable collection
         CsceneDataModifier.checkSameCidrForCpcollection(csceneBO);
