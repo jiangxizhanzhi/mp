@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -53,6 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -329,6 +331,30 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        if (getElement(nodeId).getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
+            var newElement = getElement(nodeId).getSrcElement();
+            var originElement = originHandler.getElement(nodeId);
+            Map<String, SceneElementPortBO> portId2Port = new HashMap<>();
+            CloudScenePluginHandler originHandlerPluginHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY) ;
+            if (CollectionUtils.isNotEmpty(originElement.getPorts())) {
+                for (var p : originElement.getPorts()) {
+                    portId2Port.put(p.getId(), p);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
+                for (var p : newElement.getPorts()) {
+                    if (StringUtils.isEmpty(p.getIp())) {
+                        if (portId2Port.containsKey(p.getId())) {
+                            var net = originHandlerPluginHandler.getHandlerUtils().getNetworkByPort(p);
+                            if (net != null) {
+                                var ip = IpUtils.newRandomIps(net.getCidr(), 1, Arrays.asList(portId2Port.get(p.getId()).getIp()), net.getAllocationPools(), net.getDhcp());
+                                p.setIp(ip.get(0));
+                            }
+                        }
+                    }
+                }
+            }
         }
         CloudScenePluginHandler originCloudHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         this.getHandlerUtils().setPortNetworks(originCloudHandler.getHandlerUtils().getPortId2network());

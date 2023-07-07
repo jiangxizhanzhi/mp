@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
+import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScreenRecordData;
@@ -69,6 +70,9 @@ public class ScreenrecordService extends BaseCpService {
     @Autowired
     private UserService userService ;
 
+    @Autowired
+    private CsceneService csceneService;
+
     /**
      * 分页查询录屏文件
      * @param queryParams
@@ -118,17 +122,22 @@ public class ScreenrecordService extends BaseCpService {
                 "/recordfile_list" + getParams, ScreenrecordPageVO.class);
         log.info("page screenrecord response: {}", pageResponse);
 
+        // 获取该场景的所有节点id，因为可能已经删除了一部分节点
+        var ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
+
         List<ScreenrecordVO> responseList = new ArrayList<>();
         Integer count = 0;
         if (Objects.nonNull(pageResponse) && CollectionUtils.isNotEmpty(pageResponse.getRecord())) {
             count = pageResponse.getTotalnum();
             Set<String> existUserIds = new HashSet<>();
             pageResponse.getRecord().forEach(record -> {
-                // 结果转换
-                ScreenrecordVO response = new ScreenrecordVO();
-                response.parseResult(record);
-                responseList.add(response);
-                existUserIds.add(response.getUserId());
+                if (ids.contains(record.getHostId())) {
+                    // 结果转换
+                    ScreenrecordVO response = new ScreenrecordVO();
+                    response.parseResult(record);
+                    responseList.add(response);
+                    existUserIds.add(response.getUserId());
+                }
             });
             // 处理头像
             if (!existUserIds.isEmpty()) {

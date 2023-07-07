@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -315,7 +316,8 @@ public class ImagesConverter implements BaseConverter{
             model.setWaitForStatus(Boolean.TRUE);
             containerService.action(model, request.getInstanceId());
         } else if (ImageTypeEnum.DYNAMIPS.toValue().equals(request.getImageType())) {
-            dynamipsService.reboot(request.getInstanceId());
+            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
+//            dynamipsService.reboot(request.getInstanceId());
         }
     }
 

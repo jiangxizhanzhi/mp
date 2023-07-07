@@ -68,6 +68,9 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return ResultCommon.success(basicInfoList);
+        }
         List<ElementMonitorBasicInfo> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(basicInfoList)) {
             for (var e : basicInfoList) {
@@ -83,6 +86,21 @@ public class SceneMonitorController {
             }
         }
         return ResultCommon.success(result);
+    }
+
+    @ApiOperation(value = "按需查询场景节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "support_probe", value = "查询支持探针采集的节点", dataTypeClass = Boolean.class),
+            @ApiImplicitParam(name = "support_flow", value = "查询支持流量采集的节点", dataTypeClass = Boolean.class)
+    })
+    @GetMapping("/list_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneElements(@PathVariable String sceneId,
+                                                                         @RequestParam(required = false, name = "support_probe") Boolean supportProbe,
+                                                                         @RequestParam(required = false, name = "support_flow") Boolean supportFlow
+    ) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getSceneElements(sceneId, supportProbe, supportFlow);
+        return ResultCommon.success(basicInfoList);
     }
 
     @ApiOperation(value = "查询场景模板所有节点列表")

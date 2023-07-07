@@ -26,6 +26,7 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequestMapping("/probes")
 @Api(value = "探针管理", tags = "探针管理")
@@ -69,10 +71,10 @@ public class ProbeManagerController {
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
+        log.info("query probe meta request param: {}" ,pageQueryRequest);
         PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
-
 
     @GetMapping("/abilities/page")
     @ApiOperation(value = "分页查询探针能力")

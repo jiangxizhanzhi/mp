@@ -33,6 +33,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_DEL_SNAPSHOT_URL = "/v1/scenarios/device_snapshot";
 
     public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/v1/instances/{instance_id}/action";
+    public static final String VIRTUAL_MACHINE_RESIZE_URL = "/v1/scenarios/instance_resize";
     public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/containers/{instance_id}/action";
 
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
@@ -43,6 +44,7 @@ public class CloudUrlConstant {
     public static final String COM_INFO_GET_URL = "/cpcloud/instance_control/v1/telnet";
 
     public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
+    public static final String DELETE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String EXPIRE_ALL_CONNECT = "/cpcloud/guacamole/v1/logout";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
@@ -75,9 +77,11 @@ public class CloudUrlConstant {
     public static final String ADD_VM_PORTS = "/v1/instances/{instance_id}/interfaces";
     public static final String DELETE_VM_PORTS = "/v1/instances/{instance_id}/interfaces/{port_id}";
     public static final String CREATE_PORT_MAPPING = "/cpcloud/fwd_app/v1/";
+    public static final String DELETE_PORT_MAPPING = "/cpcloud/fwd_app/v1/{fwd_id}";
 
     public static final String CREATE_PORTS = "/v1/ports";
     public static final String UPDATE_PORTS = "/v1/ports";
+    public static final String DELETE_PORTS = "/v1/ports/{port_id}";
 
     public static final String MODIFY_INSTANCE_IP = "/v1/scenarios/modify_instance_ip";
     public static final String UPDATE_QOS_RULE = "/v1/scenarios/update_qos_rules";

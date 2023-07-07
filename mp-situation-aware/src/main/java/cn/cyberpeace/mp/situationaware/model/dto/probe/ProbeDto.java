@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.model.dto.probe;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2022/4/26 10:06
  */
+@ToString
 @Data
 public class ProbeDto extends ProbeModel {
 

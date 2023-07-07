@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,6 +36,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class CsceneDataModifier {
+
+    public static final String ENABLE_PROBE_COLLECT = "enable_probe_collect";
+    public static final String CIDR = "cidr";
+
     /**
      * 端口中补充协议
      */
@@ -360,7 +365,7 @@ public class CsceneDataModifier {
         }
     }
 
-    private static void removeFilePathPrefix(SceneDataBO sceneDataBO){
+    private static void removeFilePathPrefix(SceneDataBO sceneDataBO) {
         if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
             SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
             if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
@@ -540,6 +545,7 @@ public class CsceneDataModifier {
         if (csceneBO == null) {
             return;
         }
+        addFilePathPrefix(csceneBO);
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
@@ -563,7 +569,7 @@ public class CsceneDataModifier {
         correctReturnCsceneData(csceneInstanceBO, true);
     }
 
-    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO,boolean handlerHidden) {
+    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
         if (handlerHidden) {
@@ -732,6 +738,12 @@ public class CsceneDataModifier {
         }
     }
 
+    private static void addFilePathPrefix(CsceneBO csceneBO) {
+        if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getLogo())) {
+            csceneBO.setLogo(FsCommon.genHttpUrl(csceneBO.getLogo()));
+        }
+    }
+
     /**
      * 纠正返回场景模板时文件的地址,增加前缀
      *
@@ -820,6 +832,47 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkSameCidrForCpcollection(CsceneBO csceneBO) {
+        SceneConfigDataBO sceneConfigDataBO = csceneBO.getSceneConfig();
+        if (sceneConfigDataBO != null && sceneConfigDataBO.getPlugins() != null && sceneConfigDataBO.getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY) != null) {
+            ScenePluginDataBO collctionPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY);
+            var sceneSwitchMap = collctionPluginDataBO.getScene();
+            boolean checkCidr = sceneSwitchMap.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_PROBE_COLLECT).toString());
+            if(!checkCidr){
+                var elements = collctionPluginDataBO.getElements();
+                if (elements != null && !elements.isEmpty()) {
+                    for(Map<String, Object> map : elements.values()){
+                        if (map.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(map.get(ENABLE_PROBE_COLLECT).toString())) {
+                            checkCidr = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(!checkCidr){
+                return;
+            }
+            //检查cpcloud下是否有相同cidr
+            ScenePluginDataBO cloudPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            var elements = cloudPluginDataBO.getElements();
+            Set<String> cidrSet = new HashSet();
+            if (elements != null && !elements.isEmpty()) {
+                for(Map<String, Object> map : elements.values()){
+                    if (!ObjectUtils.isEmpty(map.get(CIDR))) {
+                       String cidr = String.valueOf(map.get(CIDR));
+                       if(cidrSet.contains(cidr)){
+                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
+                           throw ex;
+                       }
+                       cidrSet.add(cidr);
+                    }
+                }
+            }
+        }
+    }
+
+
     public static void checkFirewallRules(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             var ports = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElementPorts();
@@ -852,7 +905,7 @@ public class CsceneDataModifier {
             for (var entry : elements.entrySet()) {
                 CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
                 if (CollectionUtils.isNotEmpty(elementBO.getVirtualUsbs())) {
-                    int maxUsbNums = 4 ;
+                    int maxUsbNums = 4;
                     if (elementBO.getVirtualUsbs().size() > maxUsbNums) {
                         String name = "";
                         for (var srcElement : csceneBO.getSceneConfig().getTopology().getElements()) {

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -10,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -17,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.collection.ConcurrentHashSet;
@@ -369,8 +373,14 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void qosRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> mayUpdatePortIds = new ConcurrentHashSet<>();
+        Set<String> originPortIds = new ConcurrentHashSet<>();
+        if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
+            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        }
+        if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
+            mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        }
         mayUpdatePortIds.retainAll(originPortIds);
         if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
             for (String portId : mayUpdatePortIds) {
@@ -392,10 +402,10 @@ public class ElementModifyHandler extends HandlerCommon {
             newSrcPort.setIngress(-1);
         }
         if (newSrcPort.getDelay() == null) {
-            newSrcPort.setDelay(0);
+            newSrcPort.setDelay(-1);
         }
-        if(newSrcPort.getLoss() == null){
-            newSrcPort.setLoss(0);
+        if (newSrcPort.getLoss() == null) {
+            newSrcPort.setLoss(-1);
         }
         boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
         boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
@@ -421,7 +431,7 @@ public class ElementModifyHandler extends HandlerCommon {
         if (newSrcPort.getDelay() == null) {
             newSrcPort.setDelay(0);
         }
-        if(newSrcPort.getLoss() == null){
+        if (newSrcPort.getLoss() == null) {
             newSrcPort.setLoss(0);
         }
         if (newSrcPort.getEgress() > 0 || newSrcPort.getDelay() > 0 || newSrcPort.getLoss() > 0) {
@@ -512,7 +522,7 @@ public class ElementModifyHandler extends HandlerCommon {
         Set<String> newPortIds;
         Set<String> originPortIds;
         if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
-            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());;
+            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
         } else {
             newPortIds = new ConcurrentHashSet<>();
         }
@@ -532,7 +542,9 @@ public class ElementModifyHandler extends HandlerCommon {
         // 本次可能更新的端口
         Set<String> mayUpdatePortIds = new HashSet<>(newPortIds);
         mayUpdatePortIds.retainAll(originPortIds);
-
+        log.debug("newCloudElement is {}, originCloudElement is {}, addPortIds is {}, delPortIds is {}, mayUpdatePortIds is {}",
+                JsonCommon.stringify(newCloudElement), JsonCommon.stringify(originCloudElement),
+                JsonCommon.stringify(addPortIds), JsonCommon.stringify(delPortIds), JsonCommon.stringify(mayUpdatePortIds));
         for (String addPortId : addPortIds) {
             var addCloudPort = this.newCloudScenePluginHandler.getPort(addPortId);
             var addPort = this.newCloudScenePluginHandler.getPort(addPortId).getSrcPort();
@@ -546,7 +558,7 @@ public class ElementModifyHandler extends HandlerCommon {
                     addCloudPort.setResourceId(result.getPortId());
                 } else {
                     var result = this.containerAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp());
-                    addPort.setIp(result.getFixedIp());
+                    addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 }
@@ -554,6 +566,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(addCloudPort.getAccessModes())) {
                     for (var a : addCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -570,6 +585,7 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
+                        a.setFwdId(portMapping.getId());
 
                         checkAccessModes(newCloudElement);
                     }
@@ -589,8 +605,12 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (deleteCloudPort != null && StringUtils.isNotEmpty(deleteCloudPort.getResourceId())) {
                     var deletePort = deleteCloudPort.getSrcPort();
                     var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
+                    var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
+                    var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
                     if (originNet != null) {
-                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId());
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
+                    } else if (originNet1 != null) {
+                        this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
                     }
                 }
             }
@@ -616,7 +636,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                     virtualMachine.deletePort(originCloudElement.getResourceId(), originCloudPort.getResourceId());
                 } else {
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId(), originCloudPort);
                 }
             } else if (originNet == null) {
                 // 虚拟机容器分开处理
@@ -649,6 +669,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -688,7 +711,7 @@ public class ElementModifyHandler extends HandlerCommon {
                     newCloudPort.setResourceId(result.getPortId());
                 } else {
                     // 去掉旧的
-                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId());
+                    this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId(), originCloudPort);
                     // 添加新的
                     var result = this.containerAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newPort.getIp());
 
@@ -700,6 +723,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isNotEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -743,6 +769,9 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 新增端口映射
                 if (CollectionUtils.isNotEmpty(newCloudPort.getAccessModes())) {
                     for (var a : newCloudPort.getAccessModes()) {
+                        if (StringUtils.isEmpty(a.getId())) {
+                            a.setId(TextUtils.uuid());
+                        }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
                             continue;
                         }
@@ -783,11 +812,11 @@ public class ElementModifyHandler extends HandlerCommon {
         return container.addPort(addPortData);
     }
 
-    private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId) {
+    private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId, CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO) {
         ContainerDeletePortData deletePortData = new ContainerDeletePortData();
         deletePortData.setContainerId(elementResourceId);
         deletePortData.setNetworkId(networkResourceId);
         deletePortData.setPortId(portResourceId);
-        return container.deletePort(deletePortData);
+        return container.deletePort(deletePortData, cloudPluginSceneElementPortBO);
     }
 }

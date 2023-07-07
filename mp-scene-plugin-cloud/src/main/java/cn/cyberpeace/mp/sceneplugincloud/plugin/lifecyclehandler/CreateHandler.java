@@ -722,16 +722,19 @@ public class CreateHandler extends HandlerCommon {
                         finnalCommands.toArray(new String[0])));
             } else {
                 for (var command : commands) {
+                    Runnable runnable = null ;
                     if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
                         String[] path = command.split(StringUtils.SPACE);
                         try {
                             ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                            runnable = () -> ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
                         } catch (Exception e) {
                             log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
                         }
                     } else if (command.contains("/opt/wazuha/stop.sh")) {
                         // 安装探针失败要重试
-                        containerClient.executeCommand(containerId, command, 2);
+                        containerClient.executeCommand(containerId, "echo \"" + command + "\" >> /tmp/tmp_installers/install_wazuh.sh");
+                        containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/install_wazuh.sh");
                     } else {
                         containerClient.executeCommand(containerId, command);
                     }

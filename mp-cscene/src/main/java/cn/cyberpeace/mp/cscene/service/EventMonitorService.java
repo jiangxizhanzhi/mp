@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -203,7 +204,9 @@ public class EventMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         BaseRequestUtil.processDefaultTimeRange(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
-
+        if (CollectionUtils.isNotEmpty(trendRequest.getElementIds())) {
+            return processEventTrend(sceneIds, trendRequest.getElementIds(), trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        }
         return processEventTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 

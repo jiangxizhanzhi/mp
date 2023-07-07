@@ -58,9 +58,11 @@ import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -1148,6 +1150,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         //执行节点启动
         boolean result = instanceHandler.startElement(nodeId);
         return new ServiceResult<>(result);
+    }
+
+    /**
+     * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
+     * @param csceneId 场景id
+     * @param nodeId 节点id
+     */
+    public void unSupportedOperation(String csceneId, String nodeId) {
+        CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneId, null, true);
+        String sceneId = csceneInstanceHandler.getSceneId();
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudPluginSceneElementBO cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
+        if (cloudElement != null && cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+            throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
+        }
     }
 
     /**
