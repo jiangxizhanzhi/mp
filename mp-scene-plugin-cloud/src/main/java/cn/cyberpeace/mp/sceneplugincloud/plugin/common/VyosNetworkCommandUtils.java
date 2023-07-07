@@ -323,6 +323,12 @@ public class VyosNetworkCommandUtils {
             paramsWrapper.pluginPorts.forEach(p -> {
                 SceneElementPortBO srcPort = p.getSrcPort();
                 if (Objects.nonNull(srcPort)) {
+                    if (srcPort.getDelay() == null) {
+                        srcPort.setDelay(-1);
+                    }
+                    if (srcPort.getLoss() == null) {
+                        srcPort.setLoss(-1);
+                    }
                     Integer delay = srcPort.getDelay();
                     Integer loss = srcPort.getLoss();
                     Integer order = srcPort.getOrder();
