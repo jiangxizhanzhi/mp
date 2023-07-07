@@ -93,15 +93,17 @@ public class RecreateHandler extends HandlerCommon {
                 return;
             }
             //通知云平台需要统计环境总速率的端口
-            List<String> portIds = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                for (var p : cloudElement.getSrcElement().getPorts()) {
-                    if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
-                        portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
+            if (getPluginHandler().getScene().getEnableRate()) {
+                List<String> portIds = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                    for (var p : cloudElement.getSrcElement().getPorts()) {
+                        if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
+                            portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
+                        }
                     }
                 }
+                super.vpClient.syncFlowPortInfo(portIds, "delete");
             }
-            super.vpClient.syncFlowPortInfo(portIds, "delete");
 
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
@@ -217,15 +219,17 @@ public class RecreateHandler extends HandlerCommon {
             }
 
             //通知云平台需要统计环境总速率的端口
-            List<String> portIds = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                for (var p : cloudElement.getSrcElement().getPorts()) {
-                    if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
-                        portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
-                    };
+            if (getPluginHandler().getScene().getEnableRate()) {
+                List<String> portIds = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                    for (var p : cloudElement.getSrcElement().getPorts()) {
+                        if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
+                            portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
+                        };
+                    }
                 }
+                super.vpClient.syncFlowPortInfo(portIds, "add");
             }
-            super.vpClient.syncFlowPortInfo(portIds, "add");
         }
     }
 }

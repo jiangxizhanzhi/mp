@@ -8,4 +8,6 @@ import lombok.Data;
 public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     @DefaultBool
     private Boolean enableRecording;
+    @DefaultBool
+    private Boolean enableRate;
 }

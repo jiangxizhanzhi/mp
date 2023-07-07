@@ -505,6 +505,20 @@ public class CsceneDataModifier {
         scenePluginDataBO.setScene(cpcloudPluginScene);
     }
 
+    public static void handlerEnableRate(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
+            return;
+        }
+        boolean enableRate = BaseCsceneModel.ReferenceType.READ_VS_BLUE == csceneBO.getReferenceType()
+                || BaseCsceneModel.ReferenceType.TEAM_TRAINING == csceneBO.getReferenceType()
+                || BaseCsceneModel.ReferenceType.RANGE_TEST == csceneBO.getReferenceType();
+        ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+        var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
+                .orElse(new HashMap<>());
+        cpcloudPluginScene.put("enable_rate", enableRate);
+        scenePluginDataBO.setScene(cpcloudPluginScene);
+    }
+
     public static boolean getOutputEnableRecording(BaseSceneDataBO baseSceneDataBO) {
         CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
         if (baseSceneDataBO == null || baseSceneDataBO.getPlugins() == null || baseSceneDataBO.getPlugins().get("cpcloud") == null) {
