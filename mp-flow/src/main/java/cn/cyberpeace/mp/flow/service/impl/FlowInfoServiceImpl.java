@@ -1318,7 +1318,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + multipartFile.getOriginalFilename();
-            pcapPath = PRE_PATH.concat("/" + fileName);
+            pcapPath = PRE_PATH.concat("/" + System.currentTimeMillis()  + fileName);
             tmpFile = new File(pcapPath);
             out = new FileOutputStream(tmpFile);
             byte[] ss = multipartFile.getBytes();
@@ -1440,7 +1440,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
-            String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis()  + fileName);
             log.info("===========srcPcapPath fileName: {}", fileName);
             srcFile = new File(srcPcapPath);
             fos = new FileOutputStream(srcFile);
@@ -1630,7 +1630,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 下载原pcap文件
             byte[] pcapByte = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
-            String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + fileName);
             srcFile = new File(srcPcapPath);
             fos = new FileOutputStream(srcFile);
             bos = new BufferedOutputStream(fos);
