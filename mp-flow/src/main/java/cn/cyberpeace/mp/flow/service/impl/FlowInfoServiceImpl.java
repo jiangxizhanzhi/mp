@@ -108,6 +108,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     private static final String PRE_PATH = "/root/.mp/resources/flows";
 
+    private static final Object lock = new Object();
+
     /**
      * 根据id集合查询列表
      * @param idList
@@ -1447,29 +1449,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             String pythonCmd = String.format("python3 %s %s", scriptPath, srcPcapPath);
             log.info("============{} python analyse cmd: {}", flowInfoModel.getTitle(), pythonCmd);
 
-            Process process = Runtime.getRuntime().exec(pythonCmd);
-            process.waitFor();
-            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line = "";
-            while ((line = input.readLine()) != null) {
-                strProtocols = line;
-            }
-
-            // 解析失败，重试5次
-            int count = 0;
-            while (StringUtils.isBlank(strProtocols)) {
-                if (count >= 5) {
-                    break;
-                }
-                count++;
-                Process process2 = Runtime.getRuntime().exec(pythonCmd);
-                process2.waitFor();
-                input = new BufferedReader(new InputStreamReader(process2.getInputStream()));
-                while ((line = input.readLine()) != null) {
-                    strProtocols = line;
-                }
-                Thread.sleep(1000);
-            }
+            strProtocols = this.executePython(pythonCmd);
             log.info("============{} init pcap analyse pcapRead result: {}", flowInfoModel.getTitle(), strProtocols);
 
             String fileMd5 = DigestUtils.md5Hex(flowBytes);
@@ -1515,6 +1495,38 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 初始化保存流量协议
         this.initSaveProtcols(protocolList, flowInfoModel.getId(), flowInfoModel.getPcapFile());
         log.info("end init pcap protocols for {}", flowInfoModel.getTitle());
+    }
+
+    /**
+     * 执行python命令
+     * @param command
+     * @return
+     */
+    private String executePython(String command) {
+        String line = "";
+        synchronized (lock) {
+            try {
+                Process process = Runtime.getRuntime().exec(command);
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    // 脚本执行成功
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                    while ((line = reader.readLine()) != null) {
+                        log.info("execute python success: {}", line);
+                    }
+                } else {
+                    // 脚本执行失败
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    String errorLine;
+                    while ((errorLine = errorReader.readLine()) != null) {
+                        log.error("execute python error: {}", errorLine);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("execute python error", e);
+            }
+        }
+        return line;
     }
 
     /**
