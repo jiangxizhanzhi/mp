@@ -1455,14 +1455,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 strProtocols = line;
             }
 
-            // 解析失败，重试1次
-            if (StringUtils.isBlank(strProtocols)) {
+            // 解析失败，重试5次
+            int count = 0;
+            while (StringUtils.isBlank(strProtocols)) {
+                if (count >= 5) {
+                    break;
+                }
+                count++;
                 Process process2 = Runtime.getRuntime().exec(pythonCmd);
                 process2.waitFor();
                 input = new BufferedReader(new InputStreamReader(process2.getInputStream()));
                 while ((line = input.readLine()) != null) {
                     strProtocols = line;
                 }
+                Thread.sleep(1000);
             }
             log.info("============{} init pcap analyse pcapRead result: {}", flowInfoModel.getTitle(), strProtocols);
 
