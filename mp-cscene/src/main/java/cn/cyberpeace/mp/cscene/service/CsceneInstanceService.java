@@ -54,14 +54,11 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -1474,26 +1471,30 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneHandler originSceneHandler = new SceneHandler(originData, null);
         SceneHandler newSceneHandler = new SceneHandler(instance.getScene(), null);
         for (String portId : newPorts.keySet()) {
-            var originConnectPort = originSceneHandler.getPortConnectedPort(portId);
-            var newConnectPort = newSceneHandler.getPortConnectedPort(portId);
-            if (originConnectPort == null && newConnectPort != null) {
-                // 赋值一个新的id
-                var p = newPorts.get(portId);
-                p.setId(portId + "0");
-                for (var connect : instance.getScene().getTopology().getConnections()) {
-                    if (portId.equals(connect.getSource())) {
-                        connect.setSource(p.getId());
+            var srcPort = originSceneHandler.getPort(portId);
+            if (srcPort != null && srcPort.getElement() != null && srcPort.getElement().getType() != null
+                    && srcPort.getElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
+                var originConnectPort = originSceneHandler.getPortConnectedPort(portId);
+                var newConnectPort = newSceneHandler.getPortConnectedPort(portId);
+                if (originConnectPort == null && newConnectPort != null) {
+                    // 赋值一个新的id
+                    var p = newPorts.get(portId);
+                    p.setId(portId + "00");
+                    for (var connect : instance.getScene().getTopology().getConnections()) {
+                        if (portId.equals(connect.getSource())) {
+                            connect.setSource(p.getId());
+                        }
+                        if (portId.equals(connect.getTarget())) {
+                            connect.setTarget(p.getId());
+                        }
                     }
-                    if (portId.equals(connect.getTarget())) {
-                        connect.setTarget(p.getId());
-                    }
-                }
-                for (var plugin : instance.getScene().getPlugins().values()) {
-                    var pluginPort = plugin.getElementPorts().get(portId);
-                    if (pluginPort != null) {
-                        pluginPort.remove("logic_network_id");
-                        pluginPort.remove("resource_id");
-                        plugin.getElementPorts().put(p.getId(), pluginPort);
+                    for (var plugin : instance.getScene().getPlugins().values()) {
+                        var pluginPort = plugin.getElementPorts().get(portId);
+                        if (pluginPort != null) {
+                            pluginPort.remove("logic_network_id");
+                            pluginPort.remove("resource_id");
+                            plugin.getElementPorts().put(p.getId(), pluginPort);
+                        }
                     }
                 }
             }
