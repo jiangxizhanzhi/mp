@@ -8,7 +8,7 @@ public class FlowTaskPool extends TaskPool {
     }
 
     private FlowTaskPool() {
-        super(10, 100, 60L);
+        super(2, 50, 60L);
     }
 
     public static FlowTaskPool getInstance() {
