@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.flow.util.FlowTaskPool;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -1243,7 +1244,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     flowScriptParamService.bulkCreate(scriptParamModelList);
                 }
             } else {
-                TaskCommon.executeTask(() -> this.initPcapProtocols(flowInfoModel));
+                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
             }
         } else {
             log.error("file floder is not exist");
@@ -1445,7 +1446,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             bos.write(flowBytes);
 
             String pythonCmd = String.format("python3 %s %s", scriptPath, srcPcapPath);
-            log.info("============python analyse cmd: {}", pythonCmd);
+            log.info("============{} python analyse cmd: {}", flowInfoModel.getTitle(), pythonCmd);
 
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
@@ -1455,7 +1456,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             while ((line = input.readLine()) != null) {
                 strProtocols = line;
             }
-            log.info("============init pcap analyse pcapRead result: {}", strProtocols);
+            log.info("============{} init pcap analyse pcapRead result: {}", flowInfoModel.getTitle(), strProtocols);
 
             String fileMd5 = DigestUtils.md5Hex(flowBytes);
             if (org.apache.commons.lang3.StringUtils.isNotBlank(strProtocols)) {
@@ -1478,7 +1479,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 }
             }
         } catch (Exception e) {
-            log.error("init pcap protocols exec error:", e);
+            log.error("init pcap protocols exec error for {}:", flowInfoModel.getTitle(), e);
             return;
         } finally {
             org.apache.poi.util.IOUtils.closeQuietly(input);
