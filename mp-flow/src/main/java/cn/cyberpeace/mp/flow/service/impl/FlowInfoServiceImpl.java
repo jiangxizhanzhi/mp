@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
-import cn.cyberpeace.mp.flow.util.FlowTaskPool;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -1244,7 +1243,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     flowScriptParamService.bulkCreate(scriptParamModelList);
                 }
             } else {
-                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
+                this.initPcapProtocols(flowInfoModel);
+//                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
             }
         } else {
             log.error("file floder is not exist");
