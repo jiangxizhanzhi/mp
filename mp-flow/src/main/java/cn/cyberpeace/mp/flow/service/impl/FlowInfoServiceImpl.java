@@ -1427,7 +1427,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     private void initPcapProtocols(FlowInfoModel flowInfoModel) {
         log.info("start init pcap protocols for {}", flowInfoModel.getTitle());
         List<ProtocolBO> protocolList = new ArrayList<>();
-        String strProtocols;
+        String strProtocols = "";
         String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = flowInfoModel.getPcapFile();
         BufferedReader input = null;
@@ -1437,10 +1437,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
-            if (Objects.isNull(flowBytes)) {
-                log.error("============{} download file is empty", flowInfoModel.getTitle());
-            }
-
             String fileName = FilenameUtils.getName(pcapPath);;
             String srcPcapPath = PRE_PATH.concat("/" + fileName);
             srcFile = new File(srcPcapPath);
@@ -1453,11 +1449,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
-            strProtocols = "";
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = "";
             while ((line = input.readLine()) != null) {
                 strProtocols = line;
+            }
+
+            // 解析失败，重试1次
+            if (StringUtils.isBlank(strProtocols)) {
+                Process process2 = Runtime.getRuntime().exec(pythonCmd);
+                process2.waitFor();
+                input = new BufferedReader(new InputStreamReader(process2.getInputStream()));
+                while ((line = input.readLine()) != null) {
+                    strProtocols = line;
+                }
             }
             log.info("============{} init pcap analyse pcapRead result: {}", flowInfoModel.getTitle(), strProtocols);
 
