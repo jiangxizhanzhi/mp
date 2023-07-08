@@ -1243,8 +1243,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     flowScriptParamService.bulkCreate(scriptParamModelList);
                 }
             } else {
-                this.initPcapProtocols(flowInfoModel);
-//                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
+                TaskCommon.executeTask(() -> this.initPcapProtocols(flowInfoModel));
             }
         } else {
             log.error("file floder is not exist");
@@ -1438,6 +1437,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
+            if (Objects.isNull(flowBytes)) {
+                log.error("============{} download file is empty", flowInfoModel.getTitle());
+            }
+
             String fileName = FilenameUtils.getName(pcapPath);;
             String srcPcapPath = PRE_PATH.concat("/" + fileName);
             srcFile = new File(srcPcapPath);
