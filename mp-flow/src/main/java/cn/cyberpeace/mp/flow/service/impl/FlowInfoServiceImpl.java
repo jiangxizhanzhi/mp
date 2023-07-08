@@ -1504,27 +1504,27 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     private String executePython(String command) {
         String line = "";
-        synchronized (lock) {
-            try {
-                Process process = Runtime.getRuntime().exec(command);
-                int exitCode = process.waitFor();
-                if (exitCode == 0) {
-                    // 脚本执行成功
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    while ((line = reader.readLine()) != null) {
-                        log.info("execute python success: {}", line);
-                    }
-                } else {
-                    // 脚本执行失败
-                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                    String errorLine;
-                    while ((errorLine = errorReader.readLine()) != null) {
-                        log.error("execute python error: {}", errorLine);
-                    }
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                // 脚本执行成功
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = reader.readLine()) != null) {
+                    log.info("execute python success: {}", line);
                 }
-            } catch (Exception e) {
-                log.error("execute python error", e);
+            } else {
+                // 脚本执行失败
+                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                String errorLine;
+                StringBuilder errorBuilder = new StringBuilder();
+                while ((errorLine = errorReader.readLine()) != null) {
+                    errorBuilder.append(errorLine + "\n");
+                }
+                log.error("execute python error: {}", errorBuilder);
             }
+        } catch (Exception e) {
+            log.error("execute python error", e);
         }
         return line;
     }
