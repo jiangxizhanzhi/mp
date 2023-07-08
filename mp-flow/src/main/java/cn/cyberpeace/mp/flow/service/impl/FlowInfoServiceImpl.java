@@ -1468,6 +1468,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 while ((line = input.readLine()) != null) {
                     strProtocols = line;
                 }
+                Thread.sleep(1000);
             }
             log.info("============{} init pcap analyse pcapRead result: {}", flowInfoModel.getTitle(), strProtocols);
 
