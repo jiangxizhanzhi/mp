@@ -1441,6 +1441,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
             String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            log.info("===========srcPcapPath fileName: {}", fileName);
             srcFile = new File(srcPcapPath);
             fos = new FileOutputStream(srcFile);
             bos = new BufferedOutputStream(fos);
