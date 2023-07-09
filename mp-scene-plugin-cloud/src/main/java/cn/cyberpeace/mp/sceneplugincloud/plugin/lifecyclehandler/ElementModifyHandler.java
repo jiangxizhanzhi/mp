@@ -630,7 +630,7 @@ public class ElementModifyHandler extends HandlerCommon {
             boolean ipChange = !StringUtils.equals(newIp, originIp);
             var newNet = this.newCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(newPort);
             var originNet = this.originCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(originPort);
-            if (newNet == null && originNet == null) {
+            if ((newNet == null && originNet == null) || (StringUtils.equals(newIp, originIp))) {
                 // do nothing
             } else if (newNet == null) {
                 // 虚拟机容器分开处理

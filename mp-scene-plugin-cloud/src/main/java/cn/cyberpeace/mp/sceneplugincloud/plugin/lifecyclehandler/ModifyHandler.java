@@ -76,7 +76,7 @@ public class ModifyHandler extends HandlerCommon {
         // 更新时不处理DYNAMIPS节点
         this.modifyCreateHandler.getPluginHandler().getElementMap().forEach((k, v) -> {
             if (v != null && v.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
-                this.modifyCreateHandler.getPluginHandler().getElementMap().remove(k);
+                this.modifyCreateHandler.getPluginHandler().getSceneHandler().addExcludeHandleNode(v.getSrcElement().getId());
             }
         });
         runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
