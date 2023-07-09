@@ -1301,7 +1301,7 @@ public class CreateHandler extends HandlerCommon {
             configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
         });
         //通知云平台需要统计环境总速率的端口
-        if (getPluginHandler().getScene().getEnableRate()) {
+        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
             List<String> portIds = new ArrayList<>();
             Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
             portMap.forEach((key,value) -> {
