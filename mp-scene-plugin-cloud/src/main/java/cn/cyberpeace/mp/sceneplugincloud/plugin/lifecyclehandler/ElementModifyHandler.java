@@ -462,7 +462,9 @@ public class ElementModifyHandler extends HandlerCommon {
             qosRule.setDirection(QosRuleDirection.INGRESS);
             data.getQosRules().add(qosRule);
         }
-        virtualPort.updateQosRules(data);
+        if (StringUtils.isNotEmpty(data.getQosId())) {
+            virtualPort.updateQosRules(data);
+        }
     }
 
     private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {

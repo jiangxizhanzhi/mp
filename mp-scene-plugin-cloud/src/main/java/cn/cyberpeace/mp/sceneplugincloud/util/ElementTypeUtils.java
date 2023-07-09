@@ -60,8 +60,17 @@ public class ElementTypeUtils {
     }
 
     public static boolean isVirtualGateway(CloudPluginSceneElementBO element) {
-        Integer type = element.getSrcElement().getType();
-        Integer virtualType = element.getVirtualType();
+        if (element == null) {
+            return false;
+        }
+        Integer type = 0;
+        if (element.getSrcElement() != null && element.getSrcElement().getType() != null) {
+            type = element.getSrcElement().getType();
+        }
+        Integer virtualType = 0;
+        if (element.getVirtualType() != null) {
+            virtualType = element.getVirtualType();
+        }
         boolean isVirtualGateWayNode = virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
                 || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
                 || type == BaseSceneElementModel.Type.ROUTER;
