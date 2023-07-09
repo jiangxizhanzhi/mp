@@ -60,6 +60,9 @@ public class ElementTypeUtils {
     }
 
     public static boolean isVirtualGateway(CloudPluginSceneElementBO element) {
+        if (element == null) {
+            return false;
+        }
         Integer type = 0;
         if (element.getSrcElement() != null && element.getSrcElement().getType() != null) {
             type = element.getSrcElement().getType();
