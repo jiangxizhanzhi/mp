@@ -407,10 +407,26 @@ public class ElementModifyHandler extends HandlerCommon {
         if (newSrcPort.getLoss() == null) {
             newSrcPort.setLoss(-1);
         }
-        boolean eGressChange = newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress();
-        boolean inGressChange = newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress();
-        boolean delayChange = newCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay();
-        boolean lossChange = newCloudPort.getSrcPort().getLoss() != originCloudPort.getSrcPort().getLoss();
+        boolean eGressChange = false;
+        if ((newCloudPort.getSrcPort().getEgress() != null && newCloudPort.getSrcPort().getEgress() > 0) && (originCloudPort.getSrcPort().getEgress() != null && originCloudPort.getSrcPort().getEgress() > 0 && newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress())) {
+            eGressChange = true;
+        }
+
+        boolean inGressChange = false;
+        if ((newCloudPort.getSrcPort().getIngress() != null && newCloudPort.getSrcPort().getIngress() > 0) && originCloudPort.getSrcPort().getIngress() != null && originCloudPort.getSrcPort().getIngress() > 0 && newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress()) {
+            inGressChange = true;
+        }
+
+        boolean delayChange = false;
+        if (newCloudPort.getSrcPort().getDelay() != null && newCloudPort.getSrcPort().getDelay() > 0 && originCloudPort.getSrcPort().getDelay() != null && originCloudPort.getSrcPort().getDelay() > 0 && originCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay()) {
+            delayChange = true;
+        }
+
+        boolean lossChange = false;
+        if ((newCloudPort.getSrcPort().getLoss() != null && newCloudPort.getSrcPort().getLoss() > 0) && originCloudPort.getSrcPort().getLoss() != null && originCloudPort.getSrcPort().getLoss() > 0 && newCloudPort.getSrcPort().getLoss() != originCloudPort.getSrcPort().getLoss()) {
+            lossChange = true;
+        }
+
         if (eGressChange || inGressChange || delayChange || lossChange) {
             return true;
         }
