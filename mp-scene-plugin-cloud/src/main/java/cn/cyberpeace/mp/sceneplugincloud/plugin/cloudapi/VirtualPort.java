@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ModifyInstanceIpData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.UpdateQosRuleData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
@@ -38,6 +39,15 @@ public class VirtualPort extends CloudClient {
 
         cloudPost(CloudUrlConstant.MODIFY_INSTANCE_IP, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+    }
+
+    public CreateQosRuleData createQosRules(CreateQosRuleData data) {
+        heavyConcurrentWait();
+
+        CloudResponse<CreateQosRuleData> result = cloudPost(CloudUrlConstant.CREATE_QOS_RULE, data, null,
+                new TypeReference<CloudResponse<CreateQosRuleData>>() {
+        }, true);
+        return result.getData();
     }
 
     public void updateQosRules(UpdateQosRuleData data) {

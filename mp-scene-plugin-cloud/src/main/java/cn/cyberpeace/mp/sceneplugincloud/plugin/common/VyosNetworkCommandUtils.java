@@ -378,7 +378,7 @@ public class VyosNetworkCommandUtils {
             return true;
         }
         originKeys.removeAll(newKeys);
-        return originKeys.size() == 0;
+        return originKeys.size() != 0;
     }
 
     public static boolean isProtocolsChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
@@ -414,7 +414,7 @@ public class VyosNetworkCommandUtils {
             if (originKeys.size() != newKeys.size()) {
                 return true;
             }
-            originKeys.retainAll(newKeys);
+            originKeys.removeAll(newKeys);
             if (originKeys.size() > 0) {
                 return true;
             }
@@ -442,7 +442,7 @@ public class VyosNetworkCommandUtils {
 
     private static String ospfKey(CloudPluginSceneElementPortBO portBO) {
         var result = Arrays.asList("ospf",
-                Optional.ofNullable(portBO.getOspfArea()).ofNullable(StringUtils.EMPTY),
+                Optional.ofNullable(portBO.getOspfArea()).orElse(StringUtils.EMPTY),
                 Optional.ofNullable(portBO.getOspfIp()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
     }
