@@ -376,7 +376,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskTaskModel::getSceneId, request.getSceneId());
         if (StringUtils.isNotBlank(request.getNodeId())) {
-            condition.filterEqual(FlowTaskTaskModel::getNodeIp, request.getNodeId());
+            condition.filterEqual(FlowTaskTaskModel::getNodeId, request.getNodeId());
         }
         if (StringUtils.isNotBlank(request.getInteractiveType())) {
             condition.filterEqual(FlowTaskTaskModel::getInteractiveType, request.getInteractiveType());
