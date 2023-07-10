@@ -131,7 +131,7 @@ public class ScreenrecordService extends BaseCpService {
             count = pageResponse.getTotalnum();
             Set<String> existUserIds = new HashSet<>();
             pageResponse.getRecord().forEach(record -> {
-                if (ids.contains(record.getHostId())) {
+                if (ids.size() == 0 || ids.contains(record.getHostId())) {
                     // 结果转换
                     ScreenrecordVO response = new ScreenrecordVO();
                     response.parseResult(record);
