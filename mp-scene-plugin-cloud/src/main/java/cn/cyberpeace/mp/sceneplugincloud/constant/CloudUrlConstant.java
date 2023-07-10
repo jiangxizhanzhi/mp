@@ -85,6 +85,7 @@ public class CloudUrlConstant {
 
     public static final String MODIFY_INSTANCE_IP = "/v1/scenarios/modify_instance_ip";
     public static final String UPDATE_QOS_RULE = "/v1/scenarios/update_qos_rules";
+    public static final String CREATE_QOS_RULE = "/v1/scenarios/create_qos_rules";
 
     public static final String GET_SERIAL_PORT_URL = "/v1/instances/{instance_id}/serial-port";
     public static final String ROUTER_CMD_SEND_URL = "/cpcloud/router/v1/send_rule";

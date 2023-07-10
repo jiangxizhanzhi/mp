@@ -24,11 +24,13 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetwo
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.collection.ConcurrentHashSet;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -480,6 +482,24 @@ public class ElementModifyHandler extends HandlerCommon {
         }
         if (StringUtils.isNotEmpty(data.getQosId())) {
             virtualPort.updateQosRules(data);
+        } else {
+            try {
+                var net = this.originCloudScenePluginHandler.getHandlerUtils().getNetworkByPort(originCloudPort.getSrcPort());
+                if (net != null && StringUtils.isNotEmpty(net.getResourceId())) {
+                    var createData = new CreateQosRuleData();
+                    createData.setName("MP_SCENE_" + originCloudPort.getSrcPort().getEid());
+                    createData.setQosRules(data.getQosRules());
+                    createData.setPortId(originCloudPort.getResourceId());
+                    createData.setNetworkId(net.getResourceId());
+                    var result = virtualPort.createQosRules(createData);
+                    newCloudPort.setQosId(result.getQosId());
+                    originCloudPort.setQosId(result.getQosId());
+                } else {
+                    log.error("no net when add qos , portId {}", newSrcPort.getId());
+                }
+            } catch (Exception e) {
+                log.error("failed to create qos , portId {} , exception is ", newSrcPort.getId(), ExceptionUtils.getStackTrace(e));
+            }
         }
     }
 
