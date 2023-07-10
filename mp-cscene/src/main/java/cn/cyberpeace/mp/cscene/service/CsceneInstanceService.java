@@ -742,13 +742,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
         Map<String, Integer> count = new ConcurrentHashMap<>();
         List<Runnable> tasks = new ArrayList<>();
-
+        String sceneId = params.getSceneId();
         // 事件类
         tasks.add(() -> {
             ElementMonitorRequest request = new ElementMonitorRequest();
             request.setSceneId(params.getSceneId());
             request.setElementIds(params.getNodeIds());
-            request.setStartTime(params.getStartTime());
             request.setEndTime(params.getEndTime());
             request.setFetchIfSceneInstanceShutdown(true);
             var fileCount = sceneElementMonitorService.getModifyData(request, CsceneBizConstant.FILE_MODIFY_GROUP,
@@ -763,13 +762,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             TimeListPageInfoQueryParams infoParams = new TimeListPageInfoQueryParams();
             infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             infoParams.setNodeIds(params.getNodeIds());
-            infoParams.setStartTime(params.getStartTime());
             infoParams.setEndTime(params.getEndTime());
             infoParams.setFetchIfSceneInstanceShutdown(true);
             var netCount = hostStateService.pageNetifaces(infoParams).getSource().getTotal();
             // 端口列表
+            infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             var portCount = hostStateService.pagePorts(infoParams).getSource().getTotal();
             // 进程列表
+            infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             var processCount = hostStateService.pageProcesses(infoParams).getSource().getTotal();
             count.put("info",netCount+portCount+processCount);
         });
@@ -777,7 +777,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         tasks.add(()->{
             HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
             hostEventQueryParams.setNodeIds(params.getNodeIds());
-            hostEventQueryParams.setStartTime(params.getStartTime());
             hostEventQueryParams.setEndTime(params.getEndTime());
             var result = listHostEvents(params.getSceneId(), hostEventQueryParams);
             count.put("log", result.getSource().getTotal());
@@ -786,7 +785,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         tasks.add(()->{
             FlowQueryParams flowQueryParams = new FlowQueryParams();
             flowQueryParams.setTargetNodeIds(params.getNodeIds());
-            flowQueryParams.setStartTime(params.getStartTime());
             flowQueryParams.setEndTime(params.getEndTime());
             var flowCount = flowMonitorService.pageFlow(params.getSceneId(), flowQueryParams).getSource().getTotal();
             count.put("flow", flowCount);
