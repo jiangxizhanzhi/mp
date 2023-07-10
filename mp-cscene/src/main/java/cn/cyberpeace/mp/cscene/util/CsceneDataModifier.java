@@ -514,9 +514,9 @@ public class CsceneDataModifier {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
         }
-        boolean enableRate = BaseCsceneModel.ReferenceType.READ_VS_BLUE == csceneBO.getReferenceType()
+        boolean enableRate = csceneBO.getReferenceType() == null ? false : (BaseCsceneModel.ReferenceType.READ_VS_BLUE == csceneBO.getReferenceType()
                 || BaseCsceneModel.ReferenceType.TEAM_TRAINING == csceneBO.getReferenceType()
-                || BaseCsceneModel.ReferenceType.RANGE_TEST == csceneBO.getReferenceType();
+                || BaseCsceneModel.ReferenceType.RANGE_TEST == csceneBO.getReferenceType());
         ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
         var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
                 .orElse(new HashMap<>());
