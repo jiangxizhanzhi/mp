@@ -1316,7 +1316,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         try {
             String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + multipartFile.getOriginalFilename();
-            pcapPath = PRE_PATH.concat("/" + fileName);
+            pcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
             tmpFile = new File(pcapPath);
             out = new FileOutputStream(tmpFile);
             byte[] ss = multipartFile.getBytes();
@@ -1425,37 +1425,30 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     private void initPcapProtocols(FlowInfoModel flowInfoModel) {
-        log.info("start init pcap protocols for {}", flowInfoModel.getTitle());
+        String title = flowInfoModel.getTitle();
+        log.info("start init pcap protocols for {}", title);
         List<ProtocolBO> protocolList = new ArrayList<>();
-        String strProtocols;
+        String strProtocols = "";
         String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = flowInfoModel.getPcapFile();
         BufferedReader input = null;
         File srcFile = null;
-        FileOutputStream fos = null;
-        BufferedOutputStream bos = null;
 
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
-            String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + title + "_" + fileName);
+            log.info("===========srcPcapPath: {}", srcPcapPath);
             srcFile = new File(srcPcapPath);
-            fos = new FileOutputStream(srcFile);
-            bos = new BufferedOutputStream(fos);
-            bos.write(flowBytes);
+            try (FileOutputStream fs = new FileOutputStream(srcFile)) {
+                fs.write(flowBytes);
+            }
 
             String pythonCmd = String.format("python3 %s %s", scriptPath, srcPcapPath);
-            log.info("============python analyse cmd: {}", pythonCmd);
+            log.info("============{} python analyse cmd: {}", title, pythonCmd);
 
-            Process process = Runtime.getRuntime().exec(pythonCmd);
-            process.waitFor();
-            strProtocols = "";
-            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line = "";
-            while ((line = input.readLine()) != null) {
-                strProtocols = line;
-            }
-            log.info("============init pcap analyse pcapRead result: {}", strProtocols);
+            strProtocols = this.executePython(pythonCmd, title);
+            log.info("============{} init pcap analyse pcapRead result: {}", title, strProtocols);
 
             String fileMd5 = DigestUtils.md5Hex(flowBytes);
             if (org.apache.commons.lang3.StringUtils.isNotBlank(strProtocols)) {
@@ -1478,12 +1471,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 }
             }
         } catch (Exception e) {
-            log.error("init pcap protocols exec error:", e);
+            log.error("init pcap protocols exec error for {}:", title, e);
             return;
         } finally {
             org.apache.poi.util.IOUtils.closeQuietly(input);
-            org.apache.poi.util.IOUtils.closeQuietly(fos);
-            org.apache.poi.util.IOUtils.closeQuietly(bos);
 
             if (Objects.nonNull(srcFile) && srcFile.exists()) {
                 try {
@@ -1499,7 +1490,42 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 初始化保存流量协议
         this.initSaveProtcols(protocolList, flowInfoModel.getId(), flowInfoModel.getPcapFile());
-        log.info("end init pcap protocols for {}", flowInfoModel.getTitle());
+        log.info("end init pcap protocols for {}", title);
+    }
+
+    /**
+     * 执行python命令
+     * @param command
+     * @param title
+     * @return
+     */
+    private String executePython(String command, String title) {
+        String result = "";
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                // 脚本执行成功
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result = line;
+                    log.info("{} execute python success: {}", title, line);
+                }
+            } else {
+                // 脚本执行失败
+                BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                String errorLine;
+                StringBuilder errorBuilder = new StringBuilder();
+                while ((errorLine = errorReader.readLine()) != null) {
+                    errorBuilder.append(errorLine + "  ");
+                }
+                log.error("{} execute python error: {}", title, errorBuilder);
+            }
+        } catch (Exception e) {
+            log.error("{} execute python error", title, e);
+        }
+        return result;
     }
 
     /**
@@ -1589,8 +1615,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
         String outPcapPath = "";
         String scriptPath = PRE_PATH.concat("/protocol_filter.py");
-        BufferedOutputStream bos = null;
-        FileOutputStream fos = null;
         BufferedReader input = null;
         File srcFile = null;
         File dstFile = null;
@@ -1600,11 +1624,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 下载原pcap文件
             byte[] pcapByte = FsCommon.downloadRawContent(pcapPath);
             String fileName = FilenameUtils.getName(pcapPath);;
-            String srcPcapPath = PRE_PATH.concat("/" + fileName);
+            String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
             srcFile = new File(srcPcapPath);
-            fos = new FileOutputStream(srcFile);
-            bos = new BufferedOutputStream(fos);
-            bos.write(pcapByte);
+            try (FileOutputStream fs = new FileOutputStream(srcFile)) {
+                fs.write(pcapByte);
+            }
 
             // 根据协议过滤pcap生成新的包
             String pythonCmd = String.format("python3 %s %s %s", scriptPath, srcPcapPath, strProtocols);
@@ -1617,7 +1641,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             while ((line = input.readLine()) != null) {
                 filterResult = line;
             }
-
 
             // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
             log.info("============pcap filter result: {}", filterResult);
@@ -1672,9 +1695,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         } catch (Exception e) {
             log.error("pcap file filter error", e);
         } finally {
-            org.apache.poi.util.IOUtils.closeQuietly(fos);
-            org.apache.poi.util.IOUtils.closeQuietly(bos);
-
             if (Objects.nonNull(srcFile) && srcFile.exists()) {
                 try {
                     srcFile.delete();
