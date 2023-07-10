@@ -68,6 +68,9 @@ public class ConnectionJob {
         HumanCondition humanConditionConnection = new HumanCondition();
         humanConditionConnection.filterIn(CloudPluginSceneConnectionModel::getScene, idList.toArray());
         humanConditionConnection.filterEqual(CloudPluginSceneConnectionModel::getDisable, false);
+        //防止有些脏数据，只针对8小时以内的接入数据处理
+        humanConditionConnection.filterGreaterThan(CloudPluginSceneConnectionModel::getUpdateTime, LocalDateTime.now().minusHours(8));
+        //对于刚接入的设备，云平台需要时间才能成为接入状态。防止定时任务误把还没接入的设备当成断开的数据处理
         humanConditionConnection.filterLessThan(CloudPluginSceneConnectionModel::getUpdateTime, LocalDateTime.now().minusSeconds(5));
         List<CloudPluginSceneConnectionModel> cloudPluginSceneConnectionModelList = CloudPluginSceneConnectionMapper.list(humanConditionConnection);
         if (CollectionUtils.isEmpty(cloudPluginSceneConnectionModelList)) {
