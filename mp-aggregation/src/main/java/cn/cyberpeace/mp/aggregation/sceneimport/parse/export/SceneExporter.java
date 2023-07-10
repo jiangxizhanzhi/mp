@@ -160,7 +160,7 @@ public class SceneExporter {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
                     }
-                } else if (device.getLogo().startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+                } else if (device.getLogo().startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX) && !device.getLogo().startsWith("/api/mp/file")) {
                     String relativePath = StringUtils.replaceOnce(device.getLogo(), AuthConstant.DEFAULT_IMAGE_PREFIX, "");
                     String filePath = BeanCommon.getBean(DefaultImgService.class).getDefaultImgFilePath(relativePath);
                     byte[] content = null;
@@ -171,6 +171,16 @@ public class SceneExporter {
                         log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
                         throw new MpRuntimeException(BaseErrorCode.ERROR);
                     }
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
+                } else {
+                    byte[] content = FsCommon.downloadRawContent(device.getLogo());
+                    // 判断图片文件类型
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
