@@ -59,8 +59,6 @@ public class ElementModifyHandler extends HandlerCommon {
     private VmRouter vmRouter = new VmRouter();
 
     private static final String TCP = "tcp";
-    private static final String NETWORK_DELAY = "network-delay";
-    private static final String PACKET_LOSS = "packet-loss";
 
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
@@ -171,15 +169,6 @@ public class ElementModifyHandler extends HandlerCommon {
             }
         }
         List<String> cmds = VyosNetworkCommandUtils.genModifyNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler);
-        List<String> cmdBak = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(cmds)) {
-            cmds.forEach(c -> {
-                if (c.contains(NETWORK_DELAY) || c.contains(PACKET_LOSS)) {
-                    cmdBak.add(c);
-                }
-            });
-        }
-        cmds.addAll(cmdBak);
         var buildNetwork = new RouterConfigCmdData();
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
