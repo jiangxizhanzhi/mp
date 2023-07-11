@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -51,7 +52,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,12 +135,11 @@ public class CsceneFlowService {
         }
         flowTaskTaskService.bulkCreate(flowTaskTaskModelList);
 
-        this.asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList);
+        TaskCommon.executeTask(() -> asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList));
 
         log.info("CsceneFlowService.addTask end.");
     }
 
-    @Async
     public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
