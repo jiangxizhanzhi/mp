@@ -543,42 +543,43 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         Set<String> noticeIds = new HashSet<>();
         // 查询发给组织的noticeId
         HumanCondition orgNoticeCond = new HumanCondition()
-                .select(SysNoticeOrgModel::getNoticeId);
+            .select(SysNoticeOrgModel::getNoticeId);
         List<SysNoticeOrgModel> orgNotices = noticeOrgMapper.list(orgNoticeCond);
         orgNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
         // 查询发给角色的noticeId，不包括发给所有角色
         HumanCondition roleNoticeCond = new HumanCondition()
-                .select(SysNoticeRoleModel::getNoticeId);
+            .select(SysNoticeRoleModel::getNoticeId);
         List<SysNoticeRoleModel> roleNotices = noticeRoleMapper.list(roleNoticeCond);
         roleNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
         // 查询发给指定用户的noticeId
         HumanCondition userNoticeCond = new HumanCondition()
-                .filterEqual(SysNoticeUserModel::getUser, userId)
-                .select(SysNoticeUserModel::getNoticeId);
+            .filterEqual(SysNoticeUserModel::getUser, userId)
+            .select(SysNoticeUserModel::getNoticeId);
         List<SysNoticeUserModel> userNotices = noticeUserMapper.list(userNoticeCond);
         userNotices.forEach(model -> noticeIds.add(model.getNoticeId()));
 
         HumanCondition readNoticeCond = new HumanCondition()
-                .filterEqual(SysNoticeReadModel::getUser, userId)
-                .filterEqual(SysNoticeReadModel::getIsNeedPush, 0)
-                .select(SysNoticeReadModel::getNoticeId);
+            .filterEqual(SysNoticeReadModel::getUser, userId)
+            .filterEqual(SysNoticeReadModel::getIsNeedPush, 0)
+            .select(SysNoticeReadModel::getNoticeId);
         List<SysNoticeReadModel> notPushNotices = noticeReadMapper.list(readNoticeCond);
+        List<String> notPushNoticeIds = notPushNotices.stream().map(SysNoticeReadModel::getNoticeId).collect(Collectors.toList());
 
         HumanCondition noticeCond = new HumanCondition();
         if (CollUtil.isEmpty(noticeIds)) {
             noticeCond.filterEqual(SysNoticeModel::getIsPublic, 1);
         } else {
             noticeCond.filterOrStart()
-                    .orEqual(SysNoticeModel::getIsPublic, 1)
-                    .orIn(SysNoticeModel::getId, noticeIds.toArray())
-                    .filterOrEnd();
+                .orEqual(SysNoticeModel::getIsPublic, 1)
+                .orIn(SysNoticeModel::getId, noticeIds.toArray())
+                .filterOrEnd();
         }
-        if (CollUtil.isNotEmpty(notPushNotices)) {
-            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNotices.toArray());
+        if (CollUtil.isNotEmpty(notPushNoticeIds)) {
+            noticeCond.filterNotIn(SysNoticeModel::getId, notPushNoticeIds.toArray());
         }
         noticeCond.pagination(page, pageSize)
-                .orderBy(SysNoticeModel::getTop, true)
-                .orderBy(SysNoticeModel::getPk, true);
+            .orderBy(SysNoticeModel::getTop, true)
+            .orderBy(SysNoticeModel::getPk, true);
         int total = getModelMapper().total(noticeCond);
         List<SysNoticeModel> noticeModels = getModelMapper().list(noticeCond);
         List<SysNoticeDto> noticeDtos = convert2NoticeDto(noticeModels, true);
