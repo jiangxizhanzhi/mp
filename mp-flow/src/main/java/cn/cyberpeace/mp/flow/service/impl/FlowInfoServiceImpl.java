@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.flow.util.FlowTaskPool;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
@@ -1243,7 +1244,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     flowScriptParamService.bulkCreate(scriptParamModelList);
                 }
             } else {
-                TaskCommon.executeTask(() -> this.initPcapProtocols(flowInfoModel));
+                FlowTaskPool.getInstance().executeTask(() -> this.initPcapProtocols(flowInfoModel));
             }
         } else {
             log.error("file floder is not exist");
@@ -1675,7 +1676,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 pcapModel.setPcapFile(outPcapPath);
                 pcapModel.setPcapSize(pcapSize);
                 pcapModel.setPktNum(pktNum.longValue());
-                pcapModel.setDuration(Math.round(duration * 1000));
+                pcapModel.setDuration(Math.round(Math.abs(duration) * 1000));
                 pcapModel.setProtocols(String.join(BaseConstants.COMMA, protocolList));
                 pcapModel.setUpdateTime(LocalDateTime.now());
                 flowPcapService.update(pcapModel);
