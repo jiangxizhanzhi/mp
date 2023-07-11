@@ -662,6 +662,10 @@ public class AsyncPlatFlowTaskService {
             log.error("task is running for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
         }
+        if (TaskTaskStatusEnum.INITING.toValue() == flowTaskTaskModel.getTaskStatus()) {
+            log.error("task is initing for {}", taskId);
+            throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
+        }
 
         // 任务配置校验
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
@@ -786,7 +790,7 @@ public class AsyncPlatFlowTaskService {
         // 任务状态校验
         List<String> notRunningTaskIds = new ArrayList<>();
         List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+                TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(notRunningTasks)) {
             log.error("some tasks are already running");
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);

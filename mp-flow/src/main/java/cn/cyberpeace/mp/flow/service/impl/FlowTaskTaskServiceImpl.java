@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
@@ -168,7 +169,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                                 flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
                                 flowTaskTaskModel.setNodeIp(detail.getNodeIp());
                                 flowTaskTaskModel.setNodeName(detail.getNodeName());
-                                flowTaskTaskModel.setTaskStatus(0);
+                                flowTaskTaskModel.setTaskStatus(TaskTaskStatusEnum.INIT.toValue());
                                 flowTaskTaskModelList.add(flowTaskTaskModel);
                             }
                         }

@@ -32,7 +32,8 @@ public enum FlowErrorCode implements ErrorCode {
     NODE_NOT_START("MP-110325", "node_not_start"),
     PARAMS_SHOULD_NOT_EMPTY("MP-110326", "params_should_not_empty"),
     CATEGORY_HAS_USED("MP-110327", "category_has_used"),
-    TASK_INFO_ERROR("MP-110328", "task_info_error");
+    TASK_INFO_ERROR("MP-110328", "task_info_error"),
+    TASK_IS_INITING("MP-110329", "task_is_initing");
 
 
 

@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
@@ -129,7 +130,7 @@ public class CsceneFlowService {
                 flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
                 flowTaskTaskModel.setFlowId(flowInfoModel.getId());
                 flowTaskTaskModel.setNodeId(detail.getNodeId());
-                flowTaskTaskModel.setTaskStatus(9);
+                flowTaskTaskModel.setTaskStatus(TaskTaskStatusEnum.INITING.toValue());
                 flowTaskTaskModelList.add(flowTaskTaskModel);
             }
         }
