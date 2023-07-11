@@ -68,7 +68,7 @@ public class VyosNetworkCommandUtils {
     }
 
     public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
-        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler, true);
+        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
         for (var builder : modifyBuilderChains) {
             List<String> cmds = builder.build(paramsWrapper);
@@ -82,25 +82,9 @@ public class VyosNetworkCommandUtils {
         CloudScenePluginHandler pluginHandler;
         List<CloudPluginSceneElementPortBO> pluginPorts;
         List<SceneElementPortBO> ports;
-        Boolean onlyChangeDelayAndLossValue;
 
         public ConfigParamsWrapper(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
             this.element = element;
-            this.onlyChangeDelayAndLossValue = false;
-            this.pluginHandler = pluginHandler;
-            this.ports = element.getSrcElement().getPorts();
-            if (CollectionUtils.isEmpty(element.getSrcElement().getPorts())) {
-                this.pluginPorts = new ArrayList<>();
-            } else {
-                pluginPorts = element.getSrcElement().getPorts().stream()
-                        .map(p -> pluginHandler.getPort(p.getId()))
-                        .filter(p -> p != null)
-                        .collect(Collectors.toList());
-            }
-        }
-        public ConfigParamsWrapper(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler, Boolean onlyChangeDelayAndLossValue) {
-            this.element = element;
-            this.onlyChangeDelayAndLossValue = onlyChangeDelayAndLossValue;
             this.pluginHandler = pluginHandler;
             this.ports = element.getSrcElement().getPorts();
             if (CollectionUtils.isEmpty(element.getSrcElement().getPorts())) {
@@ -360,7 +344,7 @@ public class VyosNetworkCommandUtils {
                         lossCmd = String.format(NETWORK_PACKET_LOSS, order, loss);
                         result.add(lossCmd);
                     }
-                    if (!StringUtils.isAllEmpty(delayCmd, lossCmd) && !paramsWrapper.onlyChangeDelayAndLossValue) {
+                    if (!StringUtils.isAllEmpty(delayCmd, lossCmd)) {
                         result.add(String.format(BIND_OUT_TRAFFIC_POLICY, order, order));
                     }
                 }
