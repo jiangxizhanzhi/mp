@@ -253,6 +253,46 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         int total = 0;
         List<CollectionHostEventBO> result = new ArrayList<>();
+        boolean multiNode = nodeIds != null && nodeIds.size() > 1;
+        if (multiNode) {
+            if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId) || ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId) ||
+                    ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
+                    ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId)) {
+                HostEventQueryParams params = new HostEventQueryParams();
+                params.setNodeIds(nodeIds);
+                params.setPage(queryParams.getPage());
+                params.setPageSize(queryParams.getPageSize());
+                params.setStartTime(queryParams.getStartTime());
+                params.setEndTime(queryParams.getEndTime());
+                params.setLevels(queryParams.getLevels());
+                ListObjServiceResult<CollectionHostEventBO> r;
+                if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
+                    // 文件变更信息
+                    params.setType(4);
+                } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
+                    // 注册表变更信息
+                    params.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
+                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
+                    // 操作系统日志信息
+                    params.setCatagories(CsceneBizConstant.OS_CATEGORY);
+                } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
+                    // 应用系统日志信息
+                    params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
+                } else {
+                    // 安全系统日志信息
+                    params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
+                }
+                if (StringUtils.isEmpty(scrollId)) {
+                    params.setScroll(isScrollRequest);
+                    r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                } else {
+                    r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
+                }
+                var res = r.getSource().getObjs();
+                total = r.getSource().getTotal() + total;
+                return new ListObjServiceResult<>(new ListObjResult<>(res, total));
+            }
+        }
         for (String nodeId : nodeIds) {
             var element = sceneHandler.getElement(nodeId);
             var cloudElement = cloudPluginHandler.getElement(nodeId);
@@ -283,6 +323,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 } else {
                     // 网络连接
                     request.setFetchIfSceneInstanceShutdown(true);
+                    if (multiNode) {
+                        request.setPage(1);
+                        request.setPageSize(1000);
+                    }
                     var r = sceneElementMonitorService.pageNetworkConnections(request);
                     if (r.getData() != null) {
                         res = r.getData().getList();
@@ -316,6 +360,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     }
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     // 进程信息
+                    if (multiNode) {
+                        params.setPage(1);
+                        params.setPageSize(1000);
+                    }
                     var r = hostStateService.pageProcesses(params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -435,8 +483,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             });
         }
         // 多节点分页大小处理
-        var newRes = result.stream().limit(queryParams.getPageSize()).collect(Collectors.toList());
-        return new ListObjServiceResult<>(new ListObjResult<>(newRes, total));
+        if (multiNode) {
+            int start = queryParams.getPage() <= 0 ? 0 : (queryParams.getPage() - 1) * queryParams.getPageSize();
+            if (start >= result.size()) {
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), total));
+            } else {
+                int end = Math.min(result.size(), start + queryParams.getPageSize());
+                List<CollectionHostEventBO> newRes = result.subList(start, end);
+                return new ListObjServiceResult<>(new ListObjResult<>(newRes, total));
+            }
+        } else {
+            var newRes = result.stream().limit(queryParams.getPageSize()).collect(Collectors.toList());
+            return new ListObjServiceResult<>(new ListObjResult<>(newRes, total));
+        }
     }
 
     private ListObjServiceResult<CollectionHostEventBO> getCustomProbeCollectData(String sceneInstanceId, String sceneId,
@@ -799,7 +858,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
+        // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户 6:注册表
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
             // 传入的sceneId不需要提前转
             if (queryParams.getType().equals(1)) {
@@ -828,6 +887,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 // 用户变动
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams,
                         FileEventType.USERS.name());
+            }
+
+            if(queryParams.getType().equals(6)){
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
+                        FileEventType.REGISTRY.name());
             }
         }
 
