@@ -22,7 +22,7 @@
     <select id="pageBySceneId" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams" resultType="cn.cyberpeace.mp.flow.response.FlowTaskPageResponse">
         select t.id as id, t.interactive_type as interactiveType, t.node_name as nodeName, t.node_ip as nodeIp
         ,t.success_count as successCount, t.error_count as errorCount, t.success_count+t.error_count as totalCount
-        ,t.task_status as taskStatus, i.title as title
+        ,t.task_status as taskStatus, i.title as title, t.resource_type as resourceType
         ,(select duration from mp_flow_pcap where flow_id=i.id) as duration
         ,(select pcap_size from mp_flow_pcap where flow_id=i.id) as pcapSize
         ,(select pkt_num from mp_flow_pcap where flow_id=i.id) as pktNum
