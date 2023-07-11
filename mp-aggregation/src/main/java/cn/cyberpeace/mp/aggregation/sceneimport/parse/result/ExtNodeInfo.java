@@ -43,6 +43,7 @@ public class ExtNodeInfo {
         private String ripIp;
         private String ripPear;
         private String displayContext;
+        private String vertices;
         private String type;
 
         public boolean isNotEmpty() {
@@ -55,6 +56,7 @@ public class ExtNodeInfo {
                     || StringUtils.isNotEmpty(ripIp)
                     || StringUtils.isNotEmpty(ripPear)
                     || StringUtils.isNotEmpty(displayContext)
+                    || StringUtils.isNotEmpty(vertices)
                     || StringUtils.isNotEmpty(type);
         }
     }
