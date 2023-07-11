@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -20,7 +19,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.hutool.core.collection.ConcurrentHashSet;
@@ -214,7 +212,9 @@ public class ElementModifyHandler extends HandlerCommon {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
             String flavorId = this.createFlavor(newCloudElement);
-            virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
+            String host = virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
+            newCloudElement.setHost(host);
+            originCloudElement.setHost(host);
         }
         this.changeConnect(newCloudElement, originCloudElement);
         this.qosRuleChange(newCloudElement, originCloudElement);
