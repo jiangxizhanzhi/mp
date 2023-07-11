@@ -228,7 +228,7 @@ public class FlowExecutor {
     }
 
     public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
-        flowTaskTaskService.addTask(details, sceneId, actuatorId);
+        flowTaskTaskService.addTask(details, sceneId, actuatorId, false, null);
     }
 
     public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
