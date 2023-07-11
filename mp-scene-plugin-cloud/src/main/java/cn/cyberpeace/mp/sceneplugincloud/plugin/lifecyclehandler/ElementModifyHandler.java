@@ -642,13 +642,19 @@ public class ElementModifyHandler extends HandlerCommon {
                 var deleteCloudPort = this.originCloudScenePluginHandler.getPort(delPortId);
                 if (deleteCloudPort != null && StringUtils.isNotEmpty(deleteCloudPort.getResourceId())) {
                     var deletePort = deleteCloudPort.getSrcPort();
-                    var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
-                    var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
-                    var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
-                    if (originNet != null) {
-                        this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
-                    } else if (originNet1 != null) {
-                        this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
+                    if (deletePort != null) {
+                        var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
+                        if (originNet != null) {
+                            this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
+                        }else {
+                            var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
+                            if (deletePortConnectedPort != null) {
+                                var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
+                                if (originNet1 != null) {
+                                    this.containerDeletePort(originCloudElement.getResourceId(), originNet1.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
+                                }
+                            }
+                        }
                     }
                 }
             }
