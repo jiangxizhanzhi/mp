@@ -1558,7 +1558,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                     log.info("111111111114");
                                     log.info(p.getIp());
                                     log.info(connectCloudElement.getCidr());
-                                    if (!IpUtils.newIsInCidr(p.getIp(), connectCloudElement.getCidr())) {
+                                    if (!IpUtils.newIsInCidr2(p.getIp(), connectCloudElement.getCidr())) {
                                         log.info("111111111115");
                                         p.setIp(StringUtils.EMPTY);
                                     }
