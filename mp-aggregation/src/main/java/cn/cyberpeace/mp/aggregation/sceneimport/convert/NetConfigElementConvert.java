@@ -65,8 +65,8 @@ class NetConfigElementConvert implements IConverter {
                                     var cloudPort = container.getCloudPluginPorts().get(port.getId());
                                     port.setDelay(portProtocol.getDelay());
                                     port.setLoss(portProtocol.getLoss());
-                                    port.setEgress(port.getEgress());
-                                    port.setIngress(port.getIngress());
+                                    port.setEgress(portProtocol.getEgress());
+                                    port.setIngress(portProtocol.getIngress());
                                     cloudPort.setConnectMode(portProtocol.getConnectMode());
                                     cloudPort.setBgpAs(portProtocol.getBgpAs());
                                     cloudPort.setBgpIp(portProtocol.getBgpIp());
