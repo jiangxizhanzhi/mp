@@ -732,9 +732,23 @@ public class CreateHandler extends HandlerCommon {
                             log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
                         }
                     } else if (command.contains("/opt/wazuha/stop.sh")) {
-                        // 安装探针失败要重试
                         containerClient.executeCommand(containerId, "echo \"" + command + "\" >> /tmp/tmp_installers/install_wazuh.sh");
                         containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/install_wazuh.sh > nohup.out 2>&1 &");
+
+                        try {
+                            // 安装探针失败要重试
+                            List<String> checks = new ArrayList<>(){{
+                                this.add("sleep 300 ;");
+                                this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
+                                this.add("then echo \"wazuh ok\"");
+                                this.add("else sh install_wazuh.sh ;");
+                                this.add("fi");
+                            }};
+                            containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks,"\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
+                            containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/check_wazuh.sh > nohup.out 2>&1 &");
+                        }catch (Exception e){
+                            log.error("failed to add wazuh check script ");
+                        }
                     } else {
                         containerClient.executeCommand(containerId, command);
                     }
