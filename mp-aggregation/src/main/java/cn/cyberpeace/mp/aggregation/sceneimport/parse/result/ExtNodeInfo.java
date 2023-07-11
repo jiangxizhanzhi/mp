@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.result;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,6 +45,11 @@ public class ExtNodeInfo {
         private String ripPear;
         private String displayContext;
         private String vertices;
+        private Integer egress;
+        private Integer ingress;
+        private Integer delay;
+        private Integer loss;
+        private String connectMode;
         private String type;
 
         public boolean isNotEmpty() {
@@ -57,6 +63,11 @@ public class ExtNodeInfo {
                     || StringUtils.isNotEmpty(ripPear)
                     || StringUtils.isNotEmpty(displayContext)
                     || StringUtils.isNotEmpty(vertices)
+                    || StringUtils.isNotEmpty(connectMode)
+                    || egress != null
+                    || ingress != null
+                    || loss != null
+                    || delay != null
                     || StringUtils.isNotEmpty(type);
         }
     }

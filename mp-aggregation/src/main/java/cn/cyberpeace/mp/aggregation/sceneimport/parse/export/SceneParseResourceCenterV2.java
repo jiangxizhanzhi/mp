@@ -384,6 +384,21 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                     exportInfo.setDisplayContext(connection.getDisplayContext());
                     exportInfo.setType(connection.getType());
                 }
+                if (p.getDelay() != null && p.getDelay() > 0) {
+                    exportInfo.setDelay(p.getDelay());
+                }
+                if (p.getLoss() != null && p.getLoss() > 0) {
+                    exportInfo.setLoss(p.getLoss());
+                }
+                if (p.getEgress() != null && p.getEgress() > 0) {
+                    exportInfo.setEgress(p.getEgress());
+                }
+                if (p.getIngress() != null && p.getIngress() > 0) {
+                    exportInfo.setIngress(p.getIngress());
+                }
+                if (StringUtils.isNotEmpty(cloudPort.getConnectMode())) {
+                    exportInfo.setConnectMode(cloudPort.getConnectMode());
+                }
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setBgpIp(cloudPort.getBgpIp());
                 exportInfo.setBgpPeer(cloudPort.getBgpPeer());
