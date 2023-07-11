@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,9 +17,11 @@ import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
@@ -48,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,6 +97,9 @@ public class CsceneFlowService {
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
+    @Autowired
+    private FlowInfoMapper flowInfoMapper;
+
     /**
      * 新增流量任务
      * @param request
@@ -107,6 +114,34 @@ public class CsceneFlowService {
         // 过滤未添加流量的节点
         request.setDetails(request.getDetails().stream().filter(detail -> CollectionUtils.isNotEmpty(detail.getFlowInfos())).collect(Collectors.toList()));
 
+        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
+        for (AddFlowTaskTaskDetail detail : request.getDetails()) {
+            HumanCondition condition = new HumanCondition();
+            List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
+            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+            condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
+            List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
+            //保存流量任务信息
+            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+                flowTaskTaskModel.setSceneId(sceneId);
+                flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
+                flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
+                flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+                flowTaskTaskModel.setNodeId(detail.getNodeId());
+                flowTaskTaskModel.setTaskStatus(9);
+                flowTaskTaskModelList.add(flowTaskTaskModel);
+            }
+        }
+        flowTaskTaskService.bulkCreate(flowTaskTaskModelList);
+
+        this.asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList);
+
+        log.info("CsceneFlowService.addTask end.");
+    }
+
+    @Async
+    public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         //如果没有flowplugin，则初始化flowplugin
@@ -117,7 +152,7 @@ public class CsceneFlowService {
             scenePluginDataBO.setElements(new HashMap<>());
             FlowPluginSceneElementBO elementBO = new FlowPluginSceneElementBO();
             elementBO.setFlows(new ArrayList<>());
-            for (AddFlowTaskTaskDetail detail : request.getDetails()) {
+            for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
                 scenePluginDataBO.getElements().put(detail.getNodeId(), JsonCommon.beanToSnakeMap(elementBO));
             }
             var scene = sceneHandler.toData();
@@ -138,7 +173,7 @@ public class CsceneFlowService {
         }
         List<AddFlowTaskTaskInfo> addFlowTaskTaskInfoList = new ArrayList<>();
         //遍历任务详情，初始化节点参数
-        for (AddFlowTaskTaskDetail detail : request.getDetails()) {
+        for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
             String nodeName = sceneHandler.getElement(detail.getNodeId()).getName();
             String nodeIp = "";
             String networkId = "";
@@ -169,9 +204,8 @@ public class CsceneFlowService {
         }
         //新增流量执行任务
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
-            flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId);
+            flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);
         }
-        log.info("CsceneFlowService.addTask end.");
     }
 
     /**

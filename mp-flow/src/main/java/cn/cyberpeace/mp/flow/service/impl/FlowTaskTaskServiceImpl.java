@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,17 +110,17 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
 
     /**
      * 新增流量任务
-     * @param details
+     * @param addFlowTaskTaskInfos
      * @param sceneId
      */
     @Transactional
-    public void addTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
-        log.info("FlowTaskTaskServiceImpl.addTask begin. details:{}, sceneId:{}", details, sceneId);
-        if (CollectionUtils.isNotEmpty(details)) {
+    public void addTask(List<AddFlowTaskTaskInfo> addFlowTaskTaskInfos, String sceneId, String actuatorId, boolean isAsync, List<FlowTaskTaskModel> flowTaskTaskModels) {
+        log.info("FlowTaskTaskServiceImpl.addTask begin. addFlowTaskTaskInfos:{}, sceneId:{}", addFlowTaskTaskInfos, sceneId);
+        if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfos)) {
             // 统计任务总数
-            int total = details.stream().mapToInt(detail -> detail.getFlowInfos().size()).sum();
+            int total = addFlowTaskTaskInfos.stream().mapToInt(detail -> detail.getFlowInfos().size()).sum();
 
-            for (AddFlowTaskTaskInfo detail : details) {
+            for (AddFlowTaskTaskInfo detail : addFlowTaskTaskInfos) {
                 //网口信息，如果不存在则创建网口
                 FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(detail.getNetworkId(), actuatorId);
                 String macAddress = "";
@@ -157,20 +158,38 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
                 //保存流量任务信息
                 List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
-                for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                    FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
-                    flowTaskTaskModel.setSceneId(sceneId);
-                    flowTaskTaskModel.setActuatorId(actuatorId);
-                    flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
-                    flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
-                    flowTaskTaskModel.setFlowId(flowInfoModel.getId());
-                    flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
-                    flowTaskTaskModel.setNodeId(detail.getNodeId());
-                    flowTaskTaskModel.setNodeIp(detail.getNodeIp());
-                    flowTaskTaskModel.setNodeName(detail.getNodeName());
-                    flowTaskTaskModelList.add(flowTaskTaskModel);
+                if (isAsync && CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
+                    for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                        for (FlowTaskTaskModel modelTemp : flowTaskTaskModels) {
+                            if (modelTemp.getFlowId().equals(flowInfoModel.getId()) && modelTemp.getNodeId().equals(detail.getNodeId())) {
+                                FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+                                BeanUtils.copyProperties(modelTemp, flowTaskTaskModel);
+                                flowTaskTaskModel.setActuatorId(actuatorId);
+                                flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
+                                flowTaskTaskModel.setNodeIp(detail.getNodeIp());
+                                flowTaskTaskModel.setNodeName(detail.getNodeName());
+                                flowTaskTaskModel.setTaskStatus(0);
+                                flowTaskTaskModelList.add(flowTaskTaskModel);
+                            }
+                        }
+                    }
+                    this.bulkUpdate(flowTaskTaskModelList);
+                } else {
+                    for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                        FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+                        flowTaskTaskModel.setSceneId(sceneId);
+                        flowTaskTaskModel.setActuatorId(actuatorId);
+                        flowTaskTaskModel.setResourceType(flowInfoModel.getResourceType());
+                        flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
+                        flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+                        flowTaskTaskModel.setPortId(flowTaskPortModel.getId() == null ? "":flowTaskPortModel.getId());
+                        flowTaskTaskModel.setNodeId(detail.getNodeId());
+                        flowTaskTaskModel.setNodeIp(detail.getNodeIp());
+                        flowTaskTaskModel.setNodeName(detail.getNodeName());
+                        flowTaskTaskModelList.add(flowTaskTaskModel);
+                    }
+                    this.bulkCreate(flowTaskTaskModelList);
                 }
-                this.bulkCreate(flowTaskTaskModelList);
 
                 //保存流量任务配置信息
                 List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();

@@ -52,7 +52,7 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
      * @param sceneId
      * @param actuatorId
      */
-    void addTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId);
+    void addTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId, boolean isAsync, List<FlowTaskTaskModel> flowTaskTaskModelList);
 
     /**
      * 根据节点id和流量id查询任务
