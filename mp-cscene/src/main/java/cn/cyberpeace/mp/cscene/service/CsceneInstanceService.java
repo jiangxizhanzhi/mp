@@ -68,6 +68,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -1544,6 +1545,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     // 赋值一个新的id
                     var p = newPorts.get(portId);
                     p.setId(portId + "00");
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        var connectElement = newConnectPort.getElement();
+                        if (connectElement != null) {
+                            CloudScenePluginHandler handler = newSceneHandler.getPluginHandler("cpcloud");
+                            if (handler != null) {
+                                var connectCloudElement = handler.getElement(connectElement.getId());
+                                if (connectCloudElement != null && StringUtils.isNotEmpty(connectCloudElement.getCidr())) {
+                                    if (!IpUtils.newIsInCidr(p.getIp(), connectCloudElement.getCidr())) {
+                                        p.setIp(StringUtils.EMPTY);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for (var connect : instance.getScene().getTopology().getConnections()) {
                         if (portId.equals(connect.getSource())) {
                             connect.setSource(p.getId());
