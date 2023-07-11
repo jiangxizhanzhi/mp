@@ -130,7 +130,7 @@ public class WazuhCommon {
                             "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
-                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+//                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,

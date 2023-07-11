@@ -738,7 +738,7 @@ public class CreateHandler extends HandlerCommon {
                         try {
                             // 安装探针失败要重试
                             List<String> checks = new ArrayList<>(){{
-                                this.add("sleep 300 ;");
+                                this.add("sleep 180 ;");
                                 this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
                                 this.add("then echo \"wazuh ok\"");
                                 this.add("else sh install_wazuh.sh ;");
