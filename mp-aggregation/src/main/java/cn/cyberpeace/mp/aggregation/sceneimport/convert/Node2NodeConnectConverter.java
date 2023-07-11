@@ -1,15 +1,19 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,6 +69,14 @@ class Node2NodeConnectConverter implements IConverter {
             connectionBO.setTarget(portTo.getId());
             // 传递连线的前端属性
             if (container.getPortId2Protocol().get(portFrom.getId()) != null) {
+                var vertices = container.getPortId2Protocol().get(portFrom.getId()).getVertices();
+                if (StringUtils.isNotEmpty(vertices)) {
+                    var verticesList = JsonCommon.parse(vertices, new TypeReference<List<Map<String, Object>>>() {
+                    });
+                    connectionBO.setVertices(verticesList);
+                } else {
+                    connectionBO.setVertices(new ArrayList<>());
+                }
                 connectionBO.setDisplayContext(container.getPortId2Protocol().get(portFrom.getId()).getDisplayContext());
             }
             connectionBO.setName(portFrom.getName() + "_" + portTo.getName());

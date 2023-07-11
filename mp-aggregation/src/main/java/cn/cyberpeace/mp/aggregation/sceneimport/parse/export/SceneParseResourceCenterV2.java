@@ -380,6 +380,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                 // 设置下连线的属性信息
                 var connection = sceneHandler.getPortBelongConnection(p.getId());
                 if (connection != null) {
+                    exportInfo.setVertices(JsonCommon.stringify(connection.getVertices()));
                     exportInfo.setDisplayContext(connection.getDisplayContext());
                     exportInfo.setType(connection.getType());
                 }
