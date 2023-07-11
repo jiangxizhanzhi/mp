@@ -732,7 +732,11 @@ public class DataCollectionService extends CollectionBaseService {
             if (Objects.nonNull(jsonObject.get("level"))) {
                 processModel.setLevel(jsonObject.getIntValue("level"));
             }
-            processModel.setDescription("PROCESS");
+            if (Objects.nonNull(jsonObject.get("description"))) {
+                processModel.setDescription(jsonObject.getString("description"));
+            } else {
+                processModel.setDescription("PROCESS");
+            }
             list.add(processModel);
         }
 
@@ -950,9 +954,10 @@ public class DataCollectionService extends CollectionBaseService {
                 byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
-                // 添加level信息
+                // 添加其他信息
                 if (Objects.nonNull(launchModel.getRule())) {
                     jsonObject.put("level", launchModel.getRule().getLevel());
+                    jsonObject.put("description", launchModel.getRule().getDescription());
                 }
                 Date date = launchModel.getTimestamp();
                 if (Objects.nonNull(date)) {
@@ -1456,7 +1461,6 @@ public class DataCollectionService extends CollectionBaseService {
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
             //区分文件还是注册表
             builder.description(wazuhFileRoot.getRule().getDescription())
-                    //  .catagory()
                     .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
             if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
                 fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
