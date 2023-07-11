@@ -1454,10 +1454,14 @@ public class DataCollectionService extends CollectionBaseService {
             }
         }
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
+            if (Objects.equals(FileEventType.PROCESS, fileEventType)) {
+                builder.description(FileEventType.PROCESS.toString())
+                        .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
+            } else {
+                builder.description(wazuhFileRoot.getRule().getDescription())
+                        .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
+            }
             //区分文件还是注册表
-            builder.description(wazuhFileRoot.getRule().getDescription())
-                    //  .catagory()
-                    .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
             if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
                 fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
             }
