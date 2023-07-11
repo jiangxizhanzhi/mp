@@ -1415,6 +1415,7 @@ public class CreateHandler extends HandlerCommon {
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         buildNetwork.setCmds(cmds);
+        elementBO.setCmds(cmds);
 
         // 开启dhcp
         var openDhcp = new RouterConfigCmdData();
