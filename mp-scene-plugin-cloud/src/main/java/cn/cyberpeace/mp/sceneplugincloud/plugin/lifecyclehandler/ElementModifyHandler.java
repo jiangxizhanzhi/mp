@@ -169,7 +169,7 @@ public class ElementModifyHandler extends HandlerCommon {
             }
         }
         Boolean onlyChangeDelayAndLossValue = true;
-        if (originCloudElement.getCmds().isEmpty()) {
+        if (CollectionUtils.isEmpty(originCloudElement.getCmds())) {
             // 如果cmds为空，说明是首次设置延时和丢包率，此时要绑定网络端口
             onlyChangeDelayAndLossValue = false;
         }
