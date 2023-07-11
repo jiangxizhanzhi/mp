@@ -36,6 +36,12 @@ public class FlowTaskPageResponse {
     private Integer interactiveType;
 
     /**
+     * 资源类型：0 pcap包，1 脚本
+     */
+    @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
+    private Integer resourceType;
+
+    /**
      * 目标节点名称
      */
     @ApiModelProperty(value = "目标节点名称")
