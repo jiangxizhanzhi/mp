@@ -19,7 +19,12 @@ public enum TaskTaskStatusEnum {
 
     PAUSE("PAUSE"),
 
-    PREPARING("PREPARING");
+    PREPARING("PREPARING"),
+
+    /**
+     * 初始化中，不能执行
+     */
+    INITING("INITING");
 
     private final String status;
 
