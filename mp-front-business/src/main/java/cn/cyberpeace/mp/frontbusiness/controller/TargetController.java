@@ -12,8 +12,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.elasticsearch.action.search.SearchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,12 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 /**
  * @Description: 权限管理接口
@@ -58,25 +51,6 @@ public class TargetController {
     @GetMapping("/tree")
     public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
         List<TargetBo> tree = targetService.getTree(targetId, type);
-        if (CollectionUtils.isNotEmpty(tree)) {
-            Set<String> menuIds = new HashSet<>();
-            Queue<TargetBo> queue = new ArrayDeque<>();
-            queue.addAll(tree);
-            int index = 0;
-            while (!queue.isEmpty()) {
-                var targetBo = queue.poll();
-                menuIds.add(targetBo.getIdentifier());
-                if (CollectionUtils.isNotEmpty(targetBo.getChildren())) {
-                    queue.addAll(targetBo.getChildren());
-                }
-                index++;
-                if (index > 2000) {
-                    break;
-                }
-            }
-            tree = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), new ArrayList<>(menuIds));
-            return ServiceResult.builder().source(tree).build().asResult();
-        }
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
