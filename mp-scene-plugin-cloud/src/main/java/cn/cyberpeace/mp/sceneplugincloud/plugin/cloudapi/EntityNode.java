@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
@@ -42,10 +43,17 @@ public class EntityNode extends CloudClient {
      * @return List<MibResultData>
      */
     public List<MibResultData> getMibNodeInfo(MibNodeQueryParam param) {
-        CloudResponse<List<MibResultData>> result = cloudGet(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, param,
-            new TypeReference<CloudResponse<List<MibResultData>>>() {
-            }, true);
-        return result.getData();
+        try {
+            CloudResponse<List<MibResultData>> result = cloudGet(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, param,
+                new TypeReference<CloudResponse<List<MibResultData>>>() {
+                }, true);
+            return result.getData();
+        } catch (Exception e) {
+            if(e.getMessage().startsWith("timed out")){
+                throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
+            }
+            throw new MpRuntimeException(e.getMessage());
+        }
     }
 
     /**
