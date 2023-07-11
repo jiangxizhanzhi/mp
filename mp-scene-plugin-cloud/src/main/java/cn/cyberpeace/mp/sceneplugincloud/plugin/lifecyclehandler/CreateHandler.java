@@ -1415,12 +1415,6 @@ public class CreateHandler extends HandlerCommon {
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         buildNetwork.setCmds(cmds);
-        for (String cmd : cmds) {
-            if (cmd.contains("traffic-policy out snpolicy")) {
-                elementBO.setCmds(cmds);
-                break;
-            }
-        }
 
         // 开启dhcp
         var openDhcp = new RouterConfigCmdData();

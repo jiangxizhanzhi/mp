@@ -168,18 +168,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 newCloudElement.getSrcElement().getPorts().get(i).setOrder(i + 1);
             }
         }
-        Boolean onlyChangeDelayAndLossValue = true;
-        if (CollectionUtils.isEmpty(originCloudElement.getCmds())) {
-            // 如果cmds为空，说明是首次设置延时和丢包率，此时要绑定网络端口
-            onlyChangeDelayAndLossValue = false;
-        }
-        List<String> cmds = VyosNetworkCommandUtils.genModifyNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler, onlyChangeDelayAndLossValue);
-        for (String cmd : cmds) {
-            if (cmd.contains("traffic-policy out snpolicy")) {
-                newCloudElement.setCmds(cmds);
-                break;
-            }
-        }
+        List<String> cmds = VyosNetworkCommandUtils.genModifyNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler);
         var buildNetwork = new RouterConfigCmdData();
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
