@@ -174,6 +174,12 @@ public class ElementModifyHandler extends HandlerCommon {
             onlyChangeDelayAndLossValue = false;
         }
         List<String> cmds = VyosNetworkCommandUtils.genModifyNetworkCmdList(newCloudElement, this.newCloudScenePluginHandler, onlyChangeDelayAndLossValue);
+        for (String cmd : cmds) {
+            if (cmd.contains("traffic-policy out snpolicy")) {
+                newCloudElement.setCmds(cmds);
+                break;
+            }
+        }
         var buildNetwork = new RouterConfigCmdData();
         buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
