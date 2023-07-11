@@ -30,9 +30,6 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
 
     @ApiModelProperty(value = "云平台用于分布式部署时需要的ip,节点的每个网络需要一个")
     private Map<String, String> fwdnsIps = new ConcurrentHashMap<>();
-    
-    @ApiModelProperty(value = "已经执行过的组网命令")
-    private List<String> cmds = new ArrayList<>();
 
     // 加入的网络
     @JsonIgnore
@@ -49,22 +46,16 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
 
     @Override
     public void fromModel(CloudPluginSceneElementModel obj, String... ignoreFields) {
-        super.fromModel(obj, "fwdnsIps", "cmds");
+        super.fromModel(obj, "fwdnsIps");
         fwdnsIps = StringUtils.isEmpty(obj.getFwdnsIps()) ? new HashMap<>()
                 : JsonCommon.parse(obj.getFwdnsIps(), new TypeReference<Map<String, String>>() {
-        });
-        cmds = StringUtils.isEmpty(obj.getCmds()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getCmds(), new TypeReference<List<String>>() {
         });
     }
 
     public CloudPluginSceneElementModel toModel(String... ignoreFields) {
-        var obj = super.toModel("fwdnsIps", "cmds");
+        var obj = super.toModel("fwdnsIps");
         if (fwdnsIps != null) {
             obj.setFwdnsIps(JsonCommon.stringify(fwdnsIps));
-        }
-        if (cmds != null) {
-            obj.setCmds(JsonCommon.stringify(cmds));
         }
         return obj;
     }

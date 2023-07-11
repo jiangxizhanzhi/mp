@@ -13,8 +13,5 @@ import lombok.NoArgsConstructor;
 @Table("mp_sceneplugincloud_scene_element")
 public class CloudPluginSceneElementModel extends BaseCloudPluginSceneElementModel {
     @DefaultStr
-    private String fwdnsIps;
-
-    @DefaultStr
-    private String cmds;
+    private String fwdnsIps ;
 }
