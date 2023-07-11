@@ -1547,12 +1547,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     p.setId(portId + "00");
                     if (StringUtils.isNotEmpty(p.getIp())) {
                         var connectElement = newConnectPort.getElement();
+                        log.info("111111111111");
                         if (connectElement != null) {
+                            log.info("111111111112");
                             CloudScenePluginHandler handler = newSceneHandler.getPluginHandler("cpcloud");
                             if (handler != null) {
+                                log.info("111111111113");
                                 var connectCloudElement = handler.getElement(connectElement.getId());
                                 if (connectCloudElement != null && StringUtils.isNotEmpty(connectCloudElement.getCidr())) {
+                                    log.info("111111111114");
+                                    log.info(p.getIp());
+                                    log.info(connectCloudElement.getCidr());
                                     if (!IpUtils.newIsInCidr(p.getIp(), connectCloudElement.getCidr())) {
+                                        log.info("111111111115");
                                         p.setIp(StringUtils.EMPTY);
                                     }
                                 }
