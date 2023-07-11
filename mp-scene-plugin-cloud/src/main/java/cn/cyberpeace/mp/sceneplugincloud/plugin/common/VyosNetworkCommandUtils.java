@@ -67,8 +67,8 @@ public class VyosNetworkCommandUtils {
         return result;
     }
 
-    public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
-        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler, true);
+    public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler, Boolean onlyChangeDelayAndLossValue) {
+        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler, onlyChangeDelayAndLossValue);
         List<String> result = new ArrayList<>();
         for (var builder : modifyBuilderChains) {
             List<String> cmds = builder.build(paramsWrapper);
