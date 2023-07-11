@@ -1,0 +1,19 @@
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
+
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @Description:
+ * @Author: guquan
+ * @Date：2023/7/11 20:19
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class VirtualMachineInstanceResizeResult implements CloudHttpData {
+    private String flavor;
+    private String hostname;
+}

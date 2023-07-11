@@ -178,7 +178,7 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
-    public boolean resize(String instanceId, String flavorId) {
+    public String resize(String instanceId, String flavorId) {
         VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
         resizeData.setFlavor(flavorId);
         resizeData.setInstanceId(instanceId);
@@ -186,7 +186,7 @@ public class VirtualMachine extends CloudClient {
             return instanceResize(resizeData);
         } catch (Exception e) {
             if (e.getMessage().contains("instances must change flavor!")) {
-                return true;
+                return "";
             }
             throw e;
         }
@@ -218,11 +218,11 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
-    private boolean instanceResize(VirtualMachineResizeData httpData) {
+    private String instanceResize(VirtualMachineResizeData httpData) {
         try {
-            cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<Object>>() {
+            var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<VirtualMachineInstanceResizeResult>>() {
             }, true);
-            return true;
+            return response.getData() == null ? "" : response.getData().getHostname();
         } catch (Exception e) {
             throw new MpRuntimeException(e.getMessage());
         }
