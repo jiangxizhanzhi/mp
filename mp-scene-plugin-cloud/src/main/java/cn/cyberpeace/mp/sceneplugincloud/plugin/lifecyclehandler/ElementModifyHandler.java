@@ -608,6 +608,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             a.setId(TextUtils.uuid());
                         }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            a.setAccessIp(addPort.getIp());
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
