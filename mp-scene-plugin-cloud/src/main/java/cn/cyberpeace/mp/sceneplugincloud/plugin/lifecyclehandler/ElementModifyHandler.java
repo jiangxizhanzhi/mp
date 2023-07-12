@@ -189,8 +189,10 @@ public class ElementModifyHandler extends HandlerCommon {
             // 发送拼接网络的命令
             try {
                 vmRouter.createConfig(clearNetwork);
-                vmRouter.createConfig(clearTraffic);
-                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+//                vmRouter.createConfig(clearTraffic);
+                if (CollectionUtils.isNotEmpty(buildNetwork.getCmds())) {
+                    buildNetworkResult = vmRouter.createConfig(buildNetwork);
+                }
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
                 exception = e;
