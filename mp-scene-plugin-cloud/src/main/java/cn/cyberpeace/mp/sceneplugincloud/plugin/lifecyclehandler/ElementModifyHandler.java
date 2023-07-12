@@ -597,12 +597,10 @@ public class ElementModifyHandler extends HandlerCommon {
                 // 虚拟机容器分开处理
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
                     var result = this.vmAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp(), null);
-                    addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 } else {
                     var result = this.containerAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp());
-                    addPort.setIp(addPort.getIp());
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 }

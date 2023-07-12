@@ -36,6 +36,7 @@ class SceneElementShapeConverter implements IConverter {
             SceneConfigAreaBO areaBO = new SceneConfigAreaBO();
             areaBO.setId(shape.getId());
             areaBO.setName(shape.getName());
+            areaBO.setDisplayContext(shape.getDisplayContext());
             double width = new BigDecimal(shape.getWidth()).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
             double height = new BigDecimal(shape.getLength()).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
             Position position = new Position();

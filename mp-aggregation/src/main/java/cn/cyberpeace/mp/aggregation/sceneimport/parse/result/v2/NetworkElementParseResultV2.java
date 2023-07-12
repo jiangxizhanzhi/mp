@@ -23,6 +23,7 @@ public class NetworkElementParseResultV2 {
     private String dhcp;
     private String dhcpPool;
     private List<String> dns;
+    private String displayContext;
 
     public NetworkElementParseResult convert() {
         NetworkElementParseResult result = new NetworkElementParseResult();
@@ -34,6 +35,7 @@ public class NetworkElementParseResultV2 {
         result.setDhcpPool(dhcpPool);
         result.setPosition(position);
         result.setDns(StringUtils.join(dns, ","));
+        result.setDisplayContext(displayContext);
         return result;
     }
 }
