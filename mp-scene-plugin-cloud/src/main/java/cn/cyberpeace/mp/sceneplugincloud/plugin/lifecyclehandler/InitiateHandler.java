@@ -836,14 +836,8 @@ public class InitiateHandler extends HandlerCommon {
                 // 未设置ip值,使用默认网段的网络
                 boolean isCoreRouter = this.isCoreRouter(cloudElement);
                 boolean isDynamips = this.isDynamips(cloudElement);
-                if (isCoreRouter) {
-                    // 如果是核心路由器 每个端口分配一个网络
-                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
-                    connectedNetwork.addPort(port, connectPort, true);
-                    noCidrNetwork.add(connectedNetwork);
-                } else if (isDynamips && connectPort != null) {
-                    // 如果是dynamips 每个连了线的端口分配一个网络
+                if (isCoreRouter || isDynamips) {
+                    // 如果是核心路由器/dynamips 每个端口分配一个网络
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, true);
