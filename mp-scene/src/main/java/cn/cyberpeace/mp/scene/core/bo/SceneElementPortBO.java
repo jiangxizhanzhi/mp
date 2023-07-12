@@ -11,6 +11,8 @@ public class SceneElementPortBO extends BaseSceneElementPortBO<SceneElementPortM
     @JsonIgnore
     private boolean using = true;
 
+    private boolean change = false ;
+
     @Override
     public SceneElementPortModel createModel() {
         return new SceneElementPortModel();

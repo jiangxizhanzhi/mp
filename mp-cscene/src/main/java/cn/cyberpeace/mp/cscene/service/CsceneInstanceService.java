@@ -1544,7 +1544,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (originConnectPort == null && newConnectPort != null) {
                     // 赋值一个新的id
                     var p = newPorts.get(portId);
-                    p.setId(portId + "00");
+                    p.setChange(true);
+//                    p.setId(portId + "00");
                     if (StringUtils.isNotEmpty(p.getIp())) {
                         var connectElement = newConnectPort.getElement();
                         if (connectElement != null) {
