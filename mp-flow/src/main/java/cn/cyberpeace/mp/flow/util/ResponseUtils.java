@@ -20,6 +20,11 @@ public class ResponseUtils {
     private static final String STR_CODE = "code";
 
     /**
+     * 任务运行中返回码
+     */
+    private static final String RUNNING_CODE = "6008";
+
+    /**
      * 校验返回结果码是否正常
      *
      * @param object
@@ -29,5 +34,16 @@ public class ResponseUtils {
         return Objects.nonNull(object) && StringUtils.isNotBlank(object.getString(STR_CODE))
                 && SUCCESS_CODE.equals(object.getString(STR_CODE));
     }
+
+    /**
+     * 校验返回码是否是运行中
+     * @param object
+     * @return
+     */
+    public static boolean checkRunning(JSONObject object) {
+        return Objects.nonNull(object) && StringUtils.isNotBlank(object.getString(STR_CODE))
+                && RUNNING_CODE.equals(object.getString(STR_CODE));
+    }
+
 
 }
