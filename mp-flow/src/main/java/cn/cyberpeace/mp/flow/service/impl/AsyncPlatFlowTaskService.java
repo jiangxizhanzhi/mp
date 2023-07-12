@@ -755,6 +755,11 @@ public class AsyncPlatFlowTaskService {
                 flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
                 return ResultCommon.success(true);
             } else {
+                if (ResponseUtils.checkRunning(startTaskObj)) {
+                    // 更新任务状态为运行中
+                    flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
+                    return ResultCommon.success(true);
+                }
                 log.error("start task failed for {}", taskId);
                 return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
             }
