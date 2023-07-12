@@ -192,6 +192,8 @@ public class ElementModifyHandler extends HandlerCommon {
 //                vmRouter.createConfig(clearTraffic);
                 if (CollectionUtils.isNotEmpty(buildNetwork.getCmds())) {
                     buildNetworkResult = vmRouter.createConfig(buildNetwork);
+                } else {
+                    buildNetworkResult = true;
                 }
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);

@@ -175,6 +175,8 @@ public class ModifyHandler extends HandlerCommon {
                                             e.getAccessNetworks().add(connectedNetworkBO);
                                             findedNetPortIds.add(p.getId());
                                             handlerd = true;
+                                            pluginPort.setLogicNetworkId(pluginToPort.getLogicNetworkId());
+                                            pluginPort.setAuxiliaryNetworkId(pluginToPort.getAuxiliaryNetworkId());
                                         }
                                     }
                                 } else if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
