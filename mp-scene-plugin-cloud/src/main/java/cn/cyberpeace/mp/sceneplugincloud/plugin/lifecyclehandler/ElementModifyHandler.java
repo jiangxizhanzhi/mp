@@ -586,6 +586,15 @@ public class ElementModifyHandler extends HandlerCommon {
         // 本次可能更新的端口
         Set<String> mayUpdatePortIds = new HashSet<>(newPortIds);
         mayUpdatePortIds.retainAll(originPortIds);
+
+        if (newCloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(newCloudElement.getSrcElement().getPorts())) {
+            for (var p : newCloudElement.getSrcElement().getPorts()) {
+                if (Boolean.TRUE.equals(p.isChange())) {
+                    mayUpdatePortIds.add(p.getId());
+                }
+            }
+        }
+
         log.debug("newCloudElement is {}, originCloudElement is {}, addPortIds is {}, delPortIds is {}, mayUpdatePortIds is {}",
                 JsonCommon.stringify(newCloudElement), JsonCommon.stringify(originCloudElement),
                 JsonCommon.stringify(addPortIds), JsonCommon.stringify(delPortIds), JsonCommon.stringify(mayUpdatePortIds));
@@ -651,7 +660,7 @@ public class ElementModifyHandler extends HandlerCommon {
                         var originNet = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePort);
                         if (originNet != null) {
                             this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), deleteCloudPort.getResourceId(), deleteCloudPort);
-                        }else {
+                        } else {
                             var deletePortConnectedPort = originCloudScenePluginHandler.getSceneHandler().getPortConnectedPort(delPortId);
                             if (deletePortConnectedPort != null) {
                                 var originNet1 = this.getPluginHandler().getHandlerUtils().getNetworkByPort(deletePortConnectedPort);
@@ -776,6 +785,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             a.setId(TextUtils.uuid());
                         }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            a.setAccessIp(newPort.getIp());
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
