@@ -93,6 +93,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
             shape.setId(areaBO.getId());
             shape.setName(areaBO.getName());
             shape.setNodeIds(new ArrayList<>());
+            shape.setDisplayContext(areaBO.getDisplayContext());
             Position position = JsonCommon.parse(areaBO.getPosition2(), Position.class);
             shape.setLength(this.formatDouble(position.getHeight()));
             shape.setWidth(this.formatDouble(position.getWidth()));
@@ -296,6 +297,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneConfigElementBO e, CloudPluginSceneConfigElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         networkElementParseResult.setName(e.getName());
+        networkElementParseResult.setDisplayContext(e.getDisplayContext());
         if (BaseSceneElementModel.Type.SWITCH == e.getType()) {
             networkElementParseResult.setDhcp(Boolean.TRUE.equals(pluginElement.getDhcp()) ? SPECIAL_STR_ON : SPECIAL_STR_OFF);
             networkElementParseResult.setCidr(pluginElement.getCidr());
