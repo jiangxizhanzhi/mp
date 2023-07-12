@@ -116,7 +116,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
-            queryParams.setOrders(new String[]{"-createTime"});
+            queryParams.setOrders(new String[]{"-createTime", "-title"});
         }
 
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
