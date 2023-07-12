@@ -75,9 +75,11 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
         });
         // 更新时不处理DYNAMIPS节点
+        Set<String> dynamipsIds = new HashSet<>();
         this.modifyCreateHandler.getPluginHandler().getElementMap().forEach((k, v) -> {
             if (v != null && v.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
                 this.modifyCreateHandler.getPluginHandler().getSceneHandler().addExcludeHandleNode(v.getSrcElement().getId());
+                dynamipsIds.add(v.getSrcElement().getId());
             }
         });
         runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
@@ -90,7 +92,13 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
                 for (String elementId : mayUpdateNodeIds) {
-                    if(getPluginHandler().getSceneHandler().isHandleNode(elementId)){
+                    if (getPluginHandler().getSceneHandler().isHandleNode(elementId)) {
+                        CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                        if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                            new ElementModifyHandler(newPlugin, originPlugin,
+                                    originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                        }
+                    } else if (dynamipsIds.contains(elementId)) {
                         CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
                         if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
                             new ElementModifyHandler(newPlugin, originPlugin,
