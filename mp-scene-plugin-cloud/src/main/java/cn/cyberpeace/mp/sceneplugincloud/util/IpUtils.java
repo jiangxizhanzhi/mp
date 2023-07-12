@@ -327,6 +327,23 @@ public class IpUtils {
         return (ipLong - Ipv4Util.ipv4ToLong(beginIp)) <= size;
     }
 
+    public static boolean newIsInCidr2(String ip, String cidr) {
+        String beginIp = null;
+        String lastIp = null;
+        if (cidr.contains(Ipv4Util.IP_MASK_SPLIT_MARK)) {
+            lastIp = IpUtils.lastIp(cidr);
+            beginIp = IpUtils.beginIp(cidr);
+        } else if (cidr.contains(Ipv4Util.IP_SPLIT_MARK)) {
+            String[] newIps = StrUtil.split(cidr, Ipv4Util.IP_SPLIT_MARK);
+            beginIp = newIps[0];
+            lastIp = newIps[1];
+        }
+        long cidrEnd = Ipv4Util.ipv4ToLong(lastIp);
+        long cidrStart = Ipv4Util.ipv4ToLong(beginIp);
+        long ipLong = Ipv4Util.ipv4ToLong(ip);
+        return ipLong >= cidrStart && ipLong <= cidrEnd;
+    }
+
     /**
      * 获取cidr段最后一个ip地址
      * @param cidr cidr
