@@ -211,8 +211,8 @@ public class ElementModifyHandler extends HandlerCommon {
             // 先创建flavor
             String flavorId = this.createFlavor(newCloudElement);
             String host = virtualMachine.resize(originCloudElement.getResourceId(), flavorId);
-            newCloudElement.setHost(host);
-            originCloudElement.setHost(host);
+            newCloudElement.setHost(host+"22");
+            originCloudElement.setHost(host+"22");
         }
         this.changeConnect(newCloudElement, originCloudElement);
         this.qosRuleChange(newCloudElement, originCloudElement);
