@@ -420,23 +420,39 @@ public class ElementModifyHandler extends HandlerCommon {
             newSrcPort.setLoss(-1);
         }
         boolean eGressChange = false;
-        if ((newCloudPort.getSrcPort().getEgress() != null && newCloudPort.getSrcPort().getEgress() > 0) && (originCloudPort.getSrcPort().getEgress() != null && originCloudPort.getSrcPort().getEgress() > 0 && newCloudPort.getSrcPort().getEgress() != originCloudPort.getSrcPort().getEgress())) {
-            eGressChange = true;
+        {
+            int newEgress = (newCloudPort.getSrcPort().getEgress() != null && newCloudPort.getSrcPort().getEgress() > 0) ? newCloudPort.getSrcPort().getEgress() : 0;
+            int originEgress = (originCloudPort.getSrcPort().getEgress() != null && originCloudPort.getSrcPort().getEgress() > 0) ? originCloudPort.getSrcPort().getEgress() : 0;
+            if (originEgress != newEgress) {
+                eGressChange = true;
+            }
         }
 
         boolean inGressChange = false;
-        if ((newCloudPort.getSrcPort().getIngress() != null && newCloudPort.getSrcPort().getIngress() > 0) && originCloudPort.getSrcPort().getIngress() != null && originCloudPort.getSrcPort().getIngress() > 0 && newCloudPort.getSrcPort().getIngress() != originCloudPort.getSrcPort().getIngress()) {
-            inGressChange = true;
+        {
+            int newInGress = (newCloudPort.getSrcPort().getIngress() != null && newCloudPort.getSrcPort().getIngress() > 0) ? newCloudPort.getSrcPort().getIngress() : 0;
+            int originInGress = (originCloudPort.getSrcPort().getIngress() != null && originCloudPort.getSrcPort().getIngress() > 0) ? originCloudPort.getSrcPort().getIngress() : 0;
+            if (newInGress != originInGress) {
+                inGressChange = true;
+            }
         }
 
         boolean delayChange = false;
-        if (newCloudPort.getSrcPort().getDelay() != null && newCloudPort.getSrcPort().getDelay() > 0 && originCloudPort.getSrcPort().getDelay() != null && originCloudPort.getSrcPort().getDelay() > 0 && originCloudPort.getSrcPort().getDelay() != originCloudPort.getSrcPort().getDelay()) {
-            delayChange = true;
+        {
+            int newDelay = (newCloudPort.getSrcPort().getDelay() != null && newCloudPort.getSrcPort().getDelay() > 0) ? newCloudPort.getSrcPort().getDelay() : 0;
+            int originDelay = (originCloudPort.getSrcPort().getDelay() != null && originCloudPort.getSrcPort().getDelay() > 0) ? originCloudPort.getSrcPort().getDelay() : 0;
+            if (newDelay != originDelay) {
+                delayChange = true;
+            }
         }
 
         boolean lossChange = false;
-        if ((newCloudPort.getSrcPort().getLoss() != null && newCloudPort.getSrcPort().getLoss() > 0) && originCloudPort.getSrcPort().getLoss() != null && originCloudPort.getSrcPort().getLoss() > 0 && newCloudPort.getSrcPort().getLoss() != originCloudPort.getSrcPort().getLoss()) {
-            lossChange = true;
+        {
+            int newLoss = (newCloudPort.getSrcPort().getLoss() != null && newCloudPort.getSrcPort().getLoss() > 0) ? newCloudPort.getSrcPort().getLoss() : 0;
+            int originLoss = (originCloudPort.getSrcPort().getLoss() != null && originCloudPort.getSrcPort().getLoss() > 0) ? originCloudPort.getSrcPort().getLoss() : 0;
+            if (newLoss != originLoss) {
+                lossChange = true;
+            }
         }
 
         if (eGressChange || inGressChange || delayChange || lossChange) {
