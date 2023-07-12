@@ -183,7 +183,7 @@ public class ElementModifyHandler extends HandlerCommon {
         clearTraffic.setCmds(Arrays.asList("delete traffic-policy"));
 
         boolean buildNetworkResult = false;
-        int tryTimes = 5;
+        int tryTimes = 7;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 发送拼接网络的命令
@@ -195,6 +195,12 @@ public class ElementModifyHandler extends HandlerCommon {
                 log.error("failed to build network , try time {}", i);
                 exception = e;
                 buildNetworkResult = false;
+                if (i >= 5) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                    }
+                }
             }
             if (buildNetworkResult) {
                 break;
