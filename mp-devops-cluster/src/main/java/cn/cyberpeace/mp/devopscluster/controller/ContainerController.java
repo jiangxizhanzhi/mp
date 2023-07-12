@@ -154,7 +154,10 @@ public class ContainerController {
             if (CollectionUtils.isNotEmpty(values)) {
                 List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    userBoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    var list = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        userBoList = list;
+                    }
                 }
             }
         }

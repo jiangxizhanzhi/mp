@@ -771,6 +771,8 @@ public class ElementModifyHandler extends HandlerCommon {
                     newPort.setIp(result.getFixedIp());
                     newPort.setMacAddr(result.getMacAddress());
                     newCloudPort.setResourceId(result.getPortId());
+                    newCloudPort.setAuxiliaryNetworkId(newNet.getResourceId());
+                    newCloudPort.setLogicNetworkId(newNet.getId());
                 } else {
                     // 去掉旧的
                     this.containerDeletePort(originCloudElement.getResourceId(), originNet.getResourceId(), originCloudPort.getResourceId(), originCloudPort);
@@ -780,6 +782,8 @@ public class ElementModifyHandler extends HandlerCommon {
                     newPort.setIp(newPort.getIp());
                     newPort.setMacAddr(result.getMacAddress());
                     newCloudPort.setResourceId(result.getPortId());
+                    newCloudPort.setAuxiliaryNetworkId(newNet.getResourceId());
+                    newCloudPort.setLogicNetworkId(newNet.getId());
                 }
 
                 // 新增端口映射
