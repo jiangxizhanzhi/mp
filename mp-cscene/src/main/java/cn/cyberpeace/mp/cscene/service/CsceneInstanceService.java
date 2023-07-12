@@ -1552,8 +1552,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             if (handler != null) {
                                 var connectCloudElement = handler.getElement(connectElement.getId());
                                 if (connectCloudElement != null && StringUtils.isNotEmpty(connectCloudElement.getCidr())) {
-                                    log.info(p.getIp());
-                                    log.info(connectCloudElement.getCidr());
                                     if (!IpUtils.newIsInCidr2(p.getIp(), connectCloudElement.getCidr())) {
                                         p.setIp(StringUtils.EMPTY);
                                     }
