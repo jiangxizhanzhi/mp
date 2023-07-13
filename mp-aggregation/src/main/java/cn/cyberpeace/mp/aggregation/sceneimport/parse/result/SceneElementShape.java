@@ -19,4 +19,5 @@ public class SceneElementShape {
     private Double length;
     private Double width;
     private List<String> nodeIds;
+    private String displayContext;
 }

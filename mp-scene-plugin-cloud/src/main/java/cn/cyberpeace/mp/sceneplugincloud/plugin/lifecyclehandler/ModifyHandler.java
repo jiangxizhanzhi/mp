@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -74,9 +75,11 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
         });
         // 更新时不处理DYNAMIPS节点
+        Set<String> dynamipsIds = new HashSet<>();
         this.modifyCreateHandler.getPluginHandler().getElementMap().forEach((k, v) -> {
             if (v != null && v.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
                 this.modifyCreateHandler.getPluginHandler().getSceneHandler().addExcludeHandleNode(v.getSrcElement().getId());
+                dynamipsIds.add(v.getSrcElement().getId());
             }
         });
         runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
@@ -89,7 +92,13 @@ public class ModifyHandler extends HandlerCommon {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             if (mayUpdateNodeIds != null && !mayUpdateNodeIds.isEmpty()) {
                 for (String elementId : mayUpdateNodeIds) {
-                    if(getPluginHandler().getSceneHandler().isHandleNode(elementId)){
+                    if (getPluginHandler().getSceneHandler().isHandleNode(elementId)) {
+                        CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
+                        if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
+                            new ElementModifyHandler(newPlugin, originPlugin,
+                                    originPlugin.getSceneHandler().getScene().getEvent()).modifyElement(newElement.getSrcElement().getId());
+                        }
+                    } else if (dynamipsIds.contains(elementId)) {
                         CloudPluginSceneElementBO newElement = newPlugin.getElement(elementId);
                         if (newElement != null && newElement.getSrcElement() != null && newElement.getSrcElement().getId() != null) {
                             new ElementModifyHandler(newPlugin, originPlugin,
@@ -161,22 +170,51 @@ public class ModifyHandler extends HandlerCommon {
                         var pluginPort = getPluginHandler().getPort(p.getId());
                         var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                         if (pluginPort != null) {
-                            if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
-                                // 自己构建网络直接加入
-                                if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
-                                    networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
-                                    findedNetPortIds.add(p.getId());
-                                    defaultCreatedNetPluginPort = pluginPort;
-                                }
-                            } else if (to != null) {
-                                // 未构建网络看对端端口
-                                var pluginToPort = getPluginHandler().getPort(to.getId());
-                                if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
-                                    if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
-                                        ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
-                                        connectedNetworkBO.addPort(p, to, false);
-                                        e.getAccessNetworks().add(connectedNetworkBO);
+                            boolean handlerd = false ;
+                            if (e.getSrcElement().getType() != null && e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
+                                // 终端,优先看对端网络
+                                if (to != null) {
+                                    // 未构建网络看对端端口
+                                    var pluginToPort = getPluginHandler().getPort(to.getId());
+                                    if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
+                                        if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
+                                            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                                            connectedNetworkBO.addPort(p, to, false);
+                                            e.getAccessNetworks().add(connectedNetworkBO);
+                                            findedNetPortIds.add(p.getId());
+                                            handlerd = true;
+                                            pluginPort.setLogicNetworkId(pluginToPort.getLogicNetworkId());
+                                            pluginPort.setAuxiliaryNetworkId(pluginToPort.getAuxiliaryNetworkId());
+                                        }
+                                    }
+                                } else if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
+                                    // 自己构建网络直接加入
+                                    if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
+                                        networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
                                         findedNetPortIds.add(p.getId());
+                                        defaultCreatedNetPluginPort = pluginPort;
+                                        handlerd = true ;
+                                    }
+                                }
+                            }
+                            if (!handlerd) {
+                                if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
+                                    // 自己构建网络直接加入
+                                    if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
+                                        networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                                        findedNetPortIds.add(p.getId());
+                                        defaultCreatedNetPluginPort = pluginPort;
+                                    }
+                                } else if (to != null) {
+                                    // 未构建网络看对端端口
+                                    var pluginToPort = getPluginHandler().getPort(to.getId());
+                                    if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
+                                        if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
+                                            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                                            connectedNetworkBO.addPort(p, to, false);
+                                            e.getAccessNetworks().add(connectedNetworkBO);
+                                            findedNetPortIds.add(p.getId());
+                                        }
                                     }
                                 }
                             }

@@ -64,6 +64,7 @@ class NetworkElementConverter implements IConverter {
         sceneConfigElementBO.setIcon2(DefaultImgUtil.pathToFdfsUrl(CommonConstant.DefaultImageUrl.SWITCHER));
         List<SceneConfigElementPortBO> ports = new ArrayList<>();
         sceneConfigElementBO.setPorts(ports);
+        sceneConfigElementBO.setDisplayContext(network.getDisplayContext());
 
         if (StringUtils.isNotEmpty(network.getPosition())) {
             String[] xy = network.getPosition().split(",");

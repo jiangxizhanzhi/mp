@@ -19,4 +19,5 @@ public class NetworkElementParseResult {
     private String dhcp;
     private String dhcpPool;
     private String dns;
+    private String displayContext;
 }
