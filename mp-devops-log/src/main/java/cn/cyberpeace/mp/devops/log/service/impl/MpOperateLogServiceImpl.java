@@ -36,7 +36,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements OperateL
 
     @Override
     public SearchResponse search(OperationLogPageRequest request) {
-        if (request.getLimit() * request.getOffset() > 10000) {
+        if (request.getLimit() * request.getOffset() > 100000) {
             throw new MpRuntimeException("不支持深度分页查询！");
         }
 

@@ -133,8 +133,8 @@ public class OperationLogPageRequest extends BasePageRequest{
     public SearchSourceBuilder buildSearchSourceBuilder(){
         return SearchSourceBuilder.searchSource().query(this.buildBoolQueryBuilder())
                 .sort("opTime", SortOrder.DESC)
-                .from(this.getOffset() - 1 > 0 ? this.getOffset() - 1 : 0)
-                .size(this.getLimit());
+                .from((this.getPage() - 1) * this.getPerPage())
+                .size(this.getPerPage());
     }
 
     /**
