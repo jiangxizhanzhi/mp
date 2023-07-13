@@ -809,6 +809,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             request.setSceneId(params.getSceneId());
             request.setElementIds(params.getNodeIds());
             request.setEndTime(params.getEndTime());
+            request.setPage(1);
+            request.setPageSize(999);
+            request.setPerPage(999);
             request.setFetchIfSceneInstanceShutdown(true);
             var fileCount = sceneElementMonitorService.getModifyData(request, CsceneBizConstant.FILE_MODIFY_GROUP,
                     null).getSource().getTotal();
