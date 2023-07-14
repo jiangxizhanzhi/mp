@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.log.config;
 
+import lombok.Getter;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
@@ -19,6 +20,7 @@ import javax.annotation.PostConstruct;
  * @author wanggang
  */
 @Configuration(value = "LogElasticsearchConfig")
+@Getter
 public class ElasticsearchConfig {
 
     @Value("${mp.log.es-nodes}")
