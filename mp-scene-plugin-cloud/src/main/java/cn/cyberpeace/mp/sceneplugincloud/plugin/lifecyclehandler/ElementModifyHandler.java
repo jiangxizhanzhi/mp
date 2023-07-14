@@ -752,6 +752,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             a.setId(TextUtils.uuid());
                         }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            a.setAccessIp(newPort.getIp());
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
@@ -856,6 +857,7 @@ public class ElementModifyHandler extends HandlerCommon {
                             a.setId(TextUtils.uuid());
                         }
                         if (AccessMode.Protocol.CONSOLE.equals(a.getProtocol())) {
+                            a.setAccessIp(newPort.getIp());
                             continue;
                         }
                         PortMappingCreateData portMappingCreateData = new PortMappingCreateData();
