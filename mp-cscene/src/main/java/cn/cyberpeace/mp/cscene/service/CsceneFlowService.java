@@ -500,7 +500,8 @@ public class CsceneFlowService {
             }
         });
         if (CollectionUtils.isNotEmpty(portIds) && totalSecond > 0) {
-            NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(portIds, totalSecond);
+            List<String> newPortIds = portIds.stream().distinct().collect(Collectors.toList());
+            NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond);
             if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
                 Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size()-1) * networkFlowRateResult.getTimeInt();
                 for (Long value : networkFlowRateResult.getSumRateList()) {
