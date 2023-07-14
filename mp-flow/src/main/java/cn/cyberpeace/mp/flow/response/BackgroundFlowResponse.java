@@ -53,6 +53,7 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
+        setFlowDesc(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
             setCreateTime(DateUtil.format(flowInfoModel.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
