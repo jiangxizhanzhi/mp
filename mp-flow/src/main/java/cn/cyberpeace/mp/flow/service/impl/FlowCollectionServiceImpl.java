@@ -254,6 +254,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         // 原关联数量都设置为0
         flowCollectionModel.setAttackFlowCount(0);
         flowCollectionModel.setBackgroundFlowCount(0);
+        this.getModelMapper().update(flowCollectionModel);
         // 删除原有关联信息
         flowCollectionRelService.delByCollectionId(request.getId());
 
@@ -265,7 +266,6 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             relRequest.setFlowIds(flowIds);
             this.addCollectionRel(relRequest);
         }
-        this.getModelMapper().update(flowCollectionModel);
         return ResultCommon.success(flowCollectionModel);
     }
 
