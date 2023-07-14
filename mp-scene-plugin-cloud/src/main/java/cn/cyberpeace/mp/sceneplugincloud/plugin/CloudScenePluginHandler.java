@@ -163,6 +163,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                             // 自己构建网络直接加入
                             if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
                                 networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                                if (e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
+                                    e.getDeriveNetworks().add(networkBOMap.get(pluginPort.getLogicNetworkId()));
+                                }
                             }
                         } else if (to != null) {
                             // 未构建网络看对端端口
