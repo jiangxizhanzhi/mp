@@ -79,8 +79,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private TenantUserServiceImpl tenantUserService;
 
-    private CsceneService csceneService;
-
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
             return new ArrayList<>();
@@ -431,7 +429,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (StringUtils.isEmpty(csceneBO.getId())) {
             return;
         }
-        var sceneConfigId = csceneService.getSceneConfigId(csceneBO.getId());
+        var sceneConfigId = getSceneConfigId(csceneBO.getId());
         if (StringUtils.isEmpty(sceneConfigId)) {
             return;
         }
