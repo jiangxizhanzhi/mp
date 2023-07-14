@@ -36,10 +36,12 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
@@ -76,6 +78,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
+
+    private CsceneService csceneService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -410,12 +414,38 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 return new ServiceResult<>(csceneBO);
             }
         } else {
+            handlerEnableRate(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
             return new ServiceResult<>(csceneHandler.toData());
+        }
+    }
+
+    private void handlerEnableRate(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
+        if (StringUtils.isEmpty(csceneBO.getId())) {
+            return;
+        }
+        var sceneConfigId = csceneService.getSceneConfigId(csceneBO.getId());
+        if (StringUtils.isEmpty(sceneConfigId)) {
+            return;
+        }
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, null, false, null);
+        CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (cloudSceneConfigPluginHandler != null && cloudSceneConfigPluginHandler.getScene() != null) {
+            if (csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
+                return;
+            }
+            ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
+                    .orElse(new HashMap<>());
+            cpcloudPluginScene.put("enable_rate", cloudSceneConfigPluginHandler.getScene().getEnableRate());
+            scenePluginDataBO.setScene(cpcloudPluginScene);
         }
     }
 
