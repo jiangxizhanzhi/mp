@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
@@ -55,6 +56,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -153,19 +156,40 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             this.getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
         });
         // 处理加入的网络
-        getElementMap().values().forEach(e -> {
+        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getElementMap().values());
+        allElements.forEach(cloudElement -> this.initCoreType(cloudElement));
+        Collections.sort(allElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
+
+        allElements.forEach(e -> {
             if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
                 e.getSrcElement().getPorts().forEach(p -> {
                     var pluginPort = this.getPort(p.getId());
                     var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                     if (pluginPort != null) {
                         if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
+                            if (e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
+                                // 终端特殊处理一下 如果对端已经有网络 优先加入对端网络
+                                if (to != null) {
+                                    var pluginToPort = this.getPort(to.getId());
+                                    if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
+                                        if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
+                                            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                                            connectedNetworkBO.addPort(p, to, false);
+                                            e.getAccessNetworks().add(connectedNetworkBO);
+                                        }
+                                    } else {
+                                        networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                                        e.getDeriveNetworks().add(networkBOMap.get(pluginPort.getLogicNetworkId()));
+                                    }
+                                }
+                            } else {
+                                if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
+                                    networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                                }
+                            }
                             // 自己构建网络直接加入
                             if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
                                 networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
-                                if (e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
-                                    e.getDeriveNetworks().add(networkBOMap.get(pluginPort.getLogicNetworkId()));
-                                }
                             }
                         } else if (to != null) {
                             // 未构建网络看对端端口
@@ -723,4 +747,45 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this, updateElementIds).modify();
     }
 
+
+    public void initCoreType(CloudPluginSceneElementBO element) {
+        Integer role = element.getRole();
+        CoreType coreType = CoreType.NETWORK;
+        if (role != null) {
+            if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
+                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
+            ) {
+                coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else {
+                    coreType = CoreType.FIREWALL;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            }
+        }
+        element.setCoreType(coreType);
+    }
 }
