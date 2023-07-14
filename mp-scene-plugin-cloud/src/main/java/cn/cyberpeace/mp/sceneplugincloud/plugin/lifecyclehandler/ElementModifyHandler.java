@@ -658,9 +658,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
                         a.setFwdId(portMapping.getId());
-
-                        checkAccessModes(newCloudElement);
                     }
+                    checkAccessModes(newCloudElement);
                 }
             }
         }
@@ -766,9 +765,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
-
-                        checkAccessModes(newCloudElement);
                     }
+                    checkAccessModes(newCloudElement);
                 }
 
             } else if (!StringUtils.equals(newNet.getResourceId(), originNet.getResourceId())) {
@@ -826,8 +824,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
 
-                        checkAccessModes(newCloudElement);
                     }
+                    checkAccessModes(newCloudElement);
                 }
 
             } else if (ipChange) {
@@ -870,9 +868,8 @@ public class ElementModifyHandler extends HandlerCommon {
                         a.setAvailable(true);
                         a.setAccessIp(portMapping.getHost());
                         a.setAccessPort(portMapping.getHostPort());
-
-                        checkAccessModes(newCloudElement);
                     }
+                    checkAccessModes(newCloudElement);
                 }
 
             }
