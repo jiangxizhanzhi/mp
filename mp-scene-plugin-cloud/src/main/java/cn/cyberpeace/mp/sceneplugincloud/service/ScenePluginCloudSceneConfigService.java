@@ -3,11 +3,14 @@ package cn.cyberpeace.mp.sceneplugincloud.service;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConfigStatCommon;
@@ -16,11 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -75,8 +74,12 @@ public class ScenePluginCloudSceneConfigService {
     }
 
     public ServiceResult<Boolean> updateEnableRecording(String sceneId, boolean newValue) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
+        CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneConfigBO sceneBO = cloudSceneConfigPluginHandler.getScene();
         CloudPluginSceneConfigModel sceneModel = new CloudPluginSceneConfigModel();
         sceneModel.setEnableRecording(newValue);
+        sceneModel.setEnableRate(sceneBO != null ? sceneBO.getEnableRate() : false);
         int result = cloudPluginSceneConfigMapper.filterUpdate(sceneModel, new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, sceneId));
         if (result == 0) {
             sceneModel.setScene(sceneId);
