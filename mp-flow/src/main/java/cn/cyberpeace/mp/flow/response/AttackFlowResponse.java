@@ -95,6 +95,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
+        setFlowDesc(flowInfoModel.getFlowDesc());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
             setCreateTime(DateUtil.format(flowInfoModel.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
         }
