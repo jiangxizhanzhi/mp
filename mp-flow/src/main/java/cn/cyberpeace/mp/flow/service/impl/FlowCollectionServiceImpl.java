@@ -251,18 +251,21 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
         FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
         BeanUtils.copyProperties(request, flowCollectionModel);
+        // 原关联数量都设置为0
+        flowCollectionModel.setAttackFlowCount(0);
+        flowCollectionModel.setBackgroundFlowCount(0);
         this.getModelMapper().update(flowCollectionModel);
-
         // 删除原有关联信息
         flowCollectionRelService.delByCollectionId(request.getId());
+
         // 更新集合关联信息
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(request.getId());
         if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
             List<String> flowIds = request.getFlowInfoList().stream().map(FlowInfoModel::getId).collect(Collectors.toList());
             relRequest.setFlowIds(flowIds);
+            this.addCollectionRel(relRequest);
         }
-        this.addCollectionRel(relRequest);
         return ResultCommon.success(flowCollectionModel);
     }
 
