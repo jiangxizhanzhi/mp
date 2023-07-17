@@ -332,6 +332,11 @@ public class ModifyHandler extends HandlerCommon {
         }
 
         @Override
+        protected void syncFlowPortInfo() {
+            log.info("ModifyDeleteHandler.syncFlowPortInfo.");
+        }
+
+        @Override
         public void delete() {
             super.delete();
             // 删除网络信息
