@@ -218,6 +218,7 @@ public class RecreateHandler extends HandlerCommon {
                         } );
             }
 
+            log.info("CreateInRecreateHandler.createElementProcess. enableRate:{}", getPluginHandler().getScene().getEnableRate());
             //通知云平台需要统计环境总速率的端口
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
