@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -16,12 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class ModifyHandler extends HandlerCommon {
@@ -82,6 +76,9 @@ public class ModifyHandler extends HandlerCommon {
                 dynamipsIds.add(v.getSrcElement().getId());
             }
         });
+        if (this.modifyCreateHandler.getPluginHandler().getScene() != null) {
+            this.modifyCreateHandler.getPluginHandler().getScene().setEnableRate(this.modifyDeleteHandler.getPluginHandler().getScene().getEnableRate());
+        }
         runSceneProgress(SceneProcess.MODIFY_CREATE_NODES, () -> {
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
             this.modifyInitiateHandler.initiate();
