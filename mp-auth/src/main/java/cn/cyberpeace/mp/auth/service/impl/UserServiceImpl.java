@@ -174,6 +174,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public List<UserBo> getUserDtoByOrg(String org) {
+        List<UserBo> userBos = new ArrayList<>();
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(TenantUserModel::getOrg, org);
+        List<TenantUserModel> tenantUserModels = tenantUserMapper.list(condition);
+        if (CollectionUtils.isNotEmpty(tenantUserModels)) {
+            for (TenantUserModel tenantUserModel : tenantUserModels) {
+                UserBo userBo = getUserDtoNoRestrict(tenantUserModel.getUser());
+                if (userBo != null) {
+                    userBos.add(userBo);
+                }
+            }
+        }
+        return userBos;
+    }
+
+    @Override
     public UserBo getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
         setDefaultIfNoAvatar(userModel);

@@ -26,6 +26,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserBo getUserDtoNoRestrict(String id);
 
+    List<UserBo> getUserDtoByOrg(String org);
+
     List<UserModel> getUserModelNoRestrictByUserIds(List<String> ids);
 
     UserBo getCurrentUserDto();
