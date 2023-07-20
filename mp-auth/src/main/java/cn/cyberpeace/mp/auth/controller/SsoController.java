@@ -61,6 +61,7 @@ public class SsoController {
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping("/query_user_by_token")
     public ServiceResult<UserModel> queryUserByToken(@RequestParam String token) {
+        log.info("SsoController.queryUserByToken begin. token:{}", token);
         JwtUtils.UserInfo user = verifyToken(token);
         UserBo userBo = userService.getUserDtoNoRestrict(user.getId());
 //        if (Objects.nonNull(userBo)) {
@@ -77,6 +78,7 @@ public class SsoController {
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @PostMapping("/logout")
     public ServiceResult<Objects> logout(@RequestParam String token, HttpServletRequest request) {
+        log.info("SsoController.logout begin. token:{}", token);
         UserModel user = null;
         try {
             user = JwtCommon.verifyToken(token);

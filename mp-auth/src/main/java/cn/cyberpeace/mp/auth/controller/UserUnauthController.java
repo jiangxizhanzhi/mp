@@ -2,13 +2,10 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
-import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
-import cn.cyberpeace.mp.log.service.OperateLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -41,7 +38,8 @@ public class UserUnauthController {
     @ApiOperation(value = "查询组织下所有用户")
     @ApiImplicitParam(name = "org", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/query")
-    public ObjServiceResult<List<UserSimpleBo>> get(@RequestParam String org) {
+    public ObjServiceResult<List<UserSimpleBo>> query(@RequestParam String org) {
+        log.info("UserUnauthController.query begin. org:{}", org);
         List<UserBo> userBos = userService.getUserDtoByOrg(org);
         List<UserSimpleBo> userSimpleBos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(userBos)) {
