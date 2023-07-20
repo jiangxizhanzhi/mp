@@ -49,6 +49,7 @@ public class UserUnauthController {
                 userSimpleBos.add(userSimpleBo);
             }
         }
+        log.info("UserUnauthController.query end. userSimpleBos.size:{}", userSimpleBos.size());
         return ResultUtils.obj2ObjServiceResult(userSimpleBos);
     }
 

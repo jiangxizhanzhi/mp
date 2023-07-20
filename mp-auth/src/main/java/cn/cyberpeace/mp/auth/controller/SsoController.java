@@ -60,17 +60,11 @@ public class SsoController {
     @ApiOperation(value = "根据token查询用户信息")
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping("/query_user_by_token")
-    public ServiceResult<UserModel> queryUserByToken(@RequestParam String token) {
+    public ServiceResult<UserBo> queryUserByToken(@RequestParam String token) {
         log.info("SsoController.queryUserByToken begin. token:{}", token);
         JwtUtils.UserInfo user = verifyToken(token);
         UserBo userBo = userService.getUserDtoNoRestrict(user.getId());
-//        if (Objects.nonNull(userBo)) {
-//            UserSimpleBo userSimpleBo = new UserSimpleBo();
-//            BeanUtils.copyProperties(userBo, userSimpleBo);
-//            return ResultUtils.obj2ObjServiceResult(userSimpleBo);
-//        }
-//        UserModel userModel = UserUtils.getUser(user.getId());
-//        UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);
+        log.info("SsoController.queryUserByToken end. userBo:{}", userBo);
         return ResultCommon.success(userBo);
     }
 
