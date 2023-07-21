@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -34,8 +36,11 @@ public class UserUnauthController {
     @ApiOperation(value = "查询组织下所有用户")
     @ApiImplicitParam(name = "org", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/query")
-    public ObjServiceResult<List<UserBo>> query(@RequestParam String org) {
+    public ObjServiceResult<Object> query(@RequestParam String org) {
         log.info("UserUnauthController.query begin. org:{}", org);
+        if (StringUtils.isEmpty(org)) {
+            return new ObjServiceResult<>(null, BaseErrorCode.PARAMS_INVALID).asResult();
+        }
         List<UserBo> userBos = userService.getUserDtoByOrg(org);
         log.info("UserUnauthController.query end. userBos.size:{}", userBos.size());
         return ResultUtils.obj2ObjServiceResult(userBos);
