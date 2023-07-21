@@ -43,7 +43,7 @@ public class AuthCacheConfig {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Integer seconds = authConfig.getAuthenticateCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
-            seconds = 30;
+            seconds = 300;
         }
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(seconds, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
@@ -55,7 +55,7 @@ public class AuthCacheConfig {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Integer seconds = authConfig.getAuthenticateCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
-            seconds = 30;
+            seconds = 300;
         }
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(seconds + 30, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
