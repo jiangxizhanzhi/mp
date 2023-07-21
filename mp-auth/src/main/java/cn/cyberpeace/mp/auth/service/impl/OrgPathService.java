@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springfox.documentation.annotations.Cacheable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description: 组织路径处理类
@@ -20,16 +23,24 @@ public class OrgPathService {
     @Autowired
     private OrgMapper orgMapper;
 
+    Map<String, List<OrgModel>> map = new ConcurrentHashMap<>();
+
     /**
      * 根据租户获取所有组织信息
+     *
      * @param tenant
      * @return
      */
-    @Cacheable(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL)
     public List<OrgModel> listByTenant(String tenant) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(OrgModel::getTenant, tenant);
-        return orgMapper.list(humanCondition);
+        if (map.containsKey(tenant)) {
+            return map.get(tenant);
+        } else {
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual(OrgModel::getTenant, tenant);
+            var result = orgMapper.list(humanCondition);
+            map.putIfAbsent(tenant, result);
+            return result;
+        }
     }
 
 }
