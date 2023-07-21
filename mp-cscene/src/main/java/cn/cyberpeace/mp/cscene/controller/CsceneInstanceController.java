@@ -744,7 +744,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeCommandActionRequest.class)
     @PostMapping("/exec_element")
     public ServiceResult<ElementCommandExecResult> execElement(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
-        return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getContext()).asResult();
+        log.info("exec_element,id is {},node_id is {},cmd is {},user is {}", request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser());
+        return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser(), request.getContext()).asResult();
     }
 
     @ApiOperation("节点文件上传")
@@ -764,9 +765,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @RequestParam(value = "file_path", required = false) String filePath,
             @RequestParam(value = "filename") String filename,
             @RequestParam(value = "dest_path") String destPath) throws IOException {
+        log.info("upload_element_file,id is {},node_id is {},filename is {}", id, nodeId, filename);
         if (file != null && !file.isEmpty()) {
-            String fdfs = csceneFileService.upload(file.getInputStream()).getSource();
-            return modelService.uploadElementFile(id, nodeId, fdfs, filename, destPath, null).asResult();
+            return modelService.uploadElementFileV2(id, nodeId, file.getInputStream(), filename, destPath, null).asResult();
         } else {
             return modelService.uploadElementFile(id, nodeId, filePath, filename, destPath, null).asResult();
         }

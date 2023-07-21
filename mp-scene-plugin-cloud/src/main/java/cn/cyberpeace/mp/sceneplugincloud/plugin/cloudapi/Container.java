@@ -96,6 +96,7 @@ public class Container extends CloudClient {
         CloudResponse<Object> result = cloudPost(requestUrl, data, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
+        log.info("copy file ,container is {},filepath is {} ,result is {} ", containerId, filepath, JsonCommon.stringify(result));
         return true;
     }
 
@@ -104,6 +105,24 @@ public class Container extends CloudClient {
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
+        var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+        var result = new CloudResponse<ContainerExecuteResult>();
+        try {
+            result = cloudPost(requestUrl, data, null,
+                    new TypeReference<>() {
+                    }, true);
+        } catch (Exception e) {
+            log.error("container execute command error containerId:{} command:{}", containerId, command, e);
+        }
+        return result.getData();
+    }
+
+    public ContainerExecuteResult executeCommand(String containerId, String command,String user) {
+        var data = new ContainerExecuteData();
+        data.setCommand(String.format("sh -c '%s'", command));
+        data.setInteractive(false);
+        data.setRun(true);
+        data.setUser(user);
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         var result = new CloudResponse<ContainerExecuteResult>();
         try {

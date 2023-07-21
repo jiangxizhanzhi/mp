@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
@@ -43,8 +44,11 @@ import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -510,6 +514,7 @@ public class SceneHandler extends BaseSceneHandler<
     public boolean create() {
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        save();
         try {
             for (var plugin : getPlugins()) {
                 plugin.create();
@@ -526,6 +531,12 @@ public class SceneHandler extends BaseSceneHandler<
         }
         save();
         return true;
+    }
+
+    @Override
+    public void save() {
+        log.info("save scene , scene id is {} , event is {} , event_status is {}", getSceneId(), getScene().getEvent(), getScene().getEventStatus());
+        super.save();
     }
 
     public void start() {
@@ -649,6 +660,16 @@ public class SceneHandler extends BaseSceneHandler<
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             save();
         }
+        String dir = "/tmp/mp/" + getSceneId();
+        try {
+            log.info("delete scene file dir {}", dir);
+            File file = new File(dir);
+            if (file.exists()) {
+                FileUtils.deleteDirectory(file);
+            }
+        } catch (Exception e) {
+            log.error("failed to delete dir , {} ", dir, e);
+        }
         return super.delete();
     }
 
@@ -667,6 +688,16 @@ public class SceneHandler extends BaseSceneHandler<
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             save();
+        }
+        String dir = "/tmp/mp/" + getSceneId();
+        try {
+            log.info("delete scene file dir {}", dir);
+            File file = new File(dir);
+            if (file.exists()) {
+                FileUtils.deleteDirectory(file);
+            }
+        } catch (Exception e) {
+            log.error("failed to delete dir , {} ", dir, e);
         }
         return super.logicDelete();
     }

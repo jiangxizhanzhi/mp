@@ -87,7 +87,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.resume_hold_size:200000}")
     private Integer resumeHoldSize;
 
-    @Value("${mp.sceneplugincloud.delete_pool_size:10}")
+    @Value("${mp.sceneplugincloud.delete_pool_size:100}")
     private Integer deletePoolSize;
 
     @Value("${mp.sceneplugincloud.delete_hold_size:200000}")

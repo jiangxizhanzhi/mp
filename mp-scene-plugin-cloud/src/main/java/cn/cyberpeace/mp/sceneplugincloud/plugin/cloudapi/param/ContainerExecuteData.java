@@ -12,6 +12,8 @@ public class ContainerExecuteData implements CloudHttpData {
 
     private String command;
 
+    private String user ;
+
     private Boolean run;
 
     private Boolean interactive;

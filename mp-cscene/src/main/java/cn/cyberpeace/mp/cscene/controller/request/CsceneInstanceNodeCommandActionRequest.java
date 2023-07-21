@@ -7,4 +7,6 @@ import lombok.Data;
 public class CsceneInstanceNodeCommandActionRequest extends CsceneInstanceNodeActionRequest {
     @ApiModelProperty(value = "执行命令")
     private String command;
+    @ApiModelProperty(value = "执行命令的用户")
+    private String execUser;
 }
