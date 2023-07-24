@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
@@ -45,7 +44,7 @@ public class DefaultImgUtil {
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
-                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+                path = FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
         }
         if (!FsCommon.isFileServerOuterUrl(path)) {
@@ -74,7 +73,7 @@ public class DefaultImgUtil {
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
             if (mappingModelOptional.isPresent()) {
-                path = FdfsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
+                path = FsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
         }
         if (!FsCommon.isFileServerOuterUrl(path)) {

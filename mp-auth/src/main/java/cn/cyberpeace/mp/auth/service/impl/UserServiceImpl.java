@@ -36,7 +36,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -822,7 +822,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             String filepath = null;
             try {
                 String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
-                filepath = FdfsCommon.upload(multipartFile.getInputStream(), suffix);
+                filepath = FsCommon.upload(multipartFile.getInputStream(), suffix);
                 log.info("uploaded avatar success! filepath:{}", filepath);
             } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
@@ -830,7 +830,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             if (StringUtils.isNotBlank(filepath)) {
-                String httpUrl = FdfsCommon.genHttpUrl(filepath);
+                String httpUrl = FsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 var ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();

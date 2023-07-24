@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
@@ -185,7 +185,7 @@ public class CollectionTemplateService {
             if (StringUtils.isNotBlank(colTempProbeDto.getScriptUrl())) {
                 log.info("Render Script Content...");
                 // 加载脚本内容
-                byte[] scriptByte = FdfsCommon.downloadRawContent(colTempProbeDto.getScriptUrl());
+                byte[] scriptByte = FsCommon.downloadRawContent(colTempProbeDto.getScriptUrl());
                 String scriptContent = new String(scriptByte, StandardCharsets.UTF_8);
                 colTempProbeDto.setScriptContent(scriptContent);
             }
