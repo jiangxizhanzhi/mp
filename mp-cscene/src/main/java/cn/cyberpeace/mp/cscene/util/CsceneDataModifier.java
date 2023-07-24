@@ -301,6 +301,76 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * 纠正创建和更新场景模板时 文件字段 的地址 去除文件字段的前缀，只保留文件对应的key值
+     *
+     * @param csceneBO
+     */
+    public static void removeFilePathPrefix(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
+            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
+                sceneConfig.setFile(FsCommon.getFileKey(sceneConfig.getFile()));
+            }
+            List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
+            if (CollectionUtils.isNotEmpty(elements)) {
+                elements.stream().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile())) {
+                        e.setFile(FsCommon.getFileKey(e.getFile()));
+                    }
+                    if (StringUtils.isNotEmpty(e.getIcon2())) {
+                        e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
+                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
+                    if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                        e.getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        accessMode.setPrivateKeyPath(FsCommon.getFileKey(accessMode.getPrivateKeyPath()));
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("private_key_path") != null) {
+                                    accessMode.put("private_key_path", FsCommon.getFileKey(accessMode.get("private_key_path").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(e -> {
+                        if (e.get("probes") != null) {
+                            List<Map> probes = (List<Map>) e.get("probes");
+                            probes.forEach(probe -> {
+                                if (probe.get("script_url") != null) {
+                                    probe.put("script_url", FsCommon.getFileKey(probe.get("script_url").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }
+    }
+
     private static void removeFilePathPrefix(SceneDataBO sceneDataBO){
         if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
             SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
