@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -35,17 +35,20 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pathToFdfsUrl(String path) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
-            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-            }
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path)) {
+//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+//            }
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
-                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+                path = FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;
@@ -58,19 +61,23 @@ public class DefaultImgUtil {
      * @return
      */
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
-        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX) &&
+        if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
+            String mayDefaultPath = path ;
             if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+                mayDefaultPath = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
             }
-            String group = splitToGroup(path);
-            String name = splitToName(path);
+            String group = splitToGroup(mayDefaultPath);
+            String name = splitToName(mayDefaultPath);
             Optional<LocalFileMappingModel> mappingModelOptional =
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
             if (mappingModelOptional.isPresent()) {
-                path = FdfsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
+                path = FsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
+        }
+        if (!FsCommon.isFileServerOuterUrl(path)) {
+            path = FsCommon.genHttpUrl(path);
         }
 
         return path;
@@ -143,7 +150,7 @@ public class DefaultImgUtil {
      */
     public static String getGroupByPath(String path) {
         for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
-            if (imgDirEnum.getCurrentPath().equals(path)) {
+            if (imgDirEnum.getCurrentPath().equals(path) || imgDirEnum.getEndPathName().equals(path)) {
                 return imgDirEnum.getGroup();
             }
         }

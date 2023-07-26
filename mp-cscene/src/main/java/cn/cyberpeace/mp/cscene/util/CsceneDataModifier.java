@@ -1,15 +1,20 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -36,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -296,37 +302,35 @@ public class CsceneDataModifier {
     }
 
     /**
-     * 纠正创建和更新场景模板时fdfs的地址,移除前缀
+     * 纠正创建和更新场景模板时 文件字段 的地址 去除文件字段的前缀，只保留文件对应的key值
      *
      * @param csceneBO
      */
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
-        BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
-        // 纠正fdfs的地址
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
-            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile()) && sceneConfig.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
-                sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
-                if (sceneConfig.getFile().startsWith("/")) {
-                    sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), "/", StringUtils.EMPTY));
-                }
+            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
+                sceneConfig.setFile(FsCommon.getFileKey(sceneConfig.getFile()));
             }
             List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
             if (CollectionUtils.isNotEmpty(elements)) {
                 elements.stream().forEach(e -> {
-                    if (StringUtils.isNotEmpty(e.getFile()) && e.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
-                        e.setFile(StringUtils.replaceOnce(e.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
-                        if (e.getFile().startsWith("/")) {
-                            e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
-                        }
+                    if (StringUtils.isNotEmpty(e.getFile())) {
+                        e.setFile(FsCommon.getFileKey(e.getFile()));
                     }
+                    if (StringUtils.isNotEmpty(e.getIcon2())) {
+                        e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
+                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
                     if (CollectionUtils.isNotEmpty(e.getPorts())) {
                         e.getPorts().forEach(port -> {
                             if (port != null) {
                                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                                     List<AccessMode> accessModes = port.getAccessModes();
                                     accessModes.forEach(accessMode -> {
-                                        accessMode.setPrivateKeyPath(removePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer()));
+                                        accessMode.setPrivateKeyPath(FsCommon.getFileKey(accessMode.getPrivateKeyPath()));
                                     });
                                 }
                             }
@@ -342,7 +346,7 @@ public class CsceneDataModifier {
                             List<Map> accessModes = (List<Map>) p.get("access_modes");
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("private_key_path") != null) {
-                                    accessMode.put("private_key_path", removePrefix(accessMode.get("private_key_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    accessMode.put("private_key_path", FsCommon.getFileKey(accessMode.get("private_key_path").toString()));
                                 }
                             });
                         }
@@ -357,7 +361,7 @@ public class CsceneDataModifier {
                             List<Map> probes = (List<Map>) e.get("probes");
                             probes.forEach(probe -> {
                                 if (probe.get("script_url") != null) {
-                                    probe.put("script_url", removePrefix(probe.get("script_url").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    probe.put("script_url", FsCommon.getFileKey(probe.get("script_url").toString()));
                                 }
                             });
                         }
@@ -367,17 +371,69 @@ public class CsceneDataModifier {
         }
     }
 
-    private static String removePrefix(String path, String prefix) {
-        if (StringUtils.isEmpty(path)) {
-            return path;
-        }
-        if (path.startsWith(prefix)) {
-            path = StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
-            if (path.startsWith("/")) {
-                path = StringUtils.replaceOnce(path, "/", StringUtils.EMPTY);
+    private static void removeFilePathPrefix(SceneDataBO sceneDataBO){
+        if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
+            SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
+            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile())) {
+                sceneConfig.setFile(FsCommon.getFileKey(sceneConfig.getFile()));
+            }
+            List<SceneElementBO> elements = sceneDataBO.getTopology().getElements();
+            if (CollectionUtils.isNotEmpty(elements)) {
+                elements.stream().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile())) {
+                        e.setFile(FsCommon.getFileKey(e.getFile()));
+                    }
+                    if (StringUtils.isNotEmpty(e.getIcon2())) {
+                        e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
+                    }
+//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
+//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
+//                    }
+                    if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                        e.getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        accessMode.setPrivateKeyPath(FsCommon.getFileKey(accessMode.getPrivateKeyPath()));
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            if (sceneDataBO.getPlugins() != null && sceneDataBO.getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = sceneDataBO.getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("private_key_path") != null) {
+                                    accessMode.put("private_key_path", FsCommon.getFileKey(accessMode.get("private_key_path").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            if (sceneDataBO.getPlugins() != null && sceneDataBO.getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = sceneDataBO.getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(e -> {
+                        if (e.get("probes") != null) {
+                            List<Map> probes = (List<Map>) e.get("probes");
+                            probes.forEach(probe -> {
+                                if (probe.get("script_url") != null) {
+                                    probe.put("script_url", FsCommon.getFileKey(probe.get("script_url").toString()));
+                                }
+                            });
+                        }
+                    });
+                }
             }
         }
-        return path;
     }
 
     public static void assembleInitCommands(CsceneBO csceneBO) {
@@ -481,10 +537,17 @@ public class CsceneDataModifier {
         if (csceneBO == null) {
             return;
         }
+        addFilePathPrefix(csceneBO);
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
+    }
+
+    private static void addFilePathPrefix(CsceneBO csceneBO) {
+        if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getLogo())) {
+            csceneBO.setLogo(FsCommon.genHttpUrl(csceneBO.getLogo()));
+        }
     }
 
     public static void correctVlanId(CsceneBO csceneBO) {
@@ -668,30 +731,28 @@ public class CsceneDataModifier {
     }
 
     /**
-     * 纠正返回场景模板时fdfs的地址,增加前缀
+     * 纠正返回场景模板时文件的地址,增加前缀
      *
      * @param baseSceneDataBO
      */
     private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
-        BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
-        // 纠正fdfs的地址
         if (baseSceneDataBO.getTopology() != null) {
             BaseSceneBO scene = baseSceneDataBO.getTopology().getScene();
-            if (scene != null && StringUtils.isNotEmpty(scene.getFile()) && !StringUtils.startsWith(scene.getFile(), baseAppConfig.getFdfsOuterHttpServer())) {
-                if (!StringUtils.startsWith(scene.getFile(), "/")) {
-                    scene.setFile("/" + scene.getFile());
-                }
-                scene.setFile(baseAppConfig.getFdfsOuterHttpServer() + scene.getFile());
+            if (scene != null && StringUtils.isNotEmpty(scene.getFile())) {
+                scene.setFile(FsCommon.genHttpUrl(scene.getFile()));
             }
             if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
                 baseSceneDataBO.getTopology().getElements().forEach(e -> {
                     BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
-                    if (StringUtils.isNotEmpty(sceneElement.getFile()) && !StringUtils.startsWith(sceneElement.getFile(), baseAppConfig.getFdfsOuterHttpServer())) {
-                        if (!StringUtils.startsWith(sceneElement.getFile(), "/")) {
-                            sceneElement.setFile("/" + sceneElement.getFile());
-                        }
-                        sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
+                    sceneElement.setFile(FsCommon.genHttpUrl(sceneElement.getFile()));
+                    if (StringUtils.isNotEmpty(sceneElement.getIcon2()) && sceneElement.getIcon2().startsWith("/api/mp") && !sceneElement.getIcon2().startsWith("/api/mp/file")) {
+                        List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
+                        var icon2 = DefaultImgUtil.pickPathToFdfsUrl(sceneElement.getIcon2(), mappingModelList);
+                        sceneElement.setIcon2(icon2);
+                    } else {
+                        sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
                     }
+                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {
                             if (p != null) {
@@ -699,7 +760,7 @@ public class CsceneDataModifier {
                                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                                     List<AccessMode> accessModes = port.getAccessModes();
                                     accessModes.forEach(accessMode -> {
-                                        String secretPath = addFilePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer());
+                                        String secretPath = FsCommon.genHttpUrl(accessMode.getPrivateKeyPath());
                                         accessMode.setPrivateKeyPath(secretPath);
                                     });
                                 }
@@ -716,7 +777,7 @@ public class CsceneDataModifier {
                             List<Map> accessModes = (List<Map>) p.get("access_modes");
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("private_key_path") != null) {
-                                    accessMode.put("private_key_path", addFilePrefix(accessMode.get("private_key_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    accessMode.put("private_key_path", FsCommon.genHttpUrl(accessMode.get("private_key_path").toString()));
                                 }
                             });
                         }
@@ -731,7 +792,7 @@ public class CsceneDataModifier {
                             List<Map> accessModes = (List<Map>) p.get("probes");
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("script_url") != null) {
-                                    accessMode.put("script_url", addFilePrefix(accessMode.get("script_url").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    accessMode.put("script_url", FsCommon.genHttpUrl(accessMode.get("script_url").toString()));
                                 }
                             });
                         }
@@ -739,19 +800,6 @@ public class CsceneDataModifier {
                 }
             }
         }
-    }
-
-    private static String addFilePrefix(String path, String prefix) {
-        if (StringUtils.isEmpty(path)) {
-            return path;
-        }
-        if (!StringUtils.startsWith(path, prefix)) {
-            if (!StringUtils.startsWith(path, "/")) {
-                path = "/" + path;
-            }
-            path = prefix + path;
-        }
-        return path;
     }
 
     public static void checkFlowNum(CsceneBO csceneBO) {

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -55,15 +55,15 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
 
                 String pySuffix = FileUtil.getSuffix(PY_DEMO_NAME);
                 String shSuffix = FileUtil.getSuffix(SH_DEMO_NAME);
-                String pyPath = FdfsCommon.upload(pyDemo, pySuffix);
-                String shPath = FdfsCommon.upload(shDemo, shSuffix);
+                String pyPath = FsCommon.upload(pyDemo, pySuffix);
+                String shPath = FsCommon.upload(shDemo, shSuffix);
 
                 String probeShSuffix = FileUtil.getSuffix(PROBE_SH_DEMO_NAME);
                 String probePySuffix = FileUtil.getSuffix(PROBE_PY_DEMO_NAME);
                 String probeBatSuffix = FileUtil.getSuffix(PROBE_BAT_DEMO_NAME);
-                String probeShPath = FdfsCommon.upload(probeShDemo, probeShSuffix);
-                String probePyPath = FdfsCommon.upload(probePyDemo, probePySuffix);
-                String probeBatPath = FdfsCommon.upload(probeBatDemo, probeBatSuffix);
+                String probeShPath = FsCommon.upload(probeShDemo, probeShSuffix);
+                String probePyPath = FsCommon.upload(probePyDemo, probePySuffix);
+                String probeBatPath = FsCommon.upload(probeBatDemo, probeBatSuffix);
 
                 FlowScriptDemoModel pyDemoModel = new FlowScriptDemoModel(PY_DEMO_NAME, pyPath, FlowScriptDemoModel.TYPE_FLOW);
                 FlowScriptDemoModel shDemoModel = new FlowScriptDemoModel(SH_DEMO_NAME, shPath, FlowScriptDemoModel.TYPE_FLOW);

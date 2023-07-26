@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.LfsCommon;
 import cn.cyberpeace.mp.base.service.impl.BaseRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
@@ -29,7 +30,7 @@ public class CsceneFileService extends BaseRemoteFileServiceImpl {
         if (!new HashSet<>(Arrays.asList(legalSuffix)).contains(fileSuffix)) {
             return new ServiceResult<>(null, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
-        var uploadResult = super.upload(is);
+        var uploadResult = super.upload(is, fileSuffix);
         if (!uploadResult.judgeSuccess()) {
             return new ServiceResult<>(null, uploadResult.getServiceCode(), uploadResult.getDetail());
         } else {

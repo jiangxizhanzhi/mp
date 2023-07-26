@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -128,7 +128,7 @@ public class SceneExporter {
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
-                    byte[] content = FdfsCommon.downloadRawContent(logoUrl);
+                    byte[] content = FsCommon.downloadRawContent(logoUrl);
                     // 判断图片文件类型
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
@@ -274,7 +274,7 @@ public class SceneExporter {
             if (StringUtils.contains(entry.getValue(), "?")) {
                 fdfsFilePath = StringUtils.split(entry.getValue(), "?")[0];
             }
-            byte[] content = FdfsCommon.downloadRawContent(fdfsFilePath);
+            byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
             try {
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + entry.getKey()), content);
             } catch (IOException e) {
@@ -285,7 +285,7 @@ public class SceneExporter {
 
     private void downloadPrivateKeyFile(String fdfsFilePath, String imagePath, String fileName) {
         if (StringUtils.isNotEmpty(fdfsFilePath) && StringUtils.isNotEmpty(imagePath)) {
-            byte[] content = FdfsCommon.downloadRawContent(fdfsFilePath);
+            byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
             try {
                 FileUtils.writeByteArrayToFile(new File(imagePath + "/" + fileName), content);
             } catch (IOException e) {

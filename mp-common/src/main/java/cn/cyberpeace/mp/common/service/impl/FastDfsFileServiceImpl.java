@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.common.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -58,7 +58,7 @@ public class FastDfsFileServiceImpl implements FileService {
         InputStream is = null;
         OutputStream os = null;
         try {
-            byte[] fileByte = FdfsCommon.downloadRawContent(filePath);
+            byte[] fileByte = FsCommon.downloadRawContent(filePath);
             if (ArrayUtils.isEmpty(fileByte)) {
                 log.error("downloadFile not exist");
                 throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
@@ -88,7 +88,7 @@ public class FastDfsFileServiceImpl implements FileService {
     @Override
     public ServiceResult<Void> deleteFile(String filePath) {
         try {
-            FdfsCommon.delete(filePath);
+            FsCommon.delete(filePath);
         } catch (MpRuntimeException e) {
             log.error("deleteFile error", e);
             return ResultCommon.fail(e.getMessage());
@@ -107,12 +107,12 @@ public class FastDfsFileServiceImpl implements FileService {
         try {
             // 上传到服务器
             String suffix = FileUtil.getSuffix(file.getOriginalFilename());
-            String filepath = FdfsCommon.upload(file.getInputStream(), suffix);
+            String filepath = FsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
             responseData.setFileType(suffix);
-            responseData.setHttpUrl(FdfsCommon.genHttpUrl(filepath));
-            responseData.setInnerHttpUrl(FdfsCommon.genInnerHttpUrl(filepath));
+            responseData.setHttpUrl(FsCommon.genHttpUrl(filepath));
+            responseData.setInnerHttpUrl(FsCommon.genInnerHttpUrl(filepath));
             responseData.setFileSize(file.getSize());
         } catch (MpRuntimeException | IOException e) {
             responseData.setSuccess(false);

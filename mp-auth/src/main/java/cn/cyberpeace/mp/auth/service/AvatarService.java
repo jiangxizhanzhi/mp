@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.common.FileCheckCommon;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -37,12 +37,12 @@ public class AvatarService {
         try {
             // 上传到服务器
             String suffix = FileUtil.getSuffix(file.getOriginalFilename());
-            String filepath = FdfsCommon.upload(file.getInputStream(), suffix);
+            String filepath = FsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
             responseData.setFileType(suffix);
-            responseData.setHttpUrl(FdfsCommon.genHttpUrl(filepath));
-            responseData.setInnerHttpUrl(FdfsCommon.genInnerHttpUrl(filepath));
+            responseData.setHttpUrl(FsCommon.genHttpUrl(filepath));
+            responseData.setInnerHttpUrl(FsCommon.genInnerHttpUrl(filepath));
         } catch (MpRuntimeException | IOException e) {
             responseData.setSuccess(false);
             responseData.setMessage(e.getMessage());
