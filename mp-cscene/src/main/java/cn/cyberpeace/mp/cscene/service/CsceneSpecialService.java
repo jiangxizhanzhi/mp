@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -9,12 +12,7 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
@@ -56,13 +54,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -87,6 +79,9 @@ public class CsceneSpecialService {
 
     @Resource
     private ScenePluginCloudSceneService cloudSceneService;
+
+    @Autowired
+    private UserService userService;
 
     @Data
     public static class CsceneElementVirtualStat {
@@ -203,6 +198,14 @@ public class CsceneSpecialService {
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
     }
 
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 场景实例数据
      * @param queryParams 查询参数
@@ -239,6 +242,12 @@ public class CsceneSpecialService {
         var ids = queryParams.getIds();
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getId, ids);
+        }
+
+        if (this.isTrailAccount()) {
+            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
+            var paramsIds = new HashSet<String>(userIds);
+            humanCondition.filterIn(CsceneInstanceModel::getCreateUser, paramsIds.toArray(new String[]{}));
         }
         var type = queryParams.getType();
         if (type != null) {
