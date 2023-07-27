@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
-import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -32,6 +34,9 @@ public class OrgController {
     @Autowired
     private OrgService orgService;
 
+    @Autowired
+    private UserService userService ;
+
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
     @GetMapping("/byparent")
@@ -52,8 +57,19 @@ public class OrgController {
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            orgId = user.getOrgIds().get(0);
+        }
         List<OrgDto> tree = orgService.getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
+    private boolean isTrailAccount() {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            return true;
+        }
+        return false;
+    }
 }
