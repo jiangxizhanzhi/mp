@@ -10,11 +10,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.*;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
@@ -33,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +72,13 @@ public class ProbeService {
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
         probeModel.setOsType(osTypes);
-        probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
+        if(UserUtils.getLoginUser()!= null){
+            probeModel.setCreatorId(UserUtils.getLoginUser().getId());
+            probeModel.setCreator(UserUtils.getLoginUser().getUsername());
+        }else{
+            probeModel.setCreatorId(StringUtils.EMPTY);
+            probeModel.setCreator(StringUtils.EMPTY);
+        }
 
         String probeId = TextUtils.uuid();
         probeModel.setId(probeId);
@@ -246,6 +249,12 @@ public class ProbeService {
 
         ProbeSearchCondition condition = new ProbeSearchCondition();
         BeanUtils.copyProperties(pageQueryRequest, condition);
+        //处理探针只查看同组织下人员创建的探针
+        if(UserUtils.isCurrentUserTrailAccount()){
+            Set<String> userIdsSet = UserUtils.getSameOrgUserIdsByCurrentUser();
+            String[] userIds = userIdsSet.stream().toArray(String[]::new);
+            condition.setCreatorIds(userIds);
+        }
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);

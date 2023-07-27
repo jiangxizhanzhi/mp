@@ -238,6 +238,12 @@
           #{type}
         </foreach>
       </if>
+      <if test="condition.creatorIds != null and condition.creatorIds.length > 0">
+        AND p.creator_id in
+        <foreach item="creatorId" index="index" collection="condition.creatorIds" open="(" separator="," close=")">
+          #{creatorId}
+        </foreach>
+      </if>
       <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
         AND p.probe_category in
         <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
