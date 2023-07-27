@@ -38,6 +38,12 @@ public class CollectionTemplateModel extends BaseModel implements Serializable {
     private String creator;
 
     /**
+     * 创建者用户id
+     */
+    @ApiModelProperty(value = "创建者用户id")
+    private String creatorId;
+
+    /**
      * 模板描述
      */
     @ApiModelProperty(value = "模板描述")

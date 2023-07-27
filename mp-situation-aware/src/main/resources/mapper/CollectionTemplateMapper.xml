@@ -140,6 +140,12 @@
           #{osType}
         </foreach>
       </if>
+      <if test="condition.creatorIds != null and condition.creatorIds.length > 0">
+        AND temp.creator_id in
+        <foreach item="creatorId" index="index" collection="condition.creatorIds" open="(" separator="," close=")">
+          #{creatorId}
+        </foreach>
+      </if>
       <if test="condition.creator != null and condition.creator != ''">
         AND temp.creator = #{condition.creator}
       </if>
