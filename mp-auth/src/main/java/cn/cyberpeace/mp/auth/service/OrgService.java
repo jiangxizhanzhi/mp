@@ -67,6 +67,14 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
      */
     String getPath(OrgModel orgModel);
 
+    /**
+     * 获取组织完整path
+     * @param orgModel
+     * @param orgModelList 对应租户下的所有部门列表
+     * @return
+     */
+    String getPath(OrgModel orgModel, List<OrgModel> orgModelList);
+
     OrgBO orgModel2OrgBO(OrgModel orgModel);
 
     /**
