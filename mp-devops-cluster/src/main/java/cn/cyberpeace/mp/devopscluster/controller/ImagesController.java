@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.config.OperateAuth;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -12,18 +13,8 @@ import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DynamicImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ISOService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SnapshotService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
@@ -32,42 +23,18 @@ import cn.cyberpeace.mp.devopscluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devopscluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
-import cn.cyberpeace.mp.devopscluster.converter.model.DeviceAndSnapshotConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.ImageTargetConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.InjectFileConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.*;
 import cn.cyberpeace.mp.devopscluster.dto.ImageInjectFileDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ISOFileRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFilePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesAuthRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
-import cn.cyberpeace.mp.devopscluster.vo.ISOUploadVO;
-import cn.cyberpeace.mp.devopscluster.vo.ImagesByIdVO;
-import cn.cyberpeace.mp.devopscluster.vo.ImagesByUuidsVO;
-import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
-import cn.cyberpeace.mp.devopscluster.vo.TargetUploadVO;
+import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -87,26 +54,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -193,6 +147,7 @@ public class ImagesController {
     /**
      * 更新
      */
+    @OperateAuth(resourceClass = ImageRequest.class, resourceField = "uuid")
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/update")
@@ -282,6 +237,7 @@ public class ImagesController {
     /**
      * 删除镜像
      */
+    @OperateAuth(resourceClass = ImagesDeleteRequest.class, resourceField = "imageIds", resourceFieldType = "list")
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除信息请求体", dataTypeClass = ImagesDeleteRequest.class)
     @DeleteMapping("/page")

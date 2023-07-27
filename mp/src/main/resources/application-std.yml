@@ -205,6 +205,7 @@ mp:
     logout-keep-secret-user: ${mp.auth.ext-var.logout-keep-secret-user}
     default-user-avatar: /api/mp/avatar/1.png
     mq-msg-timeout: 3600000
+    role-trial-id: ${MP_AUTH_ROLE_TRIAL_ID:ac554e268e4a44b8a5419b7e7e2cb9aa}
     # authenticate
     authenticate-cache-time: 30
     authenticate-use-individual-token-secret: true

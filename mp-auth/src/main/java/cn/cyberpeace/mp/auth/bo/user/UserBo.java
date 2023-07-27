@@ -28,6 +28,9 @@ public class UserBo extends UserModel {
     @ApiModelProperty(value = "是否是超级用户 1：是 0：否")
     private Integer isSuperUser;
 
+    @ApiModelProperty(value = "是否是试用账号 1：是 0：否")
+    private Integer isTrialAccount;
+
     @ApiModelProperty(value = "组织路径")
     List<List<String>> orgpaths;
 

@@ -19,10 +19,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -76,6 +74,16 @@ public class UserUtils {
         }
 
         return null;
+    }
+
+    /**
+     * @description: 通过当前用户id获取同组织下的所有用户id
+     * @param userId
+     * @return Set<String>
+     */
+    public static Set<String> getSameOrgUserIds(String userId){
+        List<UserModel> sameOrgUsers = userService.getSameOrgUsers(userId);
+        return sameOrgUsers.stream().map(UserModel::getId).collect(Collectors.toSet());
     }
 
     /**
