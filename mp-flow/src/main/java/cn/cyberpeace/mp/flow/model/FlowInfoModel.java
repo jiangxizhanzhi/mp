@@ -86,4 +86,8 @@ public class FlowInfoModel extends BaseModel {
     @DefaultStr
     private String scriptFile;
 
+    @ApiModelProperty(value = "创建用户")
+    @DefaultStr
+    private String createUser;
+
 }

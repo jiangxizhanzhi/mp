@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -905,7 +906,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
         flowInfoModel.setPcapFile(addRequest.getPcapFilePath());
-
+        var user = UserUtils.getLoginUser();
+        if (user != null) {
+            flowInfoModel.setCreateUser(user.getId());
+        }
         return flowInfoModel;
     }
 
