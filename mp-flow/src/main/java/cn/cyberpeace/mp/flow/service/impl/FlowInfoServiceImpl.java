@@ -926,7 +926,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setCategory(modifyRequest.getCategory());
         flowInfoModel.setFileName(modifyRequest.getFileName());
         flowInfoModel.setPcapFile(modifyRequest.getPcapFilePath());
-
         return flowInfoModel;
     }
 
@@ -946,7 +945,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setScriptFile(addRequest.getFilePath());
         flowInfoModel.setRunCmd(addRequest.getRunCmd());
         flowInfoModel.setPcapFile(addRequest.getPcapFilePath());
-
+        var user = UserUtils.getLoginUser();
+        if (user != null) {
+            flowInfoModel.setCreateUser(user.getId());
+        }
         return flowInfoModel;
     }
 
