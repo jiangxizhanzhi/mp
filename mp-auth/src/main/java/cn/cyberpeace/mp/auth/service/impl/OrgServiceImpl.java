@@ -170,10 +170,17 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public String getPath(OrgModel orgModel) {
+        return getPath(orgModel, null);
+    }
+
+    @Override
+    public String getPath(OrgModel orgModel, List<OrgModel> orgModelList) {
         String path = orgModel.getName();
         if (StringUtils.isNotBlank(orgModel.getParent())) {
 
-            List<OrgModel> orgModelList = orgPathService.listByTenant(orgModel.getTenant());
+            if (CollectionUtils.isEmpty(orgModelList)) {
+                orgModelList = orgPathService.listByTenant(orgModel.getTenant());
+            }
 
             while (StringUtils.isNotBlank(orgModel.getParent())) {
                 String parentId = orgModel.getParent();
@@ -223,7 +230,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 List<String> pathList = new ArrayList<>();
                 pathList.add(orgModel.getName());
                 if (StringUtils.isNotBlank(orgModel.getParent())) {
-                    List<OrgModel> allOrgModelList = listByTenantId(orgModel.getTenant());
+                    List<OrgModel> allOrgModelList = orgPathService.listByTenant(orgModel.getTenant());
                     while (StringUtils.isNotBlank(orgModel.getParent())) {
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
@@ -321,12 +328,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgBO> listAll(String tenantId) {
-        List<OrgModel> orgs = listByTenantId(tenantId);
+        List<OrgModel> orgs = orgPathService.listByTenant(tenantId);
         List<OrgBO> orgBOS =
             orgs.stream().map(orgModel -> {
                 OrgBO orgBO = new OrgBO();
                 BeanUtils.copyProperties(orgModel, orgBO);
-                orgBO.setPath(this.getPath(orgModel));
+                orgBO.setPath(this.getPath(orgModel, orgs));
                 return orgBO;
             }).collect(Collectors.toList());
         return orgBOS;
@@ -577,9 +584,4 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return getModelMapper().list(humanCondition);
     }
 
-    private List<OrgModel> listByTenantId(String tenantId) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(OrgModel::getTenant, tenantId);
-        return getModelMapper().list(humanCondition);
-    }
 }
