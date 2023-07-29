@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -40,13 +42,7 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Description: 录屏service
@@ -85,6 +81,12 @@ public class ScreenrecordService extends BaseCpService {
                 .append("&page=").append(queryParams.getPage());
         if (StringUtils.isNotBlank(queryParams.getSearch())) {
             getParams.append("&params=").append(queryParams.getSearch());
+        }
+        if(UserUtils.isCurrentUserTrailAccount()){
+            UserModel user = UserUtils.getLoginUser();
+            if(Objects.nonNull(user)){
+                getParams.append("&userid=").append(user.getId());
+            }
         }
         if (StringUtils.isNotBlank(queryParams.getStartTime())) {
             getParams.append("&start_time=").append(queryParams.getStartTime());
