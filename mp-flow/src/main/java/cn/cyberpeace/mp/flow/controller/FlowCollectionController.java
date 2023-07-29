@@ -72,6 +72,8 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         }
 
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        //试用账号处理
+        flowCollectionService.handleTrialAccount(queryParams);
         ListObjServiceResult<FlowCollectionModel> listResult = getModelService().list(queryParams).asResult();
 
         List<FlowCollectionResponse> responseList = new ArrayList<>();
