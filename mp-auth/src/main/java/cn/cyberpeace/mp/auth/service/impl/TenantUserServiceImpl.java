@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.RoleAuthControlConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -19,11 +20,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
@@ -45,14 +42,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -307,6 +297,13 @@ public class TenantUserServiceImpl
 
     @Override
     public PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req) {
+        var user = userService.getCurrentUserDto();
+        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
+            if (req.getOrg() == null || !user.getOrgIds().contains(req.getOrg())) {
+                req.setOrg(user.getOrgIds().get(0));
+            }
+        }
+
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
