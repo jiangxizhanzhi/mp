@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -81,8 +82,18 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .filter(entry -> CollectionUtil.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
                 .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
 
+        var reqUserIds = req.getUserIds();
+        //如果是试用账号，则需要在线用户只能是同组织下的用户
+        if(UserUtils.isCurrentUserTrailAccount() && CollectionUtils.isEmpty(reqUserIds)){
+            Set<String> sameOrgUserIds = UserUtils.getSameOrgUserIdsByCurrentUser();
+            List<String> sameOrgUserList = new ArrayList<>(sameOrgUserIds);
+            reqUserIds = new ArrayList<>(sameOrgUserIds);
+            //取交集
+            onlinedUserIds = onlinedUserIds.stream().filter(userId -> sameOrgUserList.contains(userId)).collect(Collectors.toList());
+        }
+
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(reqUserIds, onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
         List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();
         if (CollectionUtil.isEmpty(summaryDtos)) {
