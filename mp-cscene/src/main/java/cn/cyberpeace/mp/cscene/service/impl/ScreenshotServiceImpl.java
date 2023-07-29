@@ -57,6 +57,13 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, ScreenshotQueryParams queryParams) {
+        //试用账号过滤当前用户相关内容
+        if(UserUtils.isCurrentUserTrailAccount()){
+            var user = UserUtils.getLoginUser();
+            if(Objects.nonNull(user)){
+                humanCondition.filterEqual("userId",user.getId());
+            }
+        }
         if (Objects.nonNull(queryParams.getStartTime())) {
             humanCondition.filterGreaterThanOrEqual("createTime", queryParams.getStartTime() + " 00:00:00");
         }
