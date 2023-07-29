@@ -28,16 +28,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.enums.NoticeTopTypeEnum;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeReadMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
+import cn.cyberpeace.mp.frontadmin.model.*;
+import cn.cyberpeace.mp.frontadmin.repository.*;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeReadService;
@@ -51,18 +43,14 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -342,9 +330,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             ids = Arrays.asList(req.getIds());
         }
-
+        var roleIds = req.getRoleIds();
+        if(UserUtils.isCurrentUserTrailAccount() && CollectionUtils.isEmpty(roleIds)){
+            roleIds = new ArrayList<>();
+            roleIds.add(AuthConstant.ROLE_ADMIN_ID);
+        }
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
-        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null, req.getPage(), req.getPageSize());
+        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), roleIds, null, null, req.getPage(), req.getPageSize());
         return result;
     }
 
