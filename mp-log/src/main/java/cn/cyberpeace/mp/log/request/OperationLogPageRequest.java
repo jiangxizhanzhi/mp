@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -80,6 +81,12 @@ public class OperationLogPageRequest extends BasePageRequest{
     private Integer[] opTypesIgnored;
 
     /**
+     * 部分人的id，只查特定人群的日志
+     */
+    @ApiModelProperty(value = "用户ids")
+    private String[] userIds;
+
+    /**
      * 构造BoolQueryBuilder
      * @return
      */
@@ -97,6 +104,10 @@ public class OperationLogPageRequest extends BasePageRequest{
         }
         if (StringUtils.isNotBlank(userId)) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));
+        }
+        String[] userIds = this.getUserIds();
+        if(ArrayUtils.isNotEmpty(userIds)){
+            boolBuilder.must(QueryBuilders.termsQuery("userId.keyword",userIds));
         }
 
         if (StringUtils.isNotBlank(userName)) {

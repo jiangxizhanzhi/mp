@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.constant.LogConstant;
+import cn.cyberpeace.mp.log.event.LogAuth;
+import cn.cyberpeace.mp.log.event.LogAuthEventHandler;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
@@ -39,6 +41,9 @@ public class OperateLogController {
     private OptionService optionService;
 
     @Autowired
+    private LogAuthEventHandler logAuthEventHandler;
+
+    @Autowired
     public OperateLogController(OperateLogService operateLogService) {
         this.operateLogService = operateLogService;
     }
@@ -57,6 +62,9 @@ public class OperateLogController {
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
         request.ensure();
+        //通过事件获取当前用户的同组织所有用户id
+        LogAuth logAuth = logAuthEventHandler.getLogAuthByCallAuthModule(new LogAuth());
+        request.setUserIds(logAuth.getUserIds());
         return operateLogService.search(request);
     }
 
