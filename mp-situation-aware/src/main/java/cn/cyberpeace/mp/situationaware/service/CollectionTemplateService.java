@@ -75,11 +75,11 @@ public class CollectionTemplateService {
         CollectionTemplateSearchCondition condition = new CollectionTemplateSearchCondition();
         BeanUtils.copyProperties(pageQueryRequest, condition);
         //采集模板,当前用户为试用账号时只可查看同组织用户创建的模板
-        if(UserUtils.isCurrentUserTrailAccount()){
-            Set<String> userIdsSet = UserUtils.getSameOrgUserIdsByCurrentUser();
-            String[] userIds = userIdsSet.stream().toArray(String[]::new);
-            condition.setCreatorIds(userIds);
-        }
+//        if(UserUtils.isCurrentUserTrailAccount()){
+//            Set<String> userIdsSet = UserUtils.getSameOrgUserIdsByCurrentUser();
+//            String[] userIds = userIdsSet.stream().toArray(String[]::new);
+//            condition.setCreatorIds(userIds);
+//        }
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<CollectionTemplatePageItemDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
