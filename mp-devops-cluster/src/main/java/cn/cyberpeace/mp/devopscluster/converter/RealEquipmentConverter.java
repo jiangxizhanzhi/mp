@@ -85,19 +85,6 @@ public class RealEquipmentConverter implements BaseConverter{
         return page.getTotal();
     }
 
-    private boolean isTrailAccount() {
-        UserBo user = null;
-        try {
-            user = userService.getCurrentUserDto();
-        } catch (MpRuntimeException e) {
-            user = null;
-        }
-        if (user != null && RoleAuthControlConstant.TRAIL_TYPE.TRUE.getType().equals(user.getIsTrialAccount())) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * 分页查询实装列表
      * @param dto
@@ -105,17 +92,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
         this.refreshIfNecessary();
-        if (this.isTrailAccount()) {
-            var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
-            var paramsIds = new HashSet<String>(userIds);
-            paramsIds.add("");
-            var list = deviceTargetMapper.list(new HumanCondition()
-                    .selectAs("id",DeviceTargetPO::getId)
-                    .filterIn(DeviceTargetPO::getCreateUser, paramsIds.toArray(new String[]{})));
-            List<String> p = new ArrayList<>();
-            list.forEach(l -> p.add(l.getId()));
-            dto.setIds(p);
-        }
+        
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
