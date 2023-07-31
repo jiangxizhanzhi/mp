@@ -705,7 +705,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (StringUtils.isNotBlank(title)) {
             condition.filterContains(SysNoticeModel::getTitle, title);
         }
-        if (StringUtils.isNotBlank(title) || CollUtil.isNotEmpty(ids) || CollUtil.isNotEmpty(orgs) || CollUtil.isNotEmpty(roles) || StringUtils.isNotBlank(publisher) || Objects.nonNull(type)) {
+        if (StringUtils.isNotBlank(title) || CollUtil.isNotEmpty(ids) || CollUtil.isNotEmpty(orgs) || CollUtil.isNotEmpty(roles) || CollectionUtils.isNotEmpty(publishers) || Objects.nonNull(type)) {
             condition.filterNotEqual(SysNoticeModel::getIsPublic, 1);
         }
         condition.select(SysNoticeModel::getId).distinct();
