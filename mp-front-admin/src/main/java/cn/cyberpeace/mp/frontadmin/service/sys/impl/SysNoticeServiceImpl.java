@@ -330,13 +330,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             ids = Arrays.asList(req.getIds());
         }
-        var roleIds = req.getRoleIds();
-        if(UserUtils.isCurrentUserTrailAccount() && CollectionUtils.isEmpty(roleIds)){
-            roleIds = new ArrayList<>();
-            roleIds.add(AuthConstant.ROLE_ADMIN_ID);
+        List<String> publishers = new ArrayList<>();
+        if(UserUtils.isCurrentUserTrailAccount()){
+            publishers = UserUtils.getAllAdminUsers();
         }
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
-        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), roleIds, null, null, req.getPage(), req.getPageSize());
+        ServiceResult result = listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), publishers, null, req.getPage(), req.getPageSize());
         return result;
     }
 
@@ -641,7 +640,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return total;
     }
 
-    public ListObjServiceResult listNotices(String title, List<String> ids, List<String> orgs, List<String> roles, String publisher, Integer type, Integer page, Integer pageSize) {
+    public ListObjServiceResult listNotices(String title, List<String> ids, List<String> orgs, List<String> roles, List<String> publishers, Integer type, Integer page, Integer pageSize) {
         HumanCondition publicCondition = new HumanCondition()
                 .filterEqual(SysNoticeModel::getIsPublic, 1)
                 .select(SysNoticeModel::getId)
@@ -697,8 +696,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             condition.filterIn(SysNoticeModel::getId, roleOrOrgNoticeIds.toArray());
         }
 
-        if (StringUtils.isNotBlank(publisher)) {
-            condition.filterEqual(SysNoticeModel::getPublisher, publisher);
+        if (CollectionUtils.isNotEmpty(publishers)) {
+            condition.filterIn(SysNoticeModel::getPublisher, publishers.toArray());
         }
         if (Objects.nonNull(type)) {
             condition.filterEqual(SysNoticeModel::getType, type);

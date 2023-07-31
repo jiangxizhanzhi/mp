@@ -121,4 +121,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
      */
     List<UserModel> getSameOrgUsers(String userId);
 
+    List<UserBo> getAllAdminUsers();
+
 }
