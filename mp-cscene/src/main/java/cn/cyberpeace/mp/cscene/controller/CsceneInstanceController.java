@@ -543,6 +543,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("重启场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceActionRequest.class),
+    })
+    @PostMapping("/restart")
+    public ServiceResult<Boolean> restartScene(@RequestParam(required = false) String id,
+                                               @RequestBody(required = false) CsceneInstanceActionRequest request) {
+        request = formatActionRequest(request, id);
+        var result = modelService.restart(request.getId(), request.getContext()).asResult();
+//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_PAUSE, request.getContext());
+        return result;
+    }
+
     @ApiOperation("暂停场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),

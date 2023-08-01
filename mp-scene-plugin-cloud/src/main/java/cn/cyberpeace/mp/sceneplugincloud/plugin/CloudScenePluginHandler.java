@@ -270,6 +270,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
+    public void restart() {
+        new RestartHandler(this, SceneModel.Event.RESTART).restart();
+    }
+
+    @Override
     public void pause() {
         new PauseHandler(this, SceneModel.Event.PAUSE).pause();
     }

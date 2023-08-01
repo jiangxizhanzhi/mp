@@ -139,6 +139,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         cscene.fromModel(csceneObj);
     }
 
+    public boolean restart() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.restart(sceneId, generateSceneContext()).getSource();
+    }
+
     public boolean pause() {
         String sceneId = this.getSceneId();
         if (sceneId == null) {

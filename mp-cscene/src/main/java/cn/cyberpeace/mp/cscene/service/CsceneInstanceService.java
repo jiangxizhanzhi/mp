@@ -1071,6 +1071,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(), model.getTotal())).collect(Collectors.toList());
     }
 
+    public ServiceResult<Boolean> restart(String id, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.restart();
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pause();

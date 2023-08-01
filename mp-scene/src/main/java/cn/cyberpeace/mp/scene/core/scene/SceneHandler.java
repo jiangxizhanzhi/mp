@@ -535,6 +535,19 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void restart() {
+        prepareAllEvent(SceneModel.Event.RESTART, SceneElementModel.Event.RESTART);
+        startAllEvent(SceneModel.Event.RESTART, SceneElementModel.Event.RESTART);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.restart();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.RESTART, e.getMessage());
+        }
+        overAllEvent(SceneModel.Event.RESTART, SceneElementModel.Event.RESTART);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
     }
 
     // 入参重新考虑下？

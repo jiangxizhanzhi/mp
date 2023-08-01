@@ -176,6 +176,20 @@ public class SceneService {
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
+    public ServiceResult<Boolean> restart(String id, SceneContextBO context) {
+        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
+        sceneHandler.getElementMap().values().forEach(e -> {
+            var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                    EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
+            );
+            if (!validEvents.contains(SceneElementModel.Event.RESTART)) {
+                throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
+            }
+        });
+        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.restart());
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);

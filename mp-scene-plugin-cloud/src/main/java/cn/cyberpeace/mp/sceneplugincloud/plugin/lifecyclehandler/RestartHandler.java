@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -11,6 +12,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Restar
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -22,13 +25,26 @@ public class RestartHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
     private final Container container = new Container();
 
+    public static class SceneProcess {
+        public static final EventProcess RESTART_ALL_NODES = new EventProcess("restart_nodes", "sceneplugincloud.event.restart_all_nodes");
+    }
+
     public static class ElementProcess {
         public static final EventProcess RESTART_VIRTUAL_MACHINE = new EventProcess("restart_virtual_machine", "sceneplugincloud.event.restart_virtual_machine");
         public static final EventProcess RESTART_CONTAINER = new EventProcess("restart_container", "sceneplugincloud.event.restart_container");
+        public static final EventProcess RESTART_NODE = new EventProcess("restart_nodes", "sceneplugincloud.event.restart_node");
     }
 
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RestartTaskPool.getInstance(), event);
+    }
+
+    public void restart() {
+        prepareEventProcess(SceneModel.Event.RESTART, PauseHandler.SceneProcess.class, PauseHandler.ElementProcess.class);
+        List<Runnable> tasks = getPluginHandler().getElementMap().values().stream()
+                .map(element -> (Runnable) () -> this.restartElement(element))
+                .collect(Collectors.toList());
+        runSceneProgress(SceneProcess.RESTART_ALL_NODES, () -> runTasks(tasks));
     }
 
     public void restartElement(CloudPluginSceneElementBO element) {
@@ -55,6 +71,11 @@ public class RestartHandler extends HandlerCommon {
                 container.addRoute(instanceId);
                 container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
                 checkAccessModes(element);
+            });
+        } else {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_NODE));
+            runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_NODE, () -> {
+                // do nothing
             });
         }
     }
