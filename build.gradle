@@ -107,6 +107,8 @@ subprojects {
         implementation 'org.springframework.security:spring-security-crypto:5.8.5'
         implementation 'org.springframework.security:spring-security-web:5.8.5'
         implementation 'com.jcraft:jsch:0.1.55'
+        implementation 'net.java.dev.jna:jna:5.13.0'
+        implementation 'net.java.dev.jna:jna-platform:5.13.0'
         annotationProcessor 'org.projectlombok:lombok'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
