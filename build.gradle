@@ -71,6 +71,7 @@ subprojects {
         implementation 'org.apache.commons:commons-collections4:4.4'
         implementation 'org.apache.commons:commons-lang3:3.13.0'
         implementation 'org.apache.commons:commons-pool2:2.11.1'
+        implementation 'org.apache.commons:commons-compress:1.23.0'
         implementation 'org.apache.httpcomponents:httpmime:4.5.14'
         implementation ('org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.12') {
             exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
