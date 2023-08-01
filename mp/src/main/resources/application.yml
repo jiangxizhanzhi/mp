@@ -9,6 +9,8 @@ server:
 
 
 spring:
+  main:
+    allow-circular-references: true
   datasource:
     url: jdbc:mysql://10.100.7.1:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: root
@@ -36,6 +38,9 @@ spring:
   web:
     resources:
       static-locations: file:${user.home}/img
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 
 logging:

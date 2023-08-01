@@ -1,15 +1,15 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.12'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.14'
+    id 'io.spring.dependency-management' version '1.1.2'
     id 'java'
     id 'application'
-    id 'org.flywaydb.flyway' version '8.0.5'
+    id 'org.flywaydb.flyway' version '8.5.13'
     id "com.thinkimi.gradle.MybatisGenerator" version "2.3"
 }
 
-ext['tomcat.version'] = '9.0.58'
-ext['logback.version'] = '1.2.10'
-ext['log4j2.version'] = '2.18.0'
+ext['tomcat.version'] = '9.0.78'
+ext['logback.version'] = '1.2.12'
+ext['log4j2.version'] = '2.20.0'
 apply from: 'mp/config.gradle'
 
 allprojects {
@@ -53,10 +53,10 @@ subprojects {
         implementation 'cn.hutool:hutool-all:5.8.21'
         implementation 'com.alibaba:easyexcel:3.3.2'
         implementation 'com.alibaba:fastjson:1.2.83'
-        implementation 'com.auth0:java-jwt:4.4.0'
+        implementation 'com.auth0:java-jwt:3.19.4'
         implementation 'com.github.ben-manes.caffeine:caffeine:3.1.7'
-        implementation 'com.github.jsqlparser:jsqlparser:4.6'
-        implementation 'com.github.oshi:oshi-core:6.4.4'
+        implementation 'com.github.jsqlparser:jsqlparser:0.9.7'
+        implementation 'com.github.oshi:oshi-core:5.8.7'
         implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.4.7'
         implementation 'com.oopsguy.kaptcha:kaptcha-spring-boot-starter:1.0.0-beta-2'
         implementation 'com.github.xiaoymin:knife4j-spring-boot-starter:3.0.3'
@@ -66,7 +66,7 @@ subprojects {
         implementation 'commons-codec:commons-codec:1.16.0'
         implementation 'commons-io:commons-io:2.13.0'
         implementation 'commons-net:commons-net:3.9.0'
-        implementation 'io.github.hakky54:sslcontext-kickstart:8.1.4'
+        implementation 'io.github.hakky54:sslcontext-kickstart:6.8.0'
         implementation 'io.springfox:springfox-swagger2:3.0.0'
         implementation 'net.oschina.zcx7878:fastdfs-client-java:1.27.0.0'
         implementation 'net.sf.jmimemagic:jmimemagic:0.1.5'
@@ -84,7 +84,7 @@ subprojects {
         }
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
         implementation 'org.yaml:snakeyaml:1.33'
-        implementation 'org.flywaydb:flyway-core:9.21.1'
+        implementation 'org.flywaydb:flyway-core:8.5.13'
         implementation 'org.mapstruct:mapstruct:1.5.5.Final'
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.9'
         implementation 'org.mitre.dsmiley.httpproxy:smiley-http-proxy-servlet:1.12.1'
