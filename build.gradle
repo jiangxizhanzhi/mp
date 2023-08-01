@@ -90,7 +90,7 @@ subprojects {
         implementation 'org.mongodb:bson:4.10.2'
         implementation 'org.mongodb:mongodb-driver-core:4.10.2'
         implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
-        implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+        implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.3.1'
         implementation 'org.slf4j:slf4j-api:1.7.36'
         implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.14'
         implementation 'org.springframework.boot:spring-boot-starter-amqp:2.7.14'
