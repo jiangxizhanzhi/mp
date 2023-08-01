@@ -4,10 +4,14 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.hutool.core.net.Ipv4Util;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 
 @Slf4j
 public class IpUtils {
@@ -54,7 +58,7 @@ public class IpUtils {
             lastIp = IpUtils.lastIp(cidr);
             beginIp = IpUtils.beginIp(cidr);
         } else if (cidr.contains(Ipv4Util.IP_SPLIT_MARK)) {
-            String[] newIps = StrUtil.split(cidr, Ipv4Util.IP_SPLIT_MARK);
+            String[] newIps = StringUtils.split(cidr, Ipv4Util.IP_SPLIT_MARK);
             beginIp = newIps[0];
             lastIp = newIps[1];
         }
@@ -201,7 +205,7 @@ public class IpUtils {
             previousIp = IpUtils.lastIp(cidr);
             beginIp = IpUtils.beginIp(cidr);
         } else if (cidr.contains(Ipv4Util.IP_SPLIT_MARK)) {
-            String[] newIps = StrUtil.split(cidr, Ipv4Util.IP_SPLIT_MARK);
+            String[] newIps = StringUtils.split(cidr, Ipv4Util.IP_SPLIT_MARK);
             beginIp = newIps[0];
             previousIp = newIps[1];
         }
@@ -318,7 +322,7 @@ public class IpUtils {
             lastIp = IpUtils.lastIp(cidr);
             beginIp = IpUtils.beginIp(cidr);
         } else if (cidr.contains(Ipv4Util.IP_SPLIT_MARK)) {
-            String[] newIps = StrUtil.split(cidr, Ipv4Util.IP_SPLIT_MARK);
+            String[] newIps = StringUtils.split(cidr, Ipv4Util.IP_SPLIT_MARK);
             beginIp = newIps[0];
             lastIp = newIps[1];
         }
@@ -333,7 +337,7 @@ public class IpUtils {
      * @return 最后一个ip地址
      */
     private static String lastIp(String cidr) {
-        String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
+        String[] param = StringUtils.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getEndIpStr(param[0], Integer.parseInt(param[1]));
     }
 
@@ -360,7 +364,7 @@ public class IpUtils {
      * @return 第一个ip地址
      */
     public static String beginIp(String cidr) {
-        String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
+        String[] param = StringUtils.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getBeginIpStr(param[0], Integer.parseInt(param[1]));
     }
 
