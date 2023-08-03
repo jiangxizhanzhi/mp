@@ -34,7 +34,7 @@ public class ProbeOperateLogModel extends BaseModel {
     /**
      * 主机采集数据类型
      */
-    @ApiModelProperty(value = "主机采集数据类型(changeEventState,originLog,logEvent,customCollection)")
+    @ApiModelProperty(value = "主机采集数据类型(changeEventState,originLog,logEvent,customCollection,collectIps,collectPeriod)")
     @DefaultStr
     private String type;
 
@@ -44,4 +44,12 @@ public class ProbeOperateLogModel extends BaseModel {
     @ApiModelProperty(value = "操作 1:开启, 0:关闭")
     @DefaultInt(0)
     private Integer operate;
+
+    @ApiModelProperty(value = "采集周期")
+    @DefaultInt(0)
+    private Integer collectPeriod;
+
+    @ApiModelProperty(value = "需要采集的节点ip")
+    @DefaultStr
+    private String collectIps;
 }

@@ -225,7 +225,7 @@ public class InitiateHandler extends HandlerCommon {
      * @param locationMap 日志采集探针参数Map
      * @return 探针采集参数
      */
-    private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
+    public WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
             , Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
@@ -282,7 +282,7 @@ public class InitiateHandler extends HandlerCommon {
      *
      * @return 日志采集探针参数Map
      */
-    private Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> getLocationMap() {
+    public Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> getLocationMap() {
         if (locationMap == null) {
             locationMap = new HashMap<>();
             if (locationConfig == null) {

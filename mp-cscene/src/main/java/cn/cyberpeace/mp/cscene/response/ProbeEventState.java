@@ -23,4 +23,10 @@ public class ProbeEventState {
     @ApiModelProperty("自定义采集开关状态, 0:关闭,1:开启")
     @NotNull
     private Integer customCollection;
+
+    @ApiModelProperty("采集周期")
+    private Integer collectPeriod;
+
+    @ApiModelProperty("采集ip")
+    private String collectIps;
 }

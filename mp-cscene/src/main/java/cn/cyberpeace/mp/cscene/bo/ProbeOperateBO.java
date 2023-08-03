@@ -30,7 +30,7 @@ public class ProbeOperateBO {
     /**
      * 主机采集数据类型
      */
-    @ApiModelProperty(value = "主机采集数据类型(changeEventState,originLog,logEvent,customCollection)")
+    @ApiModelProperty(value = "主机采集数据类型(changeEventState,originLog,logEvent,customCollection,collectIps,collectPeriod)")
     private String type;
 
     /**
@@ -39,10 +39,16 @@ public class ProbeOperateBO {
     @ApiModelProperty(value = "操作 1:开启, 0:关闭")
     private Integer operate;
 
+    @ApiModelProperty(value = "采集周期")
+    private Integer collectPeriod;
+
+    @ApiModelProperty(value = "需要采集的节点ip")
+    private String collectIps;
+
     /**
      * 创建记录时间
      */
-    @ApiModelProperty(value = "操作 1:开启, 0:关闭")
+    @ApiModelProperty(value = "创建记录时间")
     private LocalDateTime createTime;
 
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
@@ -18,6 +19,7 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.cscene.service.RangeService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
@@ -26,6 +28,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +58,9 @@ public class ElementMonitorController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private RangeService rangeService ;
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -108,8 +114,18 @@ public class ElementMonitorController {
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
+        var ranges = rangeService.getRange(pageRequest.getSceneId());
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+        var result = sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+
+        for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
+            var r = result.getData().getList().get(i);
+            r.setTime(rangeService.getTime(r.getTime(), ranges));
+        }
+        return result;
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
@@ -127,6 +143,10 @@ public class ElementMonitorController {
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
         }
+        var ranges = rangeService.getRange(pageRequest.getSceneId());
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
         return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
                 intervalMinutes, bucketSize)).asResult();
     }
@@ -138,8 +158,16 @@ public class ElementMonitorController {
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
-
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+        var ranges = rangeService.getRange(pageRequest.getSceneId());
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
+        var result = sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+        for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
+            var r = result.getData().getList().get(i);
+            r.setTime(rangeService.getTime(r.getTime(), ranges));
+        }
+        return result;
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
@@ -156,6 +184,10 @@ public class ElementMonitorController {
         }
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
+        }
+        var ranges = rangeService.getRange(pageRequest.getSceneId());
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            pageRequest.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
         }
         return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
                 intervalMinutes, bucketSize)).asResult();

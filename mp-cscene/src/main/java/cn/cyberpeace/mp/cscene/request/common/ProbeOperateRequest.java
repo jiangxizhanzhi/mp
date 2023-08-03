@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.request.common;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.ProbeOperateBO;
+import cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,17 +40,35 @@ public class ProbeOperateRequest {
     @NotNull
     private Integer customCollection;
 
+    @ApiModelProperty("采集周期")
+    private Integer collectPeriod;
+
+    @ApiModelProperty("采集ip")
+    private String collectIps;
+
     /**
      * @description: ProbeOperateRequest转List<ProbeOperateBO>
      * @throws
      * @return List<ProbeOperateBO>
      */
-    public List<ProbeOperateBO> transFormToProbeOperateBO(){
+    public List<ProbeOperateBO> transFormToProbeOperateBO() {
         Map<String, Object> objectMap = queryAllTypeMap();
-        return objectMap.entrySet().stream().map(stringObjectEntry -> {
-            return ProbeOperateBO.builder().scene(this.getSceneId()).type(stringObjectEntry.getKey())
-                .operate((Integer)stringObjectEntry.getValue()).build();
-        }).collect(Collectors.toList());
+        return objectMap.entrySet().stream()
+                .map(stringObjectEntry -> {
+                    var res = ProbeOperateBO.builder()
+                            .scene(this.getSceneId())
+                            .type(stringObjectEntry.getKey())
+                            .build();
+                    if (res.getType().equals(ProbeOperateConstant.PROBEOPERATE_TYPE.COLLECT_IPS.getValue())) {
+                        res.setCollectIps((String) stringObjectEntry.getValue());
+                    } else if (res.getType().equals(ProbeOperateConstant.PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue())) {
+                        res.setCollectPeriod((Integer) stringObjectEntry.getValue());
+                    } else {
+                        res.setOperate((Integer) stringObjectEntry.getValue());
+                    }
+                    return res;
+                })
+                .collect(Collectors.toList());
     }
 
     public Map<String, Object> queryAllTypeMap(){

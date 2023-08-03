@@ -204,7 +204,7 @@ public class WazuhCommon {
      * @param wazuhProbeConfig   默认脚本探针配置
      * @return 默认脚本探针参数集合
      */
-    private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
+    public static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {
         if (wazuhProbeConfig == null || wazuhProbeConfig.getDefaultProbe() == null || CollectionUtils.isEmpty(wazuhProbeConfig.getDefaultProbe().getProbes())) {

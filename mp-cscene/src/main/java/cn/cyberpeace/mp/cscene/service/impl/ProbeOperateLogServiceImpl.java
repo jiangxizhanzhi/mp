@@ -63,9 +63,16 @@ public class ProbeOperateLogServiceImpl extends BaseModelServiceImpl<ProbeOperat
             return false;
         }
         //对象转换
-        List<ProbeOperateLogModel> probeOperateLogModelList = probeOperateBOList.stream().map(probeOperateBO -> {
-            return ProbeOperateLogModel.builder().scene(probeOperateBO.getScene()).type(probeOperateBO.getType()).operate(probeOperateBO.getOperate()).build();
-        }).collect(Collectors.toList());
+        List<ProbeOperateLogModel> probeOperateLogModelList = probeOperateBOList.stream()
+                .map(probeOperateBO -> ProbeOperateLogModel.builder()
+                        .scene(probeOperateBO.getScene())
+                        .type(probeOperateBO.getType())
+                        .operate(probeOperateBO.getOperate())
+                        .collectIps(probeOperateBO.getCollectIps())
+                        .collectPeriod(probeOperateBO.getCollectPeriod())
+                        .build()
+                )
+                .collect(Collectors.toList());
         //批量插入
         BaseModelMapper.BulkResult<ProbeOperateLogModel> probeOperateLogModelBulkResult =
             getModelMapper().bulkCreate(probeOperateLogModelList);

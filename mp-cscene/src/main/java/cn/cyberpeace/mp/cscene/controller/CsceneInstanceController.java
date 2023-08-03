@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.RangeService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
@@ -68,6 +70,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Autowired
+    private RangeService rangeService ;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -487,7 +492,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
                                                                       HostEventQueryParams queryParams) {
         handleQueryParams("listHostEvents", queryParams);
-        return modelService.listHostEvents(id, queryParams).asResult();
+
+        var ranges = rangeService.getRange(id);
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            queryParams.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
+
+        var result = modelService.listHostEvents(id, queryParams).asResult();
+        for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
+            var r = result.getData().getList().get(i);
+            r.setTime(rangeService.getTime(r.getTime(), ranges));
+        }
+        return result;
     }
 
 
@@ -501,7 +517,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                         @RequestParam String scrollId,
                                                                         HostEventQueryParams queryParams) {
         log.info("scrollId:{}", scrollId);
-        return modelService.scrollHostEvents(id, scrollId, queryParams).asResult();
+        var ranges = rangeService.getRange(id);
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            queryParams.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
+        var result = modelService.scrollHostEvents(id, scrollId, queryParams).asResult();
+        for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
+            var r = result.getData().getList().get(i);
+            r.setTime(rangeService.getTime(r.getTime(), ranges));
+        }
+        return result;
     }
 
     @ApiOperation("场景实例获取探针采集数据")
@@ -516,7 +541,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                               @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
         handleQueryParams("getProbeCollectionData", queryParams);
-        return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+
+        var ranges = rangeService.getRange(id);
+        if (CollectionUtils.isNotEmpty(ranges)) {
+            queryParams.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
+        }
+
+        var result =  modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+        for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
+            var r = result.getData().getList().get(i);
+            r.setTime(rangeService.getTime(r.getTime(), ranges));
+        }
+        return result;
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")

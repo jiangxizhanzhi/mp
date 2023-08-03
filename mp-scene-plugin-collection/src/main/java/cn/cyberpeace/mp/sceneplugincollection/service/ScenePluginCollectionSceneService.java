@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -13,6 +17,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -28,7 +33,9 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleModel;
@@ -36,17 +43,15 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTyp
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeRelationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
@@ -1821,6 +1826,84 @@ public class ScenePluginCollectionSceneService {
             container.executeCommand(containerId, "rm -rf " + dir);
         }
         return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<Boolean> controlProbe(String sceneId, SceneControlProbeOperate operate) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        SceneControlProbeParams sceneControlProbeParams = this.loadElementProbeControlParams(sceneHandler, operate);
+
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        InitiateHandler initiateHandler = new InitiateHandler(pluginHandler);
+
+        for (var elementParams : sceneControlProbeParams.getElementControlProbeParams()) {
+            var collectionElement = pluginHandler.getElement(elementParams.getElementId());
+            var srcElement = collectionElement.getSrcElement();
+            String agentName = srcElement.getEid();
+            String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+            var probes = collectionElement.getProbes();
+            WazuhControl.ControlConfigParam controlConfigParam = this.getElementControlConfigParam(agentName, systemType, initiateHandler, probes);
+            String action = elementParams.isEnable() ? WazuhControl.CONTROL_ACTION_ADD : WazuhControl.CONTROL_ACTION_REMOVE;
+            if (controlConfigParam.getProbeParams() != null) {
+                for (var p : controlConfigParam.getProbeParams()) {
+                    p.setAction(action);
+                }
+            }
+            if (controlConfigParam.getSyscollectorParam() != null) {
+                controlConfigParam.getSyscollectorParam().setAction(action);
+            }
+            if (controlConfigParam.getSyscheckParam() != null) {
+                controlConfigParam.getSyscheckParam().setAction(action);
+            }
+            if (controlConfigParam.getLogCollectParams() != null) {
+                for (var p : controlConfigParam.getLogCollectParams()) {
+                    p.setAction(action);
+                }
+            }
+            WazuhControlCommon.wazuhControl.controlConfigOld(agentName, systemType, controlConfigParam);
+        }
+        return new ServiceResult<>(true).asResult();
+    }
+
+    private WazuhControl.ControlConfigParam getElementControlConfigParam(String agentName, String systemType, InitiateHandler initiateHandler, List<Probe> probes) {
+        var controlParam = initiateHandler.getControlConfigParam(probes, agentName, systemType, initiateHandler.getLocationMap());
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
+                LocalFileMappingModel::getRemoteFile));
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        var defaultProbeParams = WazuhCommon.getDefaultProbeParams(nameFileMap, metadataFileServer, agentName, BeanCommon.getBean(WazuhProbeConfig.class));
+        if (controlParam.getProbeParams() == null) {
+            controlParam.setProbeParams(new ArrayList<>());
+        }
+        controlParam.getProbeParams().addAll(defaultProbeParams);
+        return controlParam;
+    }
+
+    private SceneControlProbeParams loadElementProbeControlParams(SceneHandler sceneHandler, SceneControlProbeOperate operate) {
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        SceneControlProbeParams sceneControlProbeParams = new SceneControlProbeParams(sceneHandler.getSceneId());
+        for (var e : pluginHandler.getElementMap().values()) {
+            String elementId = e.getSrcElement().getId();
+            // 如果没有指定哪些节点开启 则默认全部开启
+            boolean enable = CollectionUtils.isEmpty(operate.getCollectIps());
+            if (!enable) {
+                // 如果指定了开启的ip 则判断该节点的ip
+                if (CollectionUtils.isNotEmpty(e.getSrcElement().getPorts())) {
+                    for (var p : e.getSrcElement().getPorts()) {
+                        if (operate.getCollectIps().contains(p.getIp())) {
+                            enable = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            var elementParams = new SceneControlProbeParams.SceneElementControlProbeParams(elementId, enable);
+            elementParams.setCustomCollectionParams(new SceneControlProbeParams.CustomCollectionParams(operate.isCustomCollection()));
+            elementParams.setChangeEventParams(new SceneControlProbeParams.ChangeEventParams(operate.isChangeEventState()));
+            elementParams.setLogEventParams(new SceneControlProbeParams.LogEventParams(operate.isLogEvent()));
+            elementParams.setOriginLogParams(new SceneControlProbeParams.OriginLogParams(operate.isOriginLog()));
+            sceneControlProbeParams.getElementControlProbeParams().add(elementParams);
+        }
+        return sceneControlProbeParams;
     }
 
     /**

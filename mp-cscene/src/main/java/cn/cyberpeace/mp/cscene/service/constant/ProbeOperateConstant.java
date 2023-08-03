@@ -26,7 +26,9 @@ public class ProbeOperateConstant {
         CHANGE_EVENT_STATE("changeEventState","变更事件开关状态"),
         ORIGIN_LOG("originLog","原始日志开关状态"),
         LOG_EVENT("logEvent","日志事件开关状态"),
-        CUSTOM_COLLECTION("customCollection","自定义采集开关状态");
+        CUSTOM_COLLECTION("customCollection","自定义采集开关状态"),
+        COLLECT_IPS("collectIps","采集ip"),
+        COLLECT_PERIOD("collectPeriod","采集周期");
 
         private final String value;
 

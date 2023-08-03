@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.ProbeOperateRequest;
 import cn.cyberpeace.mp.cscene.response.ProbeEventState;
-import static cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.*;
 import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -21,8 +20,8 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
-import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.SceneControlProbeOperate;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,6 +34,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static cn.cyberpeace.mp.cscene.service.constant.ProbeOperateConstant.*;
 
 
 /**
@@ -330,9 +331,17 @@ public class SceneMonitorService {
             .changeEventState(newestMap.get(PROBEOPERATE_TYPE.CHANGE_EVENT_STATE.getValue()).getOperate())
             .originLog(newestMap.get(PROBEOPERATE_TYPE.ORIGIN_LOG.getValue()).getOperate())
             .logEvent(newestMap.get(PROBEOPERATE_TYPE.LOG_EVENT.getValue()).getOperate())
-            .customCollection(newestMap.get(PROBEOPERATE_TYPE.CUSTOM_COLLECTION.getValue()).getOperate()).build();
+            .customCollection(newestMap.get(PROBEOPERATE_TYPE.CUSTOM_COLLECTION.getValue()).getOperate())
+            .collectIps(StringUtils.EMPTY)
+            .collectPeriod(-1)
+            .build();
+        if (newestMap.containsKey(PROBEOPERATE_TYPE.COLLECT_IPS.getValue())) {
+            probeEventState.setCollectIps(newestMap.get(PROBEOPERATE_TYPE.COLLECT_IPS.getValue()).getCollectIps());
+        }
+        if (newestMap.containsKey(PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue())) {
+            probeEventState.setCollectPeriod(newestMap.get(PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue()).getCollectPeriod());
+        }
         return probeEventState;
-
     }
 
     /**
@@ -345,12 +354,34 @@ public class SceneMonitorService {
         //ProbeOperateRequest转换为批量处理的业务list
         List<ProbeOperateBO> probeOperateBOList = request.transFormToProbeOperateBO();
         //比较最近操作和最新请求是否有变化,获取变化的记录
-        if(!newestMap.isEmpty()){
-            probeOperateBOList = probeOperateBOList.stream().filter(
-                    probeOperateBO -> newestMap.get(probeOperateBO.getType()).getOperate() != probeOperateBO.getOperate())
-                .collect(Collectors.toList());
+        if (!newestMap.isEmpty()) {
+            probeOperateBOList = probeOperateBOList.stream()
+                    .filter(probeOperateBO -> {
+                        if (PROBEOPERATE_TYPE.COLLECT_IPS.getValue().equals(probeOperateBO.getType())) {
+                            var dbData = newestMap.get(probeOperateBO.getType());
+                            return dbData == null || !dbData.getCollectIps().equals(probeOperateBO.getCollectIps());
+                        } else if (PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue().equals(probeOperateBO.getType())) {
+                            var dbData = newestMap.get(probeOperateBO.getType());
+                            return dbData == null || !dbData.getCollectPeriod().equals(probeOperateBO.getCollectPeriod());
+                        } else {
+                            return newestMap.get(probeOperateBO.getType()).getOperate() != probeOperateBO.getOperate();
+                        }
+                    })
+                    .collect(Collectors.toList());
         }
         //只新增变化的记录
+        var instance = csceneInstanceService.get(request.getSceneId()).asResult().getData();
+        SceneControlProbeOperate operate = new SceneControlProbeOperate();
+        operate.setChangeEventState(request.getChangeEventState() == 1);
+        operate.setLogEvent(request.getLogEvent() == 1);
+        operate.setOriginLog(request.getOriginLog() == 1);
+        operate.setCustomCollection(request.getCustomCollection() == 1);
+        operate.setCollectIps(new HashSet<>());
+        if (StringUtils.isNotEmpty(request.getCollectIps())) {
+            var ips = StringUtils.split(request.getCollectIps(), ",");
+            operate.setCollectIps(Arrays.stream(ips).collect(Collectors.toSet()));
+        }
+        scenePluginCollectionSceneService.controlProbe(instance.getScene(), operate);
         return probeOperateLogService.operateProbeBatchInsert(probeOperateBOList);
     }
 
@@ -375,8 +406,8 @@ public class SceneMonitorService {
 
     /**
      * @description: 查询探针开关列表信息
-     * @param queryParams 
-     * @throws 
+     * @param queryParams
+     * @throws
      * @return List<ProbeOperateBO>
      */
     public List<ProbeOperateBO> queryProbeOperateLog(ProbeOperateQueryParams queryParams){
@@ -388,7 +419,7 @@ public class SceneMonitorService {
     /**
      * @description: 查询探针开关操作时间段
      * @param queryParams
-     * @throws 
+     * @throws
      * @return List<ProbeOperateTimeRange>
      */
     public List<ProbeOperateTimeRange> queryProbeOperateTimeRange(ProbeOperateQueryParams queryParams){
@@ -406,7 +437,7 @@ public class SceneMonitorService {
 
     /**
      * @description: 处理探针开关操作列表获取所有时间段
-     * @param probeOperateBOList 
+     * @param probeOperateBOList
      * @throws
      * @return List<ProbeOperateTimeRange>
      */
