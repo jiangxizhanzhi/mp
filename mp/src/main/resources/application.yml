@@ -12,9 +12,9 @@ spring:
   main:
     allow-circular-references: true
   datasource:
-    url: jdbc:mysql://10.100.7.1:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: root
-    password: cyberpeace@2020
+    url: jdbc:mariadb://10.4.1.239:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: mp
+    password: mp@NAMAN
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       maximum-pool-size: 10
