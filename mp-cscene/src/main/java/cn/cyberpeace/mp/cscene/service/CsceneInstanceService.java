@@ -43,7 +43,6 @@ import cn.cyberpeace.mp.cscene.service.param.ProbeOperateQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
-import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -54,6 +53,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
+import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -98,15 +98,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1098,6 +1090,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> resume(String id, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.resume();
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * @description: 启动节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> startElement(String id, String nodeId, CsceneContextBO context) {
+        //获取场景实例操作对象
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        //执行节点启动
+        boolean result = instanceHandler.startElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return ServiceResult<Boolean>
+     */
+    public ServiceResult<Boolean> stopElement(String id, String nodeId, CsceneContextBO context) {
+        //获取场景实例操作对象
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        //执行节点启动
+        boolean result = instanceHandler.stopElement(nodeId);
         return new ServiceResult<>(result);
     }
 

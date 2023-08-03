@@ -179,6 +179,33 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
     }
 
+    /**
+     * @description: 启动节点
+     * @param nodeId
+     * @return boolean
+     */
+    public boolean startElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.startElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    /**
+     * @description: 关闭节点
+     * @param nodeId
+     * @throws
+     * @return boolean
+     */
+    public boolean stopElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.stopElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
     public boolean pauseElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -245,7 +272,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.snapshotElementSync(sceneId, nodeId, snapshotId, snapshotName, description, generateSceneContext()).getSource();
     }
 
-    private String getSceneId() {
+    public String getSceneId() {
         if (this.initLazy) {
             CsceneInstanceModel instance = readCscene();
             return instance == null ? null : instance.getScene();

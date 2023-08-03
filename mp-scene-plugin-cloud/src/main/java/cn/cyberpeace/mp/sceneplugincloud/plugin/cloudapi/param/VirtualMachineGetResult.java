@@ -28,5 +28,6 @@ public class VirtualMachineGetResult implements CloudHttpData {
         String PAUSED = "PAUSED";
         String ACTIVE = "ACTIVE";
         String SUSPENDED = "SUSPENDED";
+        String SHUTOFF = "SHUTOFF" ;
     }
 }

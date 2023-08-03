@@ -17,7 +17,6 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -662,6 +661,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.restartElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
+        return result;
+    }
+
+    @ApiOperation("节点开机")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/start_element")
+    public ServiceResult<Boolean> startElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+        return result;
+    }
+
+    @ApiOperation("节点关机")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/stop_element")
+    public ServiceResult<Boolean> stopElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         return result;
     }
 
