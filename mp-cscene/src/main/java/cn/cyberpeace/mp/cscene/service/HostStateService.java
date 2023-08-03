@@ -25,8 +25,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryPar
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -233,8 +231,27 @@ public class HostStateService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
-
-        return listHostStates(timeList, cpuResult, memResult, diskResult);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), null, null);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> flowPercentResult = new ServiceResult();
+        List<IntervalSizeBO<LocalDateTime, Double>> flowPercentList = new ArrayList<>();
+        if (flowResult != null && CollectionUtils.isNotEmpty(flowResult.getSource())) {
+            Long maxFlow = 1L;
+            for (IntervalSizeBO<LocalDateTime, Long> temp : flowResult.getSource()) {
+                if (temp.getSize() != null && temp.getSize() > maxFlow) {
+                    maxFlow = temp.getSize();
+                }
+            }
+            maxFlow = maxFlow * 2;
+            for (IntervalSizeBO<LocalDateTime, Long> temp : flowResult.getSource()) {
+                IntervalSizeBO<LocalDateTime, Double> doubleTemp = new IntervalSizeBO(temp.getStart(), temp.getEnd(), 0D);
+                if (temp.getSize() != null) {
+                    doubleTemp.setSize((temp.getSize() * 100D) / maxFlow);
+                }
+                flowPercentList.add(doubleTemp);
+            }
+        }
+        flowPercentResult.setSource(flowPercentList);
+        return listHostStates(timeList, cpuResult, memResult, diskResult, flowPercentResult);
     }
 
     private List<HostState> processHostStateTrendByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
@@ -259,7 +276,7 @@ public class HostStateService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getMemoryPercent());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getDiskPercent());
 
-        return listHostStates(timeList, cpuResult, memResult, diskResult);
+        return listHostStates(timeList, cpuResult, memResult, diskResult, null);
     }
 
 
@@ -338,10 +355,14 @@ public class HostStateService {
     }
 
 
-    private List<HostState> listHostStates(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
+    private List<HostState> listHostStates(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> flowResult) {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalFlowPercentBOs = new ArrayList<IntervalSizeBO<LocalDateTime, Double>>();
+        if (flowResult != null) {
+            intervalFlowPercentBOs = flowResult.getSource();
+        }
 
         Map<LocalDateTime, HostState> hostStateMap = new LinkedHashMap<>();
         for (LocalDateTime time : timeList) {
@@ -352,6 +373,7 @@ public class HostStateService {
             hostState.setMemoryPercent(0.0);
             // todo diskPercent
             hostState.setDiskPercent(0.0);
+            hostState.setFlowPercent(0.0);
             hostStateMap.put(time, hostState);
         }
 
@@ -378,6 +400,15 @@ public class HostStateService {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setDiskPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
+                }
+            }
+        }
+
+        // 流量、网络
+        if (Objects.nonNull(intervalFlowPercentBOs)) {
+            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalFlowPercentBOs) {
+                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
+                    hostStateMap.get(bo.getStart()).setFlowPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
         }

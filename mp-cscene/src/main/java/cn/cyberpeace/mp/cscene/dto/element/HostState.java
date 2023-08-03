@@ -48,6 +48,9 @@ public class HostState {
     @ApiModelProperty("cpu使用率")
     private Double cpuPercent;
 
+    @ApiModelProperty("flow使用率")
+    private Double flowPercent;
+
     @ApiModelProperty("CPU核数")
     private Integer cpuCount;
 
