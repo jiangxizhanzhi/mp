@@ -45,6 +45,10 @@ public class WazuhCommon {
 
     public static final String LINUX_DOWNLOAD_AGENT_FILE = "download_agent.sh";
 
+    public static final String LINUX_DOWNLOAD_BIZ_FILE = "download_biz_file.sh";
+
+    public static final String WINDOWS_DOWNLOAD_BIZ_FILE = "download_biz_file.bat";
+
     public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
     public static final String WINDOWS_INSTALL_DIR = "C:\\ossec-agent";
