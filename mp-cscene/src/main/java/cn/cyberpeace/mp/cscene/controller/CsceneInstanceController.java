@@ -17,7 +17,6 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.response.OriginIpsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -33,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -73,6 +73,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Autowired
     private RangeService rangeService ;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService ;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -832,5 +835,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    }
+
+    @ApiOperation("利用探针上传文件")
+    @PostMapping("/upload_biz_file")
+    public ServiceResult<Boolean> uploadFile(@RequestBody CsceneInstanceNodeUploadFileActionRequest request) {
+        return scenePluginCollectionSceneService.uploadFileWithProbe(request.getId(), request.getNodeId(), request.getFileUrl(), request.getFileName());
     }
 }
