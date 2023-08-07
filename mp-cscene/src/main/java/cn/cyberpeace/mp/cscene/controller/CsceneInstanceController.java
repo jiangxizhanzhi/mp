@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
@@ -26,6 +28,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -37,6 +40,8 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -50,6 +55,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -72,10 +78,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private OptionService optionService;
 
     @Autowired
-    private RangeService rangeService ;
+    private RangeService rangeService;
 
     @Autowired
-    private ScenePluginCollectionSceneService scenePluginCollectionSceneService ;
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -550,7 +556,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             queryParams.setEndTime(TimeUtils.localDateTimeToString(ranges.get(ranges.size() - 1).getEnd()));
         }
 
-        var result =  modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
+        var result = modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
         for (int i = result.getData().getList().size() - 1; i >= 0; i--) {
             var r = result.getData().getList().get(i);
             r.setTime(rangeService.getTime(r.getTime(), ranges));
@@ -730,8 +736,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping("/create_element")
     public ServiceResult<Boolean> startElement(@RequestParam(required = false) String id,
-                                                  @RequestParam(value = "node_id", required = false) String nodeId,
-                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
+                                               @RequestParam(value = "node_id", required = false) String nodeId,
+                                               @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.createElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
@@ -862,6 +868,15 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("利用探针上传文件")
     @PostMapping("/upload_biz_file")
     public ServiceResult<Boolean> uploadFile(@RequestBody CsceneInstanceNodeUploadFileActionRequest request) {
-        return scenePluginCollectionSceneService.uploadFileWithProbe(request.getId(), request.getNodeId(), request.getFileUrl(), request.getFileName());
+        File file = new File(TextUtils.uuid());
+        String fileKey = null;
+        try {
+            HttpUtil.downloadFile(request.getFileUrl(), file);
+            fileKey = FsCommon.upload(file.getAbsolutePath());
+        } finally {
+            file.delete();
+        }
+        String fileUrl = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, SceneSingleton.sceneAppConfig.getMetadataFileServer(), fileKey);
+        return scenePluginCollectionSceneService.uploadFileWithProbe(request.getId(), request.getNodeId(), fileUrl, request.getFileName());
     }
 }

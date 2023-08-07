@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
@@ -1830,17 +1831,25 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl, String fileName) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         Probe probe = new Probe();
         probe.setId("a776bd7b07fa47fba07a79dc3f3e55ae");
         probe.setInterval(100000);
         probe.setName("test2");
         probe.setOutputFormat("none");
         probe.setScriptType(0);
+        var srcElement = sceneHandler.getElement(elementId);
+        String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
-        var scriptUrl = nameFileMap.getOrDefault(WazuhCommon.LINUX_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
-        probe.setScriptUrl(scriptUrl);
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
+            var scriptUrl = nameFileMap.getOrDefault(WazuhCommon.WINDOWS_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
+            probe.setScriptUrl(scriptUrl);
+        } else {
+            var scriptUrl = nameFileMap.getOrDefault(WazuhCommon.LINUX_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
+            probe.setScriptUrl(scriptUrl);
+        }
         probe.setType("0");
         probe.setParams(new ArrayList<>());
         Probe.Param param1 = new Probe.Param();
@@ -1860,11 +1869,10 @@ public class ScenePluginCollectionSceneService {
         param3.setName("fileName");
         param3.setDefaultValue(fileName);
         probe.getParams().add(param3);
-        return this.modifyProbe(sceneId, elementId, probe);
+        return this.modifyProbe(sceneHandler, elementId, probe);
     }
 
-    public ServiceResult<Boolean> modifyProbe(String sceneId, String elementId, Probe probe) {
-        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+    public ServiceResult<Boolean> modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe) {
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var collectionElement = pluginHandler.getElement(elementId);
         var srcElement = collectionElement.getSrcElement();
@@ -1880,7 +1888,6 @@ public class ScenePluginCollectionSceneService {
         addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
         controlConfigParam.getProbeParams().add(removeParams);
         controlConfigParam.getProbeParams().add(addParams);
-
         WazuhControlCommon.wazuhControl.controlConfigOld(agentName, systemType, controlConfigParam);
         return new ServiceResult<>(true).asResult();
     }
