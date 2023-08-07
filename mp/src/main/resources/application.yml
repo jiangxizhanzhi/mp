@@ -7,6 +7,8 @@ server:
       min-spare: 10
       max: 200
 
+pagehelper:
+  page-size-zero: true
 
 spring:
   main:
