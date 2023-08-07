@@ -1111,6 +1111,9 @@ public class CreateHandler extends HandlerCommon {
             macvlanContainerCreateData.setMacvlanId(macvlanNet.getVlanId());
             macvlanContainerCreateData.setGatewayIp(macvlanNet.getGateway());
             macvlanContainerCreateData.setCidr(macvlanNet.getCidr());
+            if (StringUtils.isNotEmpty(cloudElement.getHost())) {
+                macvlanContainerCreateData.setHost(cloudElement.getHost());
+            }
             var container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
             cloudElement.setResourceId(container.getId());
             cloudElement.setHost(container.getHost());
