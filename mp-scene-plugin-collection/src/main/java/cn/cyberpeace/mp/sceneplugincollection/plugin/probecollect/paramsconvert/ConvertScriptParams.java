@@ -61,7 +61,11 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         } else if (NumberUtils.INTEGER_TWO.equals(probe.getScriptType())) {
             scriptProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
         }
-        scriptProbeParam.setInterval(getCollectInterval());
+        if (probe.getInterval() == null) {
+            scriptProbeParam.setInterval(getCollectInterval());
+        } else {
+            scriptProbeParam.setInterval(probe.getInterval().toString());
+        }
         scriptProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         String url;
         url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());

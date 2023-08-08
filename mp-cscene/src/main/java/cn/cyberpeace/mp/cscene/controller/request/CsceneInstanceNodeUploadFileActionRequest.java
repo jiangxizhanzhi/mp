@@ -6,4 +6,5 @@ import lombok.Data;
 public class CsceneInstanceNodeUploadFileActionRequest extends CsceneInstanceNodeActionRequest {
     private String fileName;
     private String fileUrl;
+    private String targetDir;
 }

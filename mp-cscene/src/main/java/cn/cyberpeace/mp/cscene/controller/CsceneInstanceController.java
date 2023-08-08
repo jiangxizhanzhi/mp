@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -868,6 +870,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("利用探针上传文件")
     @PostMapping("/upload_biz_file")
     public ServiceResult<Boolean> uploadFile(@RequestBody CsceneInstanceNodeUploadFileActionRequest request) {
+        var instance = getModelService().get(request.getId()).getSource().getObj();
+        if (instance == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+
         File file = new File(TextUtils.uuid());
         String fileKey = null;
         try {
@@ -876,7 +883,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         } finally {
             file.delete();
         }
-        String fileUrl = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, SceneSingleton.sceneAppConfig.getMetadataFileServer(), fileKey);
-        return scenePluginCollectionSceneService.uploadFileWithProbe(request.getId(), request.getNodeId(), fileUrl, request.getFileName());
+        String fileUrl = StringUtils.joinWith("/", SceneSingleton.sceneAppConfig.getMetadataFileServer(), fileKey);
+        return scenePluginCollectionSceneService.uploadFileWithProbe(instance.getScene(), request.getNodeId(), fileUrl, request.getTargetDir(), request.getFileName());
     }
 }

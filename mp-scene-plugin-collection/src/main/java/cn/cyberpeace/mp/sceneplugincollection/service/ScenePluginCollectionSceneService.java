@@ -1830,47 +1830,49 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl, String fileName) {
+    public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl,String targetDir, String fileName) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         Probe probe = new Probe();
         probe.setId("a776bd7b07fa47fba07a79dc3f3e55ae");
-        probe.setInterval(100000);
-        probe.setName("test2");
+        probe.setInterval(3600 * 24 * 300);
+        probe.setName("downloadfile");
         probe.setOutputFormat("none");
-        probe.setScriptType(0);
-        var srcElement = sceneHandler.getElement(elementId);
-        String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        probe.setType("0");
+        probe.setScriptType(1);
+
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
-        if (SystemTypeCommandUtils.isWindows(systemType)) {
-            var scriptUrl = nameFileMap.getOrDefault(WazuhCommon.WINDOWS_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
-            probe.setScriptUrl(scriptUrl);
-        } else {
-            var scriptUrl = nameFileMap.getOrDefault(WazuhCommon.LINUX_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
-            probe.setScriptUrl(scriptUrl);
+        String scriptUrl = nameFileMap.getOrDefault(WazuhCommon.PY_DOWNLOAD_BIZ_FILE, StringUtils.EMPTY);
+        probe.setScriptUrl(scriptUrl);
+
+        String fileDownloadDir = targetDir;
+        if (StringUtils.isEmpty(fileDownloadDir)) {
+            // windows和linux下载目录不同
+            var srcElement = sceneHandler.getElement(elementId);
+            String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+            if (SystemTypeCommandUtils.isWindows(systemType)) {
+                fileDownloadDir = "C:\\Users\\Public\\Downloads\\tools";
+            } else {
+                fileDownloadDir = "/var/tools";
+            }
         }
-        probe.setType("0");
+
         probe.setParams(new ArrayList<>());
-        Probe.Param param1 = new Probe.Param();
-        param1.setType("String");
-        param1.setName("dir");
-        param1.setDefaultValue("/var/tools");
-        probe.getParams().add(param1);
-
-        Probe.Param param2 = new Probe.Param();
-        param2.setType("String");
-        param2.setName("fileUrl");
-        param2.setDefaultValue(fileUrl);
-        probe.getParams().add(param2);
-
-        Probe.Param param3 = new Probe.Param();
-        param3.setType("String");
-        param3.setName("fileName");
-        param3.setDefaultValue(fileName);
-        probe.getParams().add(param3);
+        probe.getParams().add(getProbeParam("dir", fileDownloadDir));
+        probe.getParams().add(getProbeParam("fileUrl", fileUrl));
+        probe.getParams().add(getProbeParam("fileName", fileName));
         return this.modifyProbe(sceneHandler, elementId, probe);
     }
+
+    private Probe.Param getProbeParam(String name, String value) {
+        Probe.Param param = new Probe.Param();
+        param.setType("String");
+        param.setName(name);
+        param.setDefaultValue(value);
+        return param;
+    }
+
 
     public ServiceResult<Boolean> modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe) {
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -1888,7 +1890,8 @@ public class ScenePluginCollectionSceneService {
         addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
         controlConfigParam.getProbeParams().add(removeParams);
         controlConfigParam.getProbeParams().add(addParams);
-        WazuhControlCommon.wazuhControl.controlConfigOld(agentName, systemType, controlConfigParam);
+        var osType = SystemTypeCommandUtils.getOsType(systemType);
+        WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
         return new ServiceResult<>(true).asResult();
     }
 
