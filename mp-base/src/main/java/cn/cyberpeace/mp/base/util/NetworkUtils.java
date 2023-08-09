@@ -34,7 +34,6 @@ public class NetworkUtils {
         try (var socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeout);
         } catch (IOException e) {
-            log.error("failed to check port ", e);
             return false;
         }
         return true;
