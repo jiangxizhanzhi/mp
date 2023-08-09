@@ -548,7 +548,7 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+        NetworkUtils.probePort(fixedIp, 5001, 5000, 5000, 1000 * 60 * 5,
                 null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
     }
