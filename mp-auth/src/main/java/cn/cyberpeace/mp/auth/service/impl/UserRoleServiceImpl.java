@@ -270,6 +270,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<Map<String, Object>> roleCountMaps = getModelMapper().originList(userRoleCondition);
 
         HumanCondition roleCondition = new HumanCondition()
+                .filterEqual(RoleModel::getVisible,true)
                 .select(RoleModel::getId, RoleModel::getName)
                 .distinct();
         List<RoleModel> roleModels = roleMapper.list(roleCondition);
@@ -281,11 +282,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             String roleId = (String) roleCountMap.get("role");
             Integer cnt = ((Long) roleCountMap.get("cnt")).intValue();
             String roleName = roleMap.get(roleId);
-            UserRoleStatisticBo userRoleStatisticBo = new UserRoleStatisticBo();
-            userRoleStatisticBo.setRoleId(roleId);
-            userRoleStatisticBo.setUserCnt(cnt);
-            userRoleStatisticBo.setRoleName(roleName);
-            statistics.add(userRoleStatisticBo);
+            if (roleName != null) {
+                UserRoleStatisticBo userRoleStatisticBo = new UserRoleStatisticBo();
+                userRoleStatisticBo.setRoleId(roleId);
+                userRoleStatisticBo.setUserCnt(cnt);
+                userRoleStatisticBo.setRoleName(roleName);
+                statistics.add(userRoleStatisticBo);
+            }
         }
         return statistics;
     }
