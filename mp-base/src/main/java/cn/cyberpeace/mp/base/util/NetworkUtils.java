@@ -34,6 +34,7 @@ public class NetworkUtils {
         try (var socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeout);
         } catch (IOException e) {
+            log.error("failed to check port ", e);
             return false;
         }
         return true;
@@ -102,7 +103,7 @@ public class NetworkUtils {
     /**
      * 探测目标端口直到连通
      */
-    public static void probePort(String host, int port, int perCheckTimeout, int stepTime, int timeout,
+    public static void  probePort(String host, int port, int perCheckTimeout, int stepTime, int timeout,
                           Callable<Boolean> stopCheck, int stopCheckIntervalCount,
                           Runnable callback, Runnable timeoutCallback) {
         final var probeTimeout = timeout <= 0 ? DEFAULT_PROBE_TIMEOUT : timeout;
