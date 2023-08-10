@@ -516,7 +516,7 @@ public class AsyncPlatFlowTaskService {
                 String extNetId = externalNetId;
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 22, 5000, 5000, 1000 * 60 * 10,
+                NetworkUtils.probePort(fixedIp, 22, 20000, 20000, 1000 * 60 * 10,
                         null, 0, () -> checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, extNetId)
                         , () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
 
@@ -548,7 +548,7 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        NetworkUtils.probePort(fixedIp, 5001, 5000, 5000, 1000 * 60 * 5,
+        NetworkUtils.probePort(fixedIp, 5001, 20000, 20000, 1000 * 60 * 5,
                 null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
     }
