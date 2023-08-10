@@ -359,10 +359,10 @@ public class SceneMonitorService {
                     .filter(probeOperateBO -> {
                         if (PROBEOPERATE_TYPE.COLLECT_IPS.getValue().equals(probeOperateBO.getType())) {
                             var dbData = newestMap.get(probeOperateBO.getType());
-                            return dbData == null || !dbData.getCollectIps().equals(probeOperateBO.getCollectIps());
+                            return dbData != null && !dbData.getCollectIps().equals(probeOperateBO.getCollectIps());
                         } else if (PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue().equals(probeOperateBO.getType())) {
                             var dbData = newestMap.get(probeOperateBO.getType());
-                            return dbData == null || !dbData.getCollectPeriod().equals(probeOperateBO.getCollectPeriod());
+                            return dbData != null && !dbData.getCollectPeriod().equals(probeOperateBO.getCollectPeriod());
                         } else {
                             return newestMap.get(probeOperateBO.getType()).getOperate() != probeOperateBO.getOperate();
                         }
