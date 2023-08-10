@@ -1897,9 +1897,12 @@ public class ScenePluginCollectionSceneService {
 
     public ServiceResult<Boolean> controlProbe(String sceneId, SceneControlProbeOperate operate) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-        SceneControlProbeParams sceneControlProbeParams = this.loadElementProbeControlParams(sceneHandler, operate);
-
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ServiceResult<>(true);
+        }
+
+        SceneControlProbeParams sceneControlProbeParams = this.loadElementProbeControlParams(sceneHandler, operate);
         InitiateHandler initiateHandler = new InitiateHandler(pluginHandler);
 
         for (var elementParams : sceneControlProbeParams.getElementControlProbeParams()) {
