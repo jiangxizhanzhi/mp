@@ -32,10 +32,8 @@ public class NetworkUtils {
      */
     public static boolean checkPortConnectable(String host, int port, int timeout) {
         try (var socket = new Socket()) {
-            socket.setSoTimeout(timeout);
             socket.connect(new InetSocketAddress(host, port), timeout);
         } catch (IOException e) {
-            log.error("failed to connect" , e);
             return false;
         }
         return true;
