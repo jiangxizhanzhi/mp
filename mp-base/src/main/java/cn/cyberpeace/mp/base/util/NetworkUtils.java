@@ -35,6 +35,7 @@ public class NetworkUtils {
             socket.setSoTimeout(timeout);
             socket.connect(new InetSocketAddress(host, port), timeout);
         } catch (IOException e) {
+            log.error("failed to connect" , e);
             return false;
         }
         return true;
