@@ -240,10 +240,9 @@ public class CollectionTypeService {
 //        CollectionType sca = CollectionType.builder().name("sca").code(code + "10").type(type).build();
 //        CollectionType attack = CollectionType.builder().name("攻击").code(code + "11").type(type).build();
 //        CollectionType windowsSecurity = CollectionType.builder().name("windows安全事件").code(code + "12").type(type).build();
-        CollectionType waf = CollectionType.builder().name("WAF").code(code + "13").type(type).build();
 
         CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
-        List<CollectionType> secSubTypes = Arrays.asList(av, fw, idsIps, vpn, waf, other);
+        List<CollectionType> secSubTypes = Arrays.asList(av, fw, idsIps, vpn, other);
         secSysType.setChildren(secSubTypes);
 
         return secSysType;
