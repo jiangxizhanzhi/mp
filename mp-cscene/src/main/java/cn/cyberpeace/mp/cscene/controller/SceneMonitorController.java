@@ -2,8 +2,10 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -16,6 +18,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -74,6 +77,9 @@ public class SceneMonitorController {
     @ApiOperation(value = "开启或关闭探针")
     @PostMapping("/probe/operate")
     public ServiceResult<Boolean> operateProbe(@RequestBody @Validated ProbeOperateRequest request) {
+        if (StringUtils.isEmpty(request.getSceneId())) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_START);
+        }
         return ResultCommon.success(sceneMonitorService.operateProbe(request));
     }
 
