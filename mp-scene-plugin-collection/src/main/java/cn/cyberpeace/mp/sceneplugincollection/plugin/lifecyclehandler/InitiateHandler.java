@@ -120,6 +120,7 @@ public class InitiateHandler extends HandlerCommon {
                     if (collectionElement == null) {
                         collectionElement = new CollectionPluginSceneElementBO();
                         getPluginHandler().addElement(nodeId, collectionElement);
+                        getPluginHandler().getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(collectionElement));
                     }
                     collectionElement.setEnableProbeCollect(true);
                 });

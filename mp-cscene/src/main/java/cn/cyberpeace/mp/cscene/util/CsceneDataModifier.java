@@ -446,6 +446,21 @@ public class CsceneDataModifier {
         csceneBO.getSceneConfig().getPlugins().put("cpgns3", gns3Plugin);
     }
 
+    public static void enableProbe(SceneDataBO sceneDataBO) {
+        if (sceneDataBO == null || sceneDataBO.getPlugins() == null || sceneDataBO.getPlugins().get("cpcloud") == null) {
+            return;
+        }
+        ScenePluginDataBO scenePluginDataBO = sceneDataBO.getPlugins().get("cpcollection");
+        if (scenePluginDataBO == null) {
+            scenePluginDataBO = new ScenePluginDataBO();
+        }
+        var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
+                .orElse(new HashMap<>());
+        cpcloudPluginScene.put("enable_probe_collect", true);
+        scenePluginDataBO.setScene(cpcloudPluginScene);
+        sceneDataBO.getPlugins().put("cpcollection", scenePluginDataBO);
+    }
+
     public static void handlerInputEnableRecording(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;

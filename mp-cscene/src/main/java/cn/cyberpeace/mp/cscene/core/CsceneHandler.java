@@ -140,6 +140,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         this.checkVlanIds(getCscene());
+        CsceneDataModifier.enableProbe(csceneInstance.getScene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);

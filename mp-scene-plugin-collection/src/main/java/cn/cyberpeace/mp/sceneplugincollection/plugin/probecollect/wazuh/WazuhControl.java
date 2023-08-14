@@ -412,7 +412,7 @@ public class WazuhControl {
 
     @Data
     public static class ControlConfigParam {
-        private List<ControlProbeParam> probeParams;
+        private List<ControlProbeParam> probeParams = new ArrayList<>();
         private List<ControlLogCollectParam> logCollectParams;
         private ControlSyscheckParam syscheckParam;
         private List<ControlFileModifyParam> fileModifyParams;
