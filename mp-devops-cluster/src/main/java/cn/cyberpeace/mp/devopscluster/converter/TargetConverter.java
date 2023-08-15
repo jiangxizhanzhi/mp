@@ -93,6 +93,7 @@ public class TargetConverter{
             var userIds = UserUtils.getSameOrgUserIds(UserUtils.getLoginUser().getId());
             var paramsIds = new HashSet<String>(userIds);
             paramsIds.add("");
+            paramsIds.add("3f655d87112f4ae094bbaf70830e20aa");
             var list = deviceTargetMapper.list(new HumanCondition()
                     .selectAs("id", DeviceTargetPO::getId)
                     .filterIn(DeviceTargetPO::getCreateUser, paramsIds.toArray(new String[]{})));
