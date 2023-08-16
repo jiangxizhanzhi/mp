@@ -98,7 +98,7 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig, CsceneTempService csceneTempService) {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
         setCsceneTempService(csceneTempService);
