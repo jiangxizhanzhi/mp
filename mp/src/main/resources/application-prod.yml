@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api/mp
-  port: 8080
+  port: 8001
   tomcat:
     threads:
       min-spare: ${MP_TOMCAT_MIN_POOL_SIZE:10}
@@ -45,7 +45,7 @@ logging:
   level:
     root: INFO
   file:
-    path: ${user.home}/logs
+    path: /var/log/mp
     max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
     max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
     max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
