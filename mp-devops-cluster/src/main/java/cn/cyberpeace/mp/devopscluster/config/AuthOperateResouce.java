@@ -43,7 +43,7 @@ public class AuthOperateResouce implements IOperateResource {
             var listTarget = deviceTargetMapper.findByUuids(paramsUUids);
             if (listTarget != null && listTarget.size() > 0) {
                 for (var t : listTarget) {
-                    if (StringUtils.isEmpty(t.getCreateUser())) {
+                    if (StringUtils.isEmpty(t.getCreateUser()) || t.getCreateUser().equals("3f655d87112f4ae094bbaf70830e20aa")) {
                         throw new MpRuntimeException(AuthErrorCode.PERMISSION_TRAIL_DENIED);
                     }
                 }
