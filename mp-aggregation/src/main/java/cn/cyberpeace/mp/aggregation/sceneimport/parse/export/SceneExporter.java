@@ -220,7 +220,7 @@ public class SceneExporter {
 
                 DumperOptions dumperOptions = new DumperOptions();
                 dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-                Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
+                Yaml yaml = new Yaml(new SceneRepresenter(new DumperOptions()), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber+device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
@@ -297,7 +297,7 @@ public class SceneExporter {
     private void createSceneYml(YmlParseResultV2 ymlParseResult, String envPath, String name) {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
+        Yaml yaml = new Yaml(new SceneRepresenter(new DumperOptions()), dumperOptions);
         String content = yaml.dumpAs(ymlParseResult, Tag.MAP, null);
         for (Map.Entry<String, String> e : specialYmlFields().entrySet()) {
             content = StringUtils.replace(content, e.getKey(), e.getValue());
@@ -335,6 +335,10 @@ public class SceneExporter {
             FIELD_ORDER.put("networks", 2);
             FIELD_ORDER.put("nodes", 3);
             FIELD_ORDER.put("shape", 4);
+        }
+
+        public SceneRepresenter(DumperOptions options) {
+            super(options);
         }
 
         @Override

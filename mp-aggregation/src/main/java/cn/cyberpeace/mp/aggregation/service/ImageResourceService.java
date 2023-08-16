@@ -183,7 +183,7 @@ public class ImageResourceService {
 
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
+        Yaml yaml = new Yaml(new SceneRepresenter(new DumperOptions()), dumperOptions);
         String content = yaml.dumpAs(serverYml, Tag.MAP, null);
         content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", imageName);
         content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
@@ -199,6 +199,10 @@ public class ImageResourceService {
             FIELD_ORDER.put("networks", 2);
             FIELD_ORDER.put("nodes", 3);
             FIELD_ORDER.put("shape", 4);
+        }
+
+        public SceneRepresenter(DumperOptions options) {
+            super(options);
         }
 
         @Override

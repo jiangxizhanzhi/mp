@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.lucene.util.IOUtils;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.BaseConstructor;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -37,7 +38,7 @@ class FilePathYmlParser<T> implements YmlParse<T> {
         try {
             File file = new File(filePath);
             inputStream = new FileInputStream(file);
-            BaseConstructor constructor = new Constructor();
+            BaseConstructor constructor = new Constructor(new LoaderOptions());
             constructor.setPropertyUtils(new YamlPropertyParseUtils());
             Yaml yaml = new Yaml(constructor);
             return yaml.loadAs(inputStream, resultType);
