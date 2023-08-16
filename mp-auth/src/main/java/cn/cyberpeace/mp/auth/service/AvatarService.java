@@ -3,11 +3,11 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.common.FileCheckCommon;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
+import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +36,7 @@ public class AvatarService {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
-            String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+            String suffix = FileUtils.getSuffix(file.getOriginalFilename());
             String filepath = FsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);

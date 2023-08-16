@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.frontbusiness.service;
 
 import cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +31,12 @@ public class UrlACWrapperService {
 
         dtos.forEach(d -> {
             List<String> targetIds = urlTargetsMap.get(d.getUrl());
-            if (CollectionUtil.isEmpty(targetIds)) {
+            if (CollectionUtils.isEmpty(targetIds)) {
                 targetIds = new ArrayList<>();
                 urlTargetsMap.put(d.getUrl(), targetIds);
             }
 
-            if (CollectionUtil.isNotEmpty(d.getTargetIds())) {
+            if (CollectionUtils.isNotEmpty(d.getTargetIds())) {
                 urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
             } else {
                 log.warn("No targets url detected! {}", d.getUrl());
@@ -53,7 +53,7 @@ public class UrlACWrapperService {
 
         dtos.forEach(d -> {
             List<String> targetIds = urlTargetsMap.get(d.getUrl());
-            if (CollectionUtil.isEmpty(targetIds)) {
+            if (CollectionUtils.isEmpty(targetIds)) {
                 targetIds = new ArrayList<>();
                 urlTargetsMap.put(d.getUrl(), targetIds);
             }
@@ -72,7 +72,7 @@ public class UrlACWrapperService {
 
         dtos.forEach(d -> {
             List<String> methods = urlMethodsMap.get(d.getUrl());
-            if (CollectionUtil.isEmpty(methods)) {
+            if (CollectionUtils.isEmpty(methods)) {
                 methods = new ArrayList<>();
                 urlMethodsMap.put(d.getUrl(), methods);
             }
@@ -89,7 +89,7 @@ public class UrlACWrapperService {
 
         dtos.forEach(d -> {
             List<String> methods = urlMethodsMap.get(d.getUrl());
-            if (CollectionUtil.isEmpty(methods)) {
+            if (CollectionUtils.isEmpty(methods)) {
                 methods = new ArrayList<>();
                 urlMethodsMap.put(d.getUrl(), methods);
             }

@@ -15,8 +15,8 @@ import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthentica
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.benmanes.caffeine.cache.Cache;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -86,12 +86,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // custom authenticate urls
         String[] authenticateUrls = {};
-        if (CollectionUtil.isNotEmpty(authConfig.getAuthenticateUrls())) {
+        if (CollectionUtils.isNotEmpty(authConfig.getAuthenticateUrls())) {
             authenticateUrls = authConfig.getAuthenticateUrls().toArray(new String[authConfig.getAuthenticateUrls().size()]);
         }
 
         String[] authenticateExcludeUrls = {};
-        if (CollectionUtil.isNotEmpty(authConfig.getAuthenticateExcludeUrls())) {
+        if (CollectionUtils.isNotEmpty(authConfig.getAuthenticateExcludeUrls())) {
             authenticateExcludeUrls = authConfig.getAuthenticateExcludeUrls().toArray(new String[authConfig.getAuthenticateExcludeUrls().size()]);
         }
 

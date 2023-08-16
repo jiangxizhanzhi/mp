@@ -2,14 +2,10 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.symmetric.DES;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 /**
@@ -23,8 +19,6 @@ public class PasswordUtils {
     private static AuthConfig authConfig;
 
     private static Pbkdf2PasswordEncoder passwordEncoder;
-
-    private static DES DES = SecureUtil.des(AuthConstant.PASSWORD_DES_KEY.getBytes());
 
     @SuppressWarnings({"java:S3010"})
     private PasswordUtils(AuthConfig authConfig) {
@@ -40,13 +34,11 @@ public class PasswordUtils {
             PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET);
         } else {
             if (Objects.isNull(iterations)) {
-                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_ITERATIONS");
-                Object value = ReflectUtil.getStaticFieldValue(field);
+                Object value = ClassUtils.getStaticFieldValue(Pbkdf2PasswordEncoder.class, "DEFAULT_ITERATIONS");
                 iterations = (Integer) value;
             }
             if (Objects.isNull(hashWidth)) {
-                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_HASH_WIDTH");
-                Object value = ReflectUtil.getStaticFieldValue(field);
+                Object value = ClassUtils.getStaticFieldValue(Pbkdf2PasswordEncoder.class, "DEFAULT_HASH_WIDTH");
                 hashWidth = (Integer) value;
             }
             PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET, iterations, hashWidth);
@@ -67,11 +59,11 @@ public class PasswordUtils {
     }
 
     public static String desEncrypt(String password) {
-       return DES.encryptHex(password);
+       return EncryptUtils.desEncrypt(password);
     }
 
     public static String desDecrypt(String encryptHex) {
-        return DES.decryptStr(encryptHex);
+        return EncryptUtils.desDecrypt(encryptHex);
     }
 
 }

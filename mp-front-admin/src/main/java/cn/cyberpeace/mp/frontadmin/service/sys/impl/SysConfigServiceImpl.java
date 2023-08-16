@@ -18,9 +18,8 @@ import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -96,7 +95,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
             List<UserModel> list = userService.listNotAudited();
-            if (CollectionUtil.isNotEmpty(list)) {
+            if (CollectionUtils.isNotEmpty(list)) {
                 throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
             }
         }
@@ -116,7 +115,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
                 updateByKeyName(config);
             }
         } catch (Exception e) {
-            log.error(ExceptionUtil.stacktraceToString(e));
+            log.error("batch update by key name error:", e);
             throw e;
         }
 
@@ -158,7 +157,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public void publishConfigUpdateEvent(List<SysConfigModel> configs) {
-        if (CollectionUtil.isNotEmpty(configs)) {
+        if (CollectionUtils.isNotEmpty(configs)) {
             Map<String, String> configMap = configs2Map(configs);
             SysConfigUpdateEvent event = new SysConfigUpdateEvent(configMap);
             configEventPublisher.publishEvent(event);

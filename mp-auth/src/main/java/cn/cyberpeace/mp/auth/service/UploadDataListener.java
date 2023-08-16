@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.google.common.collect.Lists;
@@ -17,13 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -118,7 +111,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
 
     private void checkImportUsers(List<ImportUserBo> users) {
-        if (CollectionUtil.isEmpty(users)) {
+        if (CollectionUtils.isEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
 
@@ -306,7 +299,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
             }
 
-            user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
+            user.setOrgIdList(Collections.singletonList(defaultTopOrg.getId()));
             return;
         }
 
@@ -343,7 +336,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
 
         List<ImportUserBo> finalList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(cfList)) {
+        if (CollectionUtils.isNotEmpty(cfList)) {
             CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
             CompletableFuture<List<List<ImportUserBo>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
             List<List<ImportUserBo>> result = finalCF.join();
@@ -378,7 +371,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             if (StringUtils.isBlank(orgPaths)) {
                 // 组织路径不存在，默认都存一级组织
                 // 组织为空则默认一级组织
-                user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
+                user.setOrgIdList(Collections.singletonList(defaultTopOrg.getId()));
                 continue;
             }
 

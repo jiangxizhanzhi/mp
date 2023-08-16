@@ -11,7 +11,8 @@ import cn.cyberpeace.mp.base.repository.condition.ConnectorCond;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -237,7 +238,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     private Map<String, String> convertSelectFields(String currentLinkName, HumanCondition condition) {
         Map<String, String> selectFields = condition.getSelectFields();
-        if (CollectionUtil.isEmpty(selectFields)) {
+        if (MapUtils.isEmpty(selectFields)) {
             return new HashMap<>();
         }
         Map<String, String> newSelectFields = new HashMap<>();
@@ -250,7 +251,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     private List<String> convertGroupFields(String currentLinkName, HumanCondition condition) {
         List<String> groupFields = condition.getGroupFields();
-        if (CollectionUtil.isEmpty(groupFields)) {
+        if (CollectionUtils.isEmpty(groupFields)) {
             return new ArrayList<>();
         }
         List<String> newGroupFields = groupFields.stream().map(g -> convertFieldName(currentLinkName, g)).collect(Collectors.toList());
@@ -260,7 +261,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     private List<String> convertOrders(String currentLinkName, HumanCondition condition) {
         List<String> orders = condition.getOrders();
-        if (CollectionUtil.isEmpty(orders)) {
+        if (CollectionUtils.isEmpty(orders)) {
             return new ArrayList<>();
         }
         List<String> newOrders = orders.stream().map(g -> convertFieldName(currentLinkName, g)).collect(Collectors.toList());

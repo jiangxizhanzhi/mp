@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ public class UserOnlineRecordTask implements Runnable {
 
 
         // 存在当前用户的在线记录，直接更新
-        if (CollectionUtil.isNotEmpty(onlinedRecordList)) {
+        if (CollectionUtils.isNotEmpty(onlinedRecordList)) {
             List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
             for (UserOnlineRecordModel recordModel : onlinedRecordList) {
                 LocalDateTime startTime = recordModel.getStartTime();
@@ -65,7 +65,7 @@ public class UserOnlineRecordTask implements Runnable {
         }
 
 
-        if (CollectionUtil.isNotEmpty(notRecordedUserModels)) {
+        if (CollectionUtils.isNotEmpty(notRecordedUserModels)) {
             // 不存在当前用户的在线记录，新增一个新的记录
             List<UserOnlineRecordModel> bulkList = new ArrayList<>();
             for (UserModel userModel : notRecordedUserModels) {
@@ -96,7 +96,7 @@ public class UserOnlineRecordTask implements Runnable {
 
                 bulkList.add(onlineRecordModel);
             }
-            if (CollectionUtil.isNotEmpty(bulkList)) {
+            if (CollectionUtils.isNotEmpty(bulkList)) {
                 userOnlineRecordService.bulkCreate(bulkList);
             }
         }

@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +84,7 @@ public class TemplateTargetServiceImpl implements TargetService {
         if (StringUtils.isBlank(parentId)) {
             // parent为空，则查询所有权限
             List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
-            if (CollectionUtil.isEmpty(targets)) {
+            if (CollectionUtils.isEmpty(targets)) {
                 return new ArrayList<>();
             }
             List<TargetBo> tree = toTree(targets);
@@ -213,7 +212,7 @@ public class TemplateTargetServiceImpl implements TargetService {
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
-            if (CollectionUtil.isNotEmpty(t.getChildren())) {
+            if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
         });

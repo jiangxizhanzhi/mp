@@ -19,9 +19,10 @@ import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
 import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +107,7 @@ public class ActivMenuService {
 
     private void check(List<TargetModel> targetModels) {
         var notEqualList = targetModels.stream().filter(t -> !Objects.equals(t.getId(), t.getIdentifier())).collect(Collectors.toList());
-        if (CollectionUtil.isNotEmpty(notEqualList)) {
+        if (CollectionUtils.isNotEmpty(notEqualList)) {
             log.error("json file error! value not equals with authority:{}", notEqualList.get(0).getId());
             throw new MpRuntimeException("json file error! value not equals with authority:" + notEqualList.get(0).getId());
         }
@@ -132,7 +133,7 @@ public class ActivMenuService {
             return false;
         }
         List<TargetModel> allTargets = targetService.listAllIgnoreVisible(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
-        if (CollectionUtil.isEmpty(allTargets)) {
+        if (CollectionUtils.isEmpty(allTargets)) {
             log.error("targets is null! please check!");
             throw new MpRuntimeException("targets is null!");
         }
@@ -171,7 +172,7 @@ public class ActivMenuService {
      * @param activeItemMap
      */
     public void doResetOptionsVisibility(Map<String, String> activeItemMap) {
-        if (CollectionUtil.isEmpty(activeItemMap)) {
+        if (MapUtils.isEmpty(activeItemMap)) {
             return;
         }
 
@@ -180,7 +181,7 @@ public class ActivMenuService {
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
 
-        if (CollectionUtil.isEmpty(optionModels)) {
+        if (CollectionUtils.isEmpty(optionModels)) {
             log.error("optionModels is null! please check!");
             throw new MpRuntimeException("optionModels is null!");
         }
@@ -200,7 +201,7 @@ public class ActivMenuService {
             if (isNoAuth) {
                 metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_YES);
             } else {
-                if (CollectionUtil.isEmpty(activedKeys)) {
+                if (CollectionUtils.isEmpty(activedKeys)) {
                     metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_NO);
                 } else {
                     boolean isVisible = metaActiveKeyList.stream().filter(key -> activedKeys.contains(key)).findAny().isPresent();
@@ -219,7 +220,7 @@ public class ActivMenuService {
             toUpdateList.add(toUpdateOptionModel);
         }
 
-        if (CollectionUtil.isNotEmpty(toUpdateList)) {
+        if (CollectionUtils.isNotEmpty(toUpdateList)) {
             optionService.bulkUpdate(toUpdateList);
         }
     }
@@ -246,11 +247,11 @@ public class ActivMenuService {
         MenuExtraInfoModel menuExtraInfo = new MenuExtraInfoModel();
         menuExtraInfo.setMenu(menuDTO.getId());
 
-        if (CollectionUtil.isNotEmpty(menuDTO.getActive())) {
+        if (CollectionUtils.isNotEmpty(menuDTO.getActive())) {
             menuExtraInfo.setActivKeys(menuDTO.getActive().stream().collect(Collectors.joining(",")));
         }
 
-        if (CollectionUtil.isNotEmpty(menuDTO.getEdition())) {
+        if (CollectionUtils.isNotEmpty(menuDTO.getEdition())) {
             menuExtraInfo.setEditions(menuDTO.getEdition().stream().collect(Collectors.joining(",")));
         }
 
@@ -260,7 +261,7 @@ public class ActivMenuService {
 
     private void recursion(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId) {
         List<ActivMenuDTO> children = menu.getChildren();
-        if (CollectionUtil.isNotEmpty(children)) {
+        if (CollectionUtils.isNotEmpty(children)) {
             for (ActivMenuDTO child : children) {
                 child.setId(child.getAuthority());
                 recursion(targets, menuExtraInfos, child, menu.getId());

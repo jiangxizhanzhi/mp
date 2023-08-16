@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class OperateRolePermissionService extends OperatePermissionService {
      * @param targetRoleNames
      */
     public void checkByTargetRoleNames(List<String> targetRoleNames) {
-        if (CollectionUtil.isEmpty(targetRoleNames)) {
+        if (CollectionUtils.isEmpty(targetRoleNames)) {
             return;
         }
         List<RoleModel> roleModels = roleService.listByNames(targetRoleNames);

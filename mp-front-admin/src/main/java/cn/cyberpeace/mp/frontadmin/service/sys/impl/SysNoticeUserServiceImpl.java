@@ -7,8 +7,8 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeUserFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUser
 
     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
-        if (CollectionUtil.isEmpty(noticeIds)) {
+        if (CollectionUtils.isEmpty(noticeIds)) {
             return 0;
         }
         HumanCondition condition = new HumanCondition().filterIn(SysNoticeUserModel::getNoticeId, noticeIds.toArray(String[]::new));
