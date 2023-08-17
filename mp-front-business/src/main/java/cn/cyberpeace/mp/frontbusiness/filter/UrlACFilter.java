@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.frontbusiness.filter;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OperatePermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -79,16 +78,6 @@ public class UrlACFilter extends OncePerRequestFilter {
                 }
             }
 
-            // 方法拦截是否开启
-            //if (Objects.nonNull(urlACFilterConfig.getMethodMatch()) && urlACFilterConfig.getMethodMatch()) {
-            //    String method = request.getMethod().toLowerCase();
-            //    boolean isMethodMatch = isMethodMatch(requestUrl, method);
-            //    if (!isMethodMatch) {
-            //        // 请求方法不匹配
-            //        log.warn("###URLACFILTER -> referer:{}, url:{}, method:{} not match!", request.getHeaders("referer"), requestUrl, method);
-            //    }
-            //}
-
             // 权限拦截是否开启
             if (Objects.nonNull(frontBusinessConfig.getUrlAcFilterAuthorityMatch()) && frontBusinessConfig.getUrlAcFilterAuthorityMatch()) {
 
@@ -130,30 +119,8 @@ public class UrlACFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
-    private boolean isMethodMatch(String requestUrl, String method) {
-        Map<String, List<String>> urlMethodsMap = urlACWrapperService.getUrlMethodsMap();
-        Map<String, List<String>> urlPatternMethodsMap = urlACWrapperService.getUrlPatternMethodsMap();
-
-
-        boolean isAccurateUrlMethodMatch = isAccurateUrlMethodMatch(requestUrl, method, urlMethodsMap);
-
-        if (isAccurateUrlMethodMatch) {
-            return true;
-        }
-
-        boolean isPatternUrlMethodMatch = isPatternUrlMethodMatch(requestUrl, method, urlPatternMethodsMap);
-        if(isPatternUrlMethodMatch) {
-            return true;
-        }
-        return false;
-    }
-
-
     private boolean isAuthoritiesMatch(String requestUrl) {
         Set<String> currentUserAuthorities = UserUtils.getLoginUserAuthorities();
-        UserModel currentUser = UserUtils.getLoginUser();
-        String currentUsername = Objects.nonNull(currentUser) ? currentUser.getUsername() : "";
         Map<String, List<String>> urlTargetsMap = urlACWrapperService.getUrlTargetsMap();
         Map<String, List<String>> urlPatternTargetsMap = urlACWrapperService.getUrlPatternTargetsMap();
 

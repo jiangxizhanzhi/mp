@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
-import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -45,13 +44,6 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
     List<OrgBO> listOrgsByUserId(String userId);
 
     /**
-     * 批量查询用户所在组织信息，返回一个map
-     * @param userIds
-     * @return
-     */
-    List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds);
-
-    /**
      * 批量查询用户组织对应关系
      * @param userIds
      * @return
@@ -78,8 +70,6 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
     boolean deleteByUserId(String userId);
 
     boolean deleteByOrgId(String orgId);
-
-    boolean deleteByTenantId(String tenantId);
 
 
 }

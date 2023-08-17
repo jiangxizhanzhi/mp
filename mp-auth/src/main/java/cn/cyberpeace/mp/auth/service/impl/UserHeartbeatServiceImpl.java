@@ -56,9 +56,4 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
     public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> getHeartbeatMap() {
         return heartbeatMap;
     }
-
-    @Override
-    public void clearHeartbeatmap() {
-        heartbeatMap.clear();
-    }
 }

@@ -210,47 +210,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public String getBatchPath(List<OrgModel> orgModelList) {
-        String allOrgPath = StringUtils.EMPTY;
-        if (CollectionUtil.isNotEmpty(orgModelList)) {
-            for (OrgModel orgModel : orgModelList) {
-                allOrgPath = allOrgPath.concat(AuthConstant.COMMA).concat(this.getPath(orgModel));
-            }
-            allOrgPath = allOrgPath.substring(1);
-        }
-
-        return allOrgPath;
-    }
-
-    @Override
-    public List<List<String>> getBathPathToList(List<OrgModel> orgModelList) {
-        List<List<String>> resultList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(orgModelList)) {
-            for (OrgModel orgModel : orgModelList) {
-                List<String> pathList = new ArrayList<>();
-                pathList.add(orgModel.getName());
-                if (StringUtils.isNotBlank(orgModel.getParent())) {
-                    List<OrgModel> allOrgModelList = orgPathService.listByTenant(orgModel.getTenant());
-                    while (StringUtils.isNotBlank(orgModel.getParent())) {
-                        String parentId = orgModel.getParent();
-                        Optional<OrgModel> orgModelOptional =
-                                allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
-                        if (orgModelOptional.isPresent()) {
-                            orgModel = orgModelOptional.get();
-                            pathList.add(0, orgModel.getName());
-                        } else {
-                            orgModel = new OrgModel();
-                        }
-                    }
-                }
-                resultList.add(pathList);
-            }
-        }
-
-        return resultList;
-    }
-
-    @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
 //        return super.bulkUpdate(objs);
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
@@ -384,28 +343,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         orgDto.execute(queryParentOrgDtoOperation);
 
         return orgDto;
-    }
-
-
-    @Override
-    public String calculatePathByOrgId(String orgId) {
-        OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
-
-        if (Objects.isNull(orgDto)) {
-            log.error("org {} not existed!", orgId);
-            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(orgId));
-        }
-
-        StringBuilder path = new StringBuilder(orgDto.getName());
-        while (true) {
-            if ((orgDto = orgDto.getParentOrg()) != null) {
-                path.insert(0, orgDto.getName() + AuthConstant.ORG_PATH_SEPARATOR);
-            } else {
-                break;
-            }
-        }
-
-        return path.toString();
     }
 
 

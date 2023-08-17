@@ -8,10 +8,8 @@ import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,8 +33,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     UserModel modify(UserRequest modifyRequest);
 
     UserModel getByUserName(String userName);
-
-    List<UserModel> listByUserName(List<String> userNames);
 
     UserModel getByIdent(String ident);
 
@@ -82,8 +78,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<ExportUserEnBo> exportExcelEn(List<UserModel> users);
 
-    boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException;
-
     void processExpiredStatus(UserBo user);
 
     // userModel转换为userdto，附加组织，角色信息
@@ -99,8 +93,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     List<UserModel> listNotAudited();
 
     List<UserBo> listByUserIds(String[] userIds);
-
-    List<UserModel> listByIds(String[] userIds);
 
     int totalUserCnt();
 

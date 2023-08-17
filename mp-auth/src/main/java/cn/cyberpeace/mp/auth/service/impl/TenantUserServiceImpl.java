@@ -179,29 +179,6 @@ public class TenantUserServiceImpl
     }
 
     @Override
-    @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
-    public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
-        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-
-        HumanCondition humanCondition = new HumanCondition()
-                .link(OrgModel.class, TenantUserModel.class)
-                .filterLink(OrgModel.class, OrgModel::getId, TenantUserModel.class, TenantUserModel::getOrg)
-                .currentLink(TenantUserModel.class)
-                .filterNotEqual(TenantUserModel::getUser, "");
-        if (CollectionUtil.isNotEmpty(userIds)) {
-            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
-        }
-        humanCondition.currentLink(TenantUserModel.class)
-                .selectAs(TenantUserModel::getUser, "userId")
-                .currentLink(OrgModel.class)
-                .selectAs(GroupConcat.f(OrgModel::getId).distinct(), "orgIds")
-                .selectAs(GroupConcat.f(OrgModel::getName).distinct(), "orgNames")
-                .currentLink(TenantUserModel.class)
-                .groupBy(TenantUserModel::getUser);
-        return getModelMapper().list(humanCondition, UserOrgMapBo.class);
-    }
-
-    @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
 
@@ -384,12 +361,6 @@ public class TenantUserServiceImpl
                 .filterEqual(TenantUserModel::getOrg, orgId);
         getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
-        return true;
-    }
-
-    @Override
-    public boolean deleteByTenantId(String tenantId) {
-        // todo
         return true;
     }
 

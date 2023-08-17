@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.MenuTemplateModel;
 import cn.cyberpeace.mp.auth.model.MenuTemplateRoleModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateMapper;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateRoleMapper;
@@ -100,7 +99,6 @@ public class MenuConfigService {
 
     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
-        Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map

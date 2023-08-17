@@ -179,26 +179,6 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public List<RoleModel> listByOrgId(String orgId) {
-        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(RoleModel::getVisible, true)
-                .filterEqual(RoleModel::getOrg, orgId);
-        List<RoleModel> roles = getModelMapper().list(humanCondition);
-        return roles;
-    }
-
-    @Override
-    public RoleModel getByIdent(String ident) {
-        ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(RoleModel::getVisible, true)
-                .filterEqual(RoleModel::getIdentifier, ident);
-        RoleModel model = getModelMapper().first(humanCondition);
-        return model;
-    }
-
-    @Override
     @Cacheable(value = CACHE_VAL_ROLE_GETBY_NAME)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
