@@ -81,7 +81,7 @@ public class AsyncPlatFlowTaskService {
     /**
      * tgn代码目录
      */
-    private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
+    private static final String TGN_PATH = "/home/apps/mp/mp_app/resources/flows/traffic_generators.zip";
 
     /**
      * 保存流量发生平台任务

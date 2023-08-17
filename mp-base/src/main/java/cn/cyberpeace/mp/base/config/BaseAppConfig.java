@@ -87,10 +87,10 @@ public class BaseAppConfig {
     @Value("${mp.base.home-dir:}")
     private String homeDir;
 
-    @Value("${mp.base.resources-dir:}")
+    @Value("${mp.base.resources-dir:/home/apps/mp/mp_app/resources}")
     private String resourcesDir;
 
-    @Value("${mp.base.file-server-dir:}")
+    @Value("${mp.base.file-server-dir:/home/apps/mp/mp_app/resources/fileserver}")
     private String fileServerDir;
 
     @Value("${mp.base.run-init:false}")

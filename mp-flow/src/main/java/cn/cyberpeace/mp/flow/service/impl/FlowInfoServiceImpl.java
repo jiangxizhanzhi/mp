@@ -89,7 +89,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 预制流量文件目录
      */
-    private static final String PRE_PATH = "/root/.mp/resources/flows";
+    private static final String PRE_PATH = "/home/apps/mp/mp_app/resources/flows";
 
 
     /**
@@ -1127,7 +1127,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         BufferedReader input = null;
         File tmp_file = null;
 
-        String prePath = "/root/.mp/resources/flows/protocol/";
+        String prePath = "/home/apps/mp/mp_app/resources/flows/protocol/";
         try {
             if (StringUtils.isBlank(scriptPath)) {
                 scriptPath  = prePath.concat("protocol_analyse.py");

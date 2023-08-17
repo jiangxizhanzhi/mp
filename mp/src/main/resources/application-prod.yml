@@ -37,7 +37,7 @@ spring:
     password: ${RABBITMQ_CRON:guest}
   web:
     resources:
-      static-locations: file:/root/.mp/resources/default_img
+      static-locations: file:/home/apps/mp/mp_app/resources/default_img
 
 
 logging:
@@ -163,7 +163,7 @@ mp:
   # mp-front-admin 模块
   frontadmin:
     activ-enable: true
-    license-dir: /home/mp/config/license
+    license-dir: /home/apps/mp/mp_app/license
     license-remind-enable: true
     # license到期提醒时间，默认剩余30天提醒
     license-remind-time: 30
