@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.service.BasEsLogService;
 import cn.cyberpeace.mp.log.service.MpOperateLogService;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -80,7 +79,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
             indexExisted = true;
             return true;
         } catch (Exception e) {
-            log.error("es getIndexRequest error! {}", ExceptionUtil.stacktraceToString(e));
+            log.error("es getIndexRequest error!", e);
             return false;
         }
     }

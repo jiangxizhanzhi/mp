@@ -85,4 +85,31 @@ public class BeanUtils {
         return map;
     }
 
+    /**
+     * 对象转map
+     * @param bean
+     * @param isIncludeNull
+     * @param isToUnderlineCase
+     * @return
+     */
+    public static Map<String, Object> beanToMap(Object bean, boolean isIncludeNull, boolean isToUnderlineCase) {
+        Map<String, Object> map = new HashMap<>();
+        final BeanWrapper wrapper = new BeanWrapperImpl(bean);
+        var propertyDescriptors = wrapper.getPropertyDescriptors();
+        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String fieldName = propertyDescriptor.getName();
+            if (!StringUtils.equals("class", fieldName)) {
+                Object propertyValue = wrapper.getPropertyValue(fieldName);
+                if (!isIncludeNull && Objects.isNull(propertyValue)) {
+                    continue;
+                }
+                if (isToUnderlineCase) {
+                    fieldName = TextUtils.humpToLine(fieldName);
+                }
+                map.put(fieldName, propertyValue);
+            }
+        }
+        return map;
+    }
+
 }

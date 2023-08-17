@@ -10,12 +10,11 @@ import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.model.CloudPlatformItemsResult;
 import cn.cyberpeace.mp.log.po.CpCloudLogPO;
 import cn.cyberpeace.mp.log.service.LogFileService;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +49,8 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
     private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
 
     private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
+
+    public static final int INDEX_NOT_FOUND = -1;
 
     @Override
     public String logReportType() {
@@ -101,10 +104,10 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             final cn.hutool.http.HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
             String disposition = httpResponse.header(cn.hutool.http.Header.CONTENT_DISPOSITION);
             String fileName = "";
-            if (StrUtil.isNotBlank(disposition)) {
-                fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
-                if (StrUtil.isBlank(fileName)) {
-                    fileName = StrUtil.subAfter(disposition, "filename=", true);
+            if (StringUtils.isNotBlank(disposition)) {
+                fileName = regexValue("filename=\"(.*?)\"", disposition);
+                if (StringUtils.isBlank(fileName)) {
+                    fileName = subAfter(disposition, "filename=", true);
                     final int lastIndexOf = fileName.lastIndexOf(";");
                     if (lastIndexOf > 0) {
                         fileName = fileName.substring(0, lastIndexOf);
@@ -131,6 +134,33 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             IOUtils.closeQuietly(inputStream);
         }
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
+    }
+
+    private String regexValue(String regex, String input) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
+    }
+
+    private String subAfter(CharSequence string, CharSequence separator, boolean isLastSeparator) {
+        if (StringUtils.isEmpty(string)) {
+            return null == string ? null : StringUtils.EMPTY;
+        }
+        if (separator == null) {
+            return StringUtils.EMPTY;
+        }
+        final String str = string.toString();
+        final String sep = separator.toString();
+        final int pos = isLastSeparator ? str.lastIndexOf(sep) : str.indexOf(sep);
+        if (INDEX_NOT_FOUND == pos || (string.length() - 1) == pos) {
+            return StringUtils.EMPTY;
+        }
+        return str.substring(pos + separator.length());
     }
 
     @Override

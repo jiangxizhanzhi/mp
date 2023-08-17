@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
-import cn.hutool.core.util.ArrayUtil;
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -41,11 +41,11 @@ public class RequestProcessor {
             params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
         }
 
-        if (ArrayUtil.isNotEmpty(pageRequest.getSelect())) {
+        if (ArrayUtils.isNotEmpty(pageRequest.getSelect())) {
             params.add(new BasicNameValuePair("select", Joiner.on(",").join(pageRequest.getSelect())));
         }
 
-        if (ArrayUtil.isNotEmpty(pageRequest.getSort())) {
+        if (ArrayUtils.isNotEmpty(pageRequest.getSort())) {
             params.add(new BasicNameValuePair("sort", Joiner.on(",").join(pageRequest.getSelect())));
         }
 

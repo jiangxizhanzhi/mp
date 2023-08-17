@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,13 +63,13 @@ public class LogFileServiceFactory {
             var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
             List<OptionBO> options = res.getSource();
             List<String> codes = new ArrayList<>();
-            if (CollectionUtil.isNotEmpty(options)) {
+            if (CollectionUtils.isNotEmpty(options)) {
                 codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
             }
 
 
             List<LogFileService> logFileServices = new ArrayList<>();
-            CollectionUtil.addAll(logFileServices, fileServiceList);
+            logFileServices.addAll(fileServiceList);
             //processVisibleLogFileServices(logFileServices);
 
             for (LogFileService logFileService : fileServiceList) {

@@ -27,7 +27,6 @@ import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -211,7 +210,7 @@ public class ServiceMonitorService {
      */
     private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
         TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
-        if (CollUtil.isEmpty(timedCache)) {
+        if (timedCache.isEmpty()) {
             return;
         }
 
@@ -246,7 +245,7 @@ public class ServiceMonitorService {
                 .map(HypervisorBO::getName)
                 .collect(Collectors.toList());
 
-        if (CollUtil.isNotEmpty(activeHostNames)) {
+        if (CollectionUtils.isNotEmpty(activeHostNames)) {
             if (StringUtils.isNotBlank(hostName)) {
                 if (activeHostNames.contains(hostName)) {
                     hostNameList.add(hostName);
@@ -269,7 +268,7 @@ public class ServiceMonitorService {
     private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<ServerMonitorConfig.MonitorProbe> monitorProbes) {
         List<String> allRestrictSrvs = new ArrayList<>();
         monitorProbes.forEach(p -> {
-            if (CollUtil.isNotEmpty(p.getRestartRestrictList())) {
+            if (CollectionUtils.isNotEmpty(p.getRestartRestrictList())) {
                 allRestrictSrvs.addAll(p.getRestartRestrictList());
             }
         });
@@ -282,7 +281,7 @@ public class ServiceMonitorService {
                 dto.setDisableRestart(Boolean.TRUE);
             }
 
-            if (CollUtil.isNotEmpty(allRestrictSrvs)) {
+            if (CollectionUtils.isNotEmpty(allRestrictSrvs)) {
                 if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) && allRestrictSrvs.contains(dto.getName())) {
                     // 状态为RUNNING，且在限制列表中，则禁止重启，既disableRestart=true
                     dto.setDisableRestart(Boolean.TRUE);

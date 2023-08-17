@@ -9,20 +9,11 @@ import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.NetAddr;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -132,7 +123,7 @@ public class SysCollectorService extends RequestProcessor {
 
         netifaces.forEach(n -> {
             List<NetAddr> netAddrs = listNetAddrs(agentId, n.getName(), "ipv4");
-            if (CollectionUtil.isNotEmpty(netAddrs)) {
+            if (!CollectionUtils.isEmpty(netAddrs)) {
                 n.setIp(netAddrs.get(0).getAddress());
             }
         });
@@ -169,7 +160,7 @@ public class SysCollectorService extends RequestProcessor {
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
-        if (Objects.isNull(result.getData()) || CollectionUtil.isEmpty(result.getData().getAffectedItems())) {
+        if (Objects.isNull(result.getData()) || CollectionUtils.isEmpty(result.getData().getAffectedItems())) {
             return Collections.emptyList();
         }
         List<NetAddr> netAddrs = result.getData().getAffectedItems();

@@ -8,12 +8,12 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -48,7 +48,7 @@ public class CollectionTemplateController {
     @ApiImplicitParam(name = "id", value = "模板ID", dataTypeClass = String.class)
     public ServiceResult<CollectionTemplateDto> getById(@RequestParam String id) {
         List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ArrayUtils.toArray(id));
-        if (CollectionUtil.isNotEmpty(colTempDtos)) {
+        if (CollectionUtils.isNotEmpty(colTempDtos)) {
             return ResultCommon.success(colTempDtos.get(0));
         }
         return ResultCommon.success();

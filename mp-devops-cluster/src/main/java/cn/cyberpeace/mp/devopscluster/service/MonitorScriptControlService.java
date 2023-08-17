@@ -22,7 +22,6 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,13 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -94,14 +87,14 @@ public class MonitorScriptControlService {
             }
         }
 
-        if (CollectionUtil.isEmpty(serviceList)) {
+        if (CollectionUtils.isEmpty(serviceList)) {
             return;
         }
 
         List<ServerMonitorConfig.MonitorProbe> cpSrvs = ServerMonitorConfig.cpCloudSrvMonitors;
         List<ServerMonitorConfig.MonitorProbe> bizSrvs = ServerMonitorConfig.businessSrvMonitors;
 
-        if (CollectionUtil.isEmpty(cpSrvs)) {
+        if (CollectionUtils.isEmpty(cpSrvs)) {
             return;
         }
 
@@ -136,15 +129,15 @@ public class MonitorScriptControlService {
         List<ServerMonitorConfig.MonitorProbe> cpSrvs = ServerMonitorConfig.cpCloudSrvMonitors;
         List<ServerMonitorConfig.MonitorProbe> bizSrvs = ServerMonitorConfig.businessSrvMonitors;
 
-        if (CollectionUtil.isNotEmpty(cpSrvs)) {
+        if (CollectionUtils.isNotEmpty(cpSrvs)) {
             allSrvMonitors.addAll(cpSrvs);
         }
 
-        if (CollectionUtil.isNotEmpty(bizSrvs)) {
+        if (CollectionUtils.isNotEmpty(bizSrvs)) {
             allSrvMonitors.addAll(bizSrvs);
         }
 
-        if (CollectionUtil.isEmpty(allSrvMonitors)) {
+        if (CollectionUtils.isEmpty(allSrvMonitors)) {
             return;
         }
 
@@ -208,7 +201,7 @@ public class MonitorScriptControlService {
                 agentRequest.setName(hostName);
                 agentRequest.setStatus("active");
                 List<Agent> agents = agentService.listAgents(agentRequest);
-                if (!CollectionUtil.isEmpty(agents)) {
+                if (!CollectionUtils.isEmpty(agents)) {
                     sendScriptInstallCmd(hostName, nameFileMap);
                     addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
                 } else {
@@ -310,14 +303,14 @@ public class MonitorScriptControlService {
         List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromYaml = getConfigFromYaml(nameFileMap);
         List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromDB = JsonCommon.parse(configFromDB, new TypeReference<List<CpNodeMonitorScriptConfigModel.ParamConfig>>() {});
 
-        if (CollectionUtil.isEmpty(configsFromYaml) || CollectionUtil.isEmpty(configsFromDB)) {
+        if (CollectionUtils.isEmpty(configsFromYaml) || CollectionUtils.isEmpty(configsFromDB)) {
             return true;
         }
 
         configsFromYaml.sort(Comparator.comparing(CpNodeMonitorScriptConfigModel.ParamConfig::getId));
         configsFromDB.sort(Comparator.comparing(CpNodeMonitorScriptConfigModel.ParamConfig::getId));
 
-        return !CollectionUtil.isEqualList(configsFromYaml, configsFromDB);
+        return !configsFromYaml.equals(configsFromDB);
     }
 
     private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
@@ -325,7 +318,7 @@ public class MonitorScriptControlService {
         allSrvs.addAll(ServerMonitorConfig.cpCloudSrvMonitors);
         allSrvs.addAll(ServerMonitorConfig.businessSrvMonitors);
 
-        if (CollectionUtil.isNotEmpty(allSrvs)) {
+        if (CollectionUtils.isNotEmpty(allSrvs)) {
             allSrvs.sort(new Comparator<ServerMonitorConfig.MonitorProbe>() {
                 @Override
                 public int compare(ServerMonitorConfig.MonitorProbe o1, ServerMonitorConfig.MonitorProbe o2) {

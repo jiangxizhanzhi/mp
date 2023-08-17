@@ -204,7 +204,7 @@ public class MenuSetService {
     private List<MenuTemplateModel> getUserAllMenus(String userId) {
         var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
-        if (CollectionUtilss.isEmpty(roles)) {
+        if (CollectionUtils.isEmpty(roles)) {
             targets = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
         } else {
             String roleId = roles.get(0).getRole();

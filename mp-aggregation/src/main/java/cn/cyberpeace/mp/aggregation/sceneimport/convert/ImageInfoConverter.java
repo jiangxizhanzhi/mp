@@ -10,16 +10,14 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.hutool.core.io.FileUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -213,7 +211,8 @@ class ImageInfoConverter implements IConverter {
         accessMode.setProxy(result.getIsproxy() == null ? true : Boolean.valueOf(result.getIsproxy()));
         accessMode.setPath(result.getPath());
         if (StringUtils.isNotEmpty(result.getPrivateKey())) {
-            if (FileUtil.exist(result.getPrivateKeyPath())) {
+            Path path = Paths.get(result.getPrivateKey());
+            if (Files.exists(path)) {
                 String fdfsPath = FsCommon.upload(result.getPrivateKeyPath());
                 accessMode.setPrivateKeyEnable(true);
                 accessMode.setPrivateKeyPath(fdfsPath);

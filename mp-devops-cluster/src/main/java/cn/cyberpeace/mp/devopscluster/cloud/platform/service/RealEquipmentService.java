@@ -17,7 +17,7 @@ import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
-import cn.hutool.core.util.URLUtil;
+import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -173,7 +173,7 @@ public class RealEquipmentService extends BaseCpService {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
                     return;
                 }
-                var u = URLUtil.url(l.getUrl());
+                var u = URLUtils.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
             });
         }

@@ -11,8 +11,8 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.Getter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +120,7 @@ class ConvertDataContainer {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(configDataBO);
         csceneBO.getSceneConfig().getTopology().getElements().forEach(element -> {
-            if (CollectionUtil.isNotEmpty(element.getInitCommands())) {
+            if (CollectionUtils.isNotEmpty(element.getInitCommands())) {
                 List<String> newCommand = element.getInitCommands().stream().filter(command -> command != null).collect(Collectors.toList());
                 element.setInitCommands(newCommand);
             }

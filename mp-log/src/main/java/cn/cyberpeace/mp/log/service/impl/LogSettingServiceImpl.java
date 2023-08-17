@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.log.repository.MpLogLevelPOMapper;
 import cn.cyberpeace.mp.log.response.LogLevelResponse;
 import cn.cyberpeace.mp.log.service.ILogSettingService;
 import cn.cyberpeace.mp.log.utils.YamlUtils;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +30,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -261,13 +263,15 @@ public class LogSettingServiceImpl implements ILogSettingService {
         log.info("####### spring.config.addition-locaiton:{}", EnvConfig.getApplicationExt());
         log.info("####### MP_ENV_PATH:{}", EnvConfig.getMpEnvPath());
         String envProp = EnvConfig.getMpEnvPath();
-        if (StringUtils.isNotEmpty(envProp) && envProp.endsWith(PROPERTIES) && FileUtil.exist(envProp)) {
+        Path envPath = Paths.get(envProp);
+        if (StringUtils.isNotEmpty(envProp) && envProp.endsWith(PROPERTIES) && Files.exists(envPath)) {
             //优先配置DMP_ENV_PATH变量下的properties日志级别
             setNewRootLevel(ROOT_KEY_FOR_PROP, rootLevel, envProp);
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationProp())) {
             String applicationProp = EnvConfig.getApplicationProp();
             //次优先配置spring.config.addition-location中的application-prop.properties日志级别
-            if (StringUtils.isNotEmpty(applicationProp) && applicationProp.endsWith(PROPERTIES) && FileUtil.exist(applicationProp)) {
+            Path applicationPath = Paths.get(applicationProp);
+            if (StringUtils.isNotEmpty(applicationProp) && applicationProp.endsWith(PROPERTIES) && Files.exists(applicationPath)) {
                 setNewRootLevel(ROOT_KEY_FOR_PROP, rootLevel, applicationProp);
             }
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationExt())) {
@@ -361,7 +365,8 @@ public class LogSettingServiceImpl implements ILogSettingService {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(options);
-        if (StringUtils.isNotEmpty(file) && (file.endsWith(YML) || file.endsWith(YAML)) && FileUtil.exist(file)) {
+        Path filePath = Paths.get(file);
+        if (StringUtils.isNotEmpty(file) && (file.endsWith(YML) || file.endsWith(YAML)) && Files.exists(filePath)) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 map = yaml.loadAs(reader, Map.class);
                 YamlUtils.buildComment(file);
