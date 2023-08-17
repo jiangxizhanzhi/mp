@@ -20,19 +20,11 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.*;
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -50,7 +42,6 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +51,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -475,16 +465,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
-
-    @Override
-    public List<UserModel> listByUserName(List<String> userNames) {
-        HumanCondition humanCondition = new HumanCondition()
-                .filterIn(UserModel::getUsername, userNames.toArray());
-        List<UserModel> userModels = getModelMapper().list(humanCondition);
-        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
-        return userModels;
-    }
-
     @Override
     public UserModel getByIdent(String ident) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
@@ -794,43 +774,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return exportUserList;
     }
 
-    @Override
-    public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
-        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
-
-        Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
-        if (userOptional.isPresent()) {
-            // 上传服务器
-            String filepath = null;
-            try {
-                String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
-                filepath = FsCommon.upload(multipartFile.getInputStream(), suffix);
-                log.info("uploaded avatar success! filepath:{}", filepath);
-            } catch (MpRuntimeException | IOException e) {
-                log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw new MpRuntimeException(AuthErrorCode.FILE_ISNULL);
-            }
-
-            if (StringUtils.isNotBlank(filepath)) {
-                String httpUrl = FsCommon.genHttpUrl(filepath);
-                UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
-                var ret = getModelMapper().update(updateUser);
-                userCacheService.evictAllUserCache();
-                return ret;
-            } else {
-                log.error("upload failed! userId:{}", userId);
-                throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
-            }
-
-        } else {
-            log.error("user id:{} not existed!", userId);
-            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
-        }
-
-    }
-
-
     /**
      * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
      *
@@ -972,11 +915,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
         userBos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userBos;
-    }
-
-    @Override
-    public List<UserModel> listByIds(String[] userIds) {
-        return getModelMapper().list(new HumanCondition().filterIn(UserModel::getId, userIds));
     }
 
     @Override

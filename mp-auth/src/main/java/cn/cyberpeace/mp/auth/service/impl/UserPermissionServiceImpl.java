@@ -115,15 +115,6 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    public List<UserModel> listUsersByTargetId(String targetId) {
-        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
-
-        List<UserModel> users = getUsersByTargetId(targetId);
-        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
-        return users;
-    }
-
-    @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listMenusByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -182,7 +173,6 @@ public class UserPermissionServiceImpl
 
     public List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
-        Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map

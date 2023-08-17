@@ -6,13 +6,11 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * @Description:
@@ -61,15 +59,5 @@ public class JwtCommon {
      */
     public static HttpServletRequest getRequest() {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-    }
-
-    /**
-     * 获取token header
-     * @return
-     */
-    public static Map<String,String> getTokenHeader(){
-        Map<String,String> headers = Maps.newHashMap();
-        headers.put("Authorization", JwtCommon.getToken());
-        return headers;
     }
 }

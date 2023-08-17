@@ -39,8 +39,6 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
 
     private String passwordParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
 
-    private boolean postOnly = true;
-
     public MobilePasswordAuthenticationFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
     }

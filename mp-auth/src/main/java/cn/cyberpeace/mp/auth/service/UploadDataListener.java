@@ -36,11 +36,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
-    /**
-     * 每隔5条存储数据库，实际使用中可以3000条，然后清理list ，方便内存回收
-     */
-    private static final int BATCH_COUNT = 100;
-
     List<ImportUserBo> list = new ArrayList<ImportUserBo>();
     /**
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
@@ -251,83 +246,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
     }
 
-
-    /**
-     * 校验角色是否存在，如果存在则查出id留待后面绑定的时候用
-     *
-     * @param
-     * @param index
-     */
-    private void checkRole(ImportUserBo user, int index) {
-        String roles = user.getRoles();
-        if (StringUtils.isBlank(roles)) {
-            log.error("No {} row error! roles:{} is empty! ", index, roles);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_EMPTY.format(String.valueOf(index)));
-        }
-
-        // 清空roleIdList
-        user.setRoleIdList(new ArrayList<>());
-        String[] roleNameArr = StringUtils.split(roles, ",");
-
-        //try {
-            opUserPermCheckService.checkByTargetRoleNames(Arrays.asList(roleNameArr));
-        //} catch (MpRuntimeException me) {
-        //    if (me.getServiceCode().equals(AuthErrorCode.PERMISSION_DENIED)) {
-        //        throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
-        //    }
-        //}
-
-        for (String roleName : roleNameArr) {
-            RoleModel roleModel = roleService.getByName(roleName.trim());
-
-            if (Objects.isNull(roleModel)) {
-                log.error("No {} row error! role {} not existed!", index, roleName.trim());
-                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
-            }
-            user.getRoleIdList().add(roleModel.getId());
-        }
-    }
-
-    /**
-     * 校验组织是否存在，如果存在则查出id留待后面绑定的时候用
-     *
-     * @param
-     * @param index
-     */
-    private void checkOrgs(ImportUserBo user, int index) {
-        String orgPaths = user.getOrgpath();
-        if (StringUtils.isBlank(orgPaths)) {
-            // 组织路径不存在，默认都存一级组织
-            // 组织为空则默认一级组织
-            List<OrgBO> orgBOS = orgService.listParents();
-            OrgBO defaultTopOrg = orgBOS.get(0);
-            if (Objects.isNull(defaultTopOrg)) {
-                log.error("默认一级组织不存在！");
-                throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
-            }
-
-            user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
-            return;
-        }
-
-        user.setOrgIdList(new ArrayList<>());
-        Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
-            OrgBO orgBO = orgService.getByPath(path.trim());
-            if (Objects.isNull(orgBO)) {
-                log.error("No {} row error! org {} not existed!", index, path.trim());
-                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ORG_NOT_EXISTED.format(String.valueOf(index), path.trim()));
-            } else {
-                user.getOrgIdList().add(orgBO.getId());
-            }
-        });
-    }
-
-
     private void preProcessOrgsAndRoles(List<ImportUserBo> users) {
         preProcessOrgs(users);
         preProcessRoles(users);
     }
-
 
     /**
      * 导入excel对密码进行预处理

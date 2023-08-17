@@ -20,8 +20,6 @@ import java.util.List;
 @ModelClass(UrlACModel.class)
 public interface UrlACMapper extends BaseModelMapper<UrlACModel> {
 
-    UrlAccessCtlDto getById(@Param("id") String id);
-
     List<UrlAccessCtlDto> listAllUrlAccessCtlDtos();
 
     List<UrlAccessCtlDto> listAllUrlAccessCtlPatternDtos();

@@ -146,10 +146,6 @@ public class UrlACService {
     @Transactional(rollbackFor = Exception.class)
     public String modify(UrlAccessCtlRequest updateReq) {
         String urlacId = updateReq.getId();
-        //UrlAccessCtlDto urlAccessCtlDto = urlACMapper.getById(urlacId);
-        //if (Objects.isNull(urlAccessCtlDto)) {
-        //    throw new MpRuntimeException("Not exist");
-        //}
 
         UrlACModel urlACModel = UrlACModel.builder()
                 .url(updateReq.getUrl())
@@ -221,29 +217,6 @@ public class UrlACService {
     @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
     public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
-        dtos.forEach(d -> {
-            if (StringUtils.isNotBlank(d.getTargetsStr())) {
-                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
-            }
-
-            if (StringUtils.isNotBlank(d.getMethodStr())) {
-                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
-            }
-        });
-
-        return dtos;
-    }
-
-
-    /**
-     * 查询所有的
-     * @return
-     */
-    @Cacheable(value = CACHE_VAL_ALL_URLAC)
-    public List<UrlAccessCtlDto> pageUrlAccessCtlDtos() {
-        List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
-        //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
-
         dtos.forEach(d -> {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
