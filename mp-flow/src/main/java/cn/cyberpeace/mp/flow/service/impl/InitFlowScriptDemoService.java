@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.flow.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;

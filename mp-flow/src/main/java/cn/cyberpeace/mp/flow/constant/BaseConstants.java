@@ -37,6 +37,8 @@ public interface BaseConstants {
      */
     String SPOT = "\\.";
 
+    String SEPARATOR_CHAR_DOT = ".";
+
     /**
      * 短横线
      */
