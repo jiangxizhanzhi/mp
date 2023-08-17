@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseR
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
-import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -147,11 +148,11 @@ public class SysCollectorService extends RequestProcessor {
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
         if (StringUtils.isNotBlank(iface)) {
-            params.add(new BasicNameValuePair("iface", URLUtil.encode(iface)));
+            params.add(new BasicNameValuePair("iface", URLEncoder.encode(iface, StandardCharsets.UTF_8)));
         }
 
         if (StringUtils.isNotBlank(proto)) {
-            params.add(new BasicNameValuePair("proto", URLUtil.encode(proto)));
+            params.add(new BasicNameValuePair("proto", URLEncoder.encode(proto, StandardCharsets.UTF_8)));
         }
 
         log.info("requestUrl:{}, params:{}", requestUrl, params);
@@ -159,7 +160,7 @@ public class SysCollectorService extends RequestProcessor {
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
+        log.info("listNetAddrs result: {}", result);
         if (Objects.isNull(result.getData()) || CollectionUtils.isEmpty(result.getData().getAffectedItems())) {
             return Collections.emptyList();
         }
