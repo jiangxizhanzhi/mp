@@ -84,13 +84,13 @@ public class BaseAppConfig {
     @Value("${mp.base.lfs-outer-http-url:/api/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
-    @Value("${mp.base.home-dir:/home/apps/mp/mp_app}")
+    @Value("${mp.base.home-dir:}")
     private String homeDir;
 
-    @Value("${mp.base.resources-dir:/home/apps/mp/mp_app/resources}")
+    @Value("${mp.base.resources-dir:}")
     private String resourcesDir;
 
-    @Value("${mp.base.file-server-dir:/home/apps/mp/mp_app/resources/fileserver}")
+    @Value("${mp.base.file-server-dir:}")
     private String fileServerDir;
 
     @Value("${mp.base.run-init:false}")

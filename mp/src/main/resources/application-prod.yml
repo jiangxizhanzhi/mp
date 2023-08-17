@@ -85,6 +85,9 @@ mp:
     lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.7.1}:${MP_API_PORT:8001}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
     lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
     run-init: true
+    home-dir: ${MP_HOME_DIR:/home/apps/mp/mp_app}
+    file-server-dir: ${MP_FILE_SERVER_DIR:/home/apps/mp/mp_app/fileserver}
+    resources-dir: ${MP_RESOURCES_DIR:/home/apps/mp/mp_app/resources}
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
