@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocolsPort;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
@@ -9,16 +10,16 @@ import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeItemModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeItemNameModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeTreeItemModel;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 靶标枚举值接口
@@ -44,7 +45,7 @@ public class TypeService extends BaseCpService {
 
     @PostConstruct
     public void init(){
-        lfuCache = CacheUtil.newLFUCache(100);
+        lfuCache = CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(TIME_OUT, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -53,7 +54,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<TypeTreeItemModel> findL1AndL2AndL3Type(Boolean isAll){
         String key = cache_prefix_model + "l3:" + isAll + ":" + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult<TypeTreeItemModel>)cache;
         }
@@ -62,7 +63,7 @@ public class TypeService extends BaseCpService {
         List<TypeTreeItemModel> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TypeTreeItemModel.class);
         CloudPlatformPageResult<TypeTreeItemModel> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 
@@ -72,7 +73,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<TargetType> findL1AndL2Type(){
         String key = cache_prefix_model + "l2:" + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult<TargetType>)cache;
         }
@@ -81,7 +82,7 @@ public class TypeService extends BaseCpService {
         List<TargetType> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TargetType.class);
         CloudPlatformPageResult<TargetType> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 
@@ -91,7 +92,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<AccessProtocolsPort> findAccessProtocolsPort(){
         String key = cache_prefix_model + "access_protocols_port:" + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult)cache;
         }
@@ -101,7 +102,7 @@ public class TypeService extends BaseCpService {
         List<AccessProtocolsPort> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), AccessProtocolsPort.class);
         CloudPlatformPageResult<AccessProtocolsPort> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 
@@ -111,7 +112,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<TypeItemModel> findIdIntegerByType(String type, Boolean isAll){
         String key = cache_prefix_model + type + ":" + isAll + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult<TypeItemModel>)cache;
         }
@@ -120,7 +121,7 @@ public class TypeService extends BaseCpService {
         List<TypeItemModel> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TypeItemModel.class);
         CloudPlatformPageResult<TypeItemModel> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 
@@ -130,7 +131,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<TypeItemNameModel> findIdStringByType(String type, Boolean isAll){
         String key = cache_prefix_model + type + ":" + isAll +  ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult<TypeItemNameModel>)cache;
         }
@@ -139,7 +140,7 @@ public class TypeService extends BaseCpService {
         List<TypeItemNameModel> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TypeItemNameModel.class);
         CloudPlatformPageResult<TypeItemNameModel> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 
@@ -150,7 +151,7 @@ public class TypeService extends BaseCpService {
      */
     public CloudPlatformPageResult<String> findItemsByType(String type){
         String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (CloudPlatformPageResult<String>)cache;
         }
@@ -159,7 +160,7 @@ public class TypeService extends BaseCpService {
         List<String> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), String.class);
         CloudPlatformPageResult<String> model = new CloudPlatformPageResult();
         model.setList(list);
-        lfuCache.put(key,model,TIME_OUT);
+        lfuCache.put(key,model);
         return model;
     }
 }

@@ -5,8 +5,8 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.repository.FlowClassificationsMapper;
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,9 +35,10 @@ public class FlowClassificationsService {
     private static final Long TIME_OUT = 2 * 60 * 60 * 1000L;
 
     @PostConstruct
-    public void init(){
-        lfuCache = CacheUtil.newLFUCache(100);
+    public void init() {
+        lfuCache = CacheBuilder.newBuilder().maximumSize(100).build();
     }
+
 
 
     @Autowired
@@ -51,7 +52,7 @@ public class FlowClassificationsService {
      */
     public List<FlowClassificationModel> findAll(){
         String key = cache_prefix_model + "flow:" + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (List<FlowClassificationModel>)cache;
         }

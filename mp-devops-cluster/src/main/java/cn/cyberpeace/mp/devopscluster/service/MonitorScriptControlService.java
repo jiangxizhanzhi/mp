@@ -20,9 +20,9 @@ import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
-import cn.hutool.cache.CacheUtil;
-import cn.hutool.cache.impl.TimedCache;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +53,10 @@ public class MonitorScriptControlService {
     private AgentService agentService;
 
     // expires in 20 minutes
-    private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
+//    private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
+    private Cache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(20, TimeUnit.MINUTES)
+            .build();;
 
 
     public void init(List<LocalFileMappingModel> mappings) {
@@ -76,12 +80,12 @@ public class MonitorScriptControlService {
 
     public void restart(String hostname, List<String> serviceList) {
         // 如果某个服务的状态还在重启中，则忽略该服务的重启
-        TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
-        log.info("restart serviceList:{}, timedCache keySet:{}", serviceList, timedCache.keySet());
+        Cache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
+        log.info("restart serviceList:{}, timedCache size:{}", serviceList, timedCache.size());
         Iterator<String> iterator = serviceList.iterator();
         while (iterator.hasNext()) {
             String cacheKey = hostname + "_" + iterator.next();
-            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
+            ServiceRestartStatusDto statusDto = timedCache.getIfPresent(cacheKey);
             if (Objects.nonNull(statusDto)) {
                 iterator.remove();
             }
@@ -285,7 +289,7 @@ public class MonitorScriptControlService {
     }
 
 
-    public TimedCache<String, ServiceRestartStatusDto> getStatusCache() {
+    public Cache<String, ServiceRestartStatusDto> getStatusCache() {
         return SRV_STATUS_CACHE;
     }
 

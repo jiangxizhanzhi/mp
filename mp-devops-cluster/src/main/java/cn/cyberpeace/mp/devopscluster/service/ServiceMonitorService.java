@@ -26,7 +26,7 @@ import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
-import cn.hutool.cache.impl.TimedCache;
+import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -209,14 +209,14 @@ public class ServiceMonitorService {
      * @param serviceMonitorDtos
      */
     private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
-        TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
-        if (timedCache.isEmpty()) {
+        Cache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
+        if (timedCache.size() == 0) {
             return;
         }
 
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
             String cacheKey = dto.getHostname() + "_" + dto.getServiceName();
-            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
+            ServiceRestartStatusDto statusDto = timedCache.getIfPresent(cacheKey);
             if (Objects.isNull(statusDto)) {
                 continue;
             }
@@ -224,7 +224,7 @@ public class ServiceMonitorService {
 
                 if (dto.getScanTime().isAfter(statusDto.getRestartTime().plusSeconds(5)) && Objects.equals(dto.getState(), MonitorStateEnum.RUNNING.getDesc())) {
                     // 重启之后的状态（重启时间延迟5秒，给脚本反应时间），且为RUNNING状态，则清除缓存
-                    timedCache.remove(cacheKey);
+                    timedCache.invalidate(cacheKey);
                 } else {
                     // 否则替换状态为RESTARTING
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
@@ -319,11 +319,11 @@ public class ServiceMonitorService {
             @Override
             public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
                 if (Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), o1.getState()) && Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), o2.getState())) {
-                    TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
+                    Cache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
                     String o1CacheKey = o1.getHostname() + "_" + o1.getServiceName();
                     String o2CacheKey = o2.getHostname() + "_" + o2.getServiceName();
-                    ServiceRestartStatusDto o1StatusDto = timedCache.get(o1CacheKey);
-                    ServiceRestartStatusDto o2StatusDto = timedCache.get(o2CacheKey);
+                    ServiceRestartStatusDto o1StatusDto = timedCache.getIfPresent(o1CacheKey);
+                    ServiceRestartStatusDto o2StatusDto = timedCache.getIfPresent(o2CacheKey);
                     if (Objects.nonNull(o1StatusDto) && Objects.nonNull(o2StatusDto)) {
                         if (o1StatusDto.getRestartTime().isBefore(o2StatusDto.getRestartTime())) {
                             return 1;
