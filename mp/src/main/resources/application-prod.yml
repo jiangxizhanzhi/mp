@@ -260,7 +260,7 @@ spring:
       on-profile: dev
 logging:
   file:
-    path: ${user.home}/logs
+    path: /var/log/mp
 
 
 
@@ -271,4 +271,4 @@ spring:
       on-profile: prod
 logging:
   file:
-    path: /home/mp/logs
+    path: /var/log/mp
