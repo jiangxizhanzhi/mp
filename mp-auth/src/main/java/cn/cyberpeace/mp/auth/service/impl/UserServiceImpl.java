@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.*;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -171,6 +172,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * 判断是否有头像，没有则设置为默认头像
      * @param userModel
      */
+    @Override
     public void setDefaultIfNoAvatar(UserModel userModel) {
         if (Objects.nonNull(userModel)) {
             if (StringUtils.isEmpty(userModel.getAvatar())) {
@@ -178,6 +180,32 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
+        }
+    }
+
+    /**
+     * 判断是否有头像，没有则设置为默认头像
+     * @param userModels
+     */
+    @Override
+    public void setDefaultIfNoAvatars(List<UserModel> userModels) {
+        if (CollectionUtils.isEmpty(userModels)) {
+            return;
+        }
+        Map<String, String> groupNamePathMap = DefaultImgUtil.getGroupNamePathMap();
+        for (UserModel userModel : userModels) {
+            if (StringUtils.isEmpty(userModel.getAvatar())) {
+                userModel.setAvatar(getDefaultUserAvatar());
+            }
+            if (StringUtils.isNotBlank(userModel.getAvatar()) && !FsCommon.isFileServerOuterUrl(userModel.getAvatar())) {
+                String path = groupNamePathMap.get(DefaultImgUtil.splitToGroup(userModel.getAvatar()) + AuthConstant.ORG_PATH_SEPARATOR + DefaultImgUtil.splitToName(userModel.getAvatar()));
+                if (StringUtils.isNotEmpty(path)) {
+                    userModel.setAvatar(path);
+                }
+            }
+            if (!FsCommon.isFileServerOuterUrl(userModel.getAvatar())) {
+                userModel.setAvatar(FsCommon.genHttpUrl(userModel.getAvatar()));
+            }
         }
     }
 

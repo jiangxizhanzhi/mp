@@ -100,6 +100,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void setDefaultIfNoAvatar(UserModel userModel);
 
+    void setDefaultIfNoAvatars(List<UserModel> userModels);
+
     void batchSetDefaultIfNoAvatar(List<UserBo> userBos);
 
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);

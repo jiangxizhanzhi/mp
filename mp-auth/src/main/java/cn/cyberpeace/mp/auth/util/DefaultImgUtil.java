@@ -12,10 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @Description: 默认图片工具类
@@ -55,6 +52,18 @@ public class DefaultImgUtil {
         }
 
         return path;
+    }
+
+    public static Map<String, String> getGroupNamePathMap() {
+        Map<String, String> rtnMap = new HashMap<>();
+        HumanCondition humanCondition = new HumanCondition();
+        List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
+        if (CollectionUtils.isNotEmpty(fileMappingModels)) {
+            for (LocalFileMappingModel localFileMappingModel : fileMappingModels) {
+                rtnMap.put(localFileMappingModel.getGroup() + AuthConstant.ORG_PATH_SEPARATOR + localFileMappingModel.getName(), FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile()));
+            }
+        }
+        return rtnMap;
     }
 
     /**
