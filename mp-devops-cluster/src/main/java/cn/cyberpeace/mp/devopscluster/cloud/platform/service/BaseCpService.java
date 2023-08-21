@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
@@ -10,8 +11,6 @@ import cn.cyberpeace.mp.devopscluster.model.BaseModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -62,7 +61,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
-        result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        try {
+            result = HttpUtils.sendHttpGet(url, wrapperHeaders(new HashMap<>()), null);
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops get request failed");
+        }
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
@@ -82,7 +86,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
-        result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).timeout(timeout).execute().body();
+        try {
+            result = HttpUtils.sendHttpGet(url, wrapperHeaders(new HashMap<>()), timeout);
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops get request with timeout failed");
+        }
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
@@ -104,7 +113,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
         }
-        result = HttpRequest.post(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        try {
+            result = HttpUtils.sendHttpPost(url, body, wrapperHeaders(new HashMap<>()));
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops post request failed");
+        }
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
         }
@@ -124,7 +138,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
         }
-        result = HttpRequest.post(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        try {
+            result = HttpUtils.sendHttpPost(url, body, wrapperHeaders(new HashMap<>()));
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops post request failed");
+        }
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
         }
@@ -146,7 +165,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(PUT_LOG_INFO, url, body, result);
         }
-        result = HttpRequest.put(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        try {
+            result = HttpUtils.sendHttpPut(url, body, wrapperHeaders(new HashMap<>()));
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops put request failed");
+        }
         if (log.isInfoEnabled()) {
             log.info(PUT_LOG_INFO, url, body, result);
         }
@@ -167,9 +191,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(DELETE_LOG_INFO, url, body, result);
         }
-
-        result = HttpRequest.delete(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
-
+        try {
+            result = HttpUtils.sendHttpDelete(url, body, wrapperHeaders(new HashMap<>()));
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops delete request failed");
+        }
         T model = this.buildSnakeObject(result, valueType);
         if (log.isInfoEnabled()) {
             log.info(DELETE_LOG_INFO, url, body, result);
@@ -185,7 +212,7 @@ public class BaseCpService {
      */
     protected <T extends BaseModel> T sendFormDataPost(String api, Map<String, Object> formMap , Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
-        String result = HttpUtil.createPost(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        String result = HttpUtils.sendHttpPost(url, formMap, wrapperHeaders(new HashMap<>()));
         T model = this.buildSnakeObject(result, valueType);
         if (log.isInfoEnabled()) {
             log.info("=====FormDataPost url：{},params：{},result：{}", url, formMap, result);
@@ -201,7 +228,7 @@ public class BaseCpService {
      */
     protected <T extends BaseModel> T sendFormDataPost(String api, List<File> fileList , Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
-        String result = HttpUtil.createPost(url).addHeaders(wrapperHeaders(new HashMap<>())).form("file",fileList.toArray(File[]::new)).execute().body();
+        String result = HttpUtils.sendHttpPostWithFile(url, wrapperHeaders(new HashMap<>()), fileList);
         T model = this.buildSnakeObject(result, valueType);
         if (log.isInfoEnabled()) {
             log.info("=====FormDataPost url：{},result：{}", url, result);
@@ -217,7 +244,7 @@ public class BaseCpService {
      */
     protected <T extends BaseModel> T sendFormDataPut(String api, Map<String, Object> formMap ,Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
-        String result = HttpRequest.put(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        String result = HttpUtils.sendHttpPut(url, formMap, wrapperHeaders(new HashMap<>()));
         if (log.isInfoEnabled()) {
             log.info("=====FormData url：{},params：{},result：{}", url, formMap, result);
         }
