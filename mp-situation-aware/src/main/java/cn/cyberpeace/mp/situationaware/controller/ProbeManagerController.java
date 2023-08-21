@@ -20,13 +20,13 @@ import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
 import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -89,7 +89,7 @@ public class ProbeManagerController {
     @ApiImplicitParam(name = "id", value = "探针ID", dataTypeClass = String.class)
     public ServiceResult<ProbeDto> getById(@RequestParam String id) {
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(id));
-        if (CollectionUtil.isNotEmpty(probeDtos)) {
+        if (CollectionUtils.isNotEmpty(probeDtos)) {
             return ResultCommon.success(probeDtos.get(0));
         }
         return ResultCommon.success();
@@ -117,7 +117,7 @@ public class ProbeManagerController {
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
-            String md5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
+            String md5 = DigestUtils.md5Hex(probeRequest.getScriptContent());
             probeRequest.setScriptChecksum(md5);
             probeRequest.setScriptUrl(httpUrl);
         }
@@ -140,7 +140,7 @@ public class ProbeManagerController {
             contentChanged = true;
         }
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
-            String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
+            String newMd5 = DigestUtils.md5Hex(probeRequest.getScriptContent());
 
             if (!Objects.equals(newMd5, oldMd5) || contentChanged) {
                 String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());

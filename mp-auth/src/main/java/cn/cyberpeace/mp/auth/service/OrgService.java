@@ -74,4 +74,18 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
     OrgBO orgModel2OrgBO(OrgModel orgModel);
 
+    /**
+     * 批量获取组织完整path
+     * @param orgModelList
+     * @return
+     */
+    String getBatchPath(List<OrgModel> orgModelList);
+
+    /**
+     * 批量获取组织路径list
+     * @param orgModelList
+     * @return
+     */
+    List<List<String>> getBathPathToList(List<OrgModel> orgModelList);
+
 }

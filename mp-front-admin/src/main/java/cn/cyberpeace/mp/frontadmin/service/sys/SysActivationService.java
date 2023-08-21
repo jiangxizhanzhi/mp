@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.util.EncryptUtils;
+import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -20,33 +22,24 @@ import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
-import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.MD5;
+import cn.cyberpeace.mp.frontadmin.util.RandomUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -338,20 +331,16 @@ public class SysActivationService {
         activationResponse.setExpiredDate(expiredDateStr);
         activationResponse.setVerifyCode(encryptedVerifyCode);
 
-        String salt = RandomUtil.randomString(8);
+        String salt = RandomUtils.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
-
-        MD5 md5 = MD5.create();
-        md5.setSalt(salt.getBytes());
-        String md5Str = md5.digestHex(content);
 
         String encryptedContent = EncryptUtils.desEncrypt(content);
         String finalContent = salt + encryptedContent;
         String filePath = frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE;
         log.info("finalContent:{}", finalContent);
 
-        FileUtil.writeString(finalContent, new File(filePath), CharsetUtil.CHARSET_UTF_8);
+        FileUtils.writeString(finalContent, new File(filePath), StandardCharsets.UTF_8);
         log.info("activation file has been generated! filePath:{}", filePath);
     }
 
@@ -363,8 +352,8 @@ public class SysActivationService {
             return null;
         }
 
-        List<String> lines = FileUtil.readUtf8Lines(activationFile);
-        if (CollectionUtil.isEmpty(lines)) {
+        List<String> lines = FileUtils.readUtf8Lines(activationFile);
+        if (CollectionUtils.isEmpty(lines)) {
             return null;
         }
 
@@ -458,7 +447,7 @@ public class SysActivationService {
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
-        String suffix = RandomUtil.randomString(6);
+        String suffix = RandomUtils.randomString(6);
         newSysActivCtlModel.setSuffix(suffix);
         newSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         newSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
@@ -499,7 +488,7 @@ public class SysActivationService {
     public List<ModuleInfoResponse> getModuleInfoList() {
         var content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
-        if (Objects.isNull(content) || CollectionUtil.isEmpty(content.getItems())) {
+        if (Objects.isNull(content) || CollectionUtils.isEmpty(content.getItems())) {
             return moduleInfoList;
         }
         var items = content.getItems();

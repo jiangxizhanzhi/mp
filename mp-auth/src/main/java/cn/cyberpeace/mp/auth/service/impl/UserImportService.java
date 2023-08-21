@@ -10,8 +10,8 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +49,7 @@ public class UserImportService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<TenantUserModel> tenantUserModels) {
-        if (CollectionUtil.isNotEmpty(userModels)) {
+        if (CollectionUtils.isNotEmpty(userModels)) {
             ServiceResult<Integer> re = userService.bulkCreateWithPasswordPreSet(userModels);
             if (!Objects.equals(userModels.size(), re.getSource())) {
                 log.error("userModels.size:{} and re.getSource:{} not same!", userModels.size(), re.getSource());

@@ -31,12 +31,11 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.cyberpeace.mp.flow.util.CommonUtil;
+import cn.cyberpeace.mp.flow.util.FileUtil;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.flow.util.FlowTaskPool;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -45,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.BeanUtils;
@@ -1047,7 +1047,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
                         String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
                         FlowInfoModel flowInfoModel = new FlowInfoModel();
-                        String flowId = DigestUtil.md5Hex(fileName);
+                        String flowId = CommonUtil.md5Hex(fileName);
                         flowInfoModel.setId(flowId);
                         flowInfoModel.setTitle(fileName);
                         flowInfoModel.setFileName(flowFile.getName());
@@ -1117,7 +1117,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         File fileFolder = new File(filePath);
         if (fileFolder.exists()) {
             File[] flowFiles = fileFolder.listFiles();
-            if (ArrayUtil.isEmpty(flowFiles)) {
+            if (ArrayUtils.isEmpty(flowFiles)) {
                 log.error("file folder is empty");
                 return ResultCommon.fail("file folder is empty");
             }
@@ -1129,7 +1129,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             for (File flowFile : flowFiles) {
                 if (flowFile.isDirectory()) {
                     File[] pcapFiles = flowFile.listFiles();
-                    if (ArrayUtil.isEmpty(pcapFiles)) {
+                    if (ArrayUtils.isEmpty(pcapFiles)) {
                         log.error("flow info folder is empty");
                         return ResultCommon.fail("flow info folder is empty");
                     }

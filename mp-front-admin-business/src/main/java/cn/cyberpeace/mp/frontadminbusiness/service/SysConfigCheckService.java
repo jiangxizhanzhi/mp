@@ -5,8 +5,8 @@ import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.SysConfigKey;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Objects;
 public class SysConfigCheckService {
 
     public void updateCheck(List<SysConfigModel> sysConfigs) {
-        if (CollectionUtil.isEmpty(sysConfigs)) {
+        if (CollectionUtils.isEmpty(sysConfigs)) {
             throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
         }
 

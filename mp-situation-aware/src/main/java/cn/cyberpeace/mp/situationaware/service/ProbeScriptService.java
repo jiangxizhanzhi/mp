@@ -4,16 +4,12 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
-import cn.cyberpeace.mp.situationaware.utils.FileUtils;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -76,19 +72,19 @@ public class ProbeScriptService {
      * @return 脚本内容
      */
     public String readScriptFileContent(MultipartFile scriptFile) {
-        if (Objects.isNull(scriptFile)) {
-            return "";
-        }
-        File file = null;
         String content = "";
+
+        if (Objects.isNull(scriptFile)) {
+            return content;
+        }
+
         try {
-            file = FileUtils.multipartToFile(scriptFile, scriptFile.getOriginalFilename());
-            content = FileUtil.readUtf8String(file);
+            byte[] bytes = scriptFile.getBytes();
+            content = new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            log.error("error:{}", ExceptionUtil.stacktraceToString(e));
+            log.error("error:", e);
             throw new MpRuntimeException("parse script file error!");
         }
-        file.deleteOnExit();
         return content;
     }
 

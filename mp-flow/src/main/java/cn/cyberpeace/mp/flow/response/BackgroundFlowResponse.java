@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.flow.response;
 
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.hutool.core.date.DateUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -56,7 +56,7 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
         setFlowDesc(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
-            setCreateTime(DateUtil.format(flowInfoModel.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
+            setCreateTime(TimeUtils.localDateTimeToString(flowInfoModel.getCreateTime()));
         }
         setInteractiveType(flowInfoModel.getInteractiveType());
 

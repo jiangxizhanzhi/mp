@@ -13,8 +13,8 @@ import cn.cyberpeace.mp.frontbusiness.mapper.UrlACTargetMapper;
 import cn.cyberpeace.mp.frontbusiness.model.UrlACModel;
 import cn.cyberpeace.mp.frontbusiness.model.UrlACTargetModel;
 import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
-import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class UrlACService {
      * @return
      */
     public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
-        if (CollUtil.isEmpty(targetIds)) {
+        if (CollectionUtils.isEmpty(targetIds)) {
             return Collections.emptyList();
         }
         List<UrlAccessCtlDto> dtos = urlACMapper.listByTargetIds(targetIds);
@@ -116,7 +116,7 @@ public class UrlACService {
             urlACModel.setIsPattern(1);
         }
 
-        if (CollUtil.isNotEmpty(addReq.getMethods())) {
+        if (CollectionUtils.isNotEmpty(addReq.getMethods())) {
             urlACModel.setMethods(addReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
@@ -125,7 +125,7 @@ public class UrlACService {
             throw new MpRuntimeException("save urlac failed!");
         }
 
-        if (CollUtil.isNotEmpty(addReq.getTargetIds())) {
+        if (CollectionUtils.isNotEmpty(addReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
                 addReq.getTargetIds().stream().map(tid ->
                     UrlACTargetModel.builder()
@@ -156,7 +156,7 @@ public class UrlACService {
             urlACModel.setIsPattern(1);
         }
 
-        if (CollUtil.isNotEmpty(updateReq.getMethods())) {
+        if (CollectionUtils.isNotEmpty(updateReq.getMethods())) {
             urlACModel.setMethods(updateReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
@@ -166,7 +166,7 @@ public class UrlACService {
         }
 
         urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
-        if (CollUtil.isNotEmpty(updateReq.getTargetIds())) {
+        if (CollectionUtils.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
                     updateReq.getTargetIds().stream().map(tid ->
                         UrlACTargetModel.builder()
@@ -239,7 +239,7 @@ public class UrlACService {
 
     @Transactional(rollbackFor = Exception.class)
     public void importByExcel(List<ImportUrlAuth> importUrlAuths) {
-        if (CollUtil.isNotEmpty(importUrlAuths)) {
+        if (CollectionUtils.isNotEmpty(importUrlAuths)) {
             List<UrlACModel> urlACModels = new ArrayList<>();
             List<UrlACTargetModel> urlACTargetModels = new ArrayList<>();
             for (ImportUrlAuth importUrlAuth : importUrlAuths) {

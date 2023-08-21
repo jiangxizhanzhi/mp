@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.log.config;
 
 import cn.cyberpeace.mp.base.config.Swagger2Config;
-import cn.hutool.core.collection.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,8 @@ import springfox.documentation.service.ParameterType;
 import springfox.documentation.service.RequestParameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+
+import java.util.Collections;
 
 @Configuration
 public class LogSwagger2Config {
@@ -36,7 +37,7 @@ public class LogSwagger2Config {
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.log"))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(CollectionUtil.toList(authParameter))
+                .globalRequestParameters(Collections.singletonList(authParameter))
                 .groupName("log");
     }
 

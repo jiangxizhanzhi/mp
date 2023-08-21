@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
@@ -13,8 +14,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import cn.hutool.core.util.URLUtil;
+import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -129,7 +129,7 @@ public class ImagesService extends BaseCpService {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
                     return;
                 }
-                var u = URLUtil.url(l.getUrl());
+                var u = URLUtils.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
                 if (config.getPublicNetProxyExcludeProtocols().contains(l.getProtocol())) {
                     return;

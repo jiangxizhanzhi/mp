@@ -6,9 +6,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontbusiness.config.FrontBusinessConfig;
 import cn.cyberpeace.mp.frontbusiness.constant.FrontBizErrorCode;
 import cn.cyberpeace.mp.frontbusiness.service.UrlACWrapperService;
-import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -84,7 +84,7 @@ public class UrlACFilter extends OncePerRequestFilter {
                 boolean isAuthoritiesMatchFlag = false;
                 // 判断是否是excludeUrls
                 List<String> excludeUrls = frontBusinessConfig.getUrlAcFilterExcludeUrls();
-                if (CollectionUtil.isNotEmpty(excludeUrls)) {
+                if (CollectionUtils.isNotEmpty(excludeUrls)) {
                     for (String urlPattern : excludeUrls) {
                         if (MATCHER.match(urlPattern, requestUrl)) {
                             isAuthoritiesMatchFlag = true;
@@ -144,7 +144,7 @@ public class UrlACFilter extends OncePerRequestFilter {
      */
     private boolean isAccurateUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> urlMethodsMap) {
         List<String> methods = urlMethodsMap.get(requestUrl);
-        if (CollectionUtil.isNotEmpty(methods)) {
+        if (CollectionUtils.isNotEmpty(methods)) {
             return methods.contains(method);
         }
         return false;
@@ -162,7 +162,7 @@ public class UrlACFilter extends OncePerRequestFilter {
         for (String urlPattern : urlPatterns) {
             if (MATCHER.match(urlPattern, requestUrl)) {
                 List<String> methods = patternUrlMethodsMap.get(urlPattern);
-                if (CollectionUtil.isNotEmpty(methods)) {
+                if (CollectionUtils.isNotEmpty(methods)) {
                     boolean methodMatch = methods.contains(method);
                     if (methodMatch) {
                         return true;
@@ -212,7 +212,7 @@ public class UrlACFilter extends OncePerRequestFilter {
      * @return
      */
     private boolean isUserAuthoritiesMatch(Set<String> currentUserAuthorities, List<String> urlTargetIds) {
-        if (CollectionUtil.isNotEmpty(urlTargetIds)) {
+        if (CollectionUtils.isNotEmpty(urlTargetIds)) {
             if (urlTargetIds.contains(NO_AUTH)) {
                 return true;
             }

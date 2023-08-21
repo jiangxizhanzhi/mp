@@ -7,8 +7,8 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.log.constant.LogConstant;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -78,7 +78,7 @@ public class OperatePermissionService {
      * @param targetRoleIds
      */
     public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
-        if (CollectionUtil.isEmpty(targetRoleIds)) {
+        if (CollectionUtils.isEmpty(targetRoleIds)) {
             return;
         }
 
@@ -110,7 +110,7 @@ public class OperatePermissionService {
      * @param targetRoleIds
      */
     public void checkByTargetRoleIds(List<String> targetRoleIds) {
-        if (CollectionUtil.isEmpty(targetRoleIds)) {
+        if (CollectionUtils.isEmpty(targetRoleIds)) {
             return;
         }
 

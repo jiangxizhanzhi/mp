@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.request.org;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.common.PageRequest;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.hutool.core.util.StrUtil;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 /**
@@ -44,8 +44,8 @@ public class OrgUserPageRequest extends PageRequest {
         if (super.getOrders() == null || super.getOrders().length == 0) {
             String updateTime = BeanUtils.getBeanGetterFieldName(UserModel::getUpdateTime);
             String username = BeanUtils.getBeanGetterFieldName(UserModel::getUsername);
-            updateTime = StrUtil.toUnderlineCase(updateTime);
-            username = StrUtil.toUnderlineCase(username);
+            updateTime = TextUtils.humpToLine(updateTime);
+            username = TextUtils.humpToLine(username);
 
             super.setOrders(new String[]{"-" + updateTime, username});
         }

@@ -13,10 +13,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
@@ -56,9 +53,10 @@ public class ResourceCenterService {
         // 处理附件
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
-            if (FileUtil.exist(sceneFilePath)) {
+            File file = new File(sceneFilePath);
+            if (file.exists()) {
                 String fdfsPath = FsCommon.upload(sceneFilePath);
-                String fileName = FileUtil.getName(sceneFilePath);
+                String fileName = file.getName();
                 fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
             } else {
                 log.info("import scene , no scene file for path {}", sceneFilePath);

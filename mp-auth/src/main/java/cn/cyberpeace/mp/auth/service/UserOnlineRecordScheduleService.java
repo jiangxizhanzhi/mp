@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -74,7 +74,7 @@ public class UserOnlineRecordScheduleService {
             }
         }
 
-        if (CollectionUtil.isNotEmpty(userModel2LastTsMapList)) {
+        if (CollectionUtils.isNotEmpty(userModel2LastTsMapList)) {
             for (Map<UserModel, LocalDateTime> userModel2LastTsMap : userModel2LastTsMapList) {
                 UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userModel2LastTsMap);
                 threadPool.submit(recordTask);

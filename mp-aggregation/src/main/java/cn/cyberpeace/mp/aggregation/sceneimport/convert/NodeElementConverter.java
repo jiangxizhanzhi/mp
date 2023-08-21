@@ -19,13 +19,13 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.IpVersion;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.hutool.core.io.FileUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -90,9 +90,10 @@ class NodeElementConverter implements IConverter {
         // 处理节点附件
         if (StringUtils.isNotEmpty(node.getFile())) {
             // 处理附件
-            if (FileUtil.exist(node.getFile())) {
+            File nodeFile = new File(node.getFile());
+            if (nodeFile.exists()) {
                 String fdfsPath = FsCommon.upload(node.getFile());
-                String fileName = FileUtil.getName(node.getFile());
+                String fileName = nodeFile.getName();
                 String nodeFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
                 sceneConfigElementBO.setFile(nodeFilePath);
             } else {

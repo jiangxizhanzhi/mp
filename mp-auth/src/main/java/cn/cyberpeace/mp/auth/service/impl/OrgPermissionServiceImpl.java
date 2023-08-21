@@ -17,8 +17,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,7 +64,7 @@ public class OrgPermissionServiceImpl
         List<String> targetIds = orgPermissionModels.stream()
                 .map(OrgPermissionModel::getTarget)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(targetIds)) {
+        if (CollectionUtils.isEmpty(targetIds)) {
             return new HashSet<>();
         }
         HumanCondition targetCondition = new HumanCondition()
@@ -104,7 +103,7 @@ public class OrgPermissionServiceImpl
             }
         }
 
-        if (CollectionUtil.isEmpty(targetIds)) {
+        if (CollectionUtils.isEmpty(targetIds)) {
             // 完成，直接返回
             return true;
         }

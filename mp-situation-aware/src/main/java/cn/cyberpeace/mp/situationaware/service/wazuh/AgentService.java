@@ -8,11 +8,11 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -66,31 +66,6 @@ public class AgentService extends RequestProcessor {
         return agentPageInfo.getList();
     }
 
-    /**
-     * 查询所有agent信息
-     * @return
-     */
-    /*public List<Agent> listAgents(List<String> agentNames) {
-        log.info("agentNames:{}", agentNames);
-        var requestUri = "/agents";
-        if (CollectionUtil.isNotEmpty(agentNames)) {
-            String names = agentNames.stream().collect(Collectors.joining(","));
-            requestUri = requestUri + "?name=" + names;
-        }
-        var requestUrl = wazuhUrl + requestUri;
-        try {
-            log.info("requestUrl:{}", requestUrl);
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-            BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>(){});
-            log.info("{}", result);
-            List<Agent> agents = result.getData().getAffectedItems();
-            return agents;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
-        }
-    }*/
-
 
     /**
      * 查询指定agentName的agentId
@@ -100,12 +75,12 @@ public class AgentService extends RequestProcessor {
      */
     public List<String> listAgentIds(List<String> agentNames) {
         AgentRequest agentRequest = new AgentRequest();
-        if (CollectionUtil.isNotEmpty(agentNames)) {
+        if (CollectionUtils.isNotEmpty(agentNames)) {
             agentRequest.setName(agentNames.stream().collect(Collectors.joining(",")));
         }
         List<Agent> agents = listAgents(agentRequest);
 
-        if (CollectionUtil.isEmpty(agents)) {
+        if (CollectionUtils.isEmpty(agents)) {
             return null;
         }
 
@@ -126,7 +101,7 @@ public class AgentService extends RequestProcessor {
             agentRequest.setName(agentName);
             List<Agent> agents = listAgents(agentRequest);
 
-            if (CollectionUtil.isEmpty(agents)) {
+            if (CollectionUtils.isEmpty(agents)) {
                 return null;
             }
 

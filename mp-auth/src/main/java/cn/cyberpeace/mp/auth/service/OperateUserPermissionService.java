@@ -6,8 +6,8 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,12 +72,12 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
     /**
      * targetUserId是否是登录用户自身
-     * @param targetUserId
+     * @param targetUserIds
      * @return
      */
     public boolean isOperateSelf(List<String> targetUserIds) {
         UserModel currentLoginUser = UserUtils.getLoginUser();
-        if (Objects.nonNull(currentLoginUser) && CollectionUtil.isNotEmpty(targetUserIds)) {
+        if (Objects.nonNull(currentLoginUser) && CollectionUtils.isNotEmpty(targetUserIds)) {
             String currentUserId = currentLoginUser.getId();
             return targetUserIds.contains(currentUserId);
         }
@@ -92,7 +92,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
      * @param targetUserIds
      */
     public void checkByTargetUserIdsForSearching(List<String> targetUserIds) {
-        if (CollectionUtil.isEmpty(targetUserIds)) {
+        if (CollectionUtils.isEmpty(targetUserIds)) {
             return;
         }
 
@@ -125,7 +125,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
      * @param targetUserIds
      */
     public void checkByTargetUserIds(List<String> targetUserIds) {
-        if (CollectionUtil.isEmpty(targetUserIds)) {
+        if (CollectionUtils.isEmpty(targetUserIds)) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
      * @param targetRoleNames
      */
     public void checkByTargetRoleNames(List<String> targetRoleNames) {
-        if (CollectionUtil.isEmpty(targetRoleNames)) {
+        if (CollectionUtils.isEmpty(targetRoleNames)) {
             return;
         }
         List<RoleModel> roleModels = roleService.listByNames(targetRoleNames);

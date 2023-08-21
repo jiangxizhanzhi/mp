@@ -21,7 +21,6 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -152,7 +151,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         String name = obj.getName();
 
         List<OrgModel> orgModelList = listByParentIdAndName(parentId, name);
-        if (CollectionUtil.isNotEmpty(orgModelList)) {
+        if (CollectionUtils.isNotEmpty(orgModelList)) {
             if (StringUtils.isNotBlank(obj.getId())) {
                 // 判断是否当前组织
                 for (OrgModel orgModel : orgModelList) {
@@ -210,6 +209,47 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    public String getBatchPath(List<OrgModel> orgModelList) {
+        String allOrgPath = StringUtils.EMPTY;
+        if (CollectionUtils.isNotEmpty(orgModelList)) {
+            for (OrgModel orgModel : orgModelList) {
+                allOrgPath = allOrgPath.concat(AuthConstant.COMMA).concat(this.getPath(orgModel));
+            }
+            allOrgPath = allOrgPath.substring(1);
+        }
+
+        return allOrgPath;
+    }
+
+    @Override
+    public List<List<String>> getBathPathToList(List<OrgModel> orgModelList) {
+        List<List<String>> resultList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(orgModelList)) {
+            for (OrgModel orgModel : orgModelList) {
+                List<String> pathList = new ArrayList<>();
+                pathList.add(orgModel.getName());
+                if (StringUtils.isNotBlank(orgModel.getParent())) {
+                    List<OrgModel> allOrgModelList = orgPathService.listByTenant(orgModel.getTenant());
+                    while (StringUtils.isNotBlank(orgModel.getParent())) {
+                        String parentId = orgModel.getParent();
+                        Optional<OrgModel> orgModelOptional =
+                                allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                        if (orgModelOptional.isPresent()) {
+                            orgModel = orgModelOptional.get();
+                            pathList.add(0, orgModel.getName());
+                        } else {
+                            orgModel = new OrgModel();
+                        }
+                    }
+                }
+                resultList.add(pathList);
+            }
+        }
+
+        return resultList;
+    }
+
+    @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
 //        return super.bulkUpdate(objs);
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
@@ -220,7 +260,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public ServiceResult<Boolean> delete(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         List<OrgModel> children = listByParentId(orgId);
-        if (CollectionUtil.isNotEmpty(children)) {
+        if (CollectionUtils.isNotEmpty(children)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
         }
 
@@ -239,7 +279,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         for (String id : ids) {
             List<OrgModel> children = listByParentId(id);
-            if (CollectionUtil.isNotEmpty(children)) {
+            if (CollectionUtils.isNotEmpty(children)) {
                 throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
             }
 
@@ -303,7 +343,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         if (StringUtils.isBlank(parentOrgId)) {
             // 查询所有组织树
             List<OrgBO> orgBOS = listAll(AuthConstant.DEFAULT_TENANT);
-            if (CollectionUtil.isEmpty(orgBOS)) {
+            if (CollectionUtils.isEmpty(orgBOS)) {
                 return new ArrayList<>();
             }
             List<OrgDto> tree = toTree(orgBOS);
@@ -323,7 +363,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         BeanUtils.copyProperties(pOrgBO, orgDto);
         orgDto.execute(queryChildOrgDtoOperation);
 
-        return CollectionUtil.toList(orgDto);
+        return Collections.singletonList(orgDto);
     }
 
 
@@ -483,7 +523,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         // 如果组织下有人员，不允许删除
         List<UserModel> users = tenantUserService.listUsersByOrgIdNoRestrict(orgId);
-        if (CollectionUtil.isNotEmpty(users)) {
+        if (CollectionUtils.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
@@ -499,7 +539,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     // 组织树排序
     private void sortTree(List<OrgDto> orgs) {
         orgs.forEach(o -> {
-            if (CollectionUtil.isNotEmpty(o.getChildren())) {
+            if (CollectionUtils.isNotEmpty(o.getChildren())) {
                 sortTree(o.getChildren());
             }
         });

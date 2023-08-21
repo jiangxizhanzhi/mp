@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Installer;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.InstallerFormDataCloudPlatformModel;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +55,8 @@ public class InstallerService extends BaseCpService {
      * @return
      */
     public Installer add(InstallerFormDataCloudPlatformModel installer, List<File> fileList) throws IOException{
-        Map<String, Object> formMap = BeanUtil.beanToMap(installer,true,true);
+
+        Map<String, Object> formMap = BeanUtils.beanToMap(installer,true,true);
 
         Installer result;
         if (StringUtils.isNotBlank(installer.getUuid())){

@@ -20,7 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -61,7 +61,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Override
     @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
-        if (CollUtil.isEmpty(roleIds)) {
+        if (CollectionUtils.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
         HumanCondition rolePermissionCondition = new HumanCondition()
@@ -84,7 +84,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
     @Override
     public List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds) {
-        if (CollUtil.isEmpty(roleIds)) {
+        if (CollectionUtils.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
         HumanCondition condition = new HumanCondition()
@@ -130,7 +130,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             }
         }
 
-        if (CollUtil.isEmpty(targetIds)) {
+        if (CollectionUtils.isEmpty(targetIds)) {
             // 完成，直接返回
             return true;
         }

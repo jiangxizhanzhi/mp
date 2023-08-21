@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -14,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -42,8 +42,9 @@ public class DevopsClusterInitListener implements ApplicationListener<Applicatio
             }
             //Add by wangssh 230531
             String bizScriptInstallerDir = collectionAppConfig.getBizScriptsInstallerDir();
-            if(!FileUtil.exist(bizScriptInstallerDir)){
-                FileUtil.mkdir(collectionAppConfig.getBizScriptsInstallerDir());
+            File directory = new File(bizScriptInstallerDir);
+            if(!directory.exists()){
+                directory.mkdir();
             }
             List<LocalFileMappingModel> mappings =
                     LocalFileMappingCommon.syncDir(WazuhCommon.BIZ_SCRIPTS_GROUP,

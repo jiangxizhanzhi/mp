@@ -7,10 +7,10 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeAbilityMapper;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
-import cn.hutool.core.collection.CollUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class ProbeAbilityService {
         pageRequest.ensure();
         if (StringUtils.isNotBlank(pageRequest.getAbilityName())) {
             List<String> ids = MessageCommonUtil.getProbeIdsByNameBaseLanguage(pageRequest.getAbilityName());
-            if (CollUtil.isEmpty(ids)) {
+            if (CollectionUtils.isEmpty(ids)) {
                 return new PageInfo<>(new ArrayList<>());
             }
             pageRequest.setAbilityIds(ids.toArray(new String[0]));

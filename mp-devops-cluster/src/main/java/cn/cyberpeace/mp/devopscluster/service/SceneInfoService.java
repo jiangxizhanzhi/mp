@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.service;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.hutool.core.collection.CollUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class SceneInfoService {
         // 添加场景信息
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(resourceNames);
         Map<String, CsceneNodeInfoBO> map = serviceResult.getSource();
-        if (CollUtil.isNotEmpty(map)) {
+        if (MapUtils.isNotEmpty(map)) {
             consumer.accept(map);
         }
     }

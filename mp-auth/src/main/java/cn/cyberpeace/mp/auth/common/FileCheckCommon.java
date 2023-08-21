@@ -3,11 +3,10 @@ package cn.cyberpeace.mp.auth.common;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
+import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.FileTypeUtil;
-import cn.hutool.core.io.FileUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +34,7 @@ public class FileCheckCommon {
             }
         }
 
-        if (CollUtil.isNotEmpty(fileCheckRequest.getSuffixList())) {
+        if (CollectionUtils.isNotEmpty(fileCheckRequest.getSuffixList())) {
             // 校验文件后缀类型
             List<String> suffixList = fileCheckRequest.getSuffixList();
             match = checkSuffix(file, suffixList);
@@ -45,7 +44,7 @@ public class FileCheckCommon {
             }
         }
 
-        if (CollUtil.isNotEmpty(fileCheckRequest.getMagicHeaderList())) {
+        if (CollectionUtils.isNotEmpty(fileCheckRequest.getMagicHeaderList())) {
             // 根据文件头判断文件类型
             List<String> magicHeaderList = fileCheckRequest.getMagicHeaderList();
             match = checkMagicHeader(file, magicHeaderList);
@@ -63,7 +62,7 @@ public class FileCheckCommon {
     }
 
     public static boolean checkSuffix(String fileName, List<String> suffixList) {
-        String suffix = FileUtil.getSuffix(fileName);
+        String suffix = FileUtils.getSuffix(fileName);
         return suffixList.stream().anyMatch(x -> x.equalsIgnoreCase(suffix));
     }
 
@@ -72,7 +71,7 @@ public class FileCheckCommon {
     }
 
     public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
-        String type = FileTypeUtil.getType(inputStream);
+        String type = FileUtils.getType(inputStream);
         if (StringUtils.isBlank(type)) {
             // 无法获取文件头信息，直接返回true
             return true;

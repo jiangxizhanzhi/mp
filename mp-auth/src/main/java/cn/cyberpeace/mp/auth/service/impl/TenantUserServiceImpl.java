@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -28,10 +29,10 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,6 +169,29 @@ public class TenantUserServiceImpl
     }
 
     @Override
+    @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
+    public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
+
+        HumanCondition humanCondition = new HumanCondition()
+                .link(OrgModel.class, TenantUserModel.class)
+                .filterLink(OrgModel.class, OrgModel::getId, TenantUserModel.class, TenantUserModel::getOrg)
+                .currentLink(TenantUserModel.class)
+                .filterNotEqual(TenantUserModel::getUser, "");
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
+        }
+        humanCondition.currentLink(TenantUserModel.class)
+                .selectAs(TenantUserModel::getUser, "userId")
+                .currentLink(OrgModel.class)
+                .selectAs(GroupConcat.f(OrgModel::getId).distinct(), "orgIds")
+                .selectAs(GroupConcat.f(OrgModel::getName).distinct(), "orgNames")
+                .currentLink(TenantUserModel.class)
+                .groupBy(TenantUserModel::getUser);
+        return getModelMapper().list(humanCondition, UserOrgMapBo.class);
+    }
+
+    @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
 
@@ -176,7 +200,7 @@ public class TenantUserServiceImpl
                 .filterLink(OrgModel.class, OrgModel::getId, TenantUserModel.class, TenantUserModel::getOrg)
                 .currentLink(TenantUserModel.class)
                 .filterNotEqual(TenantUserModel::getUser, "");
-        if (CollectionUtil.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             humanCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
         }
         humanCondition.currentLink(OrgModel.class)
@@ -223,7 +247,7 @@ public class TenantUserServiceImpl
 
         // 不清楚组织-用户关系，而是增量添加
 
-        if (CollectionUtil.isEmpty(userIds)) {
+        if (CollectionUtils.isEmpty(userIds)) {
             // 完成，直接返回
             return true;
         }
@@ -284,7 +308,7 @@ public class TenantUserServiceImpl
             orgIds.add(req.getOrg());
             if (req.isShowAllUnderLevel()) {
                 List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
-                if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+                if (CollectionUtils.isNotEmpty(childOrgDtos)) {
                     orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
                 }
             }
@@ -292,7 +316,7 @@ public class TenantUserServiceImpl
 
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
-            orders = CollectionUtil.newArrayList(req.getOrders());
+            orders = new ArrayList<>(Arrays.asList(req.getOrders()));
         }
 
         String likeUsername = SQLUtils.escapeLike(req.getUsername());
@@ -380,11 +404,11 @@ public class TenantUserServiceImpl
                 .select(TenantUserModel::getUser);
         List<TenantUserModel> tenantUserModels = tenantUserMapper.list(tenantCondition);
         List<String> tenantUserIds = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
-        if (CollectionUtil.isEmpty(tenantUserIds)) {
+        if (CollectionUtils.isEmpty(tenantUserIds)) {
             return new ArrayList<>();
         }
         humanCondition.filterIn(UserModel::getId, tenantUserIds.toArray());
-        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+        if (CollectionUtils.isNotEmpty(excludeRoleIds)) {
             HumanCondition userRoleCondition = new HumanCondition()
                     .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
             if (StringUtils.isNotBlank(selfUserId)) {
@@ -393,12 +417,12 @@ public class TenantUserServiceImpl
             userRoleCondition.select(UserRoleModel::getUser).distinct();
             List<UserRoleModel> userRoleModels = userRoleMapper.list(userRoleCondition);
             List<String> roleUserIds = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
-            if (CollectionUtil.isNotEmpty(roleUserIds)) {
+            if (CollectionUtils.isNotEmpty(roleUserIds)) {
                 humanCondition.filterNotIn(UserModel::getId, roleUserIds.toArray());
             }
         }
 
-        if (CollectionUtil.isNotEmpty(excludeUserIds)) {
+        if (CollectionUtils.isNotEmpty(excludeUserIds)) {
             humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
         }
         humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
@@ -480,24 +504,24 @@ public class TenantUserServiceImpl
                                              LocalDateTime currentDateTime) {
         HumanCondition humanCondition = new HumanCondition();
 
-        if (CollectionUtil.isNotEmpty(orgIds)) {
+        if (CollectionUtils.isNotEmpty(orgIds)) {
             HumanCondition orgCondition = new HumanCondition()
                     .filterIn(TenantUserModel::getOrg, orgIds.toArray())
                     .select(TenantUserModel::getUser)
                     .distinct();
             List<TenantUserModel> tenantUserModels = tenantUserMapper.list(orgCondition);
             List<String> ids = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
-            if (CollectionUtil.isEmpty(ids)) {
+            if (CollectionUtils.isEmpty(ids)) {
                 return null;
             }
             humanCondition.filterIn(UserModel::getId, ids.toArray());
         }
 
-        if (CollectionUtil.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserModel::getId, userIds.toArray());
         }
 
-        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+        if (CollectionUtils.isNotEmpty(excludeRoleIds)) {
             HumanCondition excludeRoleCondition = new HumanCondition()
                     .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
             if (StringUtils.isNotBlank(selfUserId)) {
@@ -506,16 +530,16 @@ public class TenantUserServiceImpl
             excludeRoleCondition.select(UserRoleModel::getUser);
             List<UserRoleModel> userRoleModels = userRoleMapper.list(excludeRoleCondition);
             List<String> ids = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
-            if (CollectionUtil.isNotEmpty(ids)) {
+            if (CollectionUtils.isNotEmpty(ids)) {
                 humanCondition.filterNotIn(UserModel::getId, ids.toArray());
             }
         }
 
-        if (CollectionUtil.isNotEmpty(excludeUserIds)) {
+        if (CollectionUtils.isNotEmpty(excludeUserIds)) {
             humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
         }
 
-        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+        if (CollectionUtils.isNotEmpty(excludeRoleIds)) {
             humanCondition.filterNotIn(UserModel::getId, excludeRoleIds.toArray());
         }
 
@@ -540,7 +564,7 @@ public class TenantUserServiceImpl
             }
         }
         humanCondition.groupBy(UserModel::getId);
-        if (CollectionUtil.isNotEmpty(orders)) {
+        if (CollectionUtils.isNotEmpty(orders)) {
             for (String order : orders) {
                 humanCondition.orderBy(order);
             }

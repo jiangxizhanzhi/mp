@@ -19,9 +19,6 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +29,8 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,14 +77,14 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
         List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
-                .filter(entry -> CollectionUtil.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
+                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
                 .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
         List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();
-        if (CollectionUtil.isEmpty(summaryDtos)) {
+        if (CollectionUtils.isEmpty(summaryDtos)) {
             return pageInfo;
         }
 
@@ -105,7 +104,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             Long totalMins = r.getTotalOnlineMinutes();
             if (totalMins > 0) {
                 double totalHrs = totalMins / 60.0;
-                reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
+                BigDecimal decimalValue = BigDecimal.valueOf(totalHrs);
+                decimalValue = decimalValue.setScale(2, RoundingMode.HALF_UP);
+                reportDto.setTotalOnlineHours(decimalValue.doubleValue());
             }
 
             // 只获取最新的一条日志
@@ -114,7 +115,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             logPageRequest.setPage(1);
             logPageRequest.setPerPage(1);
             List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
-            if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
+            if (CollectionUtils.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
                 // 动作
                 reportDto.setAction(logs.get(0).getOpType());
                 // 对象
@@ -162,7 +163,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
-        if (CollectionUtil.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
         humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
@@ -176,7 +177,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         // 默认超过5分钟没有更新end_time既判定为离线
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
-        if (CollectionUtil.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
         humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
@@ -236,7 +237,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .filterOrEnd()
                 .select(UserOnlineRecordModel::getPk);
         List<UserOnlineRecordModel> notOnlines = getModelMapper().list(notOnlineCondition);
-        if (CollUtil.isEmpty(notOnlines)) {
+        if (CollectionUtils.isEmpty(notOnlines)) {
             UserOnlineRecordModel model = new UserOnlineRecordModel();
             model.setPk(-1);
             notOnlines.add(model);
@@ -249,7 +250,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .select(UserOnlineRecordModel::getPk)
                 .groupBy(UserOnlineRecordModel::getUser);
         List<UserOnlineRecordModel> onlines = getModelMapper().list(onlineCondition);
-        if (CollUtil.isEmpty(onlines)) {
+        if (CollectionUtils.isEmpty(onlines)) {
             return 0;
         }
         List<Integer> onlinePks = onlines.stream().map(UserOnlineRecordModel::getPk).collect(Collectors.toList());

@@ -8,8 +8,8 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.lang.Validator;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class UserCreateCheckService implements UserCheckService {
 
         // 邮箱是否合法
         if (StringUtils.isNotBlank(user.getEmail())) {
-            if (!Validator.isEmail(user.getEmail())) {
+            if (!EmailValidator.getInstance().isValid(user.getEmail())) {
                 throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
             }
         }

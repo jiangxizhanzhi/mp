@@ -20,8 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,7 @@ public class UserPermissionServiceImpl
         // 角色绑定的target
         List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
         List<TargetModel> roleTargets = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(roleIds)) {
+        if (CollectionUtils.isNotEmpty(roleIds)) {
             roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
         }
         authorizedTargetsSet.addAll(roleTargets);
@@ -119,7 +118,7 @@ public class UserPermissionServiceImpl
     public List<TargetModel> listMenusByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<TargetModel> targets = listTargetsByUserId(userId);
-        if (CollectionUtil.isNotEmpty(targets)) {
+        if (CollectionUtils.isNotEmpty(targets)) {
             return targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -128,7 +127,7 @@ public class UserPermissionServiceImpl
 
     public List<TargetBo> getTreeByUserId(String userId) {
         List<TargetModel> targets = listTargetsByUserId(userId);
-        if (CollectionUtil.isEmpty(targets)) {
+        if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
         List<TargetBo> tree = toTree(targets);
@@ -151,7 +150,7 @@ public class UserPermissionServiceImpl
             }
         }
 
-        if (CollectionUtil.isEmpty(targetIds)) {
+        if (CollectionUtils.isEmpty(targetIds)) {
             // 完成，直接返回
             return true;
         }
@@ -263,7 +262,7 @@ public class UserPermissionServiceImpl
         List<String> owners = userPermissionModels.stream()
                 .map(UserPermissionModel::getOwner)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(owners)) {
+        if (CollectionUtils.isEmpty(owners)) {
             return new ArrayList<>();
         }
         HumanCondition userCondition = new HumanCondition()
