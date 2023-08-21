@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper">
 
     <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto">
-        select user, username, name, format(sum(duration_minutes) / 60, 2) total_online_hours
+        select user, username, name, sum(duration_minutes) total_online_minutes
         from mp_auth_user_online_record
         <where>
             <if test="userId != null and userId != ''">
