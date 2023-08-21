@@ -87,18 +87,6 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
-    public TargetModel getByIdentifier(String identifier) {
-        ParamCheck.notBlank(identifier, AuthBasei18nCode.TARGET_IDENTIFIER);
-        return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
-    }
-
-//    @Override
-//    public List<TargetModel> listByTenantId(String tenantId) {
-//        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
-//        return targets;
-//    }
-
-    @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
         TargetModel targetModel = getModelMapper().get(id);
@@ -186,20 +174,6 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
-    public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
-        HumanCondition humanCondition = new HumanCondition();
-        if (Objects.nonNull(types) && types.length > 0) {
-            humanCondition.filterIn(TargetModel::getType, types);
-        }
-        if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(TargetModel::getTenant, tenant);
-        }
-        humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
-        List<TargetModel> targets = getModelMapper().list(humanCondition);
-        return targets;
-    }
-
-    @Override
     public boolean deleteAll() {
         HumanCondition humanCondition = new HumanCondition()
                 .filterGreaterThan(TargetModel::getPk, AuthConstant.TARGET_FIELD_VALUE_PK_0);
@@ -229,7 +203,6 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     private List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
-        Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
@@ -294,16 +267,6 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         });
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
-    }
-
-    // TargetMapper中的方法，没有使用
-    private List<TargetModel> listByTenantId(String tenantId) {
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(TargetModel::getTenant, tenantId)
-                .filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
-        List<TargetModel> targetModels = getModelMapper().list(humanCondition);
-        return targetModels;
-
     }
 
 }

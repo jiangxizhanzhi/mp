@@ -146,7 +146,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             rolePerms.add(rolePerm);
         });
 
-        var re = bulkCreate(rolePerms);
+        bulkCreate(rolePerms);
         return true;
     }
 

@@ -29,11 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
-    /**
-     * 每隔5条存储数据库，实际使用中可以3000条，然后清理list ，方便内存回收
-     */
-    private static final int BATCH_COUNT = 100;
-
     List<ImportUserBo> list = new ArrayList<ImportUserBo>();
     /**
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
@@ -320,7 +315,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         preProcessOrgs(users);
         preProcessRoles(users);
     }
-
 
     /**
      * 导入excel对密码进行预处理

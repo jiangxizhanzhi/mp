@@ -22,10 +22,6 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     List<RoleModel> listAll(RolePageRequest rolePageRequest);
 
-    List<RoleModel> listByOrgId(String orgId);
-
-    RoleModel getByIdent(String identifier);
-
     RoleModel getByName(String name);
 
     List<RoleModel> listByNames(List<String> names);

@@ -14,10 +14,6 @@ import java.util.List;
  */
 public interface TargetService extends BaseModelService<TargetModel, QueryParams> {
 
-    <T extends TargetModel> T getByIdentifier(String identifier);
-
-//    List<TargetModel> listByTenantId(String tenantId);
-
     boolean exists(String id);
 
     <T extends TargetModel> List<T> listByParent(String parentId);
@@ -37,8 +33,6 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
      * @return
      */
     <T extends TargetModel> List<T> listAllIgnoreVisible(String tenant, Integer type);
-
-    <T extends TargetModel> List<T> listByMultiTypes(String tenant, Integer[] types);
 
     List<TargetBo> getTree(String parentId, Integer type);
 

@@ -387,28 +387,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
 
     @Override
-    public String calculatePathByOrgId(String orgId) {
-        OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
-
-        if (Objects.isNull(orgDto)) {
-            log.error("org {} not existed!", orgId);
-            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(orgId));
-        }
-
-        StringBuilder path = new StringBuilder(orgDto.getName());
-        while (true) {
-            if ((orgDto = orgDto.getParentOrg()) != null) {
-                path.insert(0, orgDto.getName() + AuthConstant.ORG_PATH_SEPARATOR);
-            } else {
-                break;
-            }
-        }
-
-        return path.toString();
-    }
-
-
-    @Override
     public OrgBO getByPath(String path) {
         ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
         OrgModel orgModel = null;

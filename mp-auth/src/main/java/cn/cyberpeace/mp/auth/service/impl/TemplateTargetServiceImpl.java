@@ -52,13 +52,6 @@ public class TemplateTargetServiceImpl implements TargetService {
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
     @Override
-    public MenuTemplateModel getByIdentifier(String identifier) {
-        ParamCheck.notBlank(identifier, AuthBasei18nCode.TARGET_IDENTIFIER);
-        var condition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual("identifier", identifier);
-        return getModelMapper().first(condition);
-    }
-
-    @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
         HumanCondition condition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getMenuId, id);
@@ -145,20 +138,6 @@ public class TemplateTargetServiceImpl implements TargetService {
     }
 
     @Override
-    public List<MenuTemplateModel> listByMultiTypes(String tenant, Integer[] types) {
-        HumanCondition humanCondition = new HumanCondition();
-        if (Objects.nonNull(types) && types.length > 0) {
-            humanCondition.filterIn(MenuTemplateModel::getType, types);
-        }
-        if (StringUtils.isNotBlank(tenant)) {
-            humanCondition.filterEqual(MenuTemplateModel::getTenant, tenant);
-        }
-        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
-        List<MenuTemplateModel> targets = getModelMapper().list(humanCondition);
-        return targets;
-    }
-
-    @Override
     public boolean deleteAll() {
         HumanCondition humanCondition = new HumanCondition().filterGreaterThan(MenuTemplateModel::getPk, AuthConstant.TARGET_FIELD_VALUE_PK_0);
         int result = getModelMapper().filterDelete(humanCondition);
@@ -168,7 +147,6 @@ public class TemplateTargetServiceImpl implements TargetService {
 
     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
-        Map<String, List<MenuTemplateModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map

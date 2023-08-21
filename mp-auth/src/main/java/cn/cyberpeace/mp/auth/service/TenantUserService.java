@@ -79,7 +79,5 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
 
     boolean deleteByOrgId(String orgId);
 
-    boolean deleteByTenantId(String tenantId);
-
 
 }

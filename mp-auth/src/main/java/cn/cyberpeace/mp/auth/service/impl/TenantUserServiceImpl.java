@@ -19,11 +19,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
@@ -45,14 +41,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -116,7 +105,8 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         List<UserModel> users = getUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
-        users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
+        userService.setDefaultIfNoAvatars(users);
+//        users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -384,12 +374,6 @@ public class TenantUserServiceImpl
                 .filterEqual(TenantUserModel::getOrg, orgId);
         getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
-        return true;
-    }
-
-    @Override
-    public boolean deleteByTenantId(String tenantId) {
-        // todo
         return true;
     }
 

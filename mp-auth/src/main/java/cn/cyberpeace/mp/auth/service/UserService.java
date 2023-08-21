@@ -36,8 +36,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserModel getByUserName(String userName);
 
-    List<UserModel> listByUserName(List<String> userNames);
-
     UserModel getByIdent(String ident);
 
     UserModel getByMobile(String mobile);
@@ -100,13 +98,13 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<UserBo> listByUserIds(String[] userIds);
 
-    List<UserModel> listByIds(String[] userIds);
-
     int totalUserCnt();
 
     String getDefaultUserAvatar();
 
     void setDefaultIfNoAvatar(UserModel userModel);
+
+    void setDefaultIfNoAvatars(List<UserModel> userModels);
 
     void batchSetDefaultIfNoAvatar(List<UserBo> userBos);
 

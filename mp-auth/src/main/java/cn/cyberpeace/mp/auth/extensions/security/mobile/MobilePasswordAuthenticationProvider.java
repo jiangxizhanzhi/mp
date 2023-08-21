@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.extensions.security.mobile;
 
-import cn.cyberpeace.mp.auth.extensions.security.check.CustomPostAuthenticationChecker;
 import cn.cyberpeace.mp.auth.extensions.security.check.CustomPreAuthenticationChecker;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -28,8 +27,6 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
     private UserDetailsChecker preAuthenticationChecks = new CustomPreAuthenticationChecker();
-
-    private UserDetailsChecker postAuthenticationChecks = new CustomPostAuthenticationChecker();
 
     private PasswordEncoder passwordEncoder;
 

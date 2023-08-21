@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.service.init;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +23,8 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
 
     private Environment environment;
 
-
     @Autowired
     private AuthConfig authConfig;
-
-    @Autowired
-    private UserService userService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {

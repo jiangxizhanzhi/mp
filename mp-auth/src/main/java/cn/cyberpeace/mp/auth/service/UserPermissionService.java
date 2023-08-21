@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -25,8 +24,6 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
      * @return
      */
     List<TargetModel> listTargetsByUserId(String userId);
-
-    List<UserModel> listUsersByTargetId(String targetId);
 
     List<TargetModel> listMenusByUserId(String userId);
 

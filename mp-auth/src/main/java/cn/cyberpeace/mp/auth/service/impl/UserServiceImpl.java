@@ -20,14 +20,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
@@ -61,7 +54,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -179,6 +171,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * 判断是否有头像，没有则设置为默认头像
      * @param userModel
      */
+    @Override
     public void setDefaultIfNoAvatar(UserModel userModel) {
         if (Objects.nonNull(userModel)) {
             if (StringUtils.isEmpty(userModel.getAvatar())) {
@@ -186,6 +179,32 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
+        }
+    }
+
+    /**
+     * 判断是否有头像，没有则设置为默认头像
+     * @param userModels
+     */
+    @Override
+    public void setDefaultIfNoAvatars(List<UserModel> userModels) {
+        if (CollectionUtils.isEmpty(userModels)) {
+            return;
+        }
+        Map<String, String> groupNamePathMap = DefaultImgUtil.getGroupNamePathMap();
+        for (UserModel userModel : userModels) {
+            if (StringUtils.isEmpty(userModel.getAvatar())) {
+                userModel.setAvatar(getDefaultUserAvatar());
+            }
+            if (StringUtils.isNotBlank(userModel.getAvatar()) && !FsCommon.isFileServerOuterUrl(userModel.getAvatar())) {
+                String path = groupNamePathMap.get(DefaultImgUtil.splitToGroup(userModel.getAvatar()) + AuthConstant.ORG_PATH_SEPARATOR + DefaultImgUtil.splitToName(userModel.getAvatar()));
+                if (StringUtils.isNotEmpty(path)) {
+                    userModel.setAvatar(path);
+                }
+            }
+            if (!FsCommon.isFileServerOuterUrl(userModel.getAvatar())) {
+                userModel.setAvatar(FsCommon.genHttpUrl(userModel.getAvatar()));
+            }
         }
     }
 
@@ -471,16 +490,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
         setDefaultIfNoAvatar(userModel);
         return userModel;
-    }
-
-
-    @Override
-    public List<UserModel> listByUserName(List<String> userNames) {
-        HumanCondition humanCondition = new HumanCondition()
-                .filterIn(UserModel::getUsername, userNames.toArray());
-        List<UserModel> userModels = getModelMapper().list(humanCondition);
-        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
-        return userModels;
     }
 
     @Override
@@ -970,11 +979,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
         userBos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userBos;
-    }
-
-    @Override
-    public List<UserModel> listByIds(String[] userIds) {
-        return getModelMapper().list(new HumanCondition().filterIn(UserModel::getId, userIds));
     }
 
     @Override

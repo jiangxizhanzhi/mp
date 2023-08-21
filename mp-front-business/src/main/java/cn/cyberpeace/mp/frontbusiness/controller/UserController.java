@@ -61,7 +61,7 @@ public class UserController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
-        boolean success = userService.resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
+        userService.resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
         return ResultCommon.success();
     }
 
@@ -72,7 +72,7 @@ public class UserController {
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
-        boolean success = userService.resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
+        userService.resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
         return ResultCommon.success();
     }
 
