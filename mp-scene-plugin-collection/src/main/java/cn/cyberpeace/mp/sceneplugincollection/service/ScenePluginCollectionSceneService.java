@@ -26,14 +26,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.*;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
@@ -57,19 +50,8 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
-import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
+import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -93,9 +75,17 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -105,15 +95,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -164,6 +146,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
+
+    @Resource(name = "wazuhRestHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
@@ -1830,7 +1815,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl,String targetDir, String fileName) {
+    public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl, String targetDir, String fileName) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         Probe probe = new Probe();
         probe.setId("a776bd7b07fa47fba07a79dc3f3e55ae");
@@ -1859,10 +1844,40 @@ public class ScenePluginCollectionSceneService {
         }
 
         probe.setParams(new ArrayList<>());
-        probe.getParams().add(getProbeParam("dir", fileDownloadDir));
-        probe.getParams().add(getProbeParam("fileUrl", fileUrl));
-        probe.getParams().add(getProbeParam("fileName", fileName));
-        return this.modifyProbe(sceneHandler, elementId, probe);
+        String params = String.format(fileDownloadDir + " " + fileUrl + " " + fileName);
+        params = TextUtils.encodeBase64(params);
+        probe.getParams().add(getProbeParam("params", params));
+        String groupId = this.modifyProbe(sceneHandler, elementId, probe).getData();
+
+        WazuhEventRequest eventRequest = new WazuhEventRequest();
+        eventRequest.setAgentNames(Arrays.asList(sceneHandler.getElement(elementId).getEid()));
+        eventRequest.setSicLaunchId("a776bd7b07fa47fba07a79dc3f3e55ae");
+        eventRequest.setSicLaunchGroup(groupId);
+
+        //根据日期构造索引
+        String[] indexArray = DataCollectionService.buildRequestIndex(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1));
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+        boolQueryBuilder.filter(QueryBuilders.termQuery("agent.name", sceneHandler.getElement(elementId).getEid()));
+        boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_id", "a776bd7b07fa47fba07a79dc3f3e55ae"));
+        boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_group", groupId));
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        for (int i = 0; i < 100; i++) {
+            try {
+                Thread.sleep(5000);
+                SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+                if (response.getHits().getHits() != null && response.getHits().getHits().length > 0) {
+                    break;
+                }
+            } catch (InterruptedException e) {
+
+            } catch (Exception e) {
+
+            }
+        }
+        return new ServiceResult<>(true);
     }
 
     private Probe.Param getProbeParam(String name, String value) {
@@ -1874,7 +1889,7 @@ public class ScenePluginCollectionSceneService {
     }
 
 
-    public ServiceResult<Boolean> modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe) {
+    public ServiceResult<String> modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe) {
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var collectionElement = pluginHandler.getElement(elementId);
         var srcElement = collectionElement.getSrcElement();
@@ -1886,13 +1901,15 @@ public class ScenePluginCollectionSceneService {
         ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
         var removeParams = convertScript.convertParams().get(0);
         var addParams = convertScript.convertParams().get(0);
+        String groupId = TextUtils.uuid();
+        addParams.setGroup(groupId);
         removeParams.setAction(WazuhControl.CONTROL_ACTION_REMOVE);
         addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
         controlConfigParam.getProbeParams().add(removeParams);
         controlConfigParam.getProbeParams().add(addParams);
         var osType = SystemTypeCommandUtils.getOsType(systemType);
         WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(groupId).asResult();
     }
 
     public ServiceResult<Boolean> controlProbe(String sceneId, SceneControlProbeOperate operate) {

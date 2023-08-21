@@ -99,6 +99,8 @@ public class WazuhEventRequest {
     @ApiModelProperty(value = "事件触发标识id")
     private String sicLaunchId;
 
+    private String sicLaunchGroup;
+
     private List<TimeRange> timeRanges;
 
     @Getter
