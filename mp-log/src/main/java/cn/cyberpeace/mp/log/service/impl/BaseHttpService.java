@@ -1,12 +1,20 @@
 package cn.cyberpeace.mp.log.service.impl;
 
-import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.log.model.BaseModel;
 import cn.cyberpeace.mp.log.utils.JsonUtils;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 基础对接接口层
@@ -24,34 +32,44 @@ public class BaseHttpService {
 
     private static final String POST_LOG_INFO = "=====POST url：{},params：{},>>>>>result：{}";
 
-    protected HttpResponse downLoad(String url,String body){
-        HttpResponse result = null;
-        result = HttpRequest.post(url).body(body).execute();
+
+    protected HttpResponse downLoad(String url, String body) {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPost httpPost = new HttpPost(url);
+
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(body, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setEntity(entity);
+
+        HttpResponse response = null;
+        try {
+            response = client.execute(httpPost);
+        } catch (IOException e) {
+            log.error("download error:", e);
+            throw new MpRuntimeException("download error");
+        }
+
         if (log.isInfoEnabled()) {
             log.info(GET_DOWNLOAD_LOG_INFO, url);
         }
-        return result;
+        return response;
     }
 
-    /**
-     * 通过Post方式查询信息
-     * @param url
-     * @param body
-     * @param valueType
-     * @param <T>
-     * @return
-     */
     protected <T extends BaseModel> T sendPost(String url, String body, Class<T> valueType) {
-        T model = null;
         String result = "";
+        try {
+            result = HttpUtils.sendPost(url, body);
+        } catch (IOException e) {
+            log.error("send post error:", e);
+            throw new MpRuntimeException("send post error");
+        }
+
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
         }
-        result = HttpRequest.post(url).body(body).header(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage()).execute().body();
-        if (log.isInfoEnabled()) {
-            log.info(POST_LOG_INFO, url, body, result);
-        }
-        model = JsonUtils.toSnakeObject(result, valueType);
+
+        T model = JsonUtils.toSnakeObject(result, valueType);
         return model;
     }
 }

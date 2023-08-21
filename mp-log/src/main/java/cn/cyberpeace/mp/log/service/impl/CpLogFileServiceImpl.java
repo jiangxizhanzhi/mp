@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 
@@ -101,8 +103,12 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         ByteArrayOutputStream bos = null;
         InputStream inputStream = null;
         try {
-            final cn.hutool.http.HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
-            String disposition = httpResponse.header(cn.hutool.http.Header.CONTENT_DISPOSITION);
+            final HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
+            Header[] headers = httpResponse.getHeaders("Content-Disposition");
+            String disposition = null;
+            if (headers.length > 0) {
+                disposition = headers[0].getValue();
+            }
             String fileName = "";
             if (StringUtils.isNotBlank(disposition)) {
                 fileName = regexValue("filename=\"(.*?)\"", disposition);
@@ -120,7 +126,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             }
             bos = new ByteArrayOutputStream();
 
-            inputStream = httpResponse.bodyStream();
+            inputStream = httpResponse.getEntity().getContent();
             byte[] tmp = new byte[4 * 1024];
             int size = 0;
             while ((size = inputStream.read(tmp)) != -1) {
