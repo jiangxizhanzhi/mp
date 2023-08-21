@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.dto.user.*;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
@@ -60,23 +57,23 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public PageInfo<UserOnlineRecordSummaryDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
         req.ensure();
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryTmpDto> recordSummaryList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryList);
 
         List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlined(null);
 
-        List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
+        List<UserOnlineRecordSummaryTmpDto> summaryDtos = pageInfo.getList();
         List<UserOnlineReportDto> reportDtos = new ArrayList<>();
         summaryDtos.forEach(r -> {
             UserOnlineReportDto reportDto = new UserOnlineReportDto();
+            BeanUtils.copyProperties(r, reportDto);
 
             reportDto.setTotalOnlineHours(0.0);
             Long totalMins = r.getTotalOnlineMinutes();
             if (totalMins > 0) {
                 double totalHrs = totalMins / 60.0;
-                r.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
+                reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
             }
-            BeanUtils.copyProperties(r, reportDto);
 
             // orgpaths
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(r.getUser());
