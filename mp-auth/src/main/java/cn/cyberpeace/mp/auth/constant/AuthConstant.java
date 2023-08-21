@@ -66,7 +66,7 @@ public class AuthConstant {
     public static final String JWT_CLAIM_USERNAME = "username";
     public static final String JWT_CLAIM_KEY = "key";
 
-    public static final long TOKEN_EXPIRE_TIME = 604800L;
+    public static final long TOKEN_EXPIRE_TIME = 181440000L;
     public static final int MILLI_TO_SECOND = 1000;
 
     public static final String SEPARATOR_CHAR_DOT = ".";
