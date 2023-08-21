@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         List<UserOnlineReportDto> reportDtos = new ArrayList<>();
         summaryDtos.forEach(r -> {
             UserOnlineReportDto reportDto = new UserOnlineReportDto();
+
+            reportDto.setTotalOnlineHours(0.0);
+            Long totalMins = r.getTotalOnlineMinutes();
+            if (totalMins > 0) {
+                double totalHrs = totalMins / 60.0;
+                r.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
+            }
             BeanUtils.copyProperties(r, reportDto);
 
             // orgpaths
