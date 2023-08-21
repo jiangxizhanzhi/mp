@@ -542,7 +542,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.restart();
             }
         } catch (Exception e) {
-            errorScene(SceneModel.Event.RESTART, e.getMessage());
+//            errorScene(SceneModel.Event.RESTART, e.getMessage());
         }
         overAllEvent(SceneModel.Event.RESTART, SceneElementModel.Event.RESTART);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
