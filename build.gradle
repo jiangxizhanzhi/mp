@@ -50,15 +50,19 @@ subprojects {
     }
 
     dependencies {
-        implementation 'cn.hutool:hutool-all:5.8.21'
+        implementation ('cn.hutool:hutool-all:5.8.21')
         implementation 'com.alibaba:easyexcel:3.3.2'
         implementation 'com.alibaba:fastjson:1.2.83'
-        implementation 'com.auth0:java-jwt:3.19.4'
+        implementation ('com.auth0:java-jwt:3.19.4'){
+            exclude group: 'com.fasterxml.jackson.dataformat'
+        }
         implementation 'com.github.ben-manes.caffeine:caffeine:3.1.7'
         implementation 'com.github.oshi:oshi-core:5.8.7'
         implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.4.7'
         implementation 'com.oopsguy.kaptcha:kaptcha-spring-boot-starter:1.0.0-beta-2'
-        implementation 'com.github.xiaoymin:knife4j-spring-boot-starter:3.0.3'
+        implementation ('com.github.xiaoymin:knife4j-spring-boot-starter:3.0.3'){
+            exclude group: 'com.fasterxml.jackson.dataformat'
+        }
         implementation 'com.google.guava:guava:32.0.1-jre'
         implementation 'com.hierynomus:sshj:0.35.0'
         implementation 'com.squareup.okhttp3:okhttp:3.14.9'
@@ -77,11 +81,14 @@ subprojects {
         implementation ('org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.12') {
             exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
             exclude group: 'org.yaml', module: 'snakeyaml'
+            exclude group: 'com.fasterxml.jackson.dataformat'
         }
         implementation ('org.elasticsearch:elasticsearch:7.17.12') {
             exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
             exclude group: 'org.yaml', module: 'snakeyaml'
+            exclude group: 'com.fasterxml.jackson.dataformat'
         }
+        implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
         implementation 'org.yaml:snakeyaml:2.1'
         implementation 'org.flywaydb:flyway-core:8.2.0'
