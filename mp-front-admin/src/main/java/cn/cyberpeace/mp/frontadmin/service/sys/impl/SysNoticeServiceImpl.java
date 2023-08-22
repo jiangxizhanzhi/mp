@@ -25,16 +25,20 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.enums.NoticeTopTypeEnum;
 import cn.cyberpeace.mp.frontadmin.model.*;
 import cn.cyberpeace.mp.frontadmin.repository.*;
+import cn.cyberpeace.mp.frontadmin.request.notice.DelayNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
+import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeReadService;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeRoleService;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeOrgService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
@@ -48,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +103,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private SysActivationService activationService;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -937,4 +945,28 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         int total = getModelMapper().total(matchCond);
         return total;
     }
+
+    @Override
+    public Boolean delayNotice(DelayNoticeRequest delayNoticeRequest) {
+        UserModel loginUser = UserUtils.getLoginUser();
+        if (Objects.isNull(loginUser) || StringUtils.isBlank(loginUser.getId())) {
+            log.error("current user not exist");
+            return false;
+        }
+
+        UserModel userModel = new UserModel();
+        userModel.setId(loginUser.getId());
+        LocalDateTime delayRemindLicenseTime;
+        if (delayNoticeRequest.getDelayType() == 0) {
+            delayRemindLicenseTime = LocalDateTime.now().plusDays(6);
+        } else {
+            ActivationResponse content = activationService.status();
+            delayRemindLicenseTime = TimeUtils.stringToLocalDateTime(content.getExpiredDate() + " 23:59:59");
+        }
+        userModel.setDelayRemindLicenseTime(delayRemindLicenseTime);
+        userMapper.update(userModel);
+
+        return true;
+    }
+
 }
