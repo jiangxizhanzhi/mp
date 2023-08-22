@@ -67,7 +67,7 @@ public class SysDespireCronJob {
     private UserMapper userMapper;
 
 //    @Scheduled(cron = "0 0 3 * * ?")
-    @Scheduled(cron = "0 0/30 * * * ? *")
+    @Scheduled(cron = "0 0/30 * * * ?")
     public void configureTasks() {
         //系统过期提醒开关需开启
         if (!Boolean.TRUE.equals(frontAdminConfig.isLicenseRemindEnable())) {
