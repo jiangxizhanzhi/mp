@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
+import cn.cyberpeace.mp.frontadmin.request.notice.DelayNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 
@@ -49,4 +50,11 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel, boolean checkCurrentUserIsRead);
 
     int unReadCount();
+
+    /**
+     * 延期提醒
+     * @param delayNoticeRequest
+     * @return
+     */
+    Boolean delayNotice(DelayNoticeRequest delayNoticeRequest);
 }

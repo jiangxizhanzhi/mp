@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
+import cn.cyberpeace.mp.frontadmin.request.notice.DelayNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
@@ -169,6 +170,14 @@ public class SysNoticeController {
     @GetMapping("/types")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+    }
+
+    @ApiOperation("延期提醒")
+    @PostMapping("/delay_notice")
+    public ServiceResult<Boolean> delayNotice(@RequestBody DelayNoticeRequest delayNoticeRequest) {
+        Boolean result = noticeService.delayNotice(delayNoticeRequest);
+
+        return ResultCommon.success(result);
     }
 
 }
