@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
-import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.common.*;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
@@ -21,6 +18,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
@@ -68,6 +66,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.http.HttpUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -1815,8 +1814,36 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<Boolean> uploadFileWithProbe(String sceneId, String elementId, String fileUrl, String targetDir, String fileName) {
+    public ServiceResult<Boolean> uploadFile(String sceneId, String elementId, String inputFileUrl, String targetDir, String fileName) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        if (cloudScenePluginHandler == null) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        var element = cloudScenePluginHandler.getElement(elementId);
+        if (element == null) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+
+        File file = new File(TextUtils.uuid());
+        try {
+            HttpUtil.downloadFile(inputFileUrl, file);
+            if (element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                Container container = new Container();
+                container.executeCommand(element.getResourceId(), "mkdir -p /var/tools");
+                container.copyFile(element.getResourceId(), file.getAbsolutePath(), "/var/tools/" + fileName);
+                return new ServiceResult<>(true);
+            } else {
+                String fileKey = FsCommon.upload(file.getAbsolutePath());
+                String finalFileUrl = StringUtils.joinWith("/", SceneSingleton.sceneAppConfig.getMetadataFileServer(), fileKey);
+                return uploadFileWithProbe(sceneHandler, sceneId, elementId, finalFileUrl, targetDir, fileName);
+            }
+        } finally {
+            file.delete();
+        }
+    }
+
+    public ServiceResult<Boolean> uploadFileWithProbe(SceneHandler sceneHandler, String sceneId, String elementId, String fileUrl, String targetDir, String fileName) {
         Probe probe = new Probe();
         probe.setId("a776bd7b07fa47fba07a79dc3f3e55ae");
         probe.setInterval(3600 * 24 * 300);

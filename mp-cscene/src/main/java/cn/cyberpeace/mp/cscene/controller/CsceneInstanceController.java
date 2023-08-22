@@ -874,16 +874,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (instance == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-
-        File file = new File(TextUtils.uuid());
-        String fileKey = null;
-        try {
-            HttpUtil.downloadFile(request.getFileUrl(), file);
-            fileKey = FsCommon.upload(file.getAbsolutePath());
-        } finally {
-            file.delete();
-        }
-        String fileUrl = StringUtils.joinWith("/", SceneSingleton.sceneAppConfig.getMetadataFileServer(), fileKey);
-        return scenePluginCollectionSceneService.uploadFileWithProbe(instance.getScene(), request.getNodeId(), fileUrl, request.getTargetDir(), request.getFileName());
+        return scenePluginCollectionSceneService.uploadFile(instance.getScene(), request.getNodeId(), request.getFileUrl(), request.getTargetDir(), request.getFileName());
     }
 }
