@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -861,6 +862,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
     }
 
+    // 控制处理文件上传的线程数量
+    private Semaphore semaphore = new Semaphore(40);
+
     @ApiOperation("利用探针上传文件")
     @PostMapping("/upload_biz_file")
     public ServiceResult<Boolean> uploadFile(@RequestBody CsceneInstanceNodeUploadFileActionRequest request) {
@@ -868,6 +872,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (instance == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return scenePluginCollectionSceneService.uploadFile(instance.getScene(), request.getNodeId(), request.getFileUrl(), request.getTargetDir(), request.getFileName());
+        if (semaphore.tryAcquire()) {
+            try {
+                return scenePluginCollectionSceneService.uploadFile(instance.getScene(), request.getNodeId(), request.getFileUrl(), request.getTargetDir(), request.getFileName());
+            } finally {
+                semaphore.release();
+            }
+        } else {
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
+        }
     }
 }
