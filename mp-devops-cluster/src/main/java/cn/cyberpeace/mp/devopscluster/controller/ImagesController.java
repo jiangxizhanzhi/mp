@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.controller.CsceneController;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
@@ -170,9 +171,12 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult add(@RequestBody ImageRequest request){
+    public ServiceResult add(@RequestBody ImageRequest request) {
         validImageRequest(request);
         imagesConverter.add(request);
+        if (request.getImageCate() == null) {
+            request.setImageCate(CsceneController.csceneBOExt.getImageCate());
+        }
         return ResultCommon.success();
     }
 
