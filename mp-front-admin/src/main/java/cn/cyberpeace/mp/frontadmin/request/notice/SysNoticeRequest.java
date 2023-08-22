@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel
+@Builder
 public class SysNoticeRequest {
 
     @ApiModelProperty(value = "租户")
