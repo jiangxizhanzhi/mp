@@ -65,8 +65,7 @@ public class SysDespireCronJob {
     @Resource
     private UserMapper userMapper;
 
-//    @Scheduled(cron = "0 0 3 * * ?")
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     public void configureTasks() {
         log.info("start system activation task");
         //系统过期提醒开关需开启
