@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
@@ -38,23 +34,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -213,10 +197,10 @@ public class CsceneController implements BaseModelListControllerBase {
             for (var csceneBO : csceneBOS) {
                 sync(csceneBO);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to import scenes ", e);
             throw new MpRuntimeException(CsceneErrorCode.SCENE_CONFIG_FILE_NOT_FORMAT);
-        }finally {
+        } finally {
             if (outputStream != null) {
                 IOUtils.close(outputStream);
             }
@@ -316,6 +300,15 @@ public class CsceneController implements BaseModelListControllerBase {
             }
         }
         return result;
+    }
+
+    @ApiOperation(value = "保存（创建/更新）场景模板Ext", notes = "请忽略test_scenes和app_scenes字段")
+    @ApiImplicitParam(name = "csceneBOExt", value = "请求体", dataTypeClass = CsceneBOExt.class)
+    @PostMapping("/save")
+    public ServiceResult<Boolean> save(@RequestBody CsceneBOExt csceneBOExt) {
+        log.info("scene save,params is {}", JsonCommon.stringify(csceneBOExt));
+        ControllerConstant.csceneBOExt = csceneBOExt;
+        return new ServiceResult<>(true);
     }
 
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
