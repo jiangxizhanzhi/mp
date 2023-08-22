@@ -1825,13 +1825,15 @@ public class ScenePluginCollectionSceneService {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
-        File file = new File(TextUtils.uuid());
+        String tmpFileName = TextUtils.uuid();
+        File file = new File(tmpFileName);
         try {
             HttpUtil.downloadFile(inputFileUrl, file);
             if (element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
                 Container container = new Container();
                 container.executeCommand(element.getResourceId(), "mkdir -p /var/tools");
-                container.copyFile(element.getResourceId(), file.getAbsolutePath(), "/var/tools/" + fileName);
+                container.copyFile(element.getResourceId(), file.getAbsolutePath(), "/var/tools/");
+                container.executeCommand(element.getResourceId(), "mv /var/tools/" + tmpFileName + " /var/tools/" + fileName);
                 return new ServiceResult<>(true);
             } else {
                 String fileKey = FsCommon.upload(file.getAbsolutePath());
