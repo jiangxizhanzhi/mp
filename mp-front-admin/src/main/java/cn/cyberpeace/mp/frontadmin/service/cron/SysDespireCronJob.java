@@ -69,13 +69,15 @@ public class SysDespireCronJob {
 //    @Scheduled(cron = "0 0 3 * * ?")
     @Scheduled(cron = "0 0/30 * * * ?")
     public void configureTasks() {
+        log.info("start system activation task");
         //系统过期提醒开关需开启
         if (!Boolean.TRUE.equals(frontAdminConfig.isLicenseRemindEnable())) {
-            log.info("System expiration cron job is not enable");
+            log.info("System activation cron job is not enable");
             return;
         }
 
         check();
+        log.info("end system activation task");
     }
 
 
@@ -99,6 +101,7 @@ public class SysDespireCronJob {
         Integer licenseRemindTime = frontAdminConfig.getLicenseRemindTime();
         if(daysBetween > licenseRemindTime || daysBetween < 0){
             // 没到提醒时间或者已经过期
+            log.info("system activation remind time not reach");
             return;
         }
         //提醒处理
@@ -125,6 +128,7 @@ public class SysDespireCronJob {
                 .currentLink(UserRoleModel.class)
                 .filterEqual(UserRoleModel::getRole, AuthConstant.ROLE_ADMIN_ID);
         var users = userMapper.list(humanCondition);
+
         List<String> userIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(users)) {
             userIds = users.stream().map(UserModel::getId).collect(Collectors.toList());
@@ -138,6 +142,7 @@ public class SysDespireCronJob {
                         .publisher(AuthConstant.ROOT_USER_ID)
                         .roleIds(Lists.newArrayList(AuthConstant.ROLE_ADMIN_ID))
                         .userIds(userIds).build();
+        log.info("system activation remind notice: {}", sysNoticeRequest);
         //新增系统通过公告，提醒用户范围：具有管理员权限的用户均收到提醒
         noticeService.add(sysNoticeRequest);
     }
