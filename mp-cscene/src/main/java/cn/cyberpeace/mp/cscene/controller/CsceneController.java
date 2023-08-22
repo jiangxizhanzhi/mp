@@ -57,8 +57,6 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private BaseAppConfig baseAppConfig;
 
-    public static CsceneBOExt csceneBOExt = new CsceneBOExt();
-
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
             request = new CsceneActionRequest();
@@ -302,15 +300,6 @@ public class CsceneController implements BaseModelListControllerBase {
             }
         }
         return result;
-    }
-
-    @ApiOperation(value = "保存（创建/更新）场景模板Ext", notes = "请忽略test_scenes和app_scenes字段")
-    @ApiImplicitParam(name = "csceneBOExt", value = "请求体", dataTypeClass = CsceneBOExt.class)
-    @PostMapping("/save")
-    public ServiceResult<Boolean> save(@RequestBody CsceneBOExt csceneBOExt) {
-        log.info("scene save,params is {}", JsonCommon.stringify(csceneBOExt));
-        this.csceneBOExt = csceneBOExt;
-        return new ServiceResult<>(true);
     }
 
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")

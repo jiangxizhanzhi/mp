@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,8 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 
-import static cn.cyberpeace.mp.cscene.controller.CsceneController.csceneBOExt;
+import static cn.cyberpeace.mp.cscene.controller.ImportResourceTypeController.csceneBOExt;
+
 
 /**
  * @Description
@@ -69,9 +71,13 @@ public class ResourceCenterService {
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         // 保存
         if (Boolean.TRUE.equals(csceneBOExt.getSceneConvertTemplate())) {
+            if (StringUtils.isEmpty(csceneBO.getName())) {
+                csceneBO.setName(csceneBO.getSceneConfig().getTopology().getScene().getName());
+            }
             CsceneBO csceneBOCopy = new CsceneBO();
             BeanUtils.copyProperties(csceneBO, csceneBOCopy);
-            csceneBO.setAppType(csceneBOExt.getSceneAppType());
+            csceneBO.setBizType(csceneBOExt.getSceneBizType());
+            csceneBO.setType(CsceneModel.Type.TEMPLATE);
             csceneService.syncWithoutCheckLimit(csceneBOCopy, new CsceneContextBO());
         }
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
