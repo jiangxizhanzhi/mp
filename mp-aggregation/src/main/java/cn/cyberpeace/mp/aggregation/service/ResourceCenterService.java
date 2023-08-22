@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.hutool.core.io.FileUtil;
@@ -24,6 +23,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
+
+import static cn.cyberpeace.mp.cscene.controller.CsceneController.csceneBOExt;
 
 /**
  * @Description
@@ -67,10 +68,10 @@ public class ResourceCenterService {
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         // 保存
-        if (ControllerConstant.csceneBOExt.getSceneConvertTemplate()) {
+        if (Boolean.TRUE.equals(csceneBOExt.getSceneConvertTemplate())) {
             CsceneBO csceneBOCopy = new CsceneBO();
             BeanUtils.copyProperties(csceneBO, csceneBOCopy);
-            csceneBO.setAppType(ControllerConstant.csceneBOExt.getSceneAppType());
+            csceneBO.setAppType(csceneBOExt.getSceneAppType());
             csceneService.syncWithoutCheckLimit(csceneBOCopy, new CsceneContextBO());
         }
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());

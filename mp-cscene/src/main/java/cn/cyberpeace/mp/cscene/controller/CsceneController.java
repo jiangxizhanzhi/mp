@@ -57,6 +57,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private BaseAppConfig baseAppConfig;
 
+    public static CsceneBOExt csceneBOExt = new CsceneBOExt();
+
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
             request = new CsceneActionRequest();
@@ -307,7 +309,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/save")
     public ServiceResult<Boolean> save(@RequestBody CsceneBOExt csceneBOExt) {
         log.info("scene save,params is {}", JsonCommon.stringify(csceneBOExt));
-        ControllerConstant.csceneBOExt = csceneBOExt;
+        this.csceneBOExt = csceneBOExt;
         return new ServiceResult<>(true);
     }
 
