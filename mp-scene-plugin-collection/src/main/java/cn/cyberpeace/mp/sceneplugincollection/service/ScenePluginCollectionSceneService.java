@@ -1893,7 +1893,7 @@ public class ScenePluginCollectionSceneService {
         boolQueryBuilder.filter(QueryBuilders.termQuery("data.sic_launch_group", groupId));
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 12; i++) {
             try {
                 Thread.sleep(5000);
                 SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
