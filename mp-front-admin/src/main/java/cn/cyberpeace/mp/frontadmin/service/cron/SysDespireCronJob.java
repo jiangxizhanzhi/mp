@@ -19,15 +19,12 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.config.TriggerTask;
-import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -36,16 +33,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.frontadmin.service.cron
- * @Author: hhuang
- * @CreateTime: 2023/05/23  21:02
  * @Description: 系统过期检查定时任务
- * @Version: 1.0
+ * @Author qiaokang
+ * @Date：2023/8/21 17:17
  */
-@Component
+@Service
 @Slf4j
-@EnableScheduling
-public class SysDespireCronJob implements SchedulingConfigurer {
+public class SysDespireCronJob {
 
     //默认系统名称
     private static final String DEFAULT_SYS_NAME = "数字化靶场";
@@ -72,20 +66,16 @@ public class SysDespireCronJob implements SchedulingConfigurer {
     @Resource
     private UserMapper userMapper;
 
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+//    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0/30 * * * ? *")
+    public void configureTasks() {
         //系统过期提醒开关需开启
         if (!Boolean.TRUE.equals(frontAdminConfig.isLicenseRemindEnable())) {
             log.info("System expiration cron job is not enable");
             return;
         }
-        taskRegistrar.addTriggerTask(new TriggerTask(() -> {
-            //执行检查提醒
-            check();
-        }, triggerContext -> {
-            CronTrigger cronTrigger = new CronTrigger(frontAdminConfig.getCronJobExpression());
-            return cronTrigger.nextExecutionTime(triggerContext);
-        }));
+
+        check();
     }
 
 
@@ -107,8 +97,8 @@ public class SysDespireCronJob implements SchedulingConfigurer {
         Integer daysBetween = Integer.valueOf(daysBetweenLong.toString());
         //配置的提醒过期天数
         Integer licenseRemindTime = frontAdminConfig.getLicenseRemindTime();
-        if(daysBetween > licenseRemindTime){
-            //没到时间 do nothing
+        if(daysBetween > licenseRemindTime || daysBetween < 0){
+            // 没到提醒时间或者已经过期
             return;
         }
         //提醒处理
@@ -131,7 +121,7 @@ public class SysDespireCronJob implements SchedulingConfigurer {
                 .link(UserModel.class, UserRoleModel.class)
                 .filterLink(UserModel.class, UserModel::getId, UserRoleModel.class, UserRoleModel::getUser)
                 .currentLink(UserModel.class)
-                .filterGreaterThanOrEqual(UserModel::getDelayRemindLicenseTime, 0)
+                .filterLessThan(UserModel::getDelayRemindLicenseTime, LocalDateTime.now())
                 .currentLink(UserRoleModel.class)
                 .filterEqual(UserRoleModel::getRole, AuthConstant.ROLE_ADMIN_ID);
         var users = userMapper.list(humanCondition);

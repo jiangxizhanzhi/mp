@@ -122,9 +122,8 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultInt(1)
     private Integer isAudited;
 
-    @ApiModelProperty(value = "-1：提醒 大于-1：不提醒 ")
-    @DefaultInt(-1)
-    private Integer delayRemindLicenseTime;
+    @ApiModelProperty(value = "延期提醒时间")
+    private LocalDateTime delayRemindLicenseTime;
 
     @ApiModelProperty(value = "加入时间")
     @DefaultGen(DateTimeGenerator.class)
