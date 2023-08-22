@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +66,7 @@ public class SysDespireCronJob {
     private UserMapper userMapper;
 
 //    @Scheduled(cron = "0 0 3 * * ?")
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     public void configureTasks() {
         log.info("start system activation task");
         //系统过期提醒开关需开启
@@ -140,7 +139,6 @@ public class SysDespireCronJob {
                         .type(NoticeTypeEnum.LICENSE.getCode())
                         .isPublic(0)
                         .publisher(AuthConstant.ROOT_USER_ID)
-                        .roleIds(Lists.newArrayList(AuthConstant.ROLE_ADMIN_ID))
                         .userIds(userIds).build();
         log.info("system activation remind notice: {}", sysNoticeRequest);
         //新增系统通过公告，提醒用户范围：具有管理员权限的用户均收到提醒
