@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -182,9 +183,10 @@ public class FlowMonitorController {
                     }
                 }
                 var otherCount = new FlowAttackTypeCount();
-                otherCount.setAttackType("other");
+                otherCount.setAttackType(MessageCommon.get("cscene.flowtype.other"));
                 otherCount.setTimes(other);
                 result.add(otherCount);
+                return ResultCommon.success(result);
             }
         }
         return ResultCommon.success(attackTypeCounts);
