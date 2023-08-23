@@ -374,7 +374,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 request.getContext()).asResult();
     }
 
-    @ApiOperation("场景实例获取远程连接")
+    @ApiOperation("登录跳板机")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
@@ -383,6 +383,23 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/get_connection")
     public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
+                                                               @RequestParam(required = false) String nodeId,
+                                                               @RequestParam(required = false) String accessModeId,
+                                                               @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+                request.getContext()).asResult();
+    }
+
+    @ApiOperation("练习过程协同互动")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeAccessModeActionRequest.class),
+    })
+    @PostMapping(value = "/get_connection2")
+    public ServiceResult<NodeConnectionBO> getRemoteConnection2(@RequestParam(required = false) String id,
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
                                                                @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {

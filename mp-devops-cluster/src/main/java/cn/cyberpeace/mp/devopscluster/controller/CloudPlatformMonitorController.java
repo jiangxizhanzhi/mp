@@ -290,7 +290,7 @@ public class CloudPlatformMonitorController {
      * 释放无效资源
      * @return
      */
-    @ApiOperation("释放无效资源")
+    @ApiOperation("平台系统管理")
     @GetMapping("/release_resource")
     public ServiceResult<Boolean> releaseResource() {
         TaskCommon.executeTask(() -> clearService.clearUselessResource());
