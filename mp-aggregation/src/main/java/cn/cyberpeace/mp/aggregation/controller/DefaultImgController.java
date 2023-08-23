@@ -67,7 +67,7 @@ public class DefaultImgController {
      */
     @ApiOperation("获取默认图片-包括多个图集")
     @GetMapping("/get-default-img-all")
-    public ServiceResult<List<List<String>>> getDefaultImg(DefaultImgRequest request){
+    public ServiceResult<List<List<String>>> getDefaultImgAll(DefaultImgRequest request){
         List<List<String>> rtnList = new ArrayList<>();
         if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
