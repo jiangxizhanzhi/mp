@@ -42,6 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.cyberpeace.mp.cscene.controller.ImportResourceTypeController.csceneBOExt;
+
 @Service
 @RequiredArgsConstructor
 public class ImagesConverter implements BaseConverter{
@@ -401,7 +403,10 @@ public class ImagesConverter implements BaseConverter{
             CloudPlatformPageResult<Device> model = deviceService.findByIds(notExistedList);
             List<Device> deviceList = model.getList();
             if (CollectionUtils.isNotEmpty(deviceList)) {
-                deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
+                deviceList.stream().forEach(device -> {
+                    device.setImageCate(csceneBOExt.getImageCate());
+                    device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE);
+                });
                 result += devopsTargetService.insert(deviceList);
             }
         }
