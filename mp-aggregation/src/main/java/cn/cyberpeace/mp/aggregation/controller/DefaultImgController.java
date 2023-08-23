@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +57,29 @@ public class DefaultImgController {
                 modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
 
         return ResultCommon.success(urlList);
+    }
+
+    /**
+     * 获取默认图片-包括多个图集
+     *
+     * @param request
+     * @return
+     */
+    @ApiOperation("获取默认图片-包括多个图集")
+    @GetMapping("/get-default-img-all")
+    public ServiceResult<List<List<String>>> getDefaultImg(DefaultImgRequest request){
+        List<List<String>> rtnList = new ArrayList<>();
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
+        List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
+        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+        List<String> urlList =
+                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+        rtnList.add(urlList);
+        rtnList.add(urlList);
+        return ResultCommon.success(rtnList);
     }
 
     @ApiOperation("获取系统图片")
