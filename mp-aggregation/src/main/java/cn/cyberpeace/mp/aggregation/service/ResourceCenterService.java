@@ -18,7 +18,6 @@ import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -74,12 +73,11 @@ public class ResourceCenterService {
             if (StringUtils.isEmpty(csceneBO.getName())) {
                 csceneBO.setName(csceneBO.getSceneConfig().getTopology().getScene().getName());
             }
-            CsceneBO csceneBOCopy = new CsceneBO();
-            BeanUtils.copyProperties(csceneBO, csceneBOCopy);
             csceneBO.setBizType(csceneBOExt.getSceneBizType());
             csceneBO.setType(CsceneModel.Type.TEMPLATE);
-            csceneService.syncWithoutCheckLimit(csceneBOCopy, new CsceneContextBO());
+            csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
         }
+        csceneBO.setId(null);
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 
