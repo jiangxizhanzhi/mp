@@ -137,10 +137,10 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request) {
         validImageRequest(request);
-        imagesConverter.add(request);
         if (request.getImageCate() == null || request.getImageCate().length == 0) {
             request.setImageCate(csceneBOExt.getImageCate());
         }
+        imagesConverter.add(request);
         return ResultCommon.success();
     }
 
