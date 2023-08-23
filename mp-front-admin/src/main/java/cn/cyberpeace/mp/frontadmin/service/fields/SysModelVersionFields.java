@@ -13,14 +13,14 @@ import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
 public class SysModelVersionFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysModelVersionModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(SysModelVersionModel::getSysName, SysModelVersionModel::getSysVersion,
+    public static final DynamicFields availableFields = new DynamicFields(SysModelVersionModel::getModelName, SysModelVersionModel::getModelVersion,
             SysModelVersionModel::getVisible).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(SysModelVersionModel::getSysName, SysModelVersionModel::getSysVersion, SysModelVersionModel::getVisible);
+    public static final DynamicFields searchFields = new DynamicFields(SysModelVersionModel::getModelName, SysModelVersionModel::getModelVersion, SysModelVersionModel::getVisible);
 
     public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }
