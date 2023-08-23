@@ -19,11 +19,11 @@ import lombok.NoArgsConstructor;
 @Table("mp_sys_model_version")
 public class SysModelVersionModel extends BaseModel {
 
-    @ApiModelProperty(value = "系统名称")
-    private String sysName;
+    @ApiModelProperty(value = "模块名称")
+    private String modelName;
 
-    @ApiModelProperty(value = "系统版本号")
-    private String sysVersion;
+    @ApiModelProperty(value = "模块版本号")
+    private String modelVersion;
 
     @ApiModelProperty(value = "是否可见")
     @DefaultBool
