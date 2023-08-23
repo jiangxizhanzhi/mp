@@ -29,7 +29,7 @@ public class SysVersionController {
     @Autowired
     private SysModelVersionService sysModelVersionService;
 
-    @ApiOperation(value = "查询所有系统设置", notes = "")
+    @ApiOperation(value = "查询系统版本号", notes = "")
     @GetMapping("/list")
     public ServiceResult<List<SysModelVersionModel>> listSysVersion() {
         List<SysModelVersionModel> rtnList = sysModelVersionService.listSysVersion();
