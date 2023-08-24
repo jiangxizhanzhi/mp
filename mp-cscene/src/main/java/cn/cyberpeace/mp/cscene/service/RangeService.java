@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RangeService {
@@ -28,6 +29,9 @@ public class RangeService {
         params.setScene(sceneId);
         params.setType(ProbeOperateConstant.PROBEOPERATE_TYPE.COLLECT_PERIOD.getValue());
         var periods = probeOperateLogService.queryOperateProbe(params);
+        periods = periods.stream()
+                .filter(p -> p.getCollectPeriod() > 0)
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(periods)) {
             return new ArrayList<>();
         } else {
@@ -58,10 +62,13 @@ public class RangeService {
     }
 
     public LocalDateTime getTime(LocalDateTime time, List<Range> ranges) {
+        if (CollectionUtils.isEmpty(ranges)) {
+            return time;
+        }
         for (int i = ranges.size() - 1; i >= 0; i--) {
             var range = ranges.get(i);
             if (time.isAfter(range.getStart()) && (time.isBefore(range.getEnd()) || time.isEqual(range.getEnd()))) {
-                if (range.getPeriod() == -1) {
+                if (range.getPeriod() <= 0) {
                     return time;
                 } else {
                     int periodNums = BigDecimal.valueOf((time.toEpochSecond(ZoneOffset.UTC) - range.getStart().toEpochSecond(ZoneOffset.UTC)))
