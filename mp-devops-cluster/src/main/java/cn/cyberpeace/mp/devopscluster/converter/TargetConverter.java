@@ -25,11 +25,9 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -122,7 +120,12 @@ public class TargetConverter{
      * @return
      */
     public List<Device> getCommonTargets(String name) {
-        CloudPlatformPageResult<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
+        CloudPlatformPageResult<Device> model = null;
+        try {
+            model = deviceService.page("?limit=9999&is_internal=true&name=" + URLEncoder.encode(name, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new MpRuntimeException("encode failed");
+        }
         List<Device> deviceList = model.getList();
         POLogoUtils.changeLogoPathToUrl(deviceList);
         return deviceList;
