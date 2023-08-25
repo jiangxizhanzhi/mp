@@ -47,6 +47,13 @@ public class SysActivationController {
         return ResultCommon.success();
     }
 
+    @ApiOperation("延期激活")
+    @ApiImplicitParam(name = "activationRequest", value = "延期激活请求体", dataTypeClass = ActivationRequest.class)
+    @PostMapping("/delay")
+    public ServiceResult<Boolean> delayActivate(@RequestBody @Validated ActivationRequest activationRequest) {
+        activationService.delayActivate(activationRequest);
+        return ResultCommon.success(true);
+    }
 
     @ApiOperation("查询激活选项内容")
     @GetMapping("/status")
