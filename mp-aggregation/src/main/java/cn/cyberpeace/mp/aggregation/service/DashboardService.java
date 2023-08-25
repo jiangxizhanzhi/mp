@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
+import cn.cyberpeace.mp.aggregation.common.SystemTimeCommon;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
-import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
-import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.*;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
@@ -39,17 +37,14 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +70,9 @@ public class DashboardService {
 
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
+
+    @Resource
+    private SystemTimeCommon systemTimeCommon;
 
     @Autowired
     public DashboardService(DeviceService deviceService,
@@ -276,6 +274,17 @@ public class DashboardService {
         BeanUtils.copyProperties(pageInfo, newPageInfo);
         newPageInfo.setList(monitorDtoList);
         return newPageInfo;
+    }
+
+
+    public SystemTimeResponse getSystemRunningTime() {
+        var now = LocalDateTime.now();
+        var end =systemTimeCommon.getStartTime();
+        Duration duration = Duration.between(end,now);
+        SystemTimeResponse systemTimeResponse = new SystemTimeResponse();
+        systemTimeResponse.setTime(duration.toSeconds());
+        return systemTimeResponse;
+
     }
 
     /**

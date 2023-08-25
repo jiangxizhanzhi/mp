@@ -3,10 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
-import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
-import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.*;
 import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
@@ -65,6 +62,13 @@ public class DashboardController {
     @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
         ResourceStatisticsResponse response = dashboardService.resourceStatistics();
+        return ResultCommon.success(response);
+    }
+
+    @ApiOperation("系统运行时间")
+    @GetMapping("/system_running_time")
+    public ServiceResult<SystemTimeResponse> getSystemRunningTime() {
+        var response = dashboardService.getSystemRunningTime();
         return ResultCommon.success(response);
     }
 
