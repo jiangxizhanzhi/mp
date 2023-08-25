@@ -9,15 +9,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -107,6 +99,29 @@ public class FlowMonitorController {
             List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
             return ResultCommon.success(flowTrends);
         }
+    }
+
+    @ApiOperation(value = "场景实时攻击")
+    @GetMapping("/scene_real_time_attack")
+    public ServiceResult<Long> getSceneRealTimeAttack(FlowTrendRequest flowTrendRequest) {
+        Long count = 0L;
+        if (StringUtils.isEmpty(flowTrendRequest.getSceneId())) {
+            return ResultCommon.success(count);
+        }
+
+        List<FlowTrend> flowTrends;
+        if (CollectionUtils.isNotEmpty(flowTrendRequest.getElementIds())) {
+            flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
+        } else {
+            flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
+        }
+        if (CollectionUtils.isNotEmpty(flowTrends)) {
+            count = flowTrends.stream()
+                    .mapToLong(FlowTrend::getDataSize)
+                    .sum();
+        }
+
+        return ResultCommon.success(count);
     }
 
     /**
