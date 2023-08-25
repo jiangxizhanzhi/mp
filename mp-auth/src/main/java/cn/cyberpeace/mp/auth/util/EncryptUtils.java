@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -73,10 +72,6 @@ public class EncryptUtils {
             byte[] contentBytes = (salt + content).getBytes(StandardCharsets.UTF_8);
             byte[] digestBytes = md.digest(contentBytes);
             md5Str = bytesToHex(digestBytes);
-
-            if (StringUtils.isNotBlank(md5Str)) {
-                md5Str = md5Str.toLowerCase();
-            }
         } catch (NoSuchAlgorithmException e) {
             log.error("md5DigestHex error:", e);
         }
@@ -88,7 +83,7 @@ public class EncryptUtils {
         for (byte b : bytes) {
             result.append(String.format("%02X", b));
         }
-        return result.toString();
+        return result.toString().toLowerCase();
     }
 
     private static byte[] hexToBytes(String hex) {
