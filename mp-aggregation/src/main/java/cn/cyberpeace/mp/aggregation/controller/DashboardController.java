@@ -65,6 +65,13 @@ public class DashboardController {
         return ResultCommon.success(response);
     }
 
+    @ApiOperation("运行的虚拟机、容器、实装设备")
+    @GetMapping("/all_active_info")
+    public ServiceResult<AllActiveResponse> getAllActiveInfo() {
+        var response = dashboardService.getAllActive();
+        return ResultCommon.success(response);
+    }
+
     @ApiOperation("系统运行时间")
     @GetMapping("/system_running_time")
     public ServiceResult<SystemTimeResponse> getSystemRunningTime() {
@@ -77,6 +84,13 @@ public class DashboardController {
     @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
         SystemClusterUsed response = mockService.mockSystemClusterUsed();
+        return ResultCommon.success(response);
+    }
+
+    @ApiOperation("全部资源统计信息")
+    @GetMapping("/all_resource_statistics")
+    public ServiceResult<AllResourceStatisticsResponse> getAllResourceStatistics() {
+        var response = dashboardService.allResourceStatistics();
         return ResultCommon.success(response);
     }
 

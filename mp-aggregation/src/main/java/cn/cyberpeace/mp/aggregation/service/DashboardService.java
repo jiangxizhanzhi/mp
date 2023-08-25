@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.aggregation.response.*;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -16,12 +17,20 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
+import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -70,9 +79,20 @@ public class DashboardService {
 
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
+    @Autowired
+    private FlowMonitorService flowMonitorService;
 
     @Resource
     private SystemTimeCommon systemTimeCommon;
+
+    @Autowired
+    private SceneMapper sceneMapper;
+
+    @Autowired
+    private VmConverter vmConverter;
+
+    @Autowired
+    private ContainerConverter containerConverter;
 
     @Autowired
     public DashboardService(DeviceService deviceService,
@@ -285,6 +305,69 @@ public class DashboardService {
         systemTimeResponse.setTime(duration.toSeconds());
         return systemTimeResponse;
 
+    }
+
+    /**
+     * 所有场景统计信息
+     * @return
+     */
+    public AllResourceStatisticsResponse allResourceStatistics() {
+        AllResourceStatisticsResponse response = new AllResourceStatisticsResponse();
+        var allTargets = resourceStatistics().getTargetStatics().get("all");
+        var containerTargetNum = allTargets.get("container");
+        var npcTargetNum = allTargets.get("npc");
+        var vmTargetNum = allTargets.get("vm");
+        var tgmTargetNum = allTargets.get("tgm");
+        Integer virtualTargetNum = 0;
+        virtualTargetNum += ObjectToInteger(containerTargetNum);
+        virtualTargetNum += ObjectToInteger(npcTargetNum);
+        virtualTargetNum += ObjectToInteger(vmTargetNum);
+        virtualTargetNum += ObjectToInteger(tgmTargetNum);
+        response.setDevopsNum(virtualTargetNum);
+
+        Integer entityTargetNum = 0;
+        var entityNum = allTargets.get("entity");
+        entityTargetNum += ObjectToInteger(entityNum);
+        response.setDeviceNum(entityTargetNum);
+
+        var csceneMapper = BeanCommon.getBean(CsceneMapper.class);
+        var csceneNum = csceneMapper.total(new HumanCondition()
+                .filterEqual(CsceneModel::getDeleted, 0));
+        response.setSceneNum(csceneNum);
+
+        response.setFlowNum(flowMonitorService.getFlowNumber());
+
+        return response;
+    }
+
+    public AllActiveResponse getAllActive() {
+        AllActiveResponse allActiveResponse = new AllActiveResponse();
+        Integer entityTargetNum = 0;
+        HumanCondition humanCondition = new HumanCondition()
+                .link(SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, 0)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getVirtualType, 6);
+        var list = sceneMapper.list(humanCondition);
+        if (list != null) {
+            entityTargetNum = list.size();
+        }
+        Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
+        Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO());
+        allActiveResponse.setContainer(totalContainers);
+        allActiveResponse.setEntity(entityTargetNum);
+        allActiveResponse.setVm(totalInstances);
+        return allActiveResponse;
+    }
+
+    private Integer ObjectToInteger(Object plus) {
+        if (Integer.class.isInstance(plus)) {
+            return (Integer) plus;
+        } else {
+            return ((BigDecimal) plus).intValue();
+        }
     }
 
     /**
