@@ -1975,7 +1975,7 @@ public class ScenePluginCollectionSceneService {
                     p.setAction(action);
                 }
             }
-            WazuhControlCommon.wazuhControl.controlConfigOld(agentName, systemType, controlConfigParam);
+            WazuhControlCommon.wazuhControl.controlConfigOld(agentName, SystemTypeCommandUtils.getOsType(systemType), controlConfigParam);
         }
         return new ServiceResult<>(true).asResult();
     }
