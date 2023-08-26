@@ -521,11 +521,11 @@ public class FlowMonitorService {
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔8小时
             startTime = endTime.minusHours(4);
-        }
-        if (CollectionUtils.isNotEmpty(sceneIds) && sceneIds.size() == 1) {
-            String sceneId = csceneInstanceService.getSceneId(sceneIds.get(0));
-            SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
-            startTime = sceneHandler.getScene().getCreateTime();
+            if (CollectionUtils.isNotEmpty(sceneIds) && sceneIds.size() == 1) {
+                String sceneId = csceneInstanceService.getSceneId(sceneIds.get(0));
+                SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+                startTime = sceneHandler.getScene().getCreateTime();
+            }
         }
 
         if (Objects.isNull(segmentCount)) {
