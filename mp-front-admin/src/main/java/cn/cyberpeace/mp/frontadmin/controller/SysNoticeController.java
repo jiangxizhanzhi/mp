@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
+import cn.cyberpeace.mp.frontadmin.request.notice.DelayNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
@@ -20,7 +21,6 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.hutool.core.collection.CollUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -32,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -92,7 +93,7 @@ public class SysNoticeController {
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
-        noticeService.unpush(CollUtil.toList(ids));
+        noticeService.unpush(Arrays.asList(ids));
         return ResultCommon.success();
     }
 
@@ -169,6 +170,14 @@ public class SysNoticeController {
     @GetMapping("/types")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+    }
+
+    @ApiOperation("延期提醒")
+    @PostMapping("/delay_notice")
+    public ServiceResult<Boolean> delayNotice(@RequestBody DelayNoticeRequest delayNoticeRequest) {
+        Boolean result = noticeService.delayNotice(delayNoticeRequest);
+
+        return ResultCommon.success(result);
     }
 
 }

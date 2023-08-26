@@ -31,17 +31,16 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,7 +126,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public List<UserModel> listUsersByRoleIdNoRestrict(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         List<UserOrgRoleBo> userOrgRoleBos = listUsersByRoleId(roleId);
-        if (CollectionUtil.isEmpty(userOrgRoleBos)) {
+        if (CollectionUtils.isEmpty(userOrgRoleBos)) {
             return Collections.emptyList();
         }
 
@@ -159,7 +158,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
-        if (CollectionUtil.isNotEmpty(excludeRoleIds) && excludeRoleIds.contains(pageRequest.getRoleId())) {
+        if (CollectionUtils.isNotEmpty(excludeRoleIds) && excludeRoleIds.contains(pageRequest.getRoleId())) {
             new PageInfo<>(Collections.emptyList());
         }
         ListObjServiceResult result = listPageUsersByRoleId(pageRequest.getRoleId(), pageRequest.getPage(), pageRequest.getPageSize());
@@ -184,7 +183,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             }
         }
 
-        if (CollectionUtil.isEmpty(roleIds)) {
+        if (CollectionUtils.isEmpty(roleIds)) {
             // 完成，直接返回
             return true;
         }
@@ -214,7 +213,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }
 
-        if (CollectionUtil.isEmpty(userIds)) {
+        if (CollectionUtils.isEmpty(userIds)) {
             // 完成，直接返回
             return true;
         }
@@ -303,7 +302,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }
 
-        if (CollectionUtil.isEmpty(userIds)) {
+        if (CollectionUtils.isEmpty(userIds)) {
             // 完成，直接返回
             return true;
         }
@@ -311,7 +310,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         // 删除用户角色
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(UserRoleModel::getRole, roleId);
-        if (CollectionUtil.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserRoleModel::getUser, userIds.toArray());
         }
         getModelMapper().filterDelete(humanCondition);
@@ -329,7 +328,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<String> roles = userRoleModels.stream()
                 .map(UserRoleModel::getRole)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(roles)) {
+        if (CollectionUtils.isEmpty(roles)) {
             return new ArrayList<>();
         }
         HumanCondition roleCondition = new HumanCondition()
@@ -346,7 +345,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<String> roles = userRoleModels.stream()
                 .map(UserRoleModel::getRole)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(roles)) {
+        if (CollectionUtils.isEmpty(roles)) {
             return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
         }
         HumanCondition roleCondition = new HumanCondition()
@@ -368,7 +367,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<String> uIds = userRoleModels.stream()
                 .map(UserRoleModel::getUser)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(uIds)) {
+        if (CollectionUtils.isEmpty(uIds)) {
             return new ArrayList<>();
         }
 
@@ -421,7 +420,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<String> uIds = userRoleModels.stream()
                 .map(UserRoleModel::getUser)
                 .collect(Collectors.toList());
-        if (CollUtil.isEmpty(uIds)) {
+        if (CollectionUtils.isEmpty(uIds)) {
             return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
         }
 

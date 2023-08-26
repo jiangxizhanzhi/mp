@@ -41,8 +41,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +50,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -245,13 +244,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIdsForSearching(Objects.nonNull(queryParams.getIds()) ? Arrays.asList(queryParams.getIds()) : null);
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
-        if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
+        if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtils.isEmpty(listObjSrvResult.getSource().getObjs())) {
             return listObjSrvResult;
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
         users.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
-        if (CollectionUtil.isNotEmpty(users)) {
+        if (CollectionUtils.isNotEmpty(users)) {
             // 转换
             ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
             BeanUtils.copyProperties(listObjSrvResult, result);
@@ -375,7 +374,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         log.info("user create success id:{}", userId);
 
         // 保存组织-用户关系
-        if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
+        if (CollectionUtils.isNotEmpty(createRequest.getOrgIds())) {
             createRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
@@ -389,7 +388,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         // 保存角色-用户关系
-        if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
+        if (CollectionUtils.isNotEmpty(createRequest.getRoleIds())) {
             createRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
@@ -446,7 +445,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String userId = userModified.getId();
 
         // 保存组织-用户关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
+        if (CollectionUtils.isNotEmpty(modifyRequest.getOrgIds())) {
             // 清除原来所有用户关联的组织
             tenantUserService.deleteByUserId(userId);
 
@@ -464,7 +463,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
         // 保存角色-用户关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
+        if (CollectionUtils.isNotEmpty(modifyRequest.getRoleIds())) {
             // 清除原来所有用户关联的角色
             userRoleService.deleteByUserId(userId);
 
@@ -745,7 +744,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             toClient.close();
 
         } catch (IOException e) {
-            log.error("{}", ExceptionUtil.stacktraceToString(e));
+            log.error("Download Excel Template error: ", e);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_TEMPLATE_DOWNLOAD_ERROR);
         }
     }
@@ -769,18 +768,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // http://10.10.10.10/biz/bug-view-4861.html
             // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
-            if (CollectionUtil.isNotEmpty(importUserBo.getRoleIdList())) {
+            if (CollectionUtils.isNotEmpty(importUserBo.getRoleIdList())) {
                 List<UserRoleModel> userRoles = importUserBo.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(userRoles)) {
+                if (CollectionUtils.isNotEmpty(userRoles)) {
                     userRoleModels.addAll(userRoles);
                 }
             }
 
             // 3. 保存组织-用户关系
             // http://10.10.10.10/biz/bug-view-4861.html
-            if (CollectionUtil.isNotEmpty(importUserBo.getOrgIdList())) {
+            if (CollectionUtils.isNotEmpty(importUserBo.getOrgIdList())) {
                 List<TenantUserModel> orgUsers = importUserBo.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(orgUsers)) {
+                if (CollectionUtils.isNotEmpty(orgUsers)) {
                     tenantUserModels.addAll(orgUsers);
                 }
             }
@@ -801,6 +800,43 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<ExportUserEnBo> exportUserList = users.stream().map(this::user2ExportUserEn).filter(Objects::nonNull).collect(Collectors.toList());
         return exportUserList;
     }
+
+    @Override
+    public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
+        Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
+        if (userOptional.isPresent()) {
+            // 上传服务器
+            String filepath = null;
+            try {
+                String suffix = FileUtils.getSuffix(multipartFile.getOriginalFilename());
+                filepath = FsCommon.upload(multipartFile.getInputStream(), suffix);
+                log.info("uploaded avatar success! filepath:{}", filepath);
+            } catch (MpRuntimeException | IOException e) {
+                log.error("uploaded error: ", e);
+                throw new MpRuntimeException(AuthErrorCode.FILE_ISNULL);
+            }
+
+            if (StringUtils.isNotBlank(filepath)) {
+                String httpUrl = FsCommon.genHttpUrl(filepath);
+                UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
+                var ret = getModelMapper().update(updateUser);
+                userCacheService.evictAllUserCache();
+                return ret;
+            } else {
+                log.error("upload failed! userId:{}", userId);
+                throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
+            }
+
+        } else {
+            log.error("user id:{} not existed!", userId);
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+        }
+
+    }
+
 
     /**
      * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
@@ -842,7 +878,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
     public List<UserBo> userOrgRoleDtos2UserDtos(List<UserOrgRoleBo> userOrgRoleBos) {
-        if (CollectionUtil.isEmpty(userOrgRoleBos)) {
+        if (CollectionUtils.isEmpty(userOrgRoleBos)) {
             return Collections.emptyList();
         }
         List<OrgBO> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
@@ -858,7 +894,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
                 List<OrgBO> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
                 //List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
-                List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+                List<List<String>> allorgpath = userOrgModels.stream().map(o -> Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
                 userBo.setOrgs(userOrgModels);
                 userBo.setOrgIds(userOrgIds);
                 userBo.setOrgpaths(allorgpath);
@@ -903,7 +939,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
 
             //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
-            List<List<String>> allorgpath = orgBOS.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            List<List<String>> allorgpath = orgBOS.stream().map(o -> Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
             userBo.setOrgs(orgBOS);
             userBo.setOrgIds(orgIds);
             userBo.setOrgpaths(allorgpath);

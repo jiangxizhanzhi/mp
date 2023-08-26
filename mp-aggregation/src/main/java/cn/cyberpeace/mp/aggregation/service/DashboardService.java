@@ -30,7 +30,6 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,13 +42,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -106,7 +99,7 @@ public class DashboardService {
             LocalDate d = today.minusDays(i);
             daylist.add(d);
         }
-        CollectionUtil.reverse(daylist);
+        Collections.reverse(daylist);
 
         String[] xAxis = daylist.stream().map(day -> df.format(day)).toArray(String[]::new);
         Integer[] userCount = daylist.stream().map(day -> {
@@ -253,7 +246,7 @@ public class DashboardService {
         //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
         List<String> onlinedUserIds = userOnlineReportBoList.stream().map(UserOnlineReportBo::getUser).collect(Collectors.toList());
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
+        if (CollectionUtils.isNotEmpty(onlinedUserIds)) {
             ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
             userConnectionNumBOList = result.getSource();
         }
@@ -266,7 +259,7 @@ public class DashboardService {
             monitorDto.setNodeSessionCnt(0);
             monitorDto.setHasNodeSession(false);
 
-            if (CollectionUtil.isNotEmpty(userConnectionNumBOList)) {
+            if (CollectionUtils.isNotEmpty(userConnectionNumBOList)) {
                 Optional<UserConnectionNumBO> boOptional = userConnectionNumBOList.stream().filter(bo -> Objects.equals(bo.getUser(), userOnlineReportBo.getUser())).findFirst();
                 if (boOptional.isPresent() && boOptional.get().getConnectionNum() > 0) {
                     monitorDto.setNodeSessionCnt(boOptional.get().getConnectionNum());

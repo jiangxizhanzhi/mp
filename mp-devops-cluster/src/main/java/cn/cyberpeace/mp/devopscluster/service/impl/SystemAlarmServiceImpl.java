@@ -16,9 +16,9 @@ import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devopscluster.service.fields.SystemAlarmFields;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmCountVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
-import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -129,11 +129,11 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
     public ListObjServiceResult<SystemAlarmModel> listSystemAlarm(AlarmQueryParams queryParams) {
 
         HumanCondition condition = new HumanCondition();
-        if (ArrayUtil.isNotEmpty(queryParams.getAlarmStatus())) {
+        if (ArrayUtils.isNotEmpty(queryParams.getAlarmStatus())) {
             condition.filterIn(SystemAlarmModel::getAlarmStatus, queryParams.getAlarmStatus());
         }
 
-        if (ArrayUtil.isNotEmpty(queryParams.getAlarmTypes())) {
+        if (ArrayUtils.isNotEmpty(queryParams.getAlarmTypes())) {
             condition.filterIn(SystemAlarmModel::getAlarmType, queryParams.getAlarmTypes());
         }
 
@@ -141,7 +141,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
             condition.filterEqual(SystemAlarmModel::getHostname, queryParams.getHostName());
         }
 
-        if (ArrayUtil.isNotEmpty(queryParams.getOrders())) {
+        if (ArrayUtils.isNotEmpty(queryParams.getOrders())) {
             condition.orderBy(queryParams.getOrders());
         }
 

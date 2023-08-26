@@ -18,8 +18,6 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.exception.ExcelAnalysisException;
 import com.alibaba.excel.exception.ExcelCommonException;
@@ -39,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -81,7 +80,7 @@ public class UserExcelController {
         String[] ids = exportRequest.getIds();
         List<String> userIds = null;
         if (Objects.nonNull(ids) && ids.length > 0) {
-            userIds = CollectionUtil.toList(ids);
+            userIds = Arrays.asList(ids);
         }
 
         List<UserModel> users = tenantUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
@@ -120,7 +119,7 @@ public class UserExcelController {
             EasyExcel.read(file.getInputStream(), ImportUserBo.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
                     .headRowNumber(2).sheet().doRead();
         } catch (ExcelCommonException | ExcelAnalysisException | ExcelDataConvertException | ExcelGenerateException ex) {
-            log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));
+            log.error("ex:", ex);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);
         }
         return ResultCommon.success();

@@ -21,7 +21,6 @@ import cn.cyberpeace.mp.devopscluster.vo.BizServiceMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,11 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -198,7 +193,7 @@ public class SystemAlarmTask {
     private List<HostState> listAllCPNodeHostStates() {
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
         List<String> hostNames = modelPage.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
-        if (CollectionUtil.isEmpty(hostNames)) {
+        if (CollectionUtils.isEmpty(hostNames)) {
             return Collections.emptyList();
         }
         List<HostState> allHostStates = new ArrayList<>();
@@ -209,7 +204,7 @@ public class SystemAlarmTask {
         Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(request);
 
         for (List<HostState> hostStates : map.values()) {
-            if (CollectionUtil.isNotEmpty(hostStates)) {
+            if (CollectionUtils.isNotEmpty(hostStates)) {
                 allHostStates.add(hostStates.get(0));
             }
         }

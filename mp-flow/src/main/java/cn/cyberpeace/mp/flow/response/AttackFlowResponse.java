@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.flow.response;
 
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.bo.ProtocolBO;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
@@ -14,7 +14,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -97,7 +96,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
         setCategory(flowInfoModel.getCategory());
         setFlowDesc(flowInfoModel.getFlowDesc());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
-            setCreateTime(DateUtil.format(flowInfoModel.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
+            setCreateTime(TimeUtils.localDateTimeToString(flowInfoModel.getCreateTime()));
         }
         setInteractiveType(flowInfoModel.getInteractiveType());
 

@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
-import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,12 +32,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @Description
@@ -59,7 +53,7 @@ public class ImageResourceService {
     public Boolean exportImageByUuid(String uuid, String imagePath) {
         if (StringUtils.isNotEmpty(uuid)) {
             var imageInfo = deviceTargetMapper.findByUuid(uuid);
-            if (ObjectUtil.isNull(imageInfo)) {
+            if (Objects.isNull(imageInfo)) {
                 log.error("failed to get image information by uuid:{}", uuid);
                 throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
             }

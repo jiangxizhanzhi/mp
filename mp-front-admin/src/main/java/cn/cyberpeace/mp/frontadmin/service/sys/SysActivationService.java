@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.util.EncryptUtils;
+import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -20,33 +23,24 @@ import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
-import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.MD5;
+import cn.cyberpeace.mp.frontadmin.util.RandomUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -159,6 +153,81 @@ public class SysActivationService {
             }
         }
 
+    }
+
+    /**
+     * 授权延期
+     * @param activationRequest
+     */
+    public void delayActivate(ActivationRequest activationRequest) {
+        ActivationResponse content = status();
+        if (Objects.isNull(content) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, content.getIsActived())) {
+            log.error("System activation status error! Can not delay activate ");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
+        }
+
+        synchronized (this) {
+            SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
+            if (Objects.isNull(validActivCtlModel)) {
+                log.error("valid activctl not existed!");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+            }
+
+            String localSysUUID = querySysUUID();
+            if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
+                log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
+            }
+
+            String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
+            if (StringUtils.isNotBlank(validActivCtlModel.getLicenseCode())) {
+                String oldLicenseCode = validActivCtlModel.getLicenseCode();
+                if (Objects.equals(oldLicenseCode, encryptedLicenseCode)) {
+                    log.error("License code is already used!");
+                    throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_CODE_USED);
+                }
+            }
+
+            List<String> delayVerifyCodeList = content.getDelayVerifyCodeList();
+            if (CollectionUtils.isNotEmpty(delayVerifyCodeList) && delayVerifyCodeList.contains(encryptedLicenseCode)) {
+                log.error("Delay license code is already used!");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_CODE_USED);
+            }
+
+            // 拼接json串，调用licenseService验证
+            ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
+            verifyInfo.setDeadline(activationRequest.getDeadline());
+            verifyInfo.setMachinecode(activationRequest.getMachineCode());
+
+            // 自定义信息
+            Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+            verifyInfo.setInfo(infoMap);
+
+            String verifyStr = JSON.toJSONString(verifyInfo);
+            String verifyCode = activationRequest.getVerifyCode();
+
+            // 校验激活码和激活配置项，是否匹配
+            boolean success = licenseService.verify(verifyStr, verifyCode);
+
+            if (success) {
+                String oldExpireDate = content.getExpiredDate();
+                ACTIVATION_CONTENT = null;
+
+                // 校验通过，更新加密文件存储磁盘
+                updateEncryptedFile(activationRequest, oldExpireDate, delayVerifyCodeList);
+
+                // 更新数据库激活限制配置
+                updateActivCtlAfterActivationSuccess(activationRequest, oldExpireDate);
+
+                ACTIVATION_CONTENT = status();
+                log.info("DELAY ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
+                activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+                activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
+            } else {
+                log.error("license verify failed！");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+            }
+        }
     }
 
     /**
@@ -338,21 +407,51 @@ public class SysActivationService {
         activationResponse.setExpiredDate(expiredDateStr);
         activationResponse.setVerifyCode(encryptedVerifyCode);
 
-        String salt = RandomUtil.randomString(8);
+        String salt = RandomUtils.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
-
-        MD5 md5 = MD5.create();
-        md5.setSalt(salt.getBytes());
-        String md5Str = md5.digestHex(content);
 
         String encryptedContent = EncryptUtils.desEncrypt(content);
         String finalContent = salt + encryptedContent;
         String filePath = frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE;
         log.info("finalContent:{}", finalContent);
 
-        FileUtil.writeString(finalContent, new File(filePath), CharsetUtil.CHARSET_UTF_8);
+        FileUtils.writeString(finalContent, new File(filePath), StandardCharsets.UTF_8);
         log.info("activation file has been generated! filePath:{}", filePath);
+    }
+
+    /**
+     * 更新磁盘上加密文件
+     * @param activationRequest
+     * @param expireDate
+     * @param delayVerifyCodeList
+     */
+    private void updateEncryptedFile(ActivationRequest activationRequest, String expireDate, List<String> delayVerifyCodeList) {
+        String verifyCode = activationRequest.getVerifyCode();
+        String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
+        ActivationResponse activationResponse = new ActivationResponse();
+        BeanUtils.copyProperties(activationRequest, activationResponse);
+        String expiredDateStr = getDelayExpireDateStr(activationRequest.getDeadline(), expireDate);
+        activationResponse.setExpiredDate(expiredDateStr);
+        activationResponse.setVerifyCode(encryptedVerifyCode);
+        if (CollectionUtils.isNotEmpty(delayVerifyCodeList)) {
+            delayVerifyCodeList.add(encryptedVerifyCode);
+        } else {
+            delayVerifyCodeList = Collections.singletonList(encryptedVerifyCode);
+        }
+        activationResponse.setDelayVerifyCodeList(delayVerifyCodeList);
+
+        String salt = RandomUtils.randomString(8);
+        String jsonStr = JSON.toJSONString(activationResponse);
+        String content = salt + jsonStr;
+
+        String encryptedContent = EncryptUtils.desEncrypt(content);
+        String finalContent = salt + encryptedContent;
+        String filePath = frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE;
+        log.info("update finalContent:{}", finalContent);
+
+        FileUtils.writeString(finalContent, new File(filePath), StandardCharsets.UTF_8);
+        log.info("update activation file has been generated! filePath:{}", filePath);
     }
 
 
@@ -363,8 +462,8 @@ public class SysActivationService {
             return null;
         }
 
-        List<String> lines = FileUtil.readUtf8Lines(activationFile);
-        if (CollectionUtil.isEmpty(lines)) {
+        List<String> lines = FileUtils.readUtf8Lines(activationFile);
+        if (CollectionUtils.isEmpty(lines)) {
             return null;
         }
 
@@ -391,6 +490,13 @@ public class SysActivationService {
 
     private String getExpiredDateStr(Integer months) {
         LocalDate localDate = LocalDate.now().plusMonths(months);
+        String expiredDate = localDate.format(dateFormatter);
+        return expiredDate;
+    }
+
+    private String getDelayExpireDateStr(Integer months, String strExpireDate) {
+        LocalDate oldExpireDate = TimeUtils.stringToLocalDate(strExpireDate);
+        LocalDate localDate = oldExpireDate.plusMonths(months);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
@@ -435,6 +541,28 @@ public class SysActivationService {
     }
 
     /**
+     * 延期激活成功，变更数据库激活限制相关配置信息
+     * @param activationRequest
+     * @param oldExpireDate
+     */
+    private void updateActivCtlAfterActivationSuccess(ActivationRequest activationRequest, String oldExpireDate) {
+        SysActivCtlModel oldSysActivCtlModel = sysCtlService.getValidCtlModel();
+        SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
+        updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
+
+        LocalDateTime expiredTime = TimeUtils.stringToLocalDateTime(oldExpireDate + " 00:00:00").plusDays(1);
+        Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
+        Long lifeTimeSeconds = duration.toSeconds();
+        updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
+
+        String expiredDateStr = getDelayExpireDateStr(activationRequest.getDeadline(), oldExpireDate);
+        updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
+        String activeDateStr = LocalDate.now().format(dateFormatter);
+        updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        sysActivCtlService.update(updateSysActivCtlModel);
+    }
+
+    /**
      * 用旧的license再次激活
      * last_active_date，active_count变动
      *
@@ -458,7 +586,7 @@ public class SysActivationService {
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
-        String suffix = RandomUtil.randomString(6);
+        String suffix = RandomUtils.randomString(6);
         newSysActivCtlModel.setSuffix(suffix);
         newSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         newSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
@@ -499,7 +627,7 @@ public class SysActivationService {
     public List<ModuleInfoResponse> getModuleInfoList() {
         var content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
-        if (Objects.isNull(content) || CollectionUtil.isEmpty(content.getItems())) {
+        if (Objects.isNull(content) || CollectionUtils.isEmpty(content.getItems())) {
             return moduleInfoList;
         }
         var items = content.getItems();

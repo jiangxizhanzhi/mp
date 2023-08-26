@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.situationaware.utils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -76,10 +75,10 @@ public class WazuhHttpsUtils {
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
-            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("connected exception: ", e);
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("wazuh api error: ", e);
             throw new MpRuntimeException("wazuh api query error!");
         }
     }
@@ -115,11 +114,11 @@ public class WazuhHttpsUtils {
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
-            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("connected exception: ", e);
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
 //            processException(e);
-            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("wazuh api error: ", e);
             throw new MpRuntimeException("wazuh api query error!");
         }
     }
@@ -144,11 +143,11 @@ public class WazuhHttpsUtils {
             response = httpClient.execute(httpGet);
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException e) {
-            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("connected exception: ", e);
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
 //            processException(e);
-            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            log.error("wazuh api error: ", e);
             throw new MpRuntimeException("wazuh api query error!");
         }
     }
@@ -163,15 +162,4 @@ public class WazuhHttpsUtils {
         return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
 
-//    private static void processException(Exception e) {
-//        if (e instanceof IOException) {
-//            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-//            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
-//        }
-//
-//        if (e instanceof UncheckedExecutionException) {
-//            log.error("unchecked exception: {}", ExceptionUtil.stacktraceToString(e));
-//            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AUTHENTICATION_FAIL);
-//        }
-//    }
 }

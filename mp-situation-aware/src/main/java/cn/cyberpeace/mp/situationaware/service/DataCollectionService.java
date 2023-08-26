@@ -18,11 +18,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -81,6 +76,7 @@ import org.springframework.util.MultiValueMap;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -285,7 +281,7 @@ public class DataCollectionService extends CollectionBaseService {
             fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             return new ListObjResult(fileEventModelList, Long.valueOf(response.getHits().getTotalHits().value).intValue());
         } catch (IOException e) {
-            log.error("es scrollFileEvents error: {} ", ExceptionUtil.stacktraceToString(e));
+            log.error("es scrollFileEvents error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
 
@@ -310,7 +306,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        if (CollUtil.isNotEmpty(probeIds)) {
+        if (!CollectionUtils.isEmpty(probeIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
             addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
@@ -495,7 +491,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         sourceBuilder.from(0);
-        sourceBuilder.size(NumberUtil.equals(agentSize, 0) ? 10 : agentSize * 2);
+        sourceBuilder.size(agentSize == 0 ? 10 : agentSize * 2);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -942,7 +938,7 @@ public class DataCollectionService extends CollectionBaseService {
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
                 })).collect(Collectors.toList());
 
-        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+        if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
         }
 
@@ -982,7 +978,7 @@ public class DataCollectionService extends CollectionBaseService {
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
                 })).collect(Collectors.toList());
 
-        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+        if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
         }
 
@@ -1261,7 +1257,7 @@ public class DataCollectionService extends CollectionBaseService {
                 .order(BucketOrder.key(false))
                 .minDocCount(0)
                 .extendedBounds(new LongBounds(minBounds, maxBounds))
-                .format(DatePattern.NORM_DATETIME_MINUTE_PATTERN)
+                .format("yyyy-MM-dd HH:mm")
                 .timeZone(ZoneId.systemDefault());
         sourceBuilder.aggregation(aggrBuilder);
 
@@ -1462,7 +1458,7 @@ public class DataCollectionService extends CollectionBaseService {
             //区分文件还是注册表
             builder.description(wazuhFileRoot.getRule().getDescription())
                     .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
-            if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
+            if (!CollectionUtils.isEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
                 fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
             }
         }
@@ -1545,7 +1541,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         // ruleIds
-        if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleIds())) {
             buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
         }
 
@@ -1749,7 +1745,7 @@ public class DataCollectionService extends CollectionBaseService {
             double used = BigDecimal.valueOf(wazuhHostStateModel.getDiskUsed()).doubleValue();
             double total = BigDecimal.valueOf(wazuhHostStateModel.getDiskTotal()).doubleValue();
             // 换算百分比 要 * 100
-            wazuhHostStateModel.setDiskPercent(NumberUtil.round(used * 100 / total, 2).doubleValue());
+            wazuhHostStateModel.setDiskPercent(formatNumber(used * 100 / total).doubleValue());
         }
 
         if (StringUtils.isNotBlank(output.getCPUCount())) {
@@ -1831,6 +1827,10 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         return wazuhHostStateModel;
+    }
+
+    private BigDecimal formatNumber(double number) {
+        return BigDecimal.valueOf(number).setScale(2, RoundingMode.HALF_DOWN);
     }
 
     private WazuhEnvVarEventModel convertEnvVarOutput2EnvVarModel(BaseChangeCountOutput output) {

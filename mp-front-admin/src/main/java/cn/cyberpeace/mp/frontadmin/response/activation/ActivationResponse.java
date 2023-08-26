@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.List;
+
 /**
  * @Description: 激活响应
  * @Author zhouxinghuai
@@ -19,11 +21,15 @@ public class ActivationResponse extends ActivationRequest {
     @ApiModelProperty(value = "是否是激活状态 1:是 0:否")
     private Integer isActived;
 
+    @ApiModelProperty(value = "授权延期校验码，des加密")
+    private List<String> delayVerifyCodeList;
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("expiredDate", expiredDate)
                 .append("isActived", isActived)
+                .append("delayVerifyCodeList", delayVerifyCodeList)
                 .append("activationRequest", super.toString())
                 .toString();
     }

@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.situationaware.model.FlowPortProtocolModel;
 import cn.cyberpeace.mp.situationaware.repository.FlowPortProtocolMapper;
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,10 +29,9 @@ public class FlowPortProtocolService {
     private Cache<String, Object> lfuCache = null;
 
     @PostConstruct
-    public void init(){
-        lfuCache = CacheUtil.newLFUCache(100);
+    public void init() {
+        lfuCache = CacheBuilder.newBuilder().maximumSize(100).build();
     }
-
 
     @Autowired
     public FlowPortProtocolService(FlowPortProtocolMapper flowPortProtocolMapper) {
@@ -45,7 +44,7 @@ public class FlowPortProtocolService {
      */
     public List<FlowPortProtocolModel> findAll(){
         String key = cache_prefix_model + "flow:port:protocol:" + ServletUtils.getAcceptLanguage();
-        Object cache = lfuCache.get(key);
+        Object cache = lfuCache.getIfPresent(key);
         if (Objects.nonNull(cache)){
             return (List<FlowPortProtocolModel>)cache;
         }

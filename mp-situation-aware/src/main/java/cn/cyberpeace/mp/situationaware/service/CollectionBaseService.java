@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class CollectionBaseService {
 
     public boolean isAgentNamesEmpty(List<String> agentNames) {
         List processedAgentNames = agentNamesExcludeNullValue(agentNames);
-        boolean isEmpty = CollectionUtil.isEmpty(processedAgentNames);
+        boolean isEmpty = CollectionUtils.isEmpty(processedAgentNames);
         if(isEmpty) {
             log.warn("agentNames is empty:{}", agentNames);
         }

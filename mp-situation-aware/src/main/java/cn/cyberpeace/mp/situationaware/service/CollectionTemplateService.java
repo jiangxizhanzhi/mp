@@ -18,12 +18,12 @@ import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -180,7 +180,7 @@ public class CollectionTemplateService {
         ProbeSearchCondition probeSearchCondition = generateCustomProbesCondition();
         probeSearchCondition.setIds(ArrayUtils.toArray(probeId));
         List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(templateId, probeSearchCondition);
-        if (CollectionUtil.isNotEmpty(customProbeDtos)) {
+        if (CollectionUtils.isNotEmpty(customProbeDtos)) {
             CollectionTemplateProbeDto colTempProbeDto = customProbeDtos.get(0);
             if (StringUtils.isNotBlank(colTempProbeDto.getScriptUrl())) {
                 log.info("Render Script Content...");
@@ -255,7 +255,7 @@ public class CollectionTemplateService {
             throw new MpRuntimeException("create template failed!");
         }
 
-        if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
+        if (CollectionUtils.isNotEmpty(allColTempProbeList)) {
             int cnt = templateProbeMapper.bulkCreate(allColTempProbeList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create template-probe count less than 1:{}", cnt);
@@ -263,7 +263,7 @@ public class CollectionTemplateService {
             }
         }
 
-        if (CollectionUtil.isNotEmpty(probeParamList)) {
+        if (CollectionUtils.isNotEmpty(probeParamList)) {
             int cnt = probeParamMapper.bulkCreate(probeParamList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create probe-param count less than 1:{}", cnt);
@@ -310,7 +310,7 @@ public class CollectionTemplateService {
             throw new MpRuntimeException("update template failed!");
         }
 
-        if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
+        if (CollectionUtils.isNotEmpty(allColTempProbeList)) {
             // templateId相关关联实体全部删除
             // todo 保留 通用探针>基础信息 类探针关联数据
             templateProbeMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
@@ -321,7 +321,7 @@ public class CollectionTemplateService {
             }
         }
 
-        if (CollectionUtil.isNotEmpty(probeParamList)) {
+        if (CollectionUtils.isNotEmpty(probeParamList)) {
             // templateId相关参数全部删除
             probeParamMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
             int cnt = probeParamMapper.bulkCreate(probeParamList).getSuccessCount();
@@ -465,7 +465,7 @@ public class CollectionTemplateService {
     private void processColTempCommonProbeReqs(String templateId, List<ColTempCommonProbeRequest> colTempCommonProbeReqs,
                                                List<CollectionTemplateProbeModel> allColTempProbeList, int catagory) {
 
-        if (CollectionUtil.isEmpty(colTempCommonProbeReqs)) {
+        if (CollectionUtils.isEmpty(colTempCommonProbeReqs)) {
             return;
         }
         for (ColTempCommonProbeRequest colTempProbeReq : colTempCommonProbeReqs) {
@@ -483,7 +483,7 @@ public class CollectionTemplateService {
                     .build();
 
             if (Objects.equals(0, colTempProbeReq.getDisabled())) {
-                if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
+                if (CollectionUtils.isNotEmpty(colTempProbeReq.getPaths())) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("paths", colTempProbeReq.getPaths());
                     colTempProbeModel.setConfig(jsonObject.toJSONString());
@@ -506,7 +506,7 @@ public class CollectionTemplateService {
     private void processColTempCustomProbeReqs(String templateId, List<ColTempCustomProbeRequest> colTempCustomProbeReqs,
                                                List<CollectionTemplateProbeModel> allColTempProbeList,
                                                List<ProbeParamModel> allProbeParamList) {
-        if (CollectionUtil.isEmpty(colTempCustomProbeReqs)) {
+        if (CollectionUtils.isEmpty(colTempCustomProbeReqs)) {
             return;
         }
         for (ColTempCustomProbeRequest customProbeRequest : colTempCustomProbeReqs) {
@@ -569,7 +569,7 @@ public class CollectionTemplateService {
     private void processCustomProbeScripts(String operate,
                                            List<ColTempCustomProbeRequest> customProbes,
                                            List<CollectionTemplateProbeModel> allColTempProbeList) {
-        if (CollectionUtil.isEmpty(customProbes)) {
+        if (CollectionUtils.isEmpty(customProbes)) {
             return;
         }
         // 处理脚本

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
@@ -20,12 +21,11 @@ import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,11 +73,11 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
             String updateTime = BeanUtils.getBeanGetterFieldName(SystemAlarmModel::getUpdateTime);
-            updateTime = StrUtil.toUnderlineCase(updateTime);
+            updateTime = TextUtils.humpToLine(updateTime);
             queryParams.setOrders(new String[]{"-" + updateTime});
         }
         // 默认只查询生效中的告警
-        if (ArrayUtil.isEmpty(queryParams.getAlarmStatus())) {
+        if (ArrayUtils.isEmpty(queryParams.getAlarmStatus())) {
             queryParams.setAlarmStatus(new Integer[]{AlarmStatusEnum.ENABLED.toValue()});
         }
 

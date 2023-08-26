@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.log.config.LogConfig;
 import cn.cyberpeace.mp.log.model.BaseModel;
-import cn.hutool.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

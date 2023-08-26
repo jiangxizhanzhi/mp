@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -8,19 +9,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.request.flow.AttackTypeTopRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
@@ -45,13 +39,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,6 +99,29 @@ public class FlowMonitorController {
             List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
             return ResultCommon.success(flowTrends);
         }
+    }
+
+    @ApiOperation(value = "场景实时攻击")
+    @GetMapping("/scene_real_time_attack")
+    public ServiceResult<Long> getSceneRealTimeAttack(FlowTrendRequest flowTrendRequest) {
+        Long count = 0L;
+        if (StringUtils.isEmpty(flowTrendRequest.getSceneId())) {
+            return ResultCommon.success(count);
+        }
+
+        List<FlowTrend> flowTrends;
+        if (CollectionUtils.isNotEmpty(flowTrendRequest.getElementIds())) {
+            flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
+        } else {
+            flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
+        }
+        if (CollectionUtils.isNotEmpty(flowTrends)) {
+            count = flowTrends.stream()
+                    .mapToLong(FlowTrend::getDataSize)
+                    .sum();
+        }
+
+        return ResultCommon.success(count);
     }
 
     /**
@@ -161,13 +178,32 @@ public class FlowMonitorController {
 
     @ApiOperation(value = "攻击流量各类别统计")
     @GetMapping("/attack_type_count")
-    public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(AttackTypeTopRequest baseRequest) {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
         if (StringUtils.isEmpty(baseRequest.getSceneId())) {
             return ResultCommon.success(new ArrayList<>());
         }
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
+        if (baseRequest.getTopNWithOther() != null) {
+            if (attackTypeCounts != null && attackTypeCounts.size() > baseRequest.getTopNWithOther()) {
+                Collections.sort(attackTypeCounts, (a1, a2) -> a2.getTimes() - a1.getTimes());
+                int other = 0;
+                List<FlowAttackTypeCount> result = new ArrayList<>();
+                for (int i = 0; i < attackTypeCounts.size(); i++) {
+                    if (i < baseRequest.getTopNWithOther()) {
+                        result.add(attackTypeCounts.get(i));
+                    } else {
+                        other += attackTypeCounts.get(i).getTimes();
+                    }
+                }
+                var otherCount = new FlowAttackTypeCount();
+                otherCount.setAttackType(MessageCommon.get("cscene.flowtype.other"));
+                otherCount.setTimes(other);
+                result.add(otherCount);
+                return ResultCommon.success(result);
+            }
+        }
         return ResultCommon.success(attackTypeCounts);
     }
 

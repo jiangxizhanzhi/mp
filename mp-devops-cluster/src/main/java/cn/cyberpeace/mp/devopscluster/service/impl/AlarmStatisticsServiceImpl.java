@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.devopscluster.enums.TimeSlotEnums;
 import cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel;
@@ -16,8 +17,6 @@ import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devopscluster.service.fields.AlarmStatisticsFields;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +28,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -148,7 +142,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         TimeUnitProcessor timeUnitProcessor = DATE_PROCESSOR_MAP.get(unit);
         HumanCondition condition = new HumanCondition()
                 .selectAs(Sum.f(AlarmStatisticsModel::getAlarmCount), AlarmStatisticsVO::getAlarmCount)
-                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getCreateTime, timeUnitProcessor.getSqlDateFormatter()), StrUtil.toUnderlineCase(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
+                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getCreateTime, timeUnitProcessor.getSqlDateFormatter()), TextUtils.humpToLine(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
                 .filterIn(AlarmStatisticsModel::getAlarmType, types)
                 .filterGreaterThanOrEqual(AlarmStatisticsModel::getCreateTime, startTime)
                 .filterLessThanOrEqual(AlarmStatisticsModel::getCreateTime, endTime)
@@ -235,7 +229,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
             endTime = timeUnitProcessor.getPreviousTimeCalcFunc().apply(endTime);
         }
 
-        finalList = CollectionUtil.reverse(finalList);
+        Collections.reverse(finalList);
         return finalList;
     }
 

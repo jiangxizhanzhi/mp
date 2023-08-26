@@ -19,4 +19,9 @@ public class FrontAdminConfig {
     private boolean activEnable = false;
 
     private String licenseDir = DEFAULT_LICENSE_DIR;
+
+    private boolean licenseRemindEnable = true;
+
+    private Integer licenseRemindTime = 30;
+
 }

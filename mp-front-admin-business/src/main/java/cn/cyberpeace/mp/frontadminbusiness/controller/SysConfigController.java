@@ -18,25 +18,20 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -89,11 +84,11 @@ public class SysConfigController {
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
         log.info("updateConfig:{}", updateConfig);
-        checkService.updateCheck(Arrays.asList(updateConfig));
+        checkService.updateCheck(Collections.singletonList(updateConfig));
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
-            sysConfigService.publishConfigUpdateEvent(CollectionUtil.toList(updateConfig));
+            sysConfigService.publishConfigUpdateEvent(Collections.singletonList(updateConfig));
             return ResultCommon.success();
         } else {
             log.error("update config failed! {}", updateConfig);

@@ -21,8 +21,8 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +119,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         if (StringUtils.isBlank(parentId)) {
             // parent为空，则查询所有权限
             List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
-            if (CollectionUtil.isEmpty(targets)) {
+            if (CollectionUtils.isEmpty(targets)) {
                 return new ArrayList<>();
             }
             List<TargetBo> tree = toTree(targets);
@@ -142,7 +142,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         BeanUtils.copyProperties(parentTarget, targetBo);
         targetBo.execute(queryChildTargetOperation);
 
-        return CollectionUtil.toList(targetBo);
+        return Collections.singletonList(targetBo);
     }
 
     @Override
@@ -261,7 +261,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
-            if (CollectionUtil.isNotEmpty(t.getChildren())) {
+            if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
         });

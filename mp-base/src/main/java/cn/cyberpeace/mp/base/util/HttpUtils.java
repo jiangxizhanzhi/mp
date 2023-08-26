@@ -18,9 +18,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +65,262 @@ public class HttpUtils {
         httpPost.setConfig(requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * post请求带header
+     * @param url
+     * @param formMap
+     * @param headers
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpPost(String url, Map<String, Object> formMap, Map<String, String> headers) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        FormBody.Builder formBodyBuilder = new FormBody.Builder();
+        for (Map.Entry<String, Object> entry : formMap.entrySet()) {
+            if (Objects.nonNull(entry.getValue())) {
+                formBodyBuilder.add(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        }
+
+        RequestBody requestBody = formBodyBuilder.build();
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .post(requestBody);
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    /**
+     * http post请求
+     * @param url
+     * @param body
+     * @param headers
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpPost(String url, String body, Map<String, String> headers) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            URL urlObj = new URL(url);
+            connection = (HttpURLConnection) urlObj.openConnection();
+            connection.setRequestMethod("POST");
+
+            // Set request headers
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                connection.setRequestProperty(entry.getKey(), entry.getValue());
+            }
+
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(body.getBytes());
+                os.flush();
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                return response.toString();
+            }
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    /**
+     * http put请求
+     * @param url
+     * @param formMap
+     * @param headers
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpPut(String url, Map<String, Object> formMap, Map<String, String> headers) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        FormBody.Builder formBodyBuilder = new FormBody.Builder();
+        for (Map.Entry<String, Object> entry : formMap.entrySet()) {
+            if (Objects.nonNull(entry.getValue())) {
+                formBodyBuilder.add(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        }
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .put(formBodyBuilder.build());
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    /**
+     * http put请求
+     * @param url
+     * @param body
+     * @param headers
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpPut(String url, String body, Map<String, String> headers) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .put(requestBody); // Set request method as PUT
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    /**
+     * http delete请求
+     * @param url
+     * @param body
+     * @param headers
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpDelete(String url, String body, Map<String, String> headers) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .delete(requestBody);
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    /**
+     * http get请求
+     * @param url
+     * @param headers
+     * @param timeout
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpGet(String url, Map<String, String> headers, Integer timeout) throws IOException {
+        HttpURLConnection connection = null;
+        try {
+            URL urlObj = new URL(url);
+            connection = (HttpURLConnection) urlObj.openConnection();
+            connection.setRequestMethod("GET");
+
+            // Set request headers
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                connection.setRequestProperty(entry.getKey(), entry.getValue());
+            }
+
+            if (Objects.nonNull(timeout) && timeout > 0) {
+                connection.setConnectTimeout(timeout);
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                return response.toString();
+            }
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    /**
+     * post请求带文件
+     * @param url
+     * @param headers
+     * @param fileList
+     * @return
+     * @throws IOException
+     */
+    public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+
+        for (File file : fileList) {
+            multipartBuilder.addFormDataPart("file", file.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), file));
+        }
+
+        RequestBody requestBody = multipartBuilder.build();
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .post(requestBody);
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    private static void uploadFile(File file, OutputStream os) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+        }
     }
 
     /**

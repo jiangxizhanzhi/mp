@@ -9,8 +9,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeRoleService;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeRoleFields;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
     @Override
     public List<RoleModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
-        if (CollUtil.isNotEmpty(noticeIds)) {
+        if (CollectionUtils.isNotEmpty(noticeIds)) {
             humanCondition.link(RoleModel.class, SysNoticeRoleModel.class)
                     .filterLink(RoleModel.class, RoleModel::getId, SysNoticeRoleModel.class, SysNoticeRoleModel::getRole)
                     .currentLink(SysNoticeRoleModel.class)
@@ -49,7 +48,7 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
-        if (CollectionUtil.isNotEmpty(noticeIds)) {
+        if (CollectionUtils.isNotEmpty(noticeIds)) {
             condition.filterIn(SysNoticeRoleModel::getNoticeId, noticeIds.toArray());
         }
         int rows = getModelMapper().filterDelete(condition);

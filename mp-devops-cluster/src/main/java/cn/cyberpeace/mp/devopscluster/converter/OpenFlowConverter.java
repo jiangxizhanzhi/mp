@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.OpenFlowPageParams;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.OpenFlowService;
@@ -9,8 +10,6 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.vo.OpenFlowMatchConditionVO;
 import cn.cyberpeace.mp.devopscluster.vo.OpenFlowVO;
 import cn.cyberpeace.mp.devopscluster.vo.convert.OpenFlowVoConverter;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -43,8 +42,7 @@ public class OpenFlowConverter implements BaseConverter{
         List<OpenFlowVO> openFlowVOS = openFlows.stream().map(v -> {
             OpenFlowVO openFlowVO = openFlowVoConverter.sourceToTarget(v);
             Map<String, Object> matchConditionMap = convertMatchCondition(v.getMatchCondition());
-            JSONObject object = JSONUtil.parseObj(matchConditionMap);
-            OpenFlowMatchConditionVO openFlowMatchConditionVO =  JSONUtil.toBean(object, OpenFlowMatchConditionVO.class);
+            OpenFlowMatchConditionVO openFlowMatchConditionVO = JsonUtils.mapToBean(matchConditionMap, OpenFlowMatchConditionVO.class);
             openFlowVO.setOpenFlowMatchConditionVO(openFlowMatchConditionVO);
             return openFlowVO;
         }).collect(Collectors.toList());

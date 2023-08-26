@@ -5,13 +5,16 @@ import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.hutool.core.io.FileUtil;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Slf4j
 @Component
@@ -41,7 +44,8 @@ public class DefaultImageInit implements ApplicationRunner {
                     log.info("DefaultImageInit imgDirEnum value is {}", imgDirEnum.getEndPathName());
                     String path = staticLocation.concat(imgDirEnum.getEndPathName());
                     log.info("DefaultImageInit path value is {}", path);
-                    if (FileUtil.isDirectory(path)) {
+                    Path dirPath = Paths.get(path);
+                    if (Files.isDirectory(dirPath)) {
                         LocalFileMappingCommon.syncDir(imgDirEnum.getGroup(), path);
                     }
                 }

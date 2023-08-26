@@ -26,7 +26,6 @@ import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.MenuExtraInfoService;
-import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -212,7 +211,7 @@ public class MenuSetService {
             String templateId = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId)).getTemplateId();
             targets = listAll(AuthConstant.DEFAULT_TENANT, 1, templateId);
         }
-        if (CollectionUtil.isEmpty(targets)) {
+        if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
         return targets;
@@ -278,7 +277,7 @@ public class MenuSetService {
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
-            if (CollectionUtil.isNotEmpty(t.getChildren())) {
+            if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
         });

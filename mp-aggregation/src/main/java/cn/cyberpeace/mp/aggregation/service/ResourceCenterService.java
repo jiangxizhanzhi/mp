@@ -7,22 +7,22 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneExporter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,6 +34,14 @@ import java.util.List;
 @Service
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
+
+    private static String LOGO_FILEPATH_FORMAT = "/api/mp/file/%s";
+
+    private static String LOGO_FILE_SUFFIX = "/api/mp/file/";
+
+    private static String LOGO_NAME = "logo.png";
+
+
     private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
     private static String UMOUNT_CMD = "umount %s";
 
@@ -56,16 +64,28 @@ public class ResourceCenterService {
         // 处理附件
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
-            if (FileUtil.exist(sceneFilePath)) {
+            File file = new File(sceneFilePath);
+            if (file.exists()) {
                 String fdfsPath = FsCommon.upload(sceneFilePath);
-                String fileName = FileUtil.getName(sceneFilePath);
+                String fileName = file.getName();
                 fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
             } else {
                 log.info("import scene , no scene file for path {}", sceneFilePath);
             }
         }
+        String logoPath = ymlFilePath + "/" + LOGO_NAME;
+        // 处理logo
+        String fdfsLogoFilePath = null;
+        File logo = new File(logoPath);
+        if (logo.exists()) {
+            String fdfsPath = FsCommon.upload(logoPath);
+            fdfsLogoFilePath = String.format(LOGO_FILEPATH_FORMAT, fdfsPath);
+        } else {
+            log.info("import logo , no logo file for path {}", sceneFilePath);
+        }
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
+        csceneBO.setLogo(fdfsLogoFilePath);
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
@@ -75,7 +95,20 @@ public class ResourceCenterService {
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath,sceneNumber,disableImageExport);
+        String logo = cscene.getSource().getObj().getLogo();
+        //存在logo图片则导出
+        if (StringUtils.isNotEmpty(logo)) {
+            String logoPath = StringUtils.replaceOnce(logo, LOGO_FILE_SUFFIX, "");
+            byte[] content = FsCommon.downloadRawContent(logoPath);
+            try {
+                FileUtils.writeByteArrayToFile(new File(envPath + "/" + "logo.png"), content);
+            } catch (IOException e) {
+                log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
+                throw new MpRuntimeException(BaseErrorCode.ERROR);
+            }
+        }
+
+        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
         return new ServiceResult<>(result);
     }
 

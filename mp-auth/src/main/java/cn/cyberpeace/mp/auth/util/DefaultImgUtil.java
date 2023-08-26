@@ -6,12 +6,12 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -108,7 +108,7 @@ public class DefaultImgUtil {
             humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
             List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(mappingModels)) {
-                url = getPathByGroup(mappingModels.get(0).getGroup()).concat(FileUtil.FILE_SEPARATOR).concat(mappingModels.get(0).getName());
+                url = getPathByGroup(mappingModels.get(0).getGroup()).concat(File.separator).concat(mappingModels.get(0).getName());
             }
         }
 

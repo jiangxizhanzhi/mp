@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
+import cn.cyberpeace.mp.auth.util.EncryptUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
-import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
-import cn.hutool.core.util.RandomUtil;
+import cn.cyberpeace.mp.frontadmin.util.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +101,7 @@ public class SysCtlService {
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             // 只有在一个新的license第一次激活的时候才会写入系统时间戳
-            String suffix = RandomUtil.randomString(6);
+            String suffix = RandomUtils.randomString(6);
             sysActivCtlModel.setSuffix(suffix);
             sysActivCtlModel.setStatus(SysActivCtlModel.STATUS_UNUSED);
 

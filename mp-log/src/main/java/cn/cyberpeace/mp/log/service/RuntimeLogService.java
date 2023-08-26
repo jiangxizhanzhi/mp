@@ -6,10 +6,10 @@ import cn.cyberpeace.mp.log.converter.RunTimeLogDTOConverter;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
-import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -39,7 +39,7 @@ public class RuntimeLogService {
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll(basePageRequest);
         allLogReportDTOList.addAll(mpAndCpLogList);
         // 时间过滤
-        if (CollectionUtil.isNotEmpty(allLogReportDTOList)) {
+        if (CollectionUtils.isNotEmpty(allLogReportDTOList)) {
             if (Objects.nonNull(basePageRequest.getStartDate()) && Objects.nonNull(basePageRequest.getEndDate())) {
                 allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
                         logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
@@ -52,7 +52,7 @@ public class RuntimeLogService {
 
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
         // 添加临时返回id
-        if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
+        if (CollectionUtils.isNotEmpty(runTimeLogDTOS)) {
             runTimeLogDTOS.forEach(dto -> {
                 dto.setId(TextUtils.uuid());
             });

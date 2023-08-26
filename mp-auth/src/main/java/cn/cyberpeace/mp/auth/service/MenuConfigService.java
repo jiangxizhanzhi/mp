@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +55,7 @@ public class MenuConfigService {
         List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
         Set<String> authorityMenuIdsSet = new HashSet<>(authorityMenuIds);
         targets = targets.stream().filter(t -> authorityMenuIdsSet.contains(t.getIdentifier())).collect(Collectors.toList());
-        if (CollectionUtil.isEmpty(targets)) {
+        if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
         List<TargetBo> tree = toTree(targets);
@@ -89,7 +88,7 @@ public class MenuConfigService {
             String templateId = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId)).getTemplateId();
             targets = listAll(AuthConstant.DEFAULT_TENANT, 1, templateId);
         }
-        if (CollectionUtil.isEmpty(targets)) {
+        if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
         List<TargetBo> tree = toTree(targets);
@@ -145,7 +144,7 @@ public class MenuConfigService {
 
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
-            if (CollectionUtil.isNotEmpty(t.getChildren())) {
+            if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
         });

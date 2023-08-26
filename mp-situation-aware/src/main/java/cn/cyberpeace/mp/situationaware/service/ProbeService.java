@@ -10,19 +10,15 @@ import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.*;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
 import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +108,7 @@ public class ProbeService {
 
         List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
 
-        if (CollectionUtil.isNotEmpty(params)) {
+        if (CollectionUtils.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
                     params.stream().map(paramReq -> {
                         ProbeParamModel paramModel = ProbeParamModel.builder()
@@ -158,7 +154,7 @@ public class ProbeService {
         //新增探针，默认为自定义探针
         //probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
 
-        if (CollectionUtil.isNotEmpty(probeRequest.getOsTypes())) {
+        if (CollectionUtils.isNotEmpty(probeRequest.getOsTypes())) {
             String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
             probeModelToUpdate.setOsType(osTypes);
         }
@@ -193,7 +189,7 @@ public class ProbeService {
 
 
         List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
-        if (CollectionUtil.isNotEmpty(params)) {
+        if (CollectionUtils.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
                     params.stream().map(paramReq -> {
                         ProbeParamModel paramModel = ProbeParamModel.builder()

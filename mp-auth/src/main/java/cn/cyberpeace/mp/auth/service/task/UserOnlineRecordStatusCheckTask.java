@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.auth.service.task;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class UserOnlineRecordStatusCheckTask implements Runnable {
         UserOnlineRecordService userOnlineRecordService = BeanCommon.getBean(UserOnlineRecordService.class);
         List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listCurrentOfflined(null);
 
-        if (CollectionUtil.isNotEmpty(offlineList)) {
+        if (CollectionUtils.isNotEmpty(offlineList)) {
             // 2. 更改为已下线，即status改为1
             List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
             for (UserOnlineRecordModel model : offlineList) {
