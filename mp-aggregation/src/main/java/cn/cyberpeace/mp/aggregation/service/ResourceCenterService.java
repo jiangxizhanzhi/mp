@@ -78,6 +78,7 @@ public class ResourceCenterService {
             csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
         }
         csceneBO.setId(null);
+        csceneBO.setType(CsceneModel.Type.INSTANCE);
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 
