@@ -35,6 +35,8 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
@@ -112,6 +114,9 @@ public class FlowMonitorService {
 
     @Autowired
     private FlowInfoServiceImpl flowServiceImpl;
+
+    @Autowired
+    private SceneMapper sceneMapper;
 
 
     /**
@@ -516,6 +521,12 @@ public class FlowMonitorService {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
+            if (CollectionUtils.isNotEmpty(sceneIds) && sceneIds.size() == 1) {
+                String sceneId = csceneInstanceService.getSceneId(sceneIds.get(0));
+                if (sceneMapper.get(sceneId).getDeleted()) {
+                    endTime = sceneMapper.get(sceneId).getUpdateTime();
+                }
+            }
         }
 
         if (Objects.isNull(startTime)) {
