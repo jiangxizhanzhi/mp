@@ -19,6 +19,9 @@ public class FlowAttackTime {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
+    @ApiModelProperty("节点ID")
+    private String nodeId;
+
     @ApiModelProperty("ip")
     private String ip;
 

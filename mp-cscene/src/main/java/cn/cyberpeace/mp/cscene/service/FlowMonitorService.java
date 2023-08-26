@@ -435,6 +435,7 @@ public class FlowMonitorService {
                         .times(bo.getTimes())
                         .nodeName(bo.getNodeName())
                         .ip(bo.getIp())
+                        .nodeId(bo.getNodeId())
                         .build()
                 ).collect(Collectors.toList());
     }
