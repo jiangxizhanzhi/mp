@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
@@ -520,6 +521,11 @@ public class FlowMonitorService {
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔8小时
             startTime = endTime.minusHours(4);
+        }
+        if (CollectionUtils.isNotEmpty(sceneIds) && sceneIds.size() == 1) {
+            String sceneId = csceneInstanceService.getSceneId(sceneIds.get(0));
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            startTime = sceneHandler.getScene().getCreateTime();
         }
 
         if (Objects.isNull(segmentCount)) {
