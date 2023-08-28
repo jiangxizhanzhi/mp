@@ -180,8 +180,9 @@ public class SysActivationService {
             }
 
             String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
+            String oldLicenseCode = "";
             if (StringUtils.isNotBlank(validActivCtlModel.getLicenseCode())) {
-                String oldLicenseCode = validActivCtlModel.getLicenseCode();
+                oldLicenseCode = validActivCtlModel.getLicenseCode();
                 if (Objects.equals(oldLicenseCode, encryptedLicenseCode)) {
                     log.error("License code is already used!");
                     throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_CODE_USED);
@@ -214,7 +215,7 @@ public class SysActivationService {
                 ACTIVATION_CONTENT = null;
 
                 // 校验通过，更新加密文件存储磁盘
-                updateEncryptedFile(activationRequest, oldExpireDate, delayVerifyCodeList);
+                updateEncryptedFile(activationRequest, oldExpireDate, delayVerifyCodeList, oldLicenseCode);
 
                 // 更新数据库激活限制配置
                 updateActivCtlAfterActivationSuccess(activationRequest, oldExpireDate);
@@ -425,15 +426,16 @@ public class SysActivationService {
      * @param activationRequest
      * @param expireDate
      * @param delayVerifyCodeList
+     * @param oldLicenseCode
      */
-    private void updateEncryptedFile(ActivationRequest activationRequest, String expireDate, List<String> delayVerifyCodeList) {
+    private void updateEncryptedFile(ActivationRequest activationRequest, String expireDate, List<String> delayVerifyCodeList, String oldLicenseCode) {
         String verifyCode = activationRequest.getVerifyCode();
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
         String expiredDateStr = getDelayExpireDateStr(activationRequest.getDeadline(), expireDate);
         activationResponse.setExpiredDate(expiredDateStr);
-        activationResponse.setVerifyCode(encryptedVerifyCode);
+        activationResponse.setVerifyCode(oldLicenseCode);
         if (CollectionUtils.isNotEmpty(delayVerifyCodeList)) {
             delayVerifyCodeList.add(encryptedVerifyCode);
         } else {
