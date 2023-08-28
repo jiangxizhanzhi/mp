@@ -50,7 +50,7 @@ public class RunTimeLogController {
     private OptionService optionService;
 
     @GetMapping("/logs")
-    @ApiOperation(value = "分页查询运行时日志", notes = "")
+    @ApiOperation(value = "行为审计", notes = "")
     public ListObjServiceResult<RunTimeLogDTO> queryLogs(BasePageRequest basePageRequest) {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }

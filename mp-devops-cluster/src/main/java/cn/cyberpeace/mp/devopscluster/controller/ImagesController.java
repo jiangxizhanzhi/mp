@@ -119,7 +119,7 @@ public class ImagesController {
     /**
      * 分页查询
      */
-    @ApiOperation("分页查询")
+    @ApiOperation("练习资产管理")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
