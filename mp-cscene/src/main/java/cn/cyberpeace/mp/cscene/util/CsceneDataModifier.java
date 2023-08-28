@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -449,50 +448,6 @@ public class CsceneDataModifier {
                 }
             });
         }
-    }
-
-    public static void handlerGns3Router(CsceneBO csceneBO) {
-        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
-            return;
-        }
-        if (csceneBO.getSceneConfig().getTopology().getElements() == null) {
-            return;
-        }
-        ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
-        if (scenePluginDataBO.getElements() == null) {
-            return;
-        }
-        List<String> gns3Routers = new ArrayList<>();
-        for (Map.Entry<String, Map<String, Object>> entry : scenePluginDataBO.getElements().entrySet()) {
-            var nodeId = entry.getKey();
-            var cloudElement = entry.getValue();
-            if (cloudElement.containsKey("image_uuid") &&
-                    cloudElement.get("image_uuid").toString().equals(getGns3RouterImageUuid())
-                    || "854f7c24-060f-4dbd-b771-68eab207a072".equals(cloudElement.get("image_uuid"))
-                    || "854f7c24-060f-4dbd-b771-68eab207a073".equals(cloudElement.get("image_uuid"))) {
-                gns3Routers.add(nodeId);
-            }
-        }
-        if (gns3Routers.size() == 0) {
-            return;
-        }
-        // 补充gns3插件
-        ScenePluginDataBO gns3Plugin = new ScenePluginDataBO();
-        gns3Plugin.setScene(new HashMap<>());
-        gns3Plugin.setElements(new HashMap<>());
-        for (String gns3Router : gns3Routers) {
-            var cloudElement = scenePluginDataBO.getElements().get(gns3Router);
-            var gns3ImageInfo = getGns3ImageInfos().get(cloudElement.get("image_uuid"));
-            if (gns3ImageInfo != null) {
-                Map<String, Object> content = new HashMap<>();
-                content.put("static_routes", cloudElement.get("static_routes"));
-                content.put("image", gns3ImageInfo.getImage());
-                content.put("platform", gns3ImageInfo.getPlatform());
-                content.put("ram", gns3ImageInfo.getRam());
-                gns3Plugin.getElements().put(gns3Router, content);
-            }
-        }
-        csceneBO.getSceneConfig().getPlugins().put("cpgns3", gns3Plugin);
     }
 
     public static void handlerInputEnableRecording(CsceneBO csceneBO) {
@@ -1086,38 +1041,4 @@ public class CsceneDataModifier {
         }
     }
 
-    private static Map<String, Gns3ImageInfo> getGns3ImageInfos() {
-        Map<String, Gns3ImageInfo> result = new HashMap<>();
-        Gns3ImageInfo c2691Router = new Gns3ImageInfo();
-        c2691Router.setImage("c2691-ik9s-mz.123-22.image");
-        c2691Router.setPlatform("c2691");
-        c2691Router.setRam(198);
-        result.put(getGns3RouterImageUuid(), c2691Router);
-
-        Gns3ImageInfo c3725Router = new Gns3ImageInfo();
-        c3725Router.setImage("c3725-adventerprisek9-mz.124-7.bin");
-        c3725Router.setPlatform("c3725");
-        c3725Router.setRam(198);
-        result.put("854f7c24-060f-4dbd-b771-68eab207a072", c3725Router);
-
-        Gns3ImageInfo c2600Router = new Gns3ImageInfo();
-        c2600Router.setImage("c2600-ik9s-mz.123-19.bin");
-        c2600Router.setPlatform("c2600");
-        c2600Router.setRam(198);
-        result.put("854f7c24-060f-4dbd-b771-68eab207a073", c2600Router);
-
-        return result;
-    }
-
-    private static String getGns3RouterImageUuid() {
-        return Gns3Singleton.gns3AppConfig.getGns3ImageUuids().get(0);
-    }
-
-    @Getter
-    @Setter
-    private static class Gns3ImageInfo {
-        private String image;
-        private String platform;
-        private Integer ram;
-    }
 }

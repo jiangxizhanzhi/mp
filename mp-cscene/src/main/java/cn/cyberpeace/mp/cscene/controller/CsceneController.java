@@ -85,7 +85,6 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkIngressAndEgress(csceneBO);
         CsceneDataModifier.correctQuickCreateSupport(csceneBO);
         CsceneDataModifier.checkFirewallRules(csceneBO);
-        CsceneDataModifier.handlerGns3Router(csceneBO);
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
     }

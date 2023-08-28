@@ -60,9 +60,6 @@ mp.auth.ext-var.authenticate-encoder-iterations=10000
 mp.auth.ext-var.logout-keep-secret-user=3cf215471268482c88a9986283e38c27
 
 
-mp.sceneplugingns3.ext-var.gns3-ip=10.100.7.1
-mp.sceneplugingns3.ext-var.gns3-port=8088
-
 # for kaptcha
 #kaptcha.text-producer.ext-var.character=
 
