@@ -97,7 +97,9 @@ public class FlowMonitorController {
     @GetMapping("/scene_attacked_port")
     public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
         List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
-
+        if (CollectionUtils.isNotEmpty(list) && request.getTopSize() != null && list.size() > request.getTopSize()) {
+            list = list.subList(0, request.getTopSize());
+        }
         return ResultCommon.success(list);
     }
 
