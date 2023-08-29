@@ -23,6 +23,8 @@ public abstract class BaseCsceneBO<
     private String createUser;
     @ApiModelProperty(value = "创建用户名")
     private String createUsername;
+    @ApiModelProperty(value = "创建用户姓名")
+    private String createName;
     @ApiModelProperty(value = "角色信息")
     private List<R> roles;
     @ApiModelProperty(value = "场景名称")

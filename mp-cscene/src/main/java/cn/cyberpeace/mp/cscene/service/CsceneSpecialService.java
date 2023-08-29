@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -87,6 +89,9 @@ public class CsceneSpecialService {
 
     @Resource
     private ScenePluginCloudSceneService cloudSceneService;
+
+    @Autowired
+    private UserService userService;
 
     @Data
     public static class CsceneElementVirtualStat {
@@ -398,6 +403,14 @@ public class CsceneSpecialService {
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
         if (CollectionUtils.isNotEmpty(data)) {
+            for (CsceneInstanceStat stat : data) {
+                if (StringUtils.isNotEmpty(stat.getCreateUsername())) {
+                    UserModel userModel = userService.getByUserName(stat.getCreateUsername());
+                    if (userModel != null) {
+                        stat.setCreateName(userModel.getName());
+                    }
+                }
+            }
             List<String> sceneIds = data.stream().map(d -> d.getId()).collect(Collectors.toList());
 
             var humanCondition2 = new HumanCondition()

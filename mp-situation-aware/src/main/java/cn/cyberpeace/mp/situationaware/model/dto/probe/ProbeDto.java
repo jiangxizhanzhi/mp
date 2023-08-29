@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,5 +42,12 @@ public class ProbeDto extends ProbeModel {
      */
     @ApiModelProperty(value = "脚本参数")
     private String parameter;
+
+    /**
+     * 创建者用户名
+     */
+    @ApiModelProperty(value = "创建者姓名")
+    @DefaultStr
+    private String creatorName;
 
 }

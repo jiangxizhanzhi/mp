@@ -472,6 +472,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             ObjServiceResult<UserModel> userResult = userService.get(noticeDto.getPublisher());
             if (Objects.nonNull(userResult.getSource())) {
                 noticeDto.setPublisherUserName(userResult.getSource().getObj().getUsername());
+                noticeDto.setPublisherName(userResult.getSource().getObj().getName());
             }
         }
 

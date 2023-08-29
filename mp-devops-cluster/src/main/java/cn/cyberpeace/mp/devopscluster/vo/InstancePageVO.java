@@ -68,6 +68,12 @@ public class InstancePageVO extends BaseVO {
     private String userName;
 
     /**
+     * 创建者
+     */
+    @ApiModelProperty("创建姓名")
+    private String userRealname;
+
+    /**
      * 运行时间
      */
     @ApiModelProperty("运行时间")
