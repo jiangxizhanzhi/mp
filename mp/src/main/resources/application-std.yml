@@ -232,6 +232,7 @@ mp:
   flow:
     trex-image: tgn-trex
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
+    trex-pass: QAZwsx123#
   sceneplugincloud:
     cpcloud-server: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}
     delete-retry-times: 2
