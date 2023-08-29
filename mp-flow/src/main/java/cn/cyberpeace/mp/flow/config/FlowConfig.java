@@ -24,4 +24,9 @@ public class FlowConfig {
      */
     private String cpUrl;
 
+    /**
+     * trex虚拟机密码
+     */
+    private String trexPass;
+
 }
