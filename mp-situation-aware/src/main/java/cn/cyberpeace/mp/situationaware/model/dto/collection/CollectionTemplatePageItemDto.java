@@ -16,4 +16,9 @@ public class CollectionTemplatePageItemDto extends CollectionTemplateModel {
 
     @ApiModelProperty(value = "探针个数")
     private Integer probeCounts;
+    /**
+     * 创建者用户名
+     */
+    @ApiModelProperty(value = "创建者姓名")
+    private String creatorName;
 }

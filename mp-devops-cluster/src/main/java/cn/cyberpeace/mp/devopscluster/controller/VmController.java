@@ -27,11 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -190,12 +186,14 @@ public class VmController {
                 csceneNodeInfoBO = source.get(instanceModel.getName());
             }
             String userName = "";
+            String userRealname = "";
             String userId = csceneNodeInfoBO.getUserId();
             if (StringUtils.isNotBlank(userId)) {
                 Optional<UserBo> optional =
                         tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
+                    userRealname = optional.get().getName();
                 }
             } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
                 String createUser = uuid2User.get(instanceModel.getName());
@@ -203,6 +201,7 @@ public class VmController {
                         tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
+                    userRealname = optional.get().getName();
                 }
             }
 
@@ -212,6 +211,7 @@ public class VmController {
                     .node(instanceModel.getNode())
                     .addressList(instanceModel.getAddressList())
                     .userName(userName)
+                    .userRealname(userRealname)
                     .referenceType(csceneNodeInfoBO.getReferenceType())
                     .event(csceneNodeInfoBO.getEvent())
                     .eventStatus(csceneNodeInfoBO.getEventStatus())

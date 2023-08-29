@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -78,6 +80,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
+
+    @Autowired
+    private UserService userService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -346,8 +351,17 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         });
         // 转为Map后顺序被打乱，此时再次排序
         listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
-        return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
-                listResult.getSource().getFields()));
+        if (CollectionUtils.isNotEmpty(listResult.getSource().getObjs())) {
+            for (CsceneBO temp : csceneBOs) {
+                if (StringUtils.isNotEmpty(temp.getCreateUsername())) {
+                    UserModel userModel = userService.getByUserName(temp.getCreateUsername());
+                    if (userModel != null) {
+                        temp.setCreateName(userModel.getName());
+                    }
+                }
+            }
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal()));
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
