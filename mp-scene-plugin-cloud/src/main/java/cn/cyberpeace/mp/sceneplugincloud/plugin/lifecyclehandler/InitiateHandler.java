@@ -55,16 +55,511 @@ public class InitiateHandler extends HandlerCommon {
 
     private List<String> existCidrs;
 
-    private void prepareExistCidrs() {
-        if (existCidrs == null) {
-            existCidrs = getHandlerUtils().statExistCidrs();
+    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
+        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+    }
+
+    public void initCoreType(CloudPluginSceneElementBO element) {
+        Integer role = element.getRole();
+        CoreType coreType = CoreType.NETWORK;
+        if (role != null) {
+            if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
+                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
+            ) {
+                coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else {
+                    coreType = CoreType.FIREWALL;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            }
         }
+        element.setCoreType(coreType);
+    }
+
+    public void initiate() {
+        this.prepareEventProcess();
+
+        getPluginHandler().getSceneHandler().addProgressPercentage(5);
+
+        // 标记已设置的ip的端口 后续需要区分端口ip是来自参数还是自动分配
+        markIpSetedPorts();
+        // 将节点排序 排序的不用会导致网络分配的不同,因此需要有统一的排序
+        List<CloudPluginSceneElementBO> allCloudElements = getOrderedAllCloudElements();
+
+        this.afterOrderElements(allCloudElements);
+
+        // 部分启动和动态更新 需要区分出哪些节点不需要处理
+        List<CloudPluginSceneElementBO> cloudElements = new ArrayList<>();
+        List<CloudPluginSceneElementBO> noEventElements = new ArrayList<>();
+        for (var e : allCloudElements) {
+            if (getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId())) {
+                cloudElements.add(e);
+            } else {
+                noEventElements.add(e);
+            }
+        }
+
+        // 初始化节点属性
+        var initiateElementTasks = cloudElements.stream()
+                .map(cloudElement -> (Runnable) () -> initiateElementBasePropertiesProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_BASE_PROPERTIES, () -> {
+                initiateElementTasks.forEach(task -> task.run());
+            });
+        }
+
+        getPluginHandler().createElementNetworks();
+
+        // 初始化ip池
+        var initiateElementIpPoolTasks = cloudElements.stream()
+                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
+                .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementIpPoolTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> {
+                initiateElementIpPoolTasks.forEach(task -> task.run());
+            });
+        }
+
+        // 初始化端口, 先初始化路由端口, 再初始化其它端口
+        List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
+        List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
+        loadInitaitePortsTasks(cloudElements, initiateRouterElementPortsTasks, initiateOtherElementPortsTasks);
+        if (!initiateRouterElementPortsTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateRouterElementPortsTasks));
+        }
+        if (!initiateOtherElementPortsTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateOtherElementPortsTasks));
+        }
+
+        // 存在需要重新分配的ip，重新分配ip
+        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
+                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
+                .collect(Collectors.toList());
+        if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
+            if (CollectionUtils.isNotEmpty(networkElements)) {
+                runSceneProgress(SceneProcess.PORT_CHECK, () -> {
+                    portCheck(networkElements);
+                });
+            }
+        }
+        if (CollectionUtils.isNotEmpty(networkElements)) {
+            runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
+                reallocateIpPorts(networkElements);
+            });
+        }
+
+        // 分配 fwdnsInterfaceIp
+        setFwdnsInterfaceIps(cloudElements);
+        this.initiateForSingleNode(noEventElements);
+    }
+
+    public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {
+        var cloudElements = noEventElements
+                .stream()
+                .filter(e -> {
+                    var connectElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(e.getSrcElement().getId());
+                    if (CollectionUtils.isEmpty(connectElements)) {
+                        return true;
+                    } else {
+                        boolean hasConnectNet = false;
+                        for (var connectElement : connectElements) {
+                            var cloudElement = getPluginHandler().getElement(connectElement.getId());
+                            if (cloudElement != null && CoreType.TERMINAL != cloudElement.getCoreType()) {
+                                hasConnectNet = true;
+                            }
+                        }
+                        return !hasConnectNet;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
+        // 使初始化结果不受数据库数据顺序的影响
+        Collections.sort(cloudElements, (a, b) -> {
+            if (a.getSrcElement().getName() == null || b.getSrcElement().getName() == null) {
+                return 0;
+            }
+            return a.getSrcElement().getName().compareTo(b.getSrcElement().getName());
+        });
+
+        cloudElements.forEach(cloudElement -> this.initCoreType(cloudElement));
+        // 根据节点的类型排序,这个顺序直接影响组网的结果
+        Collections.sort(cloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
+
+        // 初始化节点属性
+        var initiateElementTasks = cloudElements.stream()
+                .map(cloudElement -> (Runnable) () -> initiateElementBaseProperties(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementTasks.isEmpty()) {
+            initiateElementTasks.forEach(task -> task.run());
+        }
+
+        try {
+            getPluginHandler().createElementNetworks();
+        } catch (Exception e) {
+            log.error("failed to create network ", e);
+        }
+
+        // 初始化ip池
+        var initiateElementIpPoolTasks = cloudElements.stream()
+                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
+                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementIpPoolTasks.isEmpty()) {
+            initiateElementIpPoolTasks.forEach(task -> task.run());
+        }
+
+        // 初始化端口, 先初始化路由端口, 再初始化其它端口
+        List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
+        List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
+        cloudElements
+                .stream()
+                .forEach(cloudElement -> {
+                    Integer virtualType = cloudElement.getVirtualType();
+                    if (virtualType != null
+                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
+                        Runnable task = () -> initiateElementPorts(cloudElement);
+                        Integer type = cloudElement.getSrcElement().getType();
+                        // 防火墙也看作路由
+                        if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
+                                || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
+                            initiateRouterElementPortsTasks.add(task);
+                        } else {
+                            initiateOtherElementPortsTasks.add(task);
+                        }
+                    } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
+                        // 辅助节点也需要处理下端口
+                        initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
+                    }
+                });
+        if (!initiateRouterElementPortsTasks.isEmpty()) {
+            runTasks(initiateRouterElementPortsTasks);
+        }
+        if (!initiateOtherElementPortsTasks.isEmpty()) {
+            runTasks(initiateOtherElementPortsTasks);
+        }
+
+        // 存在需要重新分配的ip，重新分配ip
+        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
+                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
+                .collect(Collectors.toList());
+        if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
+            if (CollectionUtils.isNotEmpty(networkElements)) {
+                portCheck(networkElements);
+            }
+        }
+        if (CollectionUtils.isNotEmpty(networkElements)) {
+            reallocateIpPorts(networkElements);
+        }
+
+        // 分配 fwdnsInterfaceIp
+        setFwdnsInterfaceIps(cloudElements);
+    }
+
+    public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_BASE_PROPERTIES,
+                () -> initiateElementBaseProperties(cloudElement));
+    }
+
+    public void initiateElementIpPoolProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_IP_POOL,
+                () -> initIpPool(cloudElement));
+    }
+
+    public void initiateElementPortsProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_PORTS,
+                () -> initiateElementPorts(cloudElement));
+    }
+
+    public String ip2Cidr24(String ip) {
+        return ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
+    }
+
+    protected void prepareEventProcess() {
+        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
+    }
+
+    protected boolean resetResourceId() {
+        return true;
+    }
+
+    /**
+     * 初始化节点
+     * @param cloudElement 网元节点
+     */
+    protected void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
+        // 外部网络预先初始化
+        var role = cloudElement.getRole();
+        if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+            cloudElement.setExternal(true);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+            cloudElement.setAuxiliaryNetworkOn(true);
+            cloudElement.setAuxiliaryNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+
+            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+            network.setExternal(true);
+            network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+            var ports = Optional
+                    .ofNullable(cloudElement.getSrcElement().getPorts())
+                    .orElse(new ArrayList<>());
+            for (var port : ports) {
+                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+                connectNetwork.addPort(port, connectPort, true);
+            }
+            cloudElement.getDeriveNetworks().add(connectNetwork);
+        } else if (Boolean.TRUE.equals(cloudElement.getExternal()) && role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
+            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+            this.loadProperties2Network(network, cloudElement);
+            network.setExternal(true);
+            network.setResourceId(cloudElement.getResourceId());
+            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+            var ports = Optional
+                    .ofNullable(cloudElement.getSrcElement().getPorts())
+                    .orElse(new ArrayList<>());
+            for (var port : ports) {
+                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+                connectNetwork.addPort(port, connectPort, true);
+            }
+            cloudElement.getDeriveNetworks().add(connectNetwork);
+        }
+
+        if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
+            return;
+        }
+
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType == null) {
+            log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
+                    cloudElement.getSrcElement().getId());
+            return;
+        }
+
+        // 核心路由 处理下ip
+        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        return;
+                    }
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort == null) {
+                        return;
+                    }
+                    if (StringUtils.isNotEmpty(pluginPort.getOspfIp())) {
+                        p.setIp(pluginPort.getOspfIp().split("/")[0]);
+                    } else if (StringUtils.isNotEmpty(pluginPort.getBgpIp())) {
+                        p.setIp(pluginPort.getBgpIp().split("/")[0]);
+                    } else if (StringUtils.isNotEmpty(pluginPort.getRipIp())) {
+                        p.setIp(pluginPort.getRipIp().split("/")[0]);
+                    }
+                });
+            }
+        }
+
+        // 非外部资源 重置资源id
+        if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
+            if (this.resetResourceId()) {
+                cloudElement.setResourceId(StringUtils.EMPTY);
+            }
+        }
+        // defaultConnectedNetwork
+        var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+        this.loadProperties2Network(network, cloudElement);
+        ConnectedNetworkBO defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+        // 需要的网络
+        var ports = Optional
+                .ofNullable(cloudElement.getSrcElement().getPorts())
+                .orElse(new ArrayList<>());
+
+        // 如果连线的对端节点,有相同cidr的网络,那么这个网络就是默认网络
+        boolean defaultNetwordIsDerive = true;
+        for (var port : ports) {
+            var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            if (connectPort != null) {
+                // 有连线 且 对端端口已归属某个网络 则本端口接入即可
+                CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
+                if (connectNetwork != null) {
+                    if (StringUtils.equals(connectNetwork.getCidr(), defaultConnectedNetwork.getNetwork().getCidr())) {
+                        defaultConnectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
+                        defaultNetwordIsDerive = false;
+                    }
+                }
+            }
+        }
+
+        Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
+        List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
+        for (var port : ports) {
+            var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+            if (connectPort != null) {
+                // 有连线 且 对端端口已归属某个网络 则本端口接入即可
+                CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
+                if (connectNetwork != null) {
+                    ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, false);
+                    cloudElement.getAccessNetworks().add(connectedNetwork);
+                    continue;
+                }
+            }
+            // 需要自己处理网络的端口
+            String cidrDivideIp = null;
+            if (StringUtils.isNotEmpty(port.getIp())) {
+                // 自己的端口设置了ip,用自己的端口分网络
+                cidrDivideIp = port.getIp();
+            } else if (connectPort != null && StringUtils.isNotEmpty(connectPort.getIp())) {
+                // 自己的端口无ip,但是连线另一端的端口设置了ip,用对端端口ip分网络
+                cidrDivideIp = connectPort.getIp();
+            }
+            if (StringUtils.isEmpty(cidrDivideIp)) {
+                // 未设置ip值,使用默认网段的网络
+                boolean isCoreRouter = this.isCoreRouter(cloudElement);
+                boolean isDynamips = this.isDynamips(cloudElement);
+                if (isCoreRouter) {
+                    // 如果是核心路由器 每个端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                } else if (isDynamips && connectPort != null) {
+                    // 如果是dynamips 每个连了线的端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                } else {
+                    // 否则加入默认网络即可
+                    defaultConnectedNetwork.addPort(port, connectPort, true);
+                }
+            } else {
+                // 设置了ip值,根据ip值计算网段
+                String cidr = this.ip2Cidr24(cidrDivideIp);
+                if (cidr.equals(defaultConnectedNetwork.getNetwork().getCidr())) {
+                    // 和默认网段相同,则也加入默认网络
+                    defaultConnectedNetwork.addPort(port, connectPort, true);
+                } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
+                    defaultConnectedNetwork.addPort(port, connectPort, true);
+                } else {
+                    // 和默认网段不同,构建网络
+                    ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
+                    if (connectedNetwork == null) {
+                        var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        createNetwork.setCidr(cidr);
+                        connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                        cidr2ConnectedNetwork.put(cidr, connectedNetwork);
+                    }
+                    connectedNetwork.addPort(port, connectPort, true);
+                }
+            }
+        }
+        if (this.isCoreRouter(cloudElement)) {
+            // 核心路由 每个端口都接网络
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                if (defaultNetwordIsDerive) {
+                    cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+                }
+            }
+            cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
+            cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+        } else {
+            // 其余 有连线才接网络
+            List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
+            for (ConnectedNetworkBO n : noCidrNetwork) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
+                if (defaultNetwordIsDerive) {
+                    deriveNetworks.add(defaultConnectedNetwork);
+                }
+            }
+            // 至少有个网络
+            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
+                if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                    if (defaultNetwordIsDerive) {
+                        deriveNetworks.add(defaultConnectedNetwork);
+                    }
+                }
+                // 如果虚拟终端没有默认网络 那么加一个
+                if (CollectionUtils.isEmpty(deriveNetworks) && cloudElement.getVirtualType() != null &&
+                        (
+                                cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE
+                                        || cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
+                        )
+                ) {
+                    for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                        if (CollectionUtils.isNotEmpty(n.getFromPorts())) {
+                            deriveNetworks.add(n);
+                            break;
+                        }
+                    }
+                }
+            }
+            cloudElement.setDeriveNetworks(deriveNetworks);
+        }
+
+        initiateAuxiliaryNetwork(cloudElement);
     }
 
     private synchronized List<String> allocateCidrs(int count) {
         var cidrs = getHandlerUtils().randomCidrs(count, existCidrs);
         existCidrs.addAll(cidrs);
         return cidrs;
+    }
+
+    private void prepareExistCidrs() {
+        if (existCidrs == null) {
+            existCidrs = getHandlerUtils().statExistCidrs();
+        }
+    }
+
+    private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
+        boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+                && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+        return isCoreRouter;
+    }
+
+    private boolean isDynamips(CloudPluginSceneElementBO cloudElement) {
+        boolean isDynamips = (BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType())
+                && cloudElement.getCoreType() != null
+                && !cloudElement.getCoreType().equals(CoreType.TERMINAL));
+        return isDynamips;
     }
 
     /**
@@ -459,501 +954,6 @@ public class InitiateHandler extends HandlerCommon {
                 initiateVirtualToPort(cloudElement);
             }
         }
-    }
-
-    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
-    }
-
-    /**
-     * 初始化节点
-     * @param cloudElement 网元节点
-     */
-    protected void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
-        // 外部网络预先初始化
-        var role = cloudElement.getRole();
-        if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
-            cloudElement.setExternal(true);
-            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
-            cloudElement.setAuxiliaryNetworkOn(true);
-            cloudElement.setAuxiliaryNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-
-            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-            network.setExternal(true);
-            network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
-            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
-            var ports = Optional
-                    .ofNullable(cloudElement.getSrcElement().getPorts())
-                    .orElse(new ArrayList<>());
-            for (var port : ports) {
-                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
-                connectNetwork.addPort(port, connectPort, true);
-            }
-            cloudElement.getDeriveNetworks().add(connectNetwork);
-        } else if (Boolean.TRUE.equals(cloudElement.getExternal()) && role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
-            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-            this.loadProperties2Network(network, cloudElement);
-            network.setExternal(true);
-            network.setResourceId(cloudElement.getResourceId());
-            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
-            var ports = Optional
-                    .ofNullable(cloudElement.getSrcElement().getPorts())
-                    .orElse(new ArrayList<>());
-            for (var port : ports) {
-                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
-                connectNetwork.addPort(port, connectPort, true);
-            }
-            cloudElement.getDeriveNetworks().add(connectNetwork);
-        }
-
-        if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
-            return;
-        }
-
-        Integer virtualType = cloudElement.getVirtualType();
-        if (virtualType == null) {
-            log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
-                    cloudElement.getSrcElement().getId());
-            return;
-        }
-
-        // 核心路由 处理下ip
-        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
-            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                cloudElement.getSrcElement().getPorts().forEach(p -> {
-                    if (StringUtils.isNotEmpty(p.getIp())) {
-                        return;
-                    }
-                    var pluginPort = getPluginHandler().getPort(p.getId());
-                    if (pluginPort == null) {
-                        return;
-                    }
-                    if (StringUtils.isNotEmpty(pluginPort.getOspfIp())) {
-                        p.setIp(pluginPort.getOspfIp().split("/")[0]);
-                    } else if (StringUtils.isNotEmpty(pluginPort.getBgpIp())) {
-                        p.setIp(pluginPort.getBgpIp().split("/")[0]);
-                    } else if (StringUtils.isNotEmpty(pluginPort.getRipIp())) {
-                        p.setIp(pluginPort.getRipIp().split("/")[0]);
-                    }
-                });
-            }
-        }
-
-        // 非外部资源 重置资源id
-        if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
-            if (this.resetResourceId()) {
-                cloudElement.setResourceId(StringUtils.EMPTY);
-            }
-        }
-        // defaultConnectedNetwork
-        var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-        this.loadProperties2Network(network, cloudElement);
-        ConnectedNetworkBO defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
-        // 需要的网络
-        var ports = Optional
-                .ofNullable(cloudElement.getSrcElement().getPorts())
-                .orElse(new ArrayList<>());
-
-        // 如果连线的对端节点,有相同cidr的网络,那么这个网络就是默认网络
-        boolean defaultNetwordIsDerive = true;
-        for (var port : ports) {
-            var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
-            if (connectPort != null) {
-                // 有连线 且 对端端口已归属某个网络 则本端口接入即可
-                CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
-                if (connectNetwork != null) {
-                    if (StringUtils.equals(connectNetwork.getCidr(), defaultConnectedNetwork.getNetwork().getCidr())) {
-                        defaultConnectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
-                        defaultNetwordIsDerive = false;
-                    }
-                }
-            }
-        }
-
-        Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
-        List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
-        for (var port : ports) {
-            var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
-            if (connectPort != null) {
-                // 有连线 且 对端端口已归属某个网络 则本端口接入即可
-                CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(connectPort);
-                if (connectNetwork != null) {
-                    ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
-                    connectedNetwork.addPort(port, connectPort, false);
-                    cloudElement.getAccessNetworks().add(connectedNetwork);
-                    continue;
-                }
-            }
-            // 需要自己处理网络的端口
-            String cidrDivideIp = null;
-            if (StringUtils.isNotEmpty(port.getIp())) {
-                // 自己的端口设置了ip,用自己的端口分网络
-                cidrDivideIp = port.getIp();
-            } else if (connectPort != null && StringUtils.isNotEmpty(connectPort.getIp())) {
-                // 自己的端口无ip,但是连线另一端的端口设置了ip,用对端端口ip分网络
-                cidrDivideIp = connectPort.getIp();
-            }
-            if (StringUtils.isEmpty(cidrDivideIp)) {
-                // 未设置ip值,使用默认网段的网络
-                boolean isCoreRouter = this.isCoreRouter(cloudElement);
-                boolean isDynamips = this.isDynamips(cloudElement);
-                if (isCoreRouter) {
-                    // 如果是核心路由器 每个端口分配一个网络
-                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
-                    connectedNetwork.addPort(port, connectPort, true);
-                    noCidrNetwork.add(connectedNetwork);
-                } else if (isDynamips && connectPort != null) {
-                    // 如果是dynamips 每个连了线的端口分配一个网络
-                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
-                    connectedNetwork.addPort(port, connectPort, true);
-                    noCidrNetwork.add(connectedNetwork);
-                } else {
-                    // 否则加入默认网络即可
-                    defaultConnectedNetwork.addPort(port, connectPort, true);
-                }
-            } else {
-                // 设置了ip值,根据ip值计算网段
-                String cidr = this.ip2Cidr24(cidrDivideIp);
-                if (cidr.equals(defaultConnectedNetwork.getNetwork().getCidr())) {
-                    // 和默认网段相同,则也加入默认网络
-                    defaultConnectedNetwork.addPort(port, connectPort, true);
-                } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
-                    defaultConnectedNetwork.addPort(port, connectPort, true);
-                } else {
-                    // 和默认网段不同,构建网络
-                    ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
-                    if (connectedNetwork == null) {
-                        var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                        createNetwork.setCidr(cidr);
-                        connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
-                        cidr2ConnectedNetwork.put(cidr, connectedNetwork);
-                    }
-                    connectedNetwork.addPort(port, connectPort, true);
-                }
-            }
-        }
-        if (this.isCoreRouter(cloudElement)) {
-            // 核心路由 每个端口都接网络
-            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-                if (defaultNetwordIsDerive) {
-                    cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
-                }
-            }
-            cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
-            cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
-        } else {
-            // 其余 有连线才接网络
-            List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
-            for (ConnectedNetworkBO n : noCidrNetwork) {
-                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
-                    deriveNetworks.add(n);
-                }
-            }
-            for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
-                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
-                    deriveNetworks.add(n);
-                }
-            }
-            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
-                if (defaultNetwordIsDerive) {
-                    deriveNetworks.add(defaultConnectedNetwork);
-                }
-            }
-            // 至少有个网络
-            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
-                if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-                    if (defaultNetwordIsDerive) {
-                        deriveNetworks.add(defaultConnectedNetwork);
-                    }
-                }
-                // 如果虚拟终端没有默认网络 那么加一个
-                if (CollectionUtils.isEmpty(deriveNetworks) && cloudElement.getVirtualType() != null &&
-                        (
-                                cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE
-                                        || cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
-                        )
-                ) {
-                    for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
-                        if (CollectionUtils.isNotEmpty(n.getFromPorts())) {
-                            deriveNetworks.add(n);
-                            break;
-                        }
-                    }
-                }
-            }
-            cloudElement.setDeriveNetworks(deriveNetworks);
-        }
-
-        initiateAuxiliaryNetwork(cloudElement);
-    }
-
-    private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
-        boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
-                && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
-        return isCoreRouter;
-    }
-
-    private boolean isDynamips(CloudPluginSceneElementBO cloudElement) {
-        boolean isDynamips = (BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType())
-                && cloudElement.getCoreType() != null
-                && !cloudElement.getCoreType().equals(CoreType.TERMINAL));
-        return isDynamips;
-    }
-
-    public void initCoreType(CloudPluginSceneElementBO element) {
-        Integer role = element.getRole();
-        CoreType coreType = CoreType.NETWORK;
-        if (role != null) {
-            if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
-                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
-            ) {
-                coreType = CoreType.NETWORK;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK;
-                } else {
-                    coreType = CoreType.NETWORK_L2;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
-                    coreType = CoreType.ROUTER;
-                } else {
-                    coreType = CoreType.ROUTER_L2;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else {
-                    coreType = CoreType.FIREWALL;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
-                coreType = CoreType.TERMINAL;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
-                coreType = CoreType.TERMINAL;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
-                coreType = CoreType.TERMINAL;
-            }
-        }
-        element.setCoreType(coreType);
-    }
-
-    public void initiate() {
-        this.prepareEventProcess();
-
-        getPluginHandler().getSceneHandler().addProgressPercentage(5);
-
-        // 标记已设置的ip的端口 后续需要区分端口ip是来自参数还是自动分配
-        markIpSetedPorts();
-        // 将节点排序 排序的不用会导致网络分配的不同,因此需要有统一的排序
-        List<CloudPluginSceneElementBO> allCloudElements = getOrderedAllCloudElements();
-
-        this.afterOrderElements(allCloudElements);
-
-        // 部分启动和动态更新 需要区分出哪些节点不需要处理
-        List<CloudPluginSceneElementBO> cloudElements = new ArrayList<>();
-        List<CloudPluginSceneElementBO> noEventElements = new ArrayList<>();
-        for (var e : allCloudElements) {
-            if (getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId())) {
-                cloudElements.add(e);
-            } else {
-                noEventElements.add(e);
-            }
-        }
-
-        // 初始化节点属性
-        var initiateElementTasks = cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElementBasePropertiesProcess(cloudElement))
-                .collect(Collectors.toList());
-        if (!initiateElementTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_BASE_PROPERTIES, () -> {
-                initiateElementTasks.forEach(task -> task.run());
-            });
-        }
-
-        getPluginHandler().createElementNetworks();
-
-        // 初始化ip池
-        var initiateElementIpPoolTasks = cloudElements.stream()
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
-                .collect(Collectors.toList());
-        if (!initiateElementIpPoolTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> {
-                initiateElementIpPoolTasks.forEach(task -> task.run());
-            });
-        }
-
-        // 初始化端口, 先初始化路由端口, 再初始化其它端口
-        List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
-        List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
-        loadInitaitePortsTasks(cloudElements, initiateRouterElementPortsTasks, initiateOtherElementPortsTasks);
-        if (!initiateRouterElementPortsTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateRouterElementPortsTasks));
-        }
-        if (!initiateOtherElementPortsTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateOtherElementPortsTasks));
-        }
-
-        // 存在需要重新分配的ip，重新分配ip
-        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
-                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
-                .collect(Collectors.toList());
-        if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
-            if (CollectionUtils.isNotEmpty(networkElements)) {
-                runSceneProgress(SceneProcess.PORT_CHECK, () -> {
-                    portCheck(networkElements);
-                });
-            }
-        }
-        if (CollectionUtils.isNotEmpty(networkElements)) {
-            runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
-                reallocateIpPorts(networkElements);
-            });
-        }
-
-        // 分配 fwdnsInterfaceIp
-        setFwdnsInterfaceIps(cloudElements);
-        this.initiateForSingleNode(noEventElements);
-    }
-
-    public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {
-        var cloudElements = noEventElements
-                .stream()
-                .filter(e -> {
-                    var connectElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(e.getSrcElement().getId());
-                    if (CollectionUtils.isEmpty(connectElements)) {
-                        return true;
-                    } else {
-                        boolean hasConnectNet = false;
-                        for (var connectElement : connectElements) {
-                            var cloudElement = getPluginHandler().getElement(connectElement.getId());
-                            if (cloudElement != null && CoreType.TERMINAL != cloudElement.getCoreType()) {
-                                hasConnectNet = true;
-                            }
-                        }
-                        return !hasConnectNet;
-                    }
-                })
-                .collect(Collectors.toList());
-
-        // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
-        // 使初始化结果不受数据库数据顺序的影响
-        Collections.sort(cloudElements, (a, b) -> {
-            if (a.getSrcElement().getName() == null || b.getSrcElement().getName() == null) {
-                return 0;
-            }
-            return a.getSrcElement().getName().compareTo(b.getSrcElement().getName());
-        });
-
-        cloudElements.forEach(cloudElement -> this.initCoreType(cloudElement));
-        // 根据节点的类型排序,这个顺序直接影响组网的结果
-        Collections.sort(cloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
-
-        // 初始化节点属性
-        var initiateElementTasks = cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElementBaseProperties(cloudElement))
-                .collect(Collectors.toList());
-        if (!initiateElementTasks.isEmpty()) {
-            initiateElementTasks.forEach(task -> task.run());
-        }
-
-        try {
-            getPluginHandler().createElementNetworks();
-        } catch (Exception e) {
-            log.error("failed to create network ", e);
-        }
-
-        // 初始化ip池
-        var initiateElementIpPoolTasks = cloudElements.stream()
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement))
-                .collect(Collectors.toList());
-        if (!initiateElementIpPoolTasks.isEmpty()) {
-            initiateElementIpPoolTasks.forEach(task -> task.run());
-        }
-
-        // 初始化端口, 先初始化路由端口, 再初始化其它端口
-        List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
-        List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
-        cloudElements
-                .stream()
-                .forEach(cloudElement -> {
-                    Integer virtualType = cloudElement.getVirtualType();
-                    if (virtualType != null
-                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
-                        Runnable task = () -> initiateElementPorts(cloudElement);
-                        Integer type = cloudElement.getSrcElement().getType();
-                        // 防火墙也看作路由
-                        if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
-                                || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
-                            initiateRouterElementPortsTasks.add(task);
-                        } else {
-                            initiateOtherElementPortsTasks.add(task);
-                        }
-                    } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
-                        // 辅助节点也需要处理下端口
-                        initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
-                    }
-                });
-        if (!initiateRouterElementPortsTasks.isEmpty()) {
-            runTasks(initiateRouterElementPortsTasks);
-        }
-        if (!initiateOtherElementPortsTasks.isEmpty()) {
-            runTasks(initiateOtherElementPortsTasks);
-        }
-
-        // 存在需要重新分配的ip，重新分配ip
-        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
-                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
-                .collect(Collectors.toList());
-        if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
-            if (CollectionUtils.isNotEmpty(networkElements)) {
-                portCheck(networkElements);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(networkElements)) {
-            reallocateIpPorts(networkElements);
-        }
-
-        // 分配 fwdnsInterfaceIp
-        setFwdnsInterfaceIps(cloudElements);
-    }
-
-    protected void prepareEventProcess() {
-        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
-    }
-
-    protected boolean resetResourceId() {
-        return true;
-    }
-
-    public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
-        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_BASE_PROPERTIES,
-                () -> initiateElementBaseProperties(cloudElement));
-    }
-
-    public void initiateElementIpPoolProcess(CloudPluginSceneElementBO cloudElement) {
-        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_IP_POOL,
-                () -> initIpPool(cloudElement));
-    }
-
-    public void initiateElementPortsProcess(CloudPluginSceneElementBO cloudElement) {
-        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_PORTS,
-                () -> initiateElementPorts(cloudElement));
-    }
-
-    public String ip2Cidr24(String ip) {
-        return ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
     }
 
     private void loadProperties2Network(CloudPluginSceneElementNetworkBO network, CloudPluginSceneElementBO element) {
