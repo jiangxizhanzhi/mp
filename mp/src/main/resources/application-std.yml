@@ -4,8 +4,8 @@ server:
   port: 8080
   tomcat:
     threads:
-      min-spare: 10
-      max: 200
+      min-spare: ${server.tomcat.threads.mp_tomcat_min_pool_size}
+      max: ${server.tomcat.threads.mp_tomcat_max_pool_size}
 
 spring:
   datasource:
@@ -20,8 +20,8 @@ spring:
     password: ${spring.datasource.ext-var.password}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 10
+      maximum-pool-size: ${spring.datasource.hikari.mp_db_max_pool_size}
+      minimum-idle: ${spring.datasource.hikari.mp_db_min_pool_size}
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   flyway:
@@ -58,12 +58,12 @@ logging:
   file:
 #    ext-var:
 #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
-    max-file-size: 300MB
-    max-total-size: 650MB
+    max-file-size: ${logging.file.mp_logfile_max_file_size}
+    max-total-size: ${logging.file.mp_logfile_max_total_size}
     max-row-length: ${logging.file.ext-var.max-row-length}
   logback:
     rollingpolicy:
-      max-history: 15
+      max-history: ${logging.logback.rollingpolicy.mp_logfile_max_history}
 
 springfox:
   documentation:
@@ -117,19 +117,19 @@ mp:
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
-    public-net-proxy: false #公网开关
-    public-net-proxy-ip: 10.100.7.1 #公网ip
-    public-net-proxy-port: 11111 #公网端口
-    public-net-proxy-server: false
-    public-net-proxy-exclude-protocols: console,vnc,ssh,telnet,rdp
+    public-net-proxy: ${mp.devopscluster.mp_public_net_proxy} #公网开关
+    public-net-proxy-ip: ${mp.devopscluster.mp_public_net_proxy_ip} #公网ip
+    public-net-proxy-port: ${mp.devopscluster.public_net_proxy_port} #公网端口
+    public-net-proxy-server: ${mp.devopscluster.mp_public_net_proxy_server}
+    public-net-proxy-exclude-protocols: ${mp.devopscluster.mp_public_net_proxy_exclude_protocols}
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
-    disk-alarm-percent: 80 # 磁盘空间告警阈值
+    disk-alarm-percent: ${mp.devopscluster.mp_devops_disk_alarm_percent} # 磁盘空间告警阈值
     cp-ip: ${mp.common.ext-var.cp-ip}                # 云平台适配层接口地址
     cp-port: ${mp.common.ext-var.cp-port}                # 云平台适配层接口地址
     mp-ip: ${mp.common.ext-var.mp-ip}          # MP中台地址
     mp-port: ${mp.common.ext-var.mp-port}           # MP中台地址
-    allow-export: false
+    allow-export: ${mp.devopscluster.mp_allow_export}
   # mp-situationaware 模块配置
   situationaware:
 #    ext-var:
@@ -165,17 +165,17 @@ mp:
     wazuh-password: ${mp.situationaware.ext-var.wazuh-password}
     wazuh-flow-table-url: http://${mp.common.ext-var.cp-ip}:9999/knapsack/probe/v1
     # wazuh-probe-manager
-    probe-mgr-url: http://10.100.0.111:8002
-    probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
-    probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
-    probe-mgr-task-enable: false
+    probe-mgr-url: http://${mp.situationaware.ext-var.probe-ip}:${mp.situationaware.ext-var.probe-port}
+    probe-mgr-agent-script-linux-path: ${mp.situationaware.ext-var.wazuh_agent_script_linux_path}
+    probe-mgr-agent-script-windows-path: ${mp.situationaware.ext-var.wazuh_agent_script_windows_path}
+    probe-mgr-task-enable: true
     # wazuh es节点地址
     wazuh-es-nodes: ${mp.situationaware.ext-var.wazuh-es-ip}:${mp.situationaware.ext-var.wazuh-es-port}
     wazuh-es-max-page-size: ${mp.situationaware.ext-var.wazuh-es-max-page-size}
     # arkime es 地址
     arkime-es-nodes: ${mp.situationaware.ext-var.arkime-es-host}:${mp.situationaware.ext-var.arkime-es-port}
     # es 日期格式
-    es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+    es-date-pattern: ${mp.base.situationaware.es_date_pattern}
   # mp-log 模块
   log:
     ext-var:
@@ -185,8 +185,8 @@ mp:
 #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
 #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
        dynamic-level-only-root: false;
-    exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
-    exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
+    exclude-urls: ${mp.log.ext-var.exclude-urls}
+    exclude-methods: ${mp.log.ext-var.xclude-methods}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
     cp-url: http://${mp.common.ext-var.cp-ip}:11111 #云平台地址
     mp-ip: ${mp.common.ext-var.mp-ip}    # MP中台API地址
@@ -199,61 +199,60 @@ mp:
     ext-var:
 #      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:a668b6fec22144f38a6f72f8a5aa7326}
 #      authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
-      logout-keep-secret-user: ${MP_AUTH_LOGOUT_KEEP_SECRET_USER:3cf215471268482c88a9986283e38c27}
-    max-import-user-size: 1000
-    logout-reset-secret: true
+    max-import-user-size: ${mp.auth.ext-var.max-import-user-size}
+    logout-reset-secret: ${mp.auth.ext-var.logout-reset-secret}
     logout-keep-secret-user: ${mp.auth.ext-var.logout-keep-secret-user}
-    default-user-avatar: /api/mp/avatar/1.png
-    mq-msg-timeout: 3600000
+    default-user-avatar: ${mp.auth.ext-var.default-user-avatar}
+    mq-msg-timeout: ${mp.auth.ext-var.mq-msg-timeout}
     # authenticate
-    authenticate-cache-time: 30
-    authenticate-use-individual-token-secret: true
+    authenticate-cache-time: ${mp.auth.ext-var.authenticate-cache-time}
+    authenticate-use-individual-token-secret: ${mp.auth.ext-var.authenticate-use-individual-token-secret}
     authenticate-jwt-secret: ${mp.auth.ext-var.authenticate-jwt-secret}
-    authenticate-jwt-expires: 604800
-    authenticate-urls: /auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
+    authenticate-jwt-expires: ${mp.auth.ext-var.authenticate-jwt-expires}
+    authenticate-urls: ${mp.auth.ext-var.authenticate-urls}
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
-    authenticate-encoder-hash-width: 256
+    authenticate-encoder-hash-width: ${mp.auth.ext-var.authenticate-encoder-hash-width}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true
     license-dir: /home/mp/config/license
   # mp-front-business 模块配置
   frontbusiness:
-    url-ac-filter-enabled: true
+    url-ac-filter-enabled: ${mp.frontbusiness.url-ac-filter-enabled}
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
     #url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**
   # mp-flow 模块配置
   flow:
-    trex-image: tgn-trex
+    trex-image: ${mp.flow.trex-image}
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
   sceneplugincloud:
     cpcloud-server: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}
-    delete-retry-times: 2
-    default-core-router-name: Router
-    enable-reallocate-ip-ports: false
-    link-status-enabled: true
-    link-status-refresh-period: 5
-    link-status-cache-seconds: 600
-    link-status-pool-size: 10
-    link-status-hold-size: 200
-    public-net-proxy-server: false
-    public-net-proxy: false
-    public-net-proxy-ip:
-    public-net-proxy-port:
-    gateway-types: 2,3
-    cpcloud-server-timeout: 600000
-    cpcloud-http-pool-size: 200
-    initiate-pool-size: 10
-    initiate-hold-size: 20000
-    create-pool-size: 10
-    create-hold-size: 20000
-    cloud-heavy-concurrent-delay-enable: true
-    cloud-heavy-concurrent-delay: 10
-    scene-create-install-unzip-apk: true
-    dhcp-ip-allocate: true
+    delete-retry-times: ${mp.sceneplugincloud.delete-retry-times}
+    default-core-router-name: ${mp.sceneplugincloud.default-core-router-name}
+    enable-reallocate-ip-ports: ${mp.sceneplugincloud.enable-reallocate-ip-ports}
+    link-status-enabled: ${mp.sceneplugincloud.link-status-enabled}
+    link-status-refresh-period: ${mp.sceneplugincloud.link-status-refresh-period}
+    link-status-cache-seconds: ${mp.sceneplugincloud.link-status-cache-seconds}
+    link-status-pool-size: ${mp.sceneplugincloud.link-status-pool-size}
+    link-status-hold-size: ${mp.sceneplugincloud.link-status-hold-size}
+    public-net-proxy-server: ${mp.sceneplugincloud.public-net-proxy-server}
+    public-net-proxy: ${mp.sceneplugincloud.public-net-proxy}
+    public-net-proxy-ip: ${mp.sceneplugincloud.public-net-proxy-ip}
+    public-net-proxy-port: ${mp.sceneplugincloud.public-net-proxy-port}
+    gateway-types: ${mp.sceneplugincloud.gateway-types}
+    cpcloud-server-timeout: ${mp.sceneplugincloud.cpcloud-server-timeout}
+    cpcloud-http-pool-size: ${mp.sceneplugincloud.cpcloud-http-pool-size}
+    initiate-pool-size: ${mp.sceneplugincloud.initiate-pool-size}
+    initiate-hold-size: ${mp.sceneplugincloud.initiate-hold-size}
+    create-pool-size: ${mp.sceneplugincloud.create-pool-size}
+    create-hold-size: ${mp.sceneplugincloud.create-hold-size}
+    cloud-heavy-concurrent-delay-enable: ${mp.sceneplugincloud.cloud-heavy-concurrent-delay-enable}
+    cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.cloud-heavy-concurrent-delay}
+    scene-create-install-unzip-apk: ${mp.sceneplugincloud.scene-create-install-unzip-apk}
+    dhcp-ip-allocate: ${mp.sceneplugincloud.dhcp-ip-allocate}
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
     wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500
@@ -261,35 +260,35 @@ mp:
     wazuh-es-server: http://${mp.situationaware.ext-var.wazuh-es-ip}:9205
     wazuh-godfs-server: http://${mp.situationaware.ext-var.wazuh-ip}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
-    wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
+    wazuh-run-command-http-callback-url: http://${mp.situationaware.ext-var.mp_self_ip}:${mp.situationaware.ext-var.mp_self_port}/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
 #    ext-var:
 #      gns3-ip: ${GNS3_IP:10.100.7.1}
 #      gns3-port: ${GNS3_PORT:8088}
     gns3-server: http://${mp.sceneplugingns3.ext-var.gns3-ip}:${mp.sceneplugingns3.ext-var.gns3-port}
-    gns3-image-uuids: 854f7c24-060f-4dbd-b771-68eab207a071
+    gns3-image-uuids: ${mp.sceneplugingns3.ext-var.gns3-image-uuids}
   cscene:
-    has-own-recording-set: 213,214,236
-    scene-error-creating-seconds: 3600
-    element-error-creating-seconds: 300
-    ignore-scene-creating-seconds: 120
-    enable-scene-cron-job: true
-    enable-command-change: false
-    cron-job-expression: 0 0/15 * * * ?
-    enable-node-limit-db-check: true
+    has-own-recording-set: ${mp.common.ext-var.has-own-recording-set}
+    scene-error-creating-seconds: ${mp.common.ext-var.scene-error-creating-seconds}
+    element-error-creating-seconds: ${mp.common.ext-var.element-error-creating-seconds}
+    ignore-scene-creating-seconds: ${mp.common.ext-var.ignore-scene-creating-seconds}
+    enable-scene-cron-job: ${mp.common.ext-var.enable-scene-cron-job}
+    enable-command-change: ${mp.common.ext-var.enable-command-change}
+    cron-job-expression: ${mp.common.ext-var.cron-job-expression}
+    enable-node-limit-db-check: ${mp.common.ext-var.enable-node-limit-db-check}
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
   scene:
-    scene-pool-size: 100
-    scene-hold-size: 10000
-    element-pool-size: 100
-    element-hold-size: 10000
-    scene-handler-realtime-update: true
-    scene-process-save-realtime: true
-    element-process-save-realtime: true
-    dhcp-control: ${mp.scene.ext-var.dhcp-control:false}
+    scene-pool-size: ${mp.scene.ext-var.scene-pool-size}
+    scene-hold-size: ${mp.scene.ext-var.scene-hold-size}
+    element-pool-size: ${mp.scene.ext-var.element-pool-size}
+    element-hold-size: ${mp.scene.ext-var.element-hold-size}
+    scene-handler-realtime-update: ${mp.scene.ext-var.scene-handler-realtime-update}
+    scene-process-save-realtime: ${mp.scene.ext-var.scene-process-save-realtime}
+    element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
+    dhcp-control: ${mp.scene.ext-var.dhcp-control}
   aggregation:
-    export-image-timeout: 1200000
+    export-image-timeout: ${mp.scene.ext-var.export-image-timeout}
 
 # for kaptcha
 kaptcha:
