@@ -1255,12 +1255,6 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         this.prepareEventProcess();
 
-        long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
-        long gatewayTasks = getPluginHandler().getGatewayElementMap().values().size();
-        long firewallTasks = getPluginHandler().getFirewallElementMap().values().size();
-        long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
-        int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
-
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
@@ -1268,7 +1262,6 @@ public class CreateHandler extends HandlerCommon {
                 .map(cloudElement -> (Runnable) () -> {
                     createAuxiliaryNetworkProcess(cloudElement);
                     if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
-                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                     }
                 })
                 .collect(Collectors.toList());
@@ -1282,7 +1275,6 @@ public class CreateHandler extends HandlerCommon {
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
                     if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
-                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                     }
                 }).collect(Collectors.toList());
         if (!createGatewayTasks.isEmpty()) {
@@ -1294,7 +1286,6 @@ public class CreateHandler extends HandlerCommon {
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
-                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                 }).collect(Collectors.toList());
         if (!createFirewallTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks));
@@ -1305,7 +1296,6 @@ public class CreateHandler extends HandlerCommon {
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
-                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                 }).collect(Collectors.toList());
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
