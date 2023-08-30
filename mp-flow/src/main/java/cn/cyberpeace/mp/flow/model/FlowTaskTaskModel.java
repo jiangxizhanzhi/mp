@@ -82,6 +82,13 @@ public class FlowTaskTaskModel extends BaseModel {
 	private Integer taskStatus;
 
 	/**
+	 * 错误信息
+	 */
+	@ApiModelProperty(value = "错误信息")
+	@DefaultStr
+	private String msg;
+
+	/**
 	 * 目标节点id
 	 */
 	@ApiModelProperty(value = "目标节点id")
