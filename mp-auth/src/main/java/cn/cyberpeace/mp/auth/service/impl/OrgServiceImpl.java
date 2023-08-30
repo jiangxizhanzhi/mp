@@ -170,10 +170,17 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public String getPath(OrgModel orgModel) {
+        return getPath(orgModel, null);
+    }
+
+    @Override
+    public String getPath(OrgModel orgModel, List<OrgModel> orgModelList) {
         String path = orgModel.getName();
         if (StringUtils.isNotBlank(orgModel.getParent())) {
 
-            List<OrgModel> orgModelList = orgPathService.listByTenant(orgModel.getTenant());
+            if (CollectionUtils.isEmpty(orgModelList)) {
+                orgModelList = orgPathService.listByTenant(orgModel.getTenant());
+            }
 
             while (StringUtils.isNotBlank(orgModel.getParent())) {
                 String parentId = orgModel.getParent();
