@@ -141,10 +141,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+//            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+//        }
 
         if (CollectionUtils.isNotEmpty(queryParams.getSourceNodeIds())) {
             List<String> ips = new ArrayList<>();
@@ -713,10 +713,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
@@ -827,10 +827,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
@@ -880,10 +880,10 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
-            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
-            return new ServiceResult<>(new ArrayList<>());
-        }
+//        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+//            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+//            return new ServiceResult<>(new ArrayList<>());
+//        }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
