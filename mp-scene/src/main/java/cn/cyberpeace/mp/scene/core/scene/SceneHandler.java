@@ -142,75 +142,6 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
-    private String genEventKey(String targetId, int event) {
-        return String.format("%s:%d", targetId, event);
-    }
-
-    private void prepareSceneEvent(int event) {
-        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
-    }
-
-    private void prepareElementEvent(SceneElementBO element, int event) {
-        elementEventHandlerMap.put(genEventKey(element.getId(), event), new SceneElementEventHandler(element, event));
-    }
-
-    private void prepareAllEvent(int sceneEvent, int elementEvent) {
-        prepareSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                prepareElementEvent(element, elementEvent);
-            }
-        }
-    }
-
-    private SceneEventHandler getSceneEventHandler(int event) {
-        return sceneEventHandlerMap.get(genEventKey(getScene().getEid(), event));
-    }
-
-    private SceneElementEventHandler getElementEventHandler(String nodeId, int event) {
-        return elementEventHandlerMap.get(genEventKey(nodeId, event));
-    }
-
-    private boolean isTriggerEventSuccess(int flag) {
-        return EventFlag.SUCCESS == flag;
-    }
-
-    private int startSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).startEvent();
-        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
-        if (isTriggerEventSuccess(flag)) {
-            // 推送场景最新的事件状态
-            asyncAckSceneChanged(false, false);
-        }
-        return flag;
-    }
-
-    private int startElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).startEvent();
-        if (isTriggerEventSuccess(flag)) {
-            // 推送节点最新的事件状态
-            asyncAckElementChanged(nodeId, false, false);
-        }
-        return flag;
-    }
-
-    private int overSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).overEvent();
-        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
-        if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneChanged(false, false);
-        }
-        return flag;
-    }
-
-    private int overElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).overEvent();
-        if (isTriggerEventSuccess(flag)) {
-            asyncAckElementChanged(nodeId, false, false);
-        }
-        return flag;
-    }
-
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
@@ -226,24 +157,6 @@ public class SceneHandler extends BaseSceneHandler<
             asyncAckElementChanged(nodeId, false, true);
         }
         return flag;
-    }
-
-    private void startAllEvent(int sceneEvent, int elementEvent) {
-        startSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                startElementEvent(element.getId(), elementEvent);
-            }
-        }
-    }
-
-    private void overAllEvent(int sceneEvent, int elementEvent) {
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                overElementEvent(element.getId(), elementEvent);
-            }
-        }
-        overSceneEvent(sceneEvent);
     }
 
     public SceneHandler() {
@@ -1035,4 +948,90 @@ public class SceneHandler extends BaseSceneHandler<
         return terminateStates.contains(state);
     }
 
+    private String genEventKey(String targetId, int event) {
+        return String.format("%s:%d", targetId, event);
+    }
+
+    private void prepareSceneEvent(int event) {
+        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
+    }
+
+    private void prepareElementEvent(SceneElementBO element, int event) {
+        elementEventHandlerMap.put(genEventKey(element.getId(), event), new SceneElementEventHandler(element, event));
+    }
+
+    private void prepareAllEvent(int sceneEvent, int elementEvent) {
+        prepareSceneEvent(sceneEvent);
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                prepareElementEvent(element, elementEvent);
+            }
+        }
+    }
+
+    private SceneEventHandler getSceneEventHandler(int event) {
+        return sceneEventHandlerMap.get(genEventKey(getScene().getEid(), event));
+    }
+
+    private SceneElementEventHandler getElementEventHandler(String nodeId, int event) {
+        return elementEventHandlerMap.get(genEventKey(nodeId, event));
+    }
+
+    private boolean isTriggerEventSuccess(int flag) {
+        return EventFlag.SUCCESS == flag;
+    }
+
+    private int startSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).startEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
+        if (isTriggerEventSuccess(flag)) {
+            // 推送场景最新的事件状态
+            asyncAckSceneChanged(false, false);
+        }
+        return flag;
+    }
+
+    private int startElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).startEvent();
+        if (isTriggerEventSuccess(flag)) {
+            // 推送节点最新的事件状态
+            asyncAckElementChanged(nodeId, false, false);
+        }
+        return flag;
+    }
+
+    private int overSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).overEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
+        if (isTriggerEventSuccess(flag)) {
+            asyncAckSceneChanged(false, false);
+        }
+        return flag;
+    }
+
+    private int overElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).overEvent();
+        if (isTriggerEventSuccess(flag)) {
+            asyncAckElementChanged(nodeId, false, false);
+        }
+        return flag;
+    }
+
+    private void startAllEvent(int sceneEvent, int elementEvent) {
+        startSceneEvent(sceneEvent);
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                startElementEvent(element.getId(), elementEvent);
+            }
+        }
+    }
+
+    private void overAllEvent(int sceneEvent, int elementEvent) {
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                overElementEvent(element.getId(), elementEvent);
+            }
+        }
+        overSceneEvent(sceneEvent);
+    }
 }
