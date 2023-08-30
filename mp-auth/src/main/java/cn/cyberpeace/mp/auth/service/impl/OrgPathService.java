@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import springfox.documentation.annotations.Cacheable;
 
 import java.util.List;
 
