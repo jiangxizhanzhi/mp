@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.controller.response.FileUploadResponse;
 import cn.cyberpeace.mp.base.service.BaseRemoteFileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.hutool.FileUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;

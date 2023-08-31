@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.hutool.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

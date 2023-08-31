@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.config.webmvc;
 
-import cn.hutool.core.lang.Assert;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;

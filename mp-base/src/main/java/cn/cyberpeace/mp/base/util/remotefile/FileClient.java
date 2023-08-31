@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.util.remotefile;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.hutool.FileUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

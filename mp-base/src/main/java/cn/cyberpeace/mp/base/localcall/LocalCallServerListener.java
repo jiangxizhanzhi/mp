@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.filelistener.FileModifyListener;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.hutool.FileUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.hutool.CollectionUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
@@ -13,7 +14,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 

@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.hutool.FileUtil;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.protocolcollection.MibFileInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.ProtocolCollectionService;
 import cn.cyberpeace.mp.cscene.vo.MibFileUploadResponse;
 import cn.cyberpeace.mp.cscene.vo.SceneFileUploadResponse;
-import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
