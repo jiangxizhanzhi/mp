@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.common.config;
 
 import cn.cyberpeace.mp.base.config.Swagger2Config;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.cyberpeace.mp.base.util.hutool.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

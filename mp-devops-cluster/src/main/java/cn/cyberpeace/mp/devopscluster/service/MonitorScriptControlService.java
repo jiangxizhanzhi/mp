@@ -56,7 +56,7 @@ public class MonitorScriptControlService {
 //    private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
     private Cache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheBuilder.newBuilder()
             .expireAfterWrite(20, TimeUnit.MINUTES)
-            .build();;
+            .build();
 
 
     public void init(List<LocalFileMappingModel> mappings) {

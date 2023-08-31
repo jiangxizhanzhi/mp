@@ -14,6 +14,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.hutool.CollectionUtil;
+import cn.cyberpeace.mp.base.util.hutool.DatePattern;
+import cn.cyberpeace.mp.base.util.hutool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -57,9 +60,6 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.util.URLUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -1956,9 +1956,10 @@ public class ScenePluginCollectionSceneService {
             return null;
         }
         LocalDateTime localDateTime = DatetimeUtil.parseDateTimeFronLacunchOutput(startTime);
-        String dateTime = DatePattern.NORM_DATETIME_FORMAT.getDateTimeFormatter().format(localDateTime);
+        String dateTime = DatePattern.NORM_DATETIME_FORMAT.format(localDateTime);
         return dateTime;
     }
+
 
 
 }
