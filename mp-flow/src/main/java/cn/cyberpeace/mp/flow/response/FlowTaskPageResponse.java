@@ -102,6 +102,12 @@ public class FlowTaskPageResponse {
     private Integer taskStatus;
 
     /**
+     * 错误信息
+     */
+    @ApiModelProperty(value = "错误信息")
+    private String msg;
+
+    /**
      * 实时速率
      */
     @ApiModelProperty(value = "实时速率")
