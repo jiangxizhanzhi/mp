@@ -1,15 +1,9 @@
 #外部配置
-server.tomcat.threads.mp_tomcat_min_pool_size=10
-server.tomcat.threads.mp_tomcat_max_pool_size=200
-
-
 spring.datasource.ext-var.db-ip=10.100.7.1
 spring.datasource.ext-var.db-port=9306
 spring.datasource.ext-var.db-database=mp
 spring.datasource.ext-var.username=root
 spring.datasource.ext-var.password=cyberpeace@2020
-spring.datasource.hikari.mp_db_max_pool_size=10
-spring.datasource.hikari.mp_db_min_pool_size=10
 
 spring.flyway.ext-var.enabled=false
 
@@ -18,9 +12,9 @@ spring.rabbitmq.ext-var.port=9672
 spring.rabbitmq.ext-var.username=cpcloud
 spring.rabbitmq.ext-var.password=MzhhMzU4NDQzNzU
 
-springfox.documentation.ext-var.enabled=false
-springfox.documentation.ext-var.auto-startup=false
-springfox.documentation.ext-var.swagger-ui.enabled=false
+springfox.documentation.ext-var.enabled=true
+springfox.documentation.ext-var.auto-startup=true
+springfox.documentation.ext-var.swagger-ui.enabled=true
 
 # 中台各模块相关配置
 #公用配置
@@ -29,13 +23,6 @@ mp.common.ext-var.mp-ip=10.100.1.12
 mp.common.ext-var.mp-port=8001
 #云平台适配层接口地址
 mp.common.ext-var.cp-ip=10.100.7.1
-mp.devopscluster.mp_public_net_proxy=false
-mp.devopscluster.mp_public_net_proxy_ip=10.100.7.1
-mp.devopscluster.public_net_proxy_port=11111
-mp.devopscluster.mp_public_net_proxy_server=false
-mp.devopscluster.mp_public_net_proxy_exclude_protocols=console,vnc,ssh,telnet,rdp
-mp.devopscluster.mp_devops_disk_alarm_percent=80
-mp.devopscluster.mp_allow_export=false
 mp.common.ext-var.cp-port=11111
 
 mp.base.ext-var.fdfs-ip=10.100.7.1
@@ -56,101 +43,27 @@ mp.situationaware.ext-var.wazuh-es-port=9205
 mp.situationaware.ext-var.wazuh-es-max-page-size=10000
 mp.situationaware.ext-var.arkime-es-host=10.100.7.1
 mp.situationaware.ext-var.arkime-es-port=9205
-mp.situationaware.ext-var.arkime-disk=100
-mp.situationaware.ext-var.probe-ip=10.100.0.111
-mp.situationaware.ext-var.probe-port=8002
-mp.situationaware.ext-var.wazuh_agent_script_linux_path=/var/ossec/etc/shared/scripts/
-mp.situationaware.ext-var.wazuh_agent_script_windows_path=C:\ossec-agent\shared\scripts\
-mp.base.situationaware.es_date_pattern=yyyy-MM-dd'T'HH:mm:ss.SSSZ
-mp.situationaware.ext-var.mp_self_ip=mp
-mp.situationaware.ext-var.mp_self_port=8080
+mp.situationaware.ext-var.arkime-disk=50
 
 # mp-log 模块
 mp.log.ext-var.es-ip=10.100.7.1
 mp.log.ext-var.es-port=9205
 mp.log.ext-var.es-max-page-size=10000
 #日志存储数据库可以配置：es、sql
-mp.log.ext-var.log-db=es
+mp.log.ext-var.log-db=sql
 #动态日志级别保持
 mp.log.ext-var.dynamic-level-keeping=true
-mp.log.ext-var.exclude-urls=/login
-mp.log.ext-var.xclude-methods=OPTIONS
 
 # mp-auth 模块配置
-mp.auth.ext-var.authenticate-cache-time=30
-mp.auth.ext-var.authenticate-use-individual-token-secret=true
 mp.auth.ext-var.authenticate-jwt-secret=a668b6fec22144f38a6f72f8a5aa7326
-mp.auth.ext-var.authenticate-jwt-expires=604800
 mp.auth.ext-var.authenticate-encoder-iterations=10000
-mp.auth.ext-var.authenticate-encoder-hash-width=256
 mp.auth.ext-var.logout-keep-secret-user=3cf215471268482c88a9986283e38c27
-mp.auth.ext-var.authenticate-urls=/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**
-mp.auth.ext-var.max-import-user-size=1000
-mp.auth.ext-var.logout-reset-secret=true
-mp.auth.ext-var.mq-msg-timeout=3600000
-mp.auth.ext-var.default-user-avatar=/api/mp/avatar/1.png
 
-mp.sceneplugingns3.ext-var.gns3-ip=10.100.7.1
-mp.sceneplugingns3.ext-var.gns3-port=8088
-mp.sceneplugingns3.ext-var.gns3-image-uuids=854f7c24-060f-4dbd-b771-68eab207a071
 
 # for kaptcha
 #kaptcha.text-producer.ext-var.character=
 
 #系统可能在运行时修改全局日志级别，顾单独提取到ext中
 logging.level.ext-var.root=INFO
-logging.file.mp_logfile_max_file_size=300MB
-logging.file.mp_logfile_max_total_size=650MB
+
 logging.file.ext-var.max-row-length=2000
-logging.logback.rollingpolicy.mp_logfile_max_history=15
-
-mp.scene.ext-var.scene-pool-size=100
-mp.scene.ext-var.scene-hold-size=10000
-mp.scene.ext-var.element-pool-size=100
-mp.scene.ext-var.element-hold-size=10000
-mp.scene.ext-var.scene-handler-realtime-update=true
-mp.scene.ext-var.scene-process-save-realtime=true
-mp.scene.ext-var.element-process-save-realtime=true
-mp.scene.ext-var.dhcp-control=true
-mp.scene.ext-var.export-image-timeout=1200000
-
-mp.common.ext-var.has-own-recording-set=213,214,236
-mp.common.ext-var.scene-error-creating-seconds=3600
-mp.common.ext-var.element-error-creating-seconds=300
-mp.common.ext-var.ignore-scene-creating-seconds=120
-mp.common.ext-var.enable-scene-cron-job=true
-mp.common.ext-var.enable-command-change=false
-mp.common.ext-var.cron-job-expression=0 0/15 * * * ?
-mp.common.ext-var.enable-node-limit-db-check=true
-
-
-mp.frontbusiness.url-ac-filter-enabled=true
-
-mp.flow.trex-image=tgn-trex
-
-mp.sceneplugincloud.delete-retry-times=2
-mp.sceneplugincloud.default-core-router-name=Router
-mp.sceneplugincloud.enable-reallocate-ip-ports=false
-mp.sceneplugincloud.link-status-enabled=true
-mp.sceneplugincloud.link-status-refresh-period=5
-mp.sceneplugincloud.link-status-cache-seconds=600
-mp.sceneplugincloud.link-status-pool-size=10
-mp.sceneplugincloud.link-status-hold-size=200
-mp.sceneplugincloud.public-net-proxy-server=false
-mp.sceneplugincloud.public-net-proxy=false
-mp.sceneplugincloud.public-net-proxy-ip=
-mp.sceneplugincloud.public-net-proxy-port=
-mp.sceneplugincloud.gateway-types=2,3
-mp.sceneplugincloud.cpcloud-server-timeout=600000
-mp.sceneplugincloud.cpcloud-http-pool-size=200
-mp.sceneplugincloud.initiate-pool-size=10
-mp.sceneplugincloud.initiate-hold-size=20000
-mp.sceneplugincloud.create-pool-size=10
-mp.sceneplugincloud.create-hold-size=20000
-mp.sceneplugincloud.cloud-heavy-concurrent-delay-enable=true
-mp.sceneplugincloud.cloud-heavy-concurrent-delay=10
-mp.sceneplugincloud.scene-create-install-unzip-apk=true
-mp.sceneplugincloud.dhcp-ip-allocate=true
-
-
-
