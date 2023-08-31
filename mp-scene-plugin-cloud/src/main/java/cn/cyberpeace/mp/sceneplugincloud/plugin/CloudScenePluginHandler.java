@@ -788,4 +788,42 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
         element.setCoreType(coreType);
     }
+
+    public List<CloudPluginSceneElementBO> getAuxiliaryNetworkElement() {
+        return getElementMap().values().stream()
+                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getGatewayElements() {
+        return getGatewayElementMap().values().stream()
+                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getFirewallElements() {
+        return getFirewallElementMap().values().stream()
+                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getTerminalExcludeNpcElements() {
+        return getTerminalElementMap().values().stream()
+                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .filter(cloudElement -> cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC)
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getNpcElements() {
+        return getTerminalElementMap().values().stream()
+                .filter(cloudElement -> cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC)
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getDynamicElements() {
+        return new ArrayList<>(getElementMap().values()).stream()
+                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
+                .collect(Collectors.toList());
+    }
 }
