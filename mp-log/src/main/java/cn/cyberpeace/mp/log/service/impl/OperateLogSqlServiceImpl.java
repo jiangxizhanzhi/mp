@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +122,6 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
 
-
         if (StringUtils.isNotBlank(request.getUserId())) {
             humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
         }
@@ -170,8 +170,16 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
 
     private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {
         List<OperationLogPageResponse> list = new ArrayList<>(models.size());
+        List<Map<String,String>> userIdNameList = getModelMapper().selectUserIdName();
+        Map<String,String> userIdNameMap = new HashMap<String,String>();
+        if (CollectionUtils.isNotEmpty(userIdNameList)) {
+            for (Map<String,String> temp : userIdNameList) {
+                userIdNameMap.put(temp.get("id"), temp.get("name"));
+            }
+        }
         for (OperateLogSqlModel model : models) {
             OperationLogPageResponse response = JSON.parseObject(JSONObject.toJSON(model).toString(), OperationLogPageResponse.class);
+            response.setUserRealname(userIdNameMap.get(response.getUserId()));
             if (Objects.nonNull(response) && Objects.nonNull(response.getOpModuleID())) {
                 OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(response.getOpModuleID());
                 String opModuleCode = this.getlocalizedMessage(locale, opModuleEnums.getCode());

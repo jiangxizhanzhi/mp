@@ -65,6 +65,12 @@ public class OperationLogPageResponse {
     private String userName;
 
     /**
+     * 用户姓名
+     */
+    @ApiModelProperty(value = "用户姓名")
+    private String userRealname;
+
+    /**
      * 内容
      */
     @ApiModelProperty(value = "内容")
