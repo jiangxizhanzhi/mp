@@ -111,7 +111,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
             // 只获取最新的一条日志
             OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
-            logPageRequest.setUserName(r.getUsername());
+            logPageRequest.setUserId(r.getUser());
             logPageRequest.setPage(1);
             logPageRequest.setPerPage(1);
             List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
