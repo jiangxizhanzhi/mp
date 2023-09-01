@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
@@ -16,7 +17,6 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
@@ -24,7 +24,6 @@ import cn.cyberpeace.mp.scene.util.SceneEventUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +45,6 @@ public class SceneService {
     @Resource
     private SceneConfigService sceneConfigService;
 
-    @Resource
-    private SceneElementSnapshotMapper sceneElementSnapshotMapper;
-
     @Autowired
     private ResourceClearHandler resourceClearHandler;
 
@@ -65,25 +61,29 @@ public class SceneService {
     public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback) {
         SceneHandler sceneHandler;
         try {
-            sceneHandler = new SceneHandler(sceneDataBO, false, context);
+            // 使用代理 提供事件流转
+            sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO, false, context));
             sceneHandler.setRealTimeUpdate(true);
             if (sceneHandler.getScene() != null) {
                 sceneHandler.getScene().setCreateTime(null);
             }
             sceneHandler.reformTopo();
-            sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        // 在prepare中预先判断下有多少启动流程
+        var stageRecorder = new SceneStageRecorder(sceneHandler.getScene());
+        sceneHandler.setSceneStageRecorder(stageRecorder);
+        sceneHandler.prepare(partialStart);
+        sceneHandler.save();
+
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
-            sceneHandler.prepare(partialStart);
-            if (!sceneHandlerProxy.initiate(false)) {
+            if (!sceneHandler.initiate(false)) {
                 return;
             }
-            sceneHandlerProxy.create();
+            sceneHandler.create();
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();

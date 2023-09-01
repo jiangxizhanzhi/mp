@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -40,11 +41,11 @@ import java.util.stream.Collectors;
 public class InitiateHandler extends HandlerCommon {
 
     public static class SceneProcess {
-        public static final EventProcess INITIATE_BASE_PROPERTIES = new EventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties");
-        public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool");
-        public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
-        public static final EventProcess REALLOCATE_IPS = new EventProcess("reallocate_ips", "sceneplugincloud.event.reallocate_ips");
-        public static final EventProcess PORT_CHECK = new EventProcess("port_check", "sceneplugincloud.event.port_check");
+        public static final SceneEventProcess INITIATE_BASE_PROPERTIES = new SceneEventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties", "init", 1);
+        public static final SceneEventProcess INITIATE_IP_POOL = new SceneEventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool", "init", 2);
+        public static final SceneEventProcess INITIATE_PORTS = new SceneEventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports", "init", 3);
+        public static final SceneEventProcess PORT_CHECK = new SceneEventProcess("port_check", "sceneplugincloud.event.port_check", "init", 4);
+        public static final SceneEventProcess REALLOCATE_IPS = new SceneEventProcess("reallocate_ips", "sceneplugincloud.event.reallocate_ips", "init", 5);
     }
 
     public static class ElementProcess {

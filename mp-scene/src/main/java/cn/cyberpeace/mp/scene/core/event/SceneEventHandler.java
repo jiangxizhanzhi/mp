@@ -62,7 +62,7 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
         formatMessage.add(String.valueOf(eventStatus));
         formatMessage.add(process);
         formatMessage.add(String.valueOf(processStatus));
-        String message = processMessage + " process[" + StringUtils.join(formatMessage, ",") + "]";
+        String message = "[" + this.getTarget().getStage() + "," + this.getTarget().getStagePercentage() + "]" + processMessage + " process[" + StringUtils.join(formatMessage, ",") + "]";
         super.logProcess(event, eventStatus, process, processStatus, message);
     }
 }

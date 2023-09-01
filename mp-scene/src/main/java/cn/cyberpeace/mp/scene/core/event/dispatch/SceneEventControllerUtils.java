@@ -25,6 +25,9 @@ public class SceneEventControllerUtils {
     }
 
     public static void releaseEventLock(String sceneId) {
+        if (sceneEventControllers == null) {
+            return;
+        }
         var scene = sceneEventControllers.get(sceneId);
         // todo 极端并发下可能有问题
         if (scene != null && scene.releaseEventLock()) {

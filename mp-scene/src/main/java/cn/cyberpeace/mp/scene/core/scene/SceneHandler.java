@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
+import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -129,6 +131,16 @@ public class SceneHandler extends BaseSceneHandler<
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new ConcurrentHashMap<>();
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
+
+    private SceneStageRecorder sceneStageRecorder;
+
+    public void setSceneStageRecorder(SceneStageRecorder sceneStageRecorder) {
+        this.sceneStageRecorder = sceneStageRecorder;
+    }
+
+    public SceneStageRecorder getSceneStageRecorder() {
+        return this.sceneStageRecorder;
+    }
 
     public final Set<String> excludeHandleNodes = new HashSet<>();
 
@@ -331,6 +343,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int progressSceneProcess(int event, String process) {
+        getSceneStageRecorder().progress(process);
         var flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
@@ -347,6 +360,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int overSceneProcess(int event) {
+        getSceneStageRecorder().overProgress(this.getScene().getProcess());
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
             boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime());
@@ -378,6 +392,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean initiate(boolean isSave) {
+        getSceneStageRecorder().startStage(CommonSceneStage.INIT);
         prepareAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         startAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         try {
@@ -389,6 +404,7 @@ public class SceneHandler extends BaseSceneHandler<
             errorScene(SceneModel.Event.INITIATE, e.getMessage());
             return false;
         }
+        getSceneStageRecorder().endStage(CommonSceneStage.INIT);
         overAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         if (isSave) {
             save();

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.event.dispatch;
 
 import cn.cyberpeace.mp.scene.core.event.interrupt.MpSceneOperateInterrupted;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.proxy.MethodInterceptor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +13,7 @@ import java.lang.reflect.Method;
  * @Author maojun
  * @Date 2022/5/12
  */
+@Slf4j
 public class SceneHandlerProxy implements MethodInterceptor {
     private SceneHandler sceneHandler;
 
@@ -33,10 +35,13 @@ public class SceneHandlerProxy implements MethodInterceptor {
                 interrupted.getStrategy().action(sceneHandler.getSceneId(), sceneHandler);
                 return false;
             } else {
+                log.error("invoke error , {}", e);
                 throw e;
             }
         } finally {
-            SceneEventControllerUtils.releaseEventLock(sceneHandler.getSceneId());
+            if (sceneHandler.getSceneId() != null) {
+                SceneEventControllerUtils.releaseEventLock(sceneHandler.getSceneId());
+            }
         }
     }
 
