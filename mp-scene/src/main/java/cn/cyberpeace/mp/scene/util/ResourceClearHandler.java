@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.base.util.hutool.ConcurrentHashSet;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

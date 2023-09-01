@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.cscene.controller.request.MibInfoQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.protocolcollection.MibFileInfo;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;

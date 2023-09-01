@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.config.websocket;
 
-import cn.cyberpeace.mp.base.util.hutool.AnnotationUtil;
+import cn.cyberpeace.mp.base.util.mptool.AnnotationUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;

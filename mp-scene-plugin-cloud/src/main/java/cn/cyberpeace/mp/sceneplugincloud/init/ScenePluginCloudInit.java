@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.init;
 
 import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
 import cn.cyberpeace.mp.sceneplugincloud.init.jobs.CloudInstanceLinkInitJob;

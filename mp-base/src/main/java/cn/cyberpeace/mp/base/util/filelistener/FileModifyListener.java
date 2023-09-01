@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.util.filelistener;
 
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

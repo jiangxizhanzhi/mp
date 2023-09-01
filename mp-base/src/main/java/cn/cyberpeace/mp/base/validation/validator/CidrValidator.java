@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.validation.validator;
 
 
-import cn.cyberpeace.mp.base.util.hutool.Validator;
+import cn.cyberpeace.mp.base.util.mptool.Validator;
 import cn.cyberpeace.mp.base.validation.stereotype.Cidr;
 import org.apache.commons.lang3.StringUtils;
 

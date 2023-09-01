@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.common.controller;
 import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
 import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.ControllerConstant;
 import cn.cyberpeace.mp.common.service.MarkdownFileService;
 import io.swagger.annotations.Api;

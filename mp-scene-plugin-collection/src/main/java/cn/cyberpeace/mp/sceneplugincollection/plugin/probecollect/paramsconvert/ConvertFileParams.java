@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert;
 
-import cn.cyberpeace.mp.base.util.hutool.CollUtil;
+import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
