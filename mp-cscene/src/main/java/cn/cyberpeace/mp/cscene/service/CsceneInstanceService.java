@@ -18,6 +18,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
+import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -87,9 +89,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
-import cn.hutool.cache.CacheUtil;
-import cn.hutool.cache.impl.TimedCache;
-import cn.hutool.core.collection.CollUtil;
+import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +104,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -179,7 +180,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private FlowMonitorService flowMonitorService;
 
     // expires in 10 minutes
-    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+    private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
@@ -244,7 +245,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (StringUtils.isNotBlank(requestId)) {
             isScrollRequest = true;
             cacheKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
-            String cacheValue = TIMED_CACHE.get(cacheKey, false);
+            String cacheValue = null;
+            try {
+                cacheValue = TIMED_CACHE.get(cacheKey, () -> {
+                    // 如果缓存中没有对应的value，可以在这里进行计算或者从其他地方获取
+                    return "";
+                });
+            } catch (ExecutionException e) {
+            }
             if (StringUtils.isNotEmpty(cacheValue)) {
                 scrollId = cacheValue;
             }
@@ -834,10 +842,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             // 进程列表
             infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             var processCount = hostStateService.pageProcesses(infoParams).getSource().getTotal();
-            count.put("info",netCount+portCount+processCount);
+            count.put("info", netCount + portCount + processCount);
         });
         // 日志类
-        tasks.add(()->{
+        tasks.add(() -> {
             HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
             hostEventQueryParams.setNodeIds(params.getNodeIds());
             hostEventQueryParams.setEndTime(params.getEndTime());
@@ -845,7 +853,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             count.put("log", result.getSource().getTotal());
         });
         // 流量类
-        tasks.add(()->{
+        tasks.add(() -> {
             FlowQueryParams flowQueryParams = new FlowQueryParams();
             flowQueryParams.setTargetNodeIds(params.getNodeIds());
             flowQueryParams.setEndTime(params.getEndTime());
@@ -858,6 +866,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * 事件分页列表
+     *
      * @param id
      * @param queryParams
      * @return
@@ -899,7 +908,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         FileEventType.USERS.name());
             }
 
-            if(queryParams.getType().equals(6)){
+            if (queryParams.getType().equals(6)) {
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
                         FileEventType.REGISTRY.name());
             }
@@ -910,6 +919,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * 滚动分页列表
+     *
      * @param scrollId
      * @return
      */
@@ -1172,6 +1182,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * 根据引用类型分组统计
+     *
      * @param events 需要排除的event
      * @return
      */
@@ -1209,11 +1220,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
-     * @description: 启动节点
-     * @param id 
-     * @param nodeId 
-     * @param context 
+     * @param id
+     * @param nodeId
+     * @param context
      * @return ServiceResult<Boolean>
+     * @description: 启动节点
      */
     public ServiceResult<Boolean> startElement(String id, String nodeId, CsceneContextBO context) {
         //获取场景实例操作对象
@@ -1224,9 +1235,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
-     * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
      * @param csceneId 场景id
-     * @param nodeId 节点id
+     * @param nodeId   节点id
+     * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
      */
     public void unSupportedOperation(String csceneId, String nodeId) {
         CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneId, null, true);
@@ -1239,11 +1250,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
-     * @description: 关闭节点
      * @param id
      * @param nodeId
      * @param context
      * @return ServiceResult<Boolean>
+     * @description: 关闭节点
      */
     public ServiceResult<Boolean> stopElement(String id, String nodeId, CsceneContextBO context) {
         //获取场景实例操作对象
@@ -1277,7 +1288,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, CsceneContextBO context) {
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId, String image, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.recreateElement(nodeId, image);
         return new ServiceResult<>(result);
@@ -1360,7 +1371,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<ElementCommandExecResult> execElement(String id, String nodeId, String command,
                                                                String user, CsceneContextBO context) {
         String sceneId = getSceneId(id);
-        var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command,user).getSource();
+        var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command, user).getSource();
         var result = new ElementCommandExecResult();
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());
@@ -1410,13 +1421,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         // 校验快照是否被场景和场景模板引用
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
-        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
+        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
         if (CollectionUtils.isNotEmpty(configNames)) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(configNames, ",")));
         }
 
-        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image }).getSource();
+        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image}).getSource();
         var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
         if (CollectionUtils.isNotEmpty(instanceNames)) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(instanceNames, ",")));
@@ -1533,7 +1544,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
 
-        Map<String,SceneElementPortBO> newPorts = new HashMap<>();
+        Map<String, SceneElementPortBO> newPorts = new HashMap<>();
         for (var newElement : instance.getScene().getTopology().getElements()) {
             if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
                 for (var p : newElement.getPorts()) {

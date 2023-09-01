@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.common.util;
 
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

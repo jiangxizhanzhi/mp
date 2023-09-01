@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -67,6 +69,9 @@ public class CollectionTemplateService {
     @Autowired
     private ProbeService probeService;
 
+    @Autowired
+    private UserService userService;
+
     /**
      * 分页查询探针列表
      *
@@ -82,6 +87,12 @@ public class CollectionTemplateService {
         List<CollectionTemplatePageItemDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
         templateDtos.forEach(dto -> {
             dto.setProbeCounts(templateProbeMapper.countByTemplateId(dto.getId(), null));
+            if (StringUtils.isNotEmpty(dto.getCreator())) {
+                UserModel userModel = userService.getByUserName(dto.getCreator());
+                if (userModel != null) {
+                    dto.setCreatorName(userModel.getName());
+                }
+            }
         });
         PageInfo pageInfo = new PageInfo(templateDtos);
 

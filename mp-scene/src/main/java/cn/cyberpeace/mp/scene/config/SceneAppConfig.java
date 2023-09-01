@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.scene.config;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.PathUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

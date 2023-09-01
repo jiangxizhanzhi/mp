@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.util.http;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.hutool.core.util.URLUtil;
+import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 
 import java.nio.charset.StandardCharsets;
 

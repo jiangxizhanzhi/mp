@@ -39,6 +39,8 @@ public class CsceneInstanceStat {
     private Integer disk;
     @ApiModelProperty(value = "创建用户名")
     private String createUsername;
+    @ApiModelProperty(value = "创建姓名")
+    private String createName;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
     @ApiModelProperty(value = "更新时间")

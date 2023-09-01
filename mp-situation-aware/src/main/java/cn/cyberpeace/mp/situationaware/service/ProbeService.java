@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -54,6 +56,9 @@ public class ProbeService {
 
     @Autowired
     private ProbeParamService probeParamService;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 新增探针
@@ -250,6 +255,12 @@ public class ProbeService {
             processProbeDtoParams(p);
             if (p.getType() == ProbeModel.TYPE_COMMON) {
                 processInternationalMessage(p);
+            }
+            if (StringUtils.isNotEmpty(p.getCreator())) {
+                UserModel userModel = userService.getByUserName(p.getCreator());
+                if (userModel != null) {
+                    p.setCreatorName(userModel.getName());
+                }
             }
         });
         // 分页查询不附带参数

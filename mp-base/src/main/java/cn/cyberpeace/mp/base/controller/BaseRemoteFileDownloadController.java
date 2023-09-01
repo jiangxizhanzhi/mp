@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.service.BaseRemoteFileService;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;

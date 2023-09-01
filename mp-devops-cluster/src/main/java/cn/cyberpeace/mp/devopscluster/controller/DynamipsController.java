@@ -107,21 +107,24 @@ public class DynamipsController {
                 csceneNodeInfoBO = source.get(instanceModel.getName());
             }
             String userName = "";
+            String userRealname = "";
             String userId = csceneNodeInfoBO.getUserId();
             if (StringUtils.isNotBlank(userId)) {
                 Optional<UserBo> optional = tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
+                    userRealname = optional.get().getName();
                 }
             } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
                 String createUser = uuid2User.get(instanceModel.getName());
                 Optional<UserBo> optional = tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
+                    userRealname = optional.get().getName();
                 }
             }
 
-            return InstancePageVO.builder().name(instanceModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+            return InstancePageVO.builder().name(instanceModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).userRealname(userRealname).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
     }
 }

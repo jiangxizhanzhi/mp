@@ -10,6 +10,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.base.util.mptool.HttpRequest;
+import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
@@ -36,9 +39,6 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.http.HttpRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -49,14 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -217,7 +210,7 @@ public class HostStateService {
 
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
-        LocalDateTime sceneStartTime = null ;
+        LocalDateTime sceneStartTime = null;
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
             if (CollectionUtils.isNotEmpty(sceneIds)) {
@@ -559,7 +552,8 @@ public class HostStateService {
 
     private List<String> getAgentNames() {
         String url = "http://" + csceneAppConfig.getCpIp() + ":" + csceneAppConfig.getCpPort() + "/v1/hypervisors";
-        String result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+//        String result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        String result = HttpRequest.sendGetRequest(url, wrapperHeaders(new HashMap<>()));
         if (StringUtils.isBlank(result)) {
             return new ArrayList<>();
         }

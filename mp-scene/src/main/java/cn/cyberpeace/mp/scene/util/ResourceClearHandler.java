@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.hutool.core.collection.ConcurrentHashSet;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description

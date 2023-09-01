@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.proxy.lf;
 
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
 
 @Data
