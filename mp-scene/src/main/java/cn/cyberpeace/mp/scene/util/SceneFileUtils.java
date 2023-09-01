@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import org.apache.commons.lang3.StringUtils;
 

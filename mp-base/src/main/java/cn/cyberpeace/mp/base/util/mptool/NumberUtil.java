@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util.hutool;
+package cn.cyberpeace.mp.base.util.mptool;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

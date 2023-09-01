@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.sceneplugincloud.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
-import cn.cyberpeace.mp.base.util.hutool.Ipv4Util;
-import cn.cyberpeace.mp.base.util.hutool.StrUtil;
+import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
+import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import lombok.extern.slf4j.Slf4j;
 

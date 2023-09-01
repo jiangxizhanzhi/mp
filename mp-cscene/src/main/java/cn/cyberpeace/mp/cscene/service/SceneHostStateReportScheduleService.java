@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
-import cn.cyberpeace.mp.base.util.hutool.ConcurrentHashSet;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;

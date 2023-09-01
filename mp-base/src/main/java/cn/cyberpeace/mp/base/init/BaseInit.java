@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.localcall.LocalCallServerListener;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.base.websocket.BaseGroupServer;
 import cn.cyberpeace.mp.base.websocket.BaseServer;
 import lombok.extern.slf4j.Slf4j;

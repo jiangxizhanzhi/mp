@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.util.hutool.NumberUtil;
+import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;

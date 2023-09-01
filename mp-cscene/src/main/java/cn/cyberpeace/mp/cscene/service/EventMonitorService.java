@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.util.hutool.CollectionUtil;
-import cn.cyberpeace.mp.base.util.hutool.NumberUtil;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;

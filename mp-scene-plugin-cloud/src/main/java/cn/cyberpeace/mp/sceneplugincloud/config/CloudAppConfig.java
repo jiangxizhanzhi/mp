@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.config;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.constant;
 
-import cn.cyberpeace.mp.base.util.hutool.CollUtil;
+import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 
 import java.util.List;
 

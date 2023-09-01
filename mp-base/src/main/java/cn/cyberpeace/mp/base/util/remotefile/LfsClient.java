@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.base.util.remotefile;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
-import cn.cyberpeace.mp.base.util.hutool.Validator;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.Validator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;

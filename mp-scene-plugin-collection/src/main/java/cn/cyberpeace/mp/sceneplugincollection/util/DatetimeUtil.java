@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.util;
 
-import cn.cyberpeace.mp.base.util.hutool.DatePattern;
+import cn.cyberpeace.mp.base.util.mptool.DatePattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

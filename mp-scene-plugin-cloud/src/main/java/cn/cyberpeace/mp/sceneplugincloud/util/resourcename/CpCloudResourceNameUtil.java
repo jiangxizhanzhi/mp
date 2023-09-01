@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.resourcename;
 
-import cn.cyberpeace.mp.base.util.hutool.NumberUtil;
+import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.sceneplugincollection.init;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
-import cn.cyberpeace.mp.base.util.hutool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig;
