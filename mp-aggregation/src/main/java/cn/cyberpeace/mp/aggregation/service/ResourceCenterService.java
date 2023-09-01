@@ -39,7 +39,7 @@ public class ResourceCenterService {
 
     private static String LOGO_FILE_SUFFIX = "/api/mp/file/";
 
-    private static String LOGO_NAME = "logo.png";
+    private static String LOGO_NAME = "Topology.png";
 
 
     private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
@@ -101,7 +101,7 @@ public class ResourceCenterService {
             String logoPath = StringUtils.replaceOnce(logo, LOGO_FILE_SUFFIX, "");
             byte[] content = FsCommon.downloadRawContent(logoPath);
             try {
-                FileUtils.writeByteArrayToFile(new File(envPath + "/" + "logo.png"), content);
+                FileUtils.writeByteArrayToFile(new File(envPath + "/" + LOGO_NAME), content);
             } catch (IOException e) {
                 log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
                 throw new MpRuntimeException(BaseErrorCode.ERROR);
