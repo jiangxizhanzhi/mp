@@ -56,7 +56,7 @@ public class InstallerService extends BaseCpService {
      */
     public Installer add(InstallerFormDataCloudPlatformModel installer, List<File> fileList) throws IOException{
 
-        Map<String, Object> formMap = BeanUtils.beanToMap(installer,true,true);
+        Map<String, Object> formMap = BeanUtils.getSnakeMap(installer);
 
         Installer result;
         if (StringUtils.isNotBlank(installer.getUuid())){
