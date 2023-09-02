@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 
 public class Ipv4Util {
 
-    public static final String IP_MASK_SPLIT_MARK = "-";
-    public static final String IP_SPLIT_MARK = ".";
+    public static final String IP_MASK_SPLIT_MARK = "/";
+    public static final String IP_SPLIT_MARK = "-";
 
     /**
      * 用掩码位获取子网掩码
