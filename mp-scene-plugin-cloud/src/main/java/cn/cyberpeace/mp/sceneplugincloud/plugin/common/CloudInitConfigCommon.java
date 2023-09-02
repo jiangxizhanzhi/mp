@@ -52,11 +52,13 @@ public class CloudInitConfigCommon {
         private String rootPassword;
         private List<User> users;
         private List<String> initCommands;
+        private List<String> dnsList;
 
         public Builder(String standardSystemType) {
             this.standardSystemType = standardSystemType;
             this.users = new ArrayList<>();
             this.initCommands = new ArrayList<>();
+            this.dnsList = new ArrayList<>();
         }
 
         public List<String> build() {
@@ -65,6 +67,10 @@ public class CloudInitConfigCommon {
             } else {
                 return this.buildForLinux();
             }
+        }
+
+        public void addAllDns(List<String> dnsList) {
+            this.dnsList.addAll(dnsList);
         }
 
         public void addUser(String username, String password) {
@@ -138,6 +144,14 @@ public class CloudInitConfigCommon {
                         .collect(Collectors.toList());
                 list.addAll(formatCommands);
             }
+
+            if (!this.dnsList.isEmpty()) {
+                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                    list.addAll(this.getDnsList("C:\\Windows\\System32\\drivers\\etc\\hosts", this.dnsList));
+                } else {
+                    list.addAll(this.getDnsList("/etc/hosts", this.dnsList));
+                }
+            }
             return list;
         }
 
@@ -186,6 +200,21 @@ public class CloudInitConfigCommon {
                     "  " + "  " + "sudo: ALL=(ALL) NOPASSWD:ALL",
                     "  " + "  " + "plain_text_passwd: '" + user.password + "'"
             );
+        }
+
+        private List<String> getDnsList(String path, List<String> dnsList) {
+            List<String> result = new ArrayList<>();
+            result.addAll(Arrays.asList(
+                    "write_files:",
+                    "  " + "- path: " + path,
+                    "  " + "  permissions: \"0644\"",
+                    "  " + "  content: |"
+            ));
+            for (var dns : dnsList) {
+                result.add("  " + "    " + dns);
+            }
+            result.add("  " + "  append: True");
+            return result;
         }
     }
 

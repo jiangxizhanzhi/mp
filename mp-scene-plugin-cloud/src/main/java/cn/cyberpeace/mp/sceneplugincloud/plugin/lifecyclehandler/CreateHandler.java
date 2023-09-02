@@ -632,6 +632,26 @@ public class CreateHandler extends HandlerCommon {
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
         builder.addAllInitCommands(commands);
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
+            List<String> dns = new ArrayList<>();
+            for(var d:getPluginHandler().getScene().getDnsNameservers()){
+                var dnsCloudElement = getPluginHandler().getElement(d.getNodeId());
+                String dnsIp = null ;
+                if (dnsCloudElement != null) {
+                    var e = dnsCloudElement.getSrcElement();
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
+                        for(var p:e.getPorts()){
+                            if (StringUtils.isNotEmpty(p.getIp())) {
+                                dnsIp = p.getIp();
+                                break;
+                            }
+                        }
+                    }
+                }
+                dns.add(dnsIp + " " + d.getDomain());
+            }
+            builder.addAllDns(dns);
+        }
         List<String> cloudInitCommands = builder.build();
         var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
