@@ -21,4 +21,6 @@ public class CsceneQueryParams extends QueryParams {
     private String[] appType;
     @ApiModelProperty(value = "场景类型")
     private String[] bizType;
+    @ApiModelProperty(value = "场景实例库")
+    private String[] csceneInstanceCategory;
 }

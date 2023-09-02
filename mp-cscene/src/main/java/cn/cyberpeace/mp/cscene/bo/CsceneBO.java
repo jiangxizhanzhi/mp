@@ -52,10 +52,12 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig),
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getAppType),
-                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType)
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getCsceneInstanceCategory)
         ));
         this.setAppType(StringUtils.isEmpty(obj.getAppType()) ? new String[]{} : StringUtils.split(obj.getAppType(), ","));
         this.setBizType(StringUtils.isEmpty(obj.getBizType()) ? new String[]{} : StringUtils.split(obj.getBizType(), ","));
+        this.setCsceneInstanceCategory(StringUtils.isEmpty(obj.getCsceneInstanceCategory()) ? new String[]{} : StringUtils.split(obj.getCsceneInstanceCategory(), ","));
     }
 
     @Override
@@ -63,7 +65,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig),
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getAppType),
-                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType)
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getBizType),
+                BeanUtils.getBeanGetterFieldName(CsceneModel::getCsceneInstanceCategory)
         ));
         if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
@@ -75,6 +78,10 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         obj.setBizType(StringUtils.EMPTY);
         if (this.getBizType() != null && this.getBizType().length > 0) {
             obj.setBizType(StringUtils.join(this.getBizType(), ","));
+        }
+        obj.setCsceneInstanceCategory(StringUtils.EMPTY);
+        if (this.getCsceneInstanceCategory() != null && this.getCsceneInstanceCategory().length > 0) {
+            obj.setCsceneInstanceCategory(StringUtils.join(this.getCsceneInstanceCategory(), ","));
         }
         return obj;
     }

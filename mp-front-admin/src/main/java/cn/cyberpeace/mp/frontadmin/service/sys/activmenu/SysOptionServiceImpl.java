@@ -1,18 +1,26 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -84,6 +92,160 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
+    }
+
+    /**
+     * 分页查询OptionModel列表
+     * @param queryParams
+     * @return
+     */
+    @Override
+    public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
+        log.info("SysOptionServiceImpl.page begin. queryParams:{}", queryParams);
+        ListObjServiceResult<OptionModel> listObjServiceResult = this.list(queryParams);
+        Locale locale = LocaleContextHolder.getLocale();
+        List<OptionModelBO> boList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(listObjServiceResult.getSource().getObjs())) {
+            for (OptionModel optionModel : listObjServiceResult.getSource().getObjs()) {
+                OptionModelBO optionModelBO = new OptionModelBO();
+                BeanUtils.copyProperties(optionModel, optionModelBO);
+                if (Objects.equals(Locale.US, locale)) {
+                    optionModelBO.setName(optionModel.getEnName());
+                } else {
+                    optionModelBO.setName(optionModel.getZhName());
+                }
+                boList.add(optionModelBO);
+            }
+        }
+        ListObjServiceResult<OptionModelBO> result = new ListObjServiceResult<>(new ListObjResult<>(boList, listObjServiceResult.getSource().getTotal())).asResult();
+        log.info("SysOptionServiceImpl.page end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 新增选项
+     * @param optionModelBO
+     */
+    @Override
+    public void addOption(OptionModelBO optionModelBO) {
+        log.info("SysOptionServiceImpl.addOption begin. optionModelBO:{}", optionModelBO);
+        if (StringUtils.isEmpty(optionModelBO.getName())) {
+            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
+        }
+        if (checkNameExist(optionModelBO, false)) {
+            throw new MpRuntimeException(AdminErrorCode.OPTION_NAME_EXIST);
+        }
+        OptionModel optionModel = new OptionModel();
+        BeanUtils.copyProperties(optionModelBO, optionModel);
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(Locale.US, locale)) {
+            optionModel.setEnName(optionModelBO.getName());
+        } else {
+            optionModel.setZhName(optionModelBO.getName());
+        }
+        getModelMapper().create(optionModel);
+        log.info("SysOptionServiceImpl.addOption end.");
+    }
+
+    /**
+     * 编辑选项
+     * @param optionModelBO
+     */
+    @Override
+    public void editOption(OptionModelBO optionModelBO) {
+        log.info("SysOptionServiceImpl.editOption begin. optionModelBO:{}", optionModelBO);
+        if (StringUtils.isEmpty(optionModelBO.getName()) || StringUtils.isEmpty(optionModelBO.getId())) {
+            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
+        }
+        if (checkNameExist(optionModelBO, true)) {
+            throw new MpRuntimeException(AdminErrorCode.OPTION_NAME_EXIST);
+        }
+        OptionModel optionModel = new OptionModel();
+        BeanUtils.copyProperties(optionModelBO, optionModel);
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(Locale.US, locale)) {
+            optionModel.setEnName(optionModelBO.getName());
+        } else {
+            optionModel.setZhName(optionModelBO.getName());
+        }
+        getModelMapper().update(optionModel);
+        log.info("SysOptionServiceImpl.editOption end.");
+    }
+
+    /**
+     * 删除选项
+     * @param ids
+     */
+    @Override
+    public void deleteOptions(List<String> ids) {
+        log.info("SysOptionServiceImpl.deleteOptions begin. ids:{}", ids);
+        this.bulkDelete(ids.toArray(new String[ids.size()]));
+        log.info("SysOptionServiceImpl.deleteOptions end.");
+    }
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    @Override
+    public OptionModelBO findById(String id) {
+        log.info("SysOptionServiceImpl.findById begin. id:{}", id);
+        OptionModelBO optionModelBO = new OptionModelBO();
+        OptionModel optionModel = getModelMapper().get(id);
+        BeanUtils.copyProperties(optionModel, optionModelBO);
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(Locale.US, locale)) {
+            optionModelBO.setName(optionModel.getEnName());
+        } else {
+            optionModelBO.setName(optionModel.getZhName());
+        }
+        log.info("SysOptionServiceImpl.deleteOptions end. optionModelBO：{}", optionModelBO);
+        return optionModelBO;
+    }
+
+    /**
+     * 根据ids查询列表
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<OptionModel> findByIds(List<String> ids) {
+        log.info("SysOptionServiceImpl.findByIds begin. ids:{}", ids);
+        HumanCondition condition = new HumanCondition();
+        condition.filterIn(OptionModel::getId, ids.toArray(new String[ids.size()]));
+        condition.orderBy(OptionModel::getSort);
+        List<OptionModel> optionModels = getModelMapper().list(condition);
+        log.info("SysOptionServiceImpl.findByIds end. optionModels:{}", optionModels);
+        return optionModels;
+    }
+
+    /**
+     * 检查是否存在重名
+     * @param optionModelBO
+     * @param exceptOwn
+     * @return
+     */
+    private boolean checkNameExist(OptionModelBO optionModelBO, boolean exceptOwn) {
+        log.info("SysOptionServiceImpl.checkNameExist begin. optionModelBO:{}, exceptOwn:{}", optionModelBO, exceptOwn);
+        if (StringUtils.isEmpty(optionModelBO.getType()) || StringUtils.isEmpty(optionModelBO.getName())) {
+            return false;
+        }
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(OptionModel::getType, optionModelBO.getType());
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(Locale.US, locale)) {
+            condition.filterEqual(OptionModel::getEnName, optionModelBO.getName());
+        } else {
+            condition.filterEqual(OptionModel::getZhName, optionModelBO.getName());
+        }
+        if (exceptOwn) {
+            condition.filterNotEqual(OptionModel::getId, optionModelBO.getId());
+        }
+        List<OptionModel> optionModels = getModelMapper().list(condition);
+        boolean result = CollectionUtils.isNotEmpty(optionModels);
+        log.info("SysOptionServiceImpl.checkNameExist end. result:{}", result);
+        return result;
     }
 
     private void filterByVisibility(List<OptionModel> optionModels) {

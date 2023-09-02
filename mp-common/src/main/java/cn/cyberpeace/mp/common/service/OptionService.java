@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.common.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 
 import java.util.List;
 
@@ -39,5 +42,43 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      * @return
      */
     ServiceResult<List<OptionBO>> getIntOptions(String type);
+    /**
+     * 分页查询OptionModel列表
+     * @param queryParams
+     * @return
+     */
+    ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams);
+
+    /**
+     * 新增选项
+     * @param optionModelBO
+     */
+    void addOption(OptionModelBO optionModelBO);
+
+    /**
+     * 编辑选项
+     * @param optionModelBO
+     */
+    void editOption(OptionModelBO optionModelBO);
+
+    /**
+     * 删除选项
+     * @param ids
+     */
+    void deleteOptions(List<String> ids);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    OptionModelBO findById(String id);
+
+    /**
+     * 根据ids查询列表
+     * @param ids
+     * @return
+     */
+    List<OptionModel> findByIds(List<String> ids);
 
 }

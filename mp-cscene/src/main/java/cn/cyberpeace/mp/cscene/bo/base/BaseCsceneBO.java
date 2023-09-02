@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.bo.base;
 
 import cn.cyberpeace.mp.base.bo.ModelBO;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
@@ -35,6 +36,8 @@ public abstract class BaseCsceneBO<
     private String[] appType;
     @ApiModelProperty(value = "场景类型")
     private String[] bizType;
+    @ApiModelProperty(value = "场景实例库")
+    private String[] csceneInstanceCategory;
     @Override
     public T export() {
         setId(null);

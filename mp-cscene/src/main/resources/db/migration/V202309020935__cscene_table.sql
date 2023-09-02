@@ -1,0 +1,2 @@
+alter table mp_cscene_cscene add column cscene_instance_category varchar(256) not null comment '场景实例库' ;
+alter table mp_cscene_cscene_instance add column cscene_instance_category varchar(256) not null comment '场景实例库' ;

@@ -233,6 +233,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
             orCondition.filterOrEnd();
         }
+        if (queryParams.getCsceneInstanceCategory() != null && queryParams.getCsceneInstanceCategory().length > 0) {
+            var orCondition = humanCondition.filterOrStart();
+            for (var type : queryParams.getCsceneInstanceCategory()) {
+                orCondition.orContains(CsceneModel::getCsceneInstanceCategory, type);
+            }
+            orCondition.filterOrEnd();
+        }
 
         Integer type = queryParams.getType();
         if (type != null) {

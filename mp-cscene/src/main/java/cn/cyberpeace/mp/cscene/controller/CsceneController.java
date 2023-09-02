@@ -3,10 +3,16 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.bo.OptionModelBO;
+import cn.cyberpeace.mp.common.model.OptionModel;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -14,6 +20,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.request.DeleteCategoryRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -21,6 +28,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.cscene.util.ZipUtils;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -37,12 +45,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -56,6 +66,12 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+    @Resource(name = "sysOptionServiceImpl")
+    private OptionService optionService;
+
+    //场景实例库
+    public static final String SCENE_INSTANCE_CATEGORY = "scene_instance_category";
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -406,5 +422,93 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @GetMapping("/categories")
+    @ApiOperation(value = "查询场景实例库")
+    public ServiceResult<List<OptionBO>> flowCategories() {
+        return optionService.getIntOptions(SCENE_INSTANCE_CATEGORY);
+    }
+
+    /**
+     * 分页查询场景实例库列表
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("分页查询场景实例库列表")
+    @GetMapping("/page_categories")
+    public ListObjServiceResult<OptionModelBO> pageCategories(OptionQueryParams queryParams) {
+        log.info("CsceneController.pageCategories begin. queryParams:{}", queryParams);
+        queryParams.setType(SCENE_INSTANCE_CATEGORY);
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        ListObjServiceResult<OptionModelBO> result = optionService.page(queryParams);
+        log.info("CsceneController.pageCategories end. result:{}", result);
+        return result;
+    }
+
+    /**
+     * 新增场景实例库
+     * @param optionModelBO
+     * @return
+     */
+    @ApiOperation("新增场景实例库")
+    @PostMapping("/add_category")
+    public ServiceResult addCategory(@RequestBody OptionModelBO optionModelBO) {
+        log.info("CsceneController.addCategory begin. optionModelBO:{}", optionModelBO);
+        optionModelBO.setType(SCENE_INSTANCE_CATEGORY);
+        optionModelBO.setMeta("{\"activKeys\":\"no_auth\",\"visible\":1}");
+        optionModelBO.setCode(TextUtils.uuid());
+        optionModelBO.setSort(1);
+        optionService.addOption(optionModelBO);
+        log.info("CsceneController.addCategory end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 编辑场景实例库
+     * @param optionModelBO
+     * @return
+     */
+    @ApiOperation("编辑场景实例库")
+    @PostMapping("/edit_category")
+    public ServiceResult editCategory(@RequestBody OptionModelBO optionModelBO) {
+        log.info("CsceneController.editCategory begin. optionModelBO:{}", optionModelBO);
+        optionModelBO.setType(SCENE_INSTANCE_CATEGORY);
+        optionService.editOption(optionModelBO);
+        log.info("CsceneController.editCategory end.");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 删除场景实例库
+     * @param request
+     * @return
+     */
+    @ApiOperation("删除场景实例库")
+    @DeleteMapping("/delete_categories")
+    public ServiceResult deleteCategories(@RequestBody DeleteCategoryRequest request){
+        log.info("CsceneController.deleteCategories begin. request:{}", request);
+        List<OptionModel> optionModels = optionService.findByIds(request.getIds());
+        List<String> codeList = optionModels.stream().map(OptionModel::getCode).collect(Collectors.toList());
+//        if (flowServiceImpl.checkCategoryUsed(codeList)) {
+//            return ResultCommon.fail(FlowErrorCode.CATEGORY_HAS_USED);
+//        }
+        optionService.deleteOptions(request.getIds());
+        log.info("CsceneController.deleteCategories end");
+        return ResultCommon.success();
+    }
+
+    /**
+     * 场景实例库详情
+     * @param id
+     * @return
+     */
+    @ApiOperation("场景实例库详情")
+    @ApiImplicitParam(name = "id", value = "分类id", dataTypeClass = String.class)
+    @GetMapping("/categories/detail")
+    public ServiceResult<OptionModelBO> findCategoriesById(@RequestParam String id){
+        log.info("FlowInfoController.findCategoriesById begin. id:{}", id);
+        OptionModelBO optionModelBO = optionService.findById(id);
+        return new ServiceResult<>(optionModelBO).asResult();
     }
 }

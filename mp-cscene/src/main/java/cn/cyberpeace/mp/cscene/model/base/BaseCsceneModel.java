@@ -26,6 +26,8 @@ public class BaseCsceneModel extends BaseModel {
     private String appType;
     @DefaultStr
     private String bizType;
+    @DefaultStr
+    private String csceneInstanceCategory;
 
     @Override
     public boolean hasDeleted() {
