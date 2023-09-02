@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.aggregation.dto.cluster.DefaultImgTarget;
 import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.constant.DefaultImgStyleEnum;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -60,25 +62,27 @@ public class DefaultImgController {
     }
 
     /**
-     * 获取默认图片-包括多个图集
+     * 获取靶标图集
      *
-     * @param request
      * @return
      */
-    @ApiOperation("获取默认图片-包括多个图集")
-    @GetMapping("/get-default-img-all")
-    public ServiceResult<List<List<String>>> getDefaultImgAll(DefaultImgRequest request){
-        List<List<String>> rtnList = new ArrayList<>();
+    @ApiOperation("获取靶标图集")
+    @GetMapping("/get-default-img-target")
+    public ServiceResult<List<DefaultImgTarget>> getDefaultImgTarget(){
+        List<DefaultImgTarget> rtnList = new ArrayList<>();
         if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
-        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
-        List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
-        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
-        List<String> urlList =
-                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
-        rtnList.add(urlList);
-        rtnList.add(urlList);
+        for (DefaultImgStyleEnum styleEnum : DefaultImgStyleEnum.values()) {
+            List<String> groupList = Collections.singletonList(styleEnum.getGroup());
+            List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+            DefaultImgTarget defaultImgTarget = new DefaultImgTarget();
+            List<String> urlList = modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+            defaultImgTarget.setImgs(urlList);
+            defaultImgTarget.setStyle(styleEnum.getStyle());
+            defaultImgTarget.setName(styleEnum.getName());
+            rtnList.add(defaultImgTarget);
+        }
         return ResultCommon.success(rtnList);
     }
 
