@@ -488,9 +488,9 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("CsceneController.deleteCategories begin. request:{}", request);
         List<OptionModel> optionModels = optionService.findByIds(request.getIds());
         List<String> codeList = optionModels.stream().map(OptionModel::getCode).collect(Collectors.toList());
-//        if (flowServiceImpl.checkCategoryUsed(codeList)) {
-//            return ResultCommon.fail(FlowErrorCode.CATEGORY_HAS_USED);
-//        }
+        if (modelService.checkCsceneInstanceCategoryUsed(codeList)) {
+            return ResultCommon.fail(CsceneErrorCode.CSCENE_INSTANCE_CATEGORY_USED);
+        }
         optionService.deleteOptions(request.getIds());
         log.info("CsceneController.deleteCategories end");
         return ResultCommon.success();

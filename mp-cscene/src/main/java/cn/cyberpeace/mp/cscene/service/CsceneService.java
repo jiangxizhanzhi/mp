@@ -36,10 +36,12 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -694,5 +696,27 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         csceneAuthMapper.bulkDelete(csceneAuthMapper.list(humanCondition).stream()
                 .map(m -> m.getId())
                 .toArray(String[]::new));
+    }
+
+    /**
+     * 场景实例库是否被引用
+     *
+     * @param codeList
+     * @return
+     */
+    public boolean checkCsceneInstanceCategoryUsed(List<String> codeList) {
+        if (CollectionUtils.isEmpty(codeList)) {
+            return false;
+        }
+        for (String code : codeList) {
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterContains(CsceneModel::getCsceneInstanceCategory, code);
+            humanCondition.filterEqual(CsceneModel::getDeleted, 0);
+            List<CsceneModel> list = getModelMapper().list(humanCondition);
+            if (CollectionUtils.isNotEmpty(list)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

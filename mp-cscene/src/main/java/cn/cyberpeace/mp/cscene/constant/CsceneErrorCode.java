@@ -30,7 +30,8 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110299", "scene_instance_still_need_clear"),
     PARAMS_FIELD_ERROR("MP-110300", "params_field_error"),
     SCENE_CONFIG_FILE_NOT_FORMAT("MP-110301", "scene_config_file_not_format"),
-    SCENE_NOT_START("MP-110302", "scene_not_start");
+    SCENE_NOT_START("MP-110302", "scene_not_start"),
+    CSCENE_INSTANCE_CATEGORY_USED("MP-110301", "cscene_instance_category_used");
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
