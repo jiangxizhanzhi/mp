@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.PrepareHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
@@ -52,6 +53,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     private SceneHandlerUtils handlerUtils;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
+    private PrepareHandler prepareHandler ;
 
     @Override
     public void correctData() {
@@ -67,6 +69,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         handlerUtils = new SceneHandlerUtils(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
+        prepareHandler = new PrepareHandler(this);
     }
 
     @Override
@@ -119,6 +122,11 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
+    }
+
+    @Override
+    public void prepare(boolean partialStart) {
+        prepareHandler.prepare(partialStart);
     }
 
     @Override

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.common.HandlerUtils;
@@ -34,10 +36,9 @@ import java.util.stream.Collectors;
 public class CreateHandler extends HandlerCommon {
 
     public static class SceneProcess {
-        public static final EventProcess CREATE_FLOW_COLLECTOR = new EventProcess("create_flow_collector", "sceneplugincollection.event.create_flow_collector");
-        public static final EventProcess BIND_FLOW_COLLECT_PORTS = new EventProcess("bind_flow_collect_ports", "sceneplugincollection.event.bind_flow_collect_ports");
-        public static final EventProcess CREATE_PROBE_ROUTER = new EventProcess("create_probe_router", "sceneplugincollection.event.create_probe_router");
-        public static final EventProcess BIND_PROBE_COLLECT_AGENTS = new EventProcess("bind_probe_collect_agents", "sceneplugincollection.event.bind_probe_collect_agents");
+        public static final SceneEventProcess CREATE_FLOW_COLLECTOR = new SceneEventProcess("create_flow_collector", "sceneplugincollection.event.create_flow_collector", "create_flow_collect", 1);
+        public static final SceneEventProcess BIND_FLOW_COLLECT_PORTS = new SceneEventProcess("bind_flow_collect_ports", "sceneplugincollection.event.bind_flow_collect_ports", "create_flow_collect", 2);
+        public static final SceneEventProcess CREATE_PROBE_ROUTER = new SceneEventProcess("create_probe_router", "sceneplugincollection.event.create_probe_router", "create_data_collect", 1);
     }
 
     public static class ElementProcess {
@@ -107,6 +108,7 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
         Set<String> collectorVmInstanceIds = new HashSet<>();
         Set<String> collectorContainerInstanceIds = new HashSet<>();
@@ -175,6 +177,7 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // 绑定探针agent到探针采集器
         var probeCollectorId = getPluginHandler().getScene().getProbeCollector();
@@ -222,7 +225,11 @@ public class CreateHandler extends HandlerCommon {
                 runTasks(addRouterTasks);
             }
 
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
+
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 //            var probeCollectionElements = getPluginHandler().getElementMap().values()
 //                    .stream()
 //                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))

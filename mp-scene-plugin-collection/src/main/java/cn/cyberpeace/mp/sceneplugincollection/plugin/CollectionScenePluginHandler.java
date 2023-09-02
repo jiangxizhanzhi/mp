@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -14,10 +12,12 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHand
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.ElementCreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.PrepareHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.Data;
 import org.springframework.stereotype.Component;
+
 
 
 @ClassFieldClasses({
@@ -38,6 +38,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
     private ElementCreateHandler elementCreateHandler ;
+    private PrepareHandler prepareHandler;
 
     @Override
     public void correctData() {
@@ -53,6 +54,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
+        prepareHandler = new PrepareHandler(this);
     }
 
     @Override
@@ -105,6 +107,11 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
+    }
+
+    @Override
+    public void prepare(boolean partialStart) {
+        prepareHandler.prepare(partialStart);
     }
 
     @Override

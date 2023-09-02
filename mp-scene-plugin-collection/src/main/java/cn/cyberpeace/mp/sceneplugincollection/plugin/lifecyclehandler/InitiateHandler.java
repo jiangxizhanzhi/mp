@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
-import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -56,11 +56,11 @@ public class InitiateHandler extends HandlerCommon {
     private static Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap;
 
     public static class SceneProcess {
-        public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
-        public static final EventProcess INITIATE_PROBE_COLLECTION = new EventProcess("initiate_probe_collection", "sceneplugincollection.event.initiate_probe_collection");
-        public static final EventProcess CREATE_PROBE_COLLECTOR = new EventProcess("create_probe_collector", "sceneplugincollection.event.create_probe_collector");
-        public static final EventProcess INITIATE_PROBE_ROUTER = new EventProcess("initiate_probe_router", "sceneplugincollection.event.initiate_probe_router");
-        public static final EventProcess INITIATE_PROBES = new EventProcess("initiate_probes", "sceneplugincollection.event.initiate_probes");
+        public static final SceneEventProcess INITIATE_FLOW_COLLECTION = new SceneEventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection", "init", 1);
+        public static final SceneEventProcess INITIATE_PROBE_COLLECTION = new SceneEventProcess("initiate_probe_collection", "sceneplugincollection.event.initiate_probe_collection", "init", 2);
+        public static final SceneEventProcess INITIATE_PROBE_ROUTER = new SceneEventProcess("initiate_probe_router", "sceneplugincollection.event.initiate_probe_router", "init", 3);
+        public static final SceneEventProcess CREATE_PROBE_COLLECTOR = new SceneEventProcess("create_probe_collector", "sceneplugincollection.event.create_probe_collector", "init", 4);
+        public static final SceneEventProcess INITIATE_PROBES = new SceneEventProcess("initiate_probes", "sceneplugincollection.event.initiate_probes", "init", 5);
     }
 
     public static class ElementProcess {
