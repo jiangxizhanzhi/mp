@@ -28,9 +28,9 @@ public enum DefaultImgDirEnum  {
 
     DEFAULT_IMG_TARGET_FLAT("/default_img_target_flat", "default_img_target_flat"),
 
-    DEFAULT_IMG_TARGET_LINE("/default_img_target_line", "default_img_target_flat"),
+    DEFAULT_IMG_TARGET_LINE("/default_img_target_line", "default_img_target_line"),
 
-    DEFAULT_IMG_TARGET_REALISTIC("/default_img_target_realistic", "default_img_target_flat");
+    DEFAULT_IMG_TARGET_REALISTIC("/default_img_target_realistic", "default_img_target_realistic");
 
     private final String endPathName;
 
