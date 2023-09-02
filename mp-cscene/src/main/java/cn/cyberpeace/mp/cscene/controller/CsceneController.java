@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.cscene.util.ZipUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowConstant;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -48,10 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
@@ -427,7 +425,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping("/categories")
     @ApiOperation(value = "查询场景实例库")
     public ServiceResult<List<OptionBO>> flowCategories() {
-        return optionService.getIntOptions(SCENE_INSTANCE_CATEGORY);
+        return optionService.getStrOptions(SCENE_INSTANCE_CATEGORY);
     }
 
     /**

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonConstant;
 import cn.cyberpeace.mp.common.model.OptionModel;
+import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivMenuDTO;
@@ -185,7 +186,7 @@ public class ActivMenuService {
         }
 
         List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
-        QueryParams queryParams = new QueryParams();
+        OptionQueryParams queryParams = new OptionQueryParams();
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
 

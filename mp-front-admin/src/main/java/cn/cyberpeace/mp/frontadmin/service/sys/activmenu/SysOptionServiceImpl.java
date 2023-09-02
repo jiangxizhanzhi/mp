@@ -41,13 +41,32 @@ import java.util.function.Function;
  */
 @Slf4j
 @Service
-public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, QueryParams>
+public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
         implements OptionService {
 
 
     @Autowired
-    public SysOptionServiceImpl(OptionMapper optionMapper) {
+    private OptionMapper optionMapper;
+
+    @Autowired
+    public SysOptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
+        setModelFields(optionFields);
         setModelMapper(optionMapper);
+    }
+
+    /**
+     * 补充list查询条件
+     * @param humanCondition
+     * @param queryParams
+     */
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
+        if (StringUtils.isNotEmpty(queryParams.getType())) {
+            humanCondition.filterEqual("type", queryParams.getType());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getZhName())) {
+            humanCondition.filterContains("zhName", queryParams.getZhName());
+        }
     }
 
     /**

@@ -16,7 +16,7 @@ import java.util.List;
  * @author: shgang
  * @Date: 2022/7/28
  */
-public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
+public interface OptionService extends BaseModelService<OptionModel, OptionQueryParams> {
 
     /**
      * 根据类型查询选项

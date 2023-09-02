@@ -31,12 +31,31 @@ import java.util.function.Function;
  */
 @Service
 @Slf4j
-public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, QueryParams>
+public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
         implements OptionService {
 
     @Autowired
-    public OptionServiceImpl(OptionMapper optionMapper) {
+    private OptionMapper optionMapper;
+
+    @Autowired
+    public OptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
+        setModelFields(optionFields);
         setModelMapper(optionMapper);
+    }
+
+    /**
+     * 补充list查询条件
+     * @param humanCondition
+     * @param queryParams
+     */
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
+        if (StringUtils.isNotEmpty(queryParams.getType())) {
+            humanCondition.filterEqual("type", queryParams.getType());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getZhName())) {
+            humanCondition.filterContains("zhName", queryParams.getZhName());
+        }
     }
 
     /**
