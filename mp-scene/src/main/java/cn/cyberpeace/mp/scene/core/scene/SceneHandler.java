@@ -120,9 +120,6 @@ public class SceneHandler extends BaseSceneHandler<
 
     private static final DelayTaskPool delayTaskPool = new DelayTaskPool();
 
-    // mock的进度
-    private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
-
     @Setter
     private boolean realTimeUpdate;
 
@@ -917,34 +914,22 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public synchronized int addProgressPercentage(int newProcess) {
-        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
+        Integer progressPercentage = this.getScene().getProgressPercentage();
         int result = progressPercentage + newProcess;
         if (result >= 100) {
-            progressPercentageMap.put(getSceneId(), 95);
+            this.getScene().setProgressPercentage(progressPercentage);
             return 95;
         } else {
-            progressPercentageMap.put(getSceneId(), result);
+            this.getScene().setProgressPercentage(progressPercentage);
             return result;
         }
     }
 
     private Integer calculateProgressPercentage() {
-        if (CollectionUtils.isEmpty(this.getElementMap().values())) {
-            progressPercentageMap.remove(getSceneId());
+        if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
             return 100;
-        } else {
-            if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
-                progressPercentageMap.remove(getSceneId());
-                return 100;
-            } else {
-                var percentage = progressPercentageMap.get(getSceneId());
-                if (percentage == null) {
-                    return 5;
-                } else {
-                    return percentage;
-                }
-            }
         }
+        return this.getScene().getStagePercentage();
     }
 
     private boolean isTerminateEvent(int state) {
