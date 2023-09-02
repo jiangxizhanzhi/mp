@@ -1258,11 +1258,11 @@ public class CreateHandler extends HandlerCommon {
         this.prepareEventProcess();
 
         // 先创建辅助网络(包含虚拟交换机)
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         var createAuxiliaryNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
                 runTasks(createAuxiliaryNetworkTasks);
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
@@ -1270,13 +1270,15 @@ public class CreateHandler extends HandlerCommon {
         }
 
         // 再创建网关 和 防火墙
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
         var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
                 .collect(Collectors.toList());
         var createFirewallTasks = getPluginHandler().getFirewallElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
                 .collect(Collectors.toList());
+        if (!createGatewayTasks.isEmpty() || !createFirewallTasks.isEmpty()) {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+        }
 
         if (!createGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
@@ -1294,10 +1296,12 @@ public class CreateHandler extends HandlerCommon {
         }
 
         // 再创建终端
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
         var npcNodes = getPluginHandler().getNpcElements();
         var createTerminalTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+        if (!npcNodes.isEmpty() || !createTerminalTasks.isEmpty()) {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
+        }
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {

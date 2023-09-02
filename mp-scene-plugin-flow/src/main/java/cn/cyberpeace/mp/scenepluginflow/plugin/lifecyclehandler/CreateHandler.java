@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
+import cn.cyberpeace.mp.scenepluginflow.constant.FlowSceneStage;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(FlowSceneStage.CREATE_FLOW_SIMULATE);
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
@@ -200,6 +202,7 @@ public class CreateHandler extends HandlerCommon {
                 getHandlerUtils().addFlowTask(details, sceneId, executorId);
             }
         });
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(FlowSceneStage.CREATE_FLOW_SIMULATE);
 
 
 
