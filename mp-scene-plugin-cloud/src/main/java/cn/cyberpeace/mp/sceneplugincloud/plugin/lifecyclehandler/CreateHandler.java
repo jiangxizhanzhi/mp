@@ -720,6 +720,25 @@ public class CreateHandler extends HandlerCommon {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
+            for (var dns : getPluginHandler().getScene().getDnsNameservers()) {
+                var dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
+                String dnsIp = null;
+                if (dnsCloudElement != null) {
+                    var e = dnsCloudElement.getSrcElement();
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
+                        for (var p : e.getPorts()) {
+                            if (StringUtils.isNotEmpty(p.getIp())) {
+                                dnsIp = p.getIp();
+                                break;
+                            }
+                        }
+                    }
+                }
+                commands.add(String.format("echo %s %s >> %s", dnsIp, dns.getDomain(), CloudInitConfigCommon.LINUX_HOSTS_PATH));
+            }
+        }
+
         if (commands != null && !commands.isEmpty()) {
             boolean executeOnce = true;
             for (var command : commands) {

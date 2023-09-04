@@ -24,6 +24,8 @@ import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
  * @Date 2022/4/6
  */
 public class CloudInitConfigCommon {
+    public static final String WINDOWS_HOSTS_PATH = "C:\\Windows\\System32\\drivers\\etc\\hosts";
+    public static final String LINUX_HOSTS_PATH = "/etc/hosts";
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";
 
@@ -104,6 +106,11 @@ public class CloudInitConfigCommon {
                 }
             }
             list.add(userData);
+            if (!this.dnsList.isEmpty()) {
+                for (var d : this.dnsList) {
+                    list.add(String.format("echo %s >> %s", d, WINDOWS_HOSTS_PATH));
+                }
+            }
             if (!this.initCommands.isEmpty()) {
                 list.addAll(initCommands);
             }
@@ -146,11 +153,7 @@ public class CloudInitConfigCommon {
             }
 
             if (!this.dnsList.isEmpty()) {
-                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-                    list.addAll(this.getDnsList("C:\\Windows\\System32\\drivers\\etc\\hosts", this.dnsList));
-                } else {
-                    list.addAll(this.getDnsList("/etc/hosts", this.dnsList));
-                }
+                list.addAll(this.getDnsList(LINUX_HOSTS_PATH, this.dnsList));
             }
             return list;
         }
