@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.ICloudResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -44,6 +45,38 @@ public class HandlerUtils {
     private Set<String> createdNetworks = new HashSet<>();
 
     private Set<String> toDeleteNodes = new HashSet<>();
+
+    private List<String> dnsIpAndDomain = null;
+
+    public List<String> getDnsIpAndDomains() {
+        if (this.dnsIpAndDomain == null) {
+            synchronized (this) {
+                if (this.dnsIpAndDomain == null) {
+                    List<String> result = new ArrayList<>();
+                    if (CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
+                        for (var dns : getPluginHandler().getScene().getDnsNameservers()) {
+                            var dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
+                            String dnsIp = null;
+                            if (dnsCloudElement != null) {
+                                var e = dnsCloudElement.getSrcElement();
+                                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
+                                    for (var p : e.getPorts()) {
+                                        if (StringUtils.isNotEmpty(p.getIp())) {
+                                            dnsIp = p.getIp();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            result.add(dnsIp + " " + dns.getDomain());
+                            this.dnsIpAndDomain = result;
+                        }
+                    }
+                }
+            }
+        }
+        return this.dnsIpAndDomain;
+    }
 
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
         getPluginHandler().getElement(node).getFwdnsIps().putIfAbsent(netId, fwdnsInterfaceIp);

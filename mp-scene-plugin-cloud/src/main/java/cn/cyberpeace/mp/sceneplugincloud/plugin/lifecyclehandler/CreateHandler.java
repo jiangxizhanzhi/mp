@@ -632,25 +632,8 @@ public class CreateHandler extends HandlerCommon {
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
         builder.addAllInitCommands(commands);
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
-            List<String> dns = new ArrayList<>();
-            for(var d:getPluginHandler().getScene().getDnsNameservers()){
-                var dnsCloudElement = getPluginHandler().getElement(d.getNodeId());
-                String dnsIp = null ;
-                if (dnsCloudElement != null) {
-                    var e = dnsCloudElement.getSrcElement();
-                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
-                        for(var p:e.getPorts()){
-                            if (StringUtils.isNotEmpty(p.getIp())) {
-                                dnsIp = p.getIp();
-                                break;
-                            }
-                        }
-                    }
-                }
-                dns.add(dnsIp + " " + d.getDomain());
-            }
-            builder.addAllDns(dns);
+        if (!getHandlerUtils().getDnsIpAndDomains().isEmpty()) {
+            builder.addAllDns(getHandlerUtils().getDnsIpAndDomains());
         }
         List<String> cloudInitCommands = builder.build();
         var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
@@ -720,22 +703,9 @@ public class CreateHandler extends HandlerCommon {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
         }
 
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
-            for (var dns : getPluginHandler().getScene().getDnsNameservers()) {
-                var dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
-                String dnsIp = null;
-                if (dnsCloudElement != null) {
-                    var e = dnsCloudElement.getSrcElement();
-                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
-                        for (var p : e.getPorts()) {
-                            if (StringUtils.isNotEmpty(p.getIp())) {
-                                dnsIp = p.getIp();
-                                break;
-                            }
-                        }
-                    }
-                }
-                commands.add(String.format("echo %s %s >> %s", dnsIp, dns.getDomain(), CloudInitConfigCommon.LINUX_HOSTS_PATH));
+        if (!getHandlerUtils().getDnsIpAndDomains().isEmpty()) {
+            for (var ipAndDomain : getHandlerUtils().getDnsIpAndDomains()) {
+                commands.add(String.format("echo %s >> %s", ipAndDomain, CloudInitConfigCommon.LINUX_HOSTS_PATH));
             }
         }
 
