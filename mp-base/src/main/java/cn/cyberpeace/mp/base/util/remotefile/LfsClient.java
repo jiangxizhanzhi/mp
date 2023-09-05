@@ -133,6 +133,7 @@ public class LfsClient implements FileClient {
         log.info("fileKey:{}", fileKey);
         var filePath = getTargetFilePath(fileKey);
         log.info("filePath:{}", filePath);
+        log.info("filePath.getParent:{}", new File(filePath).getParent());
         if (FileUtil.exist(filePath)) {
             FileUtil.del(tmpFilePath);
         } else {
