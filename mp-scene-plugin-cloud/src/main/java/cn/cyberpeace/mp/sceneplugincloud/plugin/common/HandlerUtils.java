@@ -69,9 +69,9 @@ public class HandlerUtils {
                                 }
                             }
                             result.add(dnsIp + " " + dns.getDomain());
-                            this.dnsIpAndDomain = result;
                         }
                     }
+                    this.dnsIpAndDomain = result;
                 }
             }
         }
