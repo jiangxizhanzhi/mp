@@ -99,8 +99,11 @@ public class LfsClient implements FileClient {
 
     @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
+        log.info("filesize:{}, fileSuffix:{}", filesize, fileSuffix);
         var tmpFileKey = genFileKey(null, fileSuffix, false);
+        log.info("tmpFileKey:{}", tmpFileKey);
         var tmpFilePath = getTargetFilePath(tmpFileKey);
+        log.info("tmpFilePath:{}", tmpFilePath);
         try (var os = new FileOutputStream(tmpFilePath)) {
             StreamUtils.copyRange(is, os, 0, filesize);
         } catch (IOException e) {
@@ -127,7 +130,9 @@ public class LfsClient implements FileClient {
         }
 
         var fileKey = genFileKey(fileMd5, fileSuffix, true);
+        log.info("fileKey:{}", fileKey);
         var filePath = getTargetFilePath(fileKey);
+        log.info("filePath:{}", filePath);
         if (FileUtil.exist(filePath)) {
             FileUtil.del(tmpFilePath);
         } else {
