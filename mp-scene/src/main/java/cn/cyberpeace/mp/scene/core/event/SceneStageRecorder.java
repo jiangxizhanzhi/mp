@@ -44,11 +44,12 @@ public class SceneStageRecorder {
 
     public void addStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            var stageInfo = new SceneStageRecord(stage);
-            this.stages.add(stageInfo);
-            this.stagesMap.put(stage.getStage(), stageInfo);
-            sceneBO.setStageList(stages);
+            return;
         }
+        var stageInfo = new SceneStageRecord(stage);
+        this.stages.add(stageInfo);
+        this.stagesMap.put(stage.getStage(), stageInfo);
+        sceneBO.setStageList(stages);
     }
 
     public void startStage(SceneStage stage) {
