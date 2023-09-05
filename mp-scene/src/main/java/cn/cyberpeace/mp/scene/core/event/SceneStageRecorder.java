@@ -53,12 +53,18 @@ public class SceneStageRecorder {
     }
 
     public void startStage(SceneStage stage) {
+        if (this.stagesMap.containsKey(stage.getStage())) {
+            return;
+        }
         var stageRecord = this.stagesMap.get(stage.getStage());
         stageRecord.setStagePercentage(0);
         this.refreshSceneBO(stageRecord, this.sceneBO);
     }
 
     public void endStage(SceneStage stage) {
+        if (this.stagesMap.containsKey(stage.getStage())) {
+            return;
+        }
         var stageRecord = this.stagesMap.get(stage.getStage());
         stageRecord.setStagePercentage(100);
         this.refreshSceneBO(stageRecord, this.sceneBO);
