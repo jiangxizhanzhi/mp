@@ -1,5 +1,4 @@
-#
-v5.4.1
+#v5.4.1
 
 ALTER TABLE `mp_scene_scene`
     ADD COLUMN `stage` varchar(64) NOT NULL COMMENT '当前阶段',
