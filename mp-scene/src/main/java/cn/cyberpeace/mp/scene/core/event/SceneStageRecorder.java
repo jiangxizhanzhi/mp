@@ -44,30 +44,27 @@ public class SceneStageRecorder {
 
     public void addStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            return;
+            var stageInfo = new SceneStageRecord(stage);
+            this.stages.add(stageInfo);
+            this.stagesMap.put(stage.getStage(), stageInfo);
+            sceneBO.setStageList(stages);
         }
-        var stageInfo = new SceneStageRecord(stage);
-        this.stages.add(stageInfo);
-        this.stagesMap.put(stage.getStage(), stageInfo);
-        sceneBO.setStageList(stages);
     }
 
     public void startStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            return;
+            var stageRecord = this.stagesMap.get(stage.getStage());
+            stageRecord.setStagePercentage(0);
+            this.refreshSceneBO(stageRecord, this.sceneBO);
         }
-        var stageRecord = this.stagesMap.get(stage.getStage());
-        stageRecord.setStagePercentage(0);
-        this.refreshSceneBO(stageRecord, this.sceneBO);
     }
 
     public void endStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            return;
+            var stageRecord = this.stagesMap.get(stage.getStage());
+            stageRecord.setStagePercentage(100);
+            this.refreshSceneBO(stageRecord, this.sceneBO);
         }
-        var stageRecord = this.stagesMap.get(stage.getStage());
-        stageRecord.setStagePercentage(100);
-        this.refreshSceneBO(stageRecord, this.sceneBO);
     }
 
     public void submitProcess(List<EventProcess> processes) {
