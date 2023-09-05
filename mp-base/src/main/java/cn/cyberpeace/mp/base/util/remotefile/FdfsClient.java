@@ -81,6 +81,9 @@ public class FdfsClient implements FileClient {
         try (is; var connection = getConnection()) {
             fdfsFilePath = connection.getStorageClient().upload_file1(null, filesize,
                     new UploadStream(is, filesize), fileSuffix, null);
+            log.info("==========filesize:{}", filesize);
+            log.info("==========fileSuffix:{}", fileSuffix);
+            log.info("==========fdfsFilePath:{}", fdfsFilePath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs upload with input stream error: %s", e.getMessage());
             log.error(msg);
