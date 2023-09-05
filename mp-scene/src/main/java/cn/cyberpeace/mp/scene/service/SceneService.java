@@ -73,8 +73,6 @@ public class SceneService {
         }
 
         // 在prepare中预先判断下有多少启动流程
-        var stageRecorder = new SceneStageRecorder(sceneHandler.getScene());
-        sceneHandler.setSceneStageRecorder(stageRecorder);
         sceneHandler.prepare(partialStart);
         sceneHandler.save();
 
