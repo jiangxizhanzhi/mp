@@ -24,6 +24,8 @@ import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
  * @Date 2022/4/6
  */
 public class CloudInitConfigCommon {
+    public static final String WINDOWS_HOSTS_PATH = "C:\\Windows\\System32\\drivers\\etc\\hosts";
+    public static final String LINUX_HOSTS_PATH = "/etc/hosts";
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";
 
@@ -52,11 +54,13 @@ public class CloudInitConfigCommon {
         private String rootPassword;
         private List<User> users;
         private List<String> initCommands;
+        private List<String> dnsList;
 
         public Builder(String standardSystemType) {
             this.standardSystemType = standardSystemType;
             this.users = new ArrayList<>();
             this.initCommands = new ArrayList<>();
+            this.dnsList = new ArrayList<>();
         }
 
         public List<String> build() {
@@ -65,6 +69,10 @@ public class CloudInitConfigCommon {
             } else {
                 return this.buildForLinux();
             }
+        }
+
+        public void addAllDns(List<String> dnsList) {
+            this.dnsList.addAll(dnsList);
         }
 
         public void addUser(String username, String password) {
@@ -98,6 +106,11 @@ public class CloudInitConfigCommon {
                 }
             }
             list.add(userData);
+            if (!this.dnsList.isEmpty()) {
+                for (var d : this.dnsList) {
+                    list.add(String.format("echo %s >> %s", d, WINDOWS_HOSTS_PATH));
+                }
+            }
             if (!this.initCommands.isEmpty()) {
                 list.addAll(initCommands);
             }
@@ -137,6 +150,10 @@ public class CloudInitConfigCommon {
                         .map(s -> "  - " + s)
                         .collect(Collectors.toList());
                 list.addAll(formatCommands);
+            }
+
+            if (!this.dnsList.isEmpty()) {
+                list.addAll(this.getDnsList(LINUX_HOSTS_PATH, this.dnsList));
             }
             return list;
         }
@@ -186,6 +203,21 @@ public class CloudInitConfigCommon {
                     "  " + "  " + "sudo: ALL=(ALL) NOPASSWD:ALL",
                     "  " + "  " + "plain_text_passwd: '" + user.password + "'"
             );
+        }
+
+        private List<String> getDnsList(String path, List<String> dnsList) {
+            List<String> result = new ArrayList<>();
+            result.addAll(Arrays.asList(
+                    "write_files:",
+                    "  " + "- path: " + path,
+                    "  " + "  permissions: \"0644\"",
+                    "  " + "  content: |"
+            ));
+            for (var dns : dnsList) {
+                result.add("  " + "    " + dns);
+            }
+            result.add("  " + "  append: True");
+            return result;
         }
     }
 

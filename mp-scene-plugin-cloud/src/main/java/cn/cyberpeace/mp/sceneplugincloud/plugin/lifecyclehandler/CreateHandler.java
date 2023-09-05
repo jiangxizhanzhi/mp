@@ -632,6 +632,9 @@ public class CreateHandler extends HandlerCommon {
             userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
         builder.addAllInitCommands(commands);
+        if (!getHandlerUtils().getDnsIpAndDomains().isEmpty()) {
+            builder.addAllDns(getHandlerUtils().getDnsIpAndDomains());
+        }
         List<String> cloudInitCommands = builder.build();
         var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
@@ -698,6 +701,12 @@ public class CreateHandler extends HandlerCommon {
         }
         if (!StringUtils.isEmpty(elementFileUrl)) {
             ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, standardSystemType, elementUnzipDir, true);
+        }
+
+        if (!getHandlerUtils().getDnsIpAndDomains().isEmpty()) {
+            for (var ipAndDomain : getHandlerUtils().getDnsIpAndDomains()) {
+                commands.add(String.format("echo %s >> %s", ipAndDomain, CloudInitConfigCommon.LINUX_HOSTS_PATH));
+            }
         }
 
         if (commands != null && !commands.isEmpty()) {
