@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+@Slf4j
 public class HttpRequest {
     public static String sendGetRequest(String urlString, Map<String, String> headers) {
         try {
@@ -34,6 +37,7 @@ public class HttpRequest {
                 return "Request failed with response code: " + responseCode;
             }
         } catch (Exception e) {
+            log.error(e.getMessage());
             return e.getMessage();
         }
     }
