@@ -99,6 +99,30 @@ public class CsceneCommonService {
         return agentNames;
     }
 
+    /**
+     * 根据sceneId和elementIds查询agentNames
+     *
+     * @param sceneId
+     * @param elementIds 为空表示获取场景中所有的节点
+     * @return
+     */
+    @Cacheable(value = "query_agentnames_by_scene")
+    public List<String> getAgentNamesBySceneId(String sceneId, List<String> elementIds) {
+        if (StringUtils.isBlank(sceneId)) {
+            return Collections.emptyList();
+        }
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(sceneId).getSource();
+
+        List<String> agentNames = new ArrayList<>();
+        if (CollectionUtil.isEmpty(elementIds)) {
+            agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+        } else {
+            agentNames = elementBOs.stream().filter(e -> elementIds.contains(e.getId())).map(SceneElementBO::getEid).collect(Collectors.toList());
+        }
+
+        return agentNames;
+    }
+
     @Cacheable(value = "query_scene_create_time")
     public LocalDateTime getSceneCreateTime(String sceneId) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);

@@ -122,6 +122,17 @@ public class SnapshotConverter {
     }
 
     /**
+     * 保存iso实例的镜像
+     * @param request
+     * @return
+     */
+    public void saveIsoImage(SnapshotRequest request) {
+        ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
+        snapshotCreate.setDeviceUuid(request.getUuid());
+        scenariosService.saveIsoImage(snapshotCreate);
+    }
+
+    /**
      * 合并快照
      * @param request
      * @return

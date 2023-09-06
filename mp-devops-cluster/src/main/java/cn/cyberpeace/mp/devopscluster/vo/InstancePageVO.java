@@ -91,4 +91,14 @@ public class InstancePageVO extends BaseVO {
     @ApiModelProperty(value = "状态信息")
     private String processMessage;
 
+    @ApiModelProperty("cpu使用率")
+    private Double cpuPercent;
+
+    @ApiModelProperty("内存使用率")
+    private Double memoryPercent;
+
+
+    @ApiModelProperty(value = "系统类型")
+    private String systemType;
+
 }

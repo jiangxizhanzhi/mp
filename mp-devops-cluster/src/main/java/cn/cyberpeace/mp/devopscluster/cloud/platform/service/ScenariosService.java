@@ -35,6 +35,15 @@ public class ScenariosService extends BaseCpService {
     }
 
     /**
+     * 保存iso实例的镜像
+     */
+    public BaseCloudPlatformResult saveIsoImage(ScenariosSnapshot snapshotCreate){
+        BaseCloudPlatformResult result = super.sendPost(  BaseCloudPlatformConstant.URL_VERSION + SCENARIOS + "/save_iso_image", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
+    }
+
+    /**
      * 注入文件
      * @param injectFileCreate
      * @return

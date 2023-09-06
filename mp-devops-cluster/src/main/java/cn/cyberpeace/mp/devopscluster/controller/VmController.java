@@ -4,9 +4,14 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
@@ -19,19 +24,21 @@ import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,8 +62,18 @@ public class VmController {
 
     private final DeviceTargetMapper deviceTargetMapper;
 
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private HostStateService hostStateService;
+
     /**
      * 重启
+     *
      * @param request
      * @return
      */
@@ -72,6 +89,7 @@ public class VmController {
 
     /**
      * 暂停
+     *
      * @param request
      * @return
      */
@@ -87,6 +105,7 @@ public class VmController {
 
     /**
      * 恢复
+     *
      * @param request
      * @return
      */
@@ -102,6 +121,7 @@ public class VmController {
 
     /**
      * 开启
+     *
      * @param request
      * @return
      */
@@ -117,6 +137,7 @@ public class VmController {
 
     /**
      * 关闭
+     *
      * @param request
      * @return
      */
@@ -132,6 +153,7 @@ public class VmController {
 
     /**
      * 分页查询虚拟机信息
+     *
      * @param request
      * @return
      */
@@ -145,10 +167,11 @@ public class VmController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
-    private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
+    private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model) {
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         List<UserBo> userBoList = new ArrayList<>();
@@ -206,7 +229,31 @@ public class VmController {
                 }
             }
 
-            return InstancePageVO.builder().name(instanceModel.getName())
+            var id = getSceneId(instanceModel.getName());
+            SceneElementModel sceneElementModel = getSceneElementModel(id);
+            if (sceneElementModel == null) {
+                return null;
+            }
+            String systemType = sceneElementModel.getSystemType();
+            String prefix = SystemTypeUtils.getStandardSystemType(systemType);
+            String suffix = SystemTypeCommandUtils.getOsType(prefix);
+
+            // 查询实时主机状态
+            HostState hostState = new HostState();
+            var agentNames = csceneCommonService.getAgentNamesBySceneId(sceneElementModel.getScene(), null);
+            if (CollectionUtil.isNotEmpty(agentNames)) {
+                AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
+                agentNameBasedRequest.setAgentNames(agentNames);
+                agentNameBasedRequest.setPageSize(1);
+
+                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
+                var hostStates = map.get(id);
+                if (CollectionUtil.isNotEmpty(hostStates)) {
+                    hostState = hostStates.get(0);
+                }
+            }
+
+            return InstancePageVO.builder().name(sceneElementModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(instanceModel.getId())
                     .node(instanceModel.getNode())
@@ -219,7 +266,21 @@ public class VmController {
                     .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(instanceModel.getRunningTime())
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).
+                            systemType(prefix + "/" + suffix).
+                            cpuPercent(hostState.getCpuPercent()).memoryPercent(hostState.getMemoryPercent()).build();
         }).collect(Collectors.toList());
+    }
+
+    private String getSceneId(String csceneName) {
+        return csceneName.replaceAll("MP_SCENE_", "");
+    }
+
+
+    private SceneElementModel getSceneElementModel(String sceneId) {
+
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getId, sceneId);
+        return sceneElementMapper.first(humanCondition);
     }
 }
