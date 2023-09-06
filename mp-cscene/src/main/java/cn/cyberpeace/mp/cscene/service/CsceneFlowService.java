@@ -44,8 +44,8 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -103,6 +103,7 @@ public class CsceneFlowService {
 
     /**
      * 新增流量任务
+     *
      * @param request
      */
     public void addTask(AddFlowTaskTaskRequest request) {
@@ -210,6 +211,7 @@ public class CsceneFlowService {
 
     /**
      * 删除流量任务
+     *
      * @param id
      */
     @Transactional
@@ -226,6 +228,7 @@ public class CsceneFlowService {
 
     /**
      * 编辑流量任务配置
+     *
      * @param request
      */
     public void editTaskConf(EditFlowTaskConfRequest request) {
@@ -235,17 +238,18 @@ public class CsceneFlowService {
         flowTaskConfModel.setKeepRunning(request.getKeepRunning());
         flowTaskConfModel.setReplay(request.getReplay());
         flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
-        flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
+        flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
         flowTaskConfService.update(flowTaskConfModel);
         log.info("CsceneFlowService.editTaskConf end.");
     }
 
     /**
      * 流量任务列表查询
+     *
      * @param request
      * @return
      */
-    public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageQueryParams request) {
+    public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
         log.info("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
@@ -272,6 +276,7 @@ public class CsceneFlowService {
 
     /**
      * 条件查询任务id集合
+     *
      * @param request
      * @return
      */
@@ -292,6 +297,7 @@ public class CsceneFlowService {
 
     /**
      * 流量任务配置查询
+     *
      * @param taskId
      * @return
      */
@@ -300,7 +306,7 @@ public class CsceneFlowService {
         QueryFlowTaskConfResponse result = new QueryFlowTaskConfResponse();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
         BeanUtils.copyProperties(flowTaskConfModel, result);
-        FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
+        FlowTaskConf flowTaskConf = JsonCommon.parse(flowTaskConfModel.getConf(), FlowTaskConf.class);
         result.setFlowTaskConf(flowTaskConf);
         log.info("CsceneFlowService.queryConfByTaskId end. result:{}", result);
         return result;
@@ -308,6 +314,7 @@ public class CsceneFlowService {
 
     /**
      * 流量仿真概况
+     *
      * @param id
      * @return
      */
@@ -324,6 +331,7 @@ public class CsceneFlowService {
 
     /**
      * top5实时速率
+     *
      * @param id
      * @return
      */
@@ -343,12 +351,13 @@ public class CsceneFlowService {
 
     /**
      * TOP5流量协议
+     *
      * @param id
      * @return
      */
-    public JSONArray top5Protocols(String id) {
+    public ArrayNode top5Protocols(String id) {
         log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
-        JSONArray protocols = new JSONArray();
+        ArrayNode protocols = JsonCommon.createArrayNode();
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -366,10 +375,10 @@ public class CsceneFlowService {
                     log.info("top5Protocols url is:{}", CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/protocols/top5");
                     String rsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/protocols/top5", "{}");
                     log.info("top5Protocols rsp is:{}", rsp);
-                    JSONObject rspObj = JSONObject.parseObject(rsp);
-                    log.info("query top5 protocols response:{}", rspObj.toJSONString());
+                    JsonNode rspObj = JsonCommon.parseTree(rsp);
+                    log.info("query top5 protocols response:{}", rspObj.toPrettyString());
                     if (ResponseUtils.checkResponse(rspObj)) {
-                        protocols = rspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("protocols");
+                        protocols.addAll((ArrayNode) rspObj.get(BaseConstants.STR_DATA).get("protocols"));
                     } else {
                         log.error("query top5 protocols failed");
                     }
@@ -384,6 +393,7 @@ public class CsceneFlowService {
 
     /**
      * 流量仿真统计
+     *
      * @param id
      * @return
      */
@@ -400,6 +410,7 @@ public class CsceneFlowService {
 
     /**
      * 流量仿真统计(所有)
+     *
      * @param id
      * @return
      */
@@ -421,6 +432,7 @@ public class CsceneFlowService {
 
     /**
      * 流量任务启动
+     *
      * @param taskId
      */
     public void startTask(String taskId) {
@@ -431,6 +443,7 @@ public class CsceneFlowService {
 
     /**
      * 流量任务启动
+     *
      * @param taskIds
      */
     public void batchStartTasks(List<String> taskIds) {
@@ -441,6 +454,7 @@ public class CsceneFlowService {
 
     /**
      * 流量任务停止
+     *
      * @param taskId
      */
     public void stopTask(String taskId) {
@@ -451,6 +465,7 @@ public class CsceneFlowService {
 
     /**
      * 流量任务批量停止
+     *
      * @param taskIds
      */
     public void batchStopTasks(List<String> taskIds) {
@@ -461,6 +476,7 @@ public class CsceneFlowService {
 
     /**
      * 根据场景id查询带有流量的节点id
+     *
      * @param id
      * @return
      */
@@ -474,6 +490,7 @@ public class CsceneFlowService {
 
     /**
      * 根据场景id查询环境总速率
+     *
      * @return
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
@@ -494,7 +511,7 @@ public class CsceneFlowService {
         List<String> portIds = new ArrayList<>();
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, SceneElementPortBO> portMap = sceneHandler.getElementPortMap();
-        portMap.forEach((key,value) -> {
+        portMap.forEach((key, value) -> {
             if (cloudPluginHandler.getPort(value.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(value.getId()).getResourceId())) {
                 portIds.add(cloudPluginHandler.getPort(value.getId()).getResourceId());
             }
@@ -503,7 +520,7 @@ public class CsceneFlowService {
             List<String> newPortIds = portIds.stream().distinct().collect(Collectors.toList());
             NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond);
             if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
-                Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size()-1) * networkFlowRateResult.getTimeInt();
+                Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size() - 1) * networkFlowRateResult.getTimeInt();
                 for (Long value : networkFlowRateResult.getSumRateList()) {
                     FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
                     flowStatisticsDetail.setOffsetValue(offsetValue);
@@ -520,6 +537,7 @@ public class CsceneFlowService {
 
     /**
      * 获取实时速率统计条件
+     *
      * @return
      */
     private List<FlowStatisticalCondition> getRealTimeCondition() {

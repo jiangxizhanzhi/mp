@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Getter;
 
 import java.util.List;
@@ -42,11 +43,21 @@ public class JsonHandler {
     }
 
     public Map<String, Object> parseMap(String content) {
-        return parse(content, new TypeReference<>() {});
+        return parse(content, new TypeReference<>() {
+        });
     }
 
     public List<Object> parseList(String content) {
-        return parse(content, new TypeReference<>() {});
+        return parse(content, new TypeReference<>() {
+        });
+    }
+
+    public <T> List<T> parseList(String content, Class<T> valueType) {
+        try {
+            return objectMapper.readValue(content, objectMapper.getTypeFactory().constructCollectionType(List.class, valueType));
+        } catch (JsonProcessingException e) {
+            throw new MpRuntimeException("Parse json text error: " + e.getMessage());
+        }
     }
 
     public JsonNode parseTree(String content) {
@@ -58,6 +69,7 @@ public class JsonHandler {
         }
         return obj;
     }
+
 
     public String stringify(Object obj) {
         String result;
@@ -75,7 +87,8 @@ public class JsonHandler {
     }
 
     public <T> Map<String, Object> beanToMap(T obj) {
-        return parse(stringify(obj), new TypeReference<>() {});
+        return parse(stringify(obj), new TypeReference<>() {
+        });
     }
 
     public boolean isJsonString(final String json) {
@@ -86,4 +99,9 @@ public class JsonHandler {
             return false;
         }
     }
+
+    public ArrayNode createArrayNode() {
+        return objectMapper.createArrayNode();
+    }
+
 }
