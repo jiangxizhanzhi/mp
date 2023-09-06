@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.bo.user;
 
+import cn.cyberpeace.mp.auth.bo.major.MajorBo;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -39,5 +40,8 @@ public class UserBo extends UserModel {
 
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
+
+    @ApiModelProperty(value = "专业信息")
+    MajorBo majorBo;
 
 }

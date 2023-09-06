@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
+import cn.cyberpeace.mp.auth.bo.major.MajorBo;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
@@ -20,14 +21,7 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
@@ -114,6 +108,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private OperateUserPermissionService opUserPermCheckService;
+
+    @Autowired
+    private MajorService majorService;
 
     @Autowired
     private AuthStatusRabbitmqSender messageSender;
@@ -346,6 +343,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
         }
 
+        majorService.checkMajorId(userModel.getMajorId());
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
@@ -408,6 +406,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         userModel.setTokenSecret(null);
 
+        majorService.checkMajorId(userModel.getMajorId());
         updateCheckService.check(userModel);
         if (StringUtils.isNotBlank(userModel.getAvatar())) {
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
@@ -927,6 +926,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 过期状态处理
         processExpiredStatus(userBo);
 
+        if (StringUtils.isNotBlank(userModel.getMajorId())) {
+            MajorBo majorBo = MajorBo.convertModelToBo(majorService.getMajorById(userModel.getMajorId()));
+            userBo.setMajorBo(majorBo);
+        }
+
         if (needOrg) {
             List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userModel.getId());
             List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
@@ -948,7 +952,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
         }
-
         return userBo;
     }
 
@@ -972,6 +975,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
         userBos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userBos;
+    }
+
+    @Override
+    public List<UserBo> listByMajorIds(List<String> majorIds) {
+        if (CollectionUtils.isEmpty(majorIds)) {
+            return Collections.emptyList();
+        } else {
+            return getModelMapper().list(new HumanCondition().filterIn(UserModel::getMajorId, majorIds.toArray(new String[0]))
+                    .select(UserModel::getUsername, UserModel::getId)).stream().map(model -> this.doModel2Dto(model, false, false)).collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -1163,7 +1176,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 }
 
-class GroupConcat extends Aggregation<GroupConcat> {
+class
+GroupConcat extends Aggregation<GroupConcat> {
 
     public static Function<String, String> genDistinct() {
         return column -> String.format("distinct (%s)", column);

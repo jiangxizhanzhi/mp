@@ -19,7 +19,8 @@ public class UserFields extends BaseModelFields {
             UserModel::getUsername, UserModel::getName, UserModel::getNickname,
             UserModel::getAvatar, UserModel::getBirthday, UserModel::getEmail,
             UserModel::getIsEnabled, UserModel::getIsAudited, UserModel::getInitCheck, UserModel::getDescription, UserModel::getDateJoined,
-            UserModel::getExpiredTime, UserModel::getLastLogin, UserModel::getIdentifier, UserModel::getIdCard, UserModel::getMobile, UserModel::getAddress
+            UserModel::getExpiredTime, UserModel::getLastLogin, UserModel::getIdentifier, UserModel::getIdCard, UserModel::getMobile, UserModel::getAddress,
+            UserModel::getMajorId, UserModel::getStudentNumber
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

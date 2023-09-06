@@ -100,6 +100,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<UserBo> listByUserIds(String[] userIds);
 
+    List<UserBo> listByMajorIds(List<String> majorIds);
+
     List<UserModel> listByIds(String[] userIds);
 
     int totalUserCnt();

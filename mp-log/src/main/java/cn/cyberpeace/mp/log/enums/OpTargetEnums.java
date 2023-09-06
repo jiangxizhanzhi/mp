@@ -14,6 +14,8 @@ public enum OpTargetEnums {
     ROLE("role"),
     // "组织"
     ORG("org"),
+    //专业
+    MAJOR("major"),
     // "资源"
     TARGET("target"),
     // 菜单
