@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.common;
 import cn.cyberpeace.mp.base.util.json.JsonHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,6 +36,11 @@ public class JsonCommon {
     public static List<Object> parseList(String content) {
         return jsonHandler.parseList(content);
     }
+
+    public static <T> List<T> parseList(String content, Class<T> valueType) {
+        return jsonHandler.parseList(content, valueType);
+    }
+
 
     public static JsonNode parseTree(String content) {
         return jsonHandler.parseTree(content);
@@ -74,6 +80,10 @@ public class JsonCommon {
 
     public static String snakeStringify(Object obj) {
         return snakeJsonHandler.stringify(obj);
+    }
+
+    public static ArrayNode createArrayNode() {
+        return jsonHandler.createArrayNode();
     }
 
 }

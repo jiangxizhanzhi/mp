@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -30,6 +31,18 @@ public class ResponseUtils {
      * @param object
      * @return
      */
+    public static boolean checkResponse(JsonNode object) {
+        return Objects.nonNull(object) && StringUtils.isNotBlank(object.get(STR_CODE).asText())
+                && SUCCESS_CODE.equals(object.get(STR_CODE).asText());
+    }
+
+    /**
+     * 校验返回结果码是否正常
+     *
+     * @param object
+     * @return
+     */
+    @Deprecated
     public static boolean checkResponse(JSONObject object) {
         return Objects.nonNull(object) && StringUtils.isNotBlank(object.getString(STR_CODE))
                 && SUCCESS_CODE.equals(object.getString(STR_CODE));
@@ -40,6 +53,17 @@ public class ResponseUtils {
      * @param object
      * @return
      */
+    public static boolean checkRunning(JsonNode object) {
+        return Objects.nonNull(object) && StringUtils.isNotBlank(object.get(STR_CODE).asText())
+                && RUNNING_CODE.equals(object.get(STR_CODE).asText());
+    }
+
+    /**
+     * 校验返回码是否是运行中
+     * @param object
+     * @return
+     */
+    @Deprecated
     public static boolean checkRunning(JSONObject object) {
         return Objects.nonNull(object) && StringUtils.isNotBlank(object.getString(STR_CODE))
                 && RUNNING_CODE.equals(object.getString(STR_CODE));

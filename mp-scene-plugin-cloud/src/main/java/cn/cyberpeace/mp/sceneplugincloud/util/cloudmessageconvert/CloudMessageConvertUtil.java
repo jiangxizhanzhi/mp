@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert;
 
-import com.alibaba.fastjson.JSON;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class CloudMessageConvertUtil {
     public static void init(String content) {
         try {
             converts.clear();
-            List<Convert> result = JSON.parseArray(content, Convert.class);
+            List<Convert> result = JsonCommon.parseList(content, Convert.class);
             converts.addAll(result);
         } catch (Exception e) {
             log.error("failed to init cloud message convert,content is {}", content);

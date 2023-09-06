@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
-import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ public class WazuhModifyEventConfig {
         if (isInit) {
             return;
         }
-        modifyProbe = JSON.parseObject(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.MODIFY_PROBES), ModifyProbe.class);
+        modifyProbe = JsonCommon.parse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.MODIFY_PROBES), ModifyProbe.class);
         isInit = true;
     }
 
