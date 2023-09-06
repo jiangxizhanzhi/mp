@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
@@ -18,6 +19,7 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 
 /**
  * 靶标
+ *
  * @author wanggang
  */
 @Service
@@ -32,13 +34,14 @@ public class DeviceService extends BaseCpService {
 
     /**
      * 分页查询
+     *
      * @param params
      * @return
      */
-    public CloudPlatformPageResult<Device> page(String params){
+    public CloudPlatformPageResult<Device> page(String params) {
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/lists" + params, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
+        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), Device.class);
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());
@@ -47,15 +50,17 @@ public class DeviceService extends BaseCpService {
 
     /**
      * 根据UUID查询
+     *
      * @param uuid
      * @return
      */
-    public Device findByUuid(String uuid){
+    public Device findByUuid(String uuid) {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + uuid, Device.class);
     }
 
     /**
      * 根据ID集合查询
+     *
      * @param ids
      * @return
      */
@@ -69,6 +74,8 @@ public class DeviceService extends BaseCpService {
             CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/byid?ids=" + Joiner.on(",").join(newIds), CloudPlatformItemsPageResult.class);
             super.checkResult(pageResult);
             List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), Device.class);
+            //移除disk_format的值为iso的
+            list.removeIf(device -> MonitorConstant.ISO.equals(device.getExtImageInfo().getDiskFormat()));
             model.getList().addAll(list);
         }
         return model;
@@ -76,12 +83,13 @@ public class DeviceService extends BaseCpService {
 
     /**
      * 批量删除
+     *
      * @param uuids
      */
     public BaseCloudPlatformResult deleteByIds(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
-        BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete", JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }

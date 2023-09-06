@@ -475,6 +475,15 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
+    @ApiOperation("保存iso实例的镜像")
+    @ApiImplicitParam(name = "request", value = "创建数据请求体", dataTypeClass = SnapshotRequest.class)
+    @PostMapping("/save_iso_image")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.SNAPSHOT)
+    public ServiceResult saveIsoImage(@RequestBody SnapshotRequest request){
+        snapshotConverter.saveIsoImage(request);
+        return ResultCommon.success();
+    }
+
     /**
      * 文件注入
      */
