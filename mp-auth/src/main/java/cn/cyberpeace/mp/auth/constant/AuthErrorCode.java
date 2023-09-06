@@ -102,6 +102,7 @@ public enum AuthErrorCode implements ErrorCode {
     // validation-api params
     PARAMS_SHOULD_NOT_NULL("MP-110100", "params_should_not_null"),
     PARAMS_SHOULD_NOT_EMPTY("MP-110101", "params_should_not_empty"),
+    PARAMS_LENGTH_NOT_IN_SCOPE("MP-110102", "params_length_not_in_scope"),
 
 
     // EXCEL
@@ -138,7 +139,16 @@ public enum AuthErrorCode implements ErrorCode {
 
     VERIFY_CODE_INCORRECT("MP-110160", "verify_code_incorrect"),
     VERIFY_CODE_EXPIRE("MP-110161", "verify_code_expire"),
-    VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty");
+    VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty"),
+
+    MAJOR_ADD_NAME_DUPLICATE_ERROR("MP-110200", "major_add_name_duplicate_error"),
+    MAJOR_DELETE_USING_NAME_ERROR("MP-110201", "major_delete_using_name_error"),
+    MAJOR_CREATE_FAIL("MP-110202", "major_create_fail"),
+    MAJOR_UPDATE_FAIL("MP-110203", "major_update_fail"),
+    MAJOR_NOT_EXISTED("MP-110204", "major_not_existed"),
+
+
+    ;
 
 
     AuthErrorCode(String code, String message) {

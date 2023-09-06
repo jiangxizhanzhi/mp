@@ -87,6 +87,13 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String name;
 
+    @ApiModelProperty(value = "专业id")
+    private String majorId;
+
+    @ApiModelProperty(value = "学号")
+    @DefaultStr
+    private String studentNumber;
+
     @ApiModelProperty(value = "昵称")
     @DefaultStr
     private String nickname;
@@ -135,7 +142,7 @@ public class UserModel extends BaseModel implements Serializable {
     private LocalDateTime lastLogin;
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String majorId, String studentNumber) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.username = username;
@@ -157,6 +164,8 @@ public class UserModel extends BaseModel implements Serializable {
         this.idCard = idCard;
         this.mobile = mobile;
         this.address = address;
+        this.majorId = majorId;
+        this.studentNumber = studentNumber;
     }
 
     public static class Status {
@@ -230,11 +239,13 @@ public class UserModel extends BaseModel implements Serializable {
                 Objects.equals(identifier, userModel.identifier) &&
                 Objects.equals(idCard, userModel.idCard) &&
                 Objects.equals(mobile, userModel.mobile) &&
-                Objects.equals(address, userModel.address) ;
+                Objects.equals(address, userModel.address) &&
+                Objects.equals(majorId, userModel.majorId) &&
+                Objects.equals(studentNumber, userModel.studentNumber);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tenant, username, password, tokenSecret, name, nickname, avatar, birthday, email, initCheck, description, isEnabled, isAudited, dateJoined, expiredTime, lastLogin, identifier, mobile, idCard, address);
+        return Objects.hash(super.hashCode(), tenant, username, password, tokenSecret, name, nickname, avatar, birthday, email, initCheck, description, isEnabled, isAudited, dateJoined, expiredTime, lastLogin, identifier, mobile, idCard, address, majorId, studentNumber);
     }
 }

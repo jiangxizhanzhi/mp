@@ -40,4 +40,14 @@ public class ParamCheck {
         }
     }
 
+    public static void lengthInScope(String param, String code, int max) {
+        if (Objects.isNull(param)) {
+            return;
+        } else {
+            if (param.length() > max) {
+                throw new MpRuntimeException(AuthErrorCode.PARAMS_LENGTH_NOT_IN_SCOPE.format(MessageCommon.get(code), String.valueOf(max)));
+            }
+        }
+    }
+
 }

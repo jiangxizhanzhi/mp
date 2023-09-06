@@ -41,6 +41,11 @@ public class AuthBasei18nCode {
     public static final String ORG_PARENT = "auth.base.org.parent";
     public static final String ORG_LIST = "auth.base.org.list";
 
+    // MAJOR
+    public static final String MAJOR_NAME = "auth.base.major.name";
+    public static final String MAJOR_DESCRIPTION = "auth.base.major.description";
+    public static final String MAJOR_ID = "auth.base.major.id";
+
     // TARGET
     public static final String TARGET_ID = "auth.base.target.id";
     public static final String TARGET_IDENTIFIER = "auth.base.target.identifier";
