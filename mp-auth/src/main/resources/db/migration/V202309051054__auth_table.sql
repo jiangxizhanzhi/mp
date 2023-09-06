@@ -9,7 +9,7 @@ CREATE TABLE `mp_auth_major`
     `update_time` datetime    NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE KEY (`id`),
-    UNIQUE KEY (`major`)
+    UNIQUE KEY (`major_name`)
 ) COMMENT ='系统管理-专业配置表';
 
 alter table `mp_auth_user` add column `student_number` varchar(64) NOT NULL default '' comment '学号';
