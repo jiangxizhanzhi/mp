@@ -58,7 +58,7 @@ public class MajorController {
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除专业", target = OpTargetEnums.MAJOR)
-    public ServiceResult<Boolean> delete(@RequestParam("ids") List<String> ids) {
+    public ServiceResult<Boolean> delete(@RequestBody List<String> ids) {
         return ResultCommon.success(majorService.deleteMajors(ids));
     }
 
@@ -75,6 +75,12 @@ public class MajorController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<List<MajorDto>> listAll() {
         return ResultCommon.success(majorService.listAllMajors());
+    }
+
+    @ApiOperation("获取指定id的专业详情")
+    @GetMapping("/{id}")
+    public ServiceResult<MajorDto> getMajorById(@PathVariable("id") String id) {
+        return ResultCommon.success(MajorDto.convertModelToDto(majorService.getMajorById(id)));
     }
 
 
