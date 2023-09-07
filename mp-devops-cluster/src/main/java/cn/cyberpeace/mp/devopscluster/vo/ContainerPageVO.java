@@ -100,4 +100,7 @@ public class ContainerPageVO extends BaseVO {
 
     @ApiModelProperty(value = "状态信息")
     private String processMessage;
+
+    @ApiModelProperty(value = "系统类型")
+    private String systemType;
 }

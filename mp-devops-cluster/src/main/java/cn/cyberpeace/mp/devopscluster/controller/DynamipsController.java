@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -121,7 +122,14 @@ public class DynamipsController {
                 }
             }
 
-            return InstancePageVO.builder().name(instanceModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+            var id = csceneSpecialService.getSceneId(instanceModel.getName());
+            SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
+            if (sceneElementModel == null) {
+                return null;
+            }
+            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
+
+            return InstancePageVO.builder().systemType(systemType).name(sceneElementModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
     }
 }

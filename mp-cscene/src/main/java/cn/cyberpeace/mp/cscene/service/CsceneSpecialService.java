@@ -37,11 +37,13 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
@@ -116,6 +118,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计场景模板中各类型节点数量，测试场景数量
+     *
      * @param ids 场景模板id列表
      * @return 统计结果
      */
@@ -205,6 +208,7 @@ public class CsceneSpecialService {
 
     /**
      * 场景实例数据
+     *
      * @param queryParams 查询参数
      * @return 统计结果
      */
@@ -472,6 +476,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景模板
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -511,6 +516,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景模板
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -688,6 +694,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计iso文件 对应 引用了iso文件的场景模板
+     *
      * @param isoTmpdirUuid iso文件地址uuid
      * @return iso文件uuid 对应 引用了iso文件的场景模板
      */
@@ -717,6 +724,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景实例
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -763,6 +771,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景实例
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -809,6 +818,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计活动场景总数和场景总数
+     *
      * @return
      */
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
@@ -822,6 +832,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -850,6 +861,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneIds
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
@@ -889,18 +901,20 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneId
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
      * @return
      */
     public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
-        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
+        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{csceneId}, includeFailedScene, includeDeleteScene).getSource();
         return new ServiceResult<>(result.get(csceneId));
     }
 
     /**
      * 获取实例运行的状态信息
+     *
      * @param csceneId
      * @return
      */
@@ -916,6 +930,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据资源名称反查节点和场景信息
+     *
      * @param resourceNames
      * @return
      */
@@ -1157,6 +1172,25 @@ public class CsceneSpecialService {
         CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
         var result = csceneInstanceMapper.list(humanCondition);
         return new ServiceResult<>(result).asResult();
+    }
+
+    public String getSceneId(String csceneName) {
+        return csceneName.replaceAll("MP_SCENE_", "");
+    }
+
+    public String getSystemType(SceneElementModel sceneElementModel, String id) {
+        String systemType = sceneElementModel.getSystemType();
+        String prefix = SystemTypeUtils.getStandardSystemType(systemType);
+        String suffix = SystemTypeCommandUtils.getOsType(prefix);
+        return prefix + "/" + suffix;
+    }
+
+
+    public SceneElementModel getSceneElementModel(String sceneId) {
+
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getId, sceneId);
+        return sceneElementMapper.first(humanCondition);
     }
 
 }
