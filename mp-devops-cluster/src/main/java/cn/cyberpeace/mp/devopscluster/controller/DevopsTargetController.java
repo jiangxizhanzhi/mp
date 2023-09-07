@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devopscluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -74,11 +75,12 @@ public class DevopsTargetController {
 
     /**
      * 查询FTP信息
+     *
      * @return
      */
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
-    public Result<String> getFtpAddress(){
+    public Result<String> getFtpAddress() {
         String formatUrl = devopsClusterConfig.getCpIp();
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
@@ -91,6 +93,7 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
@@ -146,12 +149,13 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
-    public ServiceResult<Device> listAll(TargetSceneRequest request){
+    public ServiceResult<Device> listAll(TargetSceneRequest request) {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
@@ -166,7 +170,7 @@ public class DevopsTargetController {
         }
 
         List<Device> deviceList = new ArrayList<>();
-        for (TypeConvertModel first : firstTypeList){
+        for (TypeConvertModel first : firstTypeList) {
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
@@ -182,6 +186,9 @@ public class DevopsTargetController {
                 continue;
             }
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
+            //移除disk_format的值为iso的
+            secondDeviceList.removeIf(device ->
+                    device.getExtImageInfo() != null && MonitorConstant.ISO.equals(device.getExtImageInfo().getDiskFormat()));
             deviceList.addAll(secondDeviceList);
         }
         return new Result(new ListResult<>(deviceList));
@@ -190,12 +197,13 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
     @ApiOperation("查询所有靶标部分信息")
     @GetMapping("/list-part-info")
-    public ServiceResult<DeviceTargetByTypeVO> listPartInfo(TargetSceneRequest request){
+    public ServiceResult<DeviceTargetByTypeVO> listPartInfo(TargetSceneRequest request) {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
@@ -210,7 +218,7 @@ public class DevopsTargetController {
         }
 
         List<DeviceTargetByTypeVO> targetScenes = new ArrayList<>();
-        for (TypeConvertModel first : firstTypeList){
+        for (TypeConvertModel first : firstTypeList) {
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
@@ -259,7 +267,7 @@ public class DevopsTargetController {
     @ApiOperation("根据UUID查询靶标信息")
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/get-by-uuid")
-    public Result<DeviceVO> findByUuid(@RequestParam String uuid){
+    public Result<DeviceVO> findByUuid(@RequestParam String uuid) {
         Device device = targetConverter.findByUuid(uuid);
         DeviceVO deviceVO = deviceVoConverter.sourceToTarget(device);
         return new Result<>(deviceVO);
@@ -267,21 +275,21 @@ public class DevopsTargetController {
 
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
-    public PageResult<DeviceVO> page(TargetSceneRequest request){
+    public PageResult<DeviceVO> page(TargetSceneRequest request) {
         BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
-        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<Device> deviceList = targetSceneConvertModel.getList();
 
         List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
 
-        return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
+        return new PageResult<>(deviceVOList, targetSceneConvertModel.getTotal());
     }
 
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
-    public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request){
+    public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request) {
         List<Device> deviceList = targetConverter.getCommonTargets("");
         List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
 
@@ -307,9 +315,9 @@ public class DevopsTargetController {
 
     @ApiOperation("批量同步靶标数据")
     @GetMapping("/multi-async")
-    public ServiceResult multiAsync(TargetMultiAsyncRequest request){
+    public ServiceResult multiAsync(TargetMultiAsyncRequest request) {
         int deleteNum = devopsTargetService.deleteAllTarget();
-        log.info("删除靶标数量：{}",deleteNum);
+        log.info("删除靶标数量：{}", deleteNum);
         List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
         MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
 
@@ -321,7 +329,7 @@ public class DevopsTargetController {
     @ApiOperation("注册MP地址")
     @ApiImplicitParam(name = "url", value = "地址", dataTypeClass = String.class)
     @GetMapping("/register")
-    public ServiceResult register(@RequestParam(required = false) String url){
+    public ServiceResult register(@RequestParam(required = false) String url) {
         initRegisterService.register(url);
         return ResultCommon.success();
     }
@@ -330,7 +338,7 @@ public class DevopsTargetController {
     @PostMapping("/upload/icon")
     @ApiImplicitParam(name = "file", value = "文件", dataTypeClass = MultipartFile.class)
     @ResponseBody
-    public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
+    public ServiceResult<FileResponseData> uploadIcon(MultipartFile file) {
         return targetIconUploadService.build(file).upload();
     }
 
@@ -339,7 +347,7 @@ public class DevopsTargetController {
     @PostMapping("/check")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = TargetSceneRequest.class)
     @ResponseBody
-    public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request){
+    public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request) {
         request.setPage(null);
         request.setPerPage(null);
         List<String> nameList = targetConverter.findByImagePageDTO(new ImagePageDTO(request));

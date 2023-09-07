@@ -88,7 +88,6 @@ public class TargetConverter{
             return sceneConvertModel;
         }
         CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
-
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
