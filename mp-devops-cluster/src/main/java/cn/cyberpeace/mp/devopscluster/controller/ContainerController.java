@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.vo.ContainerPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -178,7 +179,14 @@ public class ContainerController {
                 }
             }
 
-            return ContainerPageVO.builder().name(containerModel.getName())
+            var id = csceneSpecialService.getSceneId(containerModel.getName());
+            SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
+            if (sceneElementModel == null) {
+                return null;
+            }
+            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
+
+            return ContainerPageVO.builder().name(sceneElementModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(containerModel.getId())
                     .image(containerModel.getImage()).node(containerModel.getNode())
@@ -192,7 +200,7 @@ public class ContainerController {
                     .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(containerModel.getRunningTime())
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
-                    .vlanIdList(containerModel.getVlanIdList()).build();
+                    .vlanIdList(containerModel.getVlanIdList()).systemType(systemType).build();
         }).collect(Collectors.toList());
     }
 }

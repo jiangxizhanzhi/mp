@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
@@ -26,9 +25,7 @@ import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -229,15 +226,12 @@ public class VmController {
                 }
             }
 
-            var id = getSceneId(instanceModel.getName());
-            SceneElementModel sceneElementModel = getSceneElementModel(id);
+            var id = csceneSpecialService.getSceneId(instanceModel.getName());
+            SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
             if (sceneElementModel == null) {
                 return null;
             }
-            String systemType = sceneElementModel.getSystemType();
-            String prefix = SystemTypeUtils.getStandardSystemType(systemType);
-            String suffix = SystemTypeCommandUtils.getOsType(prefix);
-
+            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
             // 查询实时主机状态
             HostState hostState = new HostState();
             var agentNames = csceneCommonService.getAgentNamesBySceneId(sceneElementModel.getScene(), null);
@@ -267,20 +261,10 @@ public class VmController {
                     .runningTime(instanceModel.getRunningTime())
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).
-                            systemType(prefix + "/" + suffix).
+                            systemType(systemType).
                             cpuPercent(hostState.getCpuPercent()).memoryPercent(hostState.getMemoryPercent()).build();
         }).collect(Collectors.toList());
     }
 
-    private String getSceneId(String csceneName) {
-        return csceneName.replaceAll("MP_SCENE_", "");
-    }
 
-
-    private SceneElementModel getSceneElementModel(String sceneId) {
-
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(SceneElementModel::getId, sceneId);
-        return sceneElementMapper.first(humanCondition);
-    }
 }
