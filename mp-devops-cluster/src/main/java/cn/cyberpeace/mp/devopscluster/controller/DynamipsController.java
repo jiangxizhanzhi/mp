@@ -124,12 +124,13 @@ public class DynamipsController {
 
             var id = csceneSpecialService.getSceneId(instanceModel.getName());
             SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
-            if (sceneElementModel == null) {
-                return null;
+            String systemType = "";
+            if (sceneElementModel != null) {
+                systemType = csceneSpecialService.getSystemType(sceneElementModel, id);
             }
-            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
 
-            return InstancePageVO.builder().systemType(systemType).name(sceneElementModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+
+            return InstancePageVO.builder().systemType(systemType).name(sceneElementModel == null ? instanceModel.getName() : sceneElementModel.getName()).sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName()).id(instanceModel.getId()).node(instanceModel.getNode()).addressList(instanceModel.getAddressList()).userName(userName).referenceType(csceneNodeInfoBO.getReferenceType()).event(csceneNodeInfoBO.getEvent()).eventStatus(csceneNodeInfoBO.getEventStatus()).sceneStatus(csceneNodeInfoBO.getSceneStatus()).sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc()).runningTime(instanceModel.getRunningTime()).processMessage(csceneNodeInfoBO.getProcessMessage()).status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
     }
 }

@@ -228,26 +228,28 @@ public class VmController {
 
             var id = csceneSpecialService.getSceneId(instanceModel.getName());
             SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
-            if (sceneElementModel == null) {
-                return null;
-            }
-            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
+            String systemType = null;
             // 查询实时主机状态
             HostState hostState = new HostState();
-            var agentNames = csceneCommonService.getAgentNamesBySceneId(sceneElementModel.getScene(), null);
-            if (CollectionUtil.isNotEmpty(agentNames)) {
-                AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
-                agentNameBasedRequest.setAgentNames(agentNames);
-                agentNameBasedRequest.setPageSize(1);
+            if (sceneElementModel != null) {
+                systemType = csceneSpecialService.getSystemType(sceneElementModel, id);
 
-                Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
-                var hostStates = map.get(id);
-                if (CollectionUtil.isNotEmpty(hostStates)) {
-                    hostState = hostStates.get(0);
+                var agentNames = csceneCommonService.getAgentNamesBySceneId(sceneElementModel.getScene(), null);
+                if (CollectionUtil.isNotEmpty(agentNames)) {
+                    AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
+                    agentNameBasedRequest.setAgentNames(agentNames);
+                    agentNameBasedRequest.setPageSize(1);
+
+                    Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
+                    var hostStates = map.get(id);
+                    if (CollectionUtil.isNotEmpty(hostStates)) {
+                        hostState = hostStates.get(0);
+                    }
                 }
             }
 
-            return InstancePageVO.builder().name(sceneElementModel.getName())
+
+            return InstancePageVO.builder().name(sceneElementModel == null ? instanceModel.getName() : sceneElementModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(instanceModel.getId())
                     .node(instanceModel.getNode())
