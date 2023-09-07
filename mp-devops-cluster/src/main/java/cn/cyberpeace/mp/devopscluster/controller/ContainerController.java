@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 /**
  * 容器管理类
+ *
  * @author wanggang
  */
 @Slf4j
@@ -52,6 +53,7 @@ public class ContainerController {
 
     /**
      * 重启
+     *
      * @param request
      * @return
      */
@@ -67,6 +69,7 @@ public class ContainerController {
 
     /**
      * 暂停
+     *
      * @param request
      * @return
      */
@@ -82,6 +85,7 @@ public class ContainerController {
 
     /**
      * 恢复
+     *
      * @param request
      * @return
      */
@@ -97,6 +101,7 @@ public class ContainerController {
 
     /**
      * 开启
+     *
      * @param request
      * @return
      */
@@ -112,6 +117,7 @@ public class ContainerController {
 
     /**
      * 关闭
+     *
      * @param request
      * @return
      */
@@ -127,12 +133,13 @@ public class ContainerController {
 
     /**
      * 分页查询容器列表
+     *
      * @param request
      * @return
      */
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
-    public PageResult<ContainerPageVO> page(ContainerPageRequest request){
+    public PageResult<ContainerPageVO> page(ContainerPageRequest request) {
         BasePageBO<ContainerBO> model = containerConverter.page(new ContainerPageDTO(request));
         List<ContainerPageVO> list = convertBOToPageVO(model);
         return new PageResult<>(list, model.getTotal());
@@ -140,10 +147,11 @@ public class ContainerController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
-    private List<ContainerPageVO> convertBOToPageVO(BasePageBO<ContainerBO> model){
+    private List<ContainerPageVO> convertBOToPageVO(BasePageBO<ContainerBO> model) {
         final List<ContainerBO> modelList = model.getList();
         List<String> nameList = modelList.stream().map(ContainerBO::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
@@ -181,12 +189,12 @@ public class ContainerController {
 
             var id = csceneSpecialService.getSceneId(containerModel.getName());
             SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
-            if (sceneElementModel == null) {
-                return null;
+            String systemType = "";
+            if (sceneElementModel != null) {
+                systemType = csceneSpecialService.getSystemType(sceneElementModel, id);
             }
-            String systemType = csceneSpecialService.getSystemType(sceneElementModel,id);
 
-            return ContainerPageVO.builder().name(sceneElementModel.getName())
+            return ContainerPageVO.builder().name(sceneElementModel == null ? containerModel.getName() : sceneElementModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(containerModel.getId())
                     .image(containerModel.getImage()).node(containerModel.getNode())
