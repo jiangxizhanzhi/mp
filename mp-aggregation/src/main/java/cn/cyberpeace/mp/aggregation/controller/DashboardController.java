@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOperateSummaryBO;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
@@ -89,6 +90,13 @@ public class DashboardController {
         pageRequest.ensure();
         PageInfo<UserOnlineReportMonitorBo> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "用户行为分布图", notes = "")
+    @GetMapping("/user_operate_summary")
+    public ServiceResult<List<UserOperateSummaryBO>> getUserOperateSummary() {
+        List<UserOperateSummaryBO> resuslt = dashboardService.getUserOperateSummary();
+        return ResultCommon.success(resuslt);
     }
 
     @ApiOperation(value = "用户监控会话", notes = "")

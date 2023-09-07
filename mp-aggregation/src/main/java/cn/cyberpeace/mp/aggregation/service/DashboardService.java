@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
 import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
+import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOperateSummaryBO;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -23,6 +25,10 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
+import cn.cyberpeace.mp.log.repository.OperateLogSqlMapper;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
@@ -72,6 +78,9 @@ public class DashboardService {
     private CsceneInstanceMapper csceneInstanceMapper;
 
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+    @Autowired
+    private OperateLogSqlMapper operateLogSqlMapper;
 
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
@@ -310,6 +319,107 @@ public class DashboardService {
             }
         }
         return sum;
+    }
+
+    public List<UserOperateSummaryBO> getUserOperateSummary() {
+        List<UserOperateSummaryBO> resultList = new ArrayList<>();
+        Integer total = selectCountByModuleAndType(null, null, null);
+        Integer[] opModuleIds = new Integer[]{OpModuleEnums.ARENA.ordinal(), OpModuleEnums.THEORY.ordinal(), OpModuleEnums.OPERATIONS.ordinal(),
+                OpModuleEnums.FLAG_RACE.ordinal(), OpModuleEnums.OFFENSIVE_VS_DEFENSIVE.ordinal(), OpModuleEnums.PENETRATION.ordinal(), OpModuleEnums.TEAM.ordinal()};
+        Integer[] opTypeIds = new Integer[]{OpTypeEnums.CREATE.ordinal(), OpTypeEnums.UPDATE.ordinal(), OpTypeEnums.DELETE.ordinal()};
+        Integer[] opTypeNotIds = new Integer[]{OpTypeEnums.CREATE.ordinal(), OpTypeEnums.UPDATE.ordinal(), OpTypeEnums.DELETE.ordinal()};
+        UserOperateSummaryBO userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("竞赛维护");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, opTypeIds, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("比武竞赛");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, opTypeNotIds));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        opModuleIds = new Integer[]{OpModuleEnums.TRAINING_SINGLE.ordinal()};
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("训练维护");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, opTypeIds, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("单兵训练");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, opTypeIds));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        opModuleIds = new Integer[]{OpModuleEnums.COURSE.ordinal(), OpModuleEnums.TEST_PAPER.ordinal()};
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("课程维护");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, opTypeIds, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("课程教学");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, opTypeIds));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        opModuleIds = new Integer[]{OpModuleEnums.TEST.ordinal(), OpModuleEnums.PROBLEM_SET.ordinal(), OpModuleEnums.CAPTURE_SOLVE_PROBLEM.ordinal(), OpModuleEnums.BASIS.ordinal()};
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("在线学习");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        opModuleIds = new Integer[]{OpModuleEnums.tool.ordinal(), OpModuleEnums.RESOURCE.ordinal(), OpModuleEnums.FLOW.ordinal(), OpModuleEnums.PROBE.ordinal(), OpModuleEnums.TARGET.ordinal()};
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("资源更新");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        opModuleIds = new Integer[]{OpModuleEnums.SYSTEM.ordinal(), OpModuleEnums.ACCOUNT.ordinal()};
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("系统配置");
+        userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, null));
+        userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
+        resultList.add(userOperateSummaryBO);
+
+        userOperateSummaryBO = new UserOperateSummaryBO();
+        userOperateSummaryBO.setName("其他");
+
+        Integer otherNum = total;
+        Double otherPercent = 100D;
+        for (UserOperateSummaryBO temp : resultList) {
+            otherNum -= temp.getNum();
+            otherPercent -= temp.getPercent();
+        }
+        userOperateSummaryBO.setNum(otherNum);
+        userOperateSummaryBO.setPercent(otherPercent);
+        resultList.add(userOperateSummaryBO);
+
+        return resultList;
+    }
+
+    private Integer selectCountByModuleAndType(Integer[] opModuleIds, Integer[] opTypeIds, Integer[] opTypeNotIds) {
+        HumanCondition humanCondition = new HumanCondition();
+        if (opModuleIds != null && opModuleIds.length > 0) {
+            humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, opModuleIds);
+        }
+        if (opTypeIds != null && opTypeIds.length > 0) {
+            humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeIds);
+        }
+        if (opTypeNotIds != null && opTypeNotIds.length > 0) {
+            humanCondition.filterNotIn(OperateLogSqlModel::getOpTypeId, opTypeNotIds);
+        }
+        List<OperateLogSqlModel> operateLogSqlModels = operateLogSqlMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(operateLogSqlModels)) {
+            return 0;
+        } else {
+            return operateLogSqlModels.size();
+        }
     }
 
 }
