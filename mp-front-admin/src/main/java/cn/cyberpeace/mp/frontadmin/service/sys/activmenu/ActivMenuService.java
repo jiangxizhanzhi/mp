@@ -2,11 +2,14 @@ package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.model.MenuTemplateModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.repository.MenuTemplateMapper;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonConstant;
 import cn.cyberpeace.mp.common.model.OptionModel;
@@ -22,6 +25,7 @@ import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +67,9 @@ public class ActivMenuService {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    @Autowired
+    private MenuTemplateMapper menuTemplateMapper;
+
 
     /**
      * 适用场景：重新导入menu.json
@@ -80,12 +87,23 @@ public class ActivMenuService {
 
         List<TargetModel> targetModels = new ArrayList<>();
         List<MenuExtraInfoModel> menuExtraInfoModels = new ArrayList<>();
+        List<MenuTemplateModel> menuTemplateModels = new ArrayList<>();
 
+        //英文字段如果有就用原来有的，如果没有暂时置为“”
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(MenuTemplateModel::getTemplateId, "1");
+        List<MenuTemplateModel> menuTemplateModelsOld = menuTemplateMapper.list(humanCondition);
+        Map<String, String> enNameMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(menuTemplateModelsOld)) {
+            for (MenuTemplateModel temp : menuTemplateModelsOld) {
+                enNameMap.put(temp.getMenuId(), temp.getEnName());
+            }
+        }
         for (ActivMenuDTO menu : menus) {
             // 以authority内的值为id
             menu.setId(menu.getAuthority());
             // 一开始parentid为null
-            recursion(targetModels, menuExtraInfoModels, menu, "");
+            recursion(targetModels, menuTemplateModels, menuExtraInfoModels, menu, "", enNameMap);
         }
 
         check(targetModels);
@@ -98,7 +116,7 @@ public class ActivMenuService {
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-        boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+        boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuTemplateModels, menuExtraInfoModels);
         evictCache();
         return success;
     }
@@ -242,6 +260,19 @@ public class ActivMenuService {
         return target;
     }
 
+    private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
+        MenuTemplateModel menuTemplateModel = new MenuTemplateModel();
+        menuTemplateModel.setTemplateId("1");
+        menuTemplateModel.setMenuId(menuDTO.getId());
+        menuTemplateModel.setParent(parentId);
+        menuTemplateModel.setIdentifier(menuDTO.getValue());
+        menuTemplateModel.setType(TargetModel.TYPE_MENU);
+        menuTemplateModel.setName(menuDTO.getName());
+        menuTemplateModel.setEnName(enNameMap.get(menuDTO.getId()) == null ? "" : enNameMap.get(menuDTO.getId()));
+        menuTemplateModel.setPath(menuDTO.getPath_name());
+        return menuTemplateModel;
+    }
+
     private MenuExtraInfoModel activMenuDto2MenuExtraInfo(ActivMenuDTO menuDTO, String parentId) {
         MenuExtraInfoModel menuExtraInfo = new MenuExtraInfoModel();
         menuExtraInfo.setMenu(menuDTO.getId());
@@ -258,17 +289,19 @@ public class ActivMenuService {
     }
 
 
-    private void recursion(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId) {
+    private void recursion(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId, Map<String, String> enNameMap) {
         List<ActivMenuDTO> children = menu.getChildren();
         if (CollectionUtil.isNotEmpty(children)) {
             for (ActivMenuDTO child : children) {
                 child.setId(child.getAuthority());
-                recursion(targets, menuExtraInfos, child, menu.getId());
+                recursion(targets, menuTemplateModels, menuExtraInfos, child, menu.getId(), enNameMap);
             }
         }
         TargetModel target = activMenuDto2TargetActivDto(menu, parentId);
+        MenuTemplateModel menuTemplateModel = activMenuDto2TemplateModel(menu, parentId, enNameMap);
         MenuExtraInfoModel menuExtraInfo = activMenuDto2MenuExtraInfo(menu, parentId);
         targets.add(target);
+        menuTemplateModels.add(menuTemplateModel);
         menuExtraInfos.add(menuExtraInfo);
     }
 
