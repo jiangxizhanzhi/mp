@@ -17,9 +17,19 @@ public class AttackInfo {
     @ApiModelProperty("攻击类型")
     private String attackType;
 
+    @ApiModelProperty("攻击类型")
+    private String attCkType;
+
+
     public AttackInfo(Integer severity, String attackType) {
         this.severity = severity;
         this.attackType = attackType;
+    }
+
+    public AttackInfo(Integer severity, String attackType,String attCkType) {
+        this.severity = severity;
+        this.attackType = attackType;
+        this.attCkType = attCkType;
     }
 
 }
