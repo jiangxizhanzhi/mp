@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.model.MenuTemplateModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.repository.MenuTemplateMapper;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -31,6 +33,13 @@ public class MenuReImportSupportService {
     @Autowired
     private MenuExtraInfoService menuExtraInfoService;
 
+    @Autowired
+    @Qualifier("templateTargetServiceImpl")
+    private TargetService templateTargetService;
+
+    @Autowired
+    private MenuTemplateMapper menuTemplateMapper;
+
 
     /**
      * 场景：重新导入menu.json
@@ -41,13 +50,13 @@ public class MenuReImportSupportService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public boolean rebuildAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfoModels) {
+    public boolean rebuildAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfoModels) {
         // step1. clean menus, keymenus, editionmenus
         boolean cleanSuccess = cleanAllMenusAndExtraInfos();
         boolean reImportSuccess = false;
         if (cleanSuccess) {
             // step2. rebuild menus, menuExtraInfos
-            reImportSuccess = reInsertAllMenusAndExtraInfos(targets, menuExtraInfoModels);
+            reImportSuccess = reInsertAllMenusAndExtraInfos(targets, menuTemplateModels, menuExtraInfoModels);
         }
         return reImportSuccess;
     }
@@ -109,7 +118,9 @@ public class MenuReImportSupportService {
     private boolean cleanAllMenusAndExtraInfos() {
         boolean re1 = targetService.deleteAll();
         boolean re2 = menuExtraInfoService.deleteAll();
-        if (re1 && re2) {
+        boolean re3 = templateTargetService.deleteAll();
+
+        if (re1 && re2 && re3) {
             return true;
         }
         log.error("clean all menus and menus extra infos failed!");
@@ -123,8 +134,9 @@ public class MenuReImportSupportService {
      * @param targets
      * @return
      */
-    private boolean reInsertAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfoModels) {
+    private boolean reInsertAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfoModels) {
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
+        menuTemplateMapper.bulkCreate(menuTemplateModels);
         log.info("inserted {} target rows.", result.getSource());
         boolean re1 = menuExtraInfoService.bulkCreate(menuExtraInfoModels);
         if (Objects.nonNull(result.getSource()) && result.getSource() > 0 && re1) {
