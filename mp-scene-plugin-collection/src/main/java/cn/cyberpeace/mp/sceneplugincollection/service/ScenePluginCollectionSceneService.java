@@ -84,6 +84,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ERROR_CODE_SUFFIX;
+
 @Slf4j
 @Service
 public class ScenePluginCollectionSceneService {
@@ -241,17 +243,23 @@ public class ScenePluginCollectionSceneService {
         var flowLogBOS = flowLogBOSResult.getObjs();
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
         flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)){
+            if (MapUtils.isNotEmpty(allCategoryDicMap)) {
                 List<String> categoryList;
+                List<String> categoryListAtt;
                 if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
                     categoryList = flowLogBO.getSuricata().getCategory().stream()
                             .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
+                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
+                            .map(c -> this.globalizedWithAttCkWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
                 } else {
                     categoryList = flowLogBO.getSuricata().getCategory().stream()
                             .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
+                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
+                            .map(c -> this.globalizedWithAttCkWay(c, allCategoryDicMap)).collect(Collectors.toList());
                 }
 
                 flowLogBO.getSuricata().setCategory(categoryList);
+                flowLogBO.getSuricata().setCategoryAtt(categoryListAtt);
             }
         });
 
@@ -259,14 +267,27 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
-    private String globalizedWithAttackWay(String attackWay,Map<String, FlowClassificationModel> allCategoryDicMap){
-        if (MapUtils.isEmpty(allCategoryDicMap)){
+    private String globalizedWithAttackWay(String attackWay, Map<String, FlowClassificationModel> allCategoryDicMap) {
+        if (MapUtils.isEmpty(allCategoryDicMap)) {
             return attackWay;
         }
         FlowClassificationModel model = allCategoryDicMap.get(attackWay);
         String globalized = attackWay;
         if (Objects.nonNull(model)) {
             globalized = MessageCommon.getOrDefault(SituationalAwareConstant.ERROR_CODE_PREFIX + model.getName(),
+                    attackWay);
+        }
+        return globalized;
+    }
+
+    private String globalizedWithAttCkWay(String attackWay, Map<String, FlowClassificationModel> allCategoryDicMap) {
+        if (MapUtils.isEmpty(allCategoryDicMap)) {
+            return attackWay;
+        }
+        FlowClassificationModel model = allCategoryDicMap.get(attackWay);
+        String globalized = attackWay;
+        if (Objects.nonNull(model)) {
+            globalized = MessageCommon.getOrDefault(SituationalAwareConstant.ERROR_CODE_PREFIX + model.getName() + ERROR_CODE_SUFFIX,
                     attackWay);
         }
         return globalized;
@@ -1018,6 +1039,7 @@ public class ScenePluginCollectionSceneService {
 
     /**
      * 查询每个周期内最新的数据
+     *
      * @param sceneIds
      * @param nodeIds
      * @param startTime
@@ -1033,7 +1055,7 @@ public class ScenePluginCollectionSceneService {
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
-        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult,true);
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, true);
     }
 
 
@@ -1047,7 +1069,7 @@ public class ScenePluginCollectionSceneService {
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
-    private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult , Boolean latestData) {
+    private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult, Boolean latestData) {
         if (queryResult == null || CollectionUtils.isEmpty(queryResult.getObjs())) {
             return new ArrayList<>();
         }
@@ -1154,13 +1176,14 @@ public class ScenePluginCollectionSceneService {
         }
         if (flowLogBO.getSuricata() != null) {
             List<String> category = flowLogBO.getSuricata().getCategory();
+            List<String> categoryAtt = flowLogBO.getSuricata().getCategoryAtt();
             List<Integer> severity = flowLogBO.getSuricata().getSeverity();
             if (CollectionUtils.isNotEmpty(category) && CollectionUtils.isNotEmpty(severity)) {
                 int attackInfoNum = category.size() < severity.size() ? category.size() : severity.size();
                 List<AttackInfo> attackInfos = new ArrayList<>();
                 flowBO.setAttackInfos(attackInfos);
                 for (int i = 0; i < attackInfoNum; i++) {
-                    attackInfos.add(new AttackInfo(severity.get(i), category.get(i)));
+                    attackInfos.add(new AttackInfo(severity.get(i), category.get(i), categoryAtt.get(i)));
                 }
             }
         }
@@ -1959,7 +1982,6 @@ public class ScenePluginCollectionSceneService {
         String dateTime = DatePattern.NORM_DATETIME_FORMAT.format(localDateTime);
         return dateTime;
     }
-
 
 
 }
