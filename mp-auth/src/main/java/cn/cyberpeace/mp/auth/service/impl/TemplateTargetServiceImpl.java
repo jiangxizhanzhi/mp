@@ -161,7 +161,7 @@ public class TemplateTargetServiceImpl implements TargetService {
 
     @Override
     public boolean deleteAll() {
-        HumanCondition humanCondition = new HumanCondition().filterGreaterThan(MenuTemplateModel::getPk, AuthConstant.TARGET_FIELD_VALUE_PK_0);
+        HumanCondition humanCondition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, "1");
         int result = getModelMapper().filterDelete(humanCondition);
         log.info("deleted {} rows", result);
         return true;
