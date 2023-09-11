@@ -329,4 +329,12 @@ public class VirtualMachine extends CloudClient {
         log.info("调用云平台卸载实体USB接口, response:{}", response);
         log.info("VirtualMachine.deleteEntityUsbs end.");
     }
+
+    public void execControllerCmd(String cmd) {
+        ExecHostCommandData execHostCommandData = new ExecHostCommandData();
+        execHostCommandData.setCmd(cmd);
+        execHostCommandData.setHostname("controller");
+        cloudPost(CloudUrlConstant.EXEC_HOST_COMMAND, execHostCommandData, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
 }
