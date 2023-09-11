@@ -1,0 +1,10 @@
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
+
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import lombok.Data;
+
+@Data
+public class ExecHostCommandData implements CloudHttpData {
+    private String hostname;
+    private String cmd;
+}
