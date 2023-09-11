@@ -15,7 +15,8 @@ public class WazuhModifyEventConfig {
         if (isInit) {
             return;
         }
-        modifyProbe = JsonCommon.parse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.MODIFY_PROBES), ModifyProbe.class);
+        modifyProbe = JsonCommon.snakeParse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.MODIFY_PROBES),
+                ModifyProbe.class);
         isInit = true;
     }
 

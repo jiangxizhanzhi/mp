@@ -22,7 +22,8 @@ public class WazuhProbeConfig {
         if (isInit) {
             return;
         }
-        defaultProbe = JsonCommon.parse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_CUSTOM_PROBES), DefaultProbe.class);
+        defaultProbe = JsonCommon.snakeParse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_CUSTOM_PROBES),
+                DefaultProbe.class);
         isInit = true;
     }
 
