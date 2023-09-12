@@ -281,6 +281,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         for (String id : ids) {
             List<OrgModel> children = listByParentId(id);
