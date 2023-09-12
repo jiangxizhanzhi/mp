@@ -1900,6 +1900,40 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
+    public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountTrend(String sceneId) {
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
+        var allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
+
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+        request.setAgentNames(allElementEids);
+        request.setStartTime(sceneHandler.getEarliestStartTime());
+        request.setEndTime(LocalDateTime.now());
+
+        List<AttCkTypeCount> list = new ArrayList<>();
+        var counts = dataCollectionService.getAttCkTypeCountTrend(request);
+        if (!counts.isEmpty()) {
+            counts.forEach((k, v) -> list.add(new AttCkTypeCount(k, v.longValue())));
+        }
+        return new ServiceResult<>(list);
+    }
+
+    public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountInfo(String sceneId) {
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
+        var allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
+
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+        request.setAgentNames(allElementEids);
+        request.setStartTime(sceneHandler.getEarliestStartTime());
+        request.setEndTime(LocalDateTime.now());
+
+        List<AttCkTypeCount> list = new ArrayList<>();
+        var counts = dataCollectionService.getAttCkTypeCountInfo(request);
+        if (!counts.isEmpty()) {
+            counts.forEach((k, v) -> list.add(new AttCkTypeCount(k, v.longValue())));
+        }
+        return new ServiceResult<>(list);
+    }
+
     /**
      * 根据规则类型获取规则id2file map
      *
