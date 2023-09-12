@@ -5,13 +5,13 @@ import cn.cyberpeace.mp.scene.constant.SceneStage;
 
 public class CloudSceneStage extends SceneStage {
 
-    public static CloudSceneStage CREATE_NETWORK = new CloudSceneStage("create_network");
-    public static CloudSceneStage CREATE_GATEWAY = new CloudSceneStage("create_gateway");
-    public static CloudSceneStage CREATE_INSTANCE = new CloudSceneStage("create_instance");
-    public static CloudSceneStage CONFIG = new CloudSceneStage("config");
+    public static CloudSceneStage CREATE_NETWORK = new CloudSceneStage("create_network", "wangluoyu");
+    public static CloudSceneStage CREATE_GATEWAY = new CloudSceneStage("create_gateway", "wangluoshebei");
+    public static CloudSceneStage CREATE_INSTANCE = new CloudSceneStage("create_instance", "changjingmoban");
+    public static CloudSceneStage CONFIG = new CloudSceneStage("config", "renwufangan");
 
-    private CloudSceneStage(String stage) {
-        super(stage);
+    private CloudSceneStage(String stage, String icon) {
+        super(stage, icon);
     }
 
     @Override

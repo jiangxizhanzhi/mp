@@ -4,10 +4,10 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 
 public class CommonSceneStage extends SceneStage {
 
-    public static CommonSceneStage INIT = new CommonSceneStage("init");
+    public static CommonSceneStage INIT = new CommonSceneStage("init", "xinxitongji");
 
-    private CommonSceneStage(String stage) {
-        super(stage);
+    private CommonSceneStage(String stage, String icon) {
+        super(stage, icon);
     }
 
     @Override
