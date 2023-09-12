@@ -5,11 +5,11 @@ import cn.cyberpeace.mp.scene.constant.SceneStage;
 
 public class CollectionSceneStage extends SceneStage {
 
-    public static CollectionSceneStage CREATE_FLOW_COLLECT = new CollectionSceneStage("create_flow_collect");
-    public static CollectionSceneStage CREATE_DATA_COLLECT = new CollectionSceneStage("create_data_collect");
+    public static CollectionSceneStage CREATE_FLOW_COLLECT = new CollectionSceneStage("create_flow_collect", "tanzhenguanli");
+    public static CollectionSceneStage CREATE_DATA_COLLECT = new CollectionSceneStage("create_data_collect", "zhongduanshebei");
 
-    private CollectionSceneStage(String stage) {
-        super(stage);
+    private CollectionSceneStage(String stage, String icon) {
+        super(stage, icon);
     }
 
     @Override

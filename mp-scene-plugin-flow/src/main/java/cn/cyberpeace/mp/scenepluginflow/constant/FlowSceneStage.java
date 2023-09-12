@@ -5,10 +5,10 @@ import cn.cyberpeace.mp.scene.constant.SceneStage;
 
 public class FlowSceneStage extends SceneStage {
 
-    public static FlowSceneStage CREATE_FLOW_SIMULATE = new FlowSceneStage("create_flow_simulate");
+    public static FlowSceneStage CREATE_FLOW_SIMULATE = new FlowSceneStage("create_flow_simulate", "liuliangfasheng");
 
-    private FlowSceneStage(String stage) {
-        super(stage);
+    private FlowSceneStage(String stage, String icon) {
+        super(stage, icon);
     }
 
     @Override
