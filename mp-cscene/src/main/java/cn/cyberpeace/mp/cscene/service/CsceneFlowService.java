@@ -213,8 +213,13 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNodeIp(nodeIp);
             addFlowTaskTaskInfo.setNodeName(nodeName);
             addFlowTaskTaskInfo.setNetworkId(networkId);
-            // TODO 添加可用ip
-//            addFlowTaskTaskInfo.setUsableIp();
+            // 获取可用ip
+            String usableIp = this.getUsableIp(networkId, sceneHandler);
+            if (StringUtils.isBlank(usableIp)) {
+                log.error("get usable ip error");
+                throw new MpRuntimeException(CsceneErrorCode.USABLE_IP_NOT_EXIST);
+            }
+            addFlowTaskTaskInfo.setUsableIp(usableIp);
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
 
         }
