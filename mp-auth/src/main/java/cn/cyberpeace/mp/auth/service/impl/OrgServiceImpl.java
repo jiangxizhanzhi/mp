@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +77,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
     public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
         if (StringUtils.isNotBlank(obj.getParent())) {
             OrgModel parentOrg = getOrgModel(obj.getParent());
@@ -98,6 +100,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
     public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
 
         OrgModel oldOrg = getOrgModel(obj.getId());
@@ -257,6 +260,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
     public ServiceResult<Boolean> delete(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         List<OrgModel> children = listByParentId(orgId);
