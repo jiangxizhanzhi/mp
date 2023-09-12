@@ -5,11 +5,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -139,6 +140,18 @@ public class HostStateController {
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+    }
+
+    @ApiOperation(value = "场景att&ck主机事件统计")
+    @GetMapping("/att_ck_event_count")
+    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
+        return hostStateService.getSceneAttCkTypeCountInfo(request).asResult();
+    }
+
+    @ApiOperation(value = "场景att&ck主机事件趋势")
+    @GetMapping("/att_ck_event_trend")
+    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request) {
+        return hostStateService.getSceneAttCkTypeCountTrend(request).asResult();
     }
 
 }

@@ -18,11 +18,14 @@ import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
@@ -49,7 +52,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -536,6 +546,50 @@ public class HostStateService {
             ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
             return netifacesResult;
         }
+    }
+
+    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request) {
+        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        if (CollectionUtils.isEmpty(sceneIds)) {
+            return new ServiceResult<>(new SceneAttCkTypeCountInfo()).asResult();
+        }
+        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountTrend(sceneIds.get(0));
+        var list = listServiceResult.getSource();
+        SceneAttCkTypeCountInfo attCkTypeCountInfo = new SceneAttCkTypeCountInfo();
+        attCkTypeCountInfo.setTotalTimes(0L);
+        attCkTypeCountInfo.setList(new ArrayList<>());
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (var count : list) {
+                attCkTypeCountInfo.setTotalTimes(attCkTypeCountInfo.getTotalTimes() + count.getTimes());
+                AttCkTypeCount attCkTypeCount = new AttCkTypeCount();
+                attCkTypeCount.setTimes(count.getTimes());
+                attCkTypeCount.setType(count.getType().toLowerCase());
+                attCkTypeCountInfo.getList().add(attCkTypeCount);
+            }
+        }
+        return new ServiceResult<>(attCkTypeCountInfo);
+    }
+
+    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
+        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        if (CollectionUtils.isEmpty(sceneIds)) {
+            return new ServiceResult<>(new SceneAttCkTypeCountInfo()).asResult();
+        }
+        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountInfo(sceneIds.get(0));
+        var list = listServiceResult.getSource();
+        SceneAttCkTypeCountInfo attCkTypeCountInfo = new SceneAttCkTypeCountInfo();
+        attCkTypeCountInfo.setTotalTimes(0L);
+        attCkTypeCountInfo.setList(new ArrayList<>());
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (var count : list) {
+                attCkTypeCountInfo.setTotalTimes(attCkTypeCountInfo.getTotalTimes() + count.getTimes());
+                AttCkTypeCount attCkTypeCount = new AttCkTypeCount();
+                attCkTypeCount.setTimes(count.getTimes());
+                attCkTypeCount.setType(count.getType().toLowerCase());
+                attCkTypeCountInfo.getList().add(attCkTypeCount);
+            }
+        }
+        return new ServiceResult<>(attCkTypeCountInfo);
     }
 
     private void checkListPageParams(ListPageInfoQueryParams params) {
