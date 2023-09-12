@@ -14,7 +14,17 @@ import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskDetail;
 import cn.cyberpeace.mp.cscene.request.flow.AddFlowTaskTaskRequest;
 import cn.cyberpeace.mp.cscene.request.flow.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.cscene.response.QueryFlowTaskConfResponse;
-import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
+import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
+import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsAll;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
+import cn.cyberpeace.mp.flow.bo.FlowSummary;
+import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskNode;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
@@ -40,7 +50,9 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
@@ -561,5 +573,52 @@ public class CsceneFlowService {
         }
         log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
         return queryList;
+    }
+
+
+    private String getUsableIp(String networkId, SceneHandler sceneHandler) {
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var elements = new ArrayList<>(pluginHandler.getElementMap().values());
+        ConnectedNetworkBO findNet = null;
+        for (var e : elements) {
+            List<ConnectedNetworkBO> nets = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(e.getDeriveNetworks())) {
+                nets.addAll(e.getDeriveNetworks());
+            }
+            if (CollectionUtils.isNotEmpty(e.getAccessNetworks())) {
+                nets.addAll(e.getAccessNetworks());
+            }
+            boolean finded = false;
+            for (var n : nets) {
+                if (networkId.equals(n.getNetwork().getResourceId())) {
+                    finded = true;
+                    findNet = n;
+                }
+            }
+            if (finded) {
+                break;
+            }
+        }
+        if (findNet == null) {
+            return null;
+        } else {
+            List<SceneElementPortBO> ports = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(findNet.getFromPorts())) {
+                ports.addAll(findNet.getFromPorts());
+            }
+            if (CollectionUtils.isNotEmpty(findNet.getToPorts())) {
+                ports.addAll(findNet.getToPorts());
+            }
+            var ips = ports.stream()
+                    .filter(p -> StringUtils.isNotEmpty(p.getIp()))
+                    .map(p -> p.getIp())
+                    .collect(Collectors.toList());
+            var allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
+            if (CollectionUtils.isNotEmpty(allocateIp)) {
+                return allocateIp.get(0);
+            } else {
+                return null;
+            }
+        }
     }
 }
