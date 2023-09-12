@@ -214,7 +214,10 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNodeIp(nodeIp);
             addFlowTaskTaskInfo.setNodeName(nodeName);
             addFlowTaskTaskInfo.setNetworkId(networkId);
+            // TODO 添加可用ip
+//            addFlowTaskTaskInfo.setUsableIp();
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
+
         }
         //新增流量执行任务
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {

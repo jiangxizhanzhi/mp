@@ -129,11 +129,13 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     flowTaskPortModel = new FlowTaskPortModel();
                     FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
                     if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getInstanceId())) {
+                        // pcap需要给trex虚拟机添加client网口
                         JSONObject addPortReq = new JSONObject();
                         addPortReq.put("network_id", detail.getNetworkId());
+                        addPortReq.put("fixed_ip", detail.getUsableIp());
+                        addPortReq.put("container_id", flowActuatorModel.getInstanceId());
                         try {
-                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
-                                    flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/iscenarios/attach_network", addPortReq.toJSONString());
                             JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                             log.info("add client port response:{}", addTrexClientObj.toJSONString());
                             if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {

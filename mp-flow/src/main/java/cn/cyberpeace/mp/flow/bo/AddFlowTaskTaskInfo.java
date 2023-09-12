@@ -44,4 +44,10 @@ public class AddFlowTaskTaskInfo {
      */
     @ApiModelProperty(value = "流量集合")
     private List<AddFlowTaskFlowInfo> flowInfos;
+
+    /**
+     * 网段可用ip
+     */
+    @ApiModelProperty(value = "网段可用ip")
+    private String usableIp;
 }
