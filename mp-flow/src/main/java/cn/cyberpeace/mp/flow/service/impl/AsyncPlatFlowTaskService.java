@@ -471,7 +471,7 @@ public class AsyncPlatFlowTaskService {
         try {
             // 创建trex虚拟机
             String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/container",
-                    JsonUtils.snakeStringify(flowActuatorModel));
+                    JsonUtils.snakeStringify(addContainerRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());
 
