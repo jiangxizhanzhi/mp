@@ -55,6 +55,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
+import cn.cyberpeace.mp.situationaware.request.WazuhMitreAttackEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
@@ -429,6 +430,19 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 查询某场景实例mitre attack事件
+     * @param wazuhMitreAttackEventRequest
+     * @param elementEidMap
+     * @return
+     */
+    public ListObjServiceResult<MitreAttackEventBo> listMitreAttackEventBo(WazuhMitreAttackEventRequest wazuhMitreAttackEventRequest, Map<String, SceneElementBO> elementEidMap) {
+        ListObjResult<MitreEventModel> mitreEventModelListObjResult = dataCollectionService.queryFileMitreEvents(wazuhMitreAttackEventRequest);
+        List<MitreEventModel> mitreEventModelList = mitreEventModelListObjResult.getObjs();
+        List<MitreAttackEventBo> mitreAttackEventList = mitreEventModelList.stream().map(model -> MitreAttackEventBo.getFromModel(model, elementEidMap)).collect(Collectors.toList());
+        return new ListObjServiceResult<>(new ListObjResult<>(mitreAttackEventList, mitreEventModelListObjResult.getTotal()));
+    }
+
+    /**
      * 事件列表
      *
      * @param sceneId
@@ -536,6 +550,9 @@ public class ScenePluginCollectionSceneService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
     }
+
+
+
 
     /**
      * 生成Wazuh时间查询请求参数

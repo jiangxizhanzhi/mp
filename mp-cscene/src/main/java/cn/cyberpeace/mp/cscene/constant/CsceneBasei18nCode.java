@@ -14,4 +14,5 @@ public class CsceneBasei18nCode {
     public static final String ELEMENT_ID = "cscene.error_code.base.element.id";
     public static final String ELEMENT_LIST = "cscene.error_code.base.element.list";
 
+
 }

@@ -13,11 +13,30 @@ import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.enums.LaunchStatusEnum;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.MitreEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.*;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
+import cn.cyberpeace.mp.situationaware.request.WazuhMitreAttackEventRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -81,7 +100,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -137,6 +168,8 @@ public class DataCollectionService extends CollectionBaseService {
 
     public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
 
+    public static final String CACHE_KEY_MITRE_ATTACK_EVENTS = "mitre_attack_events";
+
 
     /**
      * 查询文件事件分页
@@ -188,6 +221,30 @@ public class DataCollectionService extends CollectionBaseService {
                 total = response.getHits().getTotalHits().value;
             }
             return new ListObjResult(fileEventModelList, BigDecimal.valueOf(total).intValue());
+        } catch (IOException e) {
+            log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    @Cacheable(value = CACHE_KEY_MITRE_ATTACK_EVENTS)
+    public ListObjResult<MitreEventModel> queryFileMitreEvents(WazuhMitreAttackEventRequest wazuhMitreAttackEventRequest) {
+        List<String> agentNames = wazuhMitreAttackEventRequest.getAgentIdList();
+        if (CollectionUtils.isEmpty(agentNames)) {
+            return ListObjResult.emptyListObjResult();
+        }
+
+        SearchRequest request = WazuhMitreAttackEventRequest.getEsSearchRequest(wazuhMitreAttackEventRequest);
+
+        try {
+            SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
+            List<MitreEventModel> mitreEventModelList = wazuhFileRootList.stream().map(MitreEventModel::getMitreEventModelFromWazuhFileRoot).collect(Collectors.toList());
+            long total = 0L;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult(mitreEventModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +16,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
+
+    private final static ListObjResult<?> EMPTY_LIST_OBJ_RESULT = new ListObjResult<>(Collections.emptyList(), 0);
 
     @ApiModelProperty(value = "数据列表")
     private List<T> list = new ArrayList<>();
@@ -43,5 +46,9 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
         list.clear();
         objs.forEach(obj -> list.add(objToResultWithNull(obj, getFields())));
         return this;
+    }
+
+    public static <T> ListObjResult<T> emptyListObjResult() {
+        return (ListObjResult<T>) EMPTY_LIST_OBJ_RESULT;
     }
 }

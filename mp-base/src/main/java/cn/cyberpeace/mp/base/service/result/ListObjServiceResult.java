@@ -5,10 +5,12 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @NoArgsConstructor
 public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
+    private static final ListObjServiceResult<?> EMPTY_LIST_OBJECT_SERVICE_RESULT = new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
 
     public ListObjServiceResult(ListObjResult<T> source) {
         super(source);
@@ -68,6 +70,10 @@ public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
             return null;
         }
         return source.getTotal();
+    }
+
+    public static <T> ListObjServiceResult<T> emptyListObjServiceResult() {
+        return (ListObjServiceResult<T>) EMPTY_LIST_OBJECT_SERVICE_RESULT;
     }
 
 }

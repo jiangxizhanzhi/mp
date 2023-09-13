@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.event.HostMitreAttackEventDto;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -74,6 +75,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.MitreAttackEventBo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
@@ -86,6 +88,7 @@ import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.cyberpeace.mp.situationaware.request.WazuhMitreAttackEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
@@ -863,6 +866,56 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         TaskCommon.runTasks(tasks);
         return new ServiceResult<>(count);
     }
+
+    public ListObjServiceResult<HostMitreAttackEventDto> listHostMitreAttackEvents(String csceneInstanceId, HostMitreAttackEventRequest hostMitreAttackEventRequest) {
+        String sceneId = getSceneId(csceneInstanceId);
+        if (StringUtils.isBlank(sceneId)) {
+            return ListObjServiceResult.emptyListObjServiceResult();
+        }
+
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        List<SceneElementBO> sceneElementBoList = new ArrayList<>(sceneHandler.getElementMap().values());
+        if (!CollectionUtils.isEmpty(hostMitreAttackEventRequest.getNodeIds())) {
+            sceneElementBoList = sceneElementBoList.stream().filter(element -> {
+                return hostMitreAttackEventRequest.getNodeIds().contains(element.getId());
+            }).collect(Collectors.toList());
+        }
+
+        if (CollectionUtils.isEmpty(sceneElementBoList)) {
+            return ListObjServiceResult.emptyListObjServiceResult();
+        }
+
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (Objects.isNull(pluginHandler)) {
+            return ListObjServiceResult.emptyListObjServiceResult();
+        }
+
+        List<String> searchEidList = sceneElementBoList.stream().filter(element -> {
+            var collectionElement = pluginHandler.getElement(element.getId());
+            if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
+                return false;
+            }
+            return collectionElement.getEnableProbeCollect() != null && collectionElement.getEnableProbeCollect();
+        }).map(SceneElementBO::getEid).collect(Collectors.toList());
+
+
+
+        WazuhMitreAttackEventRequest wazuhMitreAttackEventRequest = HostMitreAttackEventRequest.getWazuRequestByHostRequest(hostMitreAttackEventRequest, searchEidList, sceneHandler);
+
+
+        Map<String, SceneElementBO> elementEidMap = sceneElementBoList.stream().collect(Collectors.toMap(SceneElementBO::getEid, Function.identity()));
+        ListObjServiceResult<MitreAttackEventBo> mitreAttackEventBoListObjServiceResult = scenePluginCollectionSceneService.listMitreAttackEventBo(wazuhMitreAttackEventRequest, elementEidMap);
+        List<MitreAttackEventBo> mitreAttackEventBoList = mitreAttackEventBoListObjServiceResult.getSource().getObjs();
+        if (CollectionUtils.isEmpty(mitreAttackEventBoList)) {
+            return ListObjServiceResult.emptyListObjServiceResult();
+        } else {
+            List<HostMitreAttackEventDto> hostMitreAttackEventDtoList = mitreAttackEventBoList.stream().map(HostMitreAttackEventDto::getFromBo).collect(Collectors.toList());
+            return new ListObjServiceResult<>(new ListObjResult<>(hostMitreAttackEventDtoList, mitreAttackEventBoListObjServiceResult.getSource().getTotal()));
+        }
+    }
+
+
+
 
     /**
      * 事件分页列表

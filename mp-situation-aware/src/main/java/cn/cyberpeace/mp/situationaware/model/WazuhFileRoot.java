@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -148,6 +149,10 @@ public class WazuhFileRoot {
         private String id;
         private List<String> gpg13;
 
+        private Mitre mitre;
+
+
+
         public void setMail(boolean mail) {
             this.mail = mail;
         }
@@ -217,6 +222,14 @@ public class WazuhFileRoot {
         public List<String> getGpg13() {
             return this.gpg13;
         }
+
+        public Mitre getMitre() {
+            return mitre;
+        }
+
+        public void setMitre(Mitre mitre) {
+            this.mitre = mitre;
+        }
     }
 
     public static class Manager {
@@ -256,6 +269,13 @@ public class WazuhFileRoot {
         public String getId() {
             return this.id;
         }
+    }
+
+    @Data
+    public static class Mitre {
+        private List<String> technique;
+        private List<String> id;
+        private List<String> tactic;
     }
 
     public class Syscheck {
