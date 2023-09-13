@@ -485,7 +485,7 @@ public class AsyncPlatFlowTaskService {
                 String ip = fixedIp + BaseConstants.COLON + "80";
 
                 // 根据portId获取mac
-                String portId = vmObj.getString("port_id");
+                String portId = netWorkObj.getString("port_id");
                 String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
                 JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
                 log.info("add getPortObj response:{}", getPortObj.toJSONString());
