@@ -1,0 +1,59 @@
+package cn.cyberpeace.mp.cscene.dto.scene;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ApiModel(value = "场景态势事件")
+public class TaiShiEventInfo {
+    @ApiModelProperty(value = "场景id")
+    private String id;
+
+    @ApiModelProperty(value = "事件名称")
+    private String eventName;
+
+    @ApiModelProperty(value = "触发类型")
+    private String triggerType;
+
+    @ApiModelProperty(value = "动作类型")
+    private String actionType;
+
+    @ApiModelProperty(value = "源节点id")
+    private String sourceNodeId;
+
+    @ApiModelProperty(value = "源节点名称")
+    private String sourceNodeName;
+
+    @ApiModelProperty(value = "源节点ip")
+    private String sourceNodeIp;
+
+    @ApiModelProperty(value = "源节点端口")
+    private String sourceNodePort;
+
+    @ApiModelProperty(value = "目的点端口")
+    private String targetNodeId;
+
+    @ApiModelProperty(value = "目的点名称")
+    private String targetNodeName;
+
+    @ApiModelProperty(value = "目的点ip")
+    private String targetNodeIp;
+
+    @ApiModelProperty(value = "目的点端口")
+    private String targetNodePort;
+
+    @ApiModelProperty(value = "att&ck事件,即攻防类型")
+    private List<String> attCks;
+
+    @ApiModelProperty(value = "att&ck事件名称,即攻防类型")
+    private List<String> attCkNames;
+}
