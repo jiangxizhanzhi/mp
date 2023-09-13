@@ -40,6 +40,8 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allIp2ElementMap = new HashMap<>();
 
+    private Map<String, SceneElementBO> allNodeId2ElementMap = new HashMap<>();
+
     private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
 
     private Map<String, SceneElementBO> allMac2ElementMapForScene = new HashMap<>();
@@ -57,6 +59,8 @@ public class BatchSceneHandler {
     private Map<String, String> nodeId2NodenameMap = new HashMap<>();
 
     private Map<Integer, CategoryGroupBO> category2CountInfo = new HashMap<>();
+
+    private Map<String, SceneHandler> id2SceneHandler = new HashMap<>();
 
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
@@ -124,6 +128,10 @@ public class BatchSceneHandler {
         this.allMac2SceneIdMap = allMac2SceneIdMap;
     }
 
+    public SceneElementBO getNodeByNodeId(String nodeId) {
+        return this.allIp2ElementMap.get(nodeId);
+    }
+
     public SceneElementBO getNodeByIpAddr(String ip) {
         return this.allIp2ElementMap.get(ip);
     }
@@ -176,9 +184,14 @@ public class BatchSceneHandler {
         return this.category2CountInfo;
     }
 
+    public CollectionScenePluginHandler getCollectionScenePluginHandler(String sceneId) {
+        return this.id2SceneHandler.get(sceneId).getPluginHandler(PluginConstant.PLUGIN_KEY);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            this.id2SceneHandler.put(sceneId,sceneHandler);
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
             }
@@ -196,6 +209,7 @@ public class BatchSceneHandler {
             this.handlerElement(sceneId, srcElements, pluginHandler, cloudPlugin);
             if (sceneHandler.getElementMap() != null) {
                 sceneHandler.getElementMap().values().forEach(srcElement -> {
+                    this.allNodeId2ElementMap.put(srcElement.getId(), srcElement);
                     var srcPorts = srcElement.getPorts();
                     if (srcPorts == null) {
                         return;
