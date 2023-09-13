@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -57,6 +58,36 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
             }
         } catch (Exception e) {
             log.error("delete vm instance error, {}", ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 删除容器
+     * @param actuatorId
+     */
+    @Override
+    public void delContainer(String actuatorId) {
+        FlowActuatorModel flowActuatorModel = this.getModelMapper().get(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("flowActuatorModel not exist for [{}]", actuatorId);
+            return;
+        }
+
+        try {
+            JSONObject delObj = new JSONObject();
+            JSONArray containersArr = new JSONArray();
+            containersArr.add(flowActuatorModel.getInstanceId());
+            delObj.put("containers", containersArr);
+            String delVmInstanceRsp = HttpUtils.sendDelete(flowConfig.getCpUrl() + "/v1/scenarios/container", delObj.toJSONString());
+            JSONObject delVmInstanceObj = JSONObject.parseObject(delVmInstanceRsp);
+            log.info("delete container instance response:{}", delVmInstanceObj.toJSONString());
+            if (!BaseConstants.SUCCESS_ZERO.equals(delVmInstanceObj.getString(BaseConstants.STR_CODE))) {
+                log.error("delete container instance error!");
+            } else {
+                log.info("delete container instance success!");
+            }
+        } catch (Exception e) {
+            log.error("delete container instance error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
 
