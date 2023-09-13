@@ -135,7 +135,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                         addPortReq.put("fixed_ip", detail.getUsableIp());
                         addPortReq.put("container_id", flowActuatorModel.getInstanceId());
                         try {
-                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/iscenarios/attach_network", addPortReq.toJSONString());
+                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/attach_network", addPortReq.toJSONString());
                             JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                             log.info("add client port response:{}", addTrexClientObj.toJSONString());
                             if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
