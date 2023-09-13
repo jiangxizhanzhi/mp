@@ -193,6 +193,10 @@ public class CreateHandler extends HandlerCommon {
                             }
                             flowInfos.add(addFlowTaskFlowInfo);
                         }
+                        // 获取可用ip
+                        FlowScenePluginHandler flowPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
+                        String usableIp = flowPluginHandler.getUsableIp(networkId, getPluginHandler().getSceneHandler());
+                        addFlowTaskTaskInfo.setUsableIp(usableIp);
                         addFlowTaskTaskInfo.setFlowInfos(flowInfos);
                         details.add(addFlowTaskTaskInfo);
                     }

@@ -135,12 +135,19 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                         addPortReq.put("fixed_ip", detail.getUsableIp());
                         addPortReq.put("container_id", flowActuatorModel.getInstanceId());
                         try {
-                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/iscenarios/attach_network", addPortReq.toJSONString());
+                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/attach_network", addPortReq.toJSONString());
                             JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                             log.info("add client port response:{}", addTrexClientObj.toJSONString());
                             if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
                                 JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                                macAddress = clientDataObj.getString("mac_address");
+                                // 根据portId获取最新mac
+                                String portId = clientDataObj.getString("port_id");
+                                String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
+                                JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
+                                log.info("add getPortObj response:{}", getPortObj.toJSONString());
+                                JSONObject portObj = getPortObj.getJSONObject(BaseConstants.STR_DATA);
+                                macAddress = portObj.getString("mac_address");
+
                                 flowTaskPortModel.setMac(macAddress);
                                 flowTaskPortModel.setActuatorId(actuatorId);
                                 flowTaskPortModel.setNetworkId(detail.getNetworkId());

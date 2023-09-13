@@ -536,7 +536,7 @@ public class CreateHandler extends HandlerCommon {
             }
             //配置勾选了snmp，则单独处理snmp协议
             SnmpConfig snmpConfig = cloudElement.getSnmpConfig();
-            if(!Objects.isNull(snmpConfig) && snmpConfig.getConfigSwitch() && !configSnmpFinished){
+            if (!Objects.isNull(snmpConfig) && Boolean.TRUE.equals(snmpConfig.getConfigSwitch()) && !configSnmpFinished) {
                 var accessMode = new EntityNodeCreateData.Interface.AccessMode();
                 accessMode.setProtocol(AccessMode.Protocol.SNMP);
                 accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SNMP));

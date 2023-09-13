@@ -34,13 +34,11 @@ import io.micrometer.core.instrument.util.StringUtils;
 import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -485,7 +483,7 @@ public class AsyncPlatFlowTaskService {
                 String ip = fixedIp + BaseConstants.COLON + "80";
 
                 // 根据portId获取mac
-                String portId = vmObj.getString("port_id");
+                String portId = netWorkObj.getString("port_id");
                 String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
                 JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
                 log.info("add getPortObj response:{}", getPortObj.toJSONString());
@@ -509,19 +507,17 @@ public class AsyncPlatFlowTaskService {
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> checkStartTrex(finalFixedIp),
-                        () -> log.error("Trex vm start error:{}", addContainerRequest.getName()));
-
+                NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                        null, 0, () -> log.info("Trex container start success"), () -> log.error("Trex container start error:{}", finalFixedIp));
             } else {
-                log.error("add trex vm error");
+                log.error("add trex container error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
         } catch (MpRuntimeException e) {
-            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
+            log.error("add container instance error, {}", ExceptionUtils.getStackTrace(e));
             throw e;
         } catch (Exception e) {
-            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
+            log.error("add container instance error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
     }
@@ -949,28 +945,19 @@ public class AsyncPlatFlowTaskService {
     }
 
 
-    private void refreshTgn(String fixedIp) {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("fileName", "traffic_generators.tar.gz");
-        File tgnFile = new File(TGN_PATH);
-        try {
-            String pcapRsp = HttpUtils.postFile(CommonUtil.getResourcetUrl(fixedIp + BaseConstants.COLON + "80") + "/pcap/refresh_tgn",
-                    FileUtils.readFileToByteArray(tgnFile), "file", jsonObj);
-            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-            log.info("upload pcap file response:{}", jsonObject.toJSONString());
-        } catch (Exception e) {
-            log.error("post tgn file error:", e);
-        }
-    }
-
-    /**
-     * 校验trex启动状态
-     * @param fixedIp
-     */
-    private void checkStartTrex(String fixedIp) {
-        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                null, 0, () -> refreshTgn(fixedIp), () -> log.error("Trex vm start error:{}", fixedIp));
-    }
+//    private void refreshTgn(String fixedIp) {
+//        JSONObject jsonObj = new JSONObject();
+//        jsonObj.put("fileName", "traffic_generators.tar.gz");
+//        File tgnFile = new File(TGN_PATH);
+//        try {
+//            String pcapRsp = HttpUtils.postFile(CommonUtil.getResourcetUrl(fixedIp + BaseConstants.COLON + "80") + "/pcap/refresh_tgn",
+//                    FileUtils.readFileToByteArray(tgnFile), "file", jsonObj);
+//            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+//            log.info("upload pcap file response:{}", jsonObject.toJSONString());
+//        } catch (Exception e) {
+//            log.error("post tgn file error:", e);
+//        }
+//    }
 
     /**
      * 删除网口信息
