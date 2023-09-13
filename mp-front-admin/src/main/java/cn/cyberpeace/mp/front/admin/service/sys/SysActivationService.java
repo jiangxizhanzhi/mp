@@ -382,7 +382,8 @@ public class SysActivationService {
     }
 
     private String getExpiredDateStr(Integer months) {
-        LocalDate localDate = LocalDate.now().plusMonths(months);
+        // 授权改为按天
+        LocalDate localDate = LocalDate.now().plusDays(months);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
