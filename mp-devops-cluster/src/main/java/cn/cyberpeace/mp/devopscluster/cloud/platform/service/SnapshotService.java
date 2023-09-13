@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
@@ -16,7 +17,6 @@ import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult
 import cn.cyberpeace.mp.devopscluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +24,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -70,8 +71,8 @@ public class SnapshotService extends BaseCpService {
      * @param name
      * @return
      */
-    public DeviceAndSnapshotCloudPlatformResult deviceAndSnapshotByName(String name){
-        return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "/device_snapshots?name=" + name, DeviceAndSnapshotCloudPlatformResult.class);
+    public DeviceAndSnapshotCloudPlatformResult deviceAndSnapshotByName(String name) {
+        return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "/device_snapshots?name=" + UriEncoder.encode(name), DeviceAndSnapshotCloudPlatformResult.class);
     }
 
     /**

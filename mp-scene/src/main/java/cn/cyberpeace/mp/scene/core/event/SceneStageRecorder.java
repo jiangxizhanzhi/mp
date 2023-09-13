@@ -150,11 +150,11 @@ public class SceneStageRecorder {
         private volatile int stagePercentage;
 
         public SceneStageRecord() {
-            super(StringUtils.EMPTY);
+            super(StringUtils.EMPTY, StringUtils.EMPTY);
         }
 
         public SceneStageRecord(SceneStage stage) {
-            super(stage.getStage());
+            super(stage.getStage(), stage.getIcon());
             this.stagePercentage = 0;
             this.stageName = stage.getStageName();
         }

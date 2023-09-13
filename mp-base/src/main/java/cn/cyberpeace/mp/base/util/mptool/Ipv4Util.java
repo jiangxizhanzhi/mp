@@ -1,17 +1,17 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
 public class Ipv4Util {
 
     public static final String IP_MASK_SPLIT_MARK = "/";
     public static final String IP_SPLIT_MARK = "-";
+
+    public static final int IP_MASK_MAX = 32;
+
+
 
     /**
      * 用掩码位获取子网掩码
@@ -38,91 +38,96 @@ public class Ipv4Util {
     /**
      * IPv4转换为长整型
      *
-     * @param ip
+     * @param strIP
      * @return
      */
-    public static long ipv4ToLong(String ip) {
-        InetAddress inetAddress = null;
-        try {
-            inetAddress = InetAddress.getByName(ip);
-        } catch (UnknownHostException e) {
+    public static long ipv4ToLong(String strIP) {
+        final long[] ip = convertToLongArray(strIP.split(StrUtil.IP_DOT));
+        return (ip[0] << 24) + (ip[1] << 16) + (ip[2] << 8) + ip[3];
+    }
+
+    public static long[] convertToLongArray(String[] stringArray) {
+        long[] longArray = new long[stringArray.length];
+
+        for (int i = 0; i < stringArray.length; i++) {
+            longArray[i] = Long.parseLong(stringArray[i]);
         }
-        byte[] bytes = inetAddress.getAddress();
-        long result = 0;
-        for (byte b : bytes) {
-            result <<= 8;
-            result |= b & 0xFF;
+
+        return longArray;
+    }
+
+    public static int[] convertToIntArray(String[] stringArray) {
+        int[] longArray = new int[stringArray.length];
+
+        for (int i = 0; i < stringArray.length; i++) {
+            longArray[i] = Integer.parseInt(stringArray[i]);
         }
-        return result;
+
+        return longArray;
     }
 
     /**
      * 长整型转换为IPv4
      *
-     * @param ip
+     * @param longIP
      * @return
      */
-    public static String longToIpv4(long ip) {
-        StringBuilder sb = new StringBuilder();
-        sb.append((ip >> 24) & 0xFF).append(".")
-                .append((ip >> 16) & 0xFF).append(".")
-                .append((ip >> 8) & 0xFF).append(".")
-                .append(ip & 0xFF);
+    public static String longToIpv4(long longIP) {
+        final StringBuilder sb = new StringBuilder();
+        // 直接右移24位
+        sb.append(longIP >> 24 & 0xFF);
+        sb.append(StrUtil.DOT);
+        // 将高8位置0，然后右移16位
+        sb.append(longIP >> 16 & 0xFF);
+        sb.append(StrUtil.DOT);
+        sb.append(longIP >> 8 & 0xFF);
+        sb.append(StrUtil.DOT);
+        sb.append(longIP & 0xFF);
         return sb.toString();
     }
 
     /**
      * 获取cidr段ip列表
      *
-     * @param cidr
-     * @param ordered true:全量地址，false:可用地址；仅在ipRange为X.X.X.X/X时才生效
-     * @return
+     * @param ipRange
+     * @param isAll   true:全量地址，false:可用地址；仅在ipRange为X.X.X.X/X时才生效
      */
-    public static List<String> list(String cidr, boolean ordered) {
-        List<String> ipAddressList = new ArrayList<>();
+    public static List<String> list(String ipRange, boolean isAll) {
+        if (ipRange.contains(IP_SPLIT_MARK)) {
+            // X.X.X.X-X.X.X.X
+            final String[] range = StrUtil.split(ipRange, IP_SPLIT_MARK);
+            return list(range[0], range[1]);
+        } else if (ipRange.contains(IP_MASK_SPLIT_MARK)) {
+            // X.X.X.X/X
+            final String[] param = StrUtil.split(ipRange, IP_MASK_SPLIT_MARK);
+            return list(param[0], Integer.parseInt(param[1]), isAll);
+        } else {
+            return CollectionUtil.toList(ipRange);
+        }
+    }
 
-        // 使用正则表达式提取CIDR中的IP地址范围
-        String[] cidrParts = cidr.split("/");
-        String ipAddress = cidrParts[0];
-        int cidrPrefix = Integer.parseInt(cidrParts[1]);
-
-        // 将IP地址转换为字节数组
-        String[] ipAddressParts = ipAddress.split("\\.");
-        byte[] ipAddressBytes = new byte[]{
-                (byte) Integer.parseInt(ipAddressParts[0]),
-                (byte) Integer.parseInt(ipAddressParts[1]),
-                (byte) Integer.parseInt(ipAddressParts[2]),
-                (byte) Integer.parseInt(ipAddressParts[3])
-        };
-
-        // 计算CIDR中的IP地址数量
-        int totalIpAddressCount = (int) Math.pow(2, 32 - cidrPrefix);
-
-        // 将每个IP地址添加到列表中
-        for (int i = 0; i < totalIpAddressCount; i++) {
-            ipAddressList.add(String.format("%d.%d.%d.%d",
-                    ipAddressBytes[0] & 0xFF,
-                    ipAddressBytes[1] & 0xFF,
-                    ipAddressBytes[2] & 0xFF,
-                    ipAddressBytes[3] & 0xFF));
-
-            // 逐个递增IP地址
-            for (int j = ipAddressBytes.length - 1; j >= 0; j--) {
-                if ((ipAddressBytes[j] & 0xFF) == 255) {
-                    ipAddressBytes[j] = 0;
-                } else {
-                    ipAddressBytes[j]++;
-                    break;
-                }
+    public static List<String> list(String ip, int maskBit, boolean isAll) {
+        if (maskBit == IP_MASK_MAX) {
+            final List<String> list = new ArrayList<>();
+            if (isAll) {
+                list.add(ip);
             }
+            return list;
         }
 
-        // 如果ordered为true，则按顺序排列IP地址列表
-        if (ordered) {
-            ipAddressList.sort(String::compareTo);
+        String startIp = getBeginIpStr(ip, maskBit);
+        String endIp = getEndIpStr(ip, maskBit);
+        if (isAll) {
+            return list(startIp, endIp);
         }
 
-        return ipAddressList;
+        int lastDotIndex = startIp.lastIndexOf(StrUtil.DOT) + 1;
+        startIp = StrUtil.subPre(startIp, lastDotIndex) +
+                (Integer.parseInt(Objects.requireNonNull(StrUtil.subSuf(startIp, lastDotIndex))) + 1);
+        lastDotIndex = endIp.lastIndexOf(StrUtil.DOT) + 1;
+        endIp = StrUtil.subPre(endIp, lastDotIndex) +
+                (Integer.parseInt(Objects.requireNonNull(StrUtil.subSuf(endIp, lastDotIndex))) - 1);
+        return list(startIp, endIp);
     }
 
 
@@ -134,34 +139,24 @@ public class Ipv4Util {
      * @return
      */
     public static List<String> list(String ipFrom, String ipTo) {
-        List<String> ipList = new ArrayList<>();
-        try {
-            InetAddress start = InetAddress.getByName(ipFrom);
-            InetAddress end = InetAddress.getByName(ipTo);
-            long startIp = ipToLong(start.getHostAddress());
-            long endIp = ipToLong(end.getHostAddress());
-            for (long ip = startIp; ip <= endIp; ip++) {
-                ipList.add(longToIp(ip));
+        final int[] ipf = convertToIntArray(ipFrom.split(StrUtil.IP_DOT));
+        final int[] ipt = convertToIntArray(ipTo.split(StrUtil.IP_DOT));
+        final List<String> ips = new ArrayList<>();
+        for (int a = ipf[0]; a <= ipt[0]; a++) {
+            for (int b = (a == ipf[0] ? ipf[1] : 0); b <= (a == ipt[0] ? ipt[1]
+                    : 255); b++) {
+                for (int c = (b == ipf[1] ? ipf[2] : 0); c <= (b == ipt[1] ? ipt[2]
+                        : 255); c++) {
+                    for (int d = (c == ipf[2] ? ipf[3] : 0); d <= (c == ipt[2] ? ipt[3]
+                            : 255); d++) {
+                        ips.add(a + "." + b + "." + c + "." + d);
+                    }
+                }
             }
-        } catch (UnknownHostException e) {
         }
-        return ipList;
+        return ips;
     }
 
-    private static long ipToLong(String ipAddress) {
-        String[] ip = ipAddress.split("\\.");
-        return (Long.parseLong(ip[0]) << 24) + (Long.parseLong(ip[1]) << 16)
-                + (Long.parseLong(ip[2]) << 8) + Long.parseLong(ip[3]);
-    }
-
-    private static String longToIp(long ip) {
-        StringBuilder sb = new StringBuilder();
-        sb.append((ip >> 24) & 0xFF).append(".");
-        sb.append((ip >> 16) & 0xFF).append(".");
-        sb.append((ip >> 8) & 0xFF).append(".");
-        sb.append(ip & 0xFF);
-        return sb.toString();
-    }
 
     /**
      * 根据 ip/掩码位 计算IP段的终止IP
@@ -171,95 +166,28 @@ public class Ipv4Util {
      * @return
      */
     public static String getEndIpStr(String ip, int maskBit) {
-        // 获取IP地址的二进制表示
-        String binaryIp = ipToBinary(ip);
-
-        // 创建掩码位的二进制字符串
-        StringBuilder maskBinary = new StringBuilder();
-        for (int i = 0; i < 32; i++) {
-            if (i < maskBit) {
-                maskBinary.append("1");
-            } else {
-                maskBinary.append("0");
-            }
-        }
-
-        // 计算终止IP的二进制表示
-        StringBuilder endIpBinary = new StringBuilder();
-        for (int i = 0; i < 32; i++) {
-            if (i < maskBit) {
-                endIpBinary.append(binaryIp.charAt(i));
-            } else {
-                endIpBinary.append("1");
-            }
-        }
-
-        // 将二进制IP转换为字符串表示
-        String endIp = binaryToIp(endIpBinary.toString());
-        return endIp;
+        return longToIpv4(getEndIpLong(ip, maskBit));
     }
 
-    private static String ipToBinary(String ip) {
-        StringBuilder binaryIp = new StringBuilder();
-        String regex = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(ip);
-        if (matcher.matches()) {
-            for (int i = 1; i <= 4; i++) {
-                String segment = matcher.group(i);
-                String binarySegment = Integer.toBinaryString(Integer.parseInt(segment));
-                binaryIp.append(addZeroPadding(binarySegment));
-            }
-        }
-        return binaryIp.toString();
+    private static Long getEndIpLong(String ip, int maskBit) {
+        return getBeginIpLong(ip, maskBit)
+                + ~ipv4ToLong(getMaskByMaskBit(maskBit));
     }
 
-    private static String addZeroPadding(String binarySegment) {
-        StringBuilder paddedSegment = new StringBuilder();
-        int paddingSize = 8 - binarySegment.length();
-        for (int i = 0; i < paddingSize; i++) {
-            paddedSegment.append("0");
-        }
-        paddedSegment.append(binarySegment);
-        return paddedSegment.toString();
-    }
-
-    private static String binaryToIp(String binaryIp) {
-        StringBuilder ip = new StringBuilder();
-        for (int i = 0; i < 4; i++) {
-            String binarySegment = binaryIp.substring(i * 8, (i + 1) * 8);
-            int decimalSegment = Integer.parseInt(binarySegment, 2);
-            ip.append(decimalSegment);
-            if (i < 3) {
-                ip.append(".");
-            }
-        }
-        return ip.toString();
-    }
 
     /**
      * 根据 ip/掩码位 计算IP段的起始IP
+     *
      * @param ip
      * @param maskBit
      * @return
      */
     public static String getBeginIpStr(String ip, int maskBit) {
-        String[] ipArray = ip.split("\\.");
-        int[] ipSections = new int[ipArray.length];
-        for (int i = 0; i < ipArray.length; i++) {
-            ipSections[i] = Integer.parseInt(ipArray[i]);
-        }
-        int ipInt = ipSections[0] << 24 | ipSections[1] << 16 | ipSections[2] << 8 | ipSections[3];
-        int mask = ~((1 << (32 - maskBit)) - 1);
-        int beginIpInt = ipInt & mask;
+        return longToIpv4(getBeginIpLong(ip, maskBit));
+    }
 
-        StringJoiner sj = new StringJoiner(".");
-        sj.add(String.valueOf((beginIpInt >> 24) & 0xFF))
-                .add(String.valueOf((beginIpInt >> 16) & 0xFF))
-                .add(String.valueOf((beginIpInt >> 8) & 0xFF))
-                .add(String.valueOf(beginIpInt & 0xFF));
-
-        return sj.toString();
+    private static Long getBeginIpLong(String ip, int maskBit) {
+        return ipv4ToLong(ip) & ipv4ToLong(getMaskByMaskBit(maskBit));
     }
 
 }

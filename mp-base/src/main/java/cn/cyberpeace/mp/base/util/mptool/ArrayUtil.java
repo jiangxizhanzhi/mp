@@ -1,0 +1,25 @@
+package cn.cyberpeace.mp.base.util.mptool;
+
+public class ArrayUtil {
+
+    public static final int INDEX_NOT_FOUND = -1;
+
+    public static <T> boolean isNotEmpty(T[] array) {
+        return (null != array && array.length != 0);
+    }
+
+    public static boolean contains(char[] array, char value) {
+        return indexOf(array, value) > INDEX_NOT_FOUND;
+    }
+
+    public static int indexOf(char[] array, char value) {
+        if (null != array) {
+            for (int i = 0; i < array.length; i++) {
+                if (value == array[i]) {
+                    return i;
+                }
+            }
+        }
+        return INDEX_NOT_FOUND;
+    }
+}

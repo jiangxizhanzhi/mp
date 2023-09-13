@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.bo;
 
-import com.alibaba.fastjson.JSONArray;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -44,6 +44,6 @@ public class FlowStatisticsAll {
      * TOP5流量协议
      */
     @ApiModelProperty(value = "TOP5流量协议")
-    private JSONArray top5Protocols;
+    private ArrayNode top5Protocols;
 
 }

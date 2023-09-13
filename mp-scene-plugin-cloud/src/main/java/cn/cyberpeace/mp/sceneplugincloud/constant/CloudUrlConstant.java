@@ -78,6 +78,7 @@ public class CloudUrlConstant {
     public static final String DELETE_VM_PORTS = "/v1/instances/{instance_id}/interfaces/{port_id}";
     public static final String CREATE_PORT_MAPPING = "/cpcloud/fwd_app/v1/";
     public static final String DELETE_PORT_MAPPING = "/cpcloud/fwd_app/v1/{fwd_id}";
+    public static final String EXEC_HOST_COMMAND = "/cpcloud/info/v1/command";
 
     public static final String CREATE_PORTS = "/v1/ports";
     public static final String UPDATE_PORTS = "/v1/ports";

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -551,5 +552,15 @@ public class IpUtils {
         long ipLong = Ipv4Util.ipv4ToLong(ip);
         String formatIp = Ipv4Util.longToIpv4(ipLong & maskIpLong);
         return formatIp + "/" + maskBit;
+    }
+
+    public static String getIpWithCidr(String netIp, String cidrIp, String defaultCidr) {
+        if (StringUtils.isEmpty(cidrIp)) {
+            return netIp + "/" + defaultCidr;
+        } else {
+            String[] info = cidrIp.split("/");
+            String maskBit = info[1];
+            return netIp + "/" + maskBit;
+        }
     }
 }

@@ -1,35 +1,22 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
-import com.google.common.base.CharMatcher;
-
 import java.util.regex.Pattern;
 
 public class Validator {
 
-    public static boolean isMatchRegex(Pattern pattern, String input) {
-        return pattern.matcher(input).matches();
-    }
+    public final static Pattern IPV4 = Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b");
+
 
     public static boolean isMatchRegex(Pattern pattern, CharSequence input) {
+        if (input == null || pattern == null) {
+            // 提供null的字符串为不匹配
+            return false;
+        }
         return pattern.matcher(input).matches();
     }
 
 
     public static boolean isIpv4(CharSequence input) {
-        String[] parts = CharMatcher.anyOf("0123456789.").retainFrom(input).split("\\.");
-        if (parts.length != 4) {
-            return false;
-        }
-        for (String part : parts) {
-            try {
-                int value = Integer.parseInt(part);
-                if (value < 0 || value > 255) {
-                    return false;
-                }
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return true;
+        return IPV4.matcher(input).matches();
     }
 }

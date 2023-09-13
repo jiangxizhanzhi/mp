@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,9 @@ public class WazuhLogProbeLocationConfig {
         if (isInit) {
             return;
         }
-        locations = JSON.parseArray(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.LOG_PROBE_LOCATIONS), ProbeLocation.class);
+        locations = JsonCommon.snakeParse(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.LOG_PROBE_LOCATIONS),
+                new TypeReference<List<ProbeLocation>>() {
+                });
         isInit = true;
     }
 

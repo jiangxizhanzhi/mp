@@ -18,6 +18,11 @@ public class AttackSuricata{
     private List<String> category;
 
     /**
+     * 分类英文描述
+     */
+    private List<String> categoryAtt;
+
+    /**
      * 分类中文描述
      */
     private List<String> categoryZh;
