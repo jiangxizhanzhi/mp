@@ -34,13 +34,11 @@ import io.micrometer.core.instrument.util.StringUtils;
 import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -510,7 +508,7 @@ public class AsyncPlatFlowTaskService {
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
                 NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                        null, 0, () -> refreshTgn(finalFixedIp), () -> log.error("Trex container start error:{}", finalFixedIp));
+                        null, 0, () -> log.info("Trex container start success"), () -> log.error("Trex container start error:{}", finalFixedIp));
             } else {
                 log.error("add trex container error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
@@ -947,19 +945,19 @@ public class AsyncPlatFlowTaskService {
     }
 
 
-    private void refreshTgn(String fixedIp) {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("fileName", "traffic_generators.tar.gz");
-        File tgnFile = new File(TGN_PATH);
-        try {
-            String pcapRsp = HttpUtils.postFile(CommonUtil.getResourcetUrl(fixedIp + BaseConstants.COLON + "80") + "/pcap/refresh_tgn",
-                    FileUtils.readFileToByteArray(tgnFile), "file", jsonObj);
-            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-            log.info("upload pcap file response:{}", jsonObject.toJSONString());
-        } catch (Exception e) {
-            log.error("post tgn file error:", e);
-        }
-    }
+//    private void refreshTgn(String fixedIp) {
+//        JSONObject jsonObj = new JSONObject();
+//        jsonObj.put("fileName", "traffic_generators.tar.gz");
+//        File tgnFile = new File(TGN_PATH);
+//        try {
+//            String pcapRsp = HttpUtils.postFile(CommonUtil.getResourcetUrl(fixedIp + BaseConstants.COLON + "80") + "/pcap/refresh_tgn",
+//                    FileUtils.readFileToByteArray(tgnFile), "file", jsonObj);
+//            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+//            log.info("upload pcap file response:{}", jsonObject.toJSONString());
+//        } catch (Exception e) {
+//            log.error("post tgn file error:", e);
+//        }
+//    }
 
     /**
      * 删除网口信息
