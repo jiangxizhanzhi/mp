@@ -366,7 +366,7 @@ public class DashboardService {
         userOperateSummaryBO.setPercent(Double.valueOf(String.format("%.2f", userOperateSummaryBO.getNum()*100.0/total)));
         resultList.add(userOperateSummaryBO);
 
-        opModuleIds = new Integer[]{OpModuleEnums.TEST.ordinal(), OpModuleEnums.PROBLEM_SET.ordinal(), OpModuleEnums.CAPTURE_SOLVE_PROBLEM.ordinal(), OpModuleEnums.BASIS.ordinal()};
+        opModuleIds = new Integer[]{OpModuleEnums.TEST.ordinal(), OpModuleEnums.EXAM.ordinal(), OpModuleEnums.PROBLEM_SET.ordinal(), OpModuleEnums.CAPTURE_SOLVE_PROBLEM.ordinal(), OpModuleEnums.BASIS.ordinal()};
         userOperateSummaryBO = new UserOperateSummaryBO();
         userOperateSummaryBO.setName("在线学习");
         userOperateSummaryBO.setNum(selectCountByModuleAndType(opModuleIds, null, null));
