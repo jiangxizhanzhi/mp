@@ -662,7 +662,7 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime, null, null);
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime, null, null, true);
     }
 
     /**
@@ -674,8 +674,8 @@ public class ScenePluginCollectionSceneService {
      * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
-    public ServiceResult<Map<String, Integer>> groupCountFlowByType(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime, sourceIps, topSize);
+    public ServiceResult<Map<String, Integer>> groupCountFlowByType(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize, boolean attackTypeI18) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime, sourceIps, topSize, attackTypeI18);
     }
 
 
@@ -1241,7 +1241,7 @@ public class ScenePluginCollectionSceneService {
      * @param endTime   结束时间
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
-    private <T> ServiceResult<Map<T, Integer>> groupCountFlow(List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
+    private <T> ServiceResult<Map<T, Integer>> groupCountFlow(List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize, boolean attackTypeI18) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
@@ -1263,6 +1263,7 @@ public class ScenePluginCollectionSceneService {
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setTopSize(topSize);
+        request.setAttackTypeI18(attackTypeI18);
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
