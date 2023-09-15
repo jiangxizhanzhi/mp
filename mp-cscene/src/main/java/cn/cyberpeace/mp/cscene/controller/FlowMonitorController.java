@@ -229,7 +229,9 @@ public class FlowMonitorController {
             }
             for (String key:resultMap.keySet()){
                 FlowAttackTypeCount flowAttackTypeCount = new FlowAttackTypeCount();
-                flowAttackTypeCount.setAttackType(key);
+                String key2 = key.replaceAll(" ", "_");
+                String attackTypeName = MessageCommon.get("cscene.attck." + key2.toLowerCase());
+                flowAttackTypeCount.setAttackType(attackTypeName);
                 flowAttackTypeCount.setTimes(resultMap.get(key));
                 resultCounts.add(flowAttackTypeCount);
             }
