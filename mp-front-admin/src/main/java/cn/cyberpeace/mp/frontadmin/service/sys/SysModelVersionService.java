@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.service.sys;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
+import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
 
 import java.util.List;
 
@@ -13,6 +14,6 @@ import java.util.List;
  */
 public interface SysModelVersionService extends BaseModelService<SysModelVersionModel, QueryParams> {
 
-    List<SysModelVersionModel> listSysVersion();
+    SysVersionResponse listSysVersion();
 
 }

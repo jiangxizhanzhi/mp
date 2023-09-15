@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.controller;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
+import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysModelVersionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,9 +32,9 @@ public class SysVersionController {
 
     @ApiOperation(value = "查询系统版本号", notes = "")
     @GetMapping("/list")
-    public ServiceResult<List<SysModelVersionModel>> listSysVersion() {
-        List<SysModelVersionModel> rtnList = sysModelVersionService.listSysVersion();
-        return ResultCommon.success(rtnList);
+    public ServiceResult<SysVersionResponse> listSysVersion() {
+        SysVersionResponse sysVersionResponse = sysModelVersionService.listSysVersion();
+        return ResultCommon.success(sysVersionResponse);
     }
 
 }
