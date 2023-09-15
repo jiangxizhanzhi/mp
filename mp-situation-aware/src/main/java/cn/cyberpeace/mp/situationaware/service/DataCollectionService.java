@@ -1044,7 +1044,7 @@ public class DataCollectionService extends CollectionBaseService {
         return null;
     }
 
-    public Map<String, Long> getAttCkTypeCountTrend(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public Map<String, Long> getAttCkTypeCountTrend(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int timeInterval) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new HashMap<>();
         }
@@ -1066,7 +1066,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         // 聚合
         AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("timeTrend").field("@timestamp")
-                .fixedInterval(DateHistogramInterval.seconds(3600))
+                .fixedInterval(DateHistogramInterval.seconds(timeInterval))
                 .subAggregation(AggregationBuilders.terms("type").field("rule.mitre.tactic"));
         sourceBuilder.aggregation(aggregationBuilder);
 
