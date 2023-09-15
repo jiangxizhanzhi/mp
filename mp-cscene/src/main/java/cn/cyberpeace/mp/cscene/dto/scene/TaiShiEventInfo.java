@@ -21,10 +21,10 @@ public class TaiShiEventInfo {
     @ApiModelProperty(value = "事件名称")
     private String eventName;
 
-    @ApiModelProperty(value = "触发类型")
+    @ApiModelProperty(value = "触发类型,host:主机采集,flow:流量采集")
     private String triggerType;
 
-    @ApiModelProperty(value = "动作类型")
+    @ApiModelProperty(value = "动作类型,attack:攻击,defense:防御")
     private String actionType;
 
     @ApiModelProperty(value = "源节点id")

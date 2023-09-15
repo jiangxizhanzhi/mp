@@ -23,12 +23,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -74,55 +76,32 @@ public class TaiShiGuidesService {
             return new ListObjServiceResult<>();
         }
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIds, new ArrayList<>());
-        LocalDateTime start = request.getStartTime() == null ? sceneHandler.getEarliestStartTime() : request.getStartTime();
-        LocalDateTime end = request.getEndTime() == null ? start.plusSeconds(10) : request.getEndTime();
-
         CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneIds.get(0));
         if (handler == null) {
             return new ListObjServiceResult<>();
         }
-        // 取探针数据索引
-        var indices = dataCollectionService.indexListBuilder(start, end);
-        // 取流量数据索引
-        String flowIndex = handler.getScene().getFlowCollector();
-        if (StringUtils.isNotEmpty(flowIndex)) {
-            flowIndex = flowIndex + "_session*";
-            indices.add(flowIndex);
-        }
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(indices.toArray(new String[]{}));
-
-        // 探针数据查询条件
-        List<String> targetNodeEids = this.getEidsByNodeIds(sceneHandler, request.getTargetNodeIds());
-        var agentQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.termsQuery("agent.name", targetNodeEids))
-                .must(QueryBuilders.existsQuery("rule.mitre.tactic"));
-        if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
-            agentQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", request.getDefenseTypes()));
+        EsEventRequestParsedResult hostResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getHost());
+        EsEventRequestParsedResult flowResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getFlow() == null ? new TaiShiRequest.EventRequest() : request.getFlow());
+        if (hostResult == null && flowResult == null) {
+            return new ListObjServiceResult<>();
         }
 
-        // 流量查询条件
-        var flowQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.existsQuery("suricata"));
-        // 流量数据既有源也有目的 可以使用ip来查下
-        List<String> sourceIps = this.getIpsByNodeIds(sceneHandler, request.getSourceNodeIds());
-        List<String> targetIps = this.getIpsByNodeIds(sceneHandler, request.getTargetNodeIds());
-        flowQuery.must(QueryBuilders.termsQuery("source.ip", sourceIps));
-        flowQuery.must(QueryBuilders.termsQuery("destination.ip", targetIps));
-        if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
-            List<String> attackTypes = new ArrayList<>();
-            for (var defenseType : request.getDefenseTypes()) {
-                attackTypes.addAll(FlowAttackTypeConvert.getAttackTypes(defenseType));
-            }
-            flowQuery.must(QueryBuilders.termsQuery("suricata.category", attackTypes));
+        List<String> indexes = new ArrayList<>();
+        var mergeQuery = QueryBuilders.boolQuery();
+        if (hostResult != null) {
+            indexes.addAll(hostResult.getIndexes());
+            mergeQuery.should(hostResult.getQuery());
+        }
+
+        if (flowResult != null) {
+            indexes.addAll(flowResult.getIndexes());
+            mergeQuery.should(flowResult.getQuery());
         }
 
         // 用或合并查询条件
         var searchBuilder = new SearchSourceBuilder();
-        searchBuilder.query(QueryBuilders.boolQuery()
-                .should(agentQuery)
-                .should(flowQuery)
-        );
+        searchBuilder.query(mergeQuery);
+
         // 分页
         searchBuilder.from((request.getPage() - 1) * request.getPageSize());
         searchBuilder.size(request.getPageSize());
@@ -130,6 +109,8 @@ public class TaiShiGuidesService {
         // 排序
         searchBuilder.sort("@timestamp", SortOrder.DESC);
 
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices(indexes.toArray(new String[]{}));
         searchRequest.source(searchBuilder);
         List<TaiShiEventInfo> result = new ArrayList<>();
         int total = 0;
@@ -153,6 +134,68 @@ public class TaiShiGuidesService {
             throw new RuntimeException(e);
         }
         return new ListObjServiceResult<>(new ListObjResult<>(result, total));
+    }
+
+
+    private EsEventRequestParsedResult getHostEsEventRequestParsedResult(BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
+        if (CollectionUtils.isNotEmpty(request.getEventName())) {
+            return null;
+        }
+        LocalDateTime start = request.getStartTime() == null ? sceneHandler.getEarliestStartTime() : request.getStartTime();
+        LocalDateTime end = request.getEndTime() == null ? start.plusSeconds(10) : request.getEndTime();
+
+        // 取探针数据索引
+        var indices = dataCollectionService.indexListBuilder(start, end);
+
+        // 探针数据查询条件
+        List<String> targetNodeEids = this.getEidsByNodeIds(sceneHandler, request.getTargetNodeIds());
+        var agentQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termsQuery("agent.name", targetNodeEids))
+                .must(QueryBuilders.existsQuery("rule.mitre.tactic"));
+        if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
+            List<String> types = request.getDefenseTypes().stream()
+                    .map(d -> FlowAttackTypeConvert.getFormatType(d))
+                    .collect(Collectors.toList());
+            agentQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", types));
+        }
+
+        EsEventRequestParsedResult result = new EsEventRequestParsedResult();
+        result.setIndexes(indices);
+        result.setQuery(agentQuery);
+        return result;
+    }
+
+    private EsEventRequestParsedResult getFlowEsEventRequestParsedResult(String sceneId, BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
+        if (request != null && CollectionUtils.isNotEmpty(request.getEventName())) {
+            return null;
+        }
+        CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneId);
+        String flowIndex = handler.getScene().getFlowCollector();
+        if (StringUtils.isEmpty(flowIndex)) {
+            return null;
+        }
+        flowIndex = flowIndex + "_session*";
+
+        // 流量查询条件
+        var flowQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.existsQuery("suricata"));
+        // 流量数据既有源也有目的 可以使用ip来查下
+        List<String> sourceIps = this.getIpsByNodeIds(sceneHandler, request.getSourceNodeIds());
+        List<String> targetIps = this.getIpsByNodeIds(sceneHandler, request.getTargetNodeIds());
+        flowQuery.must(QueryBuilders.termsQuery("source.ip", sourceIps));
+        flowQuery.must(QueryBuilders.termsQuery("destination.ip", targetIps));
+        if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
+            List<String> attackTypes = new ArrayList<>();
+            for (var defenseType : request.getDefenseTypes()) {
+                attackTypes.addAll(FlowAttackTypeConvert.getAttackTypes(FlowAttackTypeConvert.getFormatType(defenseType)));
+            }
+            flowQuery.must(QueryBuilders.termsQuery("suricata.category", attackTypes));
+        }
+
+        EsEventRequestParsedResult result = new EsEventRequestParsedResult();
+        result.setIndexes(Arrays.asList(flowIndex));
+        result.setQuery(flowQuery);
+        return result;
     }
 
     public ServiceResult<List<FlowTrend>> getEventTiming(String sceneId) {
@@ -398,5 +441,12 @@ public class TaiShiGuidesService {
             }
         }
         return flowTrendMap.get(closestTime);
+    }
+
+    @Data
+    private static class EsEventRequestParsedResult {
+        private List<String> indexes;
+
+        private BoolQueryBuilder query;
     }
 }

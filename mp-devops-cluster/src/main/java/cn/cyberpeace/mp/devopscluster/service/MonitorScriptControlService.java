@@ -30,7 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -125,7 +131,6 @@ public class MonitorScriptControlService {
         }
 
     }
-
 
 
     public void statusManually(String hostname) {
@@ -296,6 +301,7 @@ public class MonitorScriptControlService {
     /**
      * 查看yaml或者scriptUrl中的配置，跟已保存到数据库中的配置，是否有变化
      * 如果有，则需要重新发送安装指令，重新安装监控脚本
+     *
      * @param configFromDB
      * @param nameFileMap
      * @return
@@ -305,7 +311,8 @@ public class MonitorScriptControlService {
             return true;
         }
         List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromYaml = getConfigFromYaml(nameFileMap);
-        List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromDB = JsonCommon.parse(configFromDB, new TypeReference<List<CpNodeMonitorScriptConfigModel.ParamConfig>>() {});
+        List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromDB = JsonCommon.parse(configFromDB, new TypeReference<List<CpNodeMonitorScriptConfigModel.ParamConfig>>() {
+        });
 
         if (CollectionUtils.isEmpty(configsFromYaml) || CollectionUtils.isEmpty(configsFromDB)) {
             return true;
