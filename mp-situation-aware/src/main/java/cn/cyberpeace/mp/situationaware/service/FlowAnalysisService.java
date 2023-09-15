@@ -577,7 +577,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isEmpty(aggregationBOS)){
             return aggregationBOS;
         }
-        if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
+        if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY && request.isAttackTypeI18()) {
             globalizedWithAttackWay(aggregationBOS);
         }
         return aggregationBOS;

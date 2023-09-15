@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
+import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
@@ -44,9 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -205,6 +204,73 @@ public class FlowMonitorController {
             }
         }
         return ResultCommon.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "攻击流量各类别统计(归14大类)")
+    @GetMapping("/attack_type_count_group")
+    public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCountGroup(AttackTypeTopRequest baseRequest) {
+        log.info("attack_type_count_group params: {}", JsonCommon.stringify(baseRequest));
+        if (StringUtils.isEmpty(baseRequest.getSceneId())) {
+            return ResultCommon.success(new ArrayList<>());
+        }
+
+        baseRequest.setAttackTypeI18(false);
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
+        List<FlowAttackTypeCount> resultCounts = new ArrayList<>();
+        Map<String, Integer> resultMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
+            for (FlowAttackTypeCount flowAttackTypeCount : attackTypeCounts) {
+                String newType = FlowAttackTypeConvert.getAttCk(flowAttackTypeCount.getAttackType());
+                if (resultMap.get(newType) == null) {
+                    resultMap.put(newType, flowAttackTypeCount.getTimes());
+                } else {
+                    resultMap.put(newType, resultMap.get(newType) + flowAttackTypeCount.getTimes());
+                }
+            }
+            for (String key:resultMap.keySet()){
+                FlowAttackTypeCount flowAttackTypeCount = new FlowAttackTypeCount();
+                flowAttackTypeCount.setAttackType(key);
+                flowAttackTypeCount.setTimes(resultMap.get(key));
+                resultCounts.add(flowAttackTypeCount);
+            }
+        }
+        if (baseRequest.getTopNWithOther() != null) {
+            if (resultCounts != null && resultCounts.size() > baseRequest.getTopNWithOther()) {
+                Collections.sort(resultCounts, (a1, a2) -> a2.getTimes() - a1.getTimes());
+                int other = 0;
+                List<FlowAttackTypeCount> result = new ArrayList<>();
+                for (int i = 0; i < resultCounts.size(); i++) {
+                    if (i < baseRequest.getTopNWithOther()) {
+                        result.add(resultCounts.get(i));
+                    } else {
+                        other += resultCounts.get(i).getTimes();
+                    }
+                }
+                var otherCount = new FlowAttackTypeCount();
+                otherCount.setAttackType(MessageCommon.get("cscene.flowtype.other"));
+                otherCount.setTimes(other);
+                result.add(otherCount);
+                return ResultCommon.success(result);
+            }
+        }
+        return ResultCommon.success(resultCounts);
+    }
+
+    @ApiOperation(value = "攻击流量各类别统计总数")
+    @GetMapping("/attack_type_count_total")
+    public ServiceResult<Integer> getAttackTypeCountTotal(AttackTypeTopRequest baseRequest) {
+        log.info("attack_type_count_total params: {}", JsonCommon.stringify(baseRequest));
+        if (StringUtils.isEmpty(baseRequest.getSceneId())) {
+            return ResultCommon.success(0);
+        }
+        Integer total = 0;
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
+        if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
+            for (FlowAttackTypeCount flowAttackTypeCount : attackTypeCounts) {
+                total += flowAttackTypeCount.getTimes();
+            }
+        }
+        return ResultCommon.success(total);
     }
 
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")

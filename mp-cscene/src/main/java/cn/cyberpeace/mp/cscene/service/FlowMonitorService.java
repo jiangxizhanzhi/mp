@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.flow.AttackTypeTopRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
@@ -311,7 +312,7 @@ public class FlowMonitorService {
         return riskCount;
     }
 
-    public List<FlowAttackTypeCount> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+    public List<FlowAttackTypeCount> getAttackTypeCount(AttackTypeTopRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
@@ -325,7 +326,7 @@ public class FlowMonitorService {
 
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(), baseRequest.getTopSize());
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(), baseRequest.getTopSize(), baseRequest.isAttackTypeI18());
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTypeCount> result = new ArrayList<>();
         if (map != null && !map.isEmpty()) {

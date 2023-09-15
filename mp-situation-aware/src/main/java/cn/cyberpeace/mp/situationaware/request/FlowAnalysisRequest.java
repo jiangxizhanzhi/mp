@@ -132,6 +132,9 @@ public class FlowAnalysisRequest {
     @ApiModelProperty("聚合类型")
     private AggregationTypeEnum aggregationTypeEnum;
 
+    @ApiModelProperty("攻击类型是否国际化")
+    private boolean attackTypeI18 = true;
+
     @ApiModelProperty(value = "索引",hidden = true)
     private String[] indices;
 
