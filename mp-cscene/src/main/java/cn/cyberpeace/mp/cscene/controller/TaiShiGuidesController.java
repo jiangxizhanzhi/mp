@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/taishi")
 @Data
-public class TashiGuidesController {
+public class TaiShiGuidesController {
 
     @Resource
     private TaiShiGuidesService taiShiGuidesService;
@@ -46,6 +46,12 @@ public class TashiGuidesController {
     @GetMapping("/event_trend")
     public ServiceResult<List<FlowTrend>> getEventTrend(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getEventTrend(sceneId).asResult();
+    }
+
+    @ApiOperation(value = "场景运行过程中态势主机和流量事件的出现时间")
+    @GetMapping("/event_timing")
+    public ServiceResult<List<FlowTrend>> getEventTiming(@Param("sceneId") String sceneId) {
+        return taiShiGuidesService.getEventTiming(sceneId).asResult();
     }
 
 }
