@@ -39,7 +39,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_http_pool_size:200}")
     private Integer cpcloudHttpPoolSize;
 
-    @Value("${mp.sceneplugincloud.initiate_pool_size:10}")
+    @Value("${mp.sceneplugincloud.initiate_pool_size:100}")
     private Integer initiatePoolSize;
 
     @Value("${mp.sceneplugincloud.initiate_hold_size:200000}")

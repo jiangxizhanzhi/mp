@@ -142,16 +142,4 @@ public class HostStateController {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
     }
 
-    @ApiOperation(value = "场景att&ck主机事件统计")
-    @GetMapping("/att_ck_event_count")
-    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
-        return hostStateService.getSceneAttCkTypeCountInfo(request).asResult();
-    }
-
-    @ApiOperation(value = "场景att&ck主机事件趋势")
-    @GetMapping("/att_ck_event_trend")
-    public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request) {
-        return hostStateService.getSceneAttCkTypeCountTrend(request).asResult();
-    }
-
 }

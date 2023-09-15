@@ -1901,17 +1901,17 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountTrend(String sceneId) {
+    public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime) {
         BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
         var allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
 
         WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setAgentNames(allElementEids);
-        request.setStartTime(sceneHandler.getEarliestStartTime());
-        request.setEndTime(LocalDateTime.now());
+        request.setStartTime(startTime == null ? sceneHandler.getEarliestStartTime() : startTime);
+        request.setEndTime(endTime == null ? LocalDateTime.now() : endTime);
 
         List<AttCkTypeCount> list = new ArrayList<>();
-        var counts = dataCollectionService.getAttCkTypeCountTrend(request);
+        var counts = dataCollectionService.getAttCkTypeCountTrend(request, 3600);
         if (!counts.isEmpty()) {
             counts.forEach((k, v) -> list.add(new AttCkTypeCount(k, v.longValue())));
         }
