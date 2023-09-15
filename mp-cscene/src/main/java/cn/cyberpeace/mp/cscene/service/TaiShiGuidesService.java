@@ -1,19 +1,29 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.FlowEventData;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.TaiShiTotalCount;
 import cn.cyberpeace.mp.cscene.dto.scene.WazuhEventData;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.TaiShiRequest;
+import cn.cyberpeace.mp.cscene.request.flow.AttackTypeTopRequest;
+import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -24,12 +34,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +56,12 @@ public class TaiShiGuidesService {
 
     @Resource
     private CsceneCommonService csceneCommonService;
+
+    @Resource
+    private FlowMonitorService flowMonitorService;
+
+    @Resource
+    private HostStateService hostStateService;
 
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(TaiShiRequest request) {
         var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
@@ -129,6 +148,89 @@ public class TaiShiGuidesService {
             throw new RuntimeException(e);
         }
         return new ListObjServiceResult<>(new ListObjResult<>(result, total));
+    }
+
+    public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusDays(10);// todo 暂时查最近10天内的 方便测试
+
+        var flows = this.getFlowEventTrend(sceneId, startTime, endTime, 24);
+        var hosts = this.getHostEventTrend(sceneId, startTime, endTime, 24);
+        List<FlowTrend> trends = new ArrayList<>();
+        trends.addAll(flows);
+        for (int i = 0; i < hosts.size(); i++) {
+            trends.get(i).setDataSize(trends.get(i).getDataSize() + hosts.get(i).getDataSize());
+        }
+        return new ServiceResult<>(trends);
+    }
+
+    private List<FlowTrend> getFlowEventTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
+        FlowTrendRequest request = new FlowTrendRequest();
+        request.setSegmentCount(segmentCount);
+        request.setSceneId(sceneId);
+        request.setType(NumberUtils.INTEGER_ONE);
+        request.setEndTime(endTime);
+        request.setStartTime(startTime);
+        var flows = flowMonitorService.getSceneFlowTrend(request);
+        return flows;
+    }
+
+    private List<FlowTrend> getHostEventTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
+        Map<LocalDateTime, FlowTrend> flowTrendMap = new HashMap<>();
+        for (LocalDateTime time : timeList) {
+            FlowTrend flowTrend = new FlowTrend();
+            // 初始化
+            flowTrend.setTime(time);
+            flowTrend.setDataSize(0L);
+            flowTrendMap.put(time, flowTrend);
+        }
+
+        BaseSceneElementRequest elementRequest = new BaseSceneElementRequest();
+        elementRequest.setSceneId(sceneId);
+        var hosts = hostStateService.getSceneAttCkTypeCountTrend(elementRequest, startTime, endTime).getSource();
+        for (IntervalSizeBO<LocalDateTime, Long> bo : hosts) {
+            if (Objects.nonNull(bo.getStart())) {
+                FlowTrend flowTrend = getClosest(bo.getStart(), flowTrendMap);
+                if (Objects.nonNull(flowTrend)) {
+                    flowTrend.setDataSize(bo.getSize()+flowTrend.getDataSize());
+                }
+            }
+        }
+
+        List<FlowTrend> hostTrends = new ArrayList<>();
+        flowTrendMap.entrySet().forEach(entry -> {
+            hostTrends.add(entry.getValue());
+        });
+        hostTrends.sort(Comparator.comparing(FlowTrend::getTime));
+        return hostTrends;
+    }
+
+    public ServiceResult<TaiShiTotalCount> getAttCkEventCount(String sceneId) {
+        TaiShiTotalCount taiShiTotalCount = new TaiShiTotalCount();
+        taiShiTotalCount.setFlow(this.flowTotalCount(sceneId));
+        taiShiTotalCount.setHost(this.hostTotalCount(sceneId));
+        return new ServiceResult<>(taiShiTotalCount);
+    }
+
+    private long hostTotalCount(String sceneId) {
+        BaseSceneElementRequest request = new BaseSceneElementRequest();
+        request.setSceneId(sceneId);
+        return hostStateService.getSceneAttCkTypeCountInfo(request).getSource().getTotalTimes();
+    }
+
+    private long flowTotalCount(String sceneId) {
+        AttackTypeTopRequest request = new AttackTypeTopRequest();
+        request.setSceneId(sceneId);
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(request);
+        long total = 0;
+        if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
+            for (FlowAttackTypeCount flowAttackTypeCount : attackTypeCounts) {
+                total += flowAttackTypeCount.getTimes();
+            }
+        }
+        return total;
     }
 
     private TaiShiEventInfo getEventInfoFrom(WazuhEventData eventData, Map<String, SceneElementBO> eid2Elements) {
@@ -249,5 +351,19 @@ public class TaiShiGuidesService {
             }
         }
         return targetNodeEids;
+    }
+
+    private FlowTrend getClosest(LocalDateTime time, Map<LocalDateTime, FlowTrend> flowTrendMap) {
+        LocalDateTime closestTime = null;
+        long durationSeconds = Long.MAX_VALUE;
+        for (Map.Entry<LocalDateTime, FlowTrend> entry : flowTrendMap.entrySet()) {
+            Duration duration = Duration.between(entry.getKey(), time);
+            long duraSecs = Math.abs(duration.toSeconds());
+            if (durationSeconds > duraSecs) {
+                durationSeconds = duraSecs;
+                closestTime = entry.getKey();
+            }
+        }
+        return flowTrendMap.get(closestTime);
     }
 }
