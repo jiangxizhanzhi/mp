@@ -175,6 +175,9 @@ public class CsceneFlowService {
         List<AddFlowTaskTaskInfo> addFlowTaskTaskInfoList = new ArrayList<>();
         //遍历任务详情，初始化节点参数
         for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
+            if (CollectionUtils.isEmpty(detail.getFlowInfos())) {
+                continue;
+            }
             String nodeName = sceneHandler.getElement(detail.getNodeId()).getName();
             String nodeIp = "";
             String networkId = "";
