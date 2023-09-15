@@ -270,23 +270,6 @@ public class FlowMonitorController {
         return ResultCommon.success(resultCounts);
     }
 
-    @ApiOperation(value = "攻击流量各类别统计总数")
-    @GetMapping("/attack_type_count_total")
-    public ServiceResult<Integer> getAttackTypeCountTotal(AttackTypeTopRequest baseRequest) {
-        log.info("attack_type_count_total params: {}", JsonCommon.stringify(baseRequest));
-        if (StringUtils.isEmpty(baseRequest.getSceneId())) {
-            return ResultCommon.success(0);
-        }
-        Integer total = 0;
-        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
-        if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
-            for (FlowAttackTypeCount flowAttackTypeCount : attackTypeCounts) {
-                total += flowAttackTypeCount.getTimes();
-            }
-        }
-        return ResultCommon.success(total);
-    }
-
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
     @GetMapping("/attack_ip_count")
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
