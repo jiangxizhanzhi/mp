@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -12,6 +16,8 @@ public class FlowAttackTypeConvert {
     static Map<String, String> attackType2AttCks = new HashMap<>();
 
     static Map<String, List<String>> attCk2AttackTypes = new HashMap<>();
+
+    static Map<String, String> formatTypes = new HashMap<>();
 
     // todo
     static {
@@ -66,6 +72,17 @@ public class FlowAttackTypeConvert {
         attackType2AttCks.put("Detection of a Denial of Service Attack", "impact");
         attackType2AttCks.put("Crypto Currency Mining Activity Detected", "impact");
 
+        formatTypes.put("reconnaissance", "Reconnaissance");
+        formatTypes.put("initial access", "Initial access");
+        formatTypes.put("execution", "Execution");
+        formatTypes.put("privilege escalation", "Privilege Escalation");
+        formatTypes.put("defense evasionn", "Defense Evasionn");
+        formatTypes.put("credential access", "Credential Access");
+        formatTypes.put("discovery", "Discovery");
+        formatTypes.put("collection", "Collection");
+        formatTypes.put("command and control", "Command And Control");
+        formatTypes.put("impact", "Impact");
+
         for (var attck : attackType2AttCks.entrySet()) {
             if (!attCk2AttackTypes.containsKey(attck.getValue())) {
                 attCk2AttackTypes.put(attck.getValue(), new ArrayList<>());
@@ -80,6 +97,10 @@ public class FlowAttackTypeConvert {
 
     public static List<String> getAttackTypes(String attCk) {
         return attCk2AttackTypes.getOrDefault(attCk.toLowerCase(), Arrays.asList(attCk));
+    }
+
+    public static String getFormatType(String type) {
+        return formatTypes.getOrDefault(type.toLowerCase(), type);
     }
 
 }
