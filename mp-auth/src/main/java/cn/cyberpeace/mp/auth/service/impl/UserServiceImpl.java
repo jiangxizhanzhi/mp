@@ -13,10 +13,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.TenantUserModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -1031,6 +1028,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         UserModel userModel =
                 UserModel.builder().username(importUserBo.getUsername())
+                        .studentNumber(importUserBo.getStudentNumber())
+                        .majorId(importUserBo.getMajorId())
                         .name(importUserBo.getName())
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUserBo.getPassword())
@@ -1084,6 +1083,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
         log.info("roles:{}", roles);
         exportUserBo.setRoles(roles);
+
+        String majorId = user.getMajorId();
+        if (StringUtils.isNotBlank(majorId)) {
+            exportUserBo.setMajorName(Optional.ofNullable(majorService.getMajorById(user.getMajorId())).map(MajorModel::getMajorName)
+                    .orElseThrow(() -> new MpRuntimeException(AuthErrorCode.MAJOR_NOT_EXISTED.format(majorId))));
+        }
+        exportUserBo.setStudentNumber(user.getStudentNumber());
 
         return exportUserBo;
     }

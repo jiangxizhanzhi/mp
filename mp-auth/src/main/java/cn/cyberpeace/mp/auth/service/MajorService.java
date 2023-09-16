@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 专业服务类
@@ -30,6 +31,13 @@ public interface MajorService extends BaseModelService<MajorModel, QueryParams> 
     ListObjServiceResult<MajorDto> pageMajors(MajorPageRequest majorPageRequest);
 
     List<MajorDto> listAllMajors();
+
+    /**
+     * 根据专业名称查询出专业信息
+     * @param majorNameSet
+     * @return
+     */
+    List<MajorDto> listTargetMajors(Set<String> majorNameSet);
 
     Boolean deleteMajors(List<String> ids);
 

@@ -36,4 +36,12 @@ public class ExportUserEnBo {
     @ColumnWidth(80)
     private String roles;
 
+    @ExcelProperty(value = "Major")
+    @ColumnWidth(12)
+    private String majorName;
+
+    @ExcelProperty(value = "Student Number")
+    @ColumnWidth(20)
+    private String studentNumber;
+
 }

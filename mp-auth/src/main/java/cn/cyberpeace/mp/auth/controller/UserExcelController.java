@@ -71,6 +71,8 @@ public class UserExcelController {
 
     @Autowired
     private TenantUserService tenantUserService;
+    @Autowired
+    private MajorService majorService;
 
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
@@ -117,7 +119,7 @@ public class UserExcelController {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
         ExcelCheck.check(file.getInputStream(), file.getOriginalFilename());
         try {
-            EasyExcel.read(file.getInputStream(), ImportUserBo.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
+            EasyExcel.read(file.getInputStream(), ImportUserBo.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig, majorService))
                     .headRowNumber(2).sheet().doRead();
         } catch (ExcelCommonException | ExcelAnalysisException | ExcelDataConvertException | ExcelGenerateException ex) {
             log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));

@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -92,6 +93,16 @@ public class MajorServiceImpl extends BaseModelServiceImpl<MajorModel, MajorMapp
             return allMajorModels.stream().map(MajorDto::convertModelToDto).collect(Collectors.toList());
         }
 
+    }
+
+    @Override
+    public List<MajorDto> listTargetMajors(Set<String> majorNameSet) {
+        List<MajorModel> targetMajorModels = this.getMapper().list(new HumanCondition().select(MajorModel::getMajorName, MajorModel::getId).filterIn(MajorModel::getMajorName, majorNameSet.toArray(new String[0])));
+        if (CollectionUtils.isEmpty(targetMajorModels)) {
+            return Collections.emptyList();
+        } else {
+            return targetMajorModels.stream().map(MajorDto::convertModelToDto).collect(Collectors.toList());
+        }
     }
 
     @Override

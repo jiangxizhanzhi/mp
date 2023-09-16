@@ -129,6 +129,8 @@ public enum AuthErrorCode implements ErrorCode {
     EXCEL_LIST_DESC_ILLEGAL_LENGTH("MP-110137", "excel_list_desc_illegal_length"),
     EXCEL_LIST_IMPORT_ROLE_LIMIT("MP-110138", "excel_list_import_role_limit"),
     EXCEL_LIST_PWD_EMPTY("MP-110139", "excel_list_pwd_empty"),
+    EXCEL_LIST_MAJOR_EMPTY("MP-110340", "excel_list_major_empty"),
+    EXCEL_LIST_STUDENT_NUMBER_LIMIT("MP-110341", "excel_list_student_number_limit"),
 
 
     PERMISSION_DENIED("MP-110140", "permission_denied"),
@@ -146,7 +148,7 @@ public enum AuthErrorCode implements ErrorCode {
     MAJOR_CREATE_FAIL("MP-110202", "major_create_fail"),
     MAJOR_UPDATE_FAIL("MP-110203", "major_update_fail"),
     MAJOR_NOT_EXISTED("MP-110204", "major_not_existed"),
-
+    MAJOR_NOT_CONFIG("MP-110205", "major_not_config"),
 
     ;
 

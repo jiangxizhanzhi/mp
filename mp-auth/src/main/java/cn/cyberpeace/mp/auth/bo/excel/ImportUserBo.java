@@ -33,6 +33,10 @@ public class ImportUserBo {
     // 角色 名称，多个用逗号隔开
     private String roles;
 
+    private String majorName;
+
+    private String studentNumber;
+
     private String expiredTime;
 
     private String description;
@@ -42,5 +46,7 @@ public class ImportUserBo {
 
     // 组织ID，Excel中不存在，留待后端绑定用
     private List<String> orgIdList;
+
+    private String majorId;
 
 }

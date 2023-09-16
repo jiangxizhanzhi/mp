@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.response.major.MajorDto;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -16,15 +17,11 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -55,18 +52,21 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
     private AuthConfig authConfig;
 
+    private MajorService majorService;
+
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
      */
     public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
-                              OperateUserPermissionService opUserPermCheckService, AuthConfig authConfig) {
+                              OperateUserPermissionService opUserPermCheckService, AuthConfig authConfig, MajorService majorService) {
         this.userService = userService;
         this.roleService = roleService;
         this.orgService = orgService;
         this.opUserPermCheckService = opUserPermCheckService;
         this.authConfig = authConfig;
+        this.majorService = majorService;
     }
 
     /**
@@ -112,6 +112,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         checkImportUsers(list);
         preProcessOrgsAndRoles(list);
         preProcessPwd(list);
+        preProcessMajor(list);
         userService.importUsers(list);
     }
 
@@ -132,7 +133,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
                 checkExpiredTime(user.getExpiredTime(), index);
-                checkDescription(user.getDescription(), index);
+                checkLength(user.getDescription(), index, AuthErrorCode.EXCEL_LIST_DESC_ILLEGAL_LENGTH);
+                checkLength(user.getStudentNumber(), index, AuthErrorCode.EXCEL_LIST_STUDENT_NUMBER_LIMIT);
+                checkMajorName(user.getMajorName(), index);
             }
         }
 
@@ -148,19 +151,19 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         checkUserNameFromDB(userName2IndexBoMap);
     }
 
-    /**
-     * 校验简介是否合法
-     * @param description
-     * @param index
-     */
-    private void checkDescription(String description, int index) {
-        if (StringUtils.isNotBlank(description) && StringUtils.length(description) > 1000) {
-            String shortDesc = description.substring(0, 20) + "...";
-            log.error("No {} row error! description {} has illegal length!", index, shortDesc);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_DESC_ILLEGAL_LENGTH.format(String.valueOf(index), shortDesc));
+    private void checkLength(String params, int index, AuthErrorCode authErrorCode) {
+        if (StringUtils.isNotBlank(params) && StringUtils.length(params) > 1000) {
+            String shortDesc = params.substring(0, 20) + "...";
+            throw new MpRuntimeException(authErrorCode.format(String.valueOf(index), shortDesc));
         }
     }
 
+    private void checkMajorName(String majorName, int index) {
+        if (StringUtils.isBlank(majorName)) {
+            log.error("No.{} row error! major should not empty", index);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_MAJOR_EMPTY.format(String.valueOf(index)));
+        }
+    }
 
 
     /**
@@ -357,6 +360,27 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             u.setPassword(PasswordUtils.encode(u.getPassword()));
         });
         return list;
+    }
+
+    private void preProcessMajor(List<ImportUserBo> users) {
+        if (CollectionUtils.isEmpty(users)) {
+            return;
+        } else {
+            Set<String> majorNameSet = users.stream().map(ImportUserBo::getMajorName).collect(Collectors.toSet());
+            List<MajorDto> majorDtoList = majorService.listTargetMajors(majorNameSet);
+            if (CollectionUtils.isEmpty(majorDtoList)) {
+                throw new MpRuntimeException(AuthErrorCode.MAJOR_NOT_CONFIG);
+            }
+            Map<String, MajorDto> majorNameDtoMap = majorDtoList.stream().collect(Collectors.toMap(MajorDto::getMajorName, Function.identity()));
+            users.forEach(user -> {
+                MajorDto majorDto = majorNameDtoMap.get(user.getMajorName());
+                if (Objects.isNull(majorDto)) {
+                    throw new MpRuntimeException(AuthErrorCode.MAJOR_NOT_EXISTED.format(user.getMajorName()));
+                } else {
+                    user.setMajorId(majorDto.getId());
+                }
+            });
+        }
     }
 
 

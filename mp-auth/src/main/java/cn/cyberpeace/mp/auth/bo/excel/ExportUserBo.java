@@ -35,4 +35,12 @@ public class ExportUserBo {
     @ColumnWidth(80)
     private String roles;
 
+    @ExcelProperty(value = "专业")
+    @ColumnWidth(12)
+    private String majorName;
+
+    @ExcelProperty(value = "学号")
+    @ColumnWidth(20)
+    private String studentNumber;
+
 }
