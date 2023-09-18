@@ -34,7 +34,10 @@ public class ActivationRequest {
     private List<ActivationItem> items;
 
     @ApiModelProperty(value = "校验码，des加密")
-    @NotBlank
+//    @NotBlank
     private String verifyCode;
+
+    @ApiModelProperty(value = "试用7天标志")
+    private Boolean trialFlag = false;
 
 }
