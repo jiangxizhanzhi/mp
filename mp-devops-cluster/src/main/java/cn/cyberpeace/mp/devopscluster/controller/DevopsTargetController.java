@@ -87,7 +87,7 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
-    public Result<String> getFtpAddress(){
+    public Result<String> getFtpAddress() {
         String formatUrl = devopsClusterConfig.getCpIp();
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
@@ -160,8 +160,65 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
-    public ServiceResult<Device> listAll(TargetSceneRequest request){
+    public ServiceResult<Device> listAll(TargetSceneRequest request) {
         List<Device> devices = cpDeviceService.findDevicesByCategories(Arrays.asList(request.getCategory()));
+        if (StringUtils.isNotEmpty(request.getName())) {
+            List<Device> result = new ArrayList<>();
+            for (var d : devices) {
+                if (d.getName().contains(request.getName())) {
+                    result.add(d);
+                }
+            }
+            devices = result;
+        }
+        if (request.getParentSystemType() != null) {
+            List<Device> result = new ArrayList<>();
+            for (var d : devices) {
+                if (d.getExtSystemInfo() != null && d.getExtSystemInfo().getParentSystemType() != null && d.getExtSystemInfo().getParentSystemType() == request.getParentSystemType()) {
+                    result.add(d);
+                }
+            }
+            devices = result;
+        }
+        if (CollectionUtils.isNotEmpty(request.getImageTypeList())) {
+            Set<String> types = new HashSet<>();
+            for (var t : request.getImageTypeList()) {
+                types.add(t.toLowerCase());
+            }
+
+            List<Device> result = new ArrayList<>();
+            for (var d : devices) {
+                if (StringUtils.isNotEmpty(d.getImageType()) && types.contains(d.getImageType())) {
+                    result.add(d);
+                }
+            }
+            devices = result;
+        }
+        if (CollectionUtils.isNotEmpty(request.getPreTypeList())) {
+            boolean internal = false;
+            boolean custom = false;
+            for (var i : request.getPreTypeList()) {
+                if (i == 0) {
+                    internal = true;
+                }
+                if (i == 1) {
+                    custom = true;
+                }
+            }
+            List<Device> result = new ArrayList<>();
+            for (var d : devices) {
+                if (Boolean.TRUE.equals(d.getIsInit()) || Boolean.TRUE.equals(d.getIsInternal())) {
+                    if (internal) {
+                        result.add(d);
+                    }
+                } else {
+                    if (custom) {
+                        result.add(d);
+                    }
+                }
+            }
+            devices = result;
+        }
         return new Result(new ListResult<>(devices));
     }
 
