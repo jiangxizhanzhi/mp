@@ -189,6 +189,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    @ApiModelProperty(value = "宿主机名称")
+    private List<Leak> leaks;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -220,6 +223,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
         auxiliaryNetworkHostRoutes = StringUtils.isEmpty(obj.getAuxiliaryNetworkHostRoutes()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>(){});
+        leaks = StringUtils.isEmpty(obj.getLeaks()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getLeaks(), new TypeReference<List<Leak>>() {
+        });
     }
 
     @Override
@@ -262,6 +268,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (auxiliaryNetworkHostRoutes != null) {
             obj.setAuxiliaryNetworkHostRoutes(JsonCommon.stringify(auxiliaryNetworkHostRoutes));
+        }
+        if (leaks != null) {
+            obj.setLeaks(JsonCommon.stringify(leaks));
         }
         return obj;
     }

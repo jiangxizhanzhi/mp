@@ -117,6 +117,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String host;
 
+    @DefaultStr
+    private String leaks;
+
 
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;

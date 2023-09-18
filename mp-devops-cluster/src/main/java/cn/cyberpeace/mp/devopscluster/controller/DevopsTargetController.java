@@ -198,10 +198,10 @@ public class DevopsTargetController {
             boolean internal = false;
             boolean custom = false;
             for (var i : request.getPreTypeList()) {
-                if (i == 0) {
+                if (i == 1) {
                     internal = true;
                 }
-                if (i == 1) {
+                if (i == 0) {
                     custom = true;
                 }
             }
