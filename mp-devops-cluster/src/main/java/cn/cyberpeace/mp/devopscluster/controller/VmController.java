@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
@@ -229,9 +230,11 @@ public class VmController {
             var id = csceneSpecialService.getSceneId(instanceModel.getName());
             SceneElementModel sceneElementModel = csceneSpecialService.getSceneElementModel(id);
             String systemType = null;
+            String name = instanceModel.getName();
             // 查询实时主机状态
             HostState hostState = new HostState();
             if (sceneElementModel != null) {
+                name = sceneElementModel.getName();
                 systemType = csceneSpecialService.getSystemType(sceneElementModel, id);
 
                 var agentNames = csceneCommonService.getAgentNamesBySceneId(sceneElementModel.getScene(), null);
@@ -246,10 +249,19 @@ public class VmController {
                         hostState = hostStates.get(0);
                     }
                 }
+            } else {
+                DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(id);
+                if (deviceTargetPO != null) {
+                    name = deviceTargetPO.getName();
+                    Integer temp = deviceTargetPO.getSystemType();
+                    if (temp != null) {
+                        systemType = csceneSpecialService.getSystemType(String.valueOf(temp));
+                    }
+                }
             }
 
 
-            return InstancePageVO.builder().name(sceneElementModel == null ? instanceModel.getName() : sceneElementModel.getName())
+            return InstancePageVO.builder().name(name)
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(instanceModel.getId())
                     .node(instanceModel.getNode())

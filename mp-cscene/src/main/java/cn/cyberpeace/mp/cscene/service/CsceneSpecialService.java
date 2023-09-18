@@ -1185,6 +1185,12 @@ public class CsceneSpecialService {
         return prefix + "/" + suffix;
     }
 
+    public String getSystemType(String systemType) {
+        String prefix = SystemTypeUtils.getStandardSystemType(systemType);
+        String suffix = SystemTypeCommandUtils.getOsType(prefix);
+        return prefix + "/" + suffix;
+    }
+
 
     public SceneElementModel getSceneElementModel(String sceneId) {
 
