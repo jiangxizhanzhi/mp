@@ -372,7 +372,11 @@ public class TaiShiGuidesService {
         taiShi.setAttCkNames(this.getAttCkTypeNames(taiShi.getAttCks()));
         taiShi.setHostEventType("");
         taiShi.setHostEventDesc(StringUtils.join(eventData.getRule().getMitre().getTechnique(), ","));
-        taiShi.setTime(TimeUtils.utcStringToLocalDateTime(eventData.getTimestamp()));
+        String utcTime = eventData.getTimestamp();
+        if (!eventData.getTimestamp().contains("Z")) {
+            utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+        }
+        taiShi.setTime(TimeUtils.utcStringToLocalDateTime(utcTime));
         if (eventData.getAgent() != null && eid2Elements.containsKey(eventData.getAgent().getName())) {
             var element = eid2Elements.get(eventData.getAgent().getName());
             taiShi.setTargetNodeName(element.getName());
