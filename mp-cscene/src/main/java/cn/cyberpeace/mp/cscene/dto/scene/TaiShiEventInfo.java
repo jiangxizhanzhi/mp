@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -56,4 +57,13 @@ public class TaiShiEventInfo {
 
     @ApiModelProperty(value = "att&ck事件名称,即攻防类型")
     private List<String> attCkNames;
+
+    @ApiModelProperty(value = "事件类型")
+    private String hostEventType;
+
+    @ApiModelProperty(value = "事件描述")
+    private String hostEventDesc;
+
+    @ApiModelProperty(value = "时间")
+    private LocalDateTime time;
 }

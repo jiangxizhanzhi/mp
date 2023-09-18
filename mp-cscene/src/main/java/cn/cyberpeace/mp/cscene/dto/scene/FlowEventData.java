@@ -15,6 +15,8 @@ public class FlowEventData {
 
     private Suricata suricata;
 
+    private String timestamp;
+
     @Data
     @NoArgsConstructor
     public static class Port {
