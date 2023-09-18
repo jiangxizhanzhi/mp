@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiTotalCount;
+import cn.cyberpeace.mp.cscene.request.common.TaiShiHostRequest;
 import cn.cyberpeace.mp.cscene.request.common.TaiShiRequest;
 import cn.cyberpeace.mp.cscene.service.TaiShiGuidesService;
 import io.swagger.annotations.Api;
@@ -36,6 +37,12 @@ public class TaiShiGuidesController {
     @PostMapping("/event_list")
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(@RequestBody TaiShiRequest request) {
         return taiShiGuidesService.getAttCkEventList(request).asResult();
+    }
+
+    @ApiOperation(value = "场景态势主机事件列表")
+    @PostMapping("/host_event_list")
+    public ListObjServiceResult<TaiShiEventInfo> getHostEventList(@RequestBody TaiShiHostRequest request) {
+        return taiShiGuidesService.getHostEventList(request).asResult();
     }
 
     @ApiOperation(value = "场景态势主机和流量的次数统计")

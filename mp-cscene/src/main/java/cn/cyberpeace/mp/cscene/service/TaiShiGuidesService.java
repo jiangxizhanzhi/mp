@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiTotalCount;
 import cn.cyberpeace.mp.cscene.dto.scene.WazuhEventData;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.TaiShiHostRequest;
 import cn.cyberpeace.mp.cscene.request.common.TaiShiRequest;
 import cn.cyberpeace.mp.cscene.request.flow.AttackTypeTopRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
@@ -44,9 +47,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,31 +85,74 @@ public class TaiShiGuidesService {
         if (handler == null) {
             return new ListObjServiceResult<>();
         }
-        EsEventRequestParsedResult hostResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
-        EsEventRequestParsedResult flowResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getFlow() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
-        if (hostResult == null && flowResult == null) {
+
+        if (!Boolean.TRUE.equals(request.getHost()) && !Boolean.TRUE.equals(request.getFlow())) {
             return new ListObjServiceResult<>();
         }
 
-        List<String> indexes = new ArrayList<>();
+        Set<String> indexes = new HashSet<>();
         var mergeQuery = QueryBuilders.boolQuery();
-        if (hostResult != null) {
-            indexes.addAll(hostResult.getIndexes());
-            mergeQuery.should(hostResult.getQuery());
+
+        if (Boolean.TRUE.equals(request.getHost())) {
+            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
+            EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
+            if (hostDefenseResult != null) {
+                indexes.addAll(hostDefenseResult.getIndexes());
+                mergeQuery.should(hostDefenseResult.getQuery());
+            }
+            if (hostAttackResult != null) {
+                indexes.addAll(hostAttackResult.getIndexes());
+                mergeQuery.should(hostAttackResult.getQuery());
+            }
         }
 
-        if (flowResult != null) {
-            indexes.addAll(flowResult.getIndexes());
-            mergeQuery.should(flowResult.getQuery());
+        if (Boolean.TRUE.equals(request.getFlow())) {
+            EsEventRequestParsedResult flowDefenseResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
+            EsEventRequestParsedResult flowAttackResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
+            if (flowDefenseResult != null) {
+                indexes.addAll(flowDefenseResult.getIndexes());
+                mergeQuery.should(flowDefenseResult.getQuery());
+            }
+            if (flowAttackResult != null) {
+                indexes.addAll(flowAttackResult.getIndexes());
+                mergeQuery.should(flowAttackResult.getQuery());
+            }
         }
 
-        // 用或合并查询条件
+        return getResult(request.getPage(), request.getPageSize(), sceneHandler, indexes, mergeQuery);
+    }
+
+    public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
+        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        if (CollectionUtils.isEmpty(sceneIds)) {
+            return new ListObjServiceResult<>();
+        }
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIds, new ArrayList<>());
+        CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneIds.get(0));
+        if (handler == null) {
+            return new ListObjServiceResult<>();
+        }
+
+        Set<String> indexes = new HashSet<>();
+        var mergeQuery = QueryBuilders.boolQuery();
+
+        TaiShiRequest.EventRequest r = new TaiShiRequest.EventRequest();
+        r.setStartTime(request.getStartTime());
+        r.setEndTime(request.getEndTime());
+        EsEventRequestParsedResult hostResult = this.getHostEsEventRequestParsedResult(sceneHandler, r);
+        indexes.addAll(hostResult.getIndexes());
+        mergeQuery.should(hostResult.getQuery());
+
+        return getResult(request.getPage(), request.getPageSize(), sceneHandler, indexes, mergeQuery);
+    }
+
+    private ListObjServiceResult<TaiShiEventInfo> getResult(int page, int pageSize, BatchSceneHandler sceneHandler, Set<String> indexes, BoolQueryBuilder mergeQuery) {
         var searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
 
         // 分页
-        searchBuilder.from((request.getPage() - 1) * request.getPageSize());
-        searchBuilder.size(request.getPageSize());
+        searchBuilder.from((page - 1) * pageSize);
+        searchBuilder.size(pageSize);
         // 时间范围
         // 排序
         searchBuilder.sort("@timestamp", SortOrder.DESC);
@@ -126,6 +174,7 @@ public class TaiShiGuidesService {
                     result.add(taishi);
                 } else {
                     var eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
+                    eventData.setTimestamp(hit.getSourceAsMap().get("@timestamp").toString());
                     var taishi = this.getEventInfoFrom(eventData, mac2Elements);
                     result.add(taishi);
                 }
@@ -136,11 +185,7 @@ public class TaiShiGuidesService {
         return new ListObjServiceResult<>(new ListObjResult<>(result, total));
     }
 
-
     private EsEventRequestParsedResult getHostEsEventRequestParsedResult(BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
-        if (CollectionUtils.isNotEmpty(request.getEventName())) {
-            return null;
-        }
         LocalDateTime start = request.getStartTime() == null ? sceneHandler.getEarliestStartTime() : request.getStartTime();
         LocalDateTime end = request.getEndTime() == null ? start.plusSeconds(10) : request.getEndTime();
 
@@ -157,6 +202,11 @@ public class TaiShiGuidesService {
                     .map(d -> FlowAttackTypeConvert.getFormatType(d))
                     .collect(Collectors.toList());
             agentQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", types));
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getEventName())) {
+            // 加了 event name 条件,默认查不到数据
+            agentQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", Arrays.asList(TextUtils.uuid())));
         }
 
         EsEventRequestParsedResult result = new EsEventRequestParsedResult();
@@ -190,6 +240,11 @@ public class TaiShiGuidesService {
                 attackTypes.addAll(FlowAttackTypeConvert.getAttackTypes(FlowAttackTypeConvert.getFormatType(defenseType)));
             }
             flowQuery.must(QueryBuilders.termsQuery("suricata.category", attackTypes));
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getEventName())) {
+            // 加了 event name 条件,默认查不到数据
+            flowQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", Arrays.asList(TextUtils.uuid())));
         }
 
         EsEventRequestParsedResult result = new EsEventRequestParsedResult();
@@ -315,6 +370,9 @@ public class TaiShiGuidesService {
         taiShi.setTriggerType("host");
         taiShi.setAttCks(eventData.getRule().getMitre().getTactic());
         taiShi.setAttCkNames(this.getAttCkTypeNames(taiShi.getAttCks()));
+        taiShi.setHostEventType("");
+        taiShi.setHostEventDesc(StringUtils.join(eventData.getRule().getMitre().getTechnique(), ","));
+        taiShi.setTime(TimeUtils.utcStringToLocalDateTime(eventData.getTimestamp()));
         if (eventData.getAgent() != null && eid2Elements.containsKey(eventData.getAgent().getName())) {
             var element = eid2Elements.get(eventData.getAgent().getName());
             taiShi.setTargetNodeName(element.getName());
@@ -328,6 +386,7 @@ public class TaiShiGuidesService {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
         taiShi.setTriggerType("flow");
+        taiShi.setTime(TimeUtils.timestampToLocalDateTime(Long.parseLong(eventData.getTimestamp())));
         if (eventData.getSource() != null) {
             var element = this.getElementBy(eventData.getSource().getMac(), mac2Elements);
             if (element != null) {
