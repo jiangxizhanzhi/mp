@@ -253,23 +253,31 @@ public class TaiShiGuidesService {
         return result;
     }
 
-    public ServiceResult<List<FlowTrend>> getEventTiming(String sceneId) {
-        var sceneResult = csceneInstanceService.get(sceneId);
-        if (sceneResult == null || sceneResult.getSource() == null || sceneResult.getSource().getObj() == null) {
+    public ServiceResult<List<FlowTrend>> getEventTiming(String[] sceneIds) {
+        if (sceneIds == null || sceneIds.length == 0) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<String> csceneIds = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
+        for (String sceneId : sceneIds) {
+            var sceneResult = csceneInstanceService.get(sceneId);
+            if (sceneResult != null && sceneResult.getSource() != null && sceneResult.getSource().getObj() != null) {
+                csceneIds.add(sceneId);
+                ids.add(sceneResult.getSource().getObj().getScene());
+            }
+        }
+        if (CollectionUtils.isEmpty(csceneIds)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(ids, new ArrayList<>());
 
-        var scene = sceneResult.getSource().getObj();
-        LocalDateTime startTime = scene.getCreateTime();
-        LocalDateTime endTime = LocalDateTime.now();
-        if (Boolean.TRUE.equals(scene.getDeleted())) {
-            endTime = scene.getUpdateTime();
-        }
+        LocalDateTime startTime = sceneHandler.getEarliestStartTime();
+        LocalDateTime endTime = sceneHandler.getLatestUpdateTime();
 
         // todo 10秒来分可能会有很多数据
         List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, 10);
-        var flows = this.getFlowEventTrend(sceneId, startTime, endTime, timeList.size());
-        var hosts = this.getHostEventTrend(sceneId, startTime, endTime, timeList.size());
+        var flows = this.getFlowEventTrend(csceneIds.toArray(new String[]{}), startTime, endTime, timeList.size());
+        var hosts = this.getHostEventTrend(csceneIds.get(0), startTime, endTime, timeList.size());
         List<FlowTrend> trends = new ArrayList<>();
         trends.addAll(flows);
         for (int i = 0; i < hosts.size(); i++) {
@@ -285,7 +293,7 @@ public class TaiShiGuidesService {
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime = endTime.minusDays(10);// todo 暂时查最近10天内的 方便测试
 
-        var flows = this.getFlowEventTrend(sceneId, startTime, endTime, 24);
+        var flows = this.getFlowEventTrend(new String[]{sceneId}, startTime, endTime, 24);
         var hosts = this.getHostEventTrend(sceneId, startTime, endTime, 24);
         List<FlowTrend> trends = new ArrayList<>();
         trends.addAll(flows);
@@ -295,10 +303,10 @@ public class TaiShiGuidesService {
         return new ServiceResult<>(trends);
     }
 
-    private List<FlowTrend> getFlowEventTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
+    private List<FlowTrend> getFlowEventTrend(String[] sceneIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
         FlowTrendRequest request = new FlowTrendRequest();
         request.setSegmentCount(segmentCount);
-        request.setSceneId(sceneId);
+        request.setSceneId(StringUtils.join(sceneIds, ","));
         request.setType(NumberUtils.INTEGER_ONE);
         request.setEndTime(endTime);
         request.setStartTime(startTime);
