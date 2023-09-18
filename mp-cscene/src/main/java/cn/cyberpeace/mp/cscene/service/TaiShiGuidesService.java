@@ -80,8 +80,8 @@ public class TaiShiGuidesService {
         if (handler == null) {
             return new ListObjServiceResult<>();
         }
-        EsEventRequestParsedResult hostResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getHost());
-        EsEventRequestParsedResult flowResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getFlow() == null ? new TaiShiRequest.EventRequest() : request.getFlow());
+        EsEventRequestParsedResult hostResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
+        EsEventRequestParsedResult flowResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getFlow() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
         if (hostResult == null && flowResult == null) {
             return new ListObjServiceResult<>();
         }
