@@ -24,11 +24,17 @@ public class TaiShiRequest {
     @ApiModelProperty(value = "每页数量")
     private Integer pageSize;
 
-    @ApiModelProperty(value = "每页数量")
-    private EventRequest flow;
+    @ApiModelProperty(value = "攻击事件查询条件")
+    private EventRequest attack;
 
-    @ApiModelProperty(value = "每页数量")
-    private EventRequest host;
+    @ApiModelProperty(value = "防御事件查询条件")
+    private EventRequest defense;
+
+    @ApiModelProperty(value = "是否查询流量数据")
+    private Boolean flow;
+
+    @ApiModelProperty(value = "是否查询主机数据")
+    private Boolean host;
 
     public Integer getPage() {
         return page == null ? 1 : page;
