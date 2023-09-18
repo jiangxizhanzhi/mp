@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -38,12 +39,15 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -413,6 +417,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         } else {
             handlerEnableRate(csceneBO);
+            supplyPlugin(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
             String sceneName = getSceneName(csceneBO.getSceneConfig());
@@ -456,6 +461,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> syncWithoutCheckLimit(CsceneBO csceneBO, CsceneContextBO context) {
+        supplyPlugin(csceneBO);
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
@@ -690,5 +696,188 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
         }
         return ids;
+    }
+
+    public void supplyPlugin(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null) {
+            return;
+        }
+        if (csceneBO.getSceneConfig().getPlugins().containsKey("cpcollection")) {
+            return;
+        }
+        ScenePluginDataBO collectionPlugin = new ScenePluginDataBO();
+        collectionPlugin.setScene(new HashMap<>());
+        collectionPlugin.setElements(new HashMap<>());
+        collectionPlugin.setElementPorts(new HashMap<>());
+
+        csceneBO.getSceneConfig().getPlugins().put("cpcollection", collectionPlugin);
+        collectionPlugin.getScene().put("enable_flow_collect", false);
+        collectionPlugin.getScene().put("enable_flow_mirror", false);
+
+        for (var e : csceneBO.getSceneConfig().getTopology().getElements()) {
+            if (e.getType() != null && e.getType() == BaseSceneElementModel.Type.TERMINAL) {
+                Map<String, Object> collectElement = new HashMap<>();
+                collectElement.put("enable_probe_collect", true);
+                collectElement.put("probes", JsonCommon.parseList(getProbes()));
+                collectionPlugin.getElements().put(e.getId(), collectElement);
+            }
+        }
+    }
+
+    public String getProbes(){
+        return "[" +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"硬件信息\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 0," +
+                "                                        \"id\": \"001\"," +
+                "                                        \"type\": \"0\"," +
+                "                                        \"desc\": \"主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"操作系统信息\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 0," +
+                "                                        \"id\": \"002\"," +
+                "                                        \"type\": \"0\"," +
+                "                                        \"desc\": \"主机名、架构、系统名称、系统版本、平台、发布版本\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"网络接口信息\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 0," +
+                "                                        \"id\": \"003\"," +
+                "                                        \"type\": \"0\"," +
+                "                                        \"desc\": \"名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"端口信息\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 0," +
+                "                                        \"id\": \"004\"," +
+                "                                        \"type\": \"0\"," +
+                "                                        \"desc\": \"协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"进程信息\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 0," +
+                "                                        \"id\": \"005\"," +
+                "                                        \"type\": \"0\"," +
+                "                                        \"desc\": \"PID、进程名、状态、PPID、utime、stime\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"文件变更事件\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 2," +
+                "                                        \"id\": \"006\"," +
+                "                                        \"type\": \"1\"," +
+                "                                        \"collect_path\": [" +
+                "                                            \"\"" +
+                "                                        ]," +
+                "                                        \"desc\": \"包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"注册表变更事件\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 3," +
+                "                                        \"id\": \"007\"," +
+                "                                        \"type\": \"1\"," +
+                "                                        \"collect_path\": [" +
+                "                                            \"\"" +
+                "                                        ]," +
+                "                                        \"desc\": \"包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"日志文件\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 1," +
+                "                                        \"id\": \"011\"," +
+                "                                        \"type\": \"2\"," +
+                "                                        \"collect_path\": [" +
+                "                                            \"\"" +
+                "                                        ]," +
+                "                                        \"desc\": \"日志文件\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"安全软件\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 1," +
+                "                                        \"id\": \"010\"," +
+                "                                        \"type\": \"2\"," +
+                "                                        \"desc\": \"安全软件\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"操作系统\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 1," +
+                "                                        \"id\": \"008\"," +
+                "                                        \"type\": \"2\"," +
+                "                                        \"desc\": \"操作系统\"," +
+                "                                        \"open\": true" +
+                "                                    }," +
+                "                                    {" +
+                "                                        \"common\": true," +
+                "                                        \"output_format\": \"none\"," +
+                "                                        \"os_type\": \"0,1,2,3\"," +
+                "                                        \"name\": \"应用系统日志\"," +
+                "                                        \"interval\": 180," +
+                "                                        \"disabled\": false," +
+                "                                        \"exec_type\": 1," +
+                "                                        \"id\": \"009\"," +
+                "                                        \"type\": \"2\"," +
+                "                                        \"desc\": \"应用系统日志\"," +
+                "                                        \"open\": true" +
+                "                                    }" +
+                "                                ]";
     }
 }
