@@ -40,8 +40,8 @@ public class TaiShiGuidesController {
     }
 
     @ApiOperation(value = "场景态势主机事件列表")
-    @PostMapping("/host_event_list")
-    public ListObjServiceResult<TaiShiEventInfo> getHostEventList(@RequestBody TaiShiHostRequest request) {
+    @GetMapping("/host_event_list")
+    public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
         return taiShiGuidesService.getHostEventList(request).asResult();
     }
 
@@ -59,8 +59,8 @@ public class TaiShiGuidesController {
 
     @ApiOperation(value = "场景运行过程中态势主机和流量事件的出现时间")
     @GetMapping("/event_timing")
-    public ServiceResult<List<FlowTrend>> getEventTiming(@Param("sceneId") String sceneId) {
-        return taiShiGuidesService.getEventTiming(sceneId).asResult();
+    public ServiceResult<List<FlowTrend>> getEventTiming(@Param("sceneIds") String[] sceneIds) {
+        return taiShiGuidesService.getEventTiming(sceneIds).asResult();
     }
 
 }

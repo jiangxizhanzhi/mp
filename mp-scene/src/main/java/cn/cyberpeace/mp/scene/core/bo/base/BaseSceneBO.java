@@ -18,4 +18,6 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private String displayContext;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime updateTime;
 }

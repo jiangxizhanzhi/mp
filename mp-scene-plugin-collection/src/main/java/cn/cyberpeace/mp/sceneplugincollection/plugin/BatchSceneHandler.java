@@ -28,6 +28,8 @@ public class BatchSceneHandler {
 
     private LocalDateTime earliestStartTime;
 
+    private LocalDateTime latestUpdateTime;
+
     private List<String> flowCollectors = new ArrayList<>();
 
     private List<String> probeCollectors = new ArrayList<>();
@@ -70,6 +72,10 @@ public class BatchSceneHandler {
 
     public LocalDateTime getEarliestStartTime() {
         return earliestStartTime;
+    }
+
+    public LocalDateTime getLatestUpdateTime(){
+        return latestUpdateTime;
     }
 
     public List<String> getFlowCollectors() {
@@ -194,6 +200,9 @@ public class BatchSceneHandler {
             this.id2SceneHandler.put(sceneId,sceneHandler);
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
+            }
+            if (latestUpdateTime == null || sceneHandler.getScene().getUpdateTime().isAfter(latestUpdateTime)) {
+                latestUpdateTime = sceneHandler.getScene().getUpdateTime();
             }
             CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
