@@ -37,4 +37,7 @@ public class ActivationRequest {
     @NotBlank
     private String verifyCode;
 
+    @ApiModelProperty(value = "试用7天标志")
+    private Boolean trialFlag = false;
+
 }
