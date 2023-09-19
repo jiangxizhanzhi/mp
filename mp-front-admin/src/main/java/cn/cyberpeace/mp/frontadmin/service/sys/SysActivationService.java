@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.util.FileUtils;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
@@ -87,7 +89,7 @@ public class SysActivationService {
     private SysActivCtlService sysActivCtlService;
 
     @Autowired
-    private SysConfigService sysConfigService;
+    private SysConfigMapper sysConfigMapper;
 
     /**
      * 激活
@@ -143,7 +145,8 @@ public class SysActivationService {
             // 校验激活码和激活配置项，是否匹配
             boolean success = false;
             if (activationRequest.getTrialFlag()) {
-                SysConfigModel sysConfigModel = sysConfigService.getByKeyName(TRIAL_USE_SYS_CONFIG);
+                HumanCondition condition = new HumanCondition().filterEqual(SysConfigModel::getKeyName, TRIAL_USE_SYS_CONFIG);
+                SysConfigModel sysConfigModel = sysConfigMapper.first(condition);
                 if (sysConfigModel == null) {
                     success = true;
                     sysConfigModel = new SysConfigModel();
@@ -151,7 +154,7 @@ public class SysActivationService {
                     sysConfigModel.setKeyName(TRIAL_USE_SYS_CONFIG);
                     sysConfigModel.setInitValue("1");
                     sysConfigModel.setValue("1");
-                    sysConfigService.create(sysConfigModel);
+                    sysConfigMapper.create(sysConfigModel);
                 } else {
                     log.error("Trial use out of date!");
                     throw new MpRuntimeException(AdminErrorCode.TRIAL_USE_OUT_OF_DATE);
