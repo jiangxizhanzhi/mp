@@ -22,6 +22,7 @@ public enum AdminErrorCode implements ErrorCode {
     SYS_ACTIVATION_NONE("MP-110033", "sys_activation_none"),
     SYS_ACTIVATION_SYSUUID_NOTMATCH("MP-110034", "sys_activation_sysuuid_notmatch"),
     SYS_ACTIVATION_CODE_USED("MP-110035", "sys_activation_code_used"),
+    TRIAL_USE_OUT_OF_DATE("MP-110036", "trial_use_out_of_date"),
 
 
     SYS_NOTICE_NOT_EXISTED("MP-110040", "sys_notice_not_existed"),

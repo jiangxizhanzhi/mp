@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
@@ -59,6 +60,10 @@ public class SysActivationService {
 
     private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private static final Integer TRIAL_DAYS = 7;
+
+    public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
+
     // 竞赛相关激活项目
     private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
     // 实训相关激活项
@@ -80,6 +85,9 @@ public class SysActivationService {
 
     @Autowired
     private SysActivCtlService sysActivCtlService;
+
+    @Autowired
+    private SysConfigService sysConfigService;
 
     /**
      * 激活
@@ -133,7 +141,24 @@ public class SysActivationService {
             String verifyCode = activationRequest.getVerifyCode();
 
             // 校验激活码和激活配置项，是否匹配
-            boolean success = licenseService.verify(verifyStr, verifyCode);
+            boolean success = false;
+            if (activationRequest.getTrialFlag()) {
+                SysConfigModel sysConfigModel = sysConfigService.getByKeyName(TRIAL_USE_SYS_CONFIG);
+                if (sysConfigModel == null) {
+                    success = true;
+                    sysConfigModel = new SysConfigModel();
+                    sysConfigModel.setTenant("default");
+                    sysConfigModel.setKeyName(TRIAL_USE_SYS_CONFIG);
+                    sysConfigModel.setInitValue("1");
+                    sysConfigModel.setValue("1");
+                    sysConfigService.create(sysConfigModel);
+                } else {
+                    log.error("Trial use out of date!");
+                    throw new MpRuntimeException(AdminErrorCode.TRIAL_USE_OUT_OF_DATE);
+                }
+            } else {
+                success = licenseService.verify(verifyStr, verifyCode);
+            }
 
             if (success) {
                 // 校验通过，生成加密文件存储磁盘
@@ -404,7 +429,12 @@ public class SysActivationService {
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
-        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        String expiredDateStr = "";
+        if (activationRequest.getTrialFlag()) {
+            expiredDateStr = getExpiredDateStrDay(TRIAL_DAYS);
+        } else {
+            expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        }
         activationResponse.setExpiredDate(expiredDateStr);
         activationResponse.setVerifyCode(encryptedVerifyCode);
 
@@ -496,6 +526,12 @@ public class SysActivationService {
         return expiredDate;
     }
 
+    private String getExpiredDateStrDay(Integer days) {
+        LocalDate localDate = LocalDate.now().plusDays(days);
+        String expiredDate = localDate.format(dateFormatter);
+        return expiredDate;
+    }
+
     private String getDelayExpireDateStr(Integer months, String strExpireDate) {
         LocalDate oldExpireDate = TimeUtils.stringToLocalDate(strExpireDate);
         LocalDate localDate = oldExpireDate.plusMonths(months);
@@ -514,13 +550,23 @@ public class SysActivationService {
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
         // 考虑用时间戳替代
-        LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        LocalDateTime expiredTime = null;
+        if (activationRequest.getTrialFlag()) {
+            expiredTime = LocalDateTime.now().plusDays(TRIAL_DAYS).plusDays(1);
+        } else {
+            expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        }
         Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
         Long lifeTimeSeconds = duration.toSeconds();
         updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
 
         String activeDateStr = LocalDate.now().format(dateFormatter);
-        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        String expiredDateStr = "";
+        if (activationRequest.getTrialFlag()) {
+            expiredDateStr = getExpiredDateStrDay(TRIAL_DAYS);
+        } else {
+            expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        }
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
