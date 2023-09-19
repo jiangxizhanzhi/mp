@@ -53,6 +53,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -610,7 +611,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
-        return new ServiceResult<>(instanceHandler.toData());
+        var data = instanceHandler.toData();
+        var scene = data.getScene().getTopology().getScene();
+        var recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        if (recorder != null) {
+            recorder.refreshSceneBO(scene);
+        }
+        return new ServiceResult<>(data);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
