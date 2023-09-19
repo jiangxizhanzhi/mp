@@ -6,13 +6,16 @@ import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,6 +60,10 @@ public class LicenseService {
      * @return
      */
     public boolean verify(String verifyStr, String verifyCode) {
+        if (StringUtils.isEmpty(verifyCode)) {
+            log.info("verifyCode is empty!");
+            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
+        }
 //        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;

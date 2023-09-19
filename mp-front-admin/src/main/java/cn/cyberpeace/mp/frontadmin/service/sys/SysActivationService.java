@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.ModuleInfoResponse;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
@@ -61,6 +62,8 @@ public class SysActivationService {
 
     private static final Integer TRIAL_DAYS = 7;
 
+    public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
+
     // 竞赛相关激活项目
     private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
     // 实训相关激活项
@@ -82,6 +85,9 @@ public class SysActivationService {
 
     @Autowired
     private SysActivCtlService sysActivCtlService;
+
+    @Autowired
+    private SysConfigService sysConfigService;
 
     /**
      * 激活
@@ -137,7 +143,19 @@ public class SysActivationService {
             // 校验激活码和激活配置项，是否匹配
             boolean success = false;
             if (activationRequest.getTrialFlag()) {
-                success = true;
+                SysConfigModel sysConfigModel = sysConfigService.getByKeyName(TRIAL_USE_SYS_CONFIG);
+                if (sysConfigModel == null) {
+                    success = true;
+                    sysConfigModel = new SysConfigModel();
+                    sysConfigModel.setTenant("default");
+                    sysConfigModel.setKeyName(TRIAL_USE_SYS_CONFIG);
+                    sysConfigModel.setInitValue("1");
+                    sysConfigModel.setValue("1");
+                    sysConfigService.create(sysConfigModel);
+                } else {
+                    log.error("Trial use out of date!");
+                    throw new MpRuntimeException(AdminErrorCode.TRIAL_USE_OUT_OF_DATE);
+                }
             } else {
                 success = licenseService.verify(verifyStr, verifyCode);
             }
