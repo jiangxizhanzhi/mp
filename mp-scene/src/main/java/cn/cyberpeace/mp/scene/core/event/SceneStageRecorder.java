@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SceneStageRecorder {
 
-    private static Map<String, SceneStageRecorder> RECORDER_MAP = new HashMap<>();
+    private static Map<String, SceneStageRecorder> RECORDER_MAP = new ConcurrentHashMap<>(8);
 
     private Map<String, SceneEventProcess> processMap;
 
