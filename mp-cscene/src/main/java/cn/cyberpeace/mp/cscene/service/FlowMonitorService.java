@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
@@ -634,5 +635,9 @@ public class FlowMonitorService {
         }
         FlowPcapExportUtil.finalProcess(taskId, url);
         return url;
+    }
+
+    public FlowClassificationFromJsonModel getFlowClassificationFromJsonModel() {
+        return flowAnalysisService.getFlowClassificationInfoFromJson();
     }
 }

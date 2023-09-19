@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowClassificationDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.FlowEventData;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -74,6 +76,13 @@ public class TaiShiGuidesService {
 
     @Resource
     private CsceneInstanceService csceneInstanceService;
+
+    public List<FlowClassificationDto> listAllFlowClassifications() {
+        FlowClassificationFromJsonModel flowClassificationFromJsonModel = flowMonitorService.getFlowClassificationFromJsonModel();
+        List<FlowClassificationDto> flowClassificationDtoList = FlowClassificationDto.getDtoListFromModel(flowClassificationFromJsonModel);
+        List<FlowClassificationDto> attackTypeNotEmptyDtoList = flowClassificationDtoList.stream().filter(dto -> StringUtils.isNotBlank(dto.getAttackType())).collect(Collectors.toList());
+        return attackTypeNotEmptyDtoList;
+    }
 
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(TaiShiRequest request) {
         var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
