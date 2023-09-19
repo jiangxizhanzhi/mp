@@ -183,6 +183,11 @@ public class SysActivationService {
 
     }
 
+    public void resetMenuVisibility() {
+        ACTIVATION_CONTENT = status();
+        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+    }
+
     /**
      * 授权延期
      * @param activationRequest
