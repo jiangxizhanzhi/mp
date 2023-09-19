@@ -1,5 +1,5 @@
 #外部配置
-spring.datasource.ext-var.db-ip=10.4.1.36
+spring.datasource.ext-var.db-ip=10.100.7.1
 spring.datasource.ext-var.db-port=9306
 spring.datasource.ext-var.db-database=mp
 spring.datasource.ext-var.username=root
@@ -7,7 +7,7 @@ spring.datasource.ext-var.password=cyberpeace@2020
 
 spring.flyway.ext-var.enabled=false
 
-spring.rabbitmq.ext-var.host=10.4.1.36
+spring.rabbitmq.ext-var.host=10.100.7.1
 spring.rabbitmq.ext-var.port=9672
 spring.rabbitmq.ext-var.username=cpcloud
 spring.rabbitmq.ext-var.password=MzhhMzU4NDQzNzU
@@ -22,10 +22,10 @@ springfox.documentation.ext-var.swagger-ui.enabled=true
 mp.common.ext-var.mp-ip=10.100.1.12
 mp.common.ext-var.mp-port=8001
 #云平台适配层接口地址
-mp.common.ext-var.cp-ip=10.4.1.36
+mp.common.ext-var.cp-ip=10.100.7.1
 mp.common.ext-var.cp-port=11111
 
-mp.base.ext-var.fdfs-ip=10.4.1.36
+mp.base.ext-var.fdfs-ip=10.100.7.1
 mp.base.ext-var.fdfs-tracker-port=22122
 mp.base.ext-var.fdfs-inner-file-port=8888
 mp.base.ext-var.fdfs-outer-http-server=/fdfs
@@ -34,7 +34,7 @@ mp.base.ext-var.lfs-inner-http-url=/api/mp/file/%s
 mp.base.ext-var.lfs-outer-http-url=/api/mp/file/%s
 
 # mp-situationaware 模块配置
-mp.situationaware.ext-var.wazuh-ip=10.4.1.36
+mp.situationaware.ext-var.wazuh-ip=10.100.7.1
 mp.situationaware.ext-var.wazuh-port=15500
 mp.situationaware.ext-var.wazuh-username=wazuh
 mp.situationaware.ext-var.wazuh-password=Abcd123#
@@ -46,7 +46,7 @@ mp.situationaware.ext-var.arkime-es-port=9205
 mp.situationaware.ext-var.arkime-disk=50
 
 # mp-log 模块
-mp.log.ext-var.es-ip=10.4.1.36
+mp.log.ext-var.es-ip=10.100.7.1
 mp.log.ext-var.es-port=9205
 mp.log.ext-var.es-max-page-size=10000
 #日志存储数据库可以配置：es、sql
