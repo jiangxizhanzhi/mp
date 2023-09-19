@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
@@ -12,6 +14,7 @@ import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowTemplateBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -60,6 +63,7 @@ import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -81,6 +85,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Flow;
 import java.util.stream.Collectors;
 
 /**
@@ -90,6 +95,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FlowAnalysisService extends AbstractBaseService {
+
+    private static final String CLASSIFICATION_FILE_NAME = "suricata/classification.json";
 
     @javax.annotation.Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
@@ -108,13 +115,23 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     @Transactional
     public void initClassification() throws IOException {
-        Resource[] resources = new PathMatchingResourcePatternResolver()
-                .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/classification.json");
-        String json = FileUtils.readLine(resources);
-        var attackClassificationBOS = JSONObject.parseObject(json, AttackClassificationBO.class);
-        log.info("initClassification >>> attackClassificationBOS：{}",attackClassificationBOS);
+        FlowClassificationFromJsonModel flowClassificationFromJsonModel = getFlowClassificationInfoFromJson();
+        AttackClassificationBO attackClassificationBO = AttackClassificationBO.getBoFromJsonModel(flowClassificationFromJsonModel);
+        log.info("initClassification >>> attackClassificationBOS：{}",attackClassificationBO);
         flowClassificationsService.deleteAll();
-        flowClassificationsService.batchSave(attackClassificationBOS);
+        flowClassificationsService.batchSave(attackClassificationBO);
+    }
+
+    @Cacheable(value = "#root.targetClass.simpleName + '.' + #root.methodName")
+    public FlowClassificationFromJsonModel getFlowClassificationInfoFromJson() {
+        try {
+            Resource[] resources = new PathMatchingResourcePatternResolver()
+                    .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + CLASSIFICATION_FILE_NAME);
+            String json = FileUtils.readLine(resources);
+            return JsonUtils.parse(json, FlowClassificationFromJsonModel.class);
+        } catch (IOException error) {
+            throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED.format(CLASSIFICATION_FILE_NAME));
+        }
     }
 
     /**
