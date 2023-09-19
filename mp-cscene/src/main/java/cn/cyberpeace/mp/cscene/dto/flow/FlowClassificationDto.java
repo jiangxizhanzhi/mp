@@ -39,7 +39,7 @@ public class FlowClassificationDto {
     public static class FlowEvent {
         private String flowEventType;
 
-        private String severityDesc;
+        private Integer severityDesc;
     }
 
     public static List<FlowClassificationDto> getDtoListFromModel(FlowClassificationFromJsonModel flowClassificationFromJsonModel) {
@@ -51,11 +51,10 @@ public class FlowClassificationDto {
             FlowClassificationDto flowClassificationDto = new FlowClassificationDto().setAttackType(attackType);
             List<FlowEvent> flowEvents = classification.getFlow_events().stream().map(event -> {
                 String flowEventType = getValueByLocal(locale, event.getEn_desc(), event.getZh_desc());
-                String severityDesc = getSeverityDesc(event.getSeverity(), locale);
 
                 return new FlowEvent()
                         .setFlowEventType(flowEventType)
-                        .setSeverityDesc(severityDesc);
+                        .setSeverityDesc(event.getSeverity());
             }).collect(Collectors.toList());
             flowClassificationDto.setFlowEvents(flowEvents);
             classificationDtoList.add(flowClassificationDto);
@@ -69,19 +68,6 @@ public class FlowClassificationDto {
             return cnValue;
         } else {
             return enValue;
-        }
-    }
-
-    private static String getSeverityDesc(Integer severity, Locale locale) {
-
-        if (Objects.isNull(severity)) {
-            severity = NumberUtils.INTEGER_ZERO;
-        }
-        boolean chineseLocalFlag = getChineseLocalFlag(locale);
-        if (chineseLocalFlag) {
-            return String.format("%s级", String.valueOf(severity));
-        } else {
-            return String.format("Level %s", String.valueOf(severity));
         }
     }
 
