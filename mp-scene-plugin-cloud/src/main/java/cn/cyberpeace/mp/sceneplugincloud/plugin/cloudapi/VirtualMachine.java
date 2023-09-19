@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -167,6 +168,9 @@ public class VirtualMachine extends CloudClient {
         try{
             return doAction(instanceId, new VirtualMachineStopData());
         } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict") && e.getMessage().contains("powering-off")) {
+                throw new MpRuntimeException(CloudErrorCode.POWERING_OFF);
+            }
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是暂停状态
                 var instance = this.get(instanceId);

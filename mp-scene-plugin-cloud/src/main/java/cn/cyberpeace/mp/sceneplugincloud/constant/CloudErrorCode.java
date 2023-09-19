@@ -17,7 +17,8 @@ public enum CloudErrorCode implements ErrorCode {
     NODE_CREATE_TIMEOUT("MP-110709", "node_create_timeout"),
     OPERATING_ERRORS("MP-110710", "operating_errors"),
     UN_SUPPORT_STATIC_ROUTE("MP-110711", "un_support_static_route"),
-    UN_SUPPORT_OPERATE("MP-110712", "un_support_operate");
+    UN_SUPPORT_OPERATE("MP-110712", "un_support_operate"),
+    POWERING_OFF("MP-110713", "powering-off");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

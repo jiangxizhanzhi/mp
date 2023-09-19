@@ -20,7 +20,7 @@ spring:
 
   rabbitmq:
     ext-var:
-      host: ${RABBITMQ_IP:10.100.7.1}
+      host: ${RABBITMQ_IP:10.4.1.36}
       port: ${RABBITMQ_PORT:9672}
       username: ${RABBITMQ_USERNAME:cpcloud}
       password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
@@ -89,7 +89,7 @@ mp:
     ext-var:
       mp-ip: ${MP_API_IP:10.100.7.1}          # MP中台地址
       mp-port: ${MP_API_PORT:8001}
-      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+      cp-ip: ${CP_IP:10.4.1.36}                # 云平台适配层接口地址
       cp-port: ${CP_PORT:11111}
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
       public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
