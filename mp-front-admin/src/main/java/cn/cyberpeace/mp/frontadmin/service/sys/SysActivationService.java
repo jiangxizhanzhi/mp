@@ -161,6 +161,13 @@ public class SysActivationService {
 
     }
 
+
+    public void resetMenuVisibility() {
+        ACTIVATION_CONTENT = status();
+        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+    }
+
+
     /**
      * 查询系统激活状态
      * @return

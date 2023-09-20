@@ -92,6 +92,13 @@ public class SysActivationController {
         return ResultCommon.success(code);
     }
 
+    @ApiOperation("重置菜单可见性")
+    @PostMapping("/reset_menu_visibility")
+    public ServiceResult resetMenuVisibility() {
+        activationService.resetMenuVisibility();
+        return ResultCommon.success();
+    }
+
 
     private ActivationResponse getActivationResponse() {
         ActivationResponse content = activationService.status();
