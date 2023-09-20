@@ -119,6 +119,7 @@ mp:
       wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
       arkime-es-port: ${ARKIME_ES_PORT:9205}
+      arkime-image-name: ${ARKIME_IMAGE_NAME:mp_arkime:v2}
       arkime-disk: ${ARKIME_DISK:50}
       linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
       windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}

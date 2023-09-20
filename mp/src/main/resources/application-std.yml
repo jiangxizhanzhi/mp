@@ -155,7 +155,7 @@ mp:
     arkime-cpcloud-network-mirror-url: http://${mp.common.ext-var.cp-ip}:11111/cpcloud/sdn_app/v1
     arkime-es-host: ${mp.situationaware.ext-var.arkime-es-host}
     arkime-es-port: ${mp.situationaware.ext-var.arkime-es-port}
-    arkime-image-name: mp_arkime:v2
+    arkime-image-name: ${mp.situationaware.ext-var.arkime-image-name}
     arkime-disk: ${mp.situationaware.ext-var.arkime-disk}
     arkime-username: api
     arkime-password: api
