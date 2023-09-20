@@ -143,6 +143,10 @@ public class DeviceModel extends BaseModel {
     @DefaultBool
     private Boolean isInit;
 
+    @ApiModelProperty(value = "脆弱性信息")
+    @DefaultBool
+    private String leaks;
+
     /**
      * 实体信息
      */

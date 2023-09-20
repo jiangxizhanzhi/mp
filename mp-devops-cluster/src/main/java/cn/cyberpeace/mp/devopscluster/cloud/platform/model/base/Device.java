@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -165,6 +166,9 @@ public class Device extends BaseCloudPlatformResult {
     private ExtImageInfo extImageInfo;
 
     private ExtDocker extDocker;
+
+    @ApiModelProperty(value = "脆弱性信息")
+    private List<Leak> leaks;
 
     /**
      * 是否内置镜像

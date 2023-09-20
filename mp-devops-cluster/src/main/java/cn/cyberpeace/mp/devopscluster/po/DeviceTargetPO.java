@@ -145,4 +145,6 @@ public class DeviceTargetPO extends BaseModel {
      * 靶标实例创建用户
      */
     private String instanceCreateUser;
+
+    private String leaks;
 }

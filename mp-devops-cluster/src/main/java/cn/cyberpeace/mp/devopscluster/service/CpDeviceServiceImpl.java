@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceMapper;
 import cn.cyberpeace.mp.devopscluster.service.fields.DeviceFields;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
 import cn.hutool.core.collection.CollUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -217,6 +219,11 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
             ExtImageInfo extImageInfo = JsonCommon.parse(model.getExtImageInfo(), ExtImageInfo.class);
             device.setExtImageInfo(extImageInfo);
         }
+        if (StringUtils.isNotBlank(model.getLeaks())) {
+            List<Leak> leaks = JsonCommon.parse(model.getLeaks(), new TypeReference<List<Leak>>() {});
+            device.setLeaks(leaks);
+        }
+
         device.setDefaultLaunchImageName(model.getDefaultLaunchImageName());
         device.setSuccess(true);
         return device;
