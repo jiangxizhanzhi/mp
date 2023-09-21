@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequ
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.element.ElementLeaksDto;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
@@ -783,5 +784,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    }
+
+    @ApiOperation("获取实例场景某一个节点的脆弱性信息")
+    @GetMapping("/getElmentLeaks")
+    public ServiceResult<ElementLeaksDto> getElementLeaks(@RequestParam("id") String id) {
+        return new ServiceResult<>(csceneSpecialService.getElementLeaks(id)).asResult();
     }
 }

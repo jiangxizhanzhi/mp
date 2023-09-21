@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.element.ElementLeaksDto;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
@@ -34,16 +36,21 @@ import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -86,6 +93,14 @@ public class CsceneSpecialService {
 
     @Resource
     private ScenePluginCloudSceneService cloudSceneService;
+
+    @Autowired
+    private SceneConfigElementMapper sceneConfigElementMapper;
+
+    @Autowired
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
+
 
     @Data
     public static class CsceneElementStat {
@@ -893,6 +908,32 @@ public class CsceneSpecialService {
             }
         }
         return new ServiceResult<>(list);
+    }
+
+    public ElementLeaksDto getElementLeaks(String id) {
+        ParamCheck.notBlank(id, "id");
+        HumanCondition humanCondition = new HumanCondition().filterEqual(SceneConfigElementModel::getNodeId, id);
+        List<SceneConfigElementModel> sceneConfigElementModelList = sceneConfigElementMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(sceneConfigElementModelList)) {
+            return new ElementLeaksDto();
+        } else {
+            SceneConfigElementModel sceneConfigElementModel = sceneConfigElementModelList.get(0);
+            String systemNameCn = Optional.ofNullable(sceneConfigElementModel.getSystemType()).map(type -> SystemTypeUtils.KEY_SYSTEM_TYPE_MAP.get(type))
+                    .map(SystemTypeUtils.SystemTypeItem::getStandardName).orElse("");
+            ElementLeaksDto elementLeaksDto = new ElementLeaksDto();
+            elementLeaksDto.setSystemInfo(systemNameCn);
+            elementLeaksDto.setId(id);
+
+            HumanCondition cloudCondition = new HumanCondition().filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, id);
+            List<CloudPluginSceneConfigElementModel> cloudPluginSceneConfigElementModelList = cloudPluginSceneConfigElementMapper.list(humanCondition);
+            if (CollectionUtils.isNotEmpty(cloudPluginSceneConfigElementModelList)) {
+                CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = cloudPluginSceneConfigElementModelList.get(0);
+                List<Leak> leaks = JsonCommon.parse(cloudPluginSceneConfigElementModel.getLeaks(), new TypeReference<List<Leak>>() {
+                });
+                elementLeaksDto.setLeaks(leaks);
+            }
+            return elementLeaksDto;
+        }
     }
 
 }

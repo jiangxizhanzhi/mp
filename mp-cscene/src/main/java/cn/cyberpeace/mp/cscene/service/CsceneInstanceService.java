@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.dto.element.ElementLeaksDto;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -50,14 +52,21 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -85,6 +94,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -96,15 +106,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -171,6 +173,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
+
+    @Autowired
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1302,6 +1310,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             result.put(entry.getKey(), entry.getValue());
         });
         return result;
+    }
+
+    public ElementLeaksDto getElementLeaks(String id) {
+        ParamCheck.notBlank(id, "id");
+        HumanCondition humanCondition = new HumanCondition().filterEqual(SceneElementModel::getNodeId, id);
+        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(sceneElementModelList)) {
+            return new ElementLeaksDto();
+        } else {
+            SceneElementModel sceneElementModel = sceneElementModelList.get(0);
+            String systemNameCn = Optional.ofNullable(sceneElementModel.getSystemType()).map(type -> SystemTypeUtils.KEY_SYSTEM_TYPE_MAP.get(type))
+                    .map(SystemTypeUtils.SystemTypeItem::getStandardName).orElse("");
+            ElementLeaksDto elementLeaksDto = new ElementLeaksDto();
+            elementLeaksDto.setSystemInfo(systemNameCn);
+            elementLeaksDto.setId(id);
+
+            HumanCondition cloudCondition = new HumanCondition().filterEqual(CloudPluginSceneElementModel::getSceneElement, id);
+            List<CloudPluginSceneElementModel> cloudPluginSceneElementModelList = cloudPluginSceneElementMapper.list(humanCondition);
+            if (CollectionUtils.isNotEmpty(cloudPluginSceneElementModelList)) {
+                CloudPluginSceneElementModel cloudPluginSceneElementModel = cloudPluginSceneElementModelList.get(0);
+                List<Leak> leaks = JsonCommon.parse(cloudPluginSceneElementModel.getLeaks(), new TypeReference<List<Leak>>() {
+                });
+                elementLeaksDto.setLeaks(leaks);
+            }
+            return elementLeaksDto;
+        }
     }
 
 

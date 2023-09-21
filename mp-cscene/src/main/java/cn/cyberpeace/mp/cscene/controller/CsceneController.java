@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementLeaksDto;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -258,5 +259,11 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @ApiOperation("获取场景某一个节点的脆弱性信息")
+    @GetMapping("/getElmentLeaks")
+    public ServiceResult<ElementLeaksDto> getElementLeaks(@RequestParam("id") String id) {
+        return new ServiceResult<>(csceneSpecialService.getElementLeaks(id)).asResult();
     }
 }
