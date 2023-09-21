@@ -135,6 +135,11 @@ public class NetworkTrafficGroupService {
         paramObject.put("networks", networks);
         //设置环境变量
         JSONObject environment = new JSONObject();
+
+        environment.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
+        environment.put("SIC_ARKIME_INSTALL_DIR", "/opt/arkime");
+        environment.put("SIC_ARKIME_ELASTICSEARCH_PREFIX", instanceId);
+
         environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
         environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
         environment.put("ES_PREFIX", instanceId);
