@@ -925,7 +925,7 @@ public class CsceneSpecialService {
             elementLeaksDto.setId(id);
 
             HumanCondition cloudCondition = new HumanCondition().filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, id);
-            List<CloudPluginSceneConfigElementModel> cloudPluginSceneConfigElementModelList = cloudPluginSceneConfigElementMapper.list(humanCondition);
+            List<CloudPluginSceneConfigElementModel> cloudPluginSceneConfigElementModelList = cloudPluginSceneConfigElementMapper.list(cloudCondition);
             if (CollectionUtils.isNotEmpty(cloudPluginSceneConfigElementModelList)) {
                 CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = cloudPluginSceneConfigElementModelList.get(0);
                 List<Leak> leaks = JsonCommon.parse(cloudPluginSceneConfigElementModel.getLeaks(), new TypeReference<List<Leak>>() {

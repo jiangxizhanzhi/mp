@@ -1327,7 +1327,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             elementLeaksDto.setId(id);
 
             HumanCondition cloudCondition = new HumanCondition().filterEqual(CloudPluginSceneElementModel::getSceneElement, id);
-            List<CloudPluginSceneElementModel> cloudPluginSceneElementModelList = cloudPluginSceneElementMapper.list(humanCondition);
+            List<CloudPluginSceneElementModel> cloudPluginSceneElementModelList = cloudPluginSceneElementMapper.list(cloudCondition);
             if (CollectionUtils.isNotEmpty(cloudPluginSceneElementModelList)) {
                 CloudPluginSceneElementModel cloudPluginSceneElementModel = cloudPluginSceneElementModelList.get(0);
                 List<Leak> leaks = JsonCommon.parse(cloudPluginSceneElementModel.getLeaks(), new TypeReference<List<Leak>>() {

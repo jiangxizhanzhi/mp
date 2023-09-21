@@ -787,8 +787,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取实例场景某一个节点的脆弱性信息")
-    @GetMapping("/getElmentLeaks")
+    @GetMapping("/getElementLeaks")
     public ServiceResult<ElementLeaksDto> getElementLeaks(@RequestParam("id") String id) {
-        return new ServiceResult<>(csceneSpecialService.getElementLeaks(id)).asResult();
+        return new ServiceResult<>(modelService.getElementLeaks(id)).asResult();
     }
 }
