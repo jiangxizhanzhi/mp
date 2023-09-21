@@ -366,6 +366,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
+        userModel.setDelayRemindLicenseTime(LocalDateTime.now().plusDays(100));
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
