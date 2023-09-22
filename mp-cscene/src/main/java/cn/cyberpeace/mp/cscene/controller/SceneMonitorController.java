@@ -87,7 +87,19 @@ public class SceneMonitorController {
                 }
             }
         }
-        Collections.sort(result, Comparator.comparing(ElementMonitorBasicInfo::getName));
+//        Collections.sort(result, Comparator.comparing(ElementMonitorBasicInfo::getName));
+        List<ElementMonitorBasicInfo> result2 = new ArrayList<>();
+        ElementMonitorBasicInfo sp = null ;
+        for (var a : result) {
+            if ("制造中心服务端—添加探针".equals(a.getName())) {
+                sp = a;
+            } else {
+                result2.add(a);
+            }
+        }
+        if (sp != null) {
+            result2.add(0, sp);
+        }
         return ResultCommon.success(result);
     }
 
