@@ -44,6 +44,12 @@ public class SuricataConstant {
     //SURICATA_RULE表的pk字段的初始位置
     public static final Integer SURICATA_RULE_FIELD_VALUE_PK_FIRST = 0;
 
+    public static final String COMMA = ",";
+
+    public static final String EMPTY_STR = "";
+
+    public static final Integer ZERO = 0;
+
 
     /**
      * 规则字段和解析对应
