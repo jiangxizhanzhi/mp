@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
 import cn.cyberpeace.mp.situationaware.bo.WarningRuleConfigBO;
 import cn.cyberpeace.mp.situationaware.constant.*;
+import cn.cyberpeace.mp.situationaware.model.WarningRuleConfigModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -31,16 +34,16 @@ public class WarningRuleConfigDto {
     @ApiModelProperty("告警规则名称")
     private String warningName;
 
-    @ApiModelProperty("告警类别")
+    @ApiModelProperty("告警类别 1-关键文件系统 2-系统进程 3-系统配置 4-系统日志 5-关键日志")
     private String warningTarget;
 
-    @ApiModelProperty("告警等级")
+    @ApiModelProperty("告警等级 1-低危 2-中危 3-高危")
     private String warningClass;
 
-    @ApiModelProperty("告警动作")
+    @ApiModelProperty("告警动作 1-新增 2-变更 3-删除")
     private String warningMovements;
 
-    @ApiModelProperty("系统类型")
+    @ApiModelProperty("系统类型 1-windows 2-linux")
     private String systemType;
 
     @ApiModelProperty("进程名称,多个,隔开")
@@ -49,7 +52,7 @@ public class WarningRuleConfigDto {
     @ApiModelProperty("进程详细信息，多个,隔开")
     private String processDetailFeatures;
 
-    @ApiModelProperty("进程状态")
+    @ApiModelProperty("进程状态 1-running 2-sleeping")
     private List<String> processStatusList;
 
     @ApiModelProperty("文件路径，多个,隔开")
@@ -63,6 +66,26 @@ public class WarningRuleConfigDto {
 
     @ApiModelProperty("注册表路径，多个,隔开")
     private String registerPaths;
+
+    public static WarningRuleConfigModel toModel(WarningRuleConfigDto warningRuleConfigDto) {
+        WarningRuleConfigModel warningRuleConfigModel = new WarningRuleConfigModel();
+        BeanUtils.copyProperties(warningRuleConfigDto, warningRuleConfigModel);
+        warningRuleConfigModel.setWarningTarget(Integer.parseInt(warningRuleConfigDto.getWarningTarget()))
+                .setWarningClass(Integer.parseInt(warningRuleConfigDto.getWarningClass()))
+                .setSystemType(Integer.parseInt(warningRuleConfigDto.getSystemType()))
+                .setProcessStatusList(CollectionUtils.isNotEmpty(warningRuleConfigDto.getProcessStatusList()) ? String.join(",", warningRuleConfigDto.getProcessStatusList()) : "");
+        return warningRuleConfigModel;
+    }
+
+    public static WarningRuleConfigDto fromModel(WarningRuleConfigModel warningRuleConfigModel) {
+        WarningRuleConfigDto warningRuleConfigDto = new WarningRuleConfigDto();
+        BeanUtils.copyProperties(warningRuleConfigModel, warningRuleConfigDto);
+        warningRuleConfigDto.setWarningTarget(String.valueOf(warningRuleConfigModel.getWarningTarget()))
+                .setWarningClass(String.valueOf(warningRuleConfigModel.getWarningClass()))
+                .setSystemType(String.valueOf(warningRuleConfigModel.getSystemType()))
+                .setProcessStatusList(StringUtils.isBlank(warningRuleConfigModel.getProcessStatusList()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getProcessStatusList().split(",")));
+        return warningRuleConfigDto;
+    }
 
     public static WarningRuleConfigBO toBo(WarningRuleConfigDto warningRuleConfigDto) {
         WarningRuleConfigBO warningRuleConfigBO = new WarningRuleConfigBO()

@@ -46,8 +46,7 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
         ParamCheck.notBlank(id, "id");
         WarningRuleConfigModel warningRuleConfigModel = getModelMapper().get(id);
         if (Objects.nonNull(warningRuleConfigModel)) {
-            WarningRuleConfigBO warningRuleConfigBO = WarningRuleConfigBO.fromModel(warningRuleConfigModel);
-            WarningRuleConfigDto warningRuleConfigDto = WarningRuleConfigDto.fromBO(warningRuleConfigBO);
+            WarningRuleConfigDto warningRuleConfigDto = WarningRuleConfigDto.fromModel(warningRuleConfigModel);
             return warningRuleConfigDto;
         } else {
             return new WarningRuleConfigDto();
@@ -56,8 +55,7 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
 
     public void saveWarningRuleConfig(WarningRuleConfigDto warningRuleConfigDto) {
         if (Objects.nonNull(warningRuleConfigDto)) {
-            WarningRuleConfigBO warningRuleConfigBO = WarningRuleConfigDto.toBo(warningRuleConfigDto);
-            WarningRuleConfigModel warningRuleConfigModel = WarningRuleConfigBO.toModel(warningRuleConfigBO);
+            WarningRuleConfigModel warningRuleConfigModel = WarningRuleConfigDto.toModel(warningRuleConfigDto);
             this.create(warningRuleConfigModel);
         }
     }
@@ -65,23 +63,21 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
     public void updateWarningRuleConfig(WarningRuleConfigDto warningRuleConfigDto) {
         if (Objects.nonNull(warningRuleConfigDto)) {
             ParamCheck.notBlank(warningRuleConfigDto.getId(), "id");
-            WarningRuleConfigBO warningRuleConfigBO = WarningRuleConfigDto.toBo(warningRuleConfigDto);
-            WarningRuleConfigModel warningRuleConfigModel = WarningRuleConfigBO.toModel(warningRuleConfigBO);
+            WarningRuleConfigModel warningRuleConfigModel = WarningRuleConfigDto.toModel(warningRuleConfigDto);
             this.update(warningRuleConfigModel);
 
         }
     }
 
-    public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigQuery warningRuleConfigQuery) {
-        WarningRuleConfigParams warningRuleConfigParams = WarningRuleConfigQuery.toParams(warningRuleConfigQuery);
+    public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigParams warningRuleConfigParams) {
         ListObjServiceResult<WarningRuleConfigModel> modelPageResult = this.list(warningRuleConfigParams);
         List<WarningRuleConfigModel> warningRuleConfigModels = Optional.ofNullable(modelPageResult.getSource()).map(ListObjResult::getObjs).orElse(Collections.emptyList());
         int total = modelPageResult.getSource().getTotal();
 
         ListObjServiceResult<WarningRuleConfigDto> dtoPageResult = new ListObjServiceResult<>();
         if (CollectionUtils.isNotEmpty(warningRuleConfigModels)) {
-            List<WarningRuleConfigDto> warningRuleConfigDtoList = warningRuleConfigModels.stream().map(WarningRuleConfigBO::fromModel)
-                    .map(WarningRuleConfigDto::fromBO).collect(Collectors.toList());
+            List<WarningRuleConfigDto> warningRuleConfigDtoList = warningRuleConfigModels.stream()
+                    .map(WarningRuleConfigDto::fromModel).collect(Collectors.toList());
             dtoPageResult.setSource(new ListObjResult<>(warningRuleConfigDtoList, total));
         }
         return dtoPageResult;

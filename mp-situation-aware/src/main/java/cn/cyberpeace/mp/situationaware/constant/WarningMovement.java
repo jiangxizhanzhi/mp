@@ -7,9 +7,9 @@ package cn.cyberpeace.mp.situationaware.constant;
  * @Date 2023/9/21 14:54
  **/
 public enum WarningMovement implements BaseKeyAndName {
-    ADD(0, "新增"),
-    UPDATE(1, "变更"),
-    DELETE(2, "删除"),
+    ADD(1, "新增"),
+    UPDATE(2, "变更"),
+    DELETE(3, "删除"),
     ;
 
     WarningMovement(Integer key, String name) {

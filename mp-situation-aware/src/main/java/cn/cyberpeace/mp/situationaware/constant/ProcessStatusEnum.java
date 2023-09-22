@@ -7,8 +7,8 @@ package cn.cyberpeace.mp.situationaware.constant;
  * @Date 2023/9/21 15:36
  **/
 public enum ProcessStatusEnum implements BaseKeyAndName {
-    RUN(0, "running"),
-    SLEEP(1, "sleeping"),
+    RUN(1, "running"),
+    SLEEP(2, "sleeping"),
 
     ;
 

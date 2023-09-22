@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.constant.SuricataConstant;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.WarningRuleConfigDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.WarningRuleConfigParams;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.WarningRuleConfigQuery;
 import cn.cyberpeace.mp.situationaware.service.WarningRuleConfigService;
 import io.swagger.annotations.Api;
@@ -29,8 +30,8 @@ public class WarningRuleConfigController {
 
     @GetMapping("/page")
     @ApiOperation(value = "告警规则分页查询")
-    public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigQuery warningRuleConfigQuery) {
-        return warningRuleConfigService.pageWarningRuleConfig(warningRuleConfigQuery).asResult();
+    public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigParams warningRuleConfigParams) {
+        return warningRuleConfigService.pageWarningRuleConfig(warningRuleConfigParams).asResult();
     }
 
     @GetMapping

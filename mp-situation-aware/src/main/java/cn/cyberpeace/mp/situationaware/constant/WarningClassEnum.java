@@ -7,9 +7,11 @@ package cn.cyberpeace.mp.situationaware.constant;
  * @Date 2023/9/21 14:50
  **/
 public enum WarningClassEnum implements BaseKeyAndName {
-    LOW(0, "低危"),
-    MID(1, "中危"),
-    HIGH(2, "高危"),
+
+
+    LOW(1, "低危"),
+    MID(2, "中危"),
+    HIGH(3, "高危"),
     ;
 
 

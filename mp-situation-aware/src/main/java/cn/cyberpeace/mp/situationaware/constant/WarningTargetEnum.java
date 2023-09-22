@@ -10,15 +10,15 @@ package cn.cyberpeace.mp.situationaware.constant;
  **/
 public enum WarningTargetEnum implements BaseKeyAndName {
 
-    FILE(0, "关键文件系统"),
+    FILE(1, "关键文件系统"),
 
-    PROCESS(1, "系统进程"),
+    PROCESS(2, "系统进程"),
 
-    CONFIG(2, "系统配置"),
+    CONFIG(3, "系统配置"),
 
-    SYSTEM_LOG(3, "系统日志"),
+    SYSTEM_LOG(4, "系统日志"),
 
-    CORE_LOG(4, "关键日志")
+    CORE_LOG(5, "关键日志")
 
 
     ;

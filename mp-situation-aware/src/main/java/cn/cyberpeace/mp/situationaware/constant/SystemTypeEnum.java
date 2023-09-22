@@ -7,8 +7,9 @@ package cn.cyberpeace.mp.situationaware.constant;
  * @Date 2023/9/21 14:57
  **/
 public enum SystemTypeEnum implements BaseKeyAndName {
-    WINDOWS(0, "windows"),
-    LINUX(1, "linux"),
+
+    WINDOWS(1, "windows"),
+    LINUX(2, "linux"),
     ;
 
     SystemTypeEnum(Integer key, String name) {
