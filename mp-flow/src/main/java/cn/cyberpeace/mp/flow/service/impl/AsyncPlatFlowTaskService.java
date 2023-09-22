@@ -469,12 +469,11 @@ public class AsyncPlatFlowTaskService {
         addContainerRequest.setNetworks(Collections.singletonList(networks));
 
         try {
-            // 创建trex容器
-            log.info("create trex container request: {}", JsonUtils.snakeStringify(addContainerRequest));
+            // 创建trex虚拟机
             String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/container",
                     JsonUtils.snakeStringify(addContainerRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
-            log.info("add trex container response:{}", addVmObj.toJSONString());
+            log.info("add trex vm response:{}", addVmObj.toJSONString());
 
             String fixedIp = null;
             if (BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
