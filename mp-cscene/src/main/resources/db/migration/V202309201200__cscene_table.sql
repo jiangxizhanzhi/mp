@@ -429,7 +429,7 @@ update mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       }
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_config_element where name like '%PC%');
+select node_id from mp_scene_scene_config_element where name like 'PC%');
 
 update mp_sceneplugincloud_scene_element set leaks = '[{
                                                                                                    "name": "CNVD-2021-27989",
@@ -458,7 +458,7 @@ update mp_sceneplugincloud_scene_element set leaks = '[{
                                                                                                }
                                                                                            ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_element where name like '%PC%');
+select node_id from mp_scene_scene_element where name like 'PC%');
 
 
 
