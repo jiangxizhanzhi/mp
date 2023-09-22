@@ -141,7 +141,13 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                             if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
                                 JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
                                 // 根据portId获取最新mac
-                                macAddress = clientDataObj.getString("mac_address");
+                                String portId = clientDataObj.getString("port_id");
+                                String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
+                                JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
+                                log.info("add getPortObj response:{}", getPortObj.toJSONString());
+                                JSONObject portObj = getPortObj.getJSONObject(BaseConstants.STR_DATA);
+                                macAddress = portObj.getString("mac_address");
+
                                 flowTaskPortModel.setMac(macAddress);
                                 flowTaskPortModel.setActuatorId(actuatorId);
                                 flowTaskPortModel.setNetworkId(detail.getNetworkId());
