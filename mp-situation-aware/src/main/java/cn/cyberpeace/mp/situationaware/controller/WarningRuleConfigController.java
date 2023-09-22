@@ -37,7 +37,7 @@ public class WarningRuleConfigController {
     @GetMapping
     @ApiOperation(value = "查询指定id的告警规则")
     public ServiceResult<WarningRuleConfigDto> getWarningRuleConfigById(@RequestParam String id) {
-        return new ServiceResult<>(warningRuleConfigService.getWarningRuleConfigById(id));
+        return new ServiceResult<>(warningRuleConfigService.getWarningRuleConfigById(id)).asResult();
     }
 
     @PostMapping("/update")
