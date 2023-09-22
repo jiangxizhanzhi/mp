@@ -100,7 +100,7 @@ public class SceneMonitorController {
         if (sp != null) {
             result2.add(0, sp);
         }
-        return ResultCommon.success(result);
+        return ResultCommon.success(result2);
     }
 
     @ApiOperation(value = "按需查询场景节点列表")
