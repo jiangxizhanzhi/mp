@@ -73,9 +73,6 @@ public class YanshiController {
         }
         List<String> agentName = new ArrayList<>(batchSceneHandler.getAllEid2ElementMap().keySet());
         Integer alarmType = alarmRequest.getType();
-        if (alarmType != null && (alarmType > 4 || alarmType < 0)) {
-            alarmType = null;
-        }
         SearchRequest request = new SearchRequest();
         var indices = dataCollectionService.buildRequestIndex(batchSceneHandler.getEarliestStartTime(), LocalDateTime.now());
         request.indices(indices);
