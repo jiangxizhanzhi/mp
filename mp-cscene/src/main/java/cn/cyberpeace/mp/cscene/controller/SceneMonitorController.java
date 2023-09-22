@@ -91,7 +91,7 @@ public class SceneMonitorController {
         List<ElementMonitorBasicInfo> result2 = new ArrayList<>();
         ElementMonitorBasicInfo sp = null ;
         for (var a : result) {
-            if ("制造中心服务端—添加探针".equals(a.getName())) {
+            if ("制造中心服务端—添加探针".equals(a.getName()) || "Linux攻击机Hank".equals(a.getName())) {
                 sp = a;
             } else {
                 result2.add(a);
