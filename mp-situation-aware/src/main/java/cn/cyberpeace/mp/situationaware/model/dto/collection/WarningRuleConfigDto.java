@@ -41,7 +41,7 @@ public class WarningRuleConfigDto {
     private String warningClass;
 
     @ApiModelProperty("告警动作 1-新增 2-变更 3-删除")
-    private String warningMovements;
+    private List<String> warningMovements;
 
     @ApiModelProperty("系统类型 1-windows 2-linux")
     private String systemType;
@@ -73,7 +73,8 @@ public class WarningRuleConfigDto {
         warningRuleConfigModel.setWarningTarget(Integer.parseInt(warningRuleConfigDto.getWarningTarget()))
                 .setWarningClass(Integer.parseInt(warningRuleConfigDto.getWarningClass()))
                 .setSystemType(Integer.parseInt(warningRuleConfigDto.getSystemType()))
-                .setProcessStatusList(CollectionUtils.isNotEmpty(warningRuleConfigDto.getProcessStatusList()) ? String.join(",", warningRuleConfigDto.getProcessStatusList()) : "");
+                .setProcessStatusList(CollectionUtils.isNotEmpty(warningRuleConfigDto.getProcessStatusList()) ? String.join(",", warningRuleConfigDto.getProcessStatusList()) : "")
+                .setWarningMovements(CollectionUtils.isNotEmpty(warningRuleConfigDto.getWarningMovements()) ? String.join(",", warningRuleConfigDto.getWarningMovements()) : "");
         return warningRuleConfigModel;
     }
 
@@ -83,7 +84,8 @@ public class WarningRuleConfigDto {
         warningRuleConfigDto.setWarningTarget(String.valueOf(warningRuleConfigModel.getWarningTarget()))
                 .setWarningClass(String.valueOf(warningRuleConfigModel.getWarningClass()))
                 .setSystemType(String.valueOf(warningRuleConfigModel.getSystemType()))
-                .setProcessStatusList(StringUtils.isBlank(warningRuleConfigModel.getProcessStatusList()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getProcessStatusList().split(",")));
+                .setProcessStatusList(StringUtils.isBlank(warningRuleConfigModel.getProcessStatusList()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getProcessStatusList().split(",")))
+                .setWarningMovements(StringUtils.isBlank(warningRuleConfigModel.getWarningMovements()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getWarningMovements().split(",")));
         return warningRuleConfigDto;
     }
 
@@ -93,8 +95,8 @@ public class WarningRuleConfigDto {
                 .setWarningName(warningRuleConfigDto.getWarningName())
                 .setWarningTargetEnum(Optional.ofNullable(warningRuleConfigDto.getWarningTarget()).map(target -> BaseKeyAndName.getByName(target, WarningTargetEnum.class)).orElse(null))
                 .setWarningClassEnum(Optional.ofNullable(warningRuleConfigDto.getWarningClass()).map(className -> BaseKeyAndName.getByName(className, WarningClassEnum.class)).orElse(null))
-                .setWarningMovementList(Optional.ofNullable(warningRuleConfigDto.getWarningMovements()).map(moves -> Arrays.asList(moves.split(SuricataConstant.COMMA))).orElse(Collections.emptyList())
-                        .stream().filter(StringUtils::isNotBlank).map(str -> BaseKeyAndName.getByName(str, WarningMovement.class)).filter(Objects::nonNull).collect(Collectors.toList()))
+//                .setWarningMovementList(Optional.ofNullable(warningRuleConfigDto.getWarningMovements()).map(moves -> Arrays.asList(moves.split(SuricataConstant.COMMA))).orElse(Collections.emptyList())
+//                        .stream().filter(StringUtils::isNotBlank).map(str -> BaseKeyAndName.getByName(str, WarningMovement.class)).filter(Objects::nonNull).collect(Collectors.toList()))
                 .setSystemTypeEnum(Optional.ofNullable(warningRuleConfigDto.getSystemType()).map(system -> BaseKeyAndName.getByName(system, SystemTypeEnum.class)).orElse(null))
                 .setProcessNameSet(Optional.ofNullable(warningRuleConfigDto.getProcessNames()).map(processNames -> Arrays.asList(processNames.split(SuricataConstant.COMMA))).orElse(Collections.emptyList())
                         .stream().filter(StringUtils::isNotBlank).collect(Collectors.toSet()))
@@ -133,7 +135,7 @@ public class WarningRuleConfigDto {
                 .setWarningName(warningRuleConfigBO.getWarningName())
                 .setWarningTarget(warningTarget)
                 .setWarningClass(warningClass)
-                .setWarningMovements(warningMovements)
+//                .setWarningMovements(warningMovements)
                 .setSystemType(systemType)
                 .setProcessNames(processNames)
                 .setProcessStatusList(processStatusList)
