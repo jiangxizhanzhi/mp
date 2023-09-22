@@ -509,17 +509,19 @@ public class AsyncPlatFlowTaskService {
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                        null, 0, () -> refreshTgn(finalFixedIp), () -> log.error("Trex container start error:{}", finalFixedIp));
+                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
+                        null, 0, () -> checkStartTrex(finalFixedIp),
+                        () -> log.error("Trex vm start error:{}", addContainerRequest.getName()));
+
             } else {
-                log.error("add trex container error");
+                log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
         } catch (MpRuntimeException e) {
-            log.error("add container instance error, {}", ExceptionUtils.getStackTrace(e));
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
             throw e;
         } catch (Exception e) {
-            log.error("add container instance error, {}", ExceptionUtils.getStackTrace(e));
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
     }
@@ -959,6 +961,15 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("post tgn file error:", e);
         }
+    }
+
+    /**
+     * 校验trex启动状态
+     * @param fixedIp
+     */
+    private void checkStartTrex(String fixedIp) {
+        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                null, 0, () -> refreshTgn(fixedIp), () -> log.error("Trex vm start error:{}", fixedIp));
     }
 
     /**
