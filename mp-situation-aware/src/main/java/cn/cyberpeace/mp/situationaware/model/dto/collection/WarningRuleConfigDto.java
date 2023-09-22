@@ -74,7 +74,9 @@ public class WarningRuleConfigDto {
                 .setWarningClass(Integer.parseInt(warningRuleConfigDto.getWarningClass()))
                 .setSystemType(Integer.parseInt(warningRuleConfigDto.getSystemType()))
                 .setProcessStatusList(CollectionUtils.isNotEmpty(warningRuleConfigDto.getProcessStatusList()) ? String.join(",", warningRuleConfigDto.getProcessStatusList()) : "")
-                .setWarningMovements(CollectionUtils.isNotEmpty(warningRuleConfigDto.getWarningMovements()) ? String.join(",", warningRuleConfigDto.getWarningMovements()) : "");
+                .setWarningMovements(CollectionUtils.isNotEmpty(warningRuleConfigDto.getWarningMovements()) ? String.join(",", warningRuleConfigDto.getWarningMovements()) : "")
+                .setFileSizeMin(warningRuleConfigDto.getFileMinSize());
+
         return warningRuleConfigModel;
     }
 
@@ -85,7 +87,9 @@ public class WarningRuleConfigDto {
                 .setWarningClass(String.valueOf(warningRuleConfigModel.getWarningClass()))
                 .setSystemType(String.valueOf(warningRuleConfigModel.getSystemType()))
                 .setProcessStatusList(StringUtils.isBlank(warningRuleConfigModel.getProcessStatusList()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getProcessStatusList().split(",")))
-                .setWarningMovements(StringUtils.isBlank(warningRuleConfigModel.getWarningMovements()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getWarningMovements().split(",")));
+                .setWarningMovements(StringUtils.isBlank(warningRuleConfigModel.getWarningMovements()) ? Collections.emptyList() : Arrays.asList(warningRuleConfigModel.getWarningMovements().split(",")))
+                .setFileMinSize(warningRuleConfigModel.getFileSizeMin());
+
         return warningRuleConfigDto;
     }
 
