@@ -24,6 +24,8 @@ public class EsAlarmInfo {
 
     @Data
     public static class ProcessAlarmInfo extends EsAlarmInfo {
-        private String sicLaunchOutput;
+        private String name;
+        private String command;
+        private String action;
     }
 }

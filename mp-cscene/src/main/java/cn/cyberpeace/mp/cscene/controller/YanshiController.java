@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.AlarmRequest;
@@ -11,9 +12,10 @@ import cn.cyberpeace.mp.cscene.controller.request.EsAlarmInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.AlarmInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.repository.WarningRuleConfigMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Api(value = "告警数据查询接口", tags = "告警数据查询接口")
@@ -85,6 +88,13 @@ public class YanshiController {
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_file"));
             mergeQuery.should(agentQuery);
         }
+        // 进程
+        if (alarmType == null || alarmType == 1) {
+            var agentQuery = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termsQuery("agent.name", agentName))
+                    .must(QueryBuilders.termQuery("data.sic_launch_id", "38949dcf3829489d8dd9e0e63cc66541"));
+            mergeQuery.should(agentQuery);
+        }
         // 注册表
         if (alarmType == null || alarmType == 2) {
             var agentQuery = QueryBuilders.boolQuery()
@@ -98,7 +108,7 @@ public class YanshiController {
 
         // 分页
         searchBuilder.from(0);
-        searchBuilder.size(3000);
+        searchBuilder.size(500);
         // 排序
         searchBuilder.sort("@timestamp", SortOrder.DESC);
 
@@ -135,6 +145,74 @@ public class YanshiController {
                     esAlarmInfoResult.add(fileEsAlarmInfo);
                 } else if (data.getData() != null && data.getData().getSicLaunchOutput() != null) {
                     // 进程
+                    var ss = data.getData().getSicLaunchOutput().getData();
+                    if (StringUtils.isNotEmpty(ss)) {
+                        byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(ss, "\""));
+                        String output = TextUtils.decompress(raw);
+                        JSONObject jsonObject = JSONObject.parseObject(output);
+                        {
+                            JSONArray arr = jsonObject.getJSONArray("added");
+                            if (!Objects.isNull(arr)) {
+                                for (int i = 0; i < arr.size(); i++) {
+
+                                    var process = arr.getJSONObject(i);
+
+                                    EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
+                                    processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
+
+                                    processAlarmInfo.setCommand(process.getString("command"));
+                                    processAlarmInfo.setName(process.getString("name"));
+                                    processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setAction("added");
+
+                                    esAlarmInfoResult.add(processAlarmInfo);
+                                }
+                            }
+                        }
+
+                        {
+                            JSONArray arr = jsonObject.getJSONArray("deleted_prev");
+                            if (!Objects.isNull(arr)) {
+                                for (int i = 0; i < arr.size(); i++) {
+
+                                    var process = arr.getJSONObject(i);
+
+                                    EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
+                                    processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
+
+                                    processAlarmInfo.setCommand(process.getString("command"));
+                                    processAlarmInfo.setName(process.getString("name"));
+                                    processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setAction("deleted");
+
+                                    esAlarmInfoResult.add(processAlarmInfo);
+                                }
+                            }
+                        }
+
+                        {
+                            JSONArray arr = jsonObject.getJSONArray("modified");
+                            if (!Objects.isNull(arr)) {
+                                for (int i = 0; i < arr.size(); i++) {
+
+                                    var process = arr.getJSONObject(i);
+
+                                    EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
+                                    processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
+
+                                    processAlarmInfo.setCommand(process.getString("command"));
+                                    processAlarmInfo.setName(process.getString("name"));
+                                    processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setAction("modified");
+
+                                    esAlarmInfoResult.add(processAlarmInfo);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
@@ -142,16 +220,18 @@ public class YanshiController {
         }
 
         // 进程
-        if (alarmType == null || alarmType == 1) {
-            WazuhMonitorEventsRequest request1 = new WazuhMonitorEventsRequest();
-            request1.setAgentNames(new ArrayList<>(batchSceneHandler.getAllEid2ElementMap().keySet()));
-            var lll = dataCollectionService.queryProcessesWithTimeRange(request1);
-            if (CollectionUtils.isNotEmpty(lll)) {
-                for (var llll : lll) {
-
-                }
-            }
-        }
+//        if (alarmType == null || alarmType == 1) {
+//            WazuhMonitorEventsRequest request1 = new WazuhMonitorEventsRequest();
+//            request1.setStartTime(batchSceneHandler.getEarliestStartTime());
+//            request1.setEndTime(LocalDateTime.now());
+//            request1.setAgentNames(new ArrayList<>(batchSceneHandler.getAllEid2ElementMap().keySet()));
+//            var lll = dataCollectionService.queryProcessesWithTimeRangeAA(request1);
+//            if (CollectionUtils.isNotEmpty(lll)) {
+//                for (var llll : lll) {
+//                    EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
+//                }
+//            }
+//        }
 
         var rules = this.getRules();
         List<AlarmInfo> alarmInfos = new ArrayList<>();
@@ -226,18 +306,30 @@ public class YanshiController {
             } else if (esData instanceof EsAlarmInfo.ProcessAlarmInfo) {
                 var dd = (EsAlarmInfo.ProcessAlarmInfo) esData;
                 for (var r : rules.getProcessRules()) {
-                    AlarmInfo alarmInfo = new AlarmInfo();
-                    alarmInfo.setType(r.getType());
-                    alarmInfo.setNodeName(nodeName);
-                    try {
-                        String utcTime = esData.getTime();
-                        utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
-                        LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
-                        alarmInfo.setTime(time);
-                    } catch (Exception e) {
+                    if (r.hit(dd.getName(), dd.getCommand(), null)) {
+                        AlarmInfo alarmInfo = new AlarmInfo();
+                        alarmInfo.setType(r.getType());
+                        alarmInfo.setNodeName(nodeName);
+                        alarmInfo.setName(r.getName());
+                        if ("added".equals(dd.getAction())) {
+                            alarmInfo.setAction("新增");
+                        } else if ("deleted".equals(dd.getAction())) {
+                            alarmInfo.setAction("删除");
+                        } else {
+                            alarmInfo.setAction("修改");
+                        }
+                        alarmInfo.setContent(dd.getCommand());
+                        try {
+                            String utcTime = esData.getTime();
+                            utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+                            LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
+                            alarmInfo.setTime(time);
+                        } catch (Exception e) {
 
+                        }
+                        alarmInfo.setLevel(r.getLevel());
+                        alarmInfos.add(alarmInfo);
                     }
-                    alarmInfo.setLevel(r.getLevel());
                 }
             }
         }
@@ -486,6 +578,7 @@ public class YanshiController {
     public static class SicOutputData {
         private String valuesCount;
         private String data;
+        private String sicLaunchTime;
     }
 
     @Data
