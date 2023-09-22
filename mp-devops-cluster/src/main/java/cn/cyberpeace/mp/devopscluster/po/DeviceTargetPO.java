@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
@@ -146,5 +147,6 @@ public class DeviceTargetPO extends BaseModel {
      */
     private String instanceCreateUser;
 
+    @DefaultStr
     private String leaks;
 }

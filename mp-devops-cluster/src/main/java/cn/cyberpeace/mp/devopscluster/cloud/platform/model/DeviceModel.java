@@ -144,7 +144,7 @@ public class DeviceModel extends BaseModel {
     private Boolean isInit;
 
     @ApiModelProperty(value = "脆弱性信息")
-    @DefaultBool
+    @DefaultStr
     private String leaks;
 
     /**

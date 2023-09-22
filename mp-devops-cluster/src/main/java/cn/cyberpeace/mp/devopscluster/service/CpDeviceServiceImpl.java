@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devopscluster.service.fields.DeviceFields;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
 import cn.hutool.core.collection.CollUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,6 +90,9 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         if (Objects.nonNull(device.getExtDocker())) {
             model.setExtDocker(JsonCommon.stringify(device.getExtDocker()));
         }
+        if (CollectionUtils.isNotEmpty(device.getLeaks())) {
+            model.setLeaks(JsonCommon.stringify(device.getLeaks()));
+        }
         model.setIsBuildIn(device.getIsBuildIn());
         boolean b = getModelMapper().create(model);
         if (!b) {
@@ -141,6 +145,9 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         if (Objects.nonNull(device.getExtGateway())) {
             model.setExtGateway(JsonCommon.stringify(device.getExtGateway()));
         }
+        if (CollectionUtils.isNotEmpty(device.getLeaks())) {
+            model.setLeaks(JsonCommon.stringify(device.getLeaks()));
+        }
         model.setExtVm(null);
         model.setExtImageInfo(null);
         model.setExtDocker(null);
@@ -148,6 +155,7 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         model.setIsHide(device.getIsHide());
         model.setDefaultLaunchImageName(device.getDefaultLaunchImageName());
         model.setId(first.getId());
+
         ObjServiceResult<DeviceModel> result = this.update(model);
         model = result.sourceObj();
         return convert(Collections.singletonList(model)).get(0);
