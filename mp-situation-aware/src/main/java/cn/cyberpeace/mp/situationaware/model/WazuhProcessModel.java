@@ -66,4 +66,6 @@ public class WazuhProcessModel {
     @JSONField(name = "level")
     private int level;
 
+    private String action;
+
 }

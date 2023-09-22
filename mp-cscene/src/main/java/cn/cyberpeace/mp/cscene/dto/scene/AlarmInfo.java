@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @ApiModel(description = "告警详情")
 @Getter
 @Setter
@@ -22,7 +24,7 @@ public class AlarmInfo {
     @ApiModelProperty(value = "告警内容")
     private String content;
     @ApiModelProperty(value = "告警等级")
-    private Integer level;
+    private String level;
     @ApiModelProperty(value = "变更时间")
-    private String time;
+    private LocalDateTime time;
 }

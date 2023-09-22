@@ -4,12 +4,14 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.AlarmRequest;
 import cn.cyberpeace.mp.cscene.controller.request.EsAlarmInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.AlarmInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.repository.WarningRuleConfigMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import io.swagger.annotations.Api;
@@ -17,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -59,7 +62,7 @@ public class YanshiController {
     public ListObjServiceResult<AlarmInfo> pageFlow(AlarmRequest alarmRequest) {
         var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(alarmRequest.getId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<AlarmInfo>(), 0)).asResult();
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, alarmRequest.getNodeIds());
         if (CollectionUtils.isEmpty(batchSceneHandler.getProbeCollectors())) {
@@ -82,13 +85,6 @@ public class YanshiController {
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_file"));
             mergeQuery.should(agentQuery);
         }
-        // 进程
-        if (alarmType == null || alarmType == 1) {
-            var agentQuery = QueryBuilders.boolQuery()
-                    .must(QueryBuilders.termsQuery("agent.name", agentName))
-                    .must(QueryBuilders.termQuery("data.sic_launch_id", "38949dcf3829489d8dd9e0e63cc66541"));
-            mergeQuery.should(agentQuery);
-        }
         // 注册表
         if (alarmType == null || alarmType == 2) {
             var agentQuery = QueryBuilders.boolQuery()
@@ -108,7 +104,7 @@ public class YanshiController {
 
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.source(searchBuilder);
-        List<EsAlarmInfo> result = new ArrayList<>();
+        List<EsAlarmInfo> esAlarmInfoResult = new ArrayList<>();
         try {
             var response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             for (var hit : response.getHits().getHits()) {
@@ -120,7 +116,13 @@ public class YanshiController {
                 }
                 if (!groupIds.isEmpty() && groupIds.contains("syscheck_registry")) {
                     // 注册表
-
+                    EsAlarmInfo.RegistryAlarmInfo registryAlarmInfo = new EsAlarmInfo.RegistryAlarmInfo();
+                    registryAlarmInfo.setAgentName(data.getAgent().getName());
+                    registryAlarmInfo.setPath(data.getSyscheck().getPath());
+                    registryAlarmInfo.setTime(map.get("@timestamp").toString());
+                    registryAlarmInfo.setMd5(data.getSyscheck().getMd5After());
+                    registryAlarmInfo.setAction(data.getSyscheck().getEvent());
+                    esAlarmInfoResult.add(registryAlarmInfo);
                 } else if (!groupIds.isEmpty() && groupIds.contains("syscheck_file")) {
                     // 文件
                     EsAlarmInfo.FileEsAlarmInfo fileEsAlarmInfo = new EsAlarmInfo.FileEsAlarmInfo();
@@ -128,8 +130,10 @@ public class YanshiController {
                     fileEsAlarmInfo.setPath(data.getSyscheck().getPath());
                     fileEsAlarmInfo.setAgentName(data.getAgent().getName());
                     fileEsAlarmInfo.setAction(data.getSyscheck().getEvent());
-                    result.add(fileEsAlarmInfo);
-                } else {
+                    fileEsAlarmInfo.setTime(map.get("@timestamp").toString());
+                    fileEsAlarmInfo.setMd5(data.getSyscheck().getMd5After());
+                    esAlarmInfoResult.add(fileEsAlarmInfo);
+                } else if (data.getData() != null && data.getData().getSicLaunchOutput() != null) {
                     // 进程
                 }
             }
@@ -137,43 +141,319 @@ public class YanshiController {
             throw new RuntimeException(e);
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        // 进程
+        if (alarmType == null || alarmType == 1) {
+            WazuhMonitorEventsRequest request1 = new WazuhMonitorEventsRequest();
+            request1.setAgentNames(new ArrayList<>(batchSceneHandler.getAllEid2ElementMap().keySet()));
+            var lll = dataCollectionService.queryProcessesWithTimeRange(request1);
+            if (CollectionUtils.isNotEmpty(lll)) {
+                for (var llll : lll) {
+
+                }
+            }
+        }
+
+        var rules = this.getRules();
+        List<AlarmInfo> alarmInfos = new ArrayList<>();
+        for (var esData : esAlarmInfoResult) {
+            String nodeName = batchSceneHandler.getNodeByEid(esData.getAgentName()).getName();
+            if (esData instanceof EsAlarmInfo.FileEsAlarmInfo) {
+                var dd = (EsAlarmInfo.FileEsAlarmInfo) esData;
+                for (var r : rules.getFileTypeRules()) {
+                    if (r.hit(dd.getPath(), dd.getFileSize())) {
+                        AlarmInfo alarmInfo = new AlarmInfo();
+                        alarmInfo.setType(r.getType());
+                        alarmInfo.setNodeName(nodeName);
+                        try {
+                            String utcTime = esData.getTime();
+                            utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+                            LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
+                            alarmInfo.setTime(time);
+                        } catch (Exception e) {
+
+                        }
+                        alarmInfo.setLevel(r.getLevel());
+                        alarmInfo.setTarget(dd.getPath());
+                        if ("added".equals(dd.getAction())) {
+                            alarmInfo.setAction("新增");
+                        } else if ("deleted".equals(dd.getAction())) {
+                            alarmInfo.setAction("删除");
+                        } else {
+                            alarmInfo.setAction("修改");
+                        }
+                        if (StringUtils.isNotEmpty(dd.getMd5())) {
+                            alarmInfo.setContent("内容:md5 " + dd.getMd5());
+                        } else {
+                            alarmInfo.setContent("-");
+                        }
+                        alarmInfo.setName(r.getName());
+                        alarmInfos.add(alarmInfo);
+                    }
+                }
+            } else if (esData instanceof EsAlarmInfo.RegistryAlarmInfo) {
+                var dd = (EsAlarmInfo.RegistryAlarmInfo) esData;
+                for (var r : rules.getRegistryRules()) {
+                    if (r.hit(dd.getPath())) {
+                        AlarmInfo alarmInfo = new AlarmInfo();
+                        alarmInfo.setType(r.getType());
+                        alarmInfo.setNodeName(nodeName);
+                        try {
+                            String utcTime = esData.getTime();
+                            utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+                            LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
+                            alarmInfo.setTime(time);
+                        } catch (Exception e) {
+
+                        }
+                        alarmInfo.setLevel(r.getLevel());
+                        alarmInfo.setTarget(dd.getPath());
+                        if ("added".equals(dd.getAction())) {
+                            alarmInfo.setAction("新增");
+                        } else if ("deleted".equals(dd.getAction())) {
+                            alarmInfo.setAction("删除");
+                        } else {
+                            alarmInfo.setAction("修改");
+                        }
+                        alarmInfo.setName(r.getName());
+                        if (StringUtils.isNotEmpty(dd.getMd5())) {
+                            alarmInfo.setContent("内容:md5 " + dd.getMd5());
+                        } else {
+                            alarmInfo.setContent("-");
+                        }
+                        alarmInfos.add(alarmInfo);
+                    }
+                }
+            } else if (esData instanceof EsAlarmInfo.ProcessAlarmInfo) {
+                var dd = (EsAlarmInfo.ProcessAlarmInfo) esData;
+                for (var r : rules.getProcessRules()) {
+                    AlarmInfo alarmInfo = new AlarmInfo();
+                    alarmInfo.setType(r.getType());
+                    alarmInfo.setNodeName(nodeName);
+                    try {
+                        String utcTime = esData.getTime();
+                        utcTime = StringUtils.substringBeforeLast(utcTime, ".").concat("Z");
+                        LocalDateTime time = TimeUtils.utcStringToLocalDateTime(utcTime);
+                        alarmInfo.setTime(time);
+                    } catch (Exception e) {
+
+                    }
+                    alarmInfo.setLevel(r.getLevel());
+                }
+            }
+        }
+        int from = (alarmRequest.getPage() - 1) * alarmRequest.getPageSize();
+        int to = from + alarmRequest.getPageSize();
+        if (from > alarmInfos.size()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<AlarmInfo>(), alarmInfos.size())).asResult();
+        } else {
+            var sss = alarmInfos.subList(from, Math.min(to, alarmInfos.size()));
+            return new ListObjServiceResult<>(new ListObjResult<>(sss, alarmInfos.size())).asResult();
+        }
     }
 
-    private void te() {
+    private AlarmRules getRules() {
         var list = warningRuleConfigMapper.list(new HumanCondition());
+        AlarmRules rules = new AlarmRules();
         if (CollectionUtils.isNotEmpty(list)) {
-
+            for (var m : list) {
+                if (m.getWarningTarget() == 0 || m.getWarningTarget() == 3 || m.getWarningTarget() == 4) {
+                    FileTypeRule rule = null;
+                    if (m.getWarningTarget() == 0) {
+                        rule = new GuanJianXiTong();
+                    } else if (m.getWarningTarget() == 3) {
+                        rule = new XiTongRiZhi();
+                    } else {
+                        rule = new GuanJianRiZhi();
+                    }
+                    rule.setName(m.getWarningName());
+                    if (2 == m.getWarningClass()) {
+                        rule.setLevel("高危");
+                    } else if (1 == m.getWarningClass()) {
+                        rule.setLevel("中危");
+                    } else {
+                        rule.setLevel("低危");
+                    }
+                    if (StringUtils.isNotEmpty(m.getWarningMovements())) {
+                        var a = m.getWarningMovements().split(",");
+                        rule.setActions(new HashSet<>());
+                        FileTypeRule finalG = rule;
+                        Arrays.stream(a).forEach(aa -> finalG.getActions().add(aa));
+                    }
+                    if (StringUtils.isNotEmpty(m.getFilePaths())) {
+                        var a = m.getFilePaths().split(",");
+                        rule.setPaths(new HashSet<>());
+                        FileTypeRule finalG1 = rule;
+                        Arrays.stream(a).forEach(aa -> finalG1.getPaths().add(aa));
+                    }
+                    if (StringUtils.isNotEmpty(m.getFileSuffixes())) {
+                        var a = m.getFileSuffixes().split(",");
+                        rule.setSuffixes(new HashSet<>());
+                        FileTypeRule finalG2 = rule;
+                        Arrays.stream(a).forEach(aa -> finalG2.getSuffixes().add(aa));
+                    }
+                    if (m.getFileSizeMin() != null) {
+                        rule.setMinSize(Integer.parseInt(m.getFileSizeMin()));
+                    }
+                    rules.getFileTypeRules().add(rule);
+                } else if (m.getWarningTarget() == 1) {
+                    var rule = new RegistryRule();
+                    rule.setName(m.getWarningName());
+                    if (2 == m.getWarningClass()) {
+                        rule.setLevel("高危");
+                    } else if (1 == m.getWarningClass()) {
+                        rule.setLevel("中危");
+                    } else {
+                        rule.setLevel("低危");
+                    }
+                    if (StringUtils.isNotEmpty(m.getWarningMovements())) {
+                        var a = m.getWarningMovements().split(",");
+                        rule.setActions(new HashSet<>());
+                        Arrays.stream(a).forEach(aa -> rule.getActions().add(aa));
+                    }
+                    if (StringUtils.isNotEmpty(m.getRegisterPaths())) {
+                        var a = m.getRegisterPaths().split(",");
+                        rule.setPaths(new HashSet<>());
+                        Arrays.stream(a).forEach(aa -> rule.getPaths().add(aa));
+                    }
+                    rules.getRegistryRules().add(rule);
+                } else if (m.getWarningTarget() == 2) {
+                    var rule = new ProcessRule();
+                    rule.setName(m.getWarningName());
+                    if (2 == m.getWarningClass()) {
+                        rule.setLevel("高危");
+                    } else if (1 == m.getWarningClass()) {
+                        rule.setLevel("中危");
+                    } else {
+                        rule.setLevel("低危");
+                    }
+                    if (StringUtils.isNotEmpty(m.getProcessNames())) {
+                        var a = m.getProcessNames().split(",");
+                        rule.setProcessNames(new HashSet<>());
+                        Arrays.stream(a).forEach(aa -> rule.getProcessNames().add(aa));
+                    }
+                    if (StringUtils.isNotEmpty(m.getProcessDetailFeatures())) {
+                        var a = m.getProcessDetailFeatures().split(",");
+                        rule.setCommands(new HashSet<>());
+                        Arrays.stream(a).forEach(aa -> rule.getCommands().add(aa));
+                    }
+                    rules.getProcessRules().add(rule);
+                }
+            }
         }
+        return rules;
     }
 
     @Data
     public static class AlarmRules {
-        private List<GuanJianXiTongFile> guanJianXiTongFiles;
+        private List<FileTypeRule> fileTypeRules = new ArrayList<>();
+
+        private List<RegistryRule> registryRules = new ArrayList<>();
+
+        private List<ProcessRule> processRules = new ArrayList<>();
     }
 
     @Data
-    public static class GuanJianXiTongFile {
+    public static class ProcessRule {
         private String name;
-        private Integer level;
-        private String action;
+        private String type;
+        private String level;
+        private Set<String> processNames;
+        private Set<String> commands;
+        private Set<String> status;
+
+        public ProcessRule() {
+            this.setType("系统进程");
+        }
+
+        private boolean hit(String name, String command, String status) {
+            boolean hit = false;
+            if (!hit && CollectionUtils.isNotEmpty(processNames)) {
+                hit = this.processNames.contains(name);
+            }
+            if (!hit && CollectionUtils.isNotEmpty(this.status)) {
+                hit = this.status.contains(status);
+            }
+            if (!hit && (CollectionUtils.isNotEmpty(commands) && StringUtils.isNotEmpty(command))) {
+                for (var c : this.commands) {
+                    if (command.contains(c)) {
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+            return hit;
+        }
+    }
+
+    @Data
+    public static class RegistryRule {
+        private String name;
+        private String type;
+        private String level;
+        private Set<String> actions;
+        private Set<String> paths;
+
+        public RegistryRule() {
+            this.setType("系统配置");
+        }
+
+        private boolean hit(String path) {
+            boolean hit = false;
+            if (!hit && CollectionUtils.isNotEmpty(paths)) {
+                hit = this.paths.contains(path);
+            }
+            return hit;
+        }
+    }
+
+    @Data
+    public static class FileTypeRule {
+        private String name;
+        private String type;
+        private String level;
+        private Set<String> actions;
         private Set<String> paths;
         private Set<String> suffixes;
-        private Integer size;
+        private Integer minSize;
 
         private boolean hit(String path, Integer size) {
             boolean hit = false;
             if (!hit && CollectionUtils.isNotEmpty(paths)) {
-                hit = path.contains(path);
+                hit = this.paths.contains(path);
             }
             if (!hit && CollectionUtils.isNotEmpty(suffixes)) {
-                if (path.contains(".")) {
+                if (!path.contains(".")) {
                     hit = false;
                 } else {
-                    String suffix = path.substring(path.lastIndexOf("."), path.length());
+                    String suffix = path.substring(path.lastIndexOf("."));
+                    hit = this.suffixes.contains(suffix);
                 }
             }
+            if (!hit && this.minSize != null) {
+                hit = size > this.minSize;
+            }
             return hit;
+        }
+    }
+
+    public static class GuanJianXiTong extends FileTypeRule {
+        public GuanJianXiTong() {
+            super();
+            this.setType("关键系统文件");
+        }
+    }
+
+    public static class XiTongRiZhi extends FileTypeRule {
+        public XiTongRiZhi() {
+            super();
+            this.setType("系统日志");
+        }
+    }
+
+    public static class GuanJianRiZhi extends FileTypeRule {
+        public GuanJianRiZhi() {
+            super();
+            this.setType("关键日志");
         }
     }
 
@@ -199,6 +479,13 @@ public class YanshiController {
 
     @Data
     public static class SicData {
+        private SicOutputData sicLaunchOutput;
+    }
+
+    @Data
+    public static class SicOutputData {
+        private String valuesCount;
+        private String data;
     }
 
     @Data
