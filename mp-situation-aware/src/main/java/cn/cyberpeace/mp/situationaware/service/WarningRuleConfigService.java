@@ -79,6 +79,8 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
             List<WarningRuleConfigDto> warningRuleConfigDtoList = warningRuleConfigModels.stream()
                     .map(WarningRuleConfigDto::fromModel).collect(Collectors.toList());
             dtoPageResult.setSource(new ListObjResult<>(warningRuleConfigDtoList, total));
+        } else {
+            dtoPageResult.setSource(new ListObjResult<>(Collections.emptyList(), 0));
         }
         return dtoPageResult;
     }
