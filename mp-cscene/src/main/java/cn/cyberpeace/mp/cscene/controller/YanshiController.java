@@ -82,21 +82,21 @@ public class YanshiController {
 
         var mergeQuery = QueryBuilders.boolQuery();
         // 文件
-        if (alarmType == null || alarmType == 0 || alarmType == 3 || alarmType == 4) {
+        if (alarmType == null || alarmType == 1 || alarmType == 4 || alarmType == 5) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_file"));
             mergeQuery.should(agentQuery);
         }
         // 进程
-        if (alarmType == null || alarmType == 1) {
+        if (alarmType == null || alarmType == 2) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("data.sic_launch_id", "38949dcf3829489d8dd9e0e63cc66541"));
             mergeQuery.should(agentQuery);
         }
         // 注册表
-        if (alarmType == null || alarmType == 2) {
+        if (alarmType == null || alarmType == 3) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_registry"));
@@ -310,7 +310,7 @@ public class YanshiController {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
-                        alarmInfo.setName(r.getName());
+                        alarmInfo.setName(dd.getName());
                         if ("added".equals(dd.getAction())) {
                             alarmInfo.setAction("新增");
                         } else if ("deleted".equals(dd.getAction())) {
@@ -348,7 +348,7 @@ public class YanshiController {
         AlarmRules rules = new AlarmRules();
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
-                if (m.getWarningTarget() == 0 || m.getWarningTarget() == 3 || m.getWarningTarget() == 4) {
+                if (m.getWarningTarget() == 1 || m.getWarningTarget() == 4 || m.getWarningTarget() == 5) {
                     FileTypeRule rule = null;
                     if (m.getWarningTarget() == 0) {
                         rule = new GuanJianXiTong();
@@ -387,7 +387,7 @@ public class YanshiController {
                         rule.setMinSize(Integer.parseInt(m.getFileSizeMin()));
                     }
                     rules.getFileTypeRules().add(rule);
-                } else if (m.getWarningTarget() == 1) {
+                } else if (m.getWarningTarget() == 2) {
                     var rule = new RegistryRule();
                     rule.setName(m.getWarningName());
                     if (2 == m.getWarningClass()) {
@@ -408,7 +408,7 @@ public class YanshiController {
                         Arrays.stream(a).forEach(aa -> rule.getPaths().add(aa));
                     }
                     rules.getRegistryRules().add(rule);
-                } else if (m.getWarningTarget() == 2) {
+                } else if (m.getWarningTarget() == 3) {
                     var rule = new ProcessRule();
                     rule.setName(m.getWarningName());
                     if (2 == m.getWarningClass()) {
