@@ -47,6 +47,8 @@ public class WarningRuleConfigBO {
 
     private BigDecimal fileMinSize;
 
+    private Set<String> registerPathSet;
+
     public static WarningRuleConfigBO fromModel(WarningRuleConfigModel warningRuleConfigModel) {
 
         WarningTargetEnum warningTargetEnum = BaseKeyAndName.getByKey(warningRuleConfigModel.getWarningTarget(), WarningTargetEnum.class);
@@ -67,7 +69,7 @@ public class WarningRuleConfigBO {
         Set<String> fileSuffixSet = getSetFromString(warningRuleConfigModel.getFileSuffixes());
 
         BigDecimal fileMinSize = StringUtils.isBlank(warningRuleConfigModel.getFileSizeMin()) ? BigDecimal.ZERO : new BigDecimal(warningRuleConfigModel.getFileSizeMin());
-
+        Set<String> registerPathSet = getSetFromString(warningRuleConfigModel.getRegisterPaths());
 
         WarningRuleConfigBO warningRuleConfigBO = new WarningRuleConfigBO()
                 .setId(warningRuleConfigModel.getId())
@@ -80,14 +82,15 @@ public class WarningRuleConfigBO {
                 .setProcessStatusList(processStatusEnumList)
                 .setFilePathSet(filePathSet)
                 .setFileSuffixSet(fileSuffixSet)
-                .setFileMinSize(fileMinSize);
+                .setFileMinSize(fileMinSize)
+                .setRegisterPathSet(registerPathSet);
+
         return warningRuleConfigBO;
 
     }
 
     public static WarningRuleConfigModel toModel(WarningRuleConfigBO warningRuleConfigBO) {
         WarningRuleConfigModel warningRuleConfigModel = new WarningRuleConfigModel();
-        warningRuleConfigModel.setId(warningRuleConfigBO.getId());
 
         Integer warningTarget = Optional.ofNullable(warningRuleConfigBO.getWarningTargetEnum()).map(WarningTargetEnum::getKey).orElse(SuricataConstant.ZERO);
         Integer warningClass = Optional.ofNullable(warningRuleConfigBO.getWarningClassEnum()).map(WarningClassEnum::getKey).orElse(SuricataConstant.ZERO);
@@ -100,7 +103,9 @@ public class WarningRuleConfigBO {
         String filePaths = String.join(SuricataConstant.COMMA, Optional.ofNullable(warningRuleConfigBO.getFilePathSet()).orElse(Collections.emptySet()));
         String fileSuffixes = String.join(SuricataConstant.COMMA, Optional.ofNullable(warningRuleConfigBO.getFileSuffixSet()).orElse(Collections.emptySet()));
         String fileMinSize = Optional.ofNullable(warningRuleConfigBO.getFileMinSize()).map(BigDecimal::toString).orElse(SuricataConstant.EMPTY_STR);
+        String registerPaths = String.join(SuricataConstant.COMMA, Optional.ofNullable(warningRuleConfigBO.getRegisterPathSet()).orElse(Collections.emptySet()));
 
+        warningRuleConfigModel.setId(warningRuleConfigBO.getId());
         warningRuleConfigModel.setWarningName(warningRuleConfigBO.getWarningName())
                 .setWarningTarget(warningTarget)
                 .setWarningClass(warningClass)
@@ -110,7 +115,8 @@ public class WarningRuleConfigBO {
                 .setProcessStatusList(processStatusList)
                 .setFilePaths(filePaths)
                 .setFileSuffixes(fileSuffixes)
-                .setFileSizeMin(fileMinSize);
+                .setFileSizeMin(fileMinSize)
+                .setRegisterPaths(registerPaths);
         return warningRuleConfigModel;
     }
 

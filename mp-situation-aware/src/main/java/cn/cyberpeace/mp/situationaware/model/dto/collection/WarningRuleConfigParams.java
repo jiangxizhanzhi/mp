@@ -10,9 +10,9 @@ import lombok.Data;
  * @Date 2023/9/22 10:04
  **/
 @Data
-public class WarningRuleConfigRequest extends QueryParams {
+public class WarningRuleConfigParams extends QueryParams {
 
-    private String warningClass;
+    private Integer warningTarget;
 
 
 }
