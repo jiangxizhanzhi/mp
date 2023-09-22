@@ -57,7 +57,7 @@ public class FlowExecutor {
     }
 
     public void deleteExecutor(String executorId) {
-        flowService2.delContainer(executorId);
+        flowService2.delExecutor(executorId);
     }
 
     public String createFlow(String executorId, String targetNetId, String nodeId, String flowId, String fromIps, String toIps,
