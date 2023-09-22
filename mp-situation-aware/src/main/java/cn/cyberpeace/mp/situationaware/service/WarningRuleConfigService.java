@@ -70,6 +70,12 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
     }
 
     public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigParams warningRuleConfigParams) {
+        Integer warningTarget = warningRuleConfigParams.getWarningTarget();
+        if (Objects.nonNull(warningTarget) && Objects.isNull(warningRuleConfigParams.getSearchFields())) {
+            warningRuleConfigParams.setSearch(String.valueOf(warningTarget));
+            warningRuleConfigParams.setSearchFields(new String[]{"warning_target"});
+        }
+
         ListObjServiceResult<WarningRuleConfigModel> modelPageResult = this.list(warningRuleConfigParams);
         List<WarningRuleConfigModel> warningRuleConfigModels = Optional.ofNullable(modelPageResult.getSource()).map(ListObjResult::getObjs).orElse(Collections.emptyList());
         int total = modelPageResult.getSource().getTotal();
