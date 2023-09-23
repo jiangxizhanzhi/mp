@@ -345,6 +345,17 @@ public class YanshiController {
                 }
             }
         }
+
+        if (StringUtils.isNotEmpty(alarmRequest.getKey())) {
+            List<AlarmInfo> result = new ArrayList<>();
+            for (var a : result) {
+                if (a.getContent().contains(alarmRequest.getKey())) {
+                    result.add(a);
+                }
+            }
+            alarmInfos = result;
+        }
+
         int from = (alarmRequest.getPage() - 1) * alarmRequest.getPageSize();
         int to = from + alarmRequest.getPageSize();
         if (from > alarmInfos.size()) {
