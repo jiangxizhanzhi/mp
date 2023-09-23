@@ -610,7 +610,7 @@ public class YanshiController {
                     }
                 }
                 if (!hit && this.minSize != null) {
-                    hit = size > this.minSize;
+                    hit = size > this.minSize * 1024 * 1024;
                 }
             }
             return hit;
