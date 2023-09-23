@@ -80,21 +80,21 @@ public class YanshiController {
 
         var mergeQuery = QueryBuilders.boolQuery();
         // 文件
-        if (alarmType == null || alarmType == 1 || alarmType == 4 || alarmType == 5) {
+        if (alarmType == null || alarmType == 1 || alarmType == 3 || alarmType == 4) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_file"));
             mergeQuery.should(agentQuery);
         }
         // 进程
-        if (alarmType == null || alarmType == 2) {
+        if (alarmType == null || alarmType == 5) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("data.sic_launch_id", "38949dcf3829489d8dd9e0e63cc66541"));
             mergeQuery.should(agentQuery);
         }
         // 注册表
-        if (alarmType == null || alarmType == 3) {
+        if (alarmType == null || alarmType == 2) {
             var agentQuery = QueryBuilders.boolQuery()
                     .must(QueryBuilders.termsQuery("agent.name", agentName))
                     .must(QueryBuilders.termQuery("rule.groups", "syscheck_registry"));
@@ -379,11 +379,11 @@ public class YanshiController {
         AlarmRules rules = new AlarmRules();
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
-                if (m.getWarningTarget() == 1 || m.getWarningTarget() == 4 || m.getWarningTarget() == 5) {
+                if (m.getWarningTarget() == 1 || m.getWarningTarget() == 3 || m.getWarningTarget() == 4) {
                     FileTypeRule rule = null;
                     if (m.getWarningTarget() == 1) {
                         rule = new GuanJianXiTong();
-                    } else if (m.getWarningTarget() == 4) {
+                    } else if (m.getWarningTarget() == 3) {
                         rule = new XiTongRiZhi();
                     } else {
                         rule = new GuanJianRiZhi();
@@ -468,7 +468,7 @@ public class YanshiController {
                         Arrays.stream(a).forEach(aa -> rule.getPaths().add(aa));
                     }
                     rules.getRegistryRules().add(rule);
-                } else if (m.getWarningTarget() == 3) {
+                } else if (m.getWarningTarget() == 5) {
                     var rule = new ProcessRule();
                     rule.setName(m.getWarningName());
                     if (2 == m.getWarningClass()) {
