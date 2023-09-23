@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.controller.request.EsAlarmInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.AlarmInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
+import cn.cyberpeace.mp.situationaware.model.WarningRuleConfigModel;
 import cn.cyberpeace.mp.situationaware.repository.WarningRuleConfigMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import com.alibaba.fastjson.JSONArray;
@@ -244,7 +245,7 @@ public class YanshiController {
 //            }
 //        }
 
-        var rules = this.getRules();
+        var rules = this.getRules(alarmType);
         List<AlarmInfo> alarmInfos = new ArrayList<>();
         for (var esData : esAlarmInfoResult) {
             String nodeName = batchSceneHandler.getNodeByEid(esData.getAgentName()).getName();
@@ -351,7 +352,7 @@ public class YanshiController {
             for (var a : alarmInfos) {
                 if (a.getContent() != null && a.getContent().contains(alarmRequest.getKey())) {
                     result.add(a);
-                }else if(a.getTarget() != null && a.getTarget().contains(alarmRequest.getKey())){
+                } else if (a.getTarget() != null && a.getTarget().contains(alarmRequest.getKey())) {
                     result.add(a);
                 }
             }
@@ -368,8 +369,13 @@ public class YanshiController {
         }
     }
 
-    private AlarmRules getRules() {
-        var list = warningRuleConfigMapper.list(new HumanCondition());
+    private AlarmRules getRules(Integer type) {
+
+        var cond = new HumanCondition();
+        if (type != null) {
+            cond.filterEqual(WarningRuleConfigModel::getWarningTarget, type);
+        }
+        var list = warningRuleConfigMapper.list(cond);
         AlarmRules rules = new AlarmRules();
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
