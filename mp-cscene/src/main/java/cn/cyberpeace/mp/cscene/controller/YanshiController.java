@@ -308,6 +308,7 @@ public class YanshiController {
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
                         alarmInfo.setName(dd.getName());
+                        alarmInfo.setTarget(dd.getName());
                         if ("added".equals(dd.getAction())) {
                             alarmInfo.setAction("新增");
                         } else if ("deleted".equals(dd.getAction())) {
