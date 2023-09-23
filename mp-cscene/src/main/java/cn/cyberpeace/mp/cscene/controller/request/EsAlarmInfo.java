@@ -7,6 +7,7 @@ public class EsAlarmInfo {
     private String time;
     private String agentName;
     private String action;
+    private String system;
 
     @Data
     public static class RegistryAlarmInfo extends EsAlarmInfo {
@@ -25,5 +26,6 @@ public class EsAlarmInfo {
     public static class ProcessAlarmInfo extends EsAlarmInfo {
         private String name;
         private String command;
+        private String status;
     }
 }

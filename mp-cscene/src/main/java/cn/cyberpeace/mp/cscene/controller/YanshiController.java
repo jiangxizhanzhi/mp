@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.cscene.controller.request.AlarmRequest;
 import cn.cyberpeace.mp.cscene.controller.request.EsAlarmInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.AlarmInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.situationaware.model.WarningRuleConfigModel;
 import cn.cyberpeace.mp.situationaware.repository.WarningRuleConfigMapper;
@@ -38,8 +39,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -73,6 +76,17 @@ public class YanshiController {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         List<String> agentName = new ArrayList<>(batchSceneHandler.getAllEid2ElementMap().keySet());
+
+        Map<String, String> sysType = new HashMap<>();
+        for (String agent : agentName) {
+            var element = batchSceneHandler.getAllEid2ElementMap().get(agent);
+            if (SystemTypeCommandUtils.isWindows(element.getSystemType())) {
+                sysType.put(agent, "windows");
+            } else {
+                sysType.put(agent, "linux");
+            }
+        }
+
         Integer alarmType = alarmRequest.getType();
         SearchRequest request = new SearchRequest();
         var indices = dataCollectionService.buildRequestIndex(batchSceneHandler.getEarliestStartTime(), LocalDateTime.now());
@@ -126,6 +140,7 @@ public class YanshiController {
                     // 注册表
                     EsAlarmInfo.RegistryAlarmInfo registryAlarmInfo = new EsAlarmInfo.RegistryAlarmInfo();
                     registryAlarmInfo.setAgentName(data.getAgent().getName());
+                    registryAlarmInfo.setSystem(sysType.get(registryAlarmInfo.getAgentName()));
                     registryAlarmInfo.setPath(data.getSyscheck().getPath());
                     registryAlarmInfo.setTime(map.get("@timestamp").toString());
                     registryAlarmInfo.setMd5(data.getSyscheck().getMd5After());
@@ -137,6 +152,7 @@ public class YanshiController {
                     fileEsAlarmInfo.setFileSize(data.getSyscheck().getSizeAfter());
                     fileEsAlarmInfo.setPath(data.getSyscheck().getPath());
                     fileEsAlarmInfo.setAgentName(data.getAgent().getName());
+                    fileEsAlarmInfo.setSystem(sysType.get(fileEsAlarmInfo.getAgentName()));
                     fileEsAlarmInfo.setAction(data.getSyscheck().getEvent());
                     fileEsAlarmInfo.setTime(map.get("@timestamp").toString());
                     fileEsAlarmInfo.setMd5(data.getSyscheck().getMd5After());
@@ -161,11 +177,13 @@ public class YanshiController {
                                     }
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setSystem(sysType.get(processAlarmInfo.getAgentName()));
                                     processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
 
                                     processAlarmInfo.setCommand(process.getString("command"));
                                     processAlarmInfo.setName(process.getString("name"));
                                     processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setStatus(process.getString("status"));
                                     processAlarmInfo.setAction("added");
 
                                     esAlarmInfoResult.add(processAlarmInfo);
@@ -187,11 +205,13 @@ public class YanshiController {
 
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setSystem(sysType.get(processAlarmInfo.getAgentName()));
                                     processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
 
                                     processAlarmInfo.setCommand(process.getString("command"));
                                     processAlarmInfo.setName(process.getString("name"));
                                     processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setStatus(process.getString("status"));
                                     processAlarmInfo.setAction("deleted");
 
                                     esAlarmInfoResult.add(processAlarmInfo);
@@ -213,11 +233,13 @@ public class YanshiController {
 
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
+                                    processAlarmInfo.setSystem(sysType.get(processAlarmInfo.getAgentName()));
                                     processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
 
                                     processAlarmInfo.setCommand(process.getString("command"));
                                     processAlarmInfo.setName(process.getString("name"));
                                     processAlarmInfo.setTime(process.getString("create_time"));
+                                    processAlarmInfo.setStatus(process.getString("status"));
                                     processAlarmInfo.setAction("modified");
 
                                     esAlarmInfoResult.add(processAlarmInfo);
@@ -252,7 +274,7 @@ public class YanshiController {
             if (esData instanceof EsAlarmInfo.FileEsAlarmInfo) {
                 var dd = (EsAlarmInfo.FileEsAlarmInfo) esData;
                 for (var r : rules.getFileTypeRules()) {
-                    if (r.hit(dd.getPath(), dd.getFileSize(), dd.getAction())) {
+                    if (r.hit(dd.getPath(), dd.getFileSize(), dd.getAction(), dd.getSystem())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -285,7 +307,7 @@ public class YanshiController {
             } else if (esData instanceof EsAlarmInfo.RegistryAlarmInfo) {
                 var dd = (EsAlarmInfo.RegistryAlarmInfo) esData;
                 for (var r : rules.getRegistryRules()) {
-                    if (r.hit(dd.getPath(), dd.getAction())) {
+                    if (r.hit(dd.getPath(), dd.getAction(), dd.getSystem())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -318,7 +340,7 @@ public class YanshiController {
             } else if (esData instanceof EsAlarmInfo.ProcessAlarmInfo) {
                 var dd = (EsAlarmInfo.ProcessAlarmInfo) esData;
                 for (var r : rules.getProcessRules()) {
-                    if (r.hit(dd.getName(), dd.getCommand(), null, dd.getAction())) {
+                    if (r.hit(dd.getName(), dd.getCommand(), dd.getStatus(), dd.getAction(), dd.getSystem())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -388,6 +410,11 @@ public class YanshiController {
                     } else {
                         rule = new GuanJianRiZhi();
                     }
+                    if (m.getSystemType() == 1) {
+                        rule.setSystem("windows");
+                    } else {
+                        rule.setSystem("linux");
+                    }
                     rule.setName(m.getWarningName());
                     if (2 == m.getWarningClass()) {
                         rule.setLevel("高危");
@@ -442,6 +469,11 @@ public class YanshiController {
                     } else {
                         rule.setLevel("低危");
                     }
+                    if (m.getSystemType() == 1) {
+                        rule.setSystem("windows");
+                    } else {
+                        rule.setSystem("linux");
+                    }
                     if (StringUtils.isNotEmpty(m.getWarningMovements())) {
                         var a = m.getWarningMovements().split(",");
                         rule.setActions(new HashSet<>());
@@ -470,6 +502,11 @@ public class YanshiController {
                     rules.getRegistryRules().add(rule);
                 } else if (m.getWarningTarget() == 5) {
                     var rule = new ProcessRule();
+                    if (m.getSystemType() == 1) {
+                        rule.setSystem("windows");
+                    } else {
+                        rule.setSystem("linux");
+                    }
                     rule.setName(m.getWarningName());
                     if (2 == m.getWarningClass()) {
                         rule.setLevel("高危");
@@ -510,6 +547,17 @@ public class YanshiController {
                         rule.setCommands(new HashSet<>());
                         Arrays.stream(a).forEach(aa -> rule.getCommands().add(aa));
                     }
+                    if (StringUtils.isNotEmpty(m.getProcessStatusList())) {
+                        var a = m.getProcessStatusList().split(",");
+                        rule.setStatus(new HashSet<>());
+                        Arrays.stream(a).forEach(aa -> {
+                            if ("1".equals(aa)) {
+                                rule.getStatus().add("running");
+                            } else {
+                                rule.getStatus().add("sleeping");
+                            }
+                        });
+                    }
                     rules.getProcessRules().add(rule);
                 }
             }
@@ -535,19 +583,17 @@ public class YanshiController {
         private Set<String> commands;
         private Set<String> status;
         private Set<String> actions;
+        private String system;
 
         public ProcessRule() {
             this.setType("系统进程");
         }
 
-        private boolean hit(String name, String command, String status, String action) {
+        private boolean hit(String name, String command, String status, String action, String system) {
             boolean hit = false;
-            if (actions.contains(action)) {
+            if (actions.contains(action) && this.system.equals(system) && this.status.contains(status)) {
                 if (!hit && CollectionUtils.isNotEmpty(processNames)) {
                     hit = this.processNames.contains(name);
-                }
-                if (!hit && CollectionUtils.isNotEmpty(this.status)) {
-                    hit = this.status.contains(status);
                 }
                 if (!hit && (CollectionUtils.isNotEmpty(commands) && StringUtils.isNotEmpty(command))) {
                     for (var c : this.commands) {
@@ -567,6 +613,7 @@ public class YanshiController {
         private String name;
         private String type;
         private String level;
+        private String system;
         private Set<String> actions;
         private Set<String> paths;
 
@@ -574,9 +621,9 @@ public class YanshiController {
             this.setType("系统配置");
         }
 
-        private boolean hit(String path, String action) {
+        private boolean hit(String path, String action, String system) {
             boolean hit = false;
-            if (actions.contains(action)) {
+            if (actions.contains(action) && this.system.equals(system)) {
                 if (!hit && CollectionUtils.isNotEmpty(paths)) {
                     hit = this.paths.contains(path);
                 }
@@ -590,14 +637,15 @@ public class YanshiController {
         private String name;
         private String type;
         private String level;
+        private String system;
         private Set<String> actions;
         private Set<String> paths;
         private Set<String> suffixes;
         private Integer minSize;
 
-        private boolean hit(String path, Integer size, String action) {
+        private boolean hit(String path, Integer size, String action, String system) {
             boolean hit = false;
-            if (actions.contains(action)) {
+            if (actions.contains(action) && this.system.equals(system)) {
                 if (!hit && CollectionUtils.isNotEmpty(paths)) {
                     hit = this.paths.contains(path);
                 }
