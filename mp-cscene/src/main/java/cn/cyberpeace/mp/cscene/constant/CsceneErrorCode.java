@@ -25,7 +25,6 @@ public enum CsceneErrorCode implements ErrorCode {
     NODEIP_NOT_EXIST("MP-110210", "nodeip_not_exist"),
     NETWORKID_NOT_EXIST("MP-110211", "networkid_not_exist"),
     FLOW_NOT_EXIST("MP-110212", "flow_not_exist"),
-    USABLE_IP_NOT_EXIST("MP-110213", "usable_ip_not_exist"),
 
     // validation-api params
     PARAMS_SHOULD_NOT_NULL("MP-110281", "params_should_not_null"),

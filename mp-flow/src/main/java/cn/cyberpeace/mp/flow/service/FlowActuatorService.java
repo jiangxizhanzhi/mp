@@ -8,6 +8,4 @@ public interface FlowActuatorService extends BaseModelService<FlowActuatorModel,
 
     void delExecutor(String actuatorId);
 
-    void delContainer(String actuatorId);
-
 }

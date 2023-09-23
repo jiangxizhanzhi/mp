@@ -37,10 +37,4 @@ public class FlowNetworkInfo {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
-    /**
-     * 网段可用ip
-     */
-    @ApiModelProperty(value = "网段可用ip")
-    private String usableIp;
-
 }
