@@ -70,6 +70,7 @@ public class WarningRuleConfigService extends BaseModelServiceImpl<WarningRuleCo
     }
 
     public ListObjServiceResult<WarningRuleConfigDto> pageWarningRuleConfig(WarningRuleConfigParams warningRuleConfigParams) {
+        warningRuleConfigParams.ensure();
         Integer warningTarget = warningRuleConfigParams.getWarningTarget();
         if (Objects.nonNull(warningTarget) && Objects.isNull(warningRuleConfigParams.getSearchFields())) {
             warningRuleConfigParams.setSearch(String.valueOf(warningTarget));
