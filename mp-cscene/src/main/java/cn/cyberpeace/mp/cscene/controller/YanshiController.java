@@ -381,7 +381,7 @@ public class YanshiController {
                         FileTypeRule finalG2 = rule;
                         Arrays.stream(a).forEach(aa -> finalG2.getSuffixes().add(aa));
                     }
-                    if (m.getFileSizeMin() != null) {
+                    if (StringUtils.isNotEmpty(m.getFileSizeMin())) {
                         rule.setMinSize(Integer.parseInt(m.getFileSizeMin()));
                     }
                     rules.getFileTypeRules().add(rule);
