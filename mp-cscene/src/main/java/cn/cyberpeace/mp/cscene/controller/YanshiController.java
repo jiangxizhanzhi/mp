@@ -348,8 +348,10 @@ public class YanshiController {
 
         if (StringUtils.isNotEmpty(alarmRequest.getKey())) {
             List<AlarmInfo> result = new ArrayList<>();
-            for (var a : result) {
-                if (a.getContent().contains(alarmRequest.getKey())) {
+            for (var a : alarmInfos) {
+                if (a.getContent() != null && a.getContent().contains(alarmRequest.getKey())) {
+                    result.add(a);
+                }else if(a.getTarget() != null && a.getTarget().contains(alarmRequest.getKey())){
                     result.add(a);
                 }
             }
