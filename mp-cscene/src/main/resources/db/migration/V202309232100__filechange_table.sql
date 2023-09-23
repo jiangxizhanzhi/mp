@@ -1,5 +1,5 @@
 -- 文件和进程变更对应告警信息配置表
-create TABLE `host_collect_map_warning_config` (
+create TABLE `mp_host_collect_map_warning_config` (
        `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
        `id` varchar(64) NOT NULL COMMENT 'ID',
        `warning_name` varchar(64) NOT NULL COMMENT '告警名称',
