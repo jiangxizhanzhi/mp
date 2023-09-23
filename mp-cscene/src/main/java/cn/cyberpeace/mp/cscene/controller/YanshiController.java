@@ -105,7 +105,7 @@ public class YanshiController {
 
         // 分页
         searchBuilder.from(0);
-        searchBuilder.size(500);
+        searchBuilder.size(1500);
         // 排序
         searchBuilder.sort("@timestamp", SortOrder.DESC);
 
@@ -154,6 +154,10 @@ public class YanshiController {
 
                                     var process = arr.getJSONObject(i);
 
+                                    var command = process.getString("command");
+                                    if (StringUtils.isNotEmpty(command) && command.contains("ossec")) {
+                                        continue;
+                                    }
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
                                     processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
@@ -175,6 +179,11 @@ public class YanshiController {
 
                                     var process = arr.getJSONObject(i);
 
+                                    var command = process.getString("command");
+                                    if (StringUtils.isNotEmpty(command) && command.contains("ossec")) {
+                                        continue;
+                                    }
+
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
                                     processAlarmInfo.setTime(data.getData().getSicLaunchOutput().getSicLaunchTime());
@@ -195,6 +204,11 @@ public class YanshiController {
                                 for (int i = 0; i < arr.size(); i++) {
 
                                     var process = arr.getJSONObject(i);
+
+                                    var command = process.getString("command");
+                                    if (StringUtils.isNotEmpty(command) && command.contains("ossec")) {
+                                        continue;
+                                    }
 
                                     EsAlarmInfo.ProcessAlarmInfo processAlarmInfo = new EsAlarmInfo.ProcessAlarmInfo();
                                     processAlarmInfo.setAgentName(data.getAgent().getName());
@@ -237,7 +251,7 @@ public class YanshiController {
             if (esData instanceof EsAlarmInfo.FileEsAlarmInfo) {
                 var dd = (EsAlarmInfo.FileEsAlarmInfo) esData;
                 for (var r : rules.getFileTypeRules()) {
-                    if (r.hit(dd.getPath(), dd.getFileSize())) {
+                    if (r.hit(dd.getPath(), dd.getFileSize(), dd.getAction())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -270,7 +284,7 @@ public class YanshiController {
             } else if (esData instanceof EsAlarmInfo.RegistryAlarmInfo) {
                 var dd = (EsAlarmInfo.RegistryAlarmInfo) esData;
                 for (var r : rules.getRegistryRules()) {
-                    if (r.hit(dd.getPath())) {
+                    if (r.hit(dd.getPath(), dd.getAction())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -303,7 +317,7 @@ public class YanshiController {
             } else if (esData instanceof EsAlarmInfo.ProcessAlarmInfo) {
                 var dd = (EsAlarmInfo.ProcessAlarmInfo) esData;
                 for (var r : rules.getProcessRules()) {
-                    if (r.hit(dd.getName(), dd.getCommand(), null)) {
+                    if (r.hit(dd.getName(), dd.getCommand(), null, dd.getAction())) {
                         AlarmInfo alarmInfo = new AlarmInfo();
                         alarmInfo.setType(r.getType());
                         alarmInfo.setNodeName(nodeName);
@@ -348,9 +362,9 @@ public class YanshiController {
             for (var m : list) {
                 if (m.getWarningTarget() == 1 || m.getWarningTarget() == 4 || m.getWarningTarget() == 5) {
                     FileTypeRule rule = null;
-                    if (m.getWarningTarget() == 0) {
+                    if (m.getWarningTarget() == 1) {
                         rule = new GuanJianXiTong();
-                    } else if (m.getWarningTarget() == 3) {
+                    } else if (m.getWarningTarget() == 4) {
                         rule = new XiTongRiZhi();
                     } else {
                         rule = new GuanJianRiZhi();
@@ -367,7 +381,21 @@ public class YanshiController {
                         var a = m.getWarningMovements().split(",");
                         rule.setActions(new HashSet<>());
                         FileTypeRule finalG = rule;
-                        Arrays.stream(a).forEach(aa -> finalG.getActions().add(aa));
+                        Arrays.stream(a).forEach(aa -> {
+                            if ("1".equals(aa)) {
+                                finalG.getActions().add("added");
+                            } else if ("2".equals(aa)) {
+                                finalG.getActions().add("modified");
+                            } else {
+                                finalG.getActions().add("deleted");
+                            }
+                        });
+                    } else {
+                        rule.setActions(new HashSet<>() {{
+                            this.add("added");
+                            this.add("deleted");
+                            this.add("modified");
+                        }});
                     }
                     if (StringUtils.isNotEmpty(m.getFilePaths())) {
                         var a = m.getFilePaths().split(",");
@@ -398,7 +426,22 @@ public class YanshiController {
                     if (StringUtils.isNotEmpty(m.getWarningMovements())) {
                         var a = m.getWarningMovements().split(",");
                         rule.setActions(new HashSet<>());
-                        Arrays.stream(a).forEach(aa -> rule.getActions().add(aa));
+                        RegistryRule finalG = rule;
+                        Arrays.stream(a).forEach(aa -> {
+                            if ("1".equals(aa)) {
+                                finalG.getActions().add("added");
+                            } else if ("2".equals(aa)) {
+                                finalG.getActions().add("modified");
+                            } else {
+                                finalG.getActions().add("deleted");
+                            }
+                        });
+                    } else {
+                        rule.setActions(new HashSet<>() {{
+                            this.add("added");
+                            this.add("deleted");
+                            this.add("modified");
+                        }});
                     }
                     if (StringUtils.isNotEmpty(m.getRegisterPaths())) {
                         var a = m.getRegisterPaths().split(",");
@@ -416,6 +459,28 @@ public class YanshiController {
                     } else {
                         rule.setLevel("低危");
                     }
+
+                    if (StringUtils.isNotEmpty(m.getWarningMovements())) {
+                        var a = m.getWarningMovements().split(",");
+                        rule.setActions(new HashSet<>());
+                        ProcessRule finalG = rule;
+                        Arrays.stream(a).forEach(aa -> {
+                            if ("1".equals(aa)) {
+                                finalG.getActions().add("added");
+                            } else if ("2".equals(aa)) {
+                                finalG.getActions().add("modified");
+                            } else {
+                                finalG.getActions().add("deleted");
+                            }
+                        });
+                    } else {
+                        rule.setActions(new HashSet<>() {{
+                            this.add("added");
+                            this.add("deleted");
+                            this.add("modified");
+                        }});
+                    }
+
                     if (StringUtils.isNotEmpty(m.getProcessNames())) {
                         var a = m.getProcessNames().split(",");
                         rule.setProcessNames(new HashSet<>());
@@ -450,24 +515,27 @@ public class YanshiController {
         private Set<String> processNames;
         private Set<String> commands;
         private Set<String> status;
+        private Set<String> actions;
 
         public ProcessRule() {
             this.setType("系统进程");
         }
 
-        private boolean hit(String name, String command, String status) {
+        private boolean hit(String name, String command, String status, String action) {
             boolean hit = false;
-            if (!hit && CollectionUtils.isNotEmpty(processNames)) {
-                hit = this.processNames.contains(name);
-            }
-            if (!hit && CollectionUtils.isNotEmpty(this.status)) {
-                hit = this.status.contains(status);
-            }
-            if (!hit && (CollectionUtils.isNotEmpty(commands) && StringUtils.isNotEmpty(command))) {
-                for (var c : this.commands) {
-                    if (command.contains(c)) {
-                        hit = true;
-                        break;
+            if (actions.contains(action)) {
+                if (!hit && CollectionUtils.isNotEmpty(processNames)) {
+                    hit = this.processNames.contains(name);
+                }
+                if (!hit && CollectionUtils.isNotEmpty(this.status)) {
+                    hit = this.status.contains(status);
+                }
+                if (!hit && (CollectionUtils.isNotEmpty(commands) && StringUtils.isNotEmpty(command))) {
+                    for (var c : this.commands) {
+                        if (command.contains(c)) {
+                            hit = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -487,10 +555,12 @@ public class YanshiController {
             this.setType("系统配置");
         }
 
-        private boolean hit(String path) {
+        private boolean hit(String path, String action) {
             boolean hit = false;
-            if (!hit && CollectionUtils.isNotEmpty(paths)) {
-                hit = this.paths.contains(path);
+            if (actions.contains(action)) {
+                if (!hit && CollectionUtils.isNotEmpty(paths)) {
+                    hit = this.paths.contains(path);
+                }
             }
             return hit;
         }
@@ -506,21 +576,23 @@ public class YanshiController {
         private Set<String> suffixes;
         private Integer minSize;
 
-        private boolean hit(String path, Integer size) {
+        private boolean hit(String path, Integer size, String action) {
             boolean hit = false;
-            if (!hit && CollectionUtils.isNotEmpty(paths)) {
-                hit = this.paths.contains(path);
-            }
-            if (!hit && CollectionUtils.isNotEmpty(suffixes)) {
-                if (!path.contains(".")) {
-                    hit = false;
-                } else {
-                    String suffix = path.substring(path.lastIndexOf("."));
-                    hit = this.suffixes.contains(suffix);
+            if (actions.contains(action)) {
+                if (!hit && CollectionUtils.isNotEmpty(paths)) {
+                    hit = this.paths.contains(path);
                 }
-            }
-            if (!hit && this.minSize != null) {
-                hit = size > this.minSize;
+                if (!hit && CollectionUtils.isNotEmpty(suffixes)) {
+                    if (!path.contains(".")) {
+                        hit = false;
+                    } else {
+                        String suffix = path.substring(path.lastIndexOf("."));
+                        hit = this.suffixes.contains(suffix);
+                    }
+                }
+                if (!hit && this.minSize != null) {
+                    hit = size > this.minSize;
+                }
             }
             return hit;
         }

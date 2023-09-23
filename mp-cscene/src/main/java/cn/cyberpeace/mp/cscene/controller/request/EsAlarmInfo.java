@@ -6,11 +6,11 @@ import lombok.Data;
 public class EsAlarmInfo {
     private String time;
     private String agentName;
+    private String action;
 
     @Data
     public static class RegistryAlarmInfo extends EsAlarmInfo {
         private String path;
-        private String action;
         private String md5;
     }
 
@@ -18,7 +18,6 @@ public class EsAlarmInfo {
     public static class FileEsAlarmInfo extends EsAlarmInfo {
         private String path;
         private Integer fileSize;
-        private String action;
         private String md5;
     }
 
@@ -26,6 +25,5 @@ public class EsAlarmInfo {
     public static class ProcessAlarmInfo extends EsAlarmInfo {
         private String name;
         private String command;
-        private String action;
     }
 }
