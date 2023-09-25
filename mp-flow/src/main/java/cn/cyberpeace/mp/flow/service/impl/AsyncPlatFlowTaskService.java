@@ -1081,10 +1081,6 @@ public class AsyncPlatFlowTaskService {
     }
 
     private void refreshTgn(String fixedIp, boolean needCreatePorts, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
-        if (needCreatePorts) {
-            flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
-        }
-
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("fileName", "traffic_generators.tar.gz");
         File tgnFile = new File(TGN_PATH);
@@ -1095,6 +1091,10 @@ public class AsyncPlatFlowTaskService {
             log.info("upload pcap file response:{}", jsonObject.toJSONString());
         } catch (Exception e) {
             log.error("post tgn file error:", e);
+        }
+
+        if (needCreatePorts) {
+            flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
         }
     }
 
