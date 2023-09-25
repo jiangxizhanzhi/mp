@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.Leak;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -221,6 +222,20 @@ public class DevopsTargetController {
         }
         return new Result(new ListResult<>(devices));
     }
+
+
+    @ApiOperation("获取所有的漏洞名称")
+    @GetMapping("/leak/all")
+    public ServiceResult<Set<String>> listAllLeaks() {
+        List<Device> devices = cpDeviceService.findDevicesByCategories(Collections.emptyList());
+        if (CollectionUtils.isEmpty(devices)) {
+            return new ServiceResult<Set<String>>().asResult();
+        } else {
+            return new ServiceResult<>(devices.stream().map(Device::getLeaks).filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+                    .map(Leak::getName).collect(Collectors.toSet())).asResult();
+        }
+    }
+
 
     /**
      * 查询所有靶标信息
