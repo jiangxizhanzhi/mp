@@ -34,13 +34,11 @@ import io.micrometer.core.instrument.util.StringUtils;
 import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -96,7 +94,7 @@ public class AsyncPlatFlowTaskService {
     /**
      * tgn代码目录
      */
-    private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.tar.gz";
+    private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
     /**
      * 保存流量发生平台任务
@@ -1063,7 +1061,7 @@ public class AsyncPlatFlowTaskService {
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
         serverInfo.setHost(trexIp);
         serverInfo.setUser("root");
-        serverInfo.setPassword(flowConfig.getTrexPass());
+        serverInfo.setPassword("111111");
         SshUtil.execCommand(serverInfo, command);
     }
 
@@ -1075,27 +1073,16 @@ public class AsyncPlatFlowTaskService {
      * @param extNetId
      */
     private void checkTrexServer(String fixedIp, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
+        String commands = "./init.sh";
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(fixedIp);
+        serverInfo.setUser("root");
+        serverInfo.setPassword("111111");
+        SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
+
         NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                null, 0, () -> refreshTgn(fixedIp, true, networkInfos, flowActuatorModel,
+                null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
-    }
-
-    private void refreshTgn(String fixedIp, boolean needCreatePorts, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
-        JSONObject jsonObj = new JSONObject();
-        jsonObj.put("fileName", "traffic_generators.tar.gz");
-        File tgnFile = new File(TGN_PATH);
-        try {
-            String pcapRsp = HttpUtils.postFile(CommonUtil.getResourcetUrl(fixedIp + BaseConstants.COLON + "80") + "/pcap/refresh_tgn",
-                    FileUtils.readFileToByteArray(tgnFile), "file", jsonObj);
-            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-            log.info("upload pcap file response:{}", jsonObject.toJSONString());
-        } catch (Exception e) {
-            log.error("post tgn file error:", e);
-        }
-
-        if (needCreatePorts) {
-            flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
-        }
     }
 
     /**
@@ -1103,9 +1090,15 @@ public class AsyncPlatFlowTaskService {
      * @param fixedIp
      */
     private void checkStartTrex(String fixedIp) {
+        String commands = "./init.sh";
+        SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
+        serverInfo.setHost(fixedIp);
+        serverInfo.setUser("root");
+        serverInfo.setPassword("111111");
+        SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
+
         NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                null, 0, () -> refreshTgn(fixedIp, false, null, null,
-                        null), () -> log.error("Trex vm start error:{}", fixedIp));
+                null, 0, null, () -> log.error("Trex vm start error:{}", fixedIp));
     }
 
     /**
