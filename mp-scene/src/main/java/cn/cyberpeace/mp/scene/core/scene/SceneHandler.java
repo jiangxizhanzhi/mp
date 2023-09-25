@@ -48,6 +48,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -155,6 +157,8 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
+            SceneStageRecorder.getRecorder(getSceneId()).refreshSceneBO(this.getScene());
+            SceneStageRecorder.removeRecorder(getSceneId());
             save();
         }
         return flag;
@@ -933,7 +937,13 @@ public class SceneHandler extends BaseSceneHandler<
         if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
             return 100;
         }
-        return this.getScene().getStagePercentage();
+        BigDecimal total = BigDecimal.valueOf(0);
+        BigDecimal current = BigDecimal.valueOf(0);
+        for (var stage : this.getScene().getStageList()) {
+            total = total.add(BigDecimal.valueOf(100));
+            current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
+        }
+        return current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue();
     }
 
     private boolean isTerminateEvent(int state) {
