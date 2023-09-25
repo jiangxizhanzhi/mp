@@ -1303,6 +1303,10 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
             });
         }
+        if (!createGatewayTasks.isEmpty() || !createFirewallTasks.isEmpty()) {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
+        }
+
 
         // 再创建终端
         var npcNodes = getPluginHandler().getNpcElements();

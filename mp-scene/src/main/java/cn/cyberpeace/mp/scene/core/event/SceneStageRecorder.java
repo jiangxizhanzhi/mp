@@ -151,7 +151,14 @@ public class SceneStageRecorder {
         sceneBO.setStageName(this.currentStage.getStageName());
         sceneBO.setStagePercentage(this.currentStage.getStagePercentage());
         sceneBO.setStageList(this.stages);
-        sceneBO.setProgressPercentage(this.progressPercentage);
+        BigDecimal total = BigDecimal.valueOf(0);
+        BigDecimal current = BigDecimal.valueOf(0);
+        for (var stage : stages) {
+            total = total.add(BigDecimal.valueOf(100));
+            current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+        }
+        sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
+        this.progressPercentage = sceneBO.getProgressPercentage();
     }
 
     private void refreshSceneBO(SceneStageRecord record, SceneBO sceneBO) {
