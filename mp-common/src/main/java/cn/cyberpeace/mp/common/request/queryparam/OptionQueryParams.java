@@ -26,4 +26,10 @@ public class OptionQueryParams extends QueryParams {
     @ApiModelProperty(value = "名称")
     private String zhName;
 
+    @ApiModelProperty(value = "前端传递的名称字段")
+    private String pattern;
+
+    @ApiModelProperty(value = "名称en")
+    private String enName;
+
 }

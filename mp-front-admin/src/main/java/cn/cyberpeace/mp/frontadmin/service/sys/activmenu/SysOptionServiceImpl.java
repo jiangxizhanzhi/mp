@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.common.service.fields.OptionFields;
+import cn.cyberpeace.mp.common.util.LocaleUtil;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
 import lombok.extern.slf4j.Slf4j;
@@ -56,10 +57,19 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         if (StringUtils.isNotEmpty(queryParams.getType())) {
             humanCondition.filterEqual("type", queryParams.getType());
         }
-        if (StringUtils.isNotEmpty(queryParams.getZhName())) {
-            humanCondition.filterContains("zhName", queryParams.getZhName());
+
+        if (LocaleUtil.chineseLocalFlag()) {
+            if (StringUtils.isNotEmpty(queryParams.getZhName())) {
+                humanCondition.filterContains("zhName", queryParams.getZhName());
+            }
+        } else {
+            if (StringUtils.isNotEmpty(queryParams.getEnName())) {
+                humanCondition.filterContains("enName", queryParams.getEnName());
+            }
         }
     }
+
+
 
     /**
      *
