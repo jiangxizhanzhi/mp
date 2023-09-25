@@ -4,10 +4,12 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.service.ExpireRemindDateGetter;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,11 @@ public class UserImportService {
     @Transactional(rollbackFor = Exception.class)
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<TenantUserModel> tenantUserModels) {
         if (CollectionUtils.isNotEmpty(userModels)) {
+
+            for (var m : userModels) {
+                m.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+            }
+
             ServiceResult<Integer> re = userService.bulkCreateWithPasswordPreSet(userModels);
             if (!Objects.equals(userModels.size(), re.getSource())) {
                 log.error("userModels.size:{} and re.getSource:{} not same!", userModels.size(), re.getSource());
