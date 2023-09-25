@@ -266,7 +266,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
 
-        if (obj.getDelayRemindLicenseTime() != null) {
+        if (obj.getDelayRemindLicenseTime() == null) {
             obj.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         }
 
