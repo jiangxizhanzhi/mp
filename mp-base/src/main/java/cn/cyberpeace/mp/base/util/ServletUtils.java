@@ -33,12 +33,13 @@ public class ServletUtils {
      * 获取请求语言
      * @return
      */
-    public static String getAcceptLanguage(){
+    public static String getAcceptLanguage() {
         HttpServletRequest httpServletRequest = getRequest();
-        if (Objects.isNull(httpServletRequest)){
+        if (Objects.isNull(httpServletRequest)) {
             return "";
         }
-        return httpServletRequest.getHeader("Accept-Language");
+        var al = httpServletRequest.getHeader("Accept-Language");
+        return al == null ? "" : al;
     }
 
 }
