@@ -1,10 +1,10 @@
 -- 节点信息增加漏洞信息记录
-ALTER TABLE mp_sceneplugincloud_scene_element ADD leaks LONGVARCHAR not null default '' ;
-ALTER TABLE mp_sceneplugincloud_scene_config_element ADD leaks LONGVARCHAR not null default '';
-ALTER TABLE mp_devops_device add leaks LONGVARCHAR not null default '';
-ALTER TABLE mp_devops_target add leaks LONGVARCHAR not null default '';
+ALTER TABLE mp.mp_sceneplugincloud_scene_element ADD leaks LONGVARCHAR not null default '' ;
+ALTER TABLE mp.mp_sceneplugincloud_scene_config_element ADD leaks LONGVARCHAR not null default '';
+ALTER TABLE mp.mp_devops_device add leaks LONGVARCHAR not null default '';
+ALTER TABLE mp.mp_devops_target add leaks LONGVARCHAR not null default '';
 
-update mp_devops_device set leaks = '[
+update mp.mp_devops_device set leaks = '[
                                      	{
                                      		"name": "CVE-2019-12860",
                                      		"version": "S-CMS PHP v3.0",
@@ -74,7 +74,7 @@ update mp_devops_device set leaks = '[
                                      	}
                                      ]'
                                      where name = '服务器';
-update mp_devops_device set leaks = '[
+update mp.mp_devops_device set leaks = '[
                                          {
                                              "name": "CNVD-2021-27989",
                                              "severity": "严重",
@@ -102,7 +102,7 @@ update mp_devops_device set leaks = '[
                                          }
                                      ]'
                                      where name = 'PC';
-update mp_devops_device set leaks = '[
+update mp.mp_devops_device set leaks = '[
                                          {
                                              "name": "主机开放445端口",
                                              "severity": "严重",
@@ -120,7 +120,7 @@ update mp_devops_device set leaks = '[
                                          }
                                      ]'
                                      where name like '%数据库%';
-update mp_devops_device set leaks = '[
+update mp.mp_devops_device set leaks = '[
                                          {
                                              "name": "MongoDB 未授权访问漏洞",
                                              "severity": "中等",
@@ -131,7 +131,7 @@ update mp_devops_device set leaks = '[
 
 
 
-update mp_devops_target set leaks = '[
+update mp.mp_devops_target set leaks = '[
                                      	{
                                      		"name": "CVE-2019-12860",
                                      		"version": "S-CMS PHP v3.0",
@@ -201,7 +201,7 @@ update mp_devops_target set leaks = '[
                                      	}
                                      ]'
                                      where name = '服务器';
-update mp_devops_target set leaks = '[
+update mp.mp_devops_target set leaks = '[
                                          {
                                              "name": "CNVD-2021-27989",
                                              "severity": "严重",
@@ -229,7 +229,7 @@ update mp_devops_target set leaks = '[
                                          }
                                      ]'
                                      where name = 'PC';
-update mp_devops_target set leaks = '[
+update mp.mp_devops_target set leaks = '[
                                          {
                                              "name": "主机开放445端口",
                                              "severity": "严重",
@@ -247,7 +247,7 @@ update mp_devops_target set leaks = '[
                                          }
                                      ]'
                                      where name like '%数据库%';
-update mp_devops_target set leaks = '[
+update mp.mp_devops_target set leaks = '[
                                          {
                                              "name": "MongoDB 未授权访问漏洞",
                                              "severity": "中等",
@@ -256,7 +256,7 @@ update mp_devops_target set leaks = '[
                                      ]'
                                      where name like '%OPC%';
 
-update mp_sceneplugincloud_scene_config_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                   	{
                                                                                                   		"name": "CVE-2019-12860",
                                                                                                   		"version": "S-CMS PHP v3.0",
@@ -326,9 +326,9 @@ update mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                   	}
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_config_element where name like '%服务器%');
+select node_id from mp.mp_scene_scene_config_element where name like '%服务器%');
 
-update mp_sceneplugincloud_scene_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                   	{
                                                                                                   		"name": "CVE-2019-12860",
                                                                                                   		"version": "S-CMS PHP v3.0",
@@ -398,10 +398,10 @@ update mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                   	}
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_element where name like '%服务器%');
+select node_id from mp.mp_scene_scene_element where name like '%服务器%');
 
 
-update mp_sceneplugincloud_scene_config_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       {
                                                                                                           "name": "CNVD-2021-27989",
                                                                                                           "severity": "严重",
@@ -429,9 +429,9 @@ update mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       }
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_config_element where name like 'PC%');
+select node_id from mp.mp_scene_scene_config_element where name like 'PC%');
 
-update mp_sceneplugincloud_scene_element set leaks = '[{
+update mp.mp_sceneplugincloud_scene_element set leaks = '[{
                                                                                                    "name": "CNVD-2021-27989",
                                                                                                    "severity": "严重",
                                                                                                    "version": "Google Chrome <= 89.0.4389.114"
@@ -458,7 +458,7 @@ update mp_sceneplugincloud_scene_element set leaks = '[{
                                                                                                }
                                                                                            ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_element where name like 'PC%');
+select node_id from mp.mp_scene_scene_element where name like 'PC%');
 
 
 
@@ -466,7 +466,7 @@ select node_id from mp_scene_scene_element where name like 'PC%');
 
 
 
-update mp_sceneplugincloud_scene_config_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       {
                                                                                                           "name": "主机开放445端口",
                                                                                                           "severity": "严重",
@@ -484,9 +484,9 @@ update mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       }
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_config_element where name like '%数据库%');
+select node_id from mp.mp_scene_scene_config_element where name like '%数据库%');
 
-update mp_sceneplugincloud_scene_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                {
                                                                                                    "name": "主机开放445端口",
                                                                                                    "severity": "严重",
@@ -504,12 +504,12 @@ update mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                }
                                                                                            ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_element where name like '%数据库%');
+select node_id from mp.mp_scene_scene_element where name like '%数据库%');
 
 
 
 
-update mp_sceneplugincloud_scene_config_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       {
                                                                                                           "name": "MongoDB 未授权访问漏洞",
                                                                                                           "severity": "中等",
@@ -517,9 +517,9 @@ update mp_sceneplugincloud_scene_config_element set leaks = '[
                                                                                                       }
                                                                                                   ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_config_element where name like '%OPC%');
+select node_id from mp.mp_scene_scene_config_element where name like '%OPC%');
 
-update mp_sceneplugincloud_scene_element set leaks = '[
+update mp.mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                {
                                                                                                    "name": "MongoDB 未授权访问漏洞",
                                                                                                    "severity": "中等",
@@ -527,5 +527,5 @@ update mp_sceneplugincloud_scene_element set leaks = '[
                                                                                                }
                                                                                            ]'
                                                                                                    where scene_element in (
-select node_id from mp_scene_scene_element where name like '%OPC%');
+select node_id from mp.mp_scene_scene_element where name like '%OPC%');
 COMMIT;
