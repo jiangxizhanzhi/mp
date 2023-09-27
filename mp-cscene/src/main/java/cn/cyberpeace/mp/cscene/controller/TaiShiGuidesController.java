@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowClassificationDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiTotalCount;
@@ -62,5 +63,13 @@ public class TaiShiGuidesController {
     public ServiceResult<List<FlowTrend>> getEventTiming(@Param("sceneIds") String[] sceneIds) {
         return taiShiGuidesService.getEventTiming(sceneIds).asResult();
     }
+
+    @ApiOperation(value = "获取流量事件攻击类型分类详情")
+    @GetMapping("/flow_classification/all")
+    public ServiceResult<List<FlowClassificationDto>> listAllFlowClassifications() {
+        return new ServiceResult<>(taiShiGuidesService.listAllFlowClassifications()).asResult();
+    }
+
+
 
 }

@@ -6,14 +6,10 @@ import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementPortBO;
@@ -191,58 +187,10 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                 flowInfos.add(addFlowTaskFlowInfo);
             }
             addFlowTaskTaskInfo.setFlowInfos(flowInfos);
-            String usableIp = getUsableIp(networkId, getSceneHandler());
-            addFlowTaskTaskInfo.setUsableIp(usableIp);
             details.add(addFlowTaskTaskInfo);
         }
         if (CollectionUtils.isNotEmpty(details)) {
             getHandlerUtils().addFlowTask(details, sceneId, getScene().getExecutor());
-        }
-    }
-
-    public String getUsableIp(String networkId, SceneHandler sceneHandler) {
-        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        var elements = new ArrayList<>(pluginHandler.getElementMap().values());
-        ConnectedNetworkBO findNet = null;
-        for (var e : elements) {
-            List<ConnectedNetworkBO> nets = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(e.getDeriveNetworks())) {
-                nets.addAll(e.getDeriveNetworks());
-            }
-            if (CollectionUtils.isNotEmpty(e.getAccessNetworks())) {
-                nets.addAll(e.getAccessNetworks());
-            }
-            boolean finded = false;
-            for (var n : nets) {
-                if (networkId.equals(n.getNetwork().getResourceId())) {
-                    finded = true;
-                    findNet = n;
-                }
-            }
-            if (finded) {
-                break;
-            }
-        }
-        if (findNet == null) {
-            return null;
-        } else {
-            List<SceneElementPortBO> ports = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(findNet.getFromPorts())) {
-                ports.addAll(findNet.getFromPorts());
-            }
-            if (CollectionUtils.isNotEmpty(findNet.getToPorts())) {
-                ports.addAll(findNet.getToPorts());
-            }
-            var ips = ports.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getIp()))
-                    .map(p -> p.getIp())
-                    .collect(Collectors.toList());
-            var allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
-            if (CollectionUtils.isNotEmpty(allocateIp)) {
-                return allocateIp.get(0);
-            } else {
-                return null;
-            }
         }
     }
 

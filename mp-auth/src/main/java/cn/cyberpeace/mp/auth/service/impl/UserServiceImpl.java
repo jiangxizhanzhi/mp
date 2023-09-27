@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.*;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -265,6 +266,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
 
+        if (obj.getDelayRemindLicenseTime() == null) {
+            obj.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+        }
+
         return super.create(obj, fields);
     }
 
@@ -366,6 +371,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
+        userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 

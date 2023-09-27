@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.client.watcher.ActivateWatchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
@@ -183,6 +184,11 @@ public class SysActivationService {
 
     }
 
+    public void resetMenuVisibility() {
+        ACTIVATION_CONTENT = status();
+        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+    }
+
     /**
      * 授权延期
      * @param activationRequest
@@ -242,6 +248,7 @@ public class SysActivationService {
                 String oldExpireDate = content.getExpiredDate();
                 ACTIVATION_CONTENT = null;
 
+                updateMachineCode(activationRequest);
                 // 校验通过，更新加密文件存储磁盘
                 updateEncryptedFile(activationRequest, oldExpireDate, delayVerifyCodeList, oldLicenseCode);
 
@@ -257,6 +264,24 @@ public class SysActivationService {
                 throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
             }
         }
+    }
+
+    /**
+     *  由于续期是使用machine code 和功能配置+续期时间按照固定算法加密生成的激活码，而且激活码不能重复使用，
+     *  因此，如果用户续期时，选择了同样的功能配置和续期时间时，需要machine code发生变化。machine code构成是
+     *  dmidecode -s system-uuid 得到的硬件唯一序列信息，加上-suffix(6位随机字符)。
+     *  因此在延期保存延期信息时，添加变更suffix和matchine code
+     * @author zhanzhi
+     * @date 15:17 2023/9/26
+     **/
+    private void updateMachineCode(ActivationRequest activationRequest) {
+        String hardwareUuid = StringUtils.substringBeforeLast(activationRequest.getMachineCode(), "-");
+        String suffix = RandomUtils.randomString(6);
+        activationRequest.setMachineCode(String.join("-", hardwareUuid, suffix));
+    }
+
+    private String getSuffixFromMachineCode(String machineCode) {
+        return StringUtils.substringAfterLast(machineCode, "-");
     }
 
     /**
@@ -600,6 +625,9 @@ public class SysActivationService {
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getValidCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
+
+        String newSuffix = getSuffixFromMachineCode(activationRequest.getMachineCode());
+        updateSysActivCtlModel.setSuffix(newSuffix);
 
         LocalDateTime expiredTime = TimeUtils.stringToLocalDateTime(oldExpireDate + " 00:00:00").plusDays(1);
         Duration duration = Duration.between(LocalDateTime.now(), expiredTime);

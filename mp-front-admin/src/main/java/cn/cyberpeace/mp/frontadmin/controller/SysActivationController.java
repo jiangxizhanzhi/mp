@@ -100,6 +100,14 @@ public class SysActivationController {
     }
 
 
+    @ApiOperation("重置菜单可见性")
+    @GetMapping("/reset_menu_visibility")
+    public ServiceResult resetMenuVisibility() {
+        activationService.resetMenuVisibility();
+        return ResultCommon.success();
+    }
+
+
     private ActivationResponse getActivationResponse() {
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {

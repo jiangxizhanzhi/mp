@@ -32,6 +32,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -273,6 +274,10 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
             queryParams.setOrders(new String[]{"sort"});
         }
         queryParams.setType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
+        if (StringUtils.isNotBlank(queryParams.getPattern())) {
+            queryParams.setZhName(queryParams.getPattern());
+            queryParams.setEnName(queryParams.getPattern());
+        }
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
         ListObjServiceResult<OptionModelBO> result = optionService.page(queryParams);
         log.info("FlowInfoController.pageCategories end. result:{}", result);
