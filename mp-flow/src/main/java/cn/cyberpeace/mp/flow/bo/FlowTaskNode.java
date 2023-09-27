@@ -28,6 +28,11 @@ public class FlowTaskNode {
     private String nodeName;
 
     @Override
+    public int hashCode() {
+        return Objects.hash(nodeId, nodeName);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
