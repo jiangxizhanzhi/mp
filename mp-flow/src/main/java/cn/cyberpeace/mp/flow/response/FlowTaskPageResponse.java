@@ -47,6 +47,9 @@ public class FlowTaskPageResponse {
     @ApiModelProperty(value = "目标节点名称")
     private String nodeName;
 
+    @ApiModelProperty(value = "目标节点id")
+    private String nodeId;
+
     /**
      * 目标节点ip
      */

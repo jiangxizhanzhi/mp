@@ -46,6 +46,7 @@ import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -70,10 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -284,6 +282,21 @@ public class CsceneFlowService {
                 temp.setRealTimeRateList(tealTimeRateMap.get(temp.getId()));
             }
         }
+
+        if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
+            String[] nodeIds = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getNodeId).distinct().toArray(String[]::new);
+            List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
+            if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
+                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
+                flowTaskPageResponseList.forEach(node -> {
+                    String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
+                    if (StringUtils.isNotBlank(realNodeName)) {
+                        node.setNodeName(realNodeName);
+                    }
+                });
+            }
+        }
+
         ListObjServiceResult<FlowTaskPageResponse> result = new ListObjServiceResult(new ListObjResult<>(flowTaskPageResponseList, total).asResult()).asResult();
         log.info("CsceneFlowService.taskList end. result:{}", result);
         return result;
@@ -499,6 +512,23 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.nodeOption begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
         List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
+
+        if (CollectionUtils.isNotEmpty(nodeList)) {
+            String[] nodeIds = nodeList.stream().map(FlowTaskNode::getNodeId).distinct().toArray(String[]::new);
+            List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
+            if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
+                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
+                nodeList.forEach(node -> {
+                    String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
+                    if (StringUtils.isNotBlank(realNodeName)) {
+                        node.setNodeName(realNodeName);
+                    }
+                });
+            }
+        }
+
+        nodeList = nodeList.stream().distinct().collect(Collectors.toList());
+
         log.info("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
         return nodeList;
     }

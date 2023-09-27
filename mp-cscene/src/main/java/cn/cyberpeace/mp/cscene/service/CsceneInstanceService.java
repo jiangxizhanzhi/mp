@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -56,8 +57,10 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
@@ -179,6 +182,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private FlowMonitorService flowMonitorService;
+
+    @Resource
+    private SceneElementMapper sceneElementMapper;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1771,5 +1777,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         csceneElementCommon.setNodeId(nodeId);
         csceneElementCommon.setData(accessUsers);
         CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
+    }
+
+    public List<SceneElementModel> listCsceneInstanceNodes(String sceneId, String[] nodeIds, SerializableFunction<SceneElementModel>... selectFields) {
+        HumanCondition humanCondition = new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId);
+        if (Objects.nonNull(nodeIds) && nodeIds.length > 0) {
+            humanCondition.filterIn(SceneElementModel::getNodeId, nodeIds);
+        }
+        if (Objects.nonNull(selectFields) && selectFields.length > 0) {
+            humanCondition.select(selectFields);
+        }
+        return sceneElementMapper.list(humanCondition);
     }
 }
