@@ -64,6 +64,10 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         if (Objects.nonNull(queryParams.getEndTime())) {
             humanCondition.filterLessThanOrEqual("createTime", queryParams.getEndTime() + " 23:59:59");
         }
+
+        if (Objects.isNull(queryParams.getOrders())) {
+            humanCondition.reverseOrderBy(ScreenshotModel::getCreateTime).orderBy(ScreenshotModel::getId);
+        }
     }
 
     /**
