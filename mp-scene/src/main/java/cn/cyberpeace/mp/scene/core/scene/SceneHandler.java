@@ -159,6 +159,16 @@ public class SceneHandler extends BaseSceneHandler<
             asyncAckSceneChanged(false, false);
             SceneStageRecorder.getRecorder(getSceneId()).refreshSceneBO(this.getScene());
             SceneStageRecorder.removeRecorder(getSceneId());
+            String message = this.getScene().getProcessMessage();
+            for (var e : this.getElementMap().values()) {
+                if (e.getEventStatus() == 5) {
+                    message += ";" + e.getProcessMessage();
+                }
+            }
+            if (StringUtils.isNotEmpty(message) && message.length() > 2000) {
+                message = message.substring(0, 2000);
+            }
+            this.getScene().setProcessMessage(message);
             save();
         }
         return flag;
