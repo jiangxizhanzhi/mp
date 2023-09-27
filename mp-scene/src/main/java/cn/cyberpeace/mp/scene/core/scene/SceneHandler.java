@@ -949,9 +949,11 @@ public class SceneHandler extends BaseSceneHandler<
         }
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
-        for (var stage : this.getScene().getStageList()) {
-            total = total.add(BigDecimal.valueOf(100));
-            current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
+        if (CollectionUtils.isNotEmpty(this.getScene().getStageList())) {
+            for (var stage : this.getScene().getStageList()) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
+            }
         }
         if (current.intValue() == 0) {
             return 0;

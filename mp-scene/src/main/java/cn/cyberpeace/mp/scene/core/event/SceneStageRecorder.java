@@ -153,11 +153,15 @@ public class SceneStageRecorder {
         sceneBO.setStageList(this.stages);
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
-        for (var stage : stages) {
-            total = total.add(BigDecimal.valueOf(100));
-            current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+        if (CollectionUtils.isNotEmpty(stages)) {
+            for (var stage : stages) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+            }
+            sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
+        } else {
+            sceneBO.setProgressPercentage(0);
         }
-        sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
         this.progressPercentage = sceneBO.getProgressPercentage();
     }
 
@@ -167,12 +171,17 @@ public class SceneStageRecorder {
         sceneBO.setStagePercentage(record.getStagePercentage());
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
-        for (var stage : stages) {
-            total = total.add(BigDecimal.valueOf(100));
-            current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+        if (CollectionUtils.isNotEmpty(stages)) {
+            for (var stage : stages) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+            }
+            sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
+            sceneBO.setStageList(stages);
+        } else {
+            sceneBO.setProgressPercentage(0);
+            sceneBO.setStageList(new ArrayList<>());
         }
-        sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
-        sceneBO.setStageList(stages);
         this.currentStage = record;
         this.progressPercentage = sceneBO.getProgressPercentage();
     }
