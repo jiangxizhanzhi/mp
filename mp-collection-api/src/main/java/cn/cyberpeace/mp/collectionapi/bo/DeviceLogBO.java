@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class DeviceLogBO extends DeviceLog {
     @ApiModelProperty(value = "原始日志数据")
-    private Object data;
+    private Object message;
 }

@@ -20,7 +20,7 @@ import java.io.IOException;
 
 @Slf4j
 @RestController
-@RequestMapping("/log")
+@RequestMapping("/log/dev")
 public class DeviceLogController {
     @Resource
     private DeviceLogService deviceLogService;
@@ -33,7 +33,7 @@ public class DeviceLogController {
         // TODO:根据日志类型进行数据格式转换
         CommonDeviceLog deviceLog = new CommonDeviceLog();
         BeanUtil.copyProperties(logData, deviceLog,"data");
-        deviceLog.setRawData(logData.getData().toString());
+        deviceLog.setRawData(logData.getMessage().toString());
 
         try {
             deviceLog = deviceLogService.saveDocument(deviceLog);

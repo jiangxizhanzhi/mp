@@ -14,11 +14,11 @@ public class DeviceLog {
 
     @ApiModelProperty(value = "日志来源设备类型")
     @Field(type = FieldType.Keyword)
-    private String devType;
+    private String type;
 
     @ApiModelProperty(value = "日志来源设备IP")
     @Field(type = FieldType.Keyword)
-    private String devIp;
+    private String ip;
 
     @ApiModelProperty(value = "日志数据所属业务类型")
     @Field(type = FieldType.Keyword)
@@ -26,5 +26,5 @@ public class DeviceLog {
 
     @ApiModelProperty(value = "日志生成时间")
     @Field(type = FieldType.Keyword)
-    private Long timestamp;
+    private String time;
 }
