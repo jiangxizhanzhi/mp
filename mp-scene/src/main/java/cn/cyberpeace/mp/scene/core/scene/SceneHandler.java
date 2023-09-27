@@ -953,6 +953,9 @@ public class SceneHandler extends BaseSceneHandler<
             total = total.add(BigDecimal.valueOf(100));
             current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
         }
+        if (current.intValue() == 0) {
+            return 0;
+        }
         return current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue();
     }
 
