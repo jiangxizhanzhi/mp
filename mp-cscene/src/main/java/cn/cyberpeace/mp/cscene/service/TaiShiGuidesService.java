@@ -86,7 +86,15 @@ public class TaiShiGuidesService {
     }
 
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(TaiShiRequest request) {
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = new ArrayList<>();
+        if (StringUtils.isNotEmpty(request.getSceneId()) && request.getSceneId().contains(",")) {
+            var ids = request.getSceneId().split(",");
+            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(ids));
+            sceneIds.addAll(sceneIdsTmp);
+        } else {
+            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+            sceneIds.addAll(sceneIdsTmp);
+        }
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ListObjServiceResult<>();
         }
