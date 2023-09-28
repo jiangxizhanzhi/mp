@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.collection.model.log;
 
 import cn.cyberpeace.mp.collection.constant.DeviceLogConstant;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -28,6 +29,7 @@ public class DeviceLog {
 
     @ApiModelProperty(value = "日志数据所属业务类型")
     @Field(value = "log_type", type = FieldType.Keyword)
+    @JsonProperty("log_type")
     private String logType;
 
     @ApiModelProperty(value = "日志生成时间")

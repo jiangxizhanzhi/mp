@@ -12,4 +12,9 @@ public class CollectionConfig {
      * es 节点地址
      */
     private String esNode;
+
+    /**
+     * 上层业务层服务地址
+     */
+    private String app;
 }
