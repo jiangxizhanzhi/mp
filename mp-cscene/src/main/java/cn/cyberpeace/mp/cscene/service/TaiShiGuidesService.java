@@ -104,7 +104,7 @@ public class TaiShiGuidesService {
         var mergeQuery = QueryBuilders.boolQuery();
 
         if (Boolean.TRUE.equals(request.getHost())) {
-            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
+            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
             EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
             if (hostDefenseResult != null) {
                 indexes.addAll(hostDefenseResult.getIndexes());
