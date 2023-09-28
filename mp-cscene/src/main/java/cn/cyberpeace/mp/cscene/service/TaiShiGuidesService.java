@@ -33,6 +33,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -103,7 +104,7 @@ public class TaiShiGuidesService {
         var mergeQuery = QueryBuilders.boolQuery();
 
         if (Boolean.TRUE.equals(request.getHost())) {
-            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getHost() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
+            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
             EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
             if (hostDefenseResult != null) {
                 indexes.addAll(hostDefenseResult.getIndexes());
@@ -169,6 +170,7 @@ public class TaiShiGuidesService {
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(indexes.toArray(new String[]{}));
         searchRequest.source(searchBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         List<TaiShiEventInfo> result = new ArrayList<>();
         int total = 0;
         try {
