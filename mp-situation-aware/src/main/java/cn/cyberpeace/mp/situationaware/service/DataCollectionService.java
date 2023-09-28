@@ -1071,6 +1071,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.aggregation(aggregationBuilder);
 
         searchRequest.source(sourceBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
         try {
@@ -1119,6 +1120,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.aggregation(aggBuilder);
 
         searchRequest.source(sourceBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
         try {
