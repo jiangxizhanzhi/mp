@@ -1,25 +1,21 @@
 package cn.cyberpeace.mp.collection.service;
 
-import cn.cyberpeace.mp.collection.model.log.CommonDeviceLog;
 import cn.cyberpeace.mp.collection.model.log.DeviceLog;
 import cn.cyberpeace.mp.collection.service.repo.CommonDeviceLogRepo;
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,25 +26,43 @@ public class DeviceLogService {
     @Resource
     private CommonDeviceLogRepo commonDeviceLogRepo;
 
+    @Resource
+    private ElasticsearchOperations elasticsearchOperations;
+
 
     // 新增文档
-    public CommonDeviceLog saveDocument(CommonDeviceLog deviceLog) {
+    public DeviceLog saveDocument(DeviceLog deviceLog) {
         return commonDeviceLogRepo.save(deviceLog);
     }
 
-    // 查询文档
-    public List<DeviceLog> searchDocuments(String indexName, String field, String value) throws IOException {
-        SearchRequest request = new SearchRequest(indexName);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.matchQuery(field, value));
-        sourceBuilder.timeout(TimeValue.timeValueSeconds(5));
-        request.source(sourceBuilder);
+    /**
+     * 按业务类型和设备类型统计日志条数
+     *
+     * @param logType     业务类型，目前只有dmf
+     * @param deviceTypes 设备类型
+     */
+    public Map<String, Long> statisticByLogType(String logType, String[] deviceTypes) {
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("log_type", logType))
+                        .must(QueryBuilders.termsQuery("device_type", deviceTypes)))
+                .build();
 
-        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-
-        // TODO: 处理查询结果并返回设备日志列表
-        // List<DeviceLog> deviceLogs = processSearchResponse(response);
-
-        return null;
+        // 添加聚合操作，按dev_type分组并统计每组的日志条数
+        searchQuery.addAggregation(AggregationBuilders.terms("by_device_type").field("device_type"));
+        try{
+            SearchHits<DeviceLog> searchHits = elasticsearchOperations.search(searchQuery, DeviceLog.class);
+            Terms terms = searchHits.getAggregations().get("by_device_type");
+            Map<String, Long> result = new HashMap<>();
+            for (Terms.Bucket bucket : terms.getBuckets()) {
+                long count = bucket.getDocCount();
+                String devType = bucket.getKeyAsString();
+                result.put(devType, count);
+            }
+            return result;
+        }catch (Exception ex){
+            log.error("query log statistics error",ex);
+            return new HashMap<>();
+        }
     }
 }
