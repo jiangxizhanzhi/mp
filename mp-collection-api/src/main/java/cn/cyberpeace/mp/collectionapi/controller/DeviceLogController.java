@@ -50,7 +50,11 @@ public class DeviceLogController {
         // TODO:根据日志类型进行数据格式转换
         DeviceLog deviceLog = new DeviceLog();
         BeanUtil.copyProperties(logData, deviceLog, "message");
-        deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
+        if(logData.getMessage() instanceof String){
+            deviceLog.setMessage(logData.getMessage());
+        }else{
+            deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
+        }
 
         try {
             deviceLogService.saveDocument(deviceLog);
@@ -64,8 +68,8 @@ public class DeviceLogController {
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
-//        client.post("/modify/stat/log")
-        client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
+        client.post("/modify/stat/log/", logBO, null, null, 0);
+        // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
     }
 
     @PostMapping("/mock")
