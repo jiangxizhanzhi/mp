@@ -67,6 +67,7 @@ public class BlacklistFilter extends OncePerRequestFilter {
         ServiceResult serviceResult = ResultCommon.fail(AuthErrorCode.DEMO_ACCESS_ERROR);
         mapper = converter.getObjectMapper();
 
+        response.setCharacterEncoding("UTF-8");
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, serviceResult.asResult());
         writer.flush();
