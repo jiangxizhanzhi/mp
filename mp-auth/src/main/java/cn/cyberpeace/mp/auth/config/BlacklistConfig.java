@@ -46,6 +46,8 @@ public class BlacklistConfig implements ApplicationRunner {
                 return;
             }
 
+            String context = appConfig.getServerProperties().getServlet().getContextPath();
+
             // 将配置的访问路径转换为Pattern对象存储，提高过滤匹配性能
             Set<BlacklistModel.AccessItem> patterns = new HashSet<>();
             items.forEach(item -> {
@@ -53,13 +55,18 @@ public class BlacklistConfig implements ApplicationRunner {
                 BlacklistModel.AccessItem accessItem = BlacklistModel.AccessItem.builder().build();
                 if (splits.length > 1) {
                     accessItem.setMethod(splits[0].toUpperCase());
-                    accessItem.setPattern(new PathPatternParser().parse(splits[1]));
+                    accessItem.setPattern(new PathPatternParser().parse(context+splits[1]));
                 } else {
-                    accessItem.setPattern(new PathPatternParser().parse(item));
+                    accessItem.setPattern(new PathPatternParser().parse(context+item));
                 }
                 patterns.add(accessItem);
             });
             blacklistModel.setPatterns(patterns);
+
+            // 如果黑名单列表中有内容，则默认开启黑名单控制
+            if(!patterns.isEmpty()){
+                blacklistModel.setEnabled(true);
+            }
         }
     }
 }
