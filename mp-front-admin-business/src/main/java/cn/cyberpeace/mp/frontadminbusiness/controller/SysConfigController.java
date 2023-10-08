@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.bo.SysConfigBO;
 import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessConstant;
 import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -38,6 +39,7 @@ import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 系统配置管理接口
@@ -67,9 +69,14 @@ public class SysConfigController {
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
-    public ServiceResult<List<SysConfigModel>> listAll() {
+    public ServiceResult<List<SysConfigBO>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
-        return ResultCommon.success(configs);
+        List<SysConfigBO> result = configs.stream().map(sysConfigModel -> {
+            SysConfigBO sysConfigBO = new SysConfigBO();
+            sysConfigBO.fromModel(sysConfigModel);
+            return sysConfigBO;
+        }).collect(Collectors.toList());
+        return ResultCommon.success(result);
     }
 
     @ApiOperation(value = "查询系统名称", notes = "")
