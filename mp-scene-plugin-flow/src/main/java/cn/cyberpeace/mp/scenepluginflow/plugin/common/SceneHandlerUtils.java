@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
+import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
@@ -165,9 +166,9 @@ public class SceneHandlerUtils {
         flowTaskTaskService = BeanCommon.getBean(FlowTaskTaskService.class);
     }
 
-    public String startExecutor(String sceneEid) {
+    public String startExecutor(String sceneEid, List<FlowNetworkInfo> networkInfos) {
         String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
-        return flowExecutor.startExecutor(name);
+        return flowExecutor.startExecutor(name, networkInfos);
     }
 
     public void deleteExecutor(String executorId) {

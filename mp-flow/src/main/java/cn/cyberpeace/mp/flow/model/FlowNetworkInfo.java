@@ -43,4 +43,16 @@ public class FlowNetworkInfo {
     @ApiModelProperty(value = "网段可用ip")
     private String usableIp;
 
+    /**
+     * 路由
+     */
+    private HostRoute hostRoute;
+
+    @Data
+    public class HostRoute {
+        private String destination;
+
+        private String nexthop;
+    }
+
 }

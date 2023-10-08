@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
@@ -38,6 +35,8 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateResult;
@@ -59,7 +58,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -161,16 +163,10 @@ public class CsceneFlowService {
             sceneHandler = new SceneHandler(sceneId, null, false, null);
             flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         }
-        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
-        //流量执行器不存在则创建流量执行器
-        if (StringUtils.isEmpty(actuatorId)) {
-            String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
-            actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
-            FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
-            scene.setExecutor(actuatorId);
-            flowScenePluginHandler.saveScene();
-        }
+
+        List<FlowNetworkInfo> networkInfos = new ArrayList<>();
         List<AddFlowTaskTaskInfo> addFlowTaskTaskInfoList = new ArrayList<>();
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         //遍历任务详情，初始化节点参数
         for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
             if (CollectionUtils.isEmpty(detail.getFlowInfos())) {
@@ -180,12 +176,14 @@ public class CsceneFlowService {
             String nodeIp = "";
             String networkId = "";
             if (CollectionUtils.isNotEmpty(sceneHandler.getElement(detail.getNodeId()).getPorts())) {
-                CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 for (var p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
                     nodeIp = p.getIp();
                     if (StringUtils.isNotEmpty(nodeIp)) {
                         CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
                         networkId = cloudPluginSceneElementNetworkBO.getResourceId();
+                        FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
+                        flowNetworkInfo.setNetworkId(networkId);
+                        networkInfos.add(flowNetworkInfo);
                         break;
                     }
                 }
@@ -203,8 +201,7 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNodeName(nodeName);
             addFlowTaskTaskInfo.setNetworkId(networkId);
             // 获取可用ip
-            FlowScenePluginHandler flowPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
-            String usableIp = flowPluginHandler.getUsableIp(networkId, sceneHandler);
+            String usableIp = flowScenePluginHandler.getUsableIp(networkId, sceneHandler);
             if (StringUtils.isBlank(usableIp)) {
                 log.error("get usable ip error");
                 throw new MpRuntimeException(CsceneErrorCode.USABLE_IP_NOT_EXIST);
@@ -213,6 +210,38 @@ public class CsceneFlowService {
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
 
         }
+
+        String actuatorId = flowScenePluginHandler.getScene().getExecutor();
+        //流量执行器不存在则创建流量执行器
+        if (StringUtils.isEmpty(actuatorId)) {
+            String externalNetworkId = CloudSingleton.cloudAppConfig.getExternalNetId();
+            String outUsableIp = flowScenePluginHandler.getUsableIp(externalNetworkId, sceneHandler);
+            if (StringUtils.isBlank(outUsableIp)) {
+                log.error("get outUsableIp ip error");
+                throw new MpRuntimeException(CsceneErrorCode.USABLE_IP_NOT_EXIST);
+            }
+
+            FlowNetworkInfo.HostRoute hostRoute = new FlowNetworkInfo().getHostRoute();
+            cloudPluginHandler.getElementMap().values().forEach(e ->{
+                List<HostRoute> hostRoutes = e.getHostRoutes();
+                if (CollectionUtils.isNotEmpty(hostRoutes)) {
+                    hostRoute.setDestination(hostRoutes.get(0).getDestination());
+                    hostRoute.setNexthop(hostRoutes.get(0).getNexthop());
+                }
+            });
+
+            for (FlowNetworkInfo networkInfo : networkInfos) {
+                networkInfo.setUsableIp(outUsableIp);
+                networkInfo.setHostRoute(hostRoute);
+            }
+
+            String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
+            actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName, networkInfos);
+            FlowPluginSceneBO scene = flowScenePluginHandler.getScene();
+            scene.setExecutor(actuatorId);
+            flowScenePluginHandler.saveScene();
+        }
+
         //新增流量执行任务
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
             flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);

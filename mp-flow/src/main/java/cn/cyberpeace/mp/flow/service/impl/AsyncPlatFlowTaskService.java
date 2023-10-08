@@ -429,9 +429,9 @@ public class AsyncPlatFlowTaskService {
      * @param trexName
      * @return
      */
-    public String syncStartExecutor(String trexName) {
+    public String syncStartExecutor(String trexName, List<FlowNetworkInfo> networkInfos) {
         String uuid = TextUtils.uuid();
-        this.startExecutor(uuid, trexName);
+        this.startExecutor(uuid, trexName, networkInfos);
         return uuid;
     }
 
@@ -441,7 +441,7 @@ public class AsyncPlatFlowTaskService {
      * @param uuid
      * @param trexName
      */
-    private void startExecutor(String uuid, String trexName) {
+    private void startExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
         log.info("addFlowExecutor name:{}", trexName);
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
@@ -458,61 +458,116 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.GET_OUTER_NETWORK_ERROR);
         }
 
+        String innerNetId = "";
+        String outIp = "";
+        for (FlowNetworkInfo networkInfo : networkInfos) {
+            outIp = networkInfo.getUsableIp();
+            if (!externalNetId.equals(networkInfo.getNetworkId())) {
+                innerNetId = networkInfo.getNetworkId();
+                break;
+            }
+        }
+
+        if (StringUtils.isBlank(innerNetId)) {
+            innerNetId = externalNetId;
+        }
+
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddContainerRequest addContainerRequest = new AddContainerRequest();
         addContainerRequest.setName(trexName);
         addContainerRequest.setImage(flowConfig.getTrexImage());
         AddContainerRequest.Networks networks = new AddContainerRequest.Networks();
-        networks.setNetworkId(externalNetId);
+        networks.setNetworkId(innerNetId);
         addContainerRequest.setNetworks(Collections.singletonList(networks));
 
         try {
+            String instanceId = "";
+            String ip = "";
+            String mac = "";
             // 创建trex容器
             log.info("create trex container request: {}", JsonUtils.snakeStringify(addContainerRequest));
             String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/container",
                     JsonUtils.snakeStringify(addContainerRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex container response:{}", addVmObj.toJSONString());
-
-            String fixedIp = null;
-            if (BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
-                JSONObject vmObj = addVmObj.getJSONObject(BaseConstants.STR_DATA);
-                String instanceId = vmObj.getString("id");
-                JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
-                fixedIp = netWorkObj.getString("fixed_ip");
-                String ip = fixedIp + BaseConstants.COLON + "80";
-
-                // 根据portId获取mac
-                String portId = netWorkObj.getString("port_id");
-                String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
-                JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
-                log.info("add getPortObj response:{}", getPortObj.toJSONString());
-                JSONObject portObj = getPortObj.getJSONObject(BaseConstants.STR_DATA);
-                String mac = portObj.getString("mac_address");
-
-                // 新增流量执行器信息
-                flowActuatorModel.setId(uuid);
-                flowActuatorModel.setTitle(addContainerRequest.getName());
-                flowActuatorModel.setInstanceId(instanceId);
-                flowActuatorModel.setIp(ip);
-                flowActuatorModel.setNetworkId(externalNetId);
-                flowActuatorMapper.create(flowActuatorModel);
-
-                // 添加流量任务网口信息
-                FlowTaskPortModel flowTaskPortModel = new FlowTaskPortModel();
-                flowTaskPortModel.setActuatorId(uuid);
-                flowTaskPortModel.setNetworkId(externalNetId);
-                flowTaskPortModel.setMac(mac);
-                flowTaskPortService.create(flowTaskPortModel);
-
-                // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
-                String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                        null, 0, () -> log.info("Trex container start success"), () -> log.error("Trex container start error:{}", finalFixedIp));
-            } else {
+            if (!BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
                 log.error("add trex container error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
+
+            String fixedIp = "";
+            String portId = "";
+            if (innerNetId.equals(externalNetId)) {
+                JSONObject vmObj = addVmObj.getJSONObject(BaseConstants.STR_DATA);
+                instanceId = vmObj.getString("id");
+                JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
+                fixedIp = netWorkObj.getString("fixed_ip");
+                // portId
+                portId = netWorkObj.getString("port_id");
+            } else {
+                if (CollectionUtils.isEmpty(networkInfos)) {
+                    log.error("init trex error for networkInfos is empty");
+                    return;
+                }
+                FlowNetworkInfo.HostRoute hostRoute = networkInfos.get(0).getHostRoute();
+                // 创建外部网口
+                fixedIp = outIp;
+
+                // 删除外部路由
+                String cmd = String.format("pid=$(docker inspect -f {{.State.Pid}} zun-%s) && nsenter -t $pid -n ip route del %s via %s", instanceId, hostRoute.getDestination(), hostRoute.getNexthop());
+                JSONObject delRouterReq = new JSONObject();
+                delRouterReq.put("hostname", "controller");
+                delRouterReq.put("cmd", cmd);
+                String delRouterRsp = HttpUtils.sendPost("http://" + flowConfig.getCpIp() + ":9999/knapsack/info/v1/command", delRouterReq.toJSONString());
+                JSONObject delRouterRspObj = JSONObject.parseObject(delRouterRsp);
+                log.info("trex container del router response:{}", delRouterRspObj);
+
+                JSONObject addPortReq = new JSONObject();
+                addPortReq.put("network_id", externalNetId);
+                addPortReq.put("fixed_ip", outIp);
+                addPortReq.put("container_id", flowActuatorModel.getInstanceId());
+                try {
+                    String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/attach_network", addPortReq.toJSONString());
+                    JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                    log.info("add trex container port response:{}", addTrexClientObj.toJSONString());
+                    if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                        JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+                        // 根据portId获取最新mac
+                        portId = clientDataObj.getString("port_id");
+                    }
+                } catch (IOException e) {
+                    log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), externalNetId, e);
+                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+                }
+            }
+
+            // 根据portId获取mac
+            String getPortRsp = HttpUtils.sendGet(flowConfig.getCpUrl() + "/v1/ports/" + portId);
+            JSONObject getPortObj = JSONObject.parseObject(getPortRsp);
+            log.info("add getPortObj response:{}", getPortObj.toJSONString());
+            JSONObject portObj = getPortObj.getJSONObject(BaseConstants.STR_DATA);
+            mac = portObj.getString("mac_address");
+            ip = fixedIp + BaseConstants.COLON + "80";
+
+            // 新增流量执行器信息
+            flowActuatorModel.setId(uuid);
+            flowActuatorModel.setTitle(addContainerRequest.getName());
+            flowActuatorModel.setInstanceId(instanceId);
+            flowActuatorModel.setIp(ip);
+            flowActuatorModel.setNetworkId(externalNetId);
+            flowActuatorMapper.create(flowActuatorModel);
+
+            // 添加流量任务网口信息
+            FlowTaskPortModel flowTaskPortModel = new FlowTaskPortModel();
+            flowTaskPortModel.setActuatorId(uuid);
+            flowTaskPortModel.setNetworkId(externalNetId);
+            flowTaskPortModel.setMac(mac);
+            flowTaskPortService.create(flowTaskPortModel);
+
+            // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
+            String finalFixedIp = fixedIp;
+            NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                    null, 0, () -> log.info("Trex container start success"), () -> log.error("Trex container start error:{}", finalFixedIp));
         } catch (MpRuntimeException e) {
             log.error("add container instance error, {}", ExceptionUtils.getStackTrace(e));
             throw e;
