@@ -172,6 +172,11 @@ public class DevopsTargetController {
             }
             devices = result;
         }
+        if (Objects.nonNull(request.getSecondCategory())) {
+            devices = devices.stream()
+                    .filter(device -> request.getSecondCategory().equals(device.getSecondCategory()))
+                    .collect(Collectors.toList());
+        }
         if (request.getParentSystemType() != null) {
             List<Device> result = new ArrayList<>();
             for (var d : devices) {
