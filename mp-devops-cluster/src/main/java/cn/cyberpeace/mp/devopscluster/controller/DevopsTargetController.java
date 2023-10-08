@@ -37,6 +37,7 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -175,6 +176,12 @@ public class DevopsTargetController {
         if (Objects.nonNull(request.getSecondCategory())) {
             devices = devices.stream()
                     .filter(device -> request.getSecondCategory().equals(device.getSecondCategory()))
+                    .collect(Collectors.toList());
+        }
+        if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
+            Set<Integer> l2Set = new HashSet<>(request.getSecondCategoryList());
+            devices = devices.stream()
+                    .filter(device -> l2Set.contains(device.getSecondCategory()))
                     .collect(Collectors.toList());
         }
         if (request.getParentSystemType() != null) {
