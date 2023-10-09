@@ -42,9 +42,7 @@ public class InstallerDockerUploadService extends BaseUploadService {
     protected void uploadFile() {
         List<File> fileList = null;
         try {
-            log.info("start transferToFileList");
             fileList = FileUtils.transferToFileList(Collections.singletonList(file));
-            log.info("end transferToFileList");
         } catch (IOException e) {
             log.error("file transfer error",e);
         }
