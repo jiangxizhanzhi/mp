@@ -287,8 +287,8 @@ public class HttpUtils {
      */
     public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
         log.info("=======sendHttpPostWithFile url: {}", url);
-        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
-                , TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(300, TimeUnit.SECONDS).readTimeout(300
+                , TimeUnit.SECONDS).writeTimeout(300, TimeUnit.SECONDS).build();
 
         MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
