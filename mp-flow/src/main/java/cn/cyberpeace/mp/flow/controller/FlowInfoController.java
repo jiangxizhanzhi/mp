@@ -34,6 +34,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -275,8 +277,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         }
         queryParams.setType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
         if (StringUtils.isNotBlank(queryParams.getPattern())) {
-            queryParams.setZhName(queryParams.getPattern());
-            queryParams.setEnName(queryParams.getPattern());
+            queryParams.setSearch(queryParams.getPattern());
+            Locale locale = LocaleContextHolder.getLocale();
+            if (Objects.equals(Locale.US, locale)) {
+                queryParams.setSearchFields(new String[]{"enName"});
+            } else {
+                queryParams.setSearchFields(new String[]{"zhName"});
+            }
         }
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
         ListObjServiceResult<OptionModelBO> result = optionService.page(queryParams);
