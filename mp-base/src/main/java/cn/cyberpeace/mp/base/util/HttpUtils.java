@@ -286,7 +286,7 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
-//        OkHttpClient client = new OkHttpClient();
+        log.info("=======sendHttpPostWithFile url: {}", url);
         OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
                 , TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
 
@@ -310,8 +310,13 @@ public class HttpUtils {
 
         Request request = requestBuilder.build();
 
-        try (Response response = client.newCall(request).execute()) {
+        try {
+            Response response = client.newCall(request).execute();
             return response.body().string();
+        } catch (IOException e) {
+            // 打印错误日志
+            log.error("sendHttpPostWithFile error:", e);
+            throw e;
         }
     }
 
