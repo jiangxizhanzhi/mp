@@ -331,8 +331,9 @@ public class HttpUtils {
 
         try {
             Response response = client.newCall(request).execute();
-            log.info("=======sendHttpPostWithFile response: {}", response.body().string());
-            return response.body().string();
+            String result = response.body().string();
+            log.info("=======sendHttpPostWithFile response: {}", result);
+            return result;
         } catch (IOException e) {
             // 打印错误日志
             log.error("sendHttpPostWithFile error:", e);
