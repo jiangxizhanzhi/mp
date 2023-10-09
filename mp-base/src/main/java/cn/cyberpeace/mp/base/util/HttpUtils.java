@@ -286,7 +286,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+//        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
+                , TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
 
         MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
