@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -58,7 +59,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
         SysConfigModel config = getByKeyName(obj.getKeyName());
         if (Objects.nonNull(config)) {
-            log.error("config {} already existed! can not add again!");
+            log.error("config {} already existed! can not add again!", JsonCommon.stringify(config));
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_EXISTED.format(obj.getKeyName()));
         }
         return create(obj);
@@ -75,8 +76,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public List<SysConfigModel> listAll() {
-        List<SysConfigModel> sysConfigModels = getModelMapper().list(new HumanCondition());
-        return sysConfigModels;
+        return getModelMapper().list(new HumanCondition());
     }
 
     @Override
@@ -84,8 +84,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, keyName);
-        SysConfigModel sysConfigModel = getModelMapper().first(condition);
-        return sysConfigModel;
+        return getModelMapper().first(condition);
     }
 
     @Override
