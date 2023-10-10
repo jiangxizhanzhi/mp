@@ -62,11 +62,6 @@ public class BlacklistConfig implements ApplicationRunner {
                 patterns.add(accessItem);
             });
             blacklistModel.setPatterns(patterns);
-
-            // 如果黑名单列表中有内容，则默认开启黑名单控制
-            if(!patterns.isEmpty()){
-                blacklistModel.setEnabled(true);
-            }
         }
     }
 }
