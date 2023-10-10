@@ -50,6 +50,7 @@ public class DeviceLogController {
         // TODO:根据日志类型进行数据格式转换
         DeviceLog deviceLog = new DeviceLog();
         BeanUtil.copyProperties(logData, deviceLog, "message");
+        deviceLog.setTimestamp(System.currentTimeMillis());
         if(logData.getMessage() instanceof String){
             deviceLog.setMessage(logData.getMessage());
         }else{
