@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.dto.scene;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class WazuhEventData {
 
     private String fullLog;
 
-    private String timestamp;
+    private Date timestamp;
 
     @Data
     @NoArgsConstructor
