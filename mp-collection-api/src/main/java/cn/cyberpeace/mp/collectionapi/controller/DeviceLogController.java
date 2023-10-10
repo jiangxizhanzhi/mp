@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.collection.config.CollectionConfig;
 import cn.cyberpeace.mp.collection.model.log.DeviceLog;
+import cn.cyberpeace.mp.collection.model.log.PageableLogs;
+import cn.cyberpeace.mp.collection.request.DeviceLogQueryRequest;
 import cn.cyberpeace.mp.collection.service.DeviceLogService;
 import cn.cyberpeace.mp.collectionapi.bo.DeviceLogBO;
 import cn.cyberpeace.mp.collectionapi.bo.MetricBO;
+import cn.cyberpeace.mp.collectionapi.vo.DeviceLogVO;
 import cn.cyberpeace.mp.collectionapi.vo.MetricVO;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +54,11 @@ public class DeviceLogController {
         }
 
         // TODO:根据日志类型进行数据格式转换
-        DeviceLog deviceLog = new DeviceLog();
-        BeanUtil.copyProperties(logData, deviceLog, "message");
+        DeviceLog deviceLog = BeanUtil.copyProperties(logData, DeviceLog.class, "message");
         deviceLog.setTimestamp(System.currentTimeMillis());
-        if(logData.getMessage() instanceof String){
+        if (logData.getMessage() instanceof String) {
             deviceLog.setMessage(logData.getMessage());
-        }else{
+        } else {
             deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
         }
 
@@ -102,5 +107,37 @@ public class DeviceLogController {
         List<MetricBO> metrics = result.entrySet().stream().map(entry -> MetricBO.builder().metric(metric).deviceType(entry.getKey()).value(entry.getValue().intValue()).build()).collect(Collectors.toList());
 
         return new ServiceResult<>(new MetricVO(metrics)).asResult();
+    }
+
+    @GetMapping("/query")
+    @ApiOperation(value = "查询设备上报的日志信息")
+    // public DeviceLogVO queryLogs(@RequestBody @NonNull DeviceLogQueryRequest req) {
+    public DeviceLogVO queryLogs(@RequestParam(value = "time_start", required = false) String timeStart,
+                                 @RequestParam(value = "time_end", required = false) String timeEnd,
+                                 @RequestParam(required = false) String ip,
+                                 @RequestParam @NotBlank String type,
+                                 @RequestParam(value = "log_type") @NotBlank String logType,
+                                 @RequestParam(value = "page_size", defaultValue = "100") @Max(1000) @Min(1) Integer pageSize,
+                                 @RequestParam(value = "page_index", defaultValue = "1") @Min(1) Integer pageIndex) {
+        DeviceLogQueryRequest req = DeviceLogQueryRequest.builder()
+                .timeEnd(timeEnd)
+                .timeStart(timeStart)
+                .ip(ip)
+                .type(type)
+                .logType(logType)
+                .pageIndex(pageIndex)
+                .pageSize(pageSize)
+                .build();
+        if (pageSize < 1 || pageSize > 1000) {
+            req.setPageSize(100);
+        }
+        if (pageIndex < 1) {
+            req.setPageIndex(1);
+        }
+        PageableLogs logs = deviceLogService.searchLog(req);
+        List<Object> rawLogs = logs.getData().stream().map(DeviceLog::getMessage).map(Object::toString).map(JSON::parse).collect(Collectors.toList());
+        DeviceLogVO result = BeanUtil.copyProperties(logs, DeviceLogVO.class, "data");
+        result.setData(rawLogs);
+        return result;
     }
 }
