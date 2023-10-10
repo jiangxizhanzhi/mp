@@ -19,7 +19,7 @@ public class ExpireRemindDateGetterImpl implements ExpireRemindDateGetter {
     public LocalDateTime get() {
         ActivationResponse content = activationService.status();
         var delayRemindLicenseTime = TimeUtils.stringToLocalDateTime(content.getExpiredDate() + " 23:59:59");
-        delayRemindLicenseTime = delayRemindLicenseTime.minusDays(30);
+        delayRemindLicenseTime = delayRemindLicenseTime.minusDays(31);
         return delayRemindLicenseTime;
     }
 }
