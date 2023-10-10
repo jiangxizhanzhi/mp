@@ -127,8 +127,8 @@ public class HttpUtils {
             URL urlObj = new URL(url);
             connection = (HttpURLConnection) urlObj.openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(DEFAULT_TIME_OUT);
-            connection.setReadTimeout(DEFAULT_TIME_OUT);
+            connection.setConnectTimeout(DEFAULT_TIME_OUT * 1000);
+            connection.setReadTimeout(DEFAULT_TIME_OUT * 1000);
 
             // Set request headers
             for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -275,8 +275,8 @@ public class HttpUtils {
         try {
             URL urlObj = new URL(url);
             connection = (HttpURLConnection) urlObj.openConnection();
-            connection.setConnectTimeout(DEFAULT_TIME_OUT);
-            connection.setReadTimeout(DEFAULT_TIME_OUT);
+            connection.setConnectTimeout(DEFAULT_TIME_OUT * 1000);
+            connection.setReadTimeout(DEFAULT_TIME_OUT * 1000);
             connection.setRequestMethod("GET");
 
             // Set request headers
