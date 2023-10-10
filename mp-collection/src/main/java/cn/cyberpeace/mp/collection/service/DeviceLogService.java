@@ -11,6 +11,10 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -114,9 +118,10 @@ public class DeviceLogService {
 
         List<DeviceLog> logs = new ArrayList<>();
         if (totalHits > 0L && req.getPageIndex() <= totalPage) {
-            // 然后再分页查询
+            // 然后再分页查询(固定使用时间戳升序排列，避免分页数据错乱)
             NativeSearchQuery pageQuery = new NativeSearchQueryBuilder()
                     .withQuery(boolQuery)
+                    .withSort(SortBuilders.fieldSort("@timestamp").order(SortOrder.ASC))
                     .withPageable(PageRequest.of(req.getPageIndex() - 1, req.getPageSize()))
                     .build();
             SearchHits<DeviceLog> pageHits = elasticsearchOperations.search(pageQuery, DeviceLog.class);

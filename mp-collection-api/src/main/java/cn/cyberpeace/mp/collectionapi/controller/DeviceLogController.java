@@ -109,7 +109,7 @@ public class DeviceLogController {
         return new ServiceResult<>(new MetricVO(metrics)).asResult();
     }
 
-    @GetMapping("/query")
+    @GetMapping("")
     @ApiOperation(value = "查询设备上报的日志信息")
     // public DeviceLogVO queryLogs(@RequestBody @NonNull DeviceLogQueryRequest req) {
     public DeviceLogVO queryLogs(@RequestParam(value = "time_start", required = false) String timeStart,
