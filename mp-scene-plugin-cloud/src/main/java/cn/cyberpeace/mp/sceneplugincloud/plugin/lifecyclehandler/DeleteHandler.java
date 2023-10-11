@@ -351,6 +351,7 @@ public class DeleteHandler extends HandlerCommon {
         // 删除终端
         var terminals = getPluginHandler().getTerminalElementMap().values().stream()
                 .filter(t -> !deletedNodeIds.contains(t.getSrcElement().getId()))
+                .filter(t -> getPluginHandler().getSceneHandler().isHandleNode(t.getSrcElement().getId()))
                 .collect(Collectors.toList());
         var deleteTerminalTasks = terminals.stream()
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
