@@ -64,7 +64,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Value("${mp.log.dynamic-level-keeping:false}")
     private boolean dynamicLevelKeeping;
 
-    @Value("${logging.level.dynamic-level-only-root:true}")
+    @Value("${mp.log.dynamic-level-only-root:true}")
     private boolean dynamicLevelOnlyRoot;
 
     @Autowired
