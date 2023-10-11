@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
@@ -76,6 +77,22 @@ public class BatchSceneHandler {
 
     public LocalDateTime getLatestUpdateTime(){
         return latestUpdateTime;
+    }
+
+    public LocalDateTime getLatestSceneRunningTime() {
+        LocalDateTime dateTime = null;
+        for (var s : id2SceneHandler.values()) {
+            if (s.getScene().getEvent() == SceneModel.Event.DELETE) {
+                if (dateTime == null) {
+                    dateTime = s.getScene().getUpdateTime();
+                } else if (dateTime.isBefore(s.getScene().getUpdateTime())) {
+                    dateTime = s.getScene().getUpdateTime();
+                }
+            } else {
+                dateTime = LocalDateTime.now();
+            }
+        }
+        return dateTime == null ? LocalDateTime.now() : dateTime;
     }
 
     public List<String> getFlowCollectors() {
