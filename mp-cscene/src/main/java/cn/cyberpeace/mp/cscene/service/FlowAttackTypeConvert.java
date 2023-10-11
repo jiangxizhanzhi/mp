@@ -64,7 +64,7 @@ public class FlowAttackTypeConvert {
         attackType2AttCks.put("A client was using an unusual port", "command and control");
         attackType2AttCks.put("Detection of a non-standard protocol or event", "command and control");
         attackType2AttCks.put("Generic Protocol Command Decode", "command and control");
-        attackType2AttCks.put("Generic Icmp event", "command and control");
+        attackType2AttCks.put("Generic ICMP event", "command and control");
         attackType2AttCks.put("Domain Observed Used for C2 Detected", "command and control");
 
         attackType2AttCks.put("Attempted Denial of Service", "impact");

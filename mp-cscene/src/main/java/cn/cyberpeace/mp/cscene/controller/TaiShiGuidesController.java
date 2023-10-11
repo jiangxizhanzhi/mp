@@ -66,9 +66,9 @@ public class TaiShiGuidesController {
     }
 
     @ApiOperation(value = "场景运行过程中态势主机和流量事件的出现时间")
-    @GetMapping("/event_timing")
-    public ServiceResult<List<FlowTrend>> getEventTiming(@Param("sceneIds") String[] sceneIds) {
-        return taiShiGuidesService.getEventTiming(sceneIds).asResult();
+    @RequestMapping("/event_timing")
+    public ServiceResult<List<FlowTrend>> getEventTiming(@RequestBody TaiShiRequest request) {
+        return taiShiGuidesService.getEventTiming(request).asResult();
     }
 
     @ApiOperation(value = "获取流量事件攻击类型分类详情")
