@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
+import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import lombok.Data;
@@ -432,7 +433,11 @@ public class TaiShiGuidesService {
         taiShi.setTriggerType("host");
         taiShi.setAttCks(eventData.getRule().getMitre().getTactic());
         taiShi.setAttCkNames(this.getAttCkTypeNames(taiShi.getAttCks()));
-        taiShi.setHostEventType("");
+        if (CollectionUtils.isNotEmpty(eventData.getRule().getGroups()) && eventData.getRule().getGroups().contains("syscheck_registry")) {
+            taiShi.setHostEventType(FileEventType.REGISTRY.toString());
+        } else {
+            taiShi.setHostEventType(FileEventType.FILE.toString());
+        }
         taiShi.setHostEventDesc(StringUtils.join(eventData.getRule().getMitre().getTechnique(), ","));
         taiShi.setTime(TimeUtils.dateToLocalDateTime(eventData.getTimestamp()));
         if (eventData.getAgent() != null && eid2Elements.containsKey(eventData.getAgent().getName())) {
