@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.request.flow.AttackTypeTopRequest;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
@@ -57,6 +58,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -406,6 +408,50 @@ public class TaiShiGuidesService {
         taiShiTotalCount.setFlow(this.flowTotalCount(sceneId));
         taiShiTotalCount.setHost(this.hostTotalCount(sceneId));
         return new ServiceResult<>(taiShiTotalCount);
+    }
+
+    public ServiceResult<List<FlowAttackTypeCount>> getAttCkEventGroupCount(String sceneId) {
+        Map<String, FlowAttackTypeCount> result = new HashMap<>();
+
+        AttackTypeTopRequest attackTypeTopRequest = new AttackTypeTopRequest();
+        attackTypeTopRequest.setSceneId(sceneId);
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(attackTypeTopRequest);
+
+        if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
+            for (var f : attackTypeCounts) {
+                String key = f.getAttackType().toLowerCase();
+                FlowAttackTypeCount count = new FlowAttackTypeCount();
+                count.setTimes(f.getTimes());
+                count.setAttackType(key);
+                result.put(count.getAttackType(), count);
+            }
+        }
+
+        BaseSceneElementRequest elementRequest = new BaseSceneElementRequest();
+        elementRequest.setSceneId(sceneId);
+        List<AttCkTypeCount> list = hostStateService.getSceneAttCkTypeCountInfo(elementRequest).getSource().getList();
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (var a : list) {
+                String key = a.getType().toLowerCase();
+                if (!result.containsKey(key)) {
+                    FlowAttackTypeCount count = new FlowAttackTypeCount();
+                    count.setTimes(a.getTimes().intValue());
+                    count.setAttackType(key);
+                    result.put(count.getAttackType(), count);
+                } else {
+                    var count = result.get(key);
+                    count.setTimes(count.getTimes() + a.getTimes().intValue());
+                }
+            }
+        }
+        List<FlowAttackTypeCount> sortedResult = new ArrayList<>(result.values());
+        Collections.sort(sortedResult, (a1, a2) -> a2.getTimes() - a1.getTimes());
+        for (var s : sortedResult) {
+            String key2 = s.getAttackType().replaceAll(" ", "_");
+            String attackTypeName = MessageCommon.get("cscene.attck." + key2);
+            s.setAttackType(attackTypeName);
+        }
+        return new ServiceResult<>(sortedResult);
     }
 
     private long hostTotalCount(String sceneId) {
