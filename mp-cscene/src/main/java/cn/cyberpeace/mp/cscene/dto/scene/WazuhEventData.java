@@ -29,6 +29,7 @@ public class WazuhEventData {
     @NoArgsConstructor
     public static class Rule {
         private RuleMitre mitre;
+        private List<String> groups;
     }
 
     @Data
