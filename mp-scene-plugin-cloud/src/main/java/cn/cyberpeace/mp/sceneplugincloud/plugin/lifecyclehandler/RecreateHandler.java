@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -188,7 +189,9 @@ public class RecreateHandler extends HandlerCommon {
                         () -> {
                             if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
                                 cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    if (StringUtils.isEmpty(p.getIp())) {
+                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                    // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                    if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
                                         p.setUsing(false);
                                     }
                                 });
