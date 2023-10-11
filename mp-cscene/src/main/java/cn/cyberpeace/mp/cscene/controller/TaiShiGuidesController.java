@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowClassificationDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.scene.TaiShiEventInfo;
@@ -50,6 +51,12 @@ public class TaiShiGuidesController {
     @GetMapping("/event_total_count")
     public ServiceResult<TaiShiTotalCount> getAttCkEventCount(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getAttCkEventCount(sceneId).asResult();
+    }
+
+    @ApiOperation(value = "场景态势主机和流量的次数统计")
+    @GetMapping("/event_group_count")
+    public ServiceResult<List<FlowAttackTypeCount>> getAttCkEventGroupCount(@Param("sceneId") String sceneId) {
+        return taiShiGuidesService.getAttCkEventGroupCount(sceneId).asResult();
     }
 
     @ApiOperation(value = "场景态势主机和流量事件的次数趋势")
