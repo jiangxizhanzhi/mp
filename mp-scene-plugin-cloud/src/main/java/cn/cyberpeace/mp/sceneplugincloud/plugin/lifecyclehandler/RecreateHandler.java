@@ -203,7 +203,9 @@ public class RecreateHandler extends HandlerCommon {
                         () -> {
                             if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
                                 cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    if (StringUtils.isEmpty(p.getIp())) {
+                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                    // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                    if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
                                         p.setUsing(false);
                                     }
                                 });
