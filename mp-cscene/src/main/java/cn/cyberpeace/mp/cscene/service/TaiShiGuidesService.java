@@ -28,7 +28,11 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -38,14 +42,18 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -57,6 +65,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class TaiShiGuidesService {
 
@@ -96,24 +105,44 @@ public class TaiShiGuidesService {
             sceneIds.addAll(sceneIdsTmp);
         }
         if (CollectionUtils.isEmpty(sceneIds)) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIds, new ArrayList<>());
         CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneIds.get(0));
         if (handler == null) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
         if (!Boolean.TRUE.equals(request.getHost()) && !Boolean.TRUE.equals(request.getFlow())) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
         Set<String> indexes = new HashSet<>();
         var mergeQuery = QueryBuilders.boolQuery();
 
+        var formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
+        if (CollectionUtils.isNotEmpty(formatDefenseReq.getDefenseTypes())) {
+            var formatDefenseTypes = formatDefenseReq.getDefenseTypes().stream()
+                    .map(d -> ClassificationConvert.getEngageKey(d))
+                    .collect(Collectors.toList());
+            formatDefenseReq.setDefenseTypes(formatDefenseTypes);
+        } else {
+            formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
+        }
+
+        var formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
+        if (CollectionUtils.isNotEmpty(formatAttCkReq.getDefenseTypes())) {
+            var formatDefenseTypes = formatAttCkReq.getDefenseTypes().stream()
+                    .map(d -> ClassificationConvert.getAttCkKey(d))
+                    .collect(Collectors.toList());
+            formatAttCkReq.setDefenseTypes(formatDefenseTypes);
+        } else {
+            formatAttCkReq.setDefenseTypes(ClassificationConvert.getAllAttCkKeys());
+        }
+
         if (Boolean.TRUE.equals(request.getHost())) {
-            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
-            EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
+            EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatDefenseReq);
+            EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatAttCkReq);
             if (hostDefenseResult != null) {
                 indexes.addAll(hostDefenseResult.getIndexes());
                 mergeQuery.should(hostDefenseResult.getQuery());
@@ -125,8 +154,8 @@ public class TaiShiGuidesService {
         }
 
         if (Boolean.TRUE.equals(request.getFlow())) {
-            EsEventRequestParsedResult flowDefenseResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense());
-            EsEventRequestParsedResult flowAttackResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack());
+            EsEventRequestParsedResult flowDefenseResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, formatDefenseReq);
+            EsEventRequestParsedResult flowAttackResult = this.getFlowEsEventRequestParsedResult(sceneIds.get(0), sceneHandler, formatAttCkReq);
             if (flowDefenseResult != null) {
                 indexes.addAll(flowDefenseResult.getIndexes());
                 mergeQuery.should(flowDefenseResult.getQuery());
@@ -143,12 +172,12 @@ public class TaiShiGuidesService {
     public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
         var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIds, new ArrayList<>());
         CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneIds.get(0));
         if (handler == null) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
         Set<String> indexes = new HashSet<>();
@@ -206,7 +235,7 @@ public class TaiShiGuidesService {
 
     private EsEventRequestParsedResult getHostEsEventRequestParsedResult(BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
         LocalDateTime start = request.getStartTime() == null ? sceneHandler.getEarliestStartTime() : request.getStartTime();
-        LocalDateTime end = request.getEndTime() == null ? start.plusSeconds(10) : request.getEndTime();
+        LocalDateTime end = request.getEndTime() == null ? sceneHandler.getLatestSceneRunningTime() : request.getEndTime();
 
         // 取探针数据索引
         var indices = dataCollectionService.indexListBuilder(start, end);
@@ -216,6 +245,12 @@ public class TaiShiGuidesService {
         var agentQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termsQuery("agent.name", targetNodeEids))
                 .must(QueryBuilders.existsQuery("rule.mitre.tactic"));
+
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
+        rangeQueryBuilder.gte(start.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        rangeQueryBuilder.lte(end.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        agentQuery.must(rangeQueryBuilder);
+
         if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
             List<String> types = request.getDefenseTypes().stream()
                     .map(d -> FlowAttackTypeConvert.getFormatType(d))
@@ -535,4 +570,91 @@ public class TaiShiGuidesService {
 
         private BoolQueryBuilder query;
     }
+
+    private static class ClassificationConvert {
+        private static ClassificationInfoContainer CONVERT_INFO;
+
+        private static Map<String, ClassificationInfo> KEY_2_ATT_CK_INFO = new HashMap<>();
+
+        private static Map<String, ClassificationInfo> KEY_2_ENGAGE_INFO = new HashMap<>();
+
+        private static Map<String, String> ALIAS_2_ATT_CK_KEY = new HashMap<>();
+
+        private static Map<String, String> ALIAS_2_ENGAGE_KEY = new HashMap<>();
+
+        private synchronized static void init() {
+            if (CONVERT_INFO == null) {
+                try {
+                    org.springframework.core.io.Resource[] resources = new PathMatchingResourcePatternResolver()
+                            .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "config/classification.json");
+                    String json = FileUtils.readLine(resources);
+                    CONVERT_INFO = JsonCommon.snakeParse(json, ClassificationInfoContainer.class);
+                } catch (Exception error) {
+                    log.error("failed to parse classification info", error);
+                }
+                if (CollectionUtils.isNotEmpty(CONVERT_INFO.attCk)) {
+                    CONVERT_INFO.attCk.forEach(a -> {
+                        KEY_2_ATT_CK_INFO.put(a.key, a);
+                        if (a.alias != null) {
+                            a.alias.forEach(alia -> ALIAS_2_ATT_CK_KEY.put(alia, a.key));
+                        }
+                    });
+                }
+                if (CollectionUtils.isNotEmpty(CONVERT_INFO.engage)) {
+                    CONVERT_INFO.engage.forEach(a -> {
+                        KEY_2_ENGAGE_INFO.put(a.key, a);
+                        if (a.alias != null) {
+                            a.alias.forEach(alia -> ALIAS_2_ENGAGE_KEY.put(alia, a.key));
+                        }
+                    });
+                }
+            }
+        }
+
+        public static String getAttCkKey(String alia) {
+            if (ALIAS_2_ATT_CK_KEY.containsKey(alia)) {
+                return ALIAS_2_ATT_CK_KEY.get(alia);
+            }
+            return ALIAS_2_ATT_CK_KEY.getOrDefault(alia.toLowerCase(), alia);
+        }
+
+        public static String getEngageKey(String alia) {
+            if (ALIAS_2_ENGAGE_KEY.containsKey(alia)) {
+                return ALIAS_2_ENGAGE_KEY.get(alia);
+            }
+            return ALIAS_2_ENGAGE_KEY.getOrDefault(alia.toLowerCase(), alia);
+        }
+
+        public static List<String> getAllAttCkKeys() {
+            if (CONVERT_INFO == null) {
+                init();
+            }
+            return new ArrayList<>(KEY_2_ATT_CK_INFO.keySet());
+        }
+
+        public static List<String> getAllEngageKeys() {
+            if (CONVERT_INFO == null) {
+                init();
+            }
+            return new ArrayList<>(KEY_2_ENGAGE_INFO.keySet());
+        }
+
+    }
+
+    @Getter
+    @Setter
+    private static class ClassificationInfoContainer {
+        private List<ClassificationInfo> attCk;
+        private List<ClassificationInfo> engage;
+    }
+
+    @Getter
+    @Setter
+    private static class ClassificationInfo {
+        private String typeCn;
+        private String typeEn;
+        private String key;
+        private List<String> alias;
+    }
+
 }
