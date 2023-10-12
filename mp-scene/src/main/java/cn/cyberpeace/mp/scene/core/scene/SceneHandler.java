@@ -47,6 +47,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -57,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -212,7 +215,10 @@ public class SceneHandler extends BaseSceneHandler<
 
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
-        collectedSceneBO.setScene(getScene());
+        SceneBO sceneBO = new SceneBO();
+        BeanUtils.copyProperties(getScene(), sceneBO);
+        collectedSceneBO.setScene(sceneBO);
+
         String message = null;
         if (collectedSceneBO.getScene() != null && collectedSceneBO.getScene().getProcessMessage() != null) {
             message = collectedSceneBO.getScene().getProcessMessage();
@@ -224,6 +230,13 @@ public class SceneHandler extends BaseSceneHandler<
             }
             collectedSceneBO.getScene().setProcessMessage(newMessage);
         }
+
+        Locale locale = LocaleContextHolder.getLocale();
+        boolean chinaFlag = StringUtils.isBlank(locale.getLanguage()) || Locale.CHINA.getLanguage().equals(locale.getLanguage());
+        if (chinaFlag) {
+            collectedSceneBO.getScene().setStageName(String.format("正在%s", collectedSceneBO.getScene().getStageName()));
+        }
+
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
