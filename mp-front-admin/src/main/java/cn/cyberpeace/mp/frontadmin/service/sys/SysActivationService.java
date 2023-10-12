@@ -33,7 +33,6 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.client.watcher.ActivateWatchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
@@ -44,7 +43,14 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -167,8 +173,8 @@ public class SysActivationService {
             if (success) {
                 // 校验通过，生成加密文件存储磁盘
                 ACTIVATION_CONTENT = null;
+                updateMachineCode(activationRequest);
                 generateEncryptedFile(activationRequest);
-
                 // 更新数据库激活限制配置
                 processActivCtlAfterActivationSuccess(activationRequest);
 
@@ -465,6 +471,8 @@ public class SysActivationService {
         }
         activationResponse.setExpiredDate(expiredDateStr);
         activationResponse.setVerifyCode(encryptedVerifyCode);
+        //记录第一次激活时使用的verifycode，防止用户再次通过第一次激活的verifycode白嫖
+        activationResponse.setDelayVerifyCodeList(Collections.singletonList(encryptedVerifyCode));
 
         String salt = RandomUtils.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
@@ -588,6 +596,10 @@ public class SysActivationService {
         Long lifeTimeSeconds = duration.toSeconds();
         updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
 
+        //第一次激活也需要更新suffix
+        String newSuffix = getSuffixFromMachineCode(activationRequest.getMachineCode());
+        updateSysActivCtlModel.setSuffix(newSuffix);
+
         String activeDateStr = LocalDate.now().format(dateFormatter);
         String expiredDateStr = "";
         if (activationRequest.getTrialFlag()) {
@@ -597,6 +609,7 @@ public class SysActivationService {
         }
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
+        //这里正常应该是空的，不会走这个分支。
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
             // 不是首次激活
             String oldLicenseCode = oldSysActivCtlModel.getLicenseCode();
