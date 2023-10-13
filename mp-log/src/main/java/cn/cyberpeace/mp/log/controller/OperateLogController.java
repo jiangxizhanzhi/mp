@@ -7,12 +7,14 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.constant.LogConstant;
+import cn.cyberpeace.mp.log.dto.OperateExportDTO;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -34,12 +36,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -92,58 +96,25 @@ public class OperateLogController {
             request.setStartDate(request.getEndDate().minusDays(100L));
         }
         var result = operateLogService.search(request).getSource().getObjs();
-        String header = "用户名,模块,操作类型,操作对象,操作时间,内容";
-        File file = new File("audit_logs.csv");
-        InputStream fis = null;
-        FileInputStream fileInputStream = null;
-        OutputStream outputStream = null;
-        if (file.exists()) {
-            file.delete();
+        List<OperateExportDTO> dtos = new ArrayList<>();
+        for (var logResponse : result) {
+            OperateExportDTO operateExportDTO = new OperateExportDTO();
+            operateExportDTO.setName(logResponse.getUserName());
+            operateExportDTO.setModule(logResponse.getOpModule());
+            operateExportDTO.setOperateType(logResponse.getOpType());
+            operateExportDTO.setOperateTarget(logResponse.getOpTarget());
+            operateExportDTO.setOperateTime(logResponse.getOpTime().toString());
+            operateExportDTO.setContent(logResponse.getContent().replace(",", ""));
+            dtos.add(operateExportDTO);
         }
-        if (!file.exists()) {
-            try {
-                String filename = file.getName();
-                file.createNewFile();
-                StringBuilder stringBuilder = new StringBuilder();
-                for (var logResponse : result) {
-                    stringBuilder.append(StringUtils.joinWith(",",
-                            logResponse.getUserName(), logResponse.getOpModule(), logResponse.getOpType(),
-                            logResponse.getOpTarget(), logResponse.getOpTime(), logResponse.getContent().replace(",", "")))
-                            .append('\r').append('\n');
-                }
-                String data = stringBuilder.toString();
-                this.writeStringToCsv(header, data, file.getPath());
-                fileInputStream = new FileInputStream(file);
-                fis = new BufferedInputStream(fileInputStream);
-                byte[] buffer = new byte[fis.available()];
-                fis.read(buffer);
-
-                response.reset();
-                response.setCharacterEncoding("UTF-8");
-                response.addHeader("Content-Disposition", "attachment;filename*=utf-8''" + URLEncoder.encode(filename, StandardCharsets.UTF_8).replaceAll("\\+", "%20"));
-                response.addHeader("Content-Length", "" + file.length());
-                outputStream = new BufferedOutputStream(response.getOutputStream());
-                response.setContentType("application/octet-stream");
-                outputStream.write(buffer);
-                outputStream.flush();
-            } catch (Exception e) {
-                log.error("create file error: {}", ExceptionUtil.stacktraceToOneLineString(e));
-            } finally {
-                try {
-                    if (Objects.nonNull(fileInputStream)) {
-                        fileInputStream.close();
-                    }
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                    if (fis != null) {
-                        fis.close();
-                    }
-                    file.delete();
-                } catch (Exception ignored) {
-
-                }
-            }
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        try {
+            String fileName = URLEncoder.encode("审计日志", "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            EasyExcel.write(response.getOutputStream(), OperateExportDTO.class).sheet("审计日志").doWrite(dtos);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
