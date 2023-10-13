@@ -26,6 +26,7 @@ public enum AuthErrorCode implements ErrorCode {
     ACCOUNT_NOT_LOGIN("MP-110006", "account_not_login"),
     ACCOUNT_CREDENTIALS_EXPIRED("MP-110007", "account_credentials_expired"),
     ACCOUNT_STATUS_ERROR("MP-110008", "account_status_error"),
+    EXPIRE_DATE_WRONG("MP-110009", "expire_date_wrong"),
 
     ACCOUNT_DISABLED("MP-110010", "account_disabled"),
     ACCOUNT_NOT_AUDITED("MP-110011", "account_not_audited"),
