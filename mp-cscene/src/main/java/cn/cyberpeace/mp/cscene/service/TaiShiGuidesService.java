@@ -431,8 +431,9 @@ public class TaiShiGuidesService {
     }
 
     public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
-        LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusDays(10);
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
+        var startTime = sceneHandler.getEarliestStartTime();
+        var endTime = sceneHandler.getLatestSceneRunningTime();
 
         var flows = this.getFlowEventTrend(new String[]{sceneId}, startTime, endTime, 24);
         var hosts = this.getHostEventTrend(sceneId, startTime, endTime, 24);
