@@ -473,11 +473,14 @@ public class TenantUserServiceImpl
             return new PageInfo<>(new ArrayList<>(), 0);
         }
         int total = userMapper.total(humanCondition);
-        Map<String, String> userOrgMap = getUserOrgMap();
-        Map<String, String> userRoleMap = getUserRoleMap();
 
         PageHelper.startPage(page, pageSize);
         List<UserModel> userModels = userMapper.list(humanCondition);
+        // 使用查询有效返回的用户模型，关联获取组织和角色信息，而非全部获取后再拼装
+        List<String> userModelIds = userModels.stream().map(UserModel::getId).collect(Collectors.toList());
+        Map<String, String> userOrgMap = getUserOrgMap(userModelIds);
+        Map<String, String> userRoleMap = getUserRoleMap(userModelIds);
+
         PageInfo pageInfo = new PageInfo(userModels);
         pageInfo.setTotal(total);
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
@@ -571,7 +574,21 @@ public class TenantUserServiceImpl
         }
         return humanCondition;
     }
-
+    private Map<String, String> getUserOrgMap(List<String> userIds) {
+        HumanCondition orgCondition = new HumanCondition()
+                .select(TenantUserModel::getUser)
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs")
+                .filterIn("user",userIds.toArray())
+                .groupBy(TenantUserModel::getUser);
+        List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
+        Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
+        userOrgMaps.forEach(map -> {
+            String userId = (String) map.get("user");
+            String orgs = (String) map.get("orgs");
+            userOrgMap.put(userId, orgs);
+        });
+        return userOrgMap;
+    }
     private Map<String, String> getUserOrgMap() {
         HumanCondition orgCondition = new HumanCondition()
                 .select(TenantUserModel::getUser)
@@ -586,7 +603,21 @@ public class TenantUserServiceImpl
         });
         return userOrgMap;
     }
-
+    private Map<String, String> getUserRoleMap(List<String> userIds) {
+        HumanCondition roleCondition = new HumanCondition()
+                .select(UserRoleModel::getUser)
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles")
+                .filterIn("user",userIds.toArray())
+                .groupBy(UserRoleModel::getUser);
+        List<Map<String, Object>> userRoleMaps = userRoleMapper.originList(roleCondition);
+        Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
+        userRoleMaps.forEach(map -> {
+            String userId = (String) map.get("user");
+            String roles = (String) map.get("roles");
+            userRoleMap.put(userId, roles);
+        });
+        return userRoleMap;
+    }
     private Map<String, String> getUserRoleMap() {
         HumanCondition roleCondition = new HumanCondition()
                 .select(UserRoleModel::getUser)
