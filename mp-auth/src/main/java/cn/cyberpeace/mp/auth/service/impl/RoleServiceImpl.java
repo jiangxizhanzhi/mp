@@ -138,6 +138,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roles;
     }
 
+    @Override
+    public List<RoleModel> listByIds(Collection<String> ids) {
+        HumanCondition humanCondition = new HumanCondition().filterIn("id", ids.toArray());
+        return getModelMapper().list(humanCondition);
+    }
+
 
     @Override
     public List<RoleModel> listAll(RolePageRequest rolePageRequest) {
