@@ -25,11 +25,6 @@ public class FlowConfig {
     private String cpUrl;
 
     /**
-     * 云平台ip
-     */
-    private String cpIp;
-
-    /**
      * trex虚拟机密码
      */
     private String trexPass;

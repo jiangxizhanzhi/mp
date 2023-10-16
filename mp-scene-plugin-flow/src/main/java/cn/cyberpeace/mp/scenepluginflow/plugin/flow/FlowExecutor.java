@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
-import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
@@ -53,8 +52,8 @@ public class FlowExecutor {
 //        return flowService1.addExecutorSync(name, networkInfos);
 //    }
 
-    public String startExecutor(String name, List<FlowNetworkInfo> networkInfos) {
-        return flowService1.syncStartExecutor(name, networkInfos);
+    public String startExecutor(String name) {
+        return flowService1.syncStartExecutor(name);
     }
 
     public void deleteExecutor(String executorId) {
