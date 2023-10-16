@@ -508,6 +508,7 @@ public class SysActivationService {
             delayVerifyCodeList = Collections.singletonList(encryptedVerifyCode);
         }
         activationResponse.setDelayVerifyCodeList(delayVerifyCodeList);
+        activationResponse.setVerifyCode(encryptedVerifyCode);
 
         String salt = RandomUtils.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
