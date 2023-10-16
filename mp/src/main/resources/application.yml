@@ -61,7 +61,7 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
 management:
   endpoints:
@@ -157,6 +157,10 @@ mp:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip
     authenticate-encoder-iterations: 10000
     authenticate-encoder-hash-width: 256
+    auth-add-report-url: ${MP_AUTH_ADD_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_add_report}
+    auth-modify-report-url: ${MP_AUTH_MODIFY_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_modify_report}
+    auth-delete-report-url: ${MP_AUTH_DELETE_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_delete_report}
+    auth-logout-report-url: ${MP_AUTH_LOGOUT_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_logout_report}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

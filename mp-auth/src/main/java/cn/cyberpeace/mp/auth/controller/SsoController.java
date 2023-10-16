@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.UserReportService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
@@ -57,6 +58,9 @@ public class SsoController {
     @Autowired
     private UserEventPublisher userEventPublisher ;
 
+    @Autowired
+    private UserReportService userReportService;
+
     @ApiOperation(value = "根据token查询用户信息")
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping("/query_user_by_token")
@@ -91,6 +95,7 @@ public class SsoController {
             userName = user.getName();
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+            userReportService.logoutUser(user.getId());
         }
 
         if (StringUtils.isNotBlank(userName)) {

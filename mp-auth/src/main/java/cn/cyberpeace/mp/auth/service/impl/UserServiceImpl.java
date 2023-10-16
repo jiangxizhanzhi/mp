@@ -147,6 +147,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserRoleMapper userRoleMapper;
 
+    @Autowired
+    private UserReportService userReportService ;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -334,6 +336,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
+            userReportService.deleteUsers(Arrays.asList(userId));
         }
         return ret;
     }
@@ -354,6 +357,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(userIds, AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
+            userReportService.deleteUsers(Arrays.asList(userIds));
         }
         return ret;
     }
@@ -419,6 +423,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         userCacheService.evictAllUserCache();
+        userReportService.addUsers(Arrays.asList(userId));
         return userModel;
     }
 
@@ -498,6 +503,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         userCacheService.evictAllUserCache();
         messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        userReportService.modifyUsers(Arrays.asList(userId));
         return userModel;
     }
 
