@@ -143,9 +143,9 @@ public class TargetConverter{
                 throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(deviceTargetPO.getName()));
             }
         });
-        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        String[] imageUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).toArray(String[]::new);
         //引用
-        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByImageUuid(uuids.toArray(new String[0]));
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
         List<String> sceneNames = new ArrayList<>();
@@ -166,7 +166,7 @@ public class TargetConverter{
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageUuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)) {

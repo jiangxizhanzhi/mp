@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class DeviceReferCsceneInstanceStat {
+    @ApiModelProperty(value = "靶标uuid")
+    private String referenceImageUuid;
     @ApiModelProperty(value = "靶标名称")
     private String referenceImage;
     @ApiModelProperty(value = "场景id")
