@@ -95,7 +95,7 @@ public class SsoController {
             userName = user.getName();
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
-            userReportService.logoutUser(user.getId());
+            userReportService.logoutUser(user.getUsername());
         }
 
         if (StringUtils.isNotBlank(userName)) {

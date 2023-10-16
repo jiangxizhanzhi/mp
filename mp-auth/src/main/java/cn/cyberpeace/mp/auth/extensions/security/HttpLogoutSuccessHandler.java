@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.UserReportService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -54,6 +55,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private UserEventPublisher userEventPublisher ;
 
     @Autowired
+    private UserReportService userReportService ;
+
+    @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
@@ -80,6 +84,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             userName = user.getName();
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+            userReportService.logoutUser(user.getId());
         }
 
         if (StringUtils.isNotBlank(userName)) {

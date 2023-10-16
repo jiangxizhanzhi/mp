@@ -329,6 +329,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
 
+        var userBo = getUserDto(userId);
+
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         deleteReleated(userId);
 
@@ -336,7 +338,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
-            userReportService.deleteUsers(Arrays.asList(userId));
+            userReportService.deleteUsers(Arrays.asList(userBo));
         }
         return ret;
     }
@@ -348,6 +350,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
 
+        List<UserBo> userBos = new ArrayList<>();
+        for (String userId : userIds) {
+            userBos.add(getUserDto(userId));
+        }
+
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userIds));
         for (String userId : userIds) {
             deleteReleated(userId);
@@ -357,7 +364,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(userIds, AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
-            userReportService.deleteUsers(Arrays.asList(userIds));
+            userReportService.deleteUsers(userBos);
         }
         return ret;
     }
@@ -423,7 +430,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         userCacheService.evictAllUserCache();
-        userReportService.addUsers(Arrays.asList(userId));
         return userModel;
     }
 
@@ -820,6 +826,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         log.info("{}, {}, {}", userModels.size(), userRoleModels.size(), tenantUserModels.size());
         userImportService.doImport(userModels, userRoleModels, tenantUserModels);
+        var userIds = userModels.stream()
+                .map(u -> u.getId())
+                .collect(Collectors.toList());
+        userReportService.addUsers(userIds);
     }
 
     @Override

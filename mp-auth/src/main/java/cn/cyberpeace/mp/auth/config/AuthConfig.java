@@ -59,4 +59,6 @@ public class AuthConfig {
     private String authDeleteReportUrl;
 
     private String authLogoutReportUrl;
+
+    private String authReportRoleName;
 }

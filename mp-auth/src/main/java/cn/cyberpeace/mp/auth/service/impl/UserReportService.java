@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,6 +33,7 @@ public class UserReportService {
     private List<String> modifyUserReportUrls = new ArrayList<>();
     private List<String> deleteUserReportUrls = new ArrayList<>();
     private List<String> logoutUserReportUrls = new ArrayList<>();
+    private static Set<String> roleReportName = new HashSet<>();
 
     public UserReportService(@Autowired UserService userService, @Autowired AuthConfig authConfig, @Autowired JsonCommon jsonCommon) {
         this.userService = userService;
@@ -46,10 +50,14 @@ public class UserReportService {
         if (StringUtils.isNotEmpty(authConfig.getAuthLogoutReportUrl())) {
             logoutUserReportUrls.addAll(Arrays.asList(authConfig.getAuthLogoutReportUrl().split(",")));
         }
+        if (StringUtils.isNotEmpty(authConfig.getAuthReportRoleName())) {
+            roleReportName.addAll(Arrays.asList(authConfig.getAuthReportRoleName().split(",")));
+        }
         log.info("add user report url is : {}", JsonCommon.stringify(addUserReportUrls));
         log.info("modify user report url is : {}", JsonCommon.stringify(modifyUserReportUrls));
         log.info("delete user report url is : {}", JsonCommon.stringify(deleteUserReportUrls));
         log.info("logout user report url is : {}", JsonCommon.stringify(logoutUserReportUrls));
+        log.info("logout user report role name is : {}", JsonCommon.stringify(roleReportName));
     }
 
     public void addUsers(List<String> userIds) {
@@ -72,18 +80,26 @@ public class UserReportService {
         }
     }
 
-    public void deleteUsers(List<String> userIds) {
-        Message message = new Message();
-        message.setAction(Message.DELETE_ACTION);
-        message.setData(userIds);
-        this.doReport(message, this.deleteUserReportUrls);
+    public void deleteUsers(List<UserBo> userBos) {
+        var reportUsers = this.filterUserBos(userBos);
+        if (CollectionUtils.isNotEmpty(reportUsers)) {
+            Message message = new Message();
+            message.setAction(Message.DELETE_ACTION);
+            var userNames = reportUsers.stream().map(u -> u.getUsername()).collect(Collectors.toList());
+            message.setData(userNames);
+            this.doReport(message, this.deleteUserReportUrls);
+        }
     }
 
-    public void logoutUser(String user) {
-        Message message = new Message();
-        message.setAction(Message.LOGOUT_ACTION);
-        message.setData(user);
-        this.doReport(message, this.logoutUserReportUrls);
+    public void logoutUser(String userId) {
+        var userBo = userService.getUserDto(userId);
+        var reportUsers = this.filterUserBos(Arrays.asList(userBo));
+        if (CollectionUtils.isNotEmpty(reportUsers)) {
+            Message message = new Message();
+            message.setAction(Message.LOGOUT_ACTION);
+            message.setData(reportUsers.get(0).getUsername());
+            this.doReport(message, this.logoutUserReportUrls);
+        }
     }
 
     private List<UserBo> getUserInfo(List<String> userIds) {
@@ -94,7 +110,21 @@ public class UserReportService {
                 userBos.add(userBo);
             }
         }
-        return userBos;
+        return this.filterUserBos(userBos);
+    }
+
+    private List<UserBo> filterUserBos(List<UserBo> userBos) {
+        List<UserBo> reportUsers = new ArrayList<>();
+        for (var userBo : userBos) {
+            if (CollectionUtils.isNotEmpty(userBo.getRoles())) {
+                for (var role : userBo.getRoles()) {
+                    if (roleReportName.contains(role.getName())) {
+                        reportUsers.add(userBo);
+                    }
+                }
+            }
+        }
+        return reportUsers;
     }
 
     private void doReport(Message message, List<String> urls) {

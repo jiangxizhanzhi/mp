@@ -71,10 +71,6 @@ public class UserImportService {
                 log.error("tenantUserModels.size:{} and re.getSource:{} not same!", tenantUserModels.size(), re2.getSource());
                 throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
             }
-            var userIds = userModels.stream()
-                    .map(u -> u.getId())
-                    .collect(Collectors.toList());
-            userReportService.addUsers(userIds);
         }
 
         userCacheService.evictAllUserCache();
