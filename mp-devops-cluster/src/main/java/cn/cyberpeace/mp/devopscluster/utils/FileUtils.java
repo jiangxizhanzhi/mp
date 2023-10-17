@@ -68,10 +68,17 @@ public class FileUtils {
             if (!newTempDir.exists()){
                 newTempDir.mkdirs();
             }
-            final File file = new File(newTempDir,originalFilename.substring(0,index).concat(prefix));
-            // MultipartFile to File
-            multipartFile.transferTo(file);
-            fileList.add(file);
+            if (index < 0) {
+                final File file = new File(newTempDir, originalFilename);
+                // MultipartFile to File
+                multipartFile.transferTo(file);
+                fileList.add(file);
+            } else {
+                final File file = new File(newTempDir, originalFilename.substring(0, index).concat(prefix));
+                // MultipartFile to File
+                multipartFile.transferTo(file);
+                fileList.add(file);
+            }
         }
         return fileList;
     }
