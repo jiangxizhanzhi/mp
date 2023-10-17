@@ -58,8 +58,8 @@ public class UserUnauthTestController {
     public static class AddInfo {
         @ApiModelProperty("动作, 值固定为 add")
         private String action;
-        @ApiModelProperty("新增的用户列表")
-        private List<UserBo> data;
+        @ApiModelProperty("新增的用户")
+        private UserBo data;
     }
 
     @Getter
@@ -68,8 +68,8 @@ public class UserUnauthTestController {
     public static class ModifyInfo {
         @ApiModelProperty("动作, 值固定为 modify")
         private String action;
-        @ApiModelProperty("变更的用户列表")
-        private List<UserBo> data;
+        @ApiModelProperty("变更的用户")
+        private UserBo data;
     }
 
     @Getter

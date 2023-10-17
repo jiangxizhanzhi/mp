@@ -24,7 +24,7 @@
 ```javascript
 {
     "action": "add",
-        "data": [
+        "data": 
         {
             "pk": 111350,
             "id": "2ff778c6962e427e8bab8d2f7aee65a6",
@@ -85,7 +85,7 @@
                 }
             ]
         }
-    ]
+    
 }
 ```
 
@@ -95,7 +95,7 @@
 | 参数名称 | 参数说明 | 是否必须   | 数据类型 | schema |
 | -------- | --------  |--------| -------- | ------ |
 |&emsp;&emsp;action|动作, 值固定为 add|| true   |string||
-|&emsp;&emsp;data|新增的用户列表|| true  |array|UserBo|
+|&emsp;&emsp;data|新增的用户列表|| true  |UserBo|UserBo|
 |&emsp;&emsp;&emsp;&emsp;address|地址|| false  |string||
 |&emsp;&emsp;&emsp;&emsp;avatar|头像|| false  |string||
 |&emsp;&emsp;&emsp;&emsp;birthday|生日|| false  |string||

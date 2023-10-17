@@ -63,20 +63,24 @@ public class UserReportService {
     public void addUsers(List<String> userIds) {
         var userBos = this.getUserInfo(userIds);
         if (CollectionUtils.isNotEmpty(userBos)) {
-            Message message = new Message();
-            message.setAction(Message.ADD_ACTION);
-            message.setData(userBos);
-            this.doReport(message, this.addUserReportUrls);
+            for (var u : userBos) {
+                Message message = new Message();
+                message.setAction(Message.ADD_ACTION);
+                message.setData(u);
+                this.doReport(message, this.addUserReportUrls);
+            }
         }
     }
 
     public void modifyUsers(List<String> userIds) {
         var userBos = this.getUserInfo(userIds);
         if (CollectionUtils.isNotEmpty(userBos)) {
-            Message message = new Message();
-            message.setAction(Message.MODIFY_ACTION);
-            message.setData(userBos);
-            this.doReport(message, this.modifyUserReportUrls);
+            for (var u : userBos) {
+                Message message = new Message();
+                message.setAction(Message.MODIFY_ACTION);
+                message.setData(u);
+                this.doReport(message, this.modifyUserReportUrls);
+            }
         }
     }
 
