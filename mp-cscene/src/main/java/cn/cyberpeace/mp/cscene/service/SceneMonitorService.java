@@ -43,7 +43,15 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -321,7 +329,15 @@ public class SceneMonitorService {
                 basicInfos.forEach(basicInfo -> {
                     var hostStates = map.get(basicInfo.getEid());
                     if (CollectionUtil.isNotEmpty(hostStates)) {
-                        basicInfo.setHostState(hostStates.get(0));
+                        //hostState中cpu、disk、memory直接取的sceneElementBo配置的值。
+                        HostState oldHostState = basicInfo.getHostState();
+                        HostState realTimeHostState = hostStates.get(0);
+                        if (Objects.nonNull(oldHostState)) {
+                            realTimeHostState.setCpuCount(oldHostState.getCpuCount());
+                            realTimeHostState.setDiskSpace(oldHostState.getDiskSpace());
+                            realTimeHostState.setMemoryTotal(oldHostState.getMemoryTotal());
+                        }
+                        basicInfo.setHostState(realTimeHostState);
                     }
                 });
             }

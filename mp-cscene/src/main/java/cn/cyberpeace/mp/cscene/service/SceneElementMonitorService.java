@@ -248,6 +248,7 @@ public class SceneElementMonitorService {
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
         log.info("fetchHostState:{}", fetchRealTimeHostState);
         // 获取hostState比较耗时，这里加个开关
+
         if (fetchRealTimeHostState) {
             HostState resource = basicInfo.getHostState();
             if (Objects.isNull(resource)) {
@@ -291,10 +292,6 @@ public class SceneElementMonitorService {
             basicInfo.setHostState(resource);
         }
 
-        // ip地址
-//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
-//        basicInfo.setIps(ipList);
-
         // ID
         basicInfo.setId(sceneElementBO.getId());
         basicInfo.setEid(sceneElementBO.getEid());
@@ -330,8 +327,24 @@ public class SceneElementMonitorService {
         }
         basicInfo.setPorts(ePorts);
 
+        formatHostStateBySceneElementBo(basicInfo, sceneElementBO);
     }
 
+    /**
+     *   获取的主机信息，cpu,memory,disk直接使用靶标配置的值，从es中获取不一定都采得到/准确
+     * @author
+     * @date 17:09 2023/10/17
+     * @param elementMonitorBasicInfo
+     * @param sceneElementBO
+     **/
+    private void formatHostStateBySceneElementBo(ElementMonitorBasicInfo elementMonitorBasicInfo, SceneElementBO sceneElementBO) {
+        if (Objects.isNull(elementMonitorBasicInfo.getHostState())) {
+            elementMonitorBasicInfo.setHostState(new HostState());
+        }
+        elementMonitorBasicInfo.getHostState().setCpuCount(Integer.valueOf(0).equals(sceneElementBO.getCpu()) ? null : sceneElementBO.getCpu());
+        elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
+        elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+    }
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
         String imageName = null;
