@@ -511,12 +511,12 @@ public class CsceneSpecialService {
                         CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
                 .currentLink(CsceneModel.class)
                 .filterEqual(CsceneModel::getDeleted, false)
+                .selectAs(CsceneModel::getName, DeviceReferCsceneStat::getName)
                 .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
                 .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
                 .selectAs(CsceneModel::getCreateUsername, DeviceReferCsceneStat::getCreateUsername)
                 .currentLink(SceneConfigModel.class)
                 .filterEqual(SceneConfigModel::getDeleted, false)
-                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
                 .currentLink(CloudPluginSceneConfigElementModel.class);
         if (Objects.isNull(imageNames) || imageNames.length == 0) {
             deviceReferCondition.filterIn(CloudPluginSceneConfigElementModel::getImageUuid, imageUuids);
@@ -789,9 +789,9 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getId, DeviceReferCsceneInstanceStat::getCsceneId)
                 .selectAs(CsceneInstanceModel::getCreateUser, DeviceReferCsceneInstanceStat::getCreateUser)
                 .selectAs(CsceneInstanceModel::getCreateUsername, DeviceReferCsceneInstanceStat::getCreateUsername)
+                .selectAs(CsceneInstanceModel::getName, DeviceReferCsceneInstanceStat::getName)
                 .currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getDeleted, false)
-                .selectAs(SceneModel::getName, DeviceReferCsceneInstanceStat::getName)
                 .selectAs(SceneModel::getEvent, DeviceReferCsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, DeviceReferCsceneInstanceStat::getEventStatus)
                 .currentLink(CloudPluginSceneElementModel.class);
