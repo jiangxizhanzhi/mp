@@ -328,16 +328,14 @@ public class SceneMonitorService {
                 Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
                 basicInfos.forEach(basicInfo -> {
                     var hostStates = map.get(basicInfo.getEid());
-                    if (CollectionUtil.isNotEmpty(hostStates)) {
-                        //hostState中cpu、disk、memory直接取的sceneElementBo配置的值。
-                        HostState oldHostState = basicInfo.getHostState();
-                        HostState realTimeHostState = hostStates.get(0);
-                        if (Objects.nonNull(oldHostState)) {
-                            realTimeHostState.setCpuCount(oldHostState.getCpuCount());
-                            realTimeHostState.setDiskSpace(oldHostState.getDiskSpace());
-                            realTimeHostState.setMemoryTotal(oldHostState.getMemoryTotal());
+                    //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
+                    if (CollectionUtils.isNotEmpty(hostStates)) {
+                        if (!BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())) {
+                            basicInfo.setHostState(hostStates.get(0));
+                        } else {
+                            HostState realTimeHostState = getRealTimeHostState(basicInfo, hostStates);
+                            basicInfo.setHostState(realTimeHostState);
                         }
-                        basicInfo.setHostState(realTimeHostState);
                     }
                 });
             }
@@ -373,6 +371,17 @@ public class SceneMonitorService {
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
         return basicInfos;
+    }
+
+    private HostState getRealTimeHostState(ElementMonitorBasicInfo basicInfo, List<HostState> hostStates) {
+        HostState oldHostState = basicInfo.getHostState();
+        HostState realTimeHostState = hostStates.get(0);
+        if (Objects.nonNull(oldHostState)) {
+            realTimeHostState.setCpuCount(oldHostState.getCpuCount());
+            realTimeHostState.setDiskSpace(oldHostState.getDiskSpace());
+            realTimeHostState.setMemoryTotal(oldHostState.getMemoryTotal());
+        }
+        return realTimeHostState;
     }
 
     public List<ElementMonitorBasicInfo> getAllSceneConfigElements(String id, SceneAllElementsQueryRequest request) {

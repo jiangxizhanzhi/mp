@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -341,9 +342,25 @@ public class SceneElementMonitorService {
         if (Objects.isNull(elementMonitorBasicInfo.getHostState())) {
             elementMonitorBasicInfo.setHostState(new HostState());
         }
-        elementMonitorBasicInfo.getHostState().setCpuCount(Integer.valueOf(0).equals(sceneElementBO.getCpu()) ? null : sceneElementBO.getCpu());
-        elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
-        elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+        if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(elementMonitorBasicInfo.getImageType())) {
+            //容器默认 1CPU 512MB内存 10GB硬盘
+            elementMonitorBasicInfo.getHostState().setCpuCount(1);
+            if (sceneElementBO.getRam() > 0) {
+                elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
+            } else {
+                elementMonitorBasicInfo.getHostState().setMemoryTotal(512L);
+            }
+
+            if (sceneElementBO.getDisk() > 0) {
+                elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+            } else {
+                elementMonitorBasicInfo.getHostState().setDiskSpace(10L);
+            }
+        } else {
+            elementMonitorBasicInfo.getHostState().setCpuCount(sceneElementBO.getCpu());
+            elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
+            elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+        }
     }
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
