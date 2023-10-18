@@ -141,7 +141,7 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> add(@RequestBody UserRequest createRequest) {
-        if (createRequest.getExpiredTime().isBefore(LocalDateTime.now())) {
+        if (createRequest.getExpiredTime() != null && createRequest.getExpiredTime().isBefore(LocalDateTime.now())) {
             throw new MpRuntimeException(AuthErrorCode.EXPIRE_DATE_WRONG);
         }
         createRequest.setAvatar(FsCommon.getFileKey(createRequest.getAvatar()));
