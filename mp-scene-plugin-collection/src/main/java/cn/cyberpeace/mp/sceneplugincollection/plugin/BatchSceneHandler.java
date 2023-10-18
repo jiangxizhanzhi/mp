@@ -152,7 +152,7 @@ public class BatchSceneHandler {
     }
 
     public SceneElementBO getNodeByNodeId(String nodeId) {
-        return this.allIp2ElementMap.get(nodeId);
+        return this.allNodeId2ElementMap.get(nodeId);
     }
 
     public SceneElementBO getNodeByIpAddr(String ip) {
