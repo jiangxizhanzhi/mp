@@ -836,6 +836,10 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder
+                .must(QueryBuilders.existsQuery("suricata.category"))
+                .mustNot(QueryBuilders.termsQuery("suricata.category", ""));
+
 
         if (Objects.nonNull(request.getAttackTypes())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.category", request.getAttackTypes()));
