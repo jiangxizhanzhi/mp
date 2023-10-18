@@ -431,7 +431,8 @@ public class TaiShiGuidesService {
     }
 
     public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
-        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(Arrays.asList(sceneId));
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIdList, new ArrayList<>());
         var startTime = sceneHandler.getEarliestStartTime();
         var endTime = sceneHandler.getLatestSceneRunningTime();
 
