@@ -18,8 +18,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class TypeConverter {
+
+    private static final Integer INDUSTRY_CONTROL_EQUIPMENT = 6;
 
     private final TypeService typeService;
 
@@ -57,7 +61,14 @@ public class TypeConverter {
      */
     public ListResult<TargetType> findL1AndL2Type() {
         CloudPlatformPageResult<TargetType> l1AndL2Type = typeService.findL1AndL2Type();
-        return new ListResult<>(l1AndL2Type.getList());
+
+        List<TargetType> targetTypes = Optional.ofNullable(l1AndL2Type).map(CloudPlatformPageResult::getList).orElse(Collections.emptyList());
+        // task-view-12214 底层增加了id为6的工控设备, 但是目前基线版本，前台不需要展示。
+        if (CollectionUtils.isNotEmpty(targetTypes)) {
+            targetTypes = targetTypes.stream().filter(type -> !INDUSTRY_CONTROL_EQUIPMENT.equals(type.getId())).collect(Collectors.toList());
+        }
+
+        return new ListResult<>(targetTypes);
     }
 
     /**

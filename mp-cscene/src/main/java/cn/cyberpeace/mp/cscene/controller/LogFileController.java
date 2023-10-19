@@ -59,7 +59,7 @@ public class LogFileController {
     @ApiOperation(value = "分页查询日志文件")
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
-        log.info("{}", pageRequest);
+        log.info("page query log files, pageRequest = {}", pageRequest);
         if (StringUtils.isNotEmpty(pageRequest.getStartTime()) || StringUtils.isNotEmpty(pageRequest.getEndTime())) {
             var instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
             LocalDateTime startTime = null;
