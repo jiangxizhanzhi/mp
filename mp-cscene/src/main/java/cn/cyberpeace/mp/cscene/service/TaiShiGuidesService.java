@@ -60,6 +60,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -221,6 +222,40 @@ public class TaiShiGuidesService {
             Aggregations aggregations = searchResponse.getAggregations();
             ParsedDateHistogram parsedTerms = aggregations.get("histogram");
             List<? extends Histogram.Bucket>  buckets = parsedTerms.getBuckets();
+            var flowTrends = buckets.stream().map(bucket -> {
+                FlowTrend bo = new FlowTrend();
+                LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket.getKeyAsString(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+                bo.setTime(time);
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedValueCount parsedValueCount = bucketAggregations.get("count");
+                bo.setDataSize(parsedValueCount.getValue());
+                return bo;
+            }).collect(Collectors.toList());
+            return new ServiceResult<>(flowTrends);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ServiceResult<List<FlowTrend>> getResultHistogram(Set<String> indexes, BoolQueryBuilder mergeQuery) {
+        var searchBuilder = new SearchSourceBuilder();
+        searchBuilder.query(mergeQuery);
+        AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("histogram").field("@timestamp")
+                .fixedInterval(DateHistogramInterval.seconds(3600))
+                .minDocCount(0)
+                .subAggregation(AggregationBuilders.count("count").field("@timestamp"));
+        searchBuilder.aggregation(aggregationBuilder);
+        searchBuilder.size(0);
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices(indexes.toArray(new String[]{}));
+        searchRequest.source(searchBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        try {
+            var searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedDateHistogram parsedTerms = aggregations.get("histogram");
+            List<? extends Histogram.Bucket> buckets = parsedTerms.getBuckets();
             var flowTrends = buckets.stream().map(bucket -> {
                 FlowTrend bo = new FlowTrend();
                 LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket.getKeyAsString(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
@@ -433,15 +468,61 @@ public class TaiShiGuidesService {
     public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
         List<String> sceneIdList = csceneCommonService.translateSceneIds(Arrays.asList(sceneId));
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIdList, new ArrayList<>());
-        var startTime = sceneHandler.getEarliestStartTime();
-        var endTime = sceneHandler.getLatestSceneRunningTime();
+        var sceneEndTime = sceneHandler.getLatestSceneRunningTime().plusHours(1);
+        var hour = sceneEndTime.toLocalTime().getHour();
+        var endTime = LocalDateTime.of(sceneEndTime.toLocalDate(), LocalTime.of(hour, 0, 0));
+        var startTime = endTime.minusDays(1);
 
-        var flows = this.getFlowEventTrend(new String[]{sceneId}, startTime, endTime, 24);
-        var hosts = this.getHostEventTrend(sceneId, startTime, endTime, 24);
+        var formatDefenseReq = new TaiShiRequest.EventRequest();
+        formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
+        formatDefenseReq.setStartTime(startTime);
+        formatDefenseReq.setEndTime(endTime);
+        var formatAttCkReq = new TaiShiRequest.EventRequest();
+        formatAttCkReq.setDefenseTypes(ClassificationConvert.getAllAttCkKeys());
+        formatAttCkReq.setStartTime(startTime);
+        formatAttCkReq.setEndTime(endTime);
+
+        Set<String> indexes = new HashSet<>();
+        var mergeQuery = QueryBuilders.boolQuery();
+
+        EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatDefenseReq);
+        EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatAttCkReq);
+        if (hostDefenseResult != null) {
+            indexes.addAll(hostDefenseResult.getIndexes());
+            mergeQuery.should(hostDefenseResult.getQuery());
+        }
+        if (hostAttackResult != null) {
+            indexes.addAll(hostAttackResult.getIndexes());
+            mergeQuery.should(hostAttackResult.getQuery());
+        }
+
+        EsEventRequestParsedResult flowDefenseResult = this.getFlowEsEventRequestParsedResult(sceneIdList.get(0), sceneHandler, formatDefenseReq);
+        EsEventRequestParsedResult flowAttackResult = this.getFlowEsEventRequestParsedResult(sceneIdList.get(0), sceneHandler, formatAttCkReq);
+        if (flowDefenseResult != null) {
+            indexes.addAll(flowDefenseResult.getIndexes());
+            mergeQuery.should(flowDefenseResult.getQuery());
+        }
+        if (flowAttackResult != null) {
+            indexes.addAll(flowAttackResult.getIndexes());
+            mergeQuery.should(flowAttackResult.getQuery());
+        }
+
+        var result = this.getResultHistogram(indexes, mergeQuery).getSource();
+        Map<String, FlowTrend> resultMap = new HashMap<>();
+        for (var r : result) {
+            resultMap.put(TimeUtils.localDateTimeToUtcString(r.getTime()), r);
+        }
+
         List<FlowTrend> trends = new ArrayList<>();
-        trends.addAll(flows);
-        for (int i = 0; i < hosts.size(); i++) {
-            trends.get(i).setDataSize(trends.get(i).getDataSize() + hosts.get(i).getDataSize());
+        for (int i = 0; i < 24; i++) {
+            var time = startTime.plusHours(i);
+            FlowTrend flowTrend = resultMap.get(TimeUtils.localDateTimeToUtcString(time));
+            if (flowTrend == null) {
+                flowTrend = new FlowTrend();
+                flowTrend.setTime(time);
+                flowTrend.setDataSize(0L);
+            }
+            trends.add(flowTrend);
         }
         return new ServiceResult<>(trends);
     }

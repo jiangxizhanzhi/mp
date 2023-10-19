@@ -42,7 +42,7 @@ public class ResourceCenterService {
     private static String LOGO_NAME = "Topology.png";
 
 
-    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
+    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock -o nfsvers=3  %s:%s %s";
     private static String UMOUNT_CMD = "umount %s";
 
     @Resource
