@@ -157,6 +157,7 @@ public class InstallerController {
     @PostMapping(value = "/upload/docker")
     @ResponseBody
     public ServiceResult<TargetUploadVO> customUpload(MultipartFile file, HttpServletRequest request) {
+        log.info("upload docker file: {}", file.getOriginalFilename());
         installerDockerUploadService = installerDockerUploadService.build(file);
         return installerDockerUploadService.upload();
     }

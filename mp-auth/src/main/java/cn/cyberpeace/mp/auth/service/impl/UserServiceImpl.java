@@ -12,10 +12,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.TenantUserModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -25,6 +22,7 @@ import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.*;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -265,6 +263,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
 
+        if (obj.getDelayRemindLicenseTime() == null) {
+            obj.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+        }
+
         return super.create(obj, fields);
     }
 
@@ -366,6 +368,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
+        userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
@@ -876,13 +879,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
+    // 这个缓存无效，变量不可控
+    // @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
     public List<UserBo> userOrgRoleDtos2UserDtos(List<UserOrgRoleBo> userOrgRoleBos) {
         if (CollectionUtils.isEmpty(userOrgRoleBos)) {
             return Collections.emptyList();
         }
         List<OrgBO> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
-        List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
+        Map<String, OrgBO> orgMap = allOrgs.stream().collect(Collectors.toMap(OrgBO::getId, org -> org));
+        Set<String> roleIds = new HashSet<>();
+        userOrgRoleBos.forEach(user -> {
+            if(StringUtils.isNotBlank(user.getRoles())){
+                roleIds.addAll(Arrays.asList(user.getRoles().split(",")));
+            }
+        });
+        List<RoleModel> allRoles = roleService.listByIds(roleIds);
+        Map<String,RoleModel> roleMap = allRoles.stream().collect(Collectors.toMap(RoleModel::getId, role->role));
+
         List<UserBo> userBos = new ArrayList<>();
         for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
             UserBo userBo = new UserBo();
@@ -892,8 +905,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getOrgs())) {
                 List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
-                List<OrgBO> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
-                //List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
+                List<OrgBO> userOrgModels = userOrgIds.stream().map(orgMap::get).collect(Collectors.toList());
                 List<List<String>> allorgpath = userOrgModels.stream().map(o -> Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
                 userBo.setOrgs(userOrgModels);
                 userBo.setOrgIds(userOrgIds);
@@ -906,7 +918,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getRoles())) {
                 List<String> userRoleIds = Arrays.asList(userOrgRoleBo.getRoles().split(","));
-                List<RoleModel> userRoleModels = allRoles.stream().filter(r -> userRoleIds.contains(r.getId())).collect(Collectors.toList());
+                List<RoleModel> userRoleModels = userRoleIds.stream().map(roleMap::get).collect(Collectors.toList());
                 userBo.setRoles(userRoleModels);
 
                 boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));

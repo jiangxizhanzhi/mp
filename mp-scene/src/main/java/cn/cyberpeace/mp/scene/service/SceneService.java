@@ -76,6 +76,7 @@ public class SceneService {
         sceneHandler.prepare(partialStart);
         sceneHandler.save();
 
+        SceneStageRecorder.registerRecoder(sceneHandler.getSceneId(), sceneHandler.getSceneStageRecorder());
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
             if (!sceneHandler.initiate(false)) {
@@ -90,6 +91,7 @@ public class SceneService {
             if (callback != null) {
                 callback.run();
             }
+            SceneStageRecorder.removeRecorder(sceneHandler.getSceneId());
         });
 
         return new ServiceResult<>(sceneHandler.toData());

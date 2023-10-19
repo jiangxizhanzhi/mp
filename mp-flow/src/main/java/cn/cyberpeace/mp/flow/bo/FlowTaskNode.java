@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Objects;
+
 /**
  * @Description: 节点
  * @Author: guquan
@@ -24,4 +26,17 @@ public class FlowTaskNode {
      */
     @ApiModelProperty(value = "节点名称")
     private String nodeName;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nodeId, nodeName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FlowTaskNode that = (FlowTaskNode) o;
+        return Objects.equals(nodeId, that.nodeId) && Objects.equals(nodeName, that.nodeName);
+    }
 }

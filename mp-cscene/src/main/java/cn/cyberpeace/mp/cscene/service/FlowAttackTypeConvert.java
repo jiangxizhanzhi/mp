@@ -40,13 +40,13 @@ public class FlowAttackTypeConvert {
         attackType2AttCks.put("Attempted Administrator Privilege Gain", "privilege escalation");
         attackType2AttCks.put("Successful Administrator Privilege Gain", "privilege escalation");
 
-        attackType2AttCks.put("Unknown Traffic", "defense evasionn");
-        attackType2AttCks.put("A suspicious string was detected", "defense evasionn");
-        attackType2AttCks.put("A suspicious filename was detected", "defense evasionn");
-        attackType2AttCks.put("A Network Trojan was detected", "defense evasionn");
-        attackType2AttCks.put("Misc activity", "defense evasionn");
-        attackType2AttCks.put("Misc Attack", "defense evasionn");
-        attackType2AttCks.put("Possibly Unwanted Program Detected", "defense evasionn");
+        attackType2AttCks.put("Unknown Traffic", "defense evasion");
+        attackType2AttCks.put("A suspicious string was detected", "defense evasion");
+        attackType2AttCks.put("A suspicious filename was detected", "defense evasion");
+        attackType2AttCks.put("A Network Trojan was detected", "defense evasion");
+        attackType2AttCks.put("Misc activity", "defense evasion");
+        attackType2AttCks.put("Misc Attack", "defense evasion");
+        attackType2AttCks.put("Possibly Unwanted Program Detected", "defense evasion");
 
         attackType2AttCks.put("An attempted login using a suspicious username was detected", "credential access");
         attackType2AttCks.put("Attempt to login by a default username and password", "credential access");
@@ -64,7 +64,7 @@ public class FlowAttackTypeConvert {
         attackType2AttCks.put("A client was using an unusual port", "command and control");
         attackType2AttCks.put("Detection of a non-standard protocol or event", "command and control");
         attackType2AttCks.put("Generic Protocol Command Decode", "command and control");
-        attackType2AttCks.put("Generic Icmp event", "command and control");
+        attackType2AttCks.put("Generic ICMP event", "command and control");
         attackType2AttCks.put("Domain Observed Used for C2 Detected", "command and control");
 
         attackType2AttCks.put("Attempted Denial of Service", "impact");
@@ -76,7 +76,7 @@ public class FlowAttackTypeConvert {
         formatTypes.put("initial access", "Initial access");
         formatTypes.put("execution", "Execution");
         formatTypes.put("privilege escalation", "Privilege Escalation");
-        formatTypes.put("defense evasionn", "Defense Evasionn");
+        formatTypes.put("defense evasion", "Defense Evasion");
         formatTypes.put("credential access", "Credential Access");
         formatTypes.put("discovery", "Discovery");
         formatTypes.put("collection", "Collection");

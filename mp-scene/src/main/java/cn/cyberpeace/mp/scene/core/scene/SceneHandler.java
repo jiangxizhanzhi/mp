@@ -47,7 +47,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -155,6 +160,18 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
+            SceneStageRecorder.getRecorder(getSceneId()).refreshSceneBO(this.getScene());
+            SceneStageRecorder.removeRecorder(getSceneId());
+            String message = this.getScene().getProcessMessage();
+            for (var e : this.getElementMap().values()) {
+                if (e.getEventStatus() == 5) {
+                    message += ";" + e.getProcessMessage();
+                }
+            }
+            if (StringUtils.isNotEmpty(message) && message.length() > 2000) {
+                message = message.substring(0, 2000);
+            }
+            this.getScene().setProcessMessage(message);
             save();
         }
         return flag;
@@ -198,7 +215,10 @@ public class SceneHandler extends BaseSceneHandler<
 
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
-        collectedSceneBO.setScene(getScene());
+        SceneBO sceneBO = new SceneBO();
+        BeanUtils.copyProperties(getScene(), sceneBO);
+        collectedSceneBO.setScene(sceneBO);
+
         String message = null;
         if (collectedSceneBO.getScene() != null && collectedSceneBO.getScene().getProcessMessage() != null) {
             message = collectedSceneBO.getScene().getProcessMessage();
@@ -210,6 +230,13 @@ public class SceneHandler extends BaseSceneHandler<
             }
             collectedSceneBO.getScene().setProcessMessage(newMessage);
         }
+
+        Locale locale = LocaleContextHolder.getLocale();
+        boolean chinaFlag = StringUtils.isBlank(locale.getLanguage()) || Locale.CHINA.getLanguage().equals(locale.getLanguage());
+        if (chinaFlag) {
+            collectedSceneBO.getScene().setStageName(String.format("正在%s", collectedSceneBO.getScene().getStageName()));
+        }
+
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
@@ -933,7 +960,18 @@ public class SceneHandler extends BaseSceneHandler<
         if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
             return 100;
         }
-        return this.getScene().getStagePercentage();
+        BigDecimal total = BigDecimal.valueOf(0);
+        BigDecimal current = BigDecimal.valueOf(0);
+        if (CollectionUtils.isNotEmpty(this.getScene().getStageList())) {
+            for (var stage : this.getScene().getStageList()) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
+            }
+        }
+        if (current.intValue() == 0) {
+            return 0;
+        }
+        return current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue();
     }
 
     private boolean isTerminateEvent(int state) {

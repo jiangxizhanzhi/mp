@@ -37,6 +37,11 @@ import java.util.concurrent.TimeUnit;
 public class HttpUtils {
 
     /**
+     * 默认超时时间
+     */
+    private static final Integer DEFAULT_TIME_OUT = 600;
+
+    /**
      * 发送一个Post请求
      *
      * @param url
@@ -76,7 +81,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPost(String url, Map<String, Object> formMap, Map<String, String> headers) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+        log.info("=======sendHttpPost url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.SECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).build();
 
         FormBody.Builder formBodyBuilder = new FormBody.Builder();
         for (Map.Entry<String, Object> entry : formMap.entrySet()) {
@@ -99,7 +106,9 @@ public class HttpUtils {
         Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            String result = response.body().string();
+            log.info("=======sendHttpPost response: {}", result);
+            return result;
         }
     }
 
@@ -112,11 +121,14 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPost(String url, String body, Map<String, String> headers) throws IOException {
+        log.info("=======sendHttpPost url: {}", url);
         HttpURLConnection connection = null;
         try {
             URL urlObj = new URL(url);
             connection = (HttpURLConnection) urlObj.openConnection();
             connection.setRequestMethod("POST");
+            connection.setConnectTimeout(DEFAULT_TIME_OUT * 1000);
+            connection.setReadTimeout(DEFAULT_TIME_OUT * 1000);
 
             // Set request headers
             for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -137,6 +149,7 @@ public class HttpUtils {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
+                log.info("=======sendHttpPost response: {}", response);
                 return response.toString();
             }
         } finally {
@@ -155,8 +168,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPut(String url, Map<String, Object> formMap, Map<String, String> headers) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-
+        log.info("=======sendHttpPut url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.SECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).build();
         FormBody.Builder formBodyBuilder = new FormBody.Builder();
         for (Map.Entry<String, Object> entry : formMap.entrySet()) {
             if (Objects.nonNull(entry.getValue())) {
@@ -176,7 +190,9 @@ public class HttpUtils {
         Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            String result = response.body().string();
+            log.info("=======sendHttpPut response: {}", result);
+            return result;
         }
     }
 
@@ -189,8 +205,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPut(String url, String body, Map<String, String> headers) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-
+        log.info("=======sendHttpPut url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.SECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).build();
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
 
         Request.Builder requestBuilder = new Request.Builder()
@@ -205,7 +222,9 @@ public class HttpUtils {
         Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            String result = response.body().string();
+            log.info("=======sendHttpPut response: {}", result);
+            return result;
         }
     }
 
@@ -218,7 +237,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpDelete(String url, String body, Map<String, String> headers) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+        log.info("=======sendHttpDelete url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.SECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).build();
 
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), body);
 
@@ -234,7 +255,9 @@ public class HttpUtils {
         Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            String result = response.body().string();
+            log.info("=======sendHttpDelete response: {}", result);
+            return result;
         }
     }
 
@@ -247,10 +270,13 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpGet(String url, Map<String, String> headers, Integer timeout) throws IOException {
+        log.info("=======sendHttpGet url: {}", url);
         HttpURLConnection connection = null;
         try {
             URL urlObj = new URL(url);
             connection = (HttpURLConnection) urlObj.openConnection();
+            connection.setConnectTimeout(DEFAULT_TIME_OUT * 1000);
+            connection.setReadTimeout(DEFAULT_TIME_OUT * 1000);
             connection.setRequestMethod("GET");
 
             // Set request headers
@@ -268,6 +294,8 @@ public class HttpUtils {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
+
+                log.info("=======sendHttpGet response: {}", response);
                 return response.toString();
             }
         } finally {
@@ -286,7 +314,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+        log.info("=======sendHttpPostWithFile url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.SECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS).build();
 
         MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
@@ -308,8 +338,15 @@ public class HttpUtils {
 
         Request request = requestBuilder.build();
 
-        try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+        try {
+            Response response = client.newCall(request).execute();
+            String result = response.body().string();
+            log.info("=======sendHttpPostWithFile response: {}", result);
+            return result;
+        } catch (IOException e) {
+            // 打印错误日志
+            log.error("sendHttpPostWithFile error:", e);
+            throw e;
         }
     }
 

@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -248,6 +249,7 @@ public class SceneElementMonitorService {
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
         log.info("fetchHostState:{}", fetchRealTimeHostState);
         // 获取hostState比较耗时，这里加个开关
+
         if (fetchRealTimeHostState) {
             HostState resource = basicInfo.getHostState();
             if (Objects.isNull(resource)) {
@@ -291,10 +293,6 @@ public class SceneElementMonitorService {
             basicInfo.setHostState(resource);
         }
 
-        // ip地址
-//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
-//        basicInfo.setIps(ipList);
-
         // ID
         basicInfo.setId(sceneElementBO.getId());
         basicInfo.setEid(sceneElementBO.getEid());
@@ -330,8 +328,40 @@ public class SceneElementMonitorService {
         }
         basicInfo.setPorts(ePorts);
 
+        formatHostStateBySceneElementBo(basicInfo, sceneElementBO);
     }
 
+    /**
+     *   获取的主机信息，cpu,memory,disk直接使用靶标配置的值，从es中获取不一定都采得到/准确
+     * @author
+     * @date 17:09 2023/10/17
+     * @param elementMonitorBasicInfo
+     * @param sceneElementBO
+     **/
+    private void formatHostStateBySceneElementBo(ElementMonitorBasicInfo elementMonitorBasicInfo, SceneElementBO sceneElementBO) {
+        if (Objects.isNull(elementMonitorBasicInfo.getHostState())) {
+            elementMonitorBasicInfo.setHostState(new HostState());
+        }
+        if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(elementMonitorBasicInfo.getImageType())) {
+            //容器默认 1CPU 512MB内存 10GB硬盘
+            elementMonitorBasicInfo.getHostState().setCpuCount(1);
+            if (sceneElementBO.getRam() > 0) {
+                elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
+            } else {
+                elementMonitorBasicInfo.getHostState().setMemoryTotal(512L);
+            }
+
+            if (sceneElementBO.getDisk() > 0) {
+                elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+            } else {
+                elementMonitorBasicInfo.getHostState().setDiskSpace(10L);
+            }
+        } else {
+            elementMonitorBasicInfo.getHostState().setCpuCount(sceneElementBO.getCpu());
+            elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
+            elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
+        }
+    }
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
         String imageName = null;

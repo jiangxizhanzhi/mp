@@ -1267,28 +1267,30 @@ public class CreateHandler extends HandlerCommon {
         this.prepareEventProcess();
 
         // 先创建辅助网络(包含虚拟交换机)
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         var createAuxiliaryNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
+
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
                 runTasks(createAuxiliaryNetworkTasks);
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
             });
+        } else {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
         }
 
+
         // 再创建网关 和 防火墙
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+
         var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
                 .collect(Collectors.toList());
         var createFirewallTasks = getPluginHandler().getFirewallElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
                 .collect(Collectors.toList());
-        if (!createGatewayTasks.isEmpty() || !createFirewallTasks.isEmpty()) {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
-        }
-
         if (!createGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
                 runTasks(createGatewayTasks);
@@ -1303,15 +1305,14 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
             });
         }
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
 
+
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
         // 再创建终端
         var npcNodes = getPluginHandler().getNpcElements();
         var createTerminalTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
-        if (!npcNodes.isEmpty() || !createTerminalTasks.isEmpty()) {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
-        }
-
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
                 runTasks(createTerminalTasks);
@@ -1320,7 +1321,6 @@ public class CreateHandler extends HandlerCommon {
                 }
             });
         }
-
         // 批量创建NPC节点
         if (npcNodes.size() > 0) {
             // npc是一次调用批量创建 所以先记录npc相关参数
@@ -1333,17 +1333,21 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
             });
         }
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
 
+
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
         // 下发配置
         var sendDynamicConfigs = getPluginHandler().getDynamicElements().stream()
                 .map(cloudElement -> (Runnable) () -> createConfigDynamipsTask(cloudElement))
                 .collect(Collectors.toList());
         if (!sendDynamicConfigs.isEmpty()) {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
             runSceneProgress(SceneProcess.CONFIGURE, () -> {
                 runTasks(sendDynamicConfigs);
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
             });
+        } else {
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
         }
 
         //通知云平台需要统计环境总速率的端口

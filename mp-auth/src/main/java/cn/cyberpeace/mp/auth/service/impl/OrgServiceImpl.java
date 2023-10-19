@@ -175,6 +175,22 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return getPath(orgModel, null);
     }
 
+    private String getOrgPath(OrgModel orgModel, Map<String, OrgModel> orgMap) {
+        String path = orgModel.getName();
+        OrgModel current = orgModel;
+        while (StringUtils.isNotBlank(current.getParent())) {
+            String parentId = current.getParent();
+            OrgModel parent = orgMap.get(parentId);
+            if (parent != null) {
+                current = parent;
+                path = parent.getName().concat(AuthConstant.ORG_PATH_SEPARATOR).concat(path);
+            } else {
+                current = new OrgModel();
+            }
+        }
+        return path;
+    }
+
     @Override
     public String getPath(OrgModel orgModel, List<OrgModel> orgModelList) {
         String path = orgModel.getName();
@@ -333,13 +349,15 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgBO> listAll(String tenantId) {
         List<OrgModel> orgs = orgPathService.listByTenant(tenantId);
+        // 租户所有组织使用了缓存，下面的组装路径需要使用Map索引，否则会导致过多查找
+        Map<String, OrgModel> orgMap = orgs.stream().collect(Collectors.toMap(OrgModel::getId, org -> org));
         List<OrgBO> orgBOS =
-            orgs.stream().map(orgModel -> {
-                OrgBO orgBO = new OrgBO();
-                BeanUtils.copyProperties(orgModel, orgBO);
-                orgBO.setPath(this.getPath(orgModel, orgs));
-                return orgBO;
-            }).collect(Collectors.toList());
+                orgs.stream().map(orgModel -> {
+                    OrgBO orgBO = new OrgBO();
+                    BeanUtils.copyProperties(orgModel, orgBO);
+                    orgBO.setPath(this.getOrgPath(orgModel, orgMap));
+                    return orgBO;
+                }).collect(Collectors.toList());
         return orgBOS;
     }
 

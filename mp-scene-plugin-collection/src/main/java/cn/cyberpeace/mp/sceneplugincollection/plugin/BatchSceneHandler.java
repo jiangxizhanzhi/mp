@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
@@ -27,6 +28,8 @@ public class BatchSceneHandler {
     private List<String> nodeIds;
 
     private LocalDateTime earliestStartTime;
+
+    private LocalDateTime latestUpdateTime;
 
     private List<String> flowCollectors = new ArrayList<>();
 
@@ -70,6 +73,26 @@ public class BatchSceneHandler {
 
     public LocalDateTime getEarliestStartTime() {
         return earliestStartTime;
+    }
+
+    public LocalDateTime getLatestUpdateTime(){
+        return latestUpdateTime;
+    }
+
+    public LocalDateTime getLatestSceneRunningTime() {
+        LocalDateTime dateTime = null;
+        for (var s : id2SceneHandler.values()) {
+            if (s.getScene().getEvent() == SceneModel.Event.DELETE) {
+                if (dateTime == null) {
+                    dateTime = s.getScene().getUpdateTime();
+                } else if (dateTime.isBefore(s.getScene().getUpdateTime())) {
+                    dateTime = s.getScene().getUpdateTime();
+                }
+            } else {
+                dateTime = LocalDateTime.now();
+            }
+        }
+        return dateTime == null ? LocalDateTime.now() : dateTime;
     }
 
     public List<String> getFlowCollectors() {
@@ -129,7 +152,7 @@ public class BatchSceneHandler {
     }
 
     public SceneElementBO getNodeByNodeId(String nodeId) {
-        return this.allIp2ElementMap.get(nodeId);
+        return this.allNodeId2ElementMap.get(nodeId);
     }
 
     public SceneElementBO getNodeByIpAddr(String ip) {
@@ -194,6 +217,9 @@ public class BatchSceneHandler {
             this.id2SceneHandler.put(sceneId,sceneHandler);
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
+            }
+            if (latestUpdateTime == null || sceneHandler.getScene().getUpdateTime().isAfter(latestUpdateTime)) {
+                latestUpdateTime = sceneHandler.getScene().getUpdateTime();
             }
             CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);

@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
  */
 public enum CommonErrorCode implements ErrorCode {
     UPLOAD_FILE_TYPE_ERROR("MP-110800", "upload_file_type_error"),
-    FILE_DOWNLOAD_FAILED("MP-110801", "file_download_failed")
+    FILE_DOWNLOAD_FAILED("MP-110801", "file_download_failed"),
+
+    FILE_NOT_FOUND_ERROR("MP-110802", "file_not_found_error")
     ;
 
 

@@ -43,7 +43,15 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -320,8 +328,14 @@ public class SceneMonitorService {
                 Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
                 basicInfos.forEach(basicInfo -> {
                     var hostStates = map.get(basicInfo.getEid());
-                    if (CollectionUtil.isNotEmpty(hostStates)) {
-                        basicInfo.setHostState(hostStates.get(0));
+                    //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
+                    if (CollectionUtils.isNotEmpty(hostStates)) {
+                        if (!BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())) {
+                            basicInfo.setHostState(hostStates.get(0));
+                        } else {
+                            HostState realTimeHostState = getRealTimeHostState(basicInfo, hostStates);
+                            basicInfo.setHostState(realTimeHostState);
+                        }
                     }
                 });
             }
@@ -357,6 +371,17 @@ public class SceneMonitorService {
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
         return basicInfos;
+    }
+
+    private HostState getRealTimeHostState(ElementMonitorBasicInfo basicInfo, List<HostState> hostStates) {
+        HostState oldHostState = basicInfo.getHostState();
+        HostState realTimeHostState = hostStates.get(0);
+        if (Objects.nonNull(oldHostState)) {
+            realTimeHostState.setCpuCount(oldHostState.getCpuCount());
+            realTimeHostState.setDiskSpace(oldHostState.getDiskSpace());
+            realTimeHostState.setMemoryTotal(oldHostState.getMemoryTotal());
+        }
+        return realTimeHostState;
     }
 
     public List<ElementMonitorBasicInfo> getAllSceneConfigElements(String id, SceneAllElementsQueryRequest request) {

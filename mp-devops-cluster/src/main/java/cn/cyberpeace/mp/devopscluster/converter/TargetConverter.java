@@ -143,12 +143,12 @@ public class TargetConverter{
                 throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(deviceTargetPO.getName()));
             }
         });
-        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        String[] imageUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).toArray(String[]::new);
         //引用
-        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByImageUuid(uuids.toArray(new String[0]));
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        List<String> sceneNames = new ArrayList<>();
+        List<String> csceneNames = new ArrayList<>();
         String sceneName = StringUtils.EMPTY;
 
         if (MapUtils.isNotEmpty(referStateMap)) {
@@ -157,16 +157,16 @@ public class TargetConverter{
                         .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
                         .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
                         .collect(Collectors.toList());
-                sceneNames.addAll(names);
+                csceneNames.addAll(names);
             });
-            if (CollectionUtils.isNotEmpty(sceneNames)) {
-                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+            if (CollectionUtils.isNotEmpty(csceneNames)) {
+                List<String> names = csceneNames.subList(0, Math.min(csceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageUuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)) {
@@ -175,10 +175,10 @@ public class TargetConverter{
                         .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
                         .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
                         .collect(Collectors.toList());
-                sceneNames.addAll(names);
+                csceneNames.addAll(names);
             });
-            if (CollectionUtils.isNotEmpty(sceneNames)) {
-                List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
+            if (CollectionUtils.isNotEmpty(csceneNames)) {
+                List<String> names = csceneNames.subList(0, Math.min(csceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(sceneName));

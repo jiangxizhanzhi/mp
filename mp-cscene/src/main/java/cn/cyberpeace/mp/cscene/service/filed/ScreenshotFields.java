@@ -21,7 +21,7 @@ public class ScreenshotFields extends BaseModelFields {
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(ClassUtils.getBeanClassFields(ScreenshotModel.class));
+    public static final DynamicFields searchFields = new DynamicFields(ScreenshotModel::getUserName, ScreenshotModel::getUserOrgName, ScreenshotModel::getSceneName);
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(availableFields);
 }

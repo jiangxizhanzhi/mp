@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.bo.SysConfigBO;
 import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessConstant;
 import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -22,17 +23,22 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 系统配置管理接口
@@ -62,9 +68,28 @@ public class SysConfigController {
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
-    public ServiceResult<List<SysConfigModel>> listAll() {
+    public ServiceResult<List<SysConfigBO>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
-        return ResultCommon.success(configs);
+        List<SysConfigBO> result = configs.stream().map(sysConfigModel -> {
+            SysConfigBO sysConfigBO = new SysConfigBO();
+            sysConfigBO.fromModel(sysConfigModel);
+            return sysConfigBO;
+        }).collect(Collectors.toList());
+        return ResultCommon.success(result);
+    }
+
+    @ApiOperation(value = "查询常用系统设置", notes = "")
+    @GetMapping("/common")
+    public ServiceResult<List<SysConfigBO>> listCommon() {
+        List<SysConfigModel> configs = sysConfigService.listAll();
+        List<SysConfigBO> result = configs.stream()
+                .filter(sysConfigModel -> AdminBusinessConstant.COMMON_SYS_CONFIG_KEYS.contains(sysConfigModel.getKeyName()))
+                .map(sysConfigModel -> {
+                    SysConfigBO sysConfigBO = new SysConfigBO();
+                    sysConfigBO.fromModel(sysConfigModel);
+                    return sysConfigBO;
+                }).collect(Collectors.toList());
+        return ResultCommon.success(result);
     }
 
     @ApiOperation(value = "查询系统名称", notes = "")

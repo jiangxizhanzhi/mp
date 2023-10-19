@@ -14,12 +14,15 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SceneStageRecorder {
+
+    private static Map<String, SceneStageRecorder> RECORDER_MAP = new ConcurrentHashMap<>(8);
 
     private Map<String, SceneEventProcess> processMap;
 
@@ -32,6 +35,22 @@ public class SceneStageRecorder {
     private List<SceneStageRecord> stages;
 
     private Map<String, SceneStageRecord> stagesMap;
+
+    private SceneStageRecord currentStage;
+
+    private Integer progressPercentage = 0;
+
+    public static SceneStageRecorder getRecorder(String sceneId) {
+        return RECORDER_MAP.get(sceneId);
+    }
+
+    public static void removeRecorder(String sceneId) {
+        RECORDER_MAP.remove(sceneId);
+    }
+
+    public static void registerRecoder(String sceneId, SceneStageRecorder recorder) {
+        RECORDER_MAP.put(sceneId, recorder);
+    }
 
     public SceneStageRecorder(SceneBO sceneBO) {
         this.processMap = new ConcurrentHashMap<>();
@@ -127,18 +146,44 @@ public class SceneStageRecorder {
         }
     }
 
+    public void refreshSceneBO(SceneBO sceneBO) {
+        sceneBO.setStage(this.currentStage.getStage());
+        sceneBO.setStageName(this.currentStage.getStageName());
+        sceneBO.setStagePercentage(this.currentStage.getStagePercentage());
+        sceneBO.setStageList(this.stages);
+        BigDecimal total = BigDecimal.valueOf(0);
+        BigDecimal current = BigDecimal.valueOf(0);
+        if (CollectionUtils.isNotEmpty(stages)) {
+            for (var stage : stages) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+            }
+            sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
+        } else {
+            sceneBO.setProgressPercentage(0);
+        }
+        this.progressPercentage = sceneBO.getProgressPercentage();
+    }
+
     private void refreshSceneBO(SceneStageRecord record, SceneBO sceneBO) {
         sceneBO.setStage(record.getStage());
         sceneBO.setStageName(record.getStageName());
         sceneBO.setStagePercentage(record.getStagePercentage());
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
-        for (var stage : stages) {
-            total = total.add(BigDecimal.valueOf(100));
-            current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+        if (CollectionUtils.isNotEmpty(stages)) {
+            for (var stage : stages) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.stagePercentage));
+            }
+            sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
+            sceneBO.setStageList(stages);
+        } else {
+            sceneBO.setProgressPercentage(0);
+            sceneBO.setStageList(new ArrayList<>());
         }
-        sceneBO.setProgressPercentage(current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue());
-        sceneBO.setStageList(stages);
+        this.currentStage = record;
+        this.progressPercentage = sceneBO.getProgressPercentage();
     }
 
     @Getter

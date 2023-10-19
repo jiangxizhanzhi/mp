@@ -191,9 +191,12 @@ public class BaseCpService {
         if (log.isInfoEnabled()) {
             log.info(DELETE_LOG_INFO, url, body, result);
         }
+        if (body == null) {
+            body = "";
+        }
         try {
             result = HttpUtils.sendHttpDelete(url, body, wrapperHeaders(new HashMap<>()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("{} request error:", url, e);
             throw new MpRuntimeException("devops delete request failed");
         }

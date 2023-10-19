@@ -148,7 +148,6 @@ public class ScreenrecordService extends BaseCpService {
                     responseList.forEach(res -> {
                         if (userId2Bo.containsKey(res.getUserId())) {
                             var userBo = userId2Bo.get(res.getUserId());
-                            res.setUserName(userBo.getName());
                             res.setUserAvatar(userBo.getAvatar());
                         }
                     });

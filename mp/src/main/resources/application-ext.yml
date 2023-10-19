@@ -97,7 +97,7 @@ mp:
       public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
       public-net-proxy-exclude-protocols: ${MP_PUBLIC_NET_PROXY_EXCLUDE_PROTOCOLS:console,vnc,ssh,telnet,rdp}
       allow-export: ${MP_ALLOW_EXPORT:false}
-      trex-image: ${TREX_IMAGE:mp_trex}
+      trex-image: ${TREX_IMAGE:tgn-trex}
   base:
     ext-var:
       fdfs-ip: ${FDFS_IP:10.100.7.1}
@@ -119,6 +119,7 @@ mp:
       wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
       arkime-es-port: ${ARKIME_ES_PORT:9205}
+      arkime-image-name: ${ARKIME_IMAGE_NAME:mp_arkime:v2}
       arkime-disk: ${ARKIME_DISK:50}
       linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
       windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
@@ -132,6 +133,7 @@ mp:
       es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
       dynamic-level-keeping:  ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+      dynamic-level-only-root: ${DYNAMIC_LEVEL_ONLY_ROOT:false}
   # mp-auth 模块配置
   auth:
     ext-var:

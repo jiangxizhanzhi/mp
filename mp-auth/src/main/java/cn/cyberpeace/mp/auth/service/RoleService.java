@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,6 +20,8 @@ import java.util.List;
 public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     List<RoleModel> listByTenantId(String tenantId);
+
+    List<RoleModel> listByIds(Collection<String> ids);
 
     List<RoleModel> listAll(RolePageRequest rolePageRequest);
 
