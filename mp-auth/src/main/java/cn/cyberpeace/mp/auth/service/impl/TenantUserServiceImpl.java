@@ -443,9 +443,13 @@ public class TenantUserServiceImpl
         if (Objects.isNull(humanCondition)) {
             return new ArrayList<>();
         }
-        Map<String, String> userOrgMap = getUserOrgMap();
-        Map<String, String> userRoleMap = getUserRoleMap();
         List<UserModel> userModels = userMapper.list(humanCondition);
+        List<String> userIdList = new ArrayList<>();
+        for (UserModel model : userModels) {
+            userIdList.add(model.getId());
+        }
+        Map<String, String> userOrgMap = getUserOrgMap(userIdList);
+        Map<String, String> userRoleMap = getUserRoleMap(userIdList);
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
         for (UserModel model : userModels) {
             UserOrgRoleBo bo = new UserOrgRoleBo();
@@ -484,6 +488,12 @@ public class TenantUserServiceImpl
         PageInfo pageInfo = new PageInfo(userModels);
         pageInfo.setTotal(total);
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
+        List<String> userIdList = new ArrayList<>();
+        for (UserModel model : userModels) {
+            userIdList.add(model.getId());
+        }
+        Map<String, String> userOrgMap = getUserOrgMap(userIdList);
+        Map<String, String> userRoleMap = getUserRoleMap(userIdList);
         for (UserModel model : userModels) {
             UserOrgRoleBo bo = new UserOrgRoleBo();
             BeanUtils.copyProperties(model, bo);
@@ -574,6 +584,7 @@ public class TenantUserServiceImpl
         }
         return humanCondition;
     }
+<<<<<<< mp-auth/src/main/java/cn/cyberpeace/mp/auth/service/impl/TenantUserServiceImpl.java
     private Map<String, String> getUserOrgMap(List<String> userIds) {
         HumanCondition orgCondition = new HumanCondition()
                 .select(TenantUserModel::getUser)
@@ -590,10 +601,17 @@ public class TenantUserServiceImpl
         return userOrgMap;
     }
     private Map<String, String> getUserOrgMap() {
+=======
+
+    private Map<String, String> getUserOrgMap(List<String> userIdList) {
+>>>>>>> mp-auth/src/main/java/cn/cyberpeace/mp/auth/service/impl/TenantUserServiceImpl.java
         HumanCondition orgCondition = new HumanCondition()
                 .select(TenantUserModel::getUser)
-                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs")
-                .groupBy(TenantUserModel::getUser);
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), "orgs");
+        if (CollectionUtils.isNotEmpty(userIdList)) {
+            orgCondition.filterIn(TenantUserModel::getUser, userIdList.toArray());
+        }
+        orgCondition.groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
         userOrgMaps.forEach(map -> {
@@ -603,6 +621,7 @@ public class TenantUserServiceImpl
         });
         return userOrgMap;
     }
+<<<<<<< mp-auth/src/main/java/cn/cyberpeace/mp/auth/service/impl/TenantUserServiceImpl.java
     private Map<String, String> getUserRoleMap(List<String> userIds) {
         HumanCondition roleCondition = new HumanCondition()
                 .select(UserRoleModel::getUser)
@@ -619,10 +638,17 @@ public class TenantUserServiceImpl
         return userRoleMap;
     }
     private Map<String, String> getUserRoleMap() {
+=======
+
+    private Map<String, String> getUserRoleMap(List<String> userIdList) {
+>>>>>>> mp-auth/src/main/java/cn/cyberpeace/mp/auth/service/impl/TenantUserServiceImpl.java
         HumanCondition roleCondition = new HumanCondition()
                 .select(UserRoleModel::getUser)
-                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles")
-                .groupBy(UserRoleModel::getUser);
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), "roles");
+        if (CollectionUtils.isNotEmpty(userIdList)) {
+            roleCondition.filterIn(UserRoleModel::getUser, userIdList.toArray());
+        }
+        roleCondition.groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userRoleMaps = userRoleMapper.originList(roleCondition);
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
         userRoleMaps.forEach(map -> {
