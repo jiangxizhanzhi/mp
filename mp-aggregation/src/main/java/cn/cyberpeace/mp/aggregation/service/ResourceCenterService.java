@@ -37,7 +37,7 @@ import java.util.List;
 @Service
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
-    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
+    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock -o nfsvers=3 %s:%s %s";
     private static String UMOUNT_CMD = "umount %s";
 
     private static String LOGO_FILEPATH_FORMAT = "/api/mp/file/%s";
