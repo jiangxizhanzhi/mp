@@ -10,7 +10,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -67,7 +67,7 @@ public class LogFileUtil {
             return cache.get(sceneId);
         } catch (Exception e) {
             log.error(String.format("method: getLogFile; params: sceneId=%s; errorMessage: %s", sceneId, e.getMessage()), e);
-            return Collections.emptyMap();
+            return new HashMap<>();
         }
     }
 
