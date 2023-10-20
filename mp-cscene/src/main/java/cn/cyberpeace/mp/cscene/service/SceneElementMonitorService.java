@@ -117,8 +117,9 @@ public class SceneElementMonitorService {
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
-        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
+        //需要先获取plugin中imageType参数
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
+        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
 
         // todo 节点实时信息
         ElementRTInfo rtInfo = processRTInfo(baseRequest);
