@@ -34,6 +34,9 @@ public class NetworkTrafficGroupService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
+    @Autowired
+    private NetworkTrafficGroupService networkTrafficGroupService;
+
     /**
      * 索引前缀
      */
@@ -113,6 +116,9 @@ public class NetworkTrafficGroupService {
      * @param instanceId instanceId
      */
     public void createArkimeImageInstance(String instanceId) {
+        if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
+            networkTrafficGroupService.initArkimeNetwork();
+        }
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
