@@ -8,10 +8,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
@@ -732,6 +729,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             flowRecordsList.add(flowRecords);
         }
 
+        ObjServiceResult<FlowTaskTaskModel> objServiceResult = flowTaskTaskService.get(taskId);
+        if(objServiceResult.sourceObj() != null){
+            FlowTaskTaskModel task = objServiceResult.sourceObj();
+            response.setStatus(task.getTaskStatus());
+            response.setResult(task.getErrorCount()>0?2:1);
+        }
         return ResultCommon.success(response);
     }
 
