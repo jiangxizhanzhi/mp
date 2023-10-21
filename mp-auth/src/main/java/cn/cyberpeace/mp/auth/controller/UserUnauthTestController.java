@@ -25,28 +25,28 @@ import java.util.List;
 @Slf4j
 @Api(value = "用户变更通知示例")
 @RestController
-@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/users")
+@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH)
 public class UserUnauthTestController {
 
-    @PostMapping("/test_add_report")
+    @PostMapping("/UserApi/ssoAddUser")
     public ServiceResult testAddReport(@RequestBody AddInfo info) {
         log.info("add user info: {}", JsonCommon.stringify(info));
         return new ServiceResult(true);
     }
 
-    @PostMapping("/test_modify_report")
+    @PostMapping("/UserApi/ssoModifyUser")
     public ServiceResult testModifyReport(@RequestBody ModifyInfo info) {
         log.info("modify user info: {}", JsonCommon.stringify(info));
         return new ServiceResult(true);
     }
 
-    @PostMapping("/test_delete_report")
+    @PostMapping("/UserApi/ssoDelUser")
     public ServiceResult testDeleteReport(@RequestBody DeleteInfo info) {
         log.info("delete user info: {}", JsonCommon.stringify(info));
         return new ServiceResult(true);
     }
 
-    @PostMapping("/test_logout_report")
+    @PostMapping("/login/logout")
     public ServiceResult testLogoutReport(@RequestBody LogoutInfo info) {
         log.info("logout user info: {}", JsonCommon.stringify(info));
         return new ServiceResult(true);
