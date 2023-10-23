@@ -97,6 +97,7 @@ public class UserReportService {
 
     public void logoutUser(String userId) {
         var userBo = userService.getUserDtoNoRestrict(userId);
+        log.info("user id {} logout , info {}", userId, JsonCommon.stringify(userBo));
         var reportUsers = this.filterUserBos(Arrays.asList(userBo));
         if (CollectionUtils.isNotEmpty(reportUsers)) {
             Message message = new Message();
