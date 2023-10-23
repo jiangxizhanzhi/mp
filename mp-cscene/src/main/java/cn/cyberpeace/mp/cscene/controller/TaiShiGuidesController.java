@@ -38,6 +38,7 @@ public class TaiShiGuidesController {
     @ApiOperation(value = "场景态势事件列表")
     @PostMapping("/event_list")
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(@RequestBody TaiShiRequest request) {
+        log.info("getAttackEventList request = {}", request);
         return taiShiGuidesService.getAttCkEventList(request).asResult();
     }
 

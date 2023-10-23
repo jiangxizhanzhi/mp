@@ -291,7 +291,7 @@ public class TaiShiGuidesService {
         try {
             var response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             total = (int) response.getHits().getTotalHits().value;
-            var mac2Elements = sceneHandler.getAllMac2ElementMapForScene();
+            Map<String, SceneElementBO> ip2ElementMap = sceneHandler.getAllIp2ElementMapForScene();
             var eid2Elements = sceneHandler.getAllEid2ElementMap();
             for (var hit : response.getHits().getHits()) {
                 if (hit.getSourceAsMap().containsKey("agent")) {
@@ -301,7 +301,7 @@ public class TaiShiGuidesService {
                 } else {
                     var eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
                     eventData.setTimestamp(hit.getSourceAsMap().get("@timestamp").toString());
-                    var taishi = this.getEventInfoFrom(eventData, mac2Elements);
+                    var taishi = this.getEventInfoFrom(eventData, ip2ElementMap);
                     result.add(taishi);
                 }
             }
@@ -663,13 +663,13 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
-    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> mac2Elements) {
+    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> ip2ElementMap) {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
         taiShi.setTriggerType("flow");
         taiShi.setTime(TimeUtils.timestampToLocalDateTime(Long.parseLong(eventData.getTimestamp())));
         if (eventData.getSource() != null) {
-            var element = this.getElementBy(eventData.getSource().getMac(), mac2Elements);
+            var element = this.getElementBy(eventData.getSource().getIp(), ip2ElementMap);
             if (element != null) {
                 taiShi.setSourceNodeId(element.getId());
                 taiShi.setSourceNodeIp(eventData.getSource().getIp());
@@ -678,7 +678,7 @@ public class TaiShiGuidesService {
             }
         }
         if (eventData.getDestination() != null) {
-            var element = this.getElementBy(eventData.getDestination().getMac(), mac2Elements);
+            var element = this.getElementBy(eventData.getDestination().getIp(), ip2ElementMap);
             if (element != null) {
                 taiShi.setTargetNodeId(element.getId());
                 taiShi.setTargetNodeIp(eventData.getDestination().getIp());
@@ -691,16 +691,11 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
-    private SceneElementBO getElementBy(List<String> onePortMac, Map<String, SceneElementBO> mac2Elements) {
-        if (CollectionUtils.isEmpty(onePortMac)) {
+    private SceneElementBO getElementBy(String ip, Map<String, SceneElementBO> ip2ElementMap) {
+        if (StringUtils.isBlank(ip)) {
             return null;
         }
-        for (String mac : onePortMac) {
-            if (mac2Elements.containsKey(mac)) {
-                return mac2Elements.get(mac);
-            }
-        }
-        return null;
+        return ip2ElementMap.get(ip);
     }
 
     private List<String> getAttCkTypeNames(List<String> attCks) {
