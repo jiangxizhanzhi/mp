@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.jcraft.jsch.*;
 import lombok.Data;
@@ -87,7 +88,7 @@ public class SshUtil {
             }
         } catch (Exception e) {
             //设置执行失败的响应内容
-            log.error("refresh dir error", e);
+            log.error("refresh dir error , serverInfo is {}", JsonCommon.stringify(serverInfo), e);
         } finally {
             close(sftpChannel);
             close(session);

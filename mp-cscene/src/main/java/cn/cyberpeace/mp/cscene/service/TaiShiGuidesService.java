@@ -352,6 +352,9 @@ public class TaiShiGuidesService {
             return null;
         }
         CollectionScenePluginHandler handler = sceneHandler.getCollectionScenePluginHandler(sceneId);
+        if (handler == null) {
+            return null;
+        }
         String flowIndex = handler.getScene().getFlowCollector();
         if (StringUtils.isEmpty(flowIndex)) {
             return null;
