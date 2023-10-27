@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.log.service;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -18,9 +19,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -67,29 +71,29 @@ public class LogFileServiceFactory {
                 codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
             }
 
+            Set<String> codeSet = new HashSet<>(codes);
+            List<CompletableFuture<List<LogReportDTO>>> logReportFinalFutureList = new ArrayList<>();
 
-            List<LogFileService> logFileServices = new ArrayList<>();
-            logFileServices.addAll(fileServiceList);
-            //processVisibleLogFileServices(logFileServices);
+            List<CompletableFuture<List<LogReportDTO>>> logReportFutureList = fileServiceList.stream()
+                    .filter(logFileService -> isReportTypeMatch(logFileService.logReportType(), codeSet))
+                    .map(logFileService -> CompletableFuture.supplyAsync(() -> logFileService.list(null),
+                            TaskCommon.taskCommonPool.getExecutorService())).collect(Collectors.toList());
+            logReportFinalFutureList.addAll(logReportFutureList);
 
-            for (LogFileService logFileService : fileServiceList) {
-                if (isReportTypeMatch(logFileService.logReportType(), codes)) {
-                    var list = logFileService.list(null);
-                    result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
-                }
-            }
 
             var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
-            for (String code : codes) {
-                var list = logservice.list(code);
-                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
-            }
+            List<CompletableFuture<List<LogReportDTO>>> reportLogReportFutureList = codeSet.stream().map(code ->
+                    CompletableFuture.supplyAsync(() -> logservice.list(code), TaskCommon.taskCommonPool.getExecutorService())).collect(Collectors.toList());
+            logReportFinalFutureList.addAll(reportLogReportFutureList);
+
+            result.addAll(
+                    logReportFinalFutureList.stream().map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList()));
         }
 
         return result;
     }
 
-    private boolean isReportTypeMatch(String reportType, List<String> codes) {
+    private boolean isReportTypeMatch(String reportType, Set<String> codes) {
         if (codes.contains(reportType)) {
             return true;
         }
