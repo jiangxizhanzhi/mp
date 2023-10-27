@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.log.service;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.thread.taskpool.BasePoolTask;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -13,15 +15,17 @@ import cn.cyberpeace.mp.log.request.BasePageRequest;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -68,29 +72,29 @@ public class LogFileServiceFactory {
                 codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
             }
 
+            Set<String> codeSet = new HashSet<>(codes);
 
-            List<LogFileService> logFileServices = new ArrayList<>();
-            CollectionUtil.addAll(logFileServices, fileServiceList);
-            //processVisibleLogFileServices(logFileServices);
-
-            for (LogFileService logFileService : fileServiceList) {
-                if (isReportTypeMatch(logFileService.logReportType(), codes)) {
-                    var list = logFileService.list(null);
-                    result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
-                }
-            }
+            List<Callable<List<LogReportDTO>>> totalLogReportCallableList = new ArrayList<>();
+            List<Callable<List<LogReportDTO>>> logReportCallableList = fileServiceList.stream()
+                    .filter(logFileService -> isReportTypeMatch(logFileService.logReportType(), codeSet))
+                    .map(logFileService -> (Callable<List<LogReportDTO>>) () -> logFileService.list(null)).collect(Collectors.toList());
 
             var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
-            for (String code : codes) {
-                var list = logservice.list(code);
-                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
-            }
+            List<Callable<List<LogReportDTO>>> reportLogReportCallableList = codeSet.stream().map(code ->
+                    (Callable<List<LogReportDTO>>) () -> logservice.list(code)).collect(Collectors.toList());
+
+            totalLogReportCallableList.addAll(logReportCallableList);
+            totalLogReportCallableList.addAll(reportLogReportCallableList);
+
+            List<LogReportDTO> totalLogReportList = TaskCommon.callTasks(totalLogReportCallableList).stream().map(BasePoolTask::getResult)
+                    .flatMap(List::stream).collect(Collectors.toList());
+            result.addAll(totalLogReportList);
         }
 
         return result;
     }
 
-    private boolean isReportTypeMatch(String reportType, List<String> codes) {
+    private boolean isReportTypeMatch(String reportType, Set<String> codes) {
         if (codes.contains(reportType)) {
             return true;
         }
