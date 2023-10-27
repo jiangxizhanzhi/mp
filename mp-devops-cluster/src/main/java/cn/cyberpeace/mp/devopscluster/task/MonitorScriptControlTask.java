@@ -28,6 +28,7 @@ public class MonitorScriptControlTask {
         if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
             return;
         }
+        log.info("start try to refresh controller and compute agent script");
         //Add by wangssh 230531
         String bizScriptInstallerDir = collectionAppConfig.getBizScriptsInstallerDir();
         File directory = new File(bizScriptInstallerDir);
@@ -42,5 +43,6 @@ public class MonitorScriptControlTask {
         } catch (Exception e) {
             log.error("failed to init monitor script", e);
         }
+        log.info("end try to refresh controller and compute agent script");
     }
 }
