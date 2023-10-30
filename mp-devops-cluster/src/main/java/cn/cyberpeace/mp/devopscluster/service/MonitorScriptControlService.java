@@ -33,10 +33,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -189,6 +191,9 @@ public class MonitorScriptControlService {
             log.info("newAddedNodes:{}", newAddedNodes);
             toInstallList.addAll(newAddedNodes);
 
+            var tryInstallAgain = this.getTryInstallAgainNodes(configedNodeList, new HashSet<>(toInstallList));
+            toInstallList.addAll(tryInstallAgain);
+
             // 上次脚本安装失败，或者配置有变更的节点
             for (String nodeName : hostNameList) {
                 for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
@@ -226,6 +231,21 @@ public class MonitorScriptControlService {
             }
         }
 
+    }
+
+    private List<String> getTryInstallAgainNodes(List<CpNodeMonitorScriptConfigModel> configedNodeList, Set<String> toInstallListMap) {
+        // 15分钟内的可能是装失败的 尝试再次重装
+        List<String> tryInstallAgainNodes = configedNodeList.stream()
+                .filter(n -> LocalDateTime.now().isBefore(n.getCreateTime().plusMinutes(15)))
+                .map(n -> n.getAgentName())
+                .collect(Collectors.toList());
+        List<String> result = new ArrayList<>();
+        for (var s : tryInstallAgainNodes) {
+            if (!toInstallListMap.contains(s)) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
