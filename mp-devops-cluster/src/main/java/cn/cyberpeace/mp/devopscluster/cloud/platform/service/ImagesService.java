@@ -129,8 +129,11 @@ public class ImagesService extends BaseCpService {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
                     return;
                 }
-                var u = URLUtils.url(l.getUrl());
-                l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
+                //采用http、https协议访问节点部署的web服务时，前端是直接用ip+端口号访问，这里url为空
+                if (StringUtils.isNotEmpty(l.getUrl())) {
+                    var u = URLUtils.url(l.getUrl());
+                    l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
+                }
                 if (config.getPublicNetProxyExcludeProtocols().contains(l.getProtocol())) {
                     return;
                 }

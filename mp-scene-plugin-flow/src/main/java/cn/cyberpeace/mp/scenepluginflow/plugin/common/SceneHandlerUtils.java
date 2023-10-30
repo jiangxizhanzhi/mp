@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
@@ -136,7 +137,7 @@ public class SceneHandlerUtils {
             String sceneId = pluginHandler.getSourceSceneId();
             FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, callbackConsumer);
             if (Objects.nonNull(stopCallback)) {
-                FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + sceneId, stopCallback);
+                FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + sceneId, ThreadUtils.format(stopCallback));
             }
             flowExecutor.startFlows(batchStartTaskBO, callbackConsumer, runType);
         } catch (MpRuntimeException e) {
