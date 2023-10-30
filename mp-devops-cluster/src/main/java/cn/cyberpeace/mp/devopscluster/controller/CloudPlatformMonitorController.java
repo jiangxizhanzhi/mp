@@ -218,6 +218,7 @@ public class CloudPlatformMonitorController {
         // 获取所有物理主机服务状态
         CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
+        List<Runnable> tasks = new ArrayList<>();
         hypervisorPageRespons.forEach(v -> {
             String name = v.getName();
             Optional<ServiceStatus> serviceStatus =
@@ -225,14 +226,21 @@ public class CloudPlatformMonitorController {
             // 设置物理主机服务状态
             v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 
-            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
-            Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
-            v.setTotalContainers(totalContainers);
-            if (Objects.nonNull(weightAndMaxInstances)) {
-                v.setWeight(weightAndMaxInstances.getWeight());
-                v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
-            }
+            tasks.add(()->{
+                HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
+                if (Objects.nonNull(weightAndMaxInstances)) {
+                    v.setWeight(weightAndMaxInstances.getWeight());
+                    v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
+                }
+            });
+            tasks.add(()->{
+                Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
+                v.setTotalContainers(totalContainers);
+            });
+
         });
+
+        TaskCommon.runTasks(tasks);
 
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
