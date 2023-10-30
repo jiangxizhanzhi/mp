@@ -50,7 +50,7 @@ subprojects {
     }
 
     dependencies {
-        implementation ('cn.hutool:hutool-all:5.8.22')
+        implementation ('cn.hutool:hutool-all:5.8.21')
         implementation 'com.alibaba:easyexcel:3.3.2'
         implementation 'com.alibaba:fastjson:1.2.83'
         implementation ('com.auth0:java-jwt:3.19.4'){
