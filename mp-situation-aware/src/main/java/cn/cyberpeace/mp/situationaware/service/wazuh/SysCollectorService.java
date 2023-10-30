@@ -9,10 +9,18 @@ import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.NetAddr;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
-import com.alibaba.fastjson.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +33,13 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -122,10 +134,12 @@ public class SysCollectorService extends RequestProcessor {
         log.info("{}", result);
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
+        List<NetAddr> netAddrs = listNetAddrs(agentId, null, "ipv4");
+        Map<String, String> ifacToAddressMap = Optional.ofNullable(netAddrs).orElse(new ArrayList<>()).stream().collect(Collectors.toMap(NetAddr::getIface, NetAddr::getAddress, (a, b) -> a));
+
         netifaces.forEach(n -> {
-            List<NetAddr> netAddrs = listNetAddrs(agentId, n.getName(), "ipv4");
-            if (!CollectionUtils.isEmpty(netAddrs)) {
-                n.setIp(netAddrs.get(0).getAddress());
+            if (!CollectionUtils.isEmpty(ifacToAddressMap)) {
+                n.setIp(ifacToAddressMap.get(n.getName()));
             }
         });
 
