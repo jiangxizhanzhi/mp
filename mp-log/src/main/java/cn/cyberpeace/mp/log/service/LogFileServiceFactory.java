@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.log.service;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.thread.taskpool.BasePoolTask;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,22 +73,22 @@ public class LogFileServiceFactory {
             }
 
             Set<String> codeSet = new HashSet<>(codes);
-            List<CompletableFuture<List<LogReportDTO>>> logReportFinalFutureList = new ArrayList<>();
 
-            List<CompletableFuture<List<LogReportDTO>>> logReportFutureList = fileServiceList.stream()
+            List<Callable<List<LogReportDTO>>> totalLogReportCallableList = new ArrayList<>();
+            List<Callable<List<LogReportDTO>>> logReportCallableList = fileServiceList.stream()
                     .filter(logFileService -> isReportTypeMatch(logFileService.logReportType(), codeSet))
-                    .map(logFileService -> CompletableFuture.supplyAsync(() -> logFileService.list(null),
-                            TaskCommon.taskCommonPool.getExecutorService())).collect(Collectors.toList());
-            logReportFinalFutureList.addAll(logReportFutureList);
-
+                    .map(logFileService -> (Callable<List<LogReportDTO>>) () -> logFileService.list(null)).collect(Collectors.toList());
 
             var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
-            List<CompletableFuture<List<LogReportDTO>>> reportLogReportFutureList = codeSet.stream().map(code ->
-                    CompletableFuture.supplyAsync(() -> logservice.list(code), TaskCommon.taskCommonPool.getExecutorService())).collect(Collectors.toList());
-            logReportFinalFutureList.addAll(reportLogReportFutureList);
+            List<Callable<List<LogReportDTO>>> reportLogReportCallableList = codeSet.stream().map(code ->
+                    (Callable<List<LogReportDTO>>) () -> logservice.list(code)).collect(Collectors.toList());
 
-            result.addAll(
-                    logReportFinalFutureList.stream().map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList()));
+            totalLogReportCallableList.addAll(logReportCallableList);
+            totalLogReportCallableList.addAll(reportLogReportCallableList);
+
+            List<LogReportDTO> totalLogReportList = TaskCommon.callTasks(totalLogReportCallableList).stream().map(BasePoolTask::getResult)
+                    .flatMap(List::stream).collect(Collectors.toList());
+            result.addAll(totalLogReportList);
         }
 
         return result;
