@@ -60,7 +60,9 @@ public class SysActivationController {
     public ServiceResult<ActivationResponse> status() {
         log.info("query activation status...");
         ActivationResponse content = getActivationResponse();
-
+        if (content != null && AdminConstant.STATUS_NOT_ACTIVITED == content.getIsActived()) {
+            content = new ActivationResponse();
+        }
         return ResultCommon.success(content);
     }
 
