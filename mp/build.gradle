@@ -2,6 +2,10 @@ plugins {
     id "com.gorylenko.gradle-git-properties" version "2.3.1"
 }
 
+gitProperties {
+    keys = ['git.commit.id']
+}
+
 apply from: 'config.gradle'
 
 dependencies {

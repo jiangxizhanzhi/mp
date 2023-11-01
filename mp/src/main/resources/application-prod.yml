@@ -11,6 +11,8 @@ pagehelper:
   page-size-zero: true
 
 spring:
+  main:
+    allow-circular-references: true
   datasource:
     url: jdbc:mariadb://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/${MP_DB_DATABASE:mp}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${MP_DB_USERNAME:root}
@@ -120,8 +122,8 @@ mp:
     arkime-es-port: ${MP_ES_IP_PORT}
     arkime-image-name: centos-arkime_arkime:v2
     arkime-disk: ${ARKIME_DISK:100}
-    arkime-username: api
-    arkime-password: api
+    arkime-username: ${ARKIME_UNAME:api}
+    arkime-password: ${ARKIME_UCRON:api}
     #wazuh 开放接口地址用户名密码
     wazuh-base-url: http://${WAZUH_IP:10.100.7.1}:${WAZUH_PORT:15500}
     wazuh-username: ${WAZUH_USERNAME:wazuh}
