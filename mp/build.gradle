@@ -1,6 +1,11 @@
 plugins {
     id "com.gorylenko.gradle-git-properties" version "2.3.1"
 }
+gitProperties {
+    filter {
+        include('git.commit.id.abbrev')
+    }
+}
 
 apply from: 'config.gradle'
 
