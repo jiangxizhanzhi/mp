@@ -1,1 +1,2 @@
+org.springframework.boot.env.PropertiesPropertySourceLoader=cn.cyberpeace.mp.evn.UTF8PropertiesPropertySourceLoader
 org.springframework.boot.env.EnvironmentPostProcessor=cn.cyberpeace.mp.MpEnvironmentPostProcessor
