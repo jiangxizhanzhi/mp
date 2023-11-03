@@ -158,11 +158,11 @@ mp:
     authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
-    auth-add-report-url: ${MP_AUTH_ADD_REPORT_URL:http://192.168.179.160:803}
-    auth-modify-report-url: ${MP_AUTH_MODIFY_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_modify_report}
-    auth-delete-report-url: ${MP_AUTH_DELETE_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_delete_report}
-    auth-logout-report-url: ${MP_AUTH_LOGOUT_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/users/test_logout_report}
-    auth-report-role-name: ${AUTH_REPORT_ROLE_NAME:管理员,系统管理员,场景管理员,任务管理员,任务执行员}
+    auth-add-report-url: ${MP_AUTH_ADD_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/UserApi/ssoAddUser,--}
+    auth-modify-report-url: ${MP_AUTH_MODIFY_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/UserApi/ssoModifyUser,--}
+    auth-delete-report-url: ${MP_AUTH_DELETE_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/UserApi/ssoDelUser,--}
+    auth-logout-report-url: ${MP_AUTH_LOGOUT_REPORT_URL:http://127.0.0.1:8080/api/mp/unauth/login/logout,http://127.0.0.1:8080/api/mp/unauth/test/logout}
+    auth-report-role-name: ${AUTH_REPORT_ROLE_NAME:管理员,系统管理员,场景管理员,任务管理员,任务执行员&&all}
   # mp-front-admin 模块
   frontadmin:
     activ-enable: true

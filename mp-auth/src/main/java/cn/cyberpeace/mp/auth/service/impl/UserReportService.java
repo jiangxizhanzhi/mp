@@ -33,7 +33,7 @@ public class UserReportService {
     private List<String> modifyUserReportUrls = new ArrayList<>();
     private List<String> deleteUserReportUrls = new ArrayList<>();
     private List<String> logoutUserReportUrls = new ArrayList<>();
-    private static Set<String> roleReportName = new HashSet<>();
+    private static List<Set<String>> roleReportNames = new ArrayList<>();
 
     public UserReportService(@Autowired UserService userService, @Autowired AuthConfig authConfig, @Autowired JsonCommon jsonCommon) {
         this.userService = userService;
@@ -51,63 +51,85 @@ public class UserReportService {
             logoutUserReportUrls.addAll(Arrays.asList(authConfig.getAuthLogoutReportUrl().split(",")));
         }
         if (StringUtils.isNotEmpty(authConfig.getAuthReportRoleName())) {
-            roleReportName.addAll(Arrays.asList(authConfig.getAuthReportRoleName().split(",")));
+            String[] roleNames = authConfig.getAuthReportRoleName().split("&&");
+            for (String roleName : roleNames) {
+                roleReportNames.add(new HashSet<>(Arrays.asList(roleName.split(","))));
+            }
         }
         log.info("add user report url is : {}", JsonCommon.stringify(addUserReportUrls));
         log.info("modify user report url is : {}", JsonCommon.stringify(modifyUserReportUrls));
         log.info("delete user report url is : {}", JsonCommon.stringify(deleteUserReportUrls));
         log.info("logout user report url is : {}", JsonCommon.stringify(logoutUserReportUrls));
-        log.info("logout user report role name is : {}", JsonCommon.stringify(roleReportName));
+        log.info("logout user report role name is : {}", JsonCommon.stringify(roleReportNames));
     }
 
     public void addUsers(List<String> userIds) {
-        var userBos = this.getUserInfo(userIds);
-        if (CollectionUtils.isNotEmpty(userBos)) {
-            for (var u : userBos) {
-                Message message = new Message();
-                message.setAction(Message.ADD_ACTION);
-                message.setData(u);
-                this.doReport(message, this.addUserReportUrls);
-            }
-        }
+        var userBos = this.getAllUserInfo(userIds);
+        this.trySendOneByOne(userBos, addUserReportUrls, Message.ADD_ACTION);
     }
 
     public void modifyUsers(List<String> userIds) {
-        var userBos = this.getUserInfo(userIds);
-        if (CollectionUtils.isNotEmpty(userBos)) {
-            for (var u : userBos) {
-                Message message = new Message();
-                message.setAction(Message.MODIFY_ACTION);
-                message.setData(u);
-                this.doReport(message, this.modifyUserReportUrls);
+        var userBos = this.getAllUserInfo(userIds);
+        this.trySendOneByOne(userBos, modifyUserReportUrls, Message.MODIFY_ACTION);
+    }
+
+    private void trySendOneByOne(List<UserBo> userBos, List<String> urls, String action) {
+        for (int i = 0; i < urls.size(); i++) {
+            var url = urls.get(i);
+            var filterNames = roleReportNames.get(i);
+            if ("--".equals(url)) {
+                continue;
+            }
+            var sendUser = this.filterUserBos(userBos, filterNames);
+            if (CollectionUtils.isNotEmpty(sendUser)) {
+                for (var u : userBos) {
+                    Message message = new Message();
+                    message.setAction(action);
+                    message.setData(u);
+                    this.doReport(message, Arrays.asList(url));
+                }
             }
         }
     }
 
     public void deleteUsers(List<UserBo> userBos) {
-        var reportUsers = this.filterUserBos(userBos);
-        if (CollectionUtils.isNotEmpty(reportUsers)) {
-            Message message = new Message();
-            message.setAction(Message.DELETE_ACTION);
-            var userNames = reportUsers.stream().map(u -> u.getUsername()).collect(Collectors.toList());
-            message.setData(userNames);
-            this.doReport(message, this.deleteUserReportUrls);
+        for (int i = 0; i < deleteUserReportUrls.size(); i++) {
+            var url = deleteUserReportUrls.get(i);
+            var filterNames = roleReportNames.get(i);
+            if ("--".equals(url)) {
+                continue;
+            }
+            var sendUser = this.filterUserBos(userBos, filterNames);
+            if (CollectionUtils.isNotEmpty(sendUser)) {
+                Message message = new Message();
+                message.setAction(Message.DELETE_ACTION);
+                var userNames = sendUser.stream().map(u -> u.getUsername()).collect(Collectors.toList());
+                this.doReport(message, Arrays.asList(url));
+            }
         }
     }
 
     public void logoutUser(String userId) {
         var userBo = userService.getUserDtoNoRestrict(userId);
         log.info("user id {} logout , info {}", userId, JsonCommon.stringify(userBo));
-        var reportUsers = this.filterUserBos(Arrays.asList(userBo));
-        if (CollectionUtils.isNotEmpty(reportUsers)) {
-            Message message = new Message();
-            message.setAction(Message.LOGOUT_ACTION);
-            message.setData(reportUsers.get(0).getUsername());
-            this.doReport(message, this.logoutUserReportUrls);
+
+        for (int i = 0; i < logoutUserReportUrls.size(); i++) {
+            var url = logoutUserReportUrls.get(i);
+            var filterNames = roleReportNames.get(i);
+            if ("--".equals(url)) {
+                continue;
+            }
+            var reportUsers = this.filterUserBos(Arrays.asList(userBo), filterNames);
+            if (CollectionUtils.isNotEmpty(reportUsers)) {
+                Message message = new Message();
+                message.setAction(Message.LOGOUT_ACTION);
+                message.setData(reportUsers.get(0).getUsername());
+                this.doReport(message, Arrays.asList(url));
+            }
         }
     }
 
-    private List<UserBo> getUserInfo(List<String> userIds) {
+    private List<UserBo> getAllUserInfo(List<String> userIds) {
         List<UserBo> userBos = new ArrayList<>();
         for (var user : userIds) {
             var userBo = userService.getUserDtoNoRestrict(user);
@@ -115,15 +137,17 @@ public class UserReportService {
                 userBos.add(userBo);
             }
         }
-        return this.filterUserBos(userBos);
+        return userBos;
     }
 
-    private List<UserBo> filterUserBos(List<UserBo> userBos) {
+    private List<UserBo> filterUserBos(List<UserBo> userBos, Set<String> roleReportName) {
         List<UserBo> reportUsers = new ArrayList<>();
         for (var userBo : userBos) {
             if (CollectionUtils.isNotEmpty(userBo.getRoles())) {
                 for (var role : userBo.getRoles()) {
-                    if (roleReportName.contains(role.getName())) {
+                    if (roleReportName.contains("all")) {
+                        reportUsers.add(userBo);
+                    } else if (roleReportName.contains(role.getName())) {
                         reportUsers.add(userBo);
                     }
                 }

@@ -52,6 +52,31 @@ public class UserUnauthTestController {
         return new ServiceResult(true);
     }
 
+
+    @PostMapping("/test/add")
+    public ServiceResult testAddReport2(@RequestBody AddInfo info) {
+        log.info("add user info 2: {}", JsonCommon.stringify(info));
+        return new ServiceResult(true);
+    }
+
+    @PostMapping("/test/modify")
+    public ServiceResult testModifyReport2(@RequestBody ModifyInfo info) {
+        log.info("modify user info 2: {}", JsonCommon.stringify(info));
+        return new ServiceResult(true);
+    }
+
+    @PostMapping("/test/delete")
+    public ServiceResult testDeleteReport2(@RequestBody DeleteInfo info) {
+        log.info("delete user info 2: {}", JsonCommon.stringify(info));
+        return new ServiceResult(true);
+    }
+
+    @PostMapping("/test/logout")
+    public ServiceResult testLogoutReport2(@RequestBody LogoutInfo info) {
+        log.info("logout user info 2: {}", JsonCommon.stringify(info));
+        return new ServiceResult(true);
+    }
+
     @Getter
     @Setter
     @ApiModel("用户新增通知")
