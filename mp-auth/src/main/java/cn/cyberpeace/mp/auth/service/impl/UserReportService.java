@@ -104,6 +104,7 @@ public class UserReportService {
                 Message message = new Message();
                 message.setAction(Message.DELETE_ACTION);
                 var userNames = sendUser.stream().map(u -> u.getUsername()).collect(Collectors.toList());
+                message.setData(userNames);
                 this.doReport(message, Arrays.asList(url));
             }
         }
