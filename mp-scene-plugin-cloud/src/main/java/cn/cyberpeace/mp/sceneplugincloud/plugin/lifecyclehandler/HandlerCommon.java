@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -98,11 +99,27 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                 }
             };
 
+            Runnable checkTimeoutCallback = () -> {
+                accessModes.forEach(accessMode -> accessMode.setAvailable(true));
+                String sceneId = getPluginHandler().getSceneHandler().getSceneId();
+                SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+                var dbElement = sceneHandler.getElement(nodeId);
+                if (dbElement != null && dbElement.getEvent() == getPluginHandler().getSrcElement(nodeId).getEvent()) {
+                    log.info("check access mode timeout , update access info , sceneId {},nodeId {}", sceneId, nodeId);
+                    getPluginHandler().asyncAckElementChanged(nodeId, true);
+                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                        getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                    }
+                } else {
+                    log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
+                }
+            };
+
             if (port == null || port.compareTo(0) <= 0) {
                 TaskCommon.executeTask(() -> NetworkUtils.probeHost(ip, checkSuccessCallback, checkSuccessCallback));
             } else {
                 TaskCommon.executeTask(
-                        () -> NetworkUtils.probePort(protocol, ip, port, checkSuccessCallback, checkSuccessCallback));
+                        () -> NetworkUtils.probePort(protocol, ip, port, checkSuccessCallback, checkTimeoutCallback));
             }
         });
     }
