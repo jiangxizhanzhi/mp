@@ -13,11 +13,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -125,6 +129,13 @@ public class UserReportService {
                 Message message = new Message();
                 message.setAction(Message.LOGOUT_ACTION);
                 message.setData(reportUsers.get(0).getUsername());
+
+                RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+                if (!Objects.isNull(requestAttributes)) {
+                    ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+                    var jwt = servletRequestAttributes.getRequest().getHeader("Authorization");
+                    message.setToken(jwt.replace("JWT ", ""));
+                }
                 this.doReport(message, Arrays.asList(url));
             }
         }
@@ -185,5 +196,6 @@ public class UserReportService {
 
         private String action;
         private Object data;
+        private String token;
     }
 }

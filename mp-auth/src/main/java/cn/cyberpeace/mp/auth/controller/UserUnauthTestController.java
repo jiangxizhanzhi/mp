@@ -115,6 +115,7 @@ public class UserUnauthTestController {
         private String action;
         @ApiModelProperty("退出登录的用户id")
         private String data;
+        private String token;
     }
 
 }
