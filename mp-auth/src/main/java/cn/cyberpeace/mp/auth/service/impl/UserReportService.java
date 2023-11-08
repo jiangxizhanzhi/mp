@@ -130,12 +130,12 @@ public class UserReportService {
                 message.setAction(Message.LOGOUT_ACTION);
                 message.setData(reportUsers.get(0).getUsername());
 
-                RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-                if (!Objects.isNull(requestAttributes)) {
-                    ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
-                    var jwt = servletRequestAttributes.getRequest().getHeader("Authorization");
-                    message.setToken(jwt.replace("JWT ", ""));
-                }
+//                RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+//                if (!Objects.isNull(requestAttributes)) {
+//                    ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+//                    var jwt = servletRequestAttributes.getRequest().getHeader("Authorization");
+//                    message.setToken(jwt.replace("JWT ", ""));
+//                }
                 this.doReport(message, Arrays.asList(url));
             }
         }
