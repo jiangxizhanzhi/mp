@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(':mp-base')
+    implementation project(':mp-devops-cluster')
+    implementation project(':mp-scene')
+    implementation project(':mp-scene-plugin-cloud')
+    implementation project(':mp-scene-plugin-collection')
+    implementation project(':mp-situation-aware')
+    implementation project(':mp-cscene')
+}

@@ -16,7 +16,8 @@ gradle.ext {
         'mp-flow',
         'mp-front-admin',
         'mp-front-admin-business',
-        'mp-front-business'
+        'mp-front-business',
+        'mp-script-collection-evaluation'
     ]
 
     flyway = [
