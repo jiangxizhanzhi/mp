@@ -196,6 +196,5 @@ public class UserReportService {
 
         private String action;
         private Object data;
-        private String token;
     }
 }
