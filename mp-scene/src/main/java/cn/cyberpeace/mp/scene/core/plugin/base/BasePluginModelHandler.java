@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneModel;
 import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneElementMapper;
 import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneElementPortMapper;
 import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneMapper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,7 @@ import java.util.List;
     "pluginSceneElementMapper",
     "pluginSceneElementPortMapper",
 })
+@Slf4j
 public class BasePluginModelHandler<
         S9 extends BaseSceneBO<?, S9>,
         E9 extends BaseSceneElementBO<?, P9, E9>,
@@ -297,6 +300,9 @@ public class BasePluginModelHandler<
             elementPort.setSceneElementPort(elementPortId);
             elementPorts.add(elementPort);
         }
+
+        log.info("create port:{}", JsonCommon.stringify(elementPorts));
+
         return pluginSceneElementPortMapper.bulkCreate(elementPorts).getSuccessCount();
     }
 
@@ -321,7 +327,10 @@ public class BasePluginModelHandler<
             elementPort.setId(existElementPort.getId());
             updatingElementPorts.add(elementPort);
         });
+
+
         var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
+        log.info("update port:{}", JsonCommon.stringify(updatingElementPorts));
 
         // 创建不存在的
         var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
