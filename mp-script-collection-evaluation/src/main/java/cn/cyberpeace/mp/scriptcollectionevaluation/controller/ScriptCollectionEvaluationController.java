@@ -24,7 +24,7 @@ public class ScriptCollectionEvaluationController {
     @GetMapping("/start")
     @ApiOperation(value = "开始镜像采集能力评估")
     public ServiceResult<Boolean> startImageCollectionEvaluation(ImageCollectionEvaluationRequest request) {
-        return scriptCollectionEvaluationService.startImageCollectionEvaluation(request.getName()).asResult();
+        return scriptCollectionEvaluationService.startImageCollectionEvaluation(request).asResult();
     }
 
     @GetMapping("")

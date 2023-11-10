@@ -49,6 +49,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQuer
 import cn.cyberpeace.mp.scriptcollectionevaluation.bo.CollectionEvaluationBO;
 import cn.cyberpeace.mp.scriptcollectionevaluation.bo.CollectionEvaluationResult;
 import cn.cyberpeace.mp.scriptcollectionevaluation.constant.ScriptCollectionEvaluationConstant;
+import cn.cyberpeace.mp.scriptcollectionevaluation.request.ImageCollectionEvaluationRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -104,10 +105,10 @@ public class ScriptCollectionEvaluationService {
     @Resource
     private CloudCommonConfigService cloudCommonConfigService;
 
-    public ServiceResult<Boolean> startImageCollectionEvaluation(String name) {
+    public ServiceResult<Boolean> startImageCollectionEvaluation(ImageCollectionEvaluationRequest request) {
         DeviceTargetPO deviceTargetPO = deviceTargetMapper.first(new HumanCondition()
                 .select(DeviceTargetPO::getUuid)
-                .filterEqual(DeviceTargetPO::getName, name));
+                .filterEqual(DeviceTargetPO::getName, request.getName()));
         if (deviceTargetPO == null) {
             throw new MpRuntimeException("不存在此名称的镜像!");
         }
@@ -231,21 +232,21 @@ public class ScriptCollectionEvaluationService {
         var res = sceneConfigService.sync(sceneConfig, false, null).getSource();
         var sceneConfigResult = sceneConfigService.get(res.getTopology().getScene().getEid(), false, null, null).getSource();
         var sceneResult = sceneService.createFromSceneConfig(sceneConfigResult, null).getSource();
-        imageName2Scene.put(name, sceneResult);
+        imageName2Scene.put(request.getName(), sceneResult);
 
         String sceneId = sceneResult.getTopology().getScene().getEid();
         LocalDateTime sceneCreateTime = sceneResult.getTopology().getScene().getCreateTime();
 
         CollectionEvaluationResult result = new CollectionEvaluationResult();
         result.setStatus("评估中");
-        imageName2EvaluationResult.put(name, result);
+        imageName2EvaluationResult.put(request.getName(), result);
         TaskCommon.executeTask(() -> {
             List<CollectionEvaluationBO> collectionEvaluations = new ArrayList<>();
             List<String> collectionEvaluationNames = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                // 三分钟检测一次 持续十次 首先等待三分钟场景启动
+            for (int i = 0; i < request.getFrequency(); i++) {
+                // 根据传参设定检测次数和检测间隔
                 try {
-                    Thread.sleep(1000 * 60 * 3L);
+                    Thread.sleep(1000 * 60 * request.getInterval());
                 } catch (Exception ignored) {
                 }
 
@@ -439,13 +440,13 @@ public class ScriptCollectionEvaluationService {
                 }
 
                 if (!collectionEvaluationNames.contains("自定义采集")) {
-                    WazuhEventRequest request = new WazuhEventRequest();
-                    request.setStartTime(sceneCreateTime);
-                    request.setEndTime(LocalDateTime.now());
-                    request.setPageNum(1);
-                    request.setPageSize(1);
-                    request.setAgentNames(List.of(agentName));
-                    var customResult = dataCollectionService.queryCustomProbeData(request, customProbeIds).getObjs();
+                    WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+                    wazuhEventRequest.setStartTime(sceneCreateTime);
+                    wazuhEventRequest.setEndTime(LocalDateTime.now());
+                    wazuhEventRequest.setPageNum(1);
+                    wazuhEventRequest.setPageSize(1);
+                    wazuhEventRequest.setAgentNames(List.of(agentName));
+                    var customResult = dataCollectionService.queryCustomProbeData(wazuhEventRequest, customProbeIds).getObjs();
                     if (CollectionUtils.isNotEmpty(customResult)) {
                         CollectionEvaluationBO customCollectionEvaluation = new CollectionEvaluationBO();
                         customCollectionEvaluation.setName("自定义采集");
@@ -464,7 +465,7 @@ public class ScriptCollectionEvaluationService {
 
             result.setStatus("评估结束");
             result.setCollectionEvaluations(collectionEvaluations);
-            imageName2EvaluationResult.put(name, result);
+            imageName2EvaluationResult.put(request.getName(), result);
             sceneService.delete(sceneId, false, null);
         });
 
@@ -479,13 +480,13 @@ public class ScriptCollectionEvaluationService {
         CollectionEvaluationResult result = new CollectionEvaluationResult();
         String sceneId = scene.getTopology().getScene().getEid();
         SceneModel sceneModel = sceneMapper.get(sceneId);
-        if (EventStatus.ABNORMAL == sceneModel.getEventStatus()) {
+        if (sceneModel != null && EventStatus.ABNORMAL == sceneModel.getEventStatus()) {
             sceneService.delete(sceneId, false, null);
             result.setStatus("场景启动失败,请重新进行评估");
             imageName2Scene.remove(name);
             return new ServiceResult<>(result);
         }
-        if (SceneModel.Event.CREATE != sceneModel.getEvent() || EventStatus.OVER != sceneModel.getEventStatus()) {
+        if (sceneModel != null && (SceneModel.Event.CREATE != sceneModel.getEvent() || EventStatus.OVER != sceneModel.getEventStatus())) {
             result.setStatus("场景启动中,请稍等");
             return new ServiceResult<>(result);
         }
