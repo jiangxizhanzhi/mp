@@ -305,7 +305,7 @@ public class ScriptCollectionEvaluationService {
 
                 if (!collectionEvaluationNames.contains("端口信息")) {
                     CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-                    collectorBaseRequest.setAgentName(nodeId);
+                    collectorBaseRequest.setAgentName(agentName);
                     collectorBaseRequest.setPage(1);
                     collectorBaseRequest.setPageSize(1);
                     collectorBaseRequest.setPerPage(1);
