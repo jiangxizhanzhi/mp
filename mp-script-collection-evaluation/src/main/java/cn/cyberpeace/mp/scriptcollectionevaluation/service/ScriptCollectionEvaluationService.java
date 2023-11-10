@@ -36,6 +36,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
@@ -354,7 +355,7 @@ public class ScriptCollectionEvaluationService {
                     }
                 }
 
-                if (!collectionEvaluationNames.contains("注册表变更信息")) {
+                if (SystemTypeCommandUtils.isWindows(systemType) && !collectionEvaluationNames.contains("注册表变更信息")) {
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(List.of(nodeId));
                     params.setPage(1);
@@ -532,6 +533,7 @@ public class ScriptCollectionEvaluationService {
 
     private List<Probe> genProbe(String systemType) {
         Integer osType = this.getOsType(systemType);
+        String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
         ProbePageQueryRequest request = new ProbePageQueryRequest();
         request.setPage(1);
         request.setPageSize(10000);
@@ -549,19 +551,19 @@ public class ScriptCollectionEvaluationService {
             probe.setOutputFormat(probeDto.getOutputFormat());
             probe.setType(probeDto.getProbeCategory().toString());
             if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeDto.getId())) {
-                if (SystemTypeCommandUtils.isWindows(systemType)) {
+                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                     probe.setCollectPath(List.of("C:\\ossec-agent\\ossec.log"));
                 } else {
                     probe.setCollectPath(List.of("/var/ossec/logs/ossec.log"));
                 }
             } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeDto.getId())) {
-                if (SystemTypeCommandUtils.isWindows(systemType)) {
+                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                     probe.setCollectPath(List.of("HKEY_LOCAL_MACHINE\\SOFTWARE\\test"));
                 } else {
                     probe.setCollectPath(new ArrayList<>());
                 }
             } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeDto.getId())) {
-                if (SystemTypeCommandUtils.isWindows(systemType)) {
+                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                     probe.setCollectPath(List.of("C:\\ossec-agent\\ossec.log"));
                 } else {
                     probe.setCollectPath(List.of("/var/ossec/logs/ossec.log"));
