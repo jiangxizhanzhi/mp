@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
@@ -64,7 +65,7 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         scriptProbeParam.setInterval(getCollectInterval());
         scriptProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         String url;
-        url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());
+        url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, FsCommon.getFileKey(probe.getScriptUrl()));
         scriptProbeParam.setScriptUrl(url);
         if (probe.getDisabled() != null && probe.getDisabled()) {
             scriptProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
