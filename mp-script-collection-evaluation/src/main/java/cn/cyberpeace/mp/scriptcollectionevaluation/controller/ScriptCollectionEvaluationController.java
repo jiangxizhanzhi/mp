@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.scriptcollectionevaluation.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.scriptcollectionevaluation.bo.CollectionEvaluationBO;
+import cn.cyberpeace.mp.scriptcollectionevaluation.bo.CollectionEvaluationResult;
 import cn.cyberpeace.mp.scriptcollectionevaluation.request.ImageCollectionEvaluationRequest;
 import cn.cyberpeace.mp.scriptcollectionevaluation.service.ScriptCollectionEvaluationService;
 import io.swagger.annotations.Api;
@@ -13,19 +13,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @RestController
-@RequestMapping("/script/collection")
+@RequestMapping("/script/collection_evaluation")
 @Api(value = "采集评估功能", tags = "采集评估功能")
 public class ScriptCollectionEvaluationController {
     @Resource
     private ScriptCollectionEvaluationService scriptCollectionEvaluationService;
 
-    @GetMapping("/evaluation")
-    @ApiOperation(value = "根据镜像名称获取镜像采集能力评估结果")
-    public ServiceResult<List<CollectionEvaluationBO>> getImageSupportCollectionEvaluation(ImageCollectionEvaluationRequest request) {
-        return scriptCollectionEvaluationService.getImageSupportCollectionEvaluation(request.getName()).asResult();
+    @GetMapping("/start")
+    @ApiOperation(value = "开始镜像采集能力评估")
+    public ServiceResult<Boolean> startImageCollectionEvaluation(ImageCollectionEvaluationRequest request) {
+        return scriptCollectionEvaluationService.startImageCollectionEvaluation(request.getName()).asResult();
+    }
+
+    @GetMapping("")
+    @ApiOperation(value = "获取镜像采集能力评估结果")
+    public ServiceResult<CollectionEvaluationResult> getImageCollectionEvaluationResult(ImageCollectionEvaluationRequest request) {
+        return scriptCollectionEvaluationService.getImageCollectionEvaluationResult(request.getName()).asResult();
+    }
+
+    @DeleteMapping("/clear")
+    @ApiOperation(value = "清除镜像采集能力评估结果")
+    public ServiceResult<Boolean> clearImageCollectionEvaluationResult(@RequestParam String name) {
+        return scriptCollectionEvaluationService.clearImageCollectionEvaluationResult(name).asResult();
     }
 
     @DeleteMapping("/delete")
