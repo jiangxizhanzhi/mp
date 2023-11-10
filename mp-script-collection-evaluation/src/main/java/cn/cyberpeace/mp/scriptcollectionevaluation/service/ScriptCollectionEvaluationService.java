@@ -107,6 +107,9 @@ public class ScriptCollectionEvaluationService {
     private CloudCommonConfigService cloudCommonConfigService;
 
     public ServiceResult<Boolean> startImageCollectionEvaluation(ImageCollectionEvaluationRequest request) {
+        if (imageName2Scene.containsKey(request.getName()) || imageName2EvaluationResult.containsKey(request.getName())) {
+            throw new MpRuntimeException("此镜像上一次评估还未结束!");
+        }
         DeviceTargetPO deviceTargetPO = deviceTargetMapper.first(new HumanCondition()
                 .select(DeviceTargetPO::getUuid)
                 .filterEqual(DeviceTargetPO::getName, request.getName()));
@@ -254,6 +257,7 @@ public class ScriptCollectionEvaluationService {
                 String agentName = sceneResult.getTopology().getElements().get(0).getEid();
                 String nodeId = sceneResult.getTopology().getElements().get(0).getId();
                 String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
+                String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
 
                 if (!collectionEvaluationNames.contains("硬件信息")) {
                     HostStateQueryParams params = new HostStateQueryParams();
@@ -355,7 +359,7 @@ public class ScriptCollectionEvaluationService {
                     }
                 }
 
-                if (SystemTypeCommandUtils.isWindows(systemType) && !collectionEvaluationNames.contains("注册表变更信息")) {
+                if (SystemTypeCommandUtils.isWindows(standardSystemType) && !collectionEvaluationNames.contains("注册表变更信息")) {
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(List.of(nodeId));
                     params.setPage(1);
