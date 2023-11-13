@@ -480,6 +480,7 @@ public class ScriptCollectionEvaluationService {
     public ServiceResult<CollectionEvaluationResult> getImageCollectionEvaluationResult(String name) {
         SceneDataBO scene = imageName2Scene.get(name);
         if (scene == null) {
+            imageName2EvaluationResult.remove(name);
             throw new MpRuntimeException("此镜像未进行采集评估或评估已结束!");
         }
         CollectionEvaluationResult result = new CollectionEvaluationResult();
