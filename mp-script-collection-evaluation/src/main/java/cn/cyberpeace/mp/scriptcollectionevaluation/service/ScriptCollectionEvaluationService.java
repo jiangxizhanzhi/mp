@@ -254,13 +254,9 @@ public class ScriptCollectionEvaluationService {
                 Thread.sleep(1000 * 60 * request.getEvaluationTime());
             } catch (Exception ignored) {
             }
+            this.execCommand(sceneResult);
 
-            String agentName = sceneResult.getTopology().getElements().get(0).getEid();
-            String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
-            String osType = SystemTypeCommandUtils.getOsType(SystemTypeUtils.getStandardSystemType(systemType));
-            this.execCommand(agentName, osType, REGISTRY_ADD_COMMAND);
-
-            sceneService.delete(sceneId, false, null);
+            sceneService.delete(sceneId, true, null);
         });
 
         return new ServiceResult<>(true);
@@ -287,10 +283,7 @@ public class ScriptCollectionEvaluationService {
             return new ServiceResult<>(result);
         }
 
-        String agentName = scene.getTopology().getElements().get(0).getEid();
-        String systemType = scene.getTopology().getElements().get(0).getSystemType();
-        String osType = SystemTypeCommandUtils.getOsType(SystemTypeUtils.getStandardSystemType(systemType));
-        this.execCommand(agentName, osType, REGISTRY_ADD_COMMAND);
+        this.execCommand(scene);
 
         List<String> customProbeIds = imageName2CustomProbeIds.get(name);
         var res = this.getEvaluationResult(scene, customProbeIds);
@@ -569,12 +562,19 @@ public class ScriptCollectionEvaluationService {
         return collectionEvaluations;
     }
 
-    private void execCommand(String agentName, String osType, String cmd) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
-        runCommandItem.setRunId(TextUtils.uuid());
-        runCommandItem.setAgentName(agentName);
-        runCommandItem.setOsType(osType);
-        runCommandItem.setCommand(cmd);
-        WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+    private void execCommand(SceneDataBO scene) {
+        String agentName = scene.getTopology().getElements().get(0).getEid();
+        String systemType = scene.getTopology().getElements().get(0).getSystemType();
+        String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
+        String osType = SystemTypeCommandUtils.getOsType(standardSystemType);
+
+        if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setRunId(TextUtils.uuid());
+            runCommandItem.setAgentName(agentName);
+            runCommandItem.setOsType(osType);
+            runCommandItem.setCommand(REGISTRY_ADD_COMMAND);
+            WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+        }
     }
 }
