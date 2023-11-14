@@ -42,6 +42,8 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -76,7 +78,9 @@ import java.util.stream.Collectors;
 @Service
 public class ScriptCollectionEvaluationService {
     private final Map<String, SceneDataBO> imageName2Scene = new ConcurrentHashMap<>();
-    private final Map<String, CollectionEvaluationResult> imageName2EvaluationResult = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> imageName2CustomProbeIds = new ConcurrentHashMap<>();
+
+    private final String REGISTRY_ADD_COMMAND = "reg add HKLM\\software\\test";
 
     @Resource
     private DeviceTargetMapper deviceTargetMapper;
@@ -107,7 +111,7 @@ public class ScriptCollectionEvaluationService {
     private CloudCommonConfigService cloudCommonConfigService;
 
     public ServiceResult<Boolean> startImageCollectionEvaluation(ImageCollectionEvaluationRequest request) {
-        if (imageName2Scene.containsKey(request.getName()) || imageName2EvaluationResult.containsKey(request.getName())) {
+        if (imageName2Scene.containsKey(request.getName())) {
             throw new MpRuntimeException("此镜像上一次评估还未结束!");
         }
         DeviceTargetPO deviceTargetPO = deviceTargetMapper.first(new HumanCondition()
@@ -237,240 +241,25 @@ public class ScriptCollectionEvaluationService {
         var sceneConfigResult = sceneConfigService.get(res.getTopology().getScene().getEid(), false, null, null).getSource();
         var sceneResult = sceneService.createFromSceneConfig(sceneConfigResult, null).getSource();
         imageName2Scene.put(request.getName(), sceneResult);
+        imageName2CustomProbeIds.put(request.getName(), customProbeIds);
 
         String sceneId = sceneResult.getTopology().getScene().getEid();
-        LocalDateTime sceneCreateTime = sceneResult.getTopology().getScene().getCreateTime();
 
-        CollectionEvaluationResult result = new CollectionEvaluationResult();
-        result.setStatus("评估中");
-        imageName2EvaluationResult.put(request.getName(), result);
         TaskCommon.executeTask(() -> {
-            List<CollectionEvaluationBO> collectionEvaluations = new ArrayList<>();
-            List<String> collectionEvaluationNames = new ArrayList<>();
-            for (int i = 0; i < request.getFrequency(); i++) {
-                // 根据传参设定检测次数和检测间隔
-                try {
-                    Thread.sleep(1000 * 60 * request.getInterval());
-                } catch (Exception ignored) {
-                }
-
-                String agentName = sceneResult.getTopology().getElements().get(0).getEid();
-                String nodeId = sceneResult.getTopology().getElements().get(0).getId();
-                String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
-                String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
-
-                if (!collectionEvaluationNames.contains("硬件信息")) {
-                    HostStateQueryParams params = new HostStateQueryParams();
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setNodeIds(List.of(nodeId));
-                    var hostStateResult = scenePluginCollectionSceneService.listHostStates(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(hostStateResult)) {
-                        CollectionEvaluationBO hostStateCollectionEvaluation = new CollectionEvaluationBO();
-                        hostStateCollectionEvaluation.setName("硬件信息");
-                        hostStateCollectionEvaluation.setSupport(true);
-                        hostStateCollectionEvaluation.setResult(hostStateResult);
-
-                        collectionEvaluationNames.add(hostStateCollectionEvaluation.getName());
-                        collectionEvaluations.add(hostStateCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("操作系统信息")) {
-                    List<OS> osList = sysCollectorService.getOS(agentName);
-                    if (CollectionUtil.isNotEmpty(osList)) {
-                        CollectionEvaluationBO osCollectionEvaluation = new CollectionEvaluationBO();
-                        osCollectionEvaluation.setName("操作系统信息");
-                        osCollectionEvaluation.setSupport(true);
-                        osCollectionEvaluation.setResult(osList);
-
-                        collectionEvaluationNames.add(osCollectionEvaluation.getName());
-                        collectionEvaluations.add(osCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("网络接口信息")) {
-                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setSceneIds(List.of(sceneId));
-                    params.setNodeIds(List.of(nodeId));
-                    var netResult = scenePluginCollectionSceneService.listNetworkConnections(params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(netResult)) {
-                        CollectionEvaluationBO netCollectionEvaluation = new CollectionEvaluationBO();
-                        netCollectionEvaluation.setName("网络接口信息");
-                        netCollectionEvaluation.setSupport(true);
-                        netCollectionEvaluation.setResult(netResult);
-
-                        collectionEvaluationNames.add(netCollectionEvaluation.getName());
-                        collectionEvaluations.add(netCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("端口信息")) {
-                    CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-                    collectorBaseRequest.setAgentName(agentName);
-                    collectorBaseRequest.setPage(1);
-                    collectorBaseRequest.setPageSize(1);
-                    collectorBaseRequest.setPerPage(1);
-                    var portResult = sysCollectorService.pagePorts(collectorBaseRequest).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(portResult)) {
-                        CollectionEvaluationBO portCollectionEvaluation = new CollectionEvaluationBO();
-                        portCollectionEvaluation.setName("端口信息");
-                        portCollectionEvaluation.setSupport(true);
-                        portCollectionEvaluation.setResult(portResult);
-
-                        collectionEvaluationNames.add(portCollectionEvaluation.getName());
-                        collectionEvaluations.add(portCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("进程信息")) {
-                    TimeListPageInfoQueryParams params = new TimeListPageInfoQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setSceneIds(List.of(sceneId));
-                    var processResult = scenePluginCollectionSceneService.listPageProcess(params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(processResult)) {
-                        CollectionEvaluationBO processCollectionEvaluation = new CollectionEvaluationBO();
-                        processCollectionEvaluation.setName("进程信息");
-                        processCollectionEvaluation.setSupport(true);
-                        processCollectionEvaluation.setResult(processResult);
-
-                        collectionEvaluationNames.add(processCollectionEvaluation.getName());
-                        collectionEvaluations.add(processCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("文件变更信息")) {
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setRuleGroups(CsceneBizConstant.FILE_MODIFY_GROUP);
-                    var fileResult = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(fileResult)) {
-                        CollectionEvaluationBO fileCollectionEvaluation = new CollectionEvaluationBO();
-                        fileCollectionEvaluation.setName("文件变更信息");
-                        fileCollectionEvaluation.setSupport(true);
-                        fileCollectionEvaluation.setResult(fileResult);
-
-                        collectionEvaluationNames.add(fileCollectionEvaluation.getName());
-                        collectionEvaluations.add(fileCollectionEvaluation);
-                    }
-                }
-
-                if (SystemTypeCommandUtils.isWindows(standardSystemType) && !collectionEvaluationNames.contains("注册表变更信息")) {
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
-                    var registryResult = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(registryResult)) {
-                        CollectionEvaluationBO registryCollectionEvaluation = new CollectionEvaluationBO();
-                        registryCollectionEvaluation.setName("注册表变更信息");
-                        registryCollectionEvaluation.setSupport(true);
-                        registryCollectionEvaluation.setResult(registryResult);
-
-                        collectionEvaluationNames.add(registryCollectionEvaluation.getName());
-                        collectionEvaluations.add(registryCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("原始日志")) {
-                    var logResult = logFileService.queryLogCollectFiles(agentName, nodeId, systemType);
-                    if (CollectionUtils.isNotEmpty(logResult)) {
-                        CollectionEvaluationBO logCollectionEvaluation = new CollectionEvaluationBO();
-                        logCollectionEvaluation.setName("原始日志");
-                        logCollectionEvaluation.setSupport(true);
-                        logCollectionEvaluation.setResult(logResult);
-
-                        collectionEvaluationNames.add(logCollectionEvaluation.getName());
-                        collectionEvaluations.add(logCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("安全软件")) {
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
-                    var securityResult = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(securityResult)) {
-                        CollectionEvaluationBO securityCollectionEvaluation = new CollectionEvaluationBO();
-                        securityCollectionEvaluation.setName("安全软件");
-                        securityCollectionEvaluation.setSupport(true);
-                        securityCollectionEvaluation.setResult(securityResult);
-
-                        collectionEvaluationNames.add(securityCollectionEvaluation.getName());
-                        collectionEvaluations.add(securityCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("操作系统")) {
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setCatagories(CsceneBizConstant.OS_CATEGORY);
-                    var osResult = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(osResult)) {
-                        CollectionEvaluationBO osCollectionEvaluation = new CollectionEvaluationBO();
-                        osCollectionEvaluation.setName("操作系统");
-                        osCollectionEvaluation.setSupport(true);
-                        osCollectionEvaluation.setResult(osResult);
-
-                        collectionEvaluationNames.add(osCollectionEvaluation.getName());
-                        collectionEvaluations.add(osCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("应用系统日志")) {
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(List.of(nodeId));
-                    params.setPage(1);
-                    params.setPageSize(1);
-                    params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
-                    var applicationResult = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                    if (CollectionUtils.isNotEmpty(applicationResult)) {
-                        CollectionEvaluationBO applicationCollectionEvaluation = new CollectionEvaluationBO();
-                        applicationCollectionEvaluation.setName("应用系统日志");
-                        applicationCollectionEvaluation.setSupport(true);
-                        applicationCollectionEvaluation.setResult(applicationResult);
-
-                        collectionEvaluationNames.add(applicationCollectionEvaluation.getName());
-                        collectionEvaluations.add(applicationCollectionEvaluation);
-                    }
-                }
-
-                if (!collectionEvaluationNames.contains("自定义采集")) {
-                    WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
-                    wazuhEventRequest.setStartTime(sceneCreateTime);
-                    wazuhEventRequest.setEndTime(LocalDateTime.now());
-                    wazuhEventRequest.setPageNum(1);
-                    wazuhEventRequest.setPageSize(1);
-                    wazuhEventRequest.setAgentNames(List.of(agentName));
-                    var customResult = dataCollectionService.queryCustomProbeData(wazuhEventRequest, customProbeIds).getObjs();
-                    if (CollectionUtils.isNotEmpty(customResult)) {
-                        CollectionEvaluationBO customCollectionEvaluation = new CollectionEvaluationBO();
-                        customCollectionEvaluation.setName("自定义采集");
-                        customCollectionEvaluation.setSupport(true);
-                        customCollectionEvaluation.setResult(customResult);
-
-                        collectionEvaluationNames.add(customCollectionEvaluation.getName());
-                        collectionEvaluations.add(customCollectionEvaluation);
-                    }
-                }
-
-                if (collectionEvaluationNames.size() == 12) {
-                    break;
-                }
+            if (request.getEvaluationTime() == null) {
+                return;
+            }
+            // 根据传参设定最大评估时间
+            try {
+                Thread.sleep(1000 * 60 * request.getEvaluationTime());
+            } catch (Exception ignored) {
             }
 
-            result.setStatus("评估结束");
-            result.setCollectionEvaluations(collectionEvaluations);
-            imageName2EvaluationResult.put(request.getName(), result);
+            String agentName = sceneResult.getTopology().getElements().get(0).getEid();
+            String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
+            String osType = SystemTypeCommandUtils.getOsType(SystemTypeUtils.getStandardSystemType(systemType));
+            this.execCommand(agentName, osType, REGISTRY_ADD_COMMAND);
+
             sceneService.delete(sceneId, false, null);
         });
 
@@ -480,7 +269,7 @@ public class ScriptCollectionEvaluationService {
     public ServiceResult<CollectionEvaluationResult> getImageCollectionEvaluationResult(String name) {
         SceneDataBO scene = imageName2Scene.get(name);
         if (scene == null) {
-            imageName2EvaluationResult.remove(name);
+            imageName2CustomProbeIds.remove(name);
             throw new MpRuntimeException("此镜像未进行采集评估或评估已结束!");
         }
         CollectionEvaluationResult result = new CollectionEvaluationResult();
@@ -490,23 +279,32 @@ public class ScriptCollectionEvaluationService {
             sceneService.delete(sceneId, false, null);
             result.setStatus("场景启动失败,请重新进行评估");
             imageName2Scene.remove(name);
+            imageName2CustomProbeIds.remove(name);
             return new ServiceResult<>(result);
         }
         if (sceneModel != null && (SceneModel.Event.CREATE != sceneModel.getEvent() || EventStatus.OVER != sceneModel.getEventStatus())) {
             result.setStatus("场景启动中,请稍等");
             return new ServiceResult<>(result);
         }
-        result = imageName2EvaluationResult.get(name);
+
+        String agentName = scene.getTopology().getElements().get(0).getEid();
+        String systemType = scene.getTopology().getElements().get(0).getSystemType();
+        String osType = SystemTypeCommandUtils.getOsType(SystemTypeUtils.getStandardSystemType(systemType));
+        this.execCommand(agentName, osType, REGISTRY_ADD_COMMAND);
+
+        List<String> customProbeIds = imageName2CustomProbeIds.get(name);
+        var res = this.getEvaluationResult(scene, customProbeIds);
+        result.setCollectionEvaluations(res);
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> clearImageCollectionEvaluationResult(String name) {
-        imageName2Scene.remove(name);
-        imageName2EvaluationResult.remove(name);
-        return new ServiceResult<>(true);
-    }
-
-    public ServiceResult<Boolean> deleteScene(String sceneId) {
+    public ServiceResult<Boolean> deleteScene(String name) {
+        SceneDataBO scene = imageName2Scene.remove(name);
+        imageName2CustomProbeIds.remove(name);
+        if (scene == null) {
+            return new ServiceResult<>(true);
+        }
+        String sceneId = scene.getTopology().getScene().getEid();
         return sceneService.delete(sceneId, false, null);
     }
 
@@ -587,5 +385,196 @@ public class ScriptCollectionEvaluationService {
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
         return Integer.parseInt(osTypeCode.toString());
+    }
+
+    private List<CollectionEvaluationBO> getEvaluationResult(SceneDataBO sceneResult, List<String> customProbeIds) {
+        List<CollectionEvaluationBO> collectionEvaluations = new ArrayList<>();
+
+        String sceneId = sceneResult.getTopology().getScene().getEid();
+        LocalDateTime sceneCreateTime = sceneResult.getTopology().getScene().getCreateTime();
+        String agentName = sceneResult.getTopology().getElements().get(0).getEid();
+        String nodeId = sceneResult.getTopology().getElements().get(0).getId();
+        String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
+        String standardSystemType = SystemTypeUtils.getStandardSystemType(systemType);
+
+        HostStateQueryParams hostStateQueryParams = new HostStateQueryParams();
+        hostStateQueryParams.setPage(1);
+        hostStateQueryParams.setPageSize(1);
+        hostStateQueryParams.setNodeIds(List.of(nodeId));
+        var hostStateResult = scenePluginCollectionSceneService.listHostStates(sceneId, hostStateQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(hostStateResult)) {
+            CollectionEvaluationBO hostStateCollectionEvaluation = new CollectionEvaluationBO();
+            hostStateCollectionEvaluation.setName("硬件信息");
+            hostStateCollectionEvaluation.setSupport(true);
+            hostStateCollectionEvaluation.setResult(hostStateResult);
+
+            collectionEvaluations.add(hostStateCollectionEvaluation);
+        }
+
+        List<OS> osList = sysCollectorService.getOS(agentName);
+        if (CollectionUtil.isNotEmpty(osList)) {
+            CollectionEvaluationBO osCollectionEvaluation = new CollectionEvaluationBO();
+            osCollectionEvaluation.setName("操作系统信息");
+            osCollectionEvaluation.setSupport(true);
+            osCollectionEvaluation.setResult(osList);
+
+            collectionEvaluations.add(osCollectionEvaluation);
+        }
+
+        ListPageInfoQueryParams netQueryParams = new ListPageInfoQueryParams();
+        netQueryParams.setPage(1);
+        netQueryParams.setPageSize(1);
+        netQueryParams.setSceneIds(List.of(sceneId));
+        netQueryParams.setNodeIds(List.of(nodeId));
+        var netResult = scenePluginCollectionSceneService.listNetworkConnections(netQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(netResult)) {
+            CollectionEvaluationBO netCollectionEvaluation = new CollectionEvaluationBO();
+            netCollectionEvaluation.setName("网络接口信息");
+            netCollectionEvaluation.setSupport(true);
+            netCollectionEvaluation.setResult(netResult);
+
+            collectionEvaluations.add(netCollectionEvaluation);
+        }
+
+        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+        collectorBaseRequest.setAgentName(agentName);
+        collectorBaseRequest.setPage(1);
+        collectorBaseRequest.setPageSize(1);
+        collectorBaseRequest.setPerPage(1);
+        var portResult = sysCollectorService.pagePorts(collectorBaseRequest).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(portResult)) {
+            CollectionEvaluationBO portCollectionEvaluation = new CollectionEvaluationBO();
+            portCollectionEvaluation.setName("端口信息");
+            portCollectionEvaluation.setSupport(true);
+            portCollectionEvaluation.setResult(portResult);
+
+            collectionEvaluations.add(portCollectionEvaluation);
+        }
+
+        TimeListPageInfoQueryParams processQueryParams = new TimeListPageInfoQueryParams();
+        processQueryParams.setNodeIds(List.of(nodeId));
+        processQueryParams.setSceneIds(List.of(sceneId));
+        var processResult = scenePluginCollectionSceneService.listPageProcess(processQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(processResult)) {
+            CollectionEvaluationBO processCollectionEvaluation = new CollectionEvaluationBO();
+            processCollectionEvaluation.setName("进程信息");
+            processCollectionEvaluation.setSupport(true);
+            processCollectionEvaluation.setResult(processResult);
+
+            collectionEvaluations.add(processCollectionEvaluation);
+        }
+
+        HostEventQueryParams fileQueryParams = new HostEventQueryParams();
+        fileQueryParams.setNodeIds(List.of(nodeId));
+        fileQueryParams.setPage(1);
+        fileQueryParams.setPageSize(1);
+        fileQueryParams.setRuleGroups(CsceneBizConstant.FILE_MODIFY_GROUP);
+        var fileResult = scenePluginCollectionSceneService.listHostEvents(sceneId, fileQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(fileResult)) {
+            CollectionEvaluationBO fileCollectionEvaluation = new CollectionEvaluationBO();
+            fileCollectionEvaluation.setName("文件变更信息");
+            fileCollectionEvaluation.setSupport(true);
+            fileCollectionEvaluation.setResult(fileResult);
+
+            collectionEvaluations.add(fileCollectionEvaluation);
+        }
+
+        if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+            HostEventQueryParams registryQueryParams = new HostEventQueryParams();
+            registryQueryParams.setNodeIds(List.of(nodeId));
+            registryQueryParams.setPage(1);
+            registryQueryParams.setPageSize(1);
+            registryQueryParams.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
+            var registryResult = scenePluginCollectionSceneService.listHostEvents(sceneId, registryQueryParams).getSource().getObjs();
+            if (CollectionUtils.isNotEmpty(registryResult)) {
+                CollectionEvaluationBO registryCollectionEvaluation = new CollectionEvaluationBO();
+                registryCollectionEvaluation.setName("注册表变更信息");
+                registryCollectionEvaluation.setSupport(true);
+                registryCollectionEvaluation.setResult(registryResult);
+
+                collectionEvaluations.add(registryCollectionEvaluation);
+            }
+        }
+
+        var logResult = logFileService.queryLogCollectFiles(agentName, nodeId, systemType);
+        if (CollectionUtils.isNotEmpty(logResult)) {
+            CollectionEvaluationBO logCollectionEvaluation = new CollectionEvaluationBO();
+            logCollectionEvaluation.setName("原始日志");
+            logCollectionEvaluation.setSupport(true);
+            logCollectionEvaluation.setResult(logResult);
+
+            collectionEvaluations.add(logCollectionEvaluation);
+        }
+
+        HostEventQueryParams securityQueryParams = new HostEventQueryParams();
+        securityQueryParams.setNodeIds(List.of(nodeId));
+        securityQueryParams.setPage(1);
+        securityQueryParams.setPageSize(1);
+        securityQueryParams.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
+        var securityResult = scenePluginCollectionSceneService.listHostEvents(sceneId, securityQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(securityResult)) {
+            CollectionEvaluationBO securityCollectionEvaluation = new CollectionEvaluationBO();
+            securityCollectionEvaluation.setName("安全软件");
+            securityCollectionEvaluation.setSupport(true);
+            securityCollectionEvaluation.setResult(securityResult);
+
+            collectionEvaluations.add(securityCollectionEvaluation);
+        }
+
+        HostEventQueryParams osQueryParams = new HostEventQueryParams();
+        osQueryParams.setNodeIds(List.of(nodeId));
+        osQueryParams.setPage(1);
+        osQueryParams.setPageSize(1);
+        osQueryParams.setCatagories(CsceneBizConstant.OS_CATEGORY);
+        var osResult = scenePluginCollectionSceneService.listHostEvents(sceneId, osQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(osResult)) {
+            CollectionEvaluationBO osCollectionEvaluation = new CollectionEvaluationBO();
+            osCollectionEvaluation.setName("操作系统");
+            osCollectionEvaluation.setSupport(true);
+            osCollectionEvaluation.setResult(osResult);
+
+            collectionEvaluations.add(osCollectionEvaluation);
+        }
+
+        HostEventQueryParams applicationQueryParams = new HostEventQueryParams();
+        applicationQueryParams.setNodeIds(List.of(nodeId));
+        applicationQueryParams.setPage(1);
+        applicationQueryParams.setPageSize(1);
+        applicationQueryParams.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
+        var applicationResult = scenePluginCollectionSceneService.listHostEvents(sceneId, applicationQueryParams).getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(applicationResult)) {
+            CollectionEvaluationBO applicationCollectionEvaluation = new CollectionEvaluationBO();
+            applicationCollectionEvaluation.setName("应用系统日志");
+            applicationCollectionEvaluation.setSupport(true);
+            applicationCollectionEvaluation.setResult(applicationResult);
+
+            collectionEvaluations.add(applicationCollectionEvaluation);
+        }
+
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setStartTime(sceneCreateTime);
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        wazuhEventRequest.setPageNum(1);
+        wazuhEventRequest.setPageSize(1);
+        wazuhEventRequest.setAgentNames(List.of(agentName));
+        var customResult = dataCollectionService.queryCustomProbeData(wazuhEventRequest, customProbeIds).getObjs();
+        if (CollectionUtils.isNotEmpty(customResult)) {
+            CollectionEvaluationBO customCollectionEvaluation = new CollectionEvaluationBO();
+            customCollectionEvaluation.setName("自定义采集");
+            customCollectionEvaluation.setSupport(true);
+            customCollectionEvaluation.setResult(customResult);
+
+            collectionEvaluations.add(customCollectionEvaluation);
+        }
+        return collectionEvaluations;
+    }
+
+    private void execCommand(String agentName, String osType, String cmd) {
+        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        runCommandItem.setRunId(TextUtils.uuid());
+        runCommandItem.setAgentName(agentName);
+        runCommandItem.setOsType(osType);
+        runCommandItem.setCommand(cmd);
+        WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
     }
 }

@@ -7,8 +7,6 @@ import lombok.Data;
 public class ImageCollectionEvaluationRequest {
     @ApiModelProperty(value = "镜像名称")
     private String name;
-    @ApiModelProperty(value = "检测间隔 单位:min")
-    private Integer interval = 6;
-    @ApiModelProperty(value = "检测次数")
-    private Integer frequency = 1;
+    @ApiModelProperty(value = "最大评估时间 单位:min")
+    private Integer evaluationTime;
 }

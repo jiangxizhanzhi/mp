@@ -29,19 +29,13 @@ public class ScriptCollectionEvaluationController {
 
     @GetMapping("")
     @ApiOperation(value = "获取镜像采集能力评估结果")
-    public ServiceResult<CollectionEvaluationResult> getImageCollectionEvaluationResult(ImageCollectionEvaluationRequest request) {
-        return scriptCollectionEvaluationService.getImageCollectionEvaluationResult(request.getName()).asResult();
-    }
-
-    @DeleteMapping("/clear")
-    @ApiOperation(value = "清除镜像采集能力评估结果")
-    public ServiceResult<Boolean> clearImageCollectionEvaluationResult(@RequestParam String name) {
-        return scriptCollectionEvaluationService.clearImageCollectionEvaluationResult(name).asResult();
+    public ServiceResult<CollectionEvaluationResult> getImageCollectionEvaluationResult(@RequestParam String name) {
+        return scriptCollectionEvaluationService.getImageCollectionEvaluationResult(name).asResult();
     }
 
     @DeleteMapping("/delete")
-    @ApiOperation(value = "删除场景")
-    public ServiceResult<Boolean> deleteScene(@RequestParam String sceneId) {
-        return scriptCollectionEvaluationService.deleteScene(sceneId).asResult();
+    @ApiOperation(value = "删除镜像采集能力评估场景")
+    public ServiceResult<Boolean> deleteScene(@RequestParam String name) {
+        return scriptCollectionEvaluationService.deleteScene(name).asResult();
     }
 }
