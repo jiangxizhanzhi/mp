@@ -21,7 +21,7 @@ public class DeviceLog {
     private String id;
 
     @ApiModelProperty(value = "日志接收时间")
-    @Field(name = "@timestamp", type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
+    @Field(name = "@timestamp", type = FieldType.Long)
     private Long timestamp;
 
     @ApiModelProperty(value = "日志来源设备类型")
