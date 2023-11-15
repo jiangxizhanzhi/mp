@@ -60,7 +60,9 @@ public class LogService {
                     // TODO 这两个字段没有对应信息
                     // logVO.setSeverity(contestLogModel.getSeverity());
                     // logVO.setAttackIp(contestLogModel.getAttackIp());
-                    logVO.setTime(TimeUtils.stringToLocalDateTime(contestLogModel.getTime()));
+                    if(StringUtils.isNotEmpty(contestLogModel.getTime())){
+                        logVO.setTime(TimeUtils.stringToLocalDateTime(contestLogModel.getTime()));
+                    }
                     logVO.setIp(contestLogModel.getIp());
                     logVO.setContent(contestLogModel.getMessage().toString());
                     return logVO;
