@@ -278,7 +278,9 @@ public class ScriptCollectionEvaluationService {
             imageName2CustomProbeIds.remove(name);
             return new ServiceResult<>(result);
         }
-        if (sceneModel != null && (SceneModel.Event.CREATE != sceneModel.getEvent() || EventStatus.OVER != sceneModel.getEventStatus())) {
+        boolean flag = sceneModel != null && SceneModel.Event.CREATE == sceneModel.getEvent() &&
+                EventStatus.OVER != sceneModel.getEventStatus();
+        if (flag) {
             result.setStatus("场景启动中,请稍等");
             return new ServiceResult<>(result);
         }
