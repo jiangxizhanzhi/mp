@@ -57,11 +57,12 @@ public class LogService {
         var res = result.getObjs().stream()
                 .map(contestLogModel -> {
                     LogVO logVO = new LogVO();
-                    logVO.setSeverity(contestLogModel.getSeverity());
-                    logVO.setTime(contestLogModel.getTime());
-                    logVO.setContent(contestLogModel.getMessage());
+                    // TODO 这两个字段没有对应信息
+                    // logVO.setSeverity(contestLogModel.getSeverity());
+                    // logVO.setAttackIp(contestLogModel.getAttackIp());
+                    logVO.setTime(TimeUtils.stringToLocalDateTime(contestLogModel.getTime()));
                     logVO.setIp(contestLogModel.getIp());
-                    logVO.setAttackIp(contestLogModel.getAttackIp());
+                    logVO.setContent(contestLogModel.getMessage().toString());
                     return logVO;
                 }).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(res, result.getTotal()));

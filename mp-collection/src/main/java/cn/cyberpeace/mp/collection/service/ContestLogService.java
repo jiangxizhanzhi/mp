@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
 import cn.cyberpeace.mp.collection.model.contest.RuntimeLogModel;
+import cn.cyberpeace.mp.collection.model.log.DeviceLog;
 import cn.cyberpeace.mp.collection.request.IndexQueryRequest;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.util.EsResponseParseUtil;
@@ -45,7 +46,7 @@ public class ContestLogService {
     @Resource
     private BaseAppConfig baseAppConfig;
 
-    public static final String INDEX_MP_CONTEST_LOG = "mp_contest_log";
+    public static final String INDEX_MP_CONTEST_LOG = "device_log";
 
     public void addContestLog(ContestLogModel contestLogModel) {
         Map<String, Object> source = JSON.parseObject(JSON.toJSONString(contestLogModel), Map.class);
@@ -88,17 +89,19 @@ public class ContestLogService {
         }
     }
 
-    public ListObjResult<ContestLogModel> queryContestLog(LogQueryRequest request) {
+    public ListObjResult<DeviceLog> queryContestLog(LogQueryRequest request) {
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(sourceBuilder, boolQueryBuilder);
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<ContestLogModel> contestLogModels = new ArrayList<>();
+        List<DeviceLog> contestLogModels = new ArrayList<>();
         if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
             return new ListObjResult<>(contestLogModels, 0);
         }
-        contestLogModels = EsResponseParseUtil.parseResponse(response, ContestLogModel.class);
+
+        contestLogModels = EsResponseParseUtil.parseResponse(response, DeviceLog.class);
+        // contestLogModels = EsResponseParseUtil.parseResponse(response, ContestLogModel.class);
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
@@ -139,7 +142,7 @@ public class ContestLogService {
     private SearchSourceBuilder buildSearchSourceBuilder(LogQueryRequest request) {
         var sourceBuilder = new SearchSourceBuilder();
         // 按时间排序
-        sourceBuilder.sort("time", SortOrder.DESC);
+        sourceBuilder.sort("log_time", SortOrder.DESC);
         //处理分页
         processPageable(request, sourceBuilder);
         return sourceBuilder;
@@ -167,29 +170,31 @@ public class ContestLogService {
             buildIpQuery(request.getIps(), boolQueryBuilder);
         }
 
+        // TODO 目前没有这个字段，待确认
         if (CollectionUtils.isNotEmpty(request.getAttackIps())) {
             buildAttackIpQuery(request.getAttackIps(), boolQueryBuilder);
         }
 
+        // TODO 目前没有这个字段，待确认
         if (CollectionUtils.isNotEmpty(request.getSeverity())) {
             buildSeverityQuery(request.getSeverity(), boolQueryBuilder);
         }
 
         if (Objects.nonNull(request.getStartTime())) {
             //开始时间查询
-            boolQueryBuilder.must(QueryBuilders.rangeQuery("time")
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("log_time")
                     .from(request.getStartTime()));
         }
 
         if (Objects.nonNull(request.getEndTime())) {
             //结束时间查询
-            boolQueryBuilder.must(QueryBuilders.rangeQuery("time")
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("log_time")
                     .to(request.getEndTime()));
         }
     }
 
     private void buildIpQuery(List<String> ips, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("ip", ips));
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("device_ip", ips));
     }
 
     private void buildAttackIpQuery(List<String> attackIps, BoolQueryBuilder boolQueryBuilder) {
