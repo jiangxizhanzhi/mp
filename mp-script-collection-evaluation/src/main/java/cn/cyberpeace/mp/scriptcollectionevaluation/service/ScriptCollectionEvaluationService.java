@@ -251,10 +251,15 @@ public class ScriptCollectionEvaluationService {
             }
             // 根据传参设定最大评估时间
             try {
-                Thread.sleep(1000 * 60 * request.getEvaluationTime());
+                Thread.sleep(1000 * 60L * request.getEvaluationTime());
             } catch (Exception ignored) {
             }
             this.execCommand(sceneResult);
+            // 等待一分钟执行命令
+            try {
+                Thread.sleep(1000 * 60L);
+            } catch (Exception ignored) {
+            }
 
             sceneService.delete(sceneId, true, null);
         });
