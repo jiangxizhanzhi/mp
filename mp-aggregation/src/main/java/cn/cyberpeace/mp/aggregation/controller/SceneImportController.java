@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.aggregation.request.sceneimport.MoundRequest;
 import cn.cyberpeace.mp.aggregation.request.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -44,6 +43,7 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getPath())) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
+        log.info("importResourceCenter: path = {}, imagePath = {}, imagePathList = {}, sceneFilePath = {}", request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ResultCommon.success(serviceResult.getSource().getId());
     }

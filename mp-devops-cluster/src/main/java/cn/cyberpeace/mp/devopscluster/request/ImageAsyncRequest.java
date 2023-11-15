@@ -22,4 +22,7 @@ public class ImageAsyncRequest extends BaseRequest {
 
     @ApiModelProperty("是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+    @ApiModelProperty("是否上传镜像")
+    private Boolean noImage;
 }

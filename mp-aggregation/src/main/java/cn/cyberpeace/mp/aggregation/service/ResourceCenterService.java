@@ -14,10 +14,8 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -52,6 +50,16 @@ public class ResourceCenterService {
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
 
+    /**
+     *
+     * @author
+     * @date 11:41 2023/11/15
+     * @param ymlFilePath evn目录，env目录下面有topo.yml和topo2.yml
+     * @param imageFilePath
+     * @param imageFilePathList
+     * @param sceneFilePath
+     * @return cn.cyberpeace.mp.base.service.result.ServiceResult<cn.cyberpeace.mp.cscene.bo.CsceneBO>
+     **/
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
