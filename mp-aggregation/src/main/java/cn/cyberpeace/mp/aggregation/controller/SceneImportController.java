@@ -44,7 +44,7 @@ public class SceneImportController {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
         log.info("importResourceCenter: path = {}, imagePath = {}, imagePathList = {}, sceneFilePath = {}", request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
-        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
+        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath(), request.getNoImage());
         return ResultCommon.success(serviceResult.getSource().getId());
     }
 

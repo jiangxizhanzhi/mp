@@ -44,6 +44,10 @@ public class DevopsTargetService {
 
     private final SupportExportConvert supportExportConvert;
 
+//    public boolean existHideImage(Set<String> imageList) {
+//
+//    }
+
     /**
      * 分页
      * @param dto

@@ -26,4 +26,7 @@ public class SceneImportRequest {
 
     @ApiModelProperty("场景文件路径")
     private String sceneFilePath;
+
+    @ApiModelProperty("场景是否导入image")
+    private Boolean noImage;
 }

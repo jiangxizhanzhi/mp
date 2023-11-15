@@ -60,7 +60,7 @@ public class ResourceCenterService {
      * @param sceneFilePath
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<cn.cyberpeace.mp.cscene.bo.CsceneBO>
      **/
-    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
+    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath, Boolean noImage) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
@@ -94,6 +94,11 @@ public class ResourceCenterService {
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         csceneBO.setLogo(fdfsLogoFilePath);
+        //演示环境，靶标镜像导入太费时间，如果不实际导入靶标镜像，这里给后台的scene config名称前面加上 hide_
+        if (Boolean.TRUE.equals(noImage)) {
+            String hideTagName = "hide_" + csceneBO.getSceneConfig().getTopology().getScene().getName();
+            csceneBO.getSceneConfig().getTopology().getScene().setName(hideTagName);
+        }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }

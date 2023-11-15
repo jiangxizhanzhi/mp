@@ -24,7 +24,6 @@ import cn.cyberpeace.mp.scene.util.SceneEventUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +75,7 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
+        
         SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
@@ -83,7 +83,10 @@ public class SceneService {
             if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
-            sceneHandlerProxy.create();
+            // 演示模式，没有导入实际靶标镜像的场景，略过create
+            if (!sceneDataBO.getTopology().getScene().getName().startsWith("hide_")) {
+                sceneHandlerProxy.create();
+            }
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();

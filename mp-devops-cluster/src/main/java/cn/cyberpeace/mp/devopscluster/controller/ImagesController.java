@@ -553,6 +553,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageAsyncRequest.class)
     @PostMapping("/async")
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
+        log.info("async image data = {}", request);
         List<Integer> requestIds = request.getIds();
         if (CollectionUtils.isEmpty(requestIds)){
            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
