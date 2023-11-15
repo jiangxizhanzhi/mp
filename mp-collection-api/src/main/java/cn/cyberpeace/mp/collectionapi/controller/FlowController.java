@@ -55,14 +55,22 @@ public class FlowController {
     @GetMapping("/attack_level_trend")
     @ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
     public ListObjServiceResult<TrendVO> attackLevelTrend() {
-        // 默认分六段
-        return flowQueryService.queryLevelTrend().asResult();
+        try {
+            // 默认分六段
+            return flowQueryService.queryLevelTrend().asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TrendVO>(), 0)).asResult();
+        }
     }
 
     @GetMapping("/team_attack_trend")
     @ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
     public ListObjServiceResult<TrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
-        return flowQueryService.teamAttackTrend(request).asResult();
+        try {
+            return flowQueryService.teamAttackTrend(request).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TrendVO>(), 0)).asResult();
+        }
     }
 
     @GetMapping("/attack_total_count")
@@ -79,40 +87,66 @@ public class FlowController {
     public ListObjServiceResult<FlowVO> attackFlowList(
             @RequestParam(required = false, defaultValue = "1") Integer pageNum,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
-        if (start != 1) {
+        try {
+            if (start != 1) {
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
+            }
+            return flowQueryService.attackFlowList(pageNum, pageSize).asResult();
+        } catch (Exception e) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
         }
-        return flowQueryService.attackFlowList(pageNum, pageSize).asResult();
     }
 
     @GetMapping("/agg_attack_flow")
     @ApiOperation(value = "获取指定ip集合(队伍 or 设备)攻击次数与流量大小")
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
-        return flowQueryService.getAttackFlow(request).asResult();
+        try {
+            return flowQueryService.getAttackFlow(request).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<AggAttackFlowVO>(new ArrayList<>(), 0)).asResult();
+        }
     }
 
     @GetMapping("/attack_top")
     @ApiOperation(value = "全局攻防榜，获取4种top数据,(降序)默认全部")
     public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
-        return flowQueryService.getAttackTop(request).asResult();
+        try {
+            return flowQueryService.getAttackTop(request).asResult();
+
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<AttackFlowTopVO>(new ArrayList<>(), 0)).asResult();
+        }
     }
 
     @GetMapping("/attack_agg_top")
     @ApiOperation(value = "全局攻防榜，获取战队top聚合数据,(降序)默认全部")
     public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
-        return flowQueryService.getTeamAttackAggTop(request).asResult();
+        try {
+            return flowQueryService.getTeamAttackAggTop(request).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<TeamAttackCountVO>(new ArrayList<>(), 0)).asResult();
+        }
     }
 
     @GetMapping("/attack_target_top")
     @ApiOperation(value = "选手攻击榜，获取攻击目标top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
-        return flowQueryService.getAttackTargetTop(request).asResult();
+        try {
+            return flowQueryService.getAttackTargetTop(request).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamTopVO>(), 0)).asResult();
+
+        }
     }
 
     @GetMapping("/attack_type_top")
     @ApiOperation(value = "选手攻击榜，获取攻击手法top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
-        return flowQueryService.getAttackTypeTop(request).asResult();
+        try {
+            return flowQueryService.getAttackTypeTop(request).asResult();
+        } catch (Exception e) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamTopVO>(), 0)).asResult();
+        }
     }
 
     @PostMapping("/update_multiple")
