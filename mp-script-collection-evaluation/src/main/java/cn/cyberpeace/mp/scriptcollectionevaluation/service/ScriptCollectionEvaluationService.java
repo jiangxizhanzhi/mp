@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
@@ -79,6 +80,8 @@ import java.util.stream.Collectors;
 public class ScriptCollectionEvaluationService {
     private final Map<String, SceneDataBO> imageName2Scene = new ConcurrentHashMap<>();
     private final Map<String, List<String>> imageName2CustomProbeIds = new ConcurrentHashMap<>();
+
+    private final Map<String, List<LogFileVO>> imageName2LogFileCache = new ConcurrentHashMap<>();
 
     private final String REGISTRY_ADD_COMMAND = "reg add HKLM\\software\\test";
 
@@ -244,6 +247,9 @@ public class ScriptCollectionEvaluationService {
         imageName2CustomProbeIds.put(request.getName(), customProbeIds);
 
         String sceneId = sceneResult.getTopology().getScene().getEid();
+        String agentName = sceneResult.getTopology().getElements().get(0).getEid();
+        String nodeId = sceneResult.getTopology().getElements().get(0).getId();
+        String systemType = sceneResult.getTopology().getElements().get(0).getSystemType();
 
         TaskCommon.executeTask(() -> {
             if (request.getEvaluationTime() == null) {
@@ -255,6 +261,12 @@ public class ScriptCollectionEvaluationService {
             } catch (Exception ignored) {
             }
             this.execCommand(sceneResult);
+
+            // 原始日志缓存
+            var logResult = logFileService.queryLogCollectFiles(agentName, nodeId, systemType);
+            if (CollectionUtils.isNotEmpty(logResult)) {
+                imageName2LogFileCache.put(request.getName(), logResult);
+            }
             // 等待一分钟执行命令
             try {
                 Thread.sleep(1000 * 60L);
@@ -290,10 +302,12 @@ public class ScriptCollectionEvaluationService {
             return new ServiceResult<>(result);
         }
 
-        this.execCommand(scene);
+        if (SceneModel.Event.DELETE != sceneModel.getEvent()) {
+            this.execCommand(scene);
+        }
 
         List<String> customProbeIds = imageName2CustomProbeIds.get(name);
-        var res = this.getEvaluationResult(scene, customProbeIds);
+        var res = this.getEvaluationResult(scene, customProbeIds, name);
         result.setCollectionEvaluations(res);
         return new ServiceResult<>(result);
     }
@@ -387,7 +401,7 @@ public class ScriptCollectionEvaluationService {
         return Integer.parseInt(osTypeCode.toString());
     }
 
-    private List<CollectionEvaluationBO> getEvaluationResult(SceneDataBO sceneResult, List<String> customProbeIds) {
+    private List<CollectionEvaluationBO> getEvaluationResult(SceneDataBO sceneResult, List<String> customProbeIds, String name) {
         List<CollectionEvaluationBO> collectionEvaluations = new ArrayList<>();
 
         String sceneId = sceneResult.getTopology().getScene().getEid();
@@ -496,7 +510,11 @@ public class ScriptCollectionEvaluationService {
             }
         }
 
-        var logResult = logFileService.queryLogCollectFiles(agentName, nodeId, systemType);
+        // 先从缓存中获取
+        List<LogFileVO> logResult = imageName2LogFileCache.get(name);
+        if (logResult == null) {
+            logResult = logFileService.queryLogCollectFiles(agentName, nodeId, systemType);
+        }
         if (CollectionUtils.isNotEmpty(logResult)) {
             CollectionEvaluationBO logCollectionEvaluation = new CollectionEvaluationBO();
             logCollectionEvaluation.setName("原始日志");
