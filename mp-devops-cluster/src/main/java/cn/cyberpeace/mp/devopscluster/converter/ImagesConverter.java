@@ -379,7 +379,13 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Integer async(ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
-        Boolean isHide = request.getIsHide();
+        Boolean isHide;
+        //演示环境，不导入实际镜像，靶标管理处也需要隐藏
+        if (Boolean.TRUE.equals(request.getNoImage())) {
+            isHide = Boolean.TRUE;
+        } else {
+            isHide = request.getIsHide();
+        }
         DeviceAsyncBO bo = targetConverter.getAsyncDeviceIds(requestIds);
         List<Integer> notExistedList = bo.getNotExistedList();
         List<Integer> existedList = bo.getExistedList();

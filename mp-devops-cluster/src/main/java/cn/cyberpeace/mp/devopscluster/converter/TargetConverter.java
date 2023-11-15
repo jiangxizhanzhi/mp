@@ -261,7 +261,7 @@ public class TargetConverter{
             notExistedList = deviceIds;
             existedList = Lists.newArrayList();
         }else{
-            List<Integer> targetIds = deviceTargetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
+            Set<Integer> targetIds = deviceTargetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toSet());
             notExistedList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
             existedList = deviceIds.stream().filter(v -> targetIds.contains(v)).collect(Collectors.toList());
         }
