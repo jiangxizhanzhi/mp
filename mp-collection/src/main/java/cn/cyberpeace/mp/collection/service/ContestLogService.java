@@ -171,14 +171,14 @@ public class ContestLogService {
         }
 
         // TODO 目前没有这个字段，待确认
-        if (CollectionUtils.isNotEmpty(request.getAttackIps())) {
-            buildAttackIpQuery(request.getAttackIps(), boolQueryBuilder);
-        }
+//        if (CollectionUtils.isNotEmpty(request.getAttackIps())) {
+//            buildAttackIpQuery(request.getAttackIps(), boolQueryBuilder);
+//        }
 
         // TODO 目前没有这个字段，待确认
-        if (CollectionUtils.isNotEmpty(request.getSeverity())) {
-            buildSeverityQuery(request.getSeverity(), boolQueryBuilder);
-        }
+//        if (CollectionUtils.isNotEmpty(request.getSeverity())) {
+//            buildSeverityQuery(request.getSeverity(), boolQueryBuilder);
+//        }
 
         if (Objects.nonNull(request.getStartTime())) {
             //开始时间查询
