@@ -61,6 +61,45 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback, Boolean createFlag) {
+        SceneHandler sceneHandler;
+        try {
+            sceneHandler = new SceneHandler(sceneDataBO, false, context);
+            sceneHandler.setRealTimeUpdate(true);
+            if (sceneHandler.getScene() != null) {
+                sceneHandler.getScene().setCreateTime(null);
+            }
+            sceneHandler.reformTopo();
+            sceneHandler.save();
+        } catch (SceneNotExistException e) {
+            return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
+        }
+
+
+        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        SceneTaskPool.getInstance().executeTask(() -> {
+            var starTime = LocalDateTime.now();
+            sceneHandler.prepare(partialStart);
+            if (!sceneHandlerProxy.initiate(false)) {
+                return;
+            }
+            // 演示模式，没有导入实际靶标镜像的场景，略过create
+            if (Boolean.TRUE.equals(createFlag)) {
+                sceneHandlerProxy.create();
+            }
+
+            var endTime = LocalDateTime.now();
+            var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
+            sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
+            sceneHandler.updateScene();
+            if (callback != null) {
+                callback.run();
+            }
+        });
+
+        return new ServiceResult<>(sceneHandler.toData());
+    }
+
     public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback) {
         SceneHandler sceneHandler;
         try {
@@ -83,10 +122,9 @@ public class SceneService {
             if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
-            // 演示模式，没有导入实际靶标镜像的场景，略过create
-            if (!sceneDataBO.getTopology().getScene().getName().startsWith("hide_")) {
-                sceneHandlerProxy.create();
-            }
+
+            sceneHandlerProxy.create();
+
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
