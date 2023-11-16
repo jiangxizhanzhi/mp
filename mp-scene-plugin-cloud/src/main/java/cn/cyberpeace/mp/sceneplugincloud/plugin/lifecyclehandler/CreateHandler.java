@@ -1329,6 +1329,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void create(boolean createFlag) {
+        this.setCreateFlag(createFlag);
         this.prepareEventProcess();
 
         long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
@@ -1349,7 +1350,7 @@ public class CreateHandler extends HandlerCommon {
                 })
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks), createFlag);
+            runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
         }
 
         // 再创建网关
@@ -1362,7 +1363,7 @@ public class CreateHandler extends HandlerCommon {
                     }
                 }).collect(Collectors.toList());
         if (!createGatewayTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks), createFlag);
+            runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks));
         }
 
         // 再创建防火墙
@@ -1373,7 +1374,7 @@ public class CreateHandler extends HandlerCommon {
                     getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                 }).collect(Collectors.toList());
         if (!createFirewallTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks), createFlag);
+            runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks));
         }
 
         // 再创建终端
@@ -1384,7 +1385,7 @@ public class CreateHandler extends HandlerCommon {
                     getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
                 }).collect(Collectors.toList());
         if (!createTerminalTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks), createFlag);
+            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }
         // 批量创建NPC节点
         if (network2Info.values().size() > 0) {
@@ -1405,9 +1406,6 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
-        getPluginHandler().getElementMap().values().forEach(element -> {
-            getPluginHandler().overElementProcess(element.getSrcElement().getId(), getEvent());
-        });
 
     }
 

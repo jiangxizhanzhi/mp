@@ -23,6 +23,8 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
 
     private Integer event;
 
+    private Boolean createFlag = true;
+
     public PluginSceneEventHandlerCommon(H pluginHandler, TaskPool taskPool, int event) {
         this.pluginHandler = pluginHandler;
         this.taskPool = taskPool;
@@ -71,7 +73,9 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
     public void runElementProgress(String nodeId, int event, EventProcess eventProcess, Runnable runner) {
         getPluginHandler().progressElementProcess(nodeId, event, eventProcess.getProcess());
         try {
-            runner.run();
+            if (Boolean.TRUE.equals(createFlag)) {
+                runner.run();
+            }
         } catch (Exception e) {
             MpRuntimeException mpe = this.handlerSpecialException(getPluginHandler().getElement(nodeId), e);
             if (mpe != null) {
