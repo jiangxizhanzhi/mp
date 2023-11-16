@@ -3,16 +3,13 @@ package cn.cyberpeace.mp.collection;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -30,20 +27,20 @@ public class Tool {
         while (true) {
 
             // 发送的数据内容
-            File dataFile = new File("/Users/maojun/dev/app/test/data");
-            String dataContent = FileUtil.readLines(dataFile, "utf8").get(0);
-            // 选手的ip
-            File source = new File("/Users/maojun/dev/app/test/sourceIps");
-            // 设备方的ip
-            File target = new File("/Users/maojun/dev/app/test/targetIps");
+//            File dataFile = new File("/Users/maojun/dev/app/test/data");
+//            String dataContent = FileUtil.readLines(dataFile, "utf8").get(0);
+//            // 选手的ip
+//            File source = new File("/Users/maojun/dev/app/test/sourceIps");
+//            // 设备方的ip
+//            File target = new File("/Users/maojun/dev/app/test/targetIps");
 
-            List<String> teams = FileUtil.readLines(source, "utf8");
-            List<String> devices = FileUtil.readLines(target, "utf8");
+            List<String> teams = List.of(getSourceIp());
+            List<String> devices = List.of(getTargetIp());
             // 造的数据里面的时间戳 , 表示这个攻击的时间
             // 注意 造数据的时候要看下索引， arkime_sessions3-221210 这个索引是按天生成的
             // 如果需要指定某种类型的流量，可以改 参数里面, suricata.category 的值 , 这个值的类型在 international_message 里面有
             // 到时候让周豪现场选择5个类型发下
-            String esUrl = "http://10.10.100.7:9205/arkime_sessions3-221216/_doc";
+            String esUrl = "http://10.100.4.1:9206/arkime_sessions3-221216/_doc";
             long index = 1;
 
             long time = System.currentTimeMillis();
@@ -51,39 +48,30 @@ public class Tool {
             for (int i = 0; i < 1; i++) {
                 for (String team : teams) {
                     for (String device : devices) {
+                        long finalIndex = index++;
+                        int severite = SEVERITY[severiteIndex];
+                        severiteIndex = (severiteIndex + 1) % SEVERITY.length;
 
-                        List<String> teamIps = JSONObject.parseArray(team, String.class);
-                        List<String> deviceIps = JSONObject.parseArray(device, String.class);
-
-                        for (String teamIp : teamIps) {
-                            for (String deviceIp : deviceIps) {
-                                long finalIndex = index++;
-                                int severite = SEVERITY[severiteIndex];
-                                severiteIndex = (severiteIndex + 1) % SEVERITY.length;
-
-                                while (true) {
-                                    if (threadPoolExecutor.getQueue().size() < 10000) {
-                                        threadPoolExecutor.submit(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                String finalDataContent = StringUtils.replace(dataContent,"$severity", String.valueOf(severite));
-                                                var result = result(time, teamIp.trim(), deviceIp.trim(),finalDataContent);
-                                                String sendData =  JSON.toJSONString(result);
-                                                try {
-                                                    HttpUtils.sendPost(esUrl, sendData);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                                if (finalIndex % 1000 == 0) {
-                                                    System.out.println(threadPoolExecutor.getQueue().size());
-                                                    System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, teamIp.trim(), deviceIp.trim()));
-                                                }
-                                            }
-                                        });
-                                        break;
+                        while (true) {
+                            if (threadPoolExecutor.getQueue().size() < 10000) {
+                                threadPoolExecutor.submit(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String finalDataContent = StringUtils.replace(data(),"$severity", String.valueOf(severite));
+                                        var result = result(time, team, device,finalDataContent);
+                                        String sendData =  JSON.toJSONString(result);
+                                        try {
+                                            HttpUtils.sendPost(esUrl, sendData);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        if (finalIndex % 1000 == 0) {
+                                            System.out.println(threadPoolExecutor.getQueue().size());
+                                            System.out.println(String.format("%s: send for sourceIp:%s , targetIp:%s success", finalIndex, team, device));
+                                        }
                                     }
-                                }
-
+                                });
+                                break;
                             }
                         }
                     }
@@ -124,6 +112,14 @@ public class Tool {
             target.put("ip", targetIp);
         }
         return result;
+    }
+
+    public static String[] getSourceIp() {
+        return new String[] {"10.50.200.122", "10.50.200.10", "10.50.200.20"};
+    }
+
+    public static String[] getTargetIp() {
+        return new String[] {"192.168.10.21", "111.22.33.44", "172.29.92.61", "172.29.92.62", "172.29.4.10", "192.168.1.1", "172.18.6.12", "172.18.4.209"};
     }
 
     public static String data() {
@@ -234,7 +230,7 @@ public class Tool {
                        "        ],\n" +
                        "        \"severityCnt\": 1,\n" +
                        "        \"severity\": [\n" +
-                       "            3\n" +
+                       "            $severity\n" +
                        "        ],\n" +
                        "        \"signatureCnt\": 1,\n" +
                        "        \"signature\": [\n" +
