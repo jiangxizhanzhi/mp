@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -114,6 +112,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
 
     @Override
     public void create() {
+        createHandler.setCreateFlag(this.getCreateFlag());
         createHandler.create();
     }
 

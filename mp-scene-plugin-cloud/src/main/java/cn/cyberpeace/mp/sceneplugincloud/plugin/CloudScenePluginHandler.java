@@ -294,12 +294,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void create() {
+        createHandler.setCreateFlag(this.getCreateFlag());
         createHandler.create();
-    }
-
-    @Override
-    public void create(boolean createFlag) {
-        createHandler.create(createFlag);
     }
 
     @Override

@@ -105,6 +105,7 @@ public class Gns3ScenePluginHandler extends ScenePluginHandler<Gns3PluginSceneBO
 
     @Override
     public void create() throws Exception {
+        createHandler.setCreateFlag(this.getCreateFlag());
         createHandler.create();
     }
 

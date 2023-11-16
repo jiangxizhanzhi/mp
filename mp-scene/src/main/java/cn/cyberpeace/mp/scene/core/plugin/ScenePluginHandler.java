@@ -29,6 +29,8 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     private SceneHandler sceneHandler;
 
+    private Boolean createFlag = true;
+
     public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
         getSceneHandler().prepareSceneProcess(event, eventProcesses);
     }
@@ -87,11 +89,6 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     public void create() throws Exception {
 
     }
-
-    public void create(boolean createFlag) throws Exception {
-
-    }
-
     public void start() {
 
     }

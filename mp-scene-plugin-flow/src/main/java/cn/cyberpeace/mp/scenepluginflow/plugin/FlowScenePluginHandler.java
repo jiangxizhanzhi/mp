@@ -123,6 +123,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
     @Override
     public void create() {
+        createHandler.setCreateFlag(this.getCreateFlag());
         createHandler.create();
     }
 
