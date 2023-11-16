@@ -542,6 +542,34 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    public boolean create(boolean createFlag) {
+        prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+
+
+        try {
+            if (createFlag) {
+                for (var plugin : getPlugins()) {
+                    plugin.create();
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("failed to create scene , sceneId is {} , exception is {}", getSceneId(), ExceptionUtils.getStackTrace(e));
+            log.error("failed to create scene", e);
+            errorScene(SceneModel.Event.CREATE, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        for (var nodeId : getElementMap().keySet()) {
+            if (!isHandleNode(nodeId)) {
+                asyncAckElementChanged(nodeId, false, false);
+            }
+        }
+        save();
+        return true;
+    }
+
     public void start() {
     }
 

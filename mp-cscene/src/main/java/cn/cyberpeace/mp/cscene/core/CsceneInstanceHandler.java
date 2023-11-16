@@ -102,9 +102,17 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
+
+        boolean createFlag = true;
+        CsceneHandler csceneHandler = new CsceneHandler(cscene.getCscene(), null);
+        String sceneConfigName = csceneHandler.getCscene().getSceneConfig().getTopology().getScene().getName();
+        if (sceneConfigName.startsWith("hide_")) {
+            createFlag = false;
+        }
+
         cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
             LogFileUtil.getLogFile(cscene.getId());
-        }).getSource());
+        }, createFlag).getSource());
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
