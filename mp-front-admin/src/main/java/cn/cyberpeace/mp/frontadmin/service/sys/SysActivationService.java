@@ -43,6 +43,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -643,10 +644,11 @@ public class SysActivationService {
         String newSuffix = getSuffixFromMachineCode(activationRequest.getMachineCode());
         updateSysActivCtlModel.setSuffix(newSuffix);
 
-        LocalDateTime expiredTime = TimeUtils.stringToLocalDateTime(oldExpireDate + " 00:00:00").plusDays(1);
-        Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
-        Long lifeTimeSeconds = duration.toSeconds();
-        updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
+
+        long delayLifeTime = Duration.of(activationRequest.getDeadline(), ChronoUnit.MONTHS).toSeconds();
+        long oldLifeTime = Long.parseLong(Optional.ofNullable(EncryptUtils.desDecrypt(oldSysActivCtlModel.getSysLifetime())).orElse("0"));
+        long updateLifeTime = delayLifeTime + oldLifeTime;
+        updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(updateLifeTime)));
 
         String expiredDateStr = getDelayExpireDateStr(activationRequest.getDeadline(), oldExpireDate);
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
