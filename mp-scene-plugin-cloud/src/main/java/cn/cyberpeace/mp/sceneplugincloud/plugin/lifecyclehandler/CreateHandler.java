@@ -1405,6 +1405,10 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
+        getPluginHandler().getElementMap().values().forEach(element -> {
+            getPluginHandler().overElementProcess(element.getSrcElement().getId(), getEvent());
+        });
+
     }
 
     protected void prepareEventProcess() {
