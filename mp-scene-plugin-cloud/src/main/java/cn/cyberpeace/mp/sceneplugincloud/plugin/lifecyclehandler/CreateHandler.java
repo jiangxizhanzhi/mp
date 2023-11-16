@@ -1328,6 +1328,85 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    public void create(boolean createFlag) {
+        this.prepareEventProcess();
+
+        long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
+        long gatewayTasks = getPluginHandler().getGatewayElementMap().values().size();
+        long firewallTasks = getPluginHandler().getFirewallElementMap().values().size();
+        long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
+        int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
+
+        // 先创建辅助网络(包含虚拟交换机)
+        var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
+                .map(cloudElement -> (Runnable) () -> {
+                    createAuxiliaryNetworkProcess(cloudElement);
+                    if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    }
+                })
+                .collect(Collectors.toList());
+        if (!createAuxiliaryNetworkTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks), createFlag);
+        }
+
+        // 再创建网关
+        var createGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    }
+                }).collect(Collectors.toList());
+        if (!createGatewayTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks), createFlag);
+        }
+
+        // 再创建防火墙
+        var createFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                }).collect(Collectors.toList());
+        if (!createFirewallTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks), createFlag);
+        }
+
+        // 再创建终端
+        var createTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
+                .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                }).collect(Collectors.toList());
+        if (!createTerminalTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks), createFlag);
+        }
+        // 批量创建NPC节点
+        if (network2Info.values().size() > 0) {
+            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())), createFlag);
+        }
+        // 下发配置
+        runSceneProgress(SceneProcess.CONFIGURE, () -> {
+            configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
+        }, createFlag);
+        //通知云平台需要统计环境总速率的端口
+        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate()) && createFlag) {
+            List<String> portIds = new ArrayList<>();
+            Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
+            portMap.forEach((key,value) -> {
+                if (StringUtils.isNotEmpty(value.getResourceId())) {
+                    portIds.add(value.getResourceId());
+                }
+            });
+            vpClient.syncFlowPortInfo(portIds, "add");
+        }
+    }
+
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
     }

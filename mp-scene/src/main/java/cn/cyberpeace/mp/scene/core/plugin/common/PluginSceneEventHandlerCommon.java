@@ -60,6 +60,14 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         getPluginHandler().overSceneProcess(event);
     }
 
+    public void runSceneProgress(EventProcess eventProcess, Runnable runner, boolean createFlag) {
+        getPluginHandler().progressSceneProcess(event, eventProcess.getProcess());
+        if (Boolean.TRUE.equals(createFlag)) {
+            runner.run();
+        }
+        getPluginHandler().overSceneProcess(event);
+    }
+
     public void runElementProgress(String nodeId, int event, EventProcess eventProcess, Runnable runner) {
         getPluginHandler().progressElementProcess(nodeId, event, eventProcess.getProcess());
         try {

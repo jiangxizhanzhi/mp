@@ -19,7 +19,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -296,6 +295,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void create() {
         createHandler.create();
+    }
+
+    @Override
+    public void create(boolean createFlag) {
+        createHandler.create(createFlag);
     }
 
     @Override
