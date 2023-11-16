@@ -85,6 +85,7 @@ public class SceneService {
             }
             sceneHandlerProxy.create(createFlag);
 
+
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
