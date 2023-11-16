@@ -548,10 +548,8 @@ public class SceneHandler extends BaseSceneHandler<
 
 
         try {
-            if (createFlag) {
-                for (var plugin : getPlugins()) {
-                    plugin.create();
-                }
+            for (var plugin : getPlugins()) {
+                plugin.create(createFlag);
             }
 
         } catch (Exception e) {

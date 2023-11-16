@@ -62,14 +62,6 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         getPluginHandler().overSceneProcess(event);
     }
 
-    public void runSceneProgress(EventProcess eventProcess, Runnable runner, boolean createFlag) {
-        getPluginHandler().progressSceneProcess(event, eventProcess.getProcess());
-        if (Boolean.TRUE.equals(createFlag)) {
-            runner.run();
-        }
-        getPluginHandler().overSceneProcess(event);
-    }
-
     public void runElementProgress(String nodeId, int event, EventProcess eventProcess, Runnable runner) {
         getPluginHandler().progressElementProcess(nodeId, event, eventProcess.getProcess());
         try {
@@ -92,7 +84,9 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
     public void runElementProgress(String nodeId, EventProcess eventProcess, Runnable runner) {
         getPluginHandler().progressElementProcess(nodeId, event, eventProcess.getProcess());
         try {
-            runner.run();
+            if (Boolean.TRUE.equals(createFlag)) {
+                runner.run();
+            }
         } catch (Exception e) {
             log.error("failed to run element progress ", e);
             MpRuntimeException mpe = this.handlerSpecialException(getPluginHandler().getElement(nodeId), e);

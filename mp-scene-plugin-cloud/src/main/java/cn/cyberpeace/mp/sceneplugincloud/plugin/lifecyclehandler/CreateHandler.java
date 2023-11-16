@@ -1389,12 +1389,12 @@ public class CreateHandler extends HandlerCommon {
         }
         // 批量创建NPC节点
         if (network2Info.values().size() > 0) {
-            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())), createFlag);
+            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
         // 下发配置
         runSceneProgress(SceneProcess.CONFIGURE, () -> {
             configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
-        }, createFlag);
+        });
         //通知云平台需要统计环境总速率的端口
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate()) && createFlag) {
             List<String> portIds = new ArrayList<>();
