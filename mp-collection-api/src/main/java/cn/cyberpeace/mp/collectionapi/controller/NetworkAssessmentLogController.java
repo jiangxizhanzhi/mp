@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.collection.service.NetworkAssessmentLogService;
 import cn.cyberpeace.mp.collectionapi.bo.NetworkAssessmentLogDto;
 import cn.cyberpeace.mp.collectionapi.request.NetworkLogQuery;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
@@ -29,9 +30,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/log/network")
+@RequiredArgsConstructor
 public class NetworkAssessmentLogController {
 
-    private NetworkAssessmentLogService networkAssessmentLogService;
+    private final NetworkAssessmentLogService networkAssessmentLogService;
 
     @PostMapping("")
     @ApiOperation(value = "上报单条设备日志")
