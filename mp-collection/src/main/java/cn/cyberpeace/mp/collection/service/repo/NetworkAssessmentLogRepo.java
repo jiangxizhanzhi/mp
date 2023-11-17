@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface NetworkAssessmentLogRepo extends ElasticsearchRepository<NetworkAssessmentLogPo,String> {
 
-    List<NetworkAssessmentLogPo> findByReportTimeLessThanAndReportTimeGreaterThanOrderByReportTimeDesc(LocalDateTime startTime, LocalDateTime endTime);
+    List<NetworkAssessmentLogPo> findByReportTimeBetweenOrderByReportTimeDesc(LocalDateTime startTime, LocalDateTime endTime);
 
 
 

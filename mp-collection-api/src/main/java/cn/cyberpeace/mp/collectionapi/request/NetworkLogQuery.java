@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 public class NetworkLogQuery {
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @ApiModelProperty(value = "开始时间")
     private String startTime;

@@ -33,7 +33,6 @@ public class NetworkAssessmentLogService {
             endTime = LocalDateTime.now();
         }
 
-
-        return networkAssessmentLogRepo.findByReportTimeLessThanAndReportTimeGreaterThanOrderByReportTimeDesc(startTime, endTime);
+        return networkAssessmentLogRepo.findByReportTimeBetweenOrderByReportTimeDesc(startTime, endTime);
     }
 }

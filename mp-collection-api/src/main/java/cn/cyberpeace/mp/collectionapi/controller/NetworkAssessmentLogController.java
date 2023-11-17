@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.model.log.NetworkAssessmentLogPo;
 import cn.cyberpeace.mp.collection.service.NetworkAssessmentLogService;
 import cn.cyberpeace.mp.collectionapi.bo.NetworkAssessmentLogDto;
+import cn.cyberpeace.mp.collectionapi.bo.NetworkAssessmentLogScreenDto;
 import cn.cyberpeace.mp.collectionapi.request.NetworkLogQuery;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -47,16 +48,14 @@ public class NetworkAssessmentLogController {
     }
 
     @PostMapping("/list")
-    public ServiceResult<List<NetworkAssessmentLogDto>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
+    public ServiceResult<List<NetworkAssessmentLogScreenDto>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
         LocalDateTime startTime = networkLogQuery.getStartTime();
         LocalDateTime endTime = networkLogQuery.getEndTime();
-        log.info("network query = {}", networkLogQuery);
         List<NetworkAssessmentLogPo> networkAssessmentLogPoList = networkAssessmentLogService.listLogByTime(startTime, endTime);
-        log.info("network log = {}", networkAssessmentLogPoList);
         if (CollectionUtils.isEmpty(networkAssessmentLogPoList)) {
             return ServiceResult.success(new ArrayList<>());
         } else {
-            return ServiceResult.success(networkAssessmentLogPoList.stream().map(NetworkAssessmentLogDto::getFromPo)
+            return ServiceResult.success(networkAssessmentLogPoList.stream().map(NetworkAssessmentLogScreenDto::getFromPo)
                     .collect(Collectors.toList()));
         }
     }
