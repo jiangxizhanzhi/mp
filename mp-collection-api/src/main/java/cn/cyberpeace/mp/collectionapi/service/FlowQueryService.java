@@ -648,6 +648,10 @@ public class FlowQueryService {
             if (topSize != null) {
                 entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
+            double total = entries.stream().mapToLong(TopEntry::getCount).sum();
+            entries.forEach(e -> {
+                e.setPercent(e.getCount() / total);
+            });
             vo.setEntries(entries);
         });
 
@@ -701,13 +705,13 @@ public class FlowQueryService {
         Integer topSize = request.getTopSize();
         vos.forEach(vo -> {
             List<TopEntry> entries = vo.getEntries();
-            double total = entries.stream().mapToLong(TopEntry::getCount).sum();
             entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
             if (topSize != null) {
                 entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
             vo.setEntries(entries);
 
+            double total = entries.stream().mapToLong(TopEntry::getCount).sum();
             entries.forEach(e -> {
                 e.setPercent(e.getCount() / total);
             });
