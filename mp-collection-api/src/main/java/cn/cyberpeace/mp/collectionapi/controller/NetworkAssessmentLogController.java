@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,19 +43,21 @@ public class NetworkAssessmentLogController {
 
         NetworkAssessmentLogPo networkAssessmentLogPo = NetworkAssessmentLogDto.convertToPo(networkAssessmentLogDto);
         networkAssessmentLogService.save(networkAssessmentLogPo);
-        return ServiceResult.success(true).asResult();
+        return ServiceResult.success(true);
     }
 
     @PostMapping("/list")
     public ServiceResult<List<NetworkAssessmentLogDto>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
         LocalDateTime startTime = networkLogQuery.getStartTime();
         LocalDateTime endTime = networkLogQuery.getEndTime();
+        log.info("network query = {}", networkLogQuery);
         List<NetworkAssessmentLogPo> networkAssessmentLogPoList = networkAssessmentLogService.listLogByTime(startTime, endTime);
+        log.info("network log = {}", networkAssessmentLogPoList);
         if (CollectionUtils.isEmpty(networkAssessmentLogPoList)) {
-            return ServiceResult.success(Collections.emptyList()).asResult();
+            return ServiceResult.success(new ArrayList<>());
         } else {
             return ServiceResult.success(networkAssessmentLogPoList.stream().map(NetworkAssessmentLogDto::getFromPo)
-                    .collect(Collectors.toList())).asResult();
+                    .collect(Collectors.toList()));
         }
     }
 
