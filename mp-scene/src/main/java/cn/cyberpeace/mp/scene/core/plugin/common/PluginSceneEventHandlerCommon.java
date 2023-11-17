@@ -92,6 +92,7 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
+
             }
         } catch (Exception e) {
             log.error("failed to run element progress ", e);
