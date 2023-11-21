@@ -16,7 +16,9 @@ import org.springframework.beans.BeanUtils;
  * @Date 2023/11/17 14:36
  **/
 @Data
-public class NetworkAssessmentLogScreenDto extends Assessment {
+public class NetworkAssessmentLogScreenDto {
+
+    private Assessment systematizeScenarios;
 
     private Assessment mimicRouter;
 

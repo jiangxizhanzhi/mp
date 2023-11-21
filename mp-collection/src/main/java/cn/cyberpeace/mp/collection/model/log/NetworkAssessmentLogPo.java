@@ -22,10 +22,13 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @Document(indexName = DeviceLogConstant.NETWORK_LOG)
 @TypeAlias(DeviceLogConstant.NETWORK_LOG)
-public class NetworkAssessmentLogPo extends Assessment {
+public class NetworkAssessmentLogPo {
 
     @Id
     private String id;
+
+    @Field(name = "systematize_scenarios", type = FieldType.Object)
+    private Assessment systematizeScenarios;
 
     @Field(name = "mimic_router", type = FieldType.Object)
     private Assessment mimicRouter;

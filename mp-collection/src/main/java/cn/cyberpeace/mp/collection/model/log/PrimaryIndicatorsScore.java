@@ -12,9 +12,21 @@ import lombok.Data;
 @Data
 public class PrimaryIndicatorsScore {
 
+    @JsonProperty("预测能力")
+    private PredictiveAbility predictiveAbility;
+
+    @JsonProperty("承受能力")
+    private AppetiteAbility appetiteAbility;
+
+    @JsonProperty("恢复能力")
+    private RecoveryAbility recoveryAbility;
+
+    @JsonProperty("适应能力")
+    private AdaptiveAbility adaptiveAbility;
+
 
     @Data
-    private static class PredictiveAbility {
+    public static class PredictiveAbility {
         @JsonProperty("威胁事件感知")
         private Integer eventFeel;
 
@@ -23,7 +35,7 @@ public class PrimaryIndicatorsScore {
     }
 
     @Data
-    private static class AppetiteAbility {
+    public static class AppetiteAbility {
         @JsonProperty("应急响应")
         private Integer emergencyResponse;
 
@@ -35,10 +47,25 @@ public class PrimaryIndicatorsScore {
     }
 
     @Data
-    private static class RecoveryAbility {
+    public static class RecoveryAbility {
         @JsonProperty("业务连续性")
         private Integer businessAccessible;
 
+        @JsonProperty("错误恢复时间")
+        private Integer errorRecoverTime;
+
+        @JsonProperty("功能异构冗余度")
+        private Integer functionDuplicate;
+
+    }
+
+    @Data
+    public static class AdaptiveAbility {
+        @JsonProperty("主动防御")
+        private Integer activeDefence;
+
+        @JsonProperty("基于目标环境的重构")
+        private Integer refactor;
     }
 
 

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.collection.service;
 
 import cn.cyberpeace.mp.collection.model.log.NetworkAssessmentLogPo;
 import cn.cyberpeace.mp.collection.service.repo.NetworkAssessmentLogRepo;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,10 +16,10 @@ import java.util.Objects;
  * @Date 2023/11/16 19:52
  **/
 @Service
-@RequiredArgsConstructor
 public class NetworkAssessmentLogService {
 
-    private final NetworkAssessmentLogRepo networkAssessmentLogRepo;
+    @Autowired
+    private NetworkAssessmentLogRepo networkAssessmentLogRepo;
 
     public void save(NetworkAssessmentLogPo networkAssessmentLogPo) {
         networkAssessmentLogRepo.save(networkAssessmentLogPo);

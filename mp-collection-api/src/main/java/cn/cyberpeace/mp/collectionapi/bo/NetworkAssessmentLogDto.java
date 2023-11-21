@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
  * @Date 2023/11/16 18:35
  **/
 @Data
-public class NetworkAssessmentLogDto extends Assessment {
+public class NetworkAssessmentLogDto {
+
+    private Assessment systematizeScenarios;
 
     private Assessment mimicRouter;
 
