@@ -17,9 +17,12 @@ public class Assessment {
 
     private CyberResiliencyCapability cyberResiliencyCapability;
 
+
     @JsonProperty("平均威胁隔离时间")
     private String averageThreatIsolationTime;
 
     @JsonProperty("平均系统修复时间")
     private String averageSystemRepairTime;
+    @JsonProperty("服务不可用次数")
+    private Integer systemUnavailableTime;
 }
