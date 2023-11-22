@@ -1021,6 +1021,31 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     }
 
     /**
+     * 检查力流量脚本参数是否初始化完整，否则进行修正
+     */
+    public void checkDefaultFlowScriptParams(){
+        log.info("============= checkDefaultFlowScriptParams ================");
+        // 首先读取全量的流量模型和参数信息
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.SCRIPT.toValue());
+        List<FlowInfoModel> flowInfoModelList = getModelMapper().list(humanCondition);
+        List<FlowScriptParamModel> scriptParamModelList  = flowScriptParamService.getModelMapper().list(new HumanCondition());
+
+        // 已经初始化的流量参数
+        Set<String> flowIds = scriptParamModelList.stream().map(FlowScriptParamModel::getFlowId).collect(Collectors.toSet());
+
+        // 针对攻击脚本类型的流量，检测是否存在参数，不存在则补充创建
+        List<FlowInfoModel> unInitialedModels = flowInfoModelList.stream().filter(info -> !flowIds.contains(info.getId())).collect(Collectors.toList());
+        if(unInitialedModels.isEmpty()){
+            log.info("all default flow script params are valid, ignore");
+            return;
+        }
+
+        // 攻击流量，要添加默认脚本参数信息
+        addDefaultScriptParams(unInitialedModels);
+    }
+
+    /**
      * 导入流量文件
      * @param file
      * @return
@@ -1076,26 +1101,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
                     if (!flowInfoModelList.get(0).getFileName().endsWith(".pcap")) {
                         // 攻击流量，要添加默认脚本参数信息
-                        List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
-                        flowInfoModelList.forEach(flowInfo -> {
-                            FlowInfoModel flowInfoModel = this.selectByTitle(flowInfo.getTitle());
-                            FlowScriptParamModel scriptParamIp = new FlowScriptParamModel();
-                            scriptParamIp.setFlowId(flowInfoModel.getId());
-                            scriptParamIp.setParamKey("ip");
-                            scriptParamIp.setParamType(1);
-                            scriptParamIp.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
-                            scriptParamModelList.add(scriptParamIp);
-
-                            FlowScriptParamModel scriptParamPort = new FlowScriptParamModel();
-                            scriptParamPort.setFlowId(flowInfoModel.getId());
-                            scriptParamPort.setParamKey("port");
-                            scriptParamPort.setParamValue("80");
-                            scriptParamPort.setParamType(2);
-                            scriptParamPort.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
-                            scriptParamModelList.add(scriptParamPort);
-                        });
-
-                        flowScriptParamService.bulkCreate(scriptParamModelList);
+                        addDefaultScriptParams(flowInfoModelList);
                     }
                 }
             }
@@ -1105,6 +1111,30 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return true;
+    }
+
+    private void addDefaultScriptParams(List<FlowInfoModel> flowInfoModelList) {
+        List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
+        flowInfoModelList.forEach(flowInfo -> {
+            log.info("build default script params of flow {}/{}", flowInfo.getId(), flowInfo.getTitle());
+            FlowInfoModel flowInfoModel = this.selectByTitle(flowInfo.getTitle());
+            FlowScriptParamModel scriptParamIp = new FlowScriptParamModel();
+            scriptParamIp.setFlowId(flowInfoModel.getId());
+            scriptParamIp.setParamKey("ip");
+            scriptParamIp.setParamType(1);
+            scriptParamIp.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
+            scriptParamModelList.add(scriptParamIp);
+
+            FlowScriptParamModel scriptParamPort = new FlowScriptParamModel();
+            scriptParamPort.setFlowId(flowInfoModel.getId());
+            scriptParamPort.setParamKey("port");
+            scriptParamPort.setParamValue("80");
+            scriptParamPort.setParamType(2);
+            scriptParamPort.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
+            scriptParamModelList.add(scriptParamPort);
+        });
+
+        flowScriptParamService.bulkCreate(scriptParamModelList);
     }
 
     /**
