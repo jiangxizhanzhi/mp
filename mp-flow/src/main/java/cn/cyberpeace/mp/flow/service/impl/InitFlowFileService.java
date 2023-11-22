@@ -32,6 +32,8 @@ public class InitFlowFileService implements CommandLineRunner {
             FlowInfoModel flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             if (Objects.nonNull(flowInfoModel)) {
                 log.info("=========== no need to import flow file ===========");
+                // 即使流量已经存在，也需要判断对应的配置参数信息是否初始化完成
+                flowInfoService.checkDefaultFlowScriptParams();
             } else {
                 flowInfoService.batchImportFlowInfo();
                 flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
