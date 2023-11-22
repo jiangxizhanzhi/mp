@@ -364,26 +364,26 @@ public class FlowQueryService {
         Collections.sort(resArray, (r1, r2) -> {
             return r1.getName().compareTo(r2.getName());
         });
-        for (var res : resArray) {
-            System.out.println();
-            boolean wr = false;
-            for (var bo : res.getAttackTypeBOS()) {
-                System.out.println();
-                if (!wr) {
-                    System.out.print(rrMap.get(res.getName()).hezi + "\t");
-                    System.out.print(rrMap.get(res.getName()).saidao + "\t");
-                    System.out.print(rrMap.get(res.getName()).shebei + "\t");
-                    System.out.print(res.getAttackCount().getAttackCount() + "\t");
-                    System.out.print(res.getFlowSize().getSize() + "\t");
-                    wr = true;
-                } else {
-                    System.out.print("\t\t\t\t\t");
-                }
-                System.out.print(bo.getZhName() + "\t");
-                System.out.print(bo.getCount() + "\t");
-                System.out.print(bo.getFlowSize() + "\t");
-            }
-        }
+//        for (var res : resArray) {
+//            System.out.println();
+//            boolean wr = false;
+//            for (var bo : res.getAttackTypeBOS()) {
+//                System.out.println();
+//                if (!wr) {
+//                    System.out.print(rrMap.get(res.getName()).hezi + "\t");
+//                    System.out.print(rrMap.get(res.getName()).saidao + "\t");
+//                    System.out.print(rrMap.get(res.getName()).shebei + "\t");
+//                    System.out.print(res.getAttackCount().getAttackCount() + "\t");
+//                    System.out.print(res.getFlowSize().getSize() + "\t");
+//                    wr = true;
+//                } else {
+//                    System.out.print("\t\t\t\t\t");
+//                }
+//                System.out.print(bo.getZhName() + "\t");
+//                System.out.print(bo.getCount() + "\t");
+//                System.out.print(bo.getFlowSize() + "\t");
+//            }
+//        }
 
 
         var result = new ArrayList<>(resMap.values());

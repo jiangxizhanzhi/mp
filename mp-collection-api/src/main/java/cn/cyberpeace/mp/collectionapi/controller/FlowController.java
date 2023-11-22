@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
+@Slf4j
 @RestController
 @RequestMapping("/flow")
 @Api(value = "", tags = "")
@@ -59,6 +61,7 @@ public class FlowController {
             // 默认分六段
             return flowQueryService.queryLevelTrend().asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TrendVO>(), 0)).asResult();
         }
     }
@@ -69,6 +72,7 @@ public class FlowController {
         try {
             return flowQueryService.teamAttackTrend(request).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TrendVO>(), 0)).asResult();
         }
     }
@@ -93,6 +97,7 @@ public class FlowController {
             }
             return flowQueryService.attackFlowList(pageNum, pageSize).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
         }
     }
@@ -103,6 +108,7 @@ public class FlowController {
         try {
             return flowQueryService.getAttackFlow(request).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new ListObjServiceResult<>(new ListObjResult<AggAttackFlowVO>(new ArrayList<>(), 0)).asResult();
         }
     }
@@ -114,6 +120,8 @@ public class FlowController {
             return flowQueryService.getAttackTop(request).asResult();
 
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
             return new ListObjServiceResult<>(new ListObjResult<AttackFlowTopVO>(new ArrayList<>(), 0)).asResult();
         }
     }
@@ -124,6 +132,8 @@ public class FlowController {
         try {
             return flowQueryService.getTeamAttackAggTop(request).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
             return new ListObjServiceResult<>(new ListObjResult<TeamAttackCountVO>(new ArrayList<>(), 0)).asResult();
         }
     }
@@ -134,6 +144,8 @@ public class FlowController {
         try {
             return flowQueryService.getAttackTargetTop(request).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamTopVO>(), 0)).asResult();
 
         }
@@ -145,6 +157,8 @@ public class FlowController {
         try {
             return flowQueryService.getAttackTypeTop(request).asResult();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamTopVO>(), 0)).asResult();
         }
     }
