@@ -17,4 +17,6 @@ public class CollectionConfig {
      * 上层业务层服务地址
      */
     private String app;
+
+    private String adApp;
 }

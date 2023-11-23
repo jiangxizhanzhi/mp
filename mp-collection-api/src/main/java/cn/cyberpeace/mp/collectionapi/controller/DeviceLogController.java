@@ -41,10 +41,18 @@ public class DeviceLogController {
 
     private HttpClient client;
 
+    /**
+     * 测试环境业务AD client, 也需要推一下日志
+     */
+    private HttpClient testAdClient;
+
     @PostConstruct
     private void initHttpClient() {
         client = HttpClient.builder().configServer(config.getApp()).build();
+        testAdClient = HttpClient.builder().configServer(config.getAdApp()).build();
     }
+
+
 
     @PostMapping("")
     @ApiOperation(value = "上报单条设备日志")
@@ -74,7 +82,8 @@ public class DeviceLogController {
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
-        client.post("/modify/stat/log/", logBO, null, null, 0);
+        client.post("/modify/stat/log/", logBO, null, null, 10_000);
+        testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=36af2bf41995c3207c62e39c1914b5ec", logBO, null, null, 10_000);
         // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
     }
 
