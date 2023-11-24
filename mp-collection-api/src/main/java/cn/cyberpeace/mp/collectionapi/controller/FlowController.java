@@ -60,7 +60,7 @@ public class FlowController {
     @ApiOperation(value = "总体攻击趋势(统计十分钟内的攻击次数)")
     public ServiceResult<TrendVO> attackTrend() {
         if (debugLogFlag) {
-            log.debug("in attack trend");
+            log.info("in attack trend");
         }
         // 默认分六段
         return flowQueryService.queryAttackTrend().asResult();
@@ -71,7 +71,7 @@ public class FlowController {
     public ListObjServiceResult<TrendVO> attackLevelTrend() {
         try {
             if (debugLogFlag) {
-                log.debug("in attack level trend");
+                log.info("in attack level trend");
             }
             // 默认分六段
             return flowQueryService.queryLevelTrend().asResult();
@@ -86,7 +86,7 @@ public class FlowController {
     public ListObjServiceResult<TrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("teamAttackTrend params: request = {}", request);
+                log.info("teamAttackTrend params: request = {}", request);
             }
             return flowQueryService.teamAttackTrend(request).asResult();
         } catch (Exception e) {
@@ -99,7 +99,7 @@ public class FlowController {
     @ApiOperation(value = "总攻击次数")
     public ServiceResult<Long> attackTotalCount() {
         if (debugLogFlag) {
-            log.debug("in attack total count");
+            log.info("in attack total count");
         }
         if (start != 1) {
             return new ServiceResult<>(0L).asResult();
@@ -114,7 +114,7 @@ public class FlowController {
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         try {
             if (debugLogFlag) {
-                log.debug("attackFlowList params: pageNum = {}, pageSize = {}", pageNum, pageSize);
+                log.info("attackFlowList params: pageNum = {}, pageSize = {}", pageNum, pageSize);
             }
             if (start != 1) {
                 return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
@@ -131,7 +131,7 @@ public class FlowController {
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("getAttackFlow params: request = {}", request);
+                log.info("getAttackFlow params: request = {}", request);
             }
             return flowQueryService.getAttackFlow(request).asResult();
         } catch (Exception e) {
@@ -145,7 +145,7 @@ public class FlowController {
     public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("getAttackTop params: request = {}", request);
+                log.info("getAttackTop params: request = {}", request);
             }
             return flowQueryService.getAttackTop(request).asResult();
 
@@ -161,7 +161,7 @@ public class FlowController {
     public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("getTeamAttackAggTop params: request = {}", request);
+                log.info("getTeamAttackAggTop params: request = {}", request);
             }
             return flowQueryService.getTeamAttackAggTop(request).asResult();
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class FlowController {
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("getAttackTargetTop params: request = {}", request);
+                log.info("getAttackTargetTop params: request = {}", request);
             }
             return flowQueryService.getAttackTargetTop(request).asResult();
         } catch (Exception e) {
@@ -192,7 +192,7 @@ public class FlowController {
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
         try {
             if (debugLogFlag) {
-                log.debug("getAttackTypeTop params: request = {}", request);
+                log.info("getAttackTypeTop params: request = {}", request);
             }
             return flowQueryService.getAttackTypeTop(request).asResult();
         } catch (Exception e) {

@@ -58,7 +58,7 @@ public class DeviceLogController {
     @ApiOperation(value = "上报单条设备日志")
     public ServiceResult<Boolean> reportDeviceLog(@RequestBody @NonNull DeviceLogBO logData) {
         if (FlowController.debugLogFlag) {
-            log.debug("device log: {}", JsonCommon.stringify(logData));
+            log.info("device log: {}", JsonCommon.stringify(logData));
         }
 
         // TODO:根据日志类型进行数据格式转换
@@ -91,7 +91,7 @@ public class DeviceLogController {
     @ApiOperation(value = "上报单条设备日志")
     public ServiceResult<Boolean> mockForward(@RequestBody @NonNull DeviceLogBO logData) {
         if (FlowController.debugLogFlag) {
-            log.debug("device log: {}", JsonCommon.stringify(logData));
+            log.info("device log: {}", JsonCommon.stringify(logData));
         }
 
         // TODO:根据日志类型进行数据格式转换
@@ -112,7 +112,7 @@ public class DeviceLogController {
     @ApiOperation(value = "查询日志统计指标")
     public ServiceResult<MetricVO> getMetrics(@RequestParam("metric") @NonNull String metric, @RequestParam("device_type") @NonNull String deviceType) {
         if (FlowController.debugLogFlag) {
-            log.debug("getMetrics metric = {}, deviceType = {}", metric, deviceType);
+            log.info("getMetrics metric = {}, deviceType = {}", metric, deviceType);
         }
         String[] deviceTypes = Arrays.stream(deviceType.split(",")).map(String::trim).toArray(String[]::new);
         Map<String, Long> result = deviceLogService.statisticByLogType(metric, deviceTypes);
@@ -132,7 +132,7 @@ public class DeviceLogController {
                                  @RequestParam(value = "page_size", defaultValue = "100") @Max(1000) @Min(1) Integer pageSize,
                                  @RequestParam(value = "page_index", defaultValue = "1") @Min(1) Integer pageIndex) {
         if (FlowController.debugLogFlag) {
-            log.debug("queryLogs timeStart = {}, timeEnd = {}, ip = {}, type = {}, logType = {}, pageSize = {}, pageIndex = {}", timeStart, timeEnd, ip, type, logType, pageSize, pageIndex);
+            log.info("queryLogs timeStart = {}, timeEnd = {}, ip = {}, type = {}, logType = {}, pageSize = {}, pageIndex = {}", timeStart, timeEnd, ip, type, logType, pageSize, pageIndex);
         }
         DeviceLogQueryRequest req = DeviceLogQueryRequest.builder()
                 .timeEnd(timeEnd)
