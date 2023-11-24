@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.collection.service;
 import cn.cyberpeace.mp.collection.model.log.NetworkAssessmentLogPo;
 import cn.cyberpeace.mp.collection.service.repo.NetworkAssessmentLogRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,5 +36,9 @@ public class NetworkAssessmentLogService {
         }
 
         return networkAssessmentLogRepo.findByReportTimeBetweenOrderByReportTimeDesc(startTime, endTime);
+    }
+
+    public Page<NetworkAssessmentLogPo> page(PageRequest pageRequest) {
+        return networkAssessmentLogRepo.findAll(pageRequest);
     }
 }

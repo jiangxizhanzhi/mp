@@ -19,11 +19,17 @@ public class NetworkLogQuery {
 
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @ApiModelProperty(value = "开始时间")
+    @ApiModelProperty(value = "开始时间, 已废弃")
     private String startTime;
 
-    @ApiModelProperty(value = "结束时间")
+    @ApiModelProperty(value = "结束时间， 已废弃")
     private String endTime;
+
+    @ApiModelProperty(value = "分页大小")
+    private Integer pageSize;
+
+    @ApiModelProperty(value = "页码")
+    private Integer page;
 
 
     public LocalDateTime getEndTime() {

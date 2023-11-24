@@ -5,22 +5,20 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.model.log.NetworkAssessmentLogPo;
 import cn.cyberpeace.mp.collection.service.NetworkAssessmentLogService;
 import cn.cyberpeace.mp.collectionapi.bo.NetworkAssessmentLogDto;
-import cn.cyberpeace.mp.collectionapi.bo.NetworkAssessmentLogScreenDto;
 import cn.cyberpeace.mp.collectionapi.request.NetworkLogQuery;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * @ClassName NetworkAssessmentLogController
@@ -49,19 +47,17 @@ public class NetworkAssessmentLogController {
     }
 
     @PostMapping("/list")
-    public ServiceResult<List<NetworkAssessmentLogScreenDto>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
+    public ServiceResult<Page<NetworkAssessmentLogPo>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
         if (FlowController.debugLogFlag) {
             log.info("listByTime networkLogQuery = {}", networkLogQuery);
         }
-        LocalDateTime startTime = networkLogQuery.getStartTime();
-        LocalDateTime endTime = networkLogQuery.getEndTime();
-        List<NetworkAssessmentLogPo> networkAssessmentLogPoList = networkAssessmentLogService.listLogByTime(startTime, endTime);
-        if (CollectionUtils.isEmpty(networkAssessmentLogPoList)) {
-            return ServiceResult.success(new ArrayList<>());
-        } else {
-            return ServiceResult.success(networkAssessmentLogPoList.stream().map(NetworkAssessmentLogScreenDto::getFromPo)
-                    .collect(Collectors.toList()));
-        }
+        Integer page = Optional.of(networkLogQuery).map(NetworkLogQuery::getPage).orElse(0);
+        Integer pageSize = Optional.of(networkLogQuery).map(NetworkLogQuery::getPageSize).orElse(10);
+
+        Sort.TypedSort<NetworkAssessmentLogPo> typedSort = Sort.sort(NetworkAssessmentLogPo.class);
+        Sort sort = typedSort.by(NetworkAssessmentLogPo::getReportTime).descending();
+        PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
+        return ServiceResult.success(networkAssessmentLogService.page(pageRequest));
     }
 
 }
