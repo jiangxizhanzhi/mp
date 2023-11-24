@@ -39,8 +39,9 @@ public class NetworkAssessmentLogController {
     @PostMapping("")
     @ApiOperation(value = "上报单条设备日志")
     public ServiceResult<Boolean> reportNetworkAssessmentLog(@RequestBody @NonNull NetworkAssessmentLogDto networkAssessmentLogDto) {
-
-        log.info("network log: {}", JsonCommon.stringify(networkAssessmentLogDto));
+        if (FlowController.debugLogFlag) {
+            log.debug("network log: {}", JsonCommon.stringify(networkAssessmentLogDto));
+        }
 
         NetworkAssessmentLogPo networkAssessmentLogPo = NetworkAssessmentLogDto.convertToPo(networkAssessmentLogDto);
         networkAssessmentLogService.save(networkAssessmentLogPo);
@@ -49,6 +50,9 @@ public class NetworkAssessmentLogController {
 
     @PostMapping("/list")
     public ServiceResult<List<NetworkAssessmentLogScreenDto>> listByTime(@RequestBody @NonNull NetworkLogQuery networkLogQuery) {
+        if (FlowController.debugLogFlag) {
+            log.debug("listByTime networkLogQuery = {}", networkLogQuery);
+        }
         LocalDateTime startTime = networkLogQuery.getStartTime();
         LocalDateTime endTime = networkLogQuery.getEndTime();
         List<NetworkAssessmentLogPo> networkAssessmentLogPoList = networkAssessmentLogService.listLogByTime(startTime, endTime);

@@ -30,6 +30,9 @@ public class LogController {
     @GetMapping("/list")
     @ApiOperation(value = "查询日志列表")
     public ListObjServiceResult<LogVO> list(LogQueryPageRequest request, @RequestBody LogQueryPageRequest bodyParams) {
+        if (FlowController.debugLogFlag) {
+            log.debug("list params: request = {}, bodyParams = {}", request, bodyParams);
+        }
         request.setAttackIps(bodyParams.getAttackIps());
         request.setIps(bodyParams.getIps());
         return logQueryService.queryContestLog(request).asResult();
@@ -38,7 +41,9 @@ public class LogController {
     @PostMapping("/report")
     @ApiOperation(value = "日志上报")
     public ServiceResult<Boolean> report(@RequestBody LogReportBO logReportBO) {
-        log.info("attack log: {}", JsonCommon.stringify(logReportBO));
+        if (FlowController.debugLogFlag) {
+            log.debug("attack log: {}", JsonCommon.stringify(logReportBO));
+        }
         logQueryService.addContestLog(logReportBO);
         return new ServiceResult<>(true).asResult();
     }
@@ -46,7 +51,9 @@ public class LogController {
     @PostMapping("/report_run")
     @ApiOperation(value = "内部日志上报")
     public ServiceResult<Boolean> report(@RequestBody RuntimeLogReportBO runtimeLogReportBO) {
-        log.info("device log: {}", JsonCommon.stringify(runtimeLogReportBO));
+        if (FlowController.debugLogFlag) {
+            log.debug("device log: {}", JsonCommon.stringify(runtimeLogReportBO));
+        }
         logQueryService.addRuntimeLog(runtimeLogReportBO);
         return new ServiceResult<>(true).asResult();
     }
@@ -54,6 +61,9 @@ public class LogController {
     @GetMapping("/query_by_index")
     @ApiOperation(value = "分页查询指定索引")
     public ListObjServiceResult<Map> queryByIndex(IndexQueryRequest request) {
+        if (FlowController.debugLogFlag) {
+            log.debug("queryByIndex params: request = {}", request);
+        }
         return logQueryService.queryByIndex(request).asResult();
     }
 }

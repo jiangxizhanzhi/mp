@@ -39,6 +39,8 @@ import java.util.ArrayList;
 @Api(value = "", tags = "")
 public class FlowController {
 
+    public static Boolean debugLogFlag = false;
+
     @Resource
     private FlowQueryService flowQueryService;
 
@@ -47,9 +49,19 @@ public class FlowController {
 
     public static int start = 1;
 
+    @PostMapping("/log_level")
+    @ApiOperation(value = "更新debugLogFlag")
+    public ServiceResult<Boolean> updateDebugLogFlag() {
+        debugLogFlag = !debugLogFlag;
+        return ServiceResult.success(debugLogFlag);
+    }
+
     @GetMapping("/attack_trend")
     @ApiOperation(value = "总体攻击趋势(统计十分钟内的攻击次数)")
     public ServiceResult<TrendVO> attackTrend() {
+        if (debugLogFlag) {
+            log.debug("in attack trend");
+        }
         // 默认分六段
         return flowQueryService.queryAttackTrend().asResult();
     }
@@ -58,6 +70,9 @@ public class FlowController {
     @ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
     public ListObjServiceResult<TrendVO> attackLevelTrend() {
         try {
+            if (debugLogFlag) {
+                log.debug("in attack level trend");
+            }
             // 默认分六段
             return flowQueryService.queryLevelTrend().asResult();
         } catch (Exception e) {
@@ -70,6 +85,9 @@ public class FlowController {
     @ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
     public ListObjServiceResult<TrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("teamAttackTrend params: request = {}", request);
+            }
             return flowQueryService.teamAttackTrend(request).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -80,6 +98,9 @@ public class FlowController {
     @GetMapping("/attack_total_count")
     @ApiOperation(value = "总攻击次数")
     public ServiceResult<Long> attackTotalCount() {
+        if (debugLogFlag) {
+            log.debug("in attack total count");
+        }
         if (start != 1) {
             return new ServiceResult<>(0L).asResult();
         }
@@ -92,6 +113,9 @@ public class FlowController {
             @RequestParam(required = false, defaultValue = "1") Integer pageNum,
             @RequestParam(required = false, defaultValue = "10") Integer pageSize) {
         try {
+            if (debugLogFlag) {
+                log.debug("attackFlowList params: pageNum = {}, pageSize = {}", pageNum, pageSize);
+            }
             if (start != 1) {
                 return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FlowVO>(), 0)).asResult();
             }
@@ -106,6 +130,9 @@ public class FlowController {
     @ApiOperation(value = "获取指定ip集合(队伍 or 设备)攻击次数与流量大小")
     public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("getAttackFlow params: request = {}", request);
+            }
             return flowQueryService.getAttackFlow(request).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -117,6 +144,9 @@ public class FlowController {
     @ApiOperation(value = "全局攻防榜，获取4种top数据,(降序)默认全部")
     public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("getAttackTop params: request = {}", request);
+            }
             return flowQueryService.getAttackTop(request).asResult();
 
         } catch (Exception e) {
@@ -130,6 +160,9 @@ public class FlowController {
     @ApiOperation(value = "全局攻防榜，获取战队top聚合数据,(降序)默认全部")
     public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("getTeamAttackAggTop params: request = {}", request);
+            }
             return flowQueryService.getTeamAttackAggTop(request).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -142,6 +175,9 @@ public class FlowController {
     @ApiOperation(value = "选手攻击榜，获取攻击目标top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("getAttackTargetTop params: request = {}", request);
+            }
             return flowQueryService.getAttackTargetTop(request).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -155,6 +191,9 @@ public class FlowController {
     @ApiOperation(value = "选手攻击榜，获取攻击手法top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
         try {
+            if (debugLogFlag) {
+                log.debug("getAttackTypeTop params: request = {}", request);
+            }
             return flowQueryService.getAttackTypeTop(request).asResult();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
