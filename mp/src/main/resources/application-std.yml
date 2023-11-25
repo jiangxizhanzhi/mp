@@ -244,7 +244,7 @@ mp:
     public-net-proxy-ip: ${mp.sceneplugincloud.ext-var.public-net-proxy-ip}
     public-net-proxy-port: ${mp.sceneplugincloud.ext-var.public-net-proxy-port}
     gateway-types: ${mp.sceneplugincloud.ext-var.gateway-types}
-    cpcloud-server-timeout: 600000
+    cpcloud-server-timeout: ${mp.sceneplugincloud.ext-var.cpcloud-server-timeout}
     cpcloud-http-pool-size: ${mp.sceneplugincloud.ext-var.cpcloud-http-pool-size}
     initiate-pool-size: ${mp.sceneplugincloud.ext-var.initiate-pool-size}
     initiate-hold-size: ${mp.sceneplugincloud.ext-var.initiate-hold-size}
