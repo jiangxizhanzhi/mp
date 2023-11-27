@@ -245,12 +245,13 @@ mp:
     public-net-proxy-ip: ${mp.sceneplugincloud.ext-var.public-net-proxy-ip}
     public-net-proxy-port: ${mp.sceneplugincloud.ext-var.public-net-proxy-port}
     gateway-types: ${mp.sceneplugincloud.ext-var.gateway-types}
-    cpcloud-server-timeout: 600000
+    cpcloud-server-timeout: ${mp.sceneplugincloud.ext-var.cpcloud-server-timeout}
     cpcloud-http-pool-size: ${mp.sceneplugincloud.ext-var.cpcloud-http-pool-size}
     initiate-pool-size: ${mp.sceneplugincloud.ext-var.initiate-pool-size}
     initiate-hold-size: ${mp.sceneplugincloud.ext-var.initiate-hold-size}
     create-pool-size: ${mp.sceneplugincloud.ext-var.create-pool-size}
     create-hold-size: ${mp.sceneplugincloud.ext-var.create-hold-size}
+    delete-pool-size: ${mp.sceneplugincloud.ext-var.delete-pool-size}
     cloud-heavy-concurrent-delay-enable: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay-enable}
     cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay}
     scene-create-install-unzip-apk: ${mp.sceneplugincloud.ext-var.scene-create-install-unzip-apk}
