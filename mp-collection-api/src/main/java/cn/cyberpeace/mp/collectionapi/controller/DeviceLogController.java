@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.collection.config.CollectionConfig;
@@ -76,13 +77,12 @@ public class DeviceLogController {
             return new ServiceResult<>(true).asResult();
         } catch (Exception e) {
             log.error("save device log error", e);
-            return new ServiceResult<>(false).asResult();
+            return new ServiceResult<>(false, BaseErrorCode.ERROR, e.getMessage()).asResult();
         }
     }
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
-        client.post("/modify/stat/log/", logBO, null, null, 10_000);
         testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=36af2bf41995c3207c62e39c1914b5ec", logBO, null, null, 10_000);
         // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
     }

@@ -9,7 +9,7 @@ ip:
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
   mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
   app: ${APP_IP:127.0.0.1}       # 上层业务服务IP
-  ad: ${AD_IP:10.30.133.13}
+  ad: ${AD_IP:10.2.65.1}
 port:
   self-callback: ${MP_SELF_PORT:8080}
   log-es: ${LOG_ES_PORT:9200}
