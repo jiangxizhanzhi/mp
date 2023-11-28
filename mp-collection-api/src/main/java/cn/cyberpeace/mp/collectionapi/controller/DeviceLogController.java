@@ -83,7 +83,7 @@ public class DeviceLogController {
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
-        testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=36af2bf41995c3207c62e39c1914b5ec", logBO, null, null, 10_000);
+        testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=4b5d6dbdde4f98dc0641391a8d059cc2", logBO, null, null, 10_000);
         // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
     }
 
