@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.base.util.thread.ThreadPoolUtils;
 import cn.cyberpeace.mp.collection.config.CollectionConfig;
 import cn.cyberpeace.mp.collection.model.log.DeviceLog;
 import cn.cyberpeace.mp.collection.model.log.PageableLogs;
@@ -85,7 +86,7 @@ public class DeviceLogController {
         }
         try {
             deviceLogService.saveDocument(deviceLog);
-            forwardLog(logData);
+            ThreadPoolUtils.DEVICE_PUSH_POOL.submit(() -> forwardLog(logData));
             return new ServiceResult<>(true).asResult();
         } catch (Exception e) {
             log.error("save device log error", e);
