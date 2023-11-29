@@ -39,6 +39,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@Deprecated
 public class ContestLogService {
     @Resource(name = "restHighLevelClientImpl")
     private IRestHighLevelClient restHighLevelClient;

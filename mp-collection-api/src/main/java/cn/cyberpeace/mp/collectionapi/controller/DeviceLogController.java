@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.collection.config.CollectionConfig;
 import cn.cyberpeace.mp.collection.model.log.DeviceLog;
 import cn.cyberpeace.mp.collection.model.log.PageableLogs;
@@ -18,7 +19,12 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -28,6 +34,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,6 +54,8 @@ public class DeviceLogController {
      */
     private HttpClient testAdClient;
 
+    private static final Object DEFAULT_MESSAGE_RETURN = new Object();
+
     @PostConstruct
     private void initHttpClient() {
         client = HttpClient.builder().configServer(config.getApp()).build();
@@ -65,12 +74,15 @@ public class DeviceLogController {
         // TODO:根据日志类型进行数据格式转换
         DeviceLog deviceLog = BeanUtil.copyProperties(logData, DeviceLog.class, "message");
         deviceLog.setTimestamp(System.currentTimeMillis());
-        if (logData.getMessage() instanceof String) {
-            deviceLog.setMessage(logData.getMessage());
-        } else {
-            deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
+        if (Objects.nonNull(logData.getMessage())) {
+            if (logData.getMessage() instanceof String) {
+                if (JsonUtils.isValidJson(logData.getMessage().toString())) {
+                    deviceLog.setMessage(logData.getMessage());
+                }
+            } else {
+                deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
+            }
         }
-
         try {
             deviceLogService.saveDocument(deviceLog);
             forwardLog(logData);
@@ -123,7 +135,6 @@ public class DeviceLogController {
 
     @GetMapping("")
     @ApiOperation(value = "查询设备上报的日志信息")
-    // public DeviceLogVO queryLogs(@RequestBody @NonNull DeviceLogQueryRequest req) {
     public DeviceLogVO queryLogs(@RequestParam(value = "time_start", required = false) String timeStart,
                                  @RequestParam(value = "time_end", required = false) String timeEnd,
                                  @RequestParam(required = false) String ip,
@@ -150,7 +161,14 @@ public class DeviceLogController {
             req.setPageIndex(1);
         }
         PageableLogs logs = deviceLogService.searchLog(req);
-        List<Object> rawLogs = logs.getData().stream().map(DeviceLog::getMessage).map(Object::toString).map(JSON::parse).collect(Collectors.toList());
+        List<Object> rawLogs = logs.getData().stream().map(DeviceLog::getMessage).map(Object::toString).map(str -> {
+            try {
+                return JSON.parse(str);
+            } catch (Exception e) {
+                log.error(String.format("convert message to JSON Object fail: %s", str));
+                return DEFAULT_MESSAGE_RETURN;
+            }
+        }).collect(Collectors.toList());
         DeviceLogVO result = BeanUtil.copyProperties(logs, DeviceLogVO.class, "data");
         result.setData(rawLogs);
         return result;

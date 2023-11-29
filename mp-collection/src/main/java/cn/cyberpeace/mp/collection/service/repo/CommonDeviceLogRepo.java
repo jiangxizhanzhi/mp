@@ -5,5 +5,5 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Component;
 
 @Component
-public interface CommonDeviceLogRepo  extends ElasticsearchRepository<DeviceLog,String> {
+public interface CommonDeviceLogRepo extends ElasticsearchRepository<DeviceLog,String>, CommonDeviceLogRepoCustom{
 }

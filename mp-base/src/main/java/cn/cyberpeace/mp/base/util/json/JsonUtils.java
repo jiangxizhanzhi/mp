@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class JsonUtils {
 
     public static final String DEFAULT_DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
@@ -52,6 +54,16 @@ public class JsonUtils {
         var objectMapper = createDefaultObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
+    }
+
+    public static boolean isValidJson(String jsonString) {
+        try {
+            JsonNode jsonNode = jsonHandler.parseTree(jsonString);
+            return true;
+        } catch (Exception e) {
+            log.error(String.format("log is not json format: %s", jsonString), e.getMessage());
+            return false;
+        }
     }
 
     public static <T> T parse(String content, Class<T> valueType) {

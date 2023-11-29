@@ -241,7 +241,7 @@ public class LocalCallServerListener extends FileModifyListener {
         }
 
         try {
-            method.invoke(serverBean, args);
+            method.invoke(serverBean, (Object[]) args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             log.error("Local call method({}) args({}) on class({}) error: {}", formatMethodName, args, serverClass, e);
         }
