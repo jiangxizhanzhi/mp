@@ -14,7 +14,7 @@ import java.util.List;
  * @Date 2023/11/16 19:44
  **/
 @Repository
-public interface NetworkAssessmentLogRepo extends ElasticsearchRepository<NetworkAssessmentLogPo,String> {
+public interface NetworkAssessmentLogRepo extends ElasticsearchRepository<NetworkAssessmentLogPo,String>, NetworkAssessmentLogRepoCustom {
 
     List<NetworkAssessmentLogPo> findByReportTimeBetweenOrderByReportTimeDesc(LocalDateTime startTime, LocalDateTime endTime);
 
