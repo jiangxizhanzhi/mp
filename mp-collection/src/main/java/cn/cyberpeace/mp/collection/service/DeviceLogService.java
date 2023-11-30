@@ -36,8 +36,8 @@ public class DeviceLogService {
 
 
     // 新增文档
-    public DeviceLog saveDocument(DeviceLog deviceLog) {
-        return commonDeviceLogRepo.save(deviceLog);
+    public Iterable<DeviceLog>  saveDocuments(Iterable<DeviceLog> deviceLogList) {
+        return commonDeviceLogRepo.saveAll(deviceLogList);
     }
 
     /**

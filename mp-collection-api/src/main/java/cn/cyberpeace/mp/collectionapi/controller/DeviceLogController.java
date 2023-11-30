@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,10 +33,16 @@ import javax.annotation.Resource;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,7 +55,7 @@ public class DeviceLogController {
     @Resource
     private CollectionConfig config;
 
-    private HttpClient client;
+    private static final List<DeviceLog> DEVICE_BUFFER = new ArrayList<DeviceLog>();
 
     /**
      * 测试环境业务AD client, 也需要推一下日志
@@ -58,13 +65,32 @@ public class DeviceLogController {
     private static final Object DEFAULT_MESSAGE_RETURN = new Object();
 
     @PostConstruct
-    private void initHttpClient() {
-        client = HttpClient.builder().configServer(config.getApp()).build();
-        testAdClient = HttpClient.builder().configServer(config.getAdApp()).build();
+    private void init() {
+        testAdClient = HttpClient.builder().configServer(config.getAdApp()).configMaxConnTotal(100).configMaxConnPerRoute(75).configTimeout(30_000).build();
+
+        // 每两秒执行一次，或者size>100 保存日志
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            synchronized (DEVICE_BUFFER) {
+                if (!CollectionUtils.isEmpty(DEVICE_BUFFER)) {
+                    deviceLogService.saveDocuments(DEVICE_BUFFER);
+                    DEVICE_BUFFER.clear();
+                }
+            }
+        }, 1, 2, TimeUnit.SECONDS);
+
     }
 
 
 
+    /**
+     *  DEVICE_BUFFER 收集日志。
+     *  如果缓存长度大于100或者等待2s后，就批量存储
+     * @author
+     * @date 16:46 2023/11/30
+     * @param logData
+     * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.lang.Boolean>
+     **/
     @PostMapping("")
     @ApiOperation(value = "上报单条设备日志")
     public ServiceResult<Boolean> reportDeviceLog(@RequestBody @NonNull DeviceLogBO logData) {
@@ -85,11 +111,22 @@ public class DeviceLogController {
             }
         }
         try {
-            deviceLogService.saveDocument(deviceLog);
-            ThreadPoolUtils.DEVICE_PUSH_POOL.submit(() -> forwardLog(logData));
+            // 有几次设备日志发送量过大挤占了连接池，导致其他接口连接超时，这边由于接口都对接好了。正常设备上报日志应该ok
+            synchronized (DEVICE_BUFFER) {
+                DEVICE_BUFFER.add(deviceLog);
+                if (DEVICE_BUFFER.size() > 100) {
+                    deviceLogService.saveDocuments(DEVICE_BUFFER);
+                    DEVICE_BUFFER.clear();
+                }
+            }
+            CompletableFuture.runAsync(() -> forwardLog(logData), ThreadPoolUtils.DEVICE_PUSH_POOL)
+                    .exceptionally(error -> {
+                        log.error("推送日志异常", error);
+                        return null;
+                    });
             return new ServiceResult<>(true).asResult();
         } catch (Exception e) {
-            log.error("save device log error", e);
+            log.error("save device log error");
             return new ServiceResult<>(false, BaseErrorCode.ERROR, e.getMessage()).asResult();
         }
     }
@@ -113,7 +150,7 @@ public class DeviceLogController {
         deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
 
         try {
-            deviceLogService.saveDocument(deviceLog);
+            deviceLogService.saveDocuments(Collections.singletonList(deviceLog));
             return new ServiceResult<>(true).asResult();
         } catch (Exception e) {
             log.error("save device log error", e);

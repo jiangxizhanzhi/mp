@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ThreadPoolUtils {
 
-    public static final ThreadPoolExecutor DEVICE_PUSH_POOL = new ThreadPoolExecutor(5, 50, 2, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(1000), r -> {
+    public static final ThreadPoolExecutor DEVICE_PUSH_POOL = new ThreadPoolExecutor(30, 400, 10, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(10000), r -> {
                 Thread namedThread = new Thread(r);
                 namedThread.setName(String.format("device_log_push_thread-%d", namedThread.getId()));
                 return namedThread;

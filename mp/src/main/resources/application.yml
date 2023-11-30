@@ -8,8 +8,8 @@ ip:
   es: 10.66.10.110                # MP新中台ES地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
   mp: 10.100.1.12:8001                       # MP中台地址
-  app: ${APP_IP:10.2.65.1}       # 上层业务服务IP
-  ad: ${AD_IP:10.2.65.1}
+  app: ${APP_IP:10.66.20.1}       # 上层业务服务IP
+  ad: ${AD_IP:10.66.20.1}
 port:
   self-callback: 8080
   app: ${APP_PORT:8080}         # 上层业务服务端口
