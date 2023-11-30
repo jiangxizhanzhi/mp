@@ -95,9 +95,6 @@ public class FlowInfoService {
 
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
-
-//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
-
         SearchResponse response = restHighLevelClient.search(searchRequest);
 
         List<TeamFlowInfo> teamFlowInfos = new ArrayList<>();
@@ -137,8 +134,6 @@ public class FlowInfoService {
 
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
-
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (response.getHits().getTotalHits().value < 1L) {
             return new ServiceResult<>(new HashMap<>());
@@ -146,17 +141,6 @@ public class FlowInfoService {
         var flowDetail = JsonCommon.parseMap(response.getHits().getAt(0).getSourceAsString());
         return new ServiceResult<>(flowDetail);
     }
-
-    //    /**
-//     * 删除从开始时间到结束时间内的文档
-//     * @param
-//     * @return
-//     */
-//    @Override
-//    public void deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
-//        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
-//        restHighLevelClient.allDeleteByQuery(deleteByQueryRequest);
-//    }
 
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(pageFlowRequest.getSourceIps())) {
@@ -850,7 +834,6 @@ public class FlowInfoService {
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         return restHighLevelClient.search(searchRequest);
     }
@@ -877,7 +860,6 @@ public class FlowInfoService {
 
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-//        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         return restHighLevelClient.search(searchRequest);
     }
