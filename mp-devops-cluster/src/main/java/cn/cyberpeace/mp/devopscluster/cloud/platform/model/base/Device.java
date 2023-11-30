@@ -194,4 +194,9 @@ public class Device extends BaseCloudPlatformResult {
     }
 
     private Boolean supportExport;
+
+    /**
+     * 业务标签
+     */
+    private Integer businessTag;
 }

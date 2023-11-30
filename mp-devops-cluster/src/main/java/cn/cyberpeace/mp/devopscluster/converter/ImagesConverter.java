@@ -147,6 +147,7 @@ public class ImagesConverter implements BaseConverter{
                             imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
                         }
                     }
+                    imageConvertModel.setBusinessTag(supportExports.get(imageConvertModel.getUuid()).getBusinessTag());
                 }
             }
         }
@@ -164,6 +165,7 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setBusinessTag(request.getBusinessTag());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -174,6 +176,8 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertModel findByUuid(String id) {
         Device device = deviceService.findByUuid(id);
+        var m = deviceTargetMapper.findByUuid(device.getUuid());
+        device.setBusinessTag(m.getBusinessTag());
         return wrapperImageConvertModel(device);
     }
 
@@ -200,6 +204,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        device.setBusinessTag(request.getBusinessTag());
         devopsTargetService.updateById(device);
     }
 
@@ -488,6 +493,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
+        imageModel.setBusinessTag(device.getBusinessTag());
         return imageModel;
     }
 

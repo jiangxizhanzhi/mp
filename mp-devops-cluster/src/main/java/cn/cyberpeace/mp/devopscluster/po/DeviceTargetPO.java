@@ -165,4 +165,10 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    /**
+     * 业务标签
+     */
+    @DefaultStr
+    private Integer businessTag;
 }

@@ -174,6 +174,7 @@ public class ImagesController {
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
+        imagesByIdVO.setBusinessTag(model.getBusinessTag());
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());
@@ -632,6 +633,7 @@ public class ImagesController {
                     .isImport(v.getIsImport())
                     .isInternal(v.getIsInternal())
                     .allowExport(true)
+                    .businessTag(v.getBusinessTag())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)

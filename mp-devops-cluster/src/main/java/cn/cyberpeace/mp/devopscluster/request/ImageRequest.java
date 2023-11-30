@@ -124,4 +124,10 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 业务标签
+     */
+    @ApiModelProperty(value = "业务标签")
+    private Integer businessTag;
 }

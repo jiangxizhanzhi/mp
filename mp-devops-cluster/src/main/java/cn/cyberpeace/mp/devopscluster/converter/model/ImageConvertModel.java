@@ -146,4 +146,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String createUserName;
 
+    /**
+     * 业务标签
+     */
+    private Integer businessTag;
+
 }
