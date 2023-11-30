@@ -35,7 +35,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -133,29 +132,11 @@ public class DeviceLogController {
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
+        if (logBO.getMessage() instanceof String) {
+            logBO.setMessage(JSON.parse(logBO.getMessage().toString()));
+        }
         testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=4b5d6dbdde4f98dc0641391a8d059cc2", logBO, null, null, 10_000);
         // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
-    }
-
-    @PostMapping("/mock")
-    @ApiOperation(value = "上报单条设备日志")
-    public ServiceResult<Boolean> mockForward(@RequestBody @NonNull DeviceLogBO logData) {
-        if (FlowController.debugLogFlag) {
-            log.info("device log: {}", JsonCommon.stringify(logData));
-        }
-
-        // TODO:根据日志类型进行数据格式转换
-        DeviceLog deviceLog = new DeviceLog();
-        BeanUtil.copyProperties(logData, deviceLog, "message");
-        deviceLog.setMessage(JSON.toJSONString(logData.getMessage()));
-
-        try {
-            deviceLogService.saveDocuments(Collections.singletonList(deviceLog));
-            return new ServiceResult<>(true).asResult();
-        } catch (Exception e) {
-            log.error("save device log error", e);
-            return new ServiceResult<>(false).asResult();
-        }
     }
 
     @GetMapping("/stat")
