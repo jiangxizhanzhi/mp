@@ -2,16 +2,15 @@ package cn.cyberpeace.mp.collection.request;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class LogQueryRequest {
     private List<String> ips;
 
-    private LocalDateTime startTime;
+    private String startTime;
 
-    private LocalDateTime endTime;
+    private String endTime;
 
     private List<Integer> severity;
 

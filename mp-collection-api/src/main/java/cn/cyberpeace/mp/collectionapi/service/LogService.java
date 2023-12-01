@@ -12,8 +12,6 @@ import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
 import cn.cyberpeace.mp.collectionapi.bo.RuntimeLogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -47,15 +45,13 @@ public class LogService {
         logQueryRequest.setPageNum(request.getPageNum());
         logQueryRequest.setPageSize(request.getPageSize());
         if (StringUtils.isNotEmpty(request.getStartTime())) {
-            logQueryRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+            logQueryRequest.setStartTime(request.getStartTime());
 
         }
         if (StringUtils.isNotEmpty(request.getEndTime())) {
-            logQueryRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+            logQueryRequest.setEndTime(request.getEndTime());
         }
-        logQueryRequest.setSeverity(request.getSeverity());
         logQueryRequest.setIps(request.getIps());
-        logQueryRequest.setAttackIps(request.getAttackIps());
         var result = contestLogService.queryContestLog(logQueryRequest);
         var res = result.getObjs().stream()
                 .map(contestLogModel -> {
@@ -65,18 +61,6 @@ public class LogService {
                     }
                     logVO.setIp(contestLogModel.getIp());
                     logVO.setContent(contestLogModel.getMessage().toString());
-
-                    // TODO: 2023/11/15 目前设备上报信息里面，没有这个字段，先mock一下
-                    if (CollectionUtils.isNotEmpty(request.getAttackIps())) {
-                        logVO.setAttackIp(request.getAttackIps().get(RandomUtils.nextInt(0, request.getAttackIps().size())));
-                    } else {
-                        logVO.setAttackIp("10.100.7.1");
-                    }
-                    if (CollectionUtils.isNotEmpty(request.getSeverity())) {
-                        logVO.setSeverity(request.getSeverity().get(RandomUtils.nextInt(0, request.getSeverity().size())));
-                    } else {
-                        logVO.setSeverity(0);
-                    }
 
                     return logVO;
                 }).collect(Collectors.toList());

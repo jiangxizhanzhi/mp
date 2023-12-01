@@ -21,10 +21,4 @@ public class LogQueryPageRequest {
 
     @ApiModelProperty(value = "设备ip集合")
     private List<String> ips;
-
-    @ApiModelProperty(value = "攻击源ip(战队ip)集合")
-    private List<String> attackIps;
-
-    @ApiModelProperty(value = "日志安全等级集合")
-    private List<Integer> severity;
 }

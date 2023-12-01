@@ -33,11 +33,11 @@ public class LogController {
         if (FlowController.debugLogFlag) {
             log.info("list params: request = {}, bodyParams = {}", request, bodyParams);
         }
-        request.setAttackIps(bodyParams.getAttackIps());
         request.setIps(bodyParams.getIps());
         return logQueryService.queryContestLog(request).asResult();
     }
 
+    @Deprecated
     @PostMapping("/report")
     @ApiOperation(value = "日志上报")
     public ServiceResult<Boolean> report(@RequestBody LogReportBO logReportBO) {
@@ -48,6 +48,7 @@ public class LogController {
         return new ServiceResult<>(true).asResult();
     }
 
+    @Deprecated
     @PostMapping("/report_run")
     @ApiOperation(value = "内部日志上报")
     public ServiceResult<Boolean> report(@RequestBody RuntimeLogReportBO runtimeLogReportBO) {
