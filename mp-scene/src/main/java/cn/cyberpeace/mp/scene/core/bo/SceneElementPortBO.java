@@ -25,16 +25,16 @@ public class SceneElementPortBO extends BaseSceneElementPortBO<SceneElementPortM
         // fromModel 和 toModel 得互斥,否则在并发下会出现 model 中 port_id = id 的情况
         // 因为 fromModel 里面id的值设置 , 分两步 , 第一步会把数据库id复制到bo的id,第二步执行 setId(obj.getPortId());
         // 第一步和第二步之间执行 toModel 就会有问题了
-        synchronized (object) {
+//        synchronized (object) {
             super.fromModel(obj, ignoreFields);
-        }
+//        }
     }
 
     @Override
     public SceneElementPortModel toModel(String... ignoreFields) {
-        synchronized (object) {
+//        synchronized (object) {
             return super.toModel(ignoreFields);
-        }
+//        }
     }
 
 }
