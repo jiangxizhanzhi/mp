@@ -245,11 +245,11 @@ mp:
     public-net-proxy-port:
     gateway-types: 2,3
     cpcloud-server-timeout: 600000
-    cpcloud-http-pool-size: 200
-    initiate-pool-size: 10
-    initiate-hold-size: 20000
-    create-pool-size: 10
-    create-hold-size: 20000
+    cpcloud-http-pool-size: ${mp.sceneplugincloud.ext-var.cpcloud-http-pool-size}
+    initiate-pool-size: ${mp.sceneplugincloud.ext-var.initiate-pool-size}
+    initiate-hold-size: ${mp.sceneplugincloud.ext-var.initiate-hold-size}
+    create-pool-size: ${mp.sceneplugincloud.ext-var.create-pool-size}
+    create-hold-size: ${mp.sceneplugincloud.ext-var.create-hold-size}
     cloud-heavy-concurrent-delay-enable: true
     cloud-heavy-concurrent-delay: 10
     scene-create-install-unzip-apk: true
@@ -280,13 +280,13 @@ mp:
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
   scene:
-    scene-pool-size: 100
-    scene-hold-size: 10000
-    element-pool-size: 100
-    element-hold-size: 10000
+    scene-pool-size: ${mp.scene.ext-var.scene-pool-size}
+    scene-hold-size: ${mp.scene.ext-var.scene-hold-size}
+    element-pool-size: ${mp.scene.ext-var.element-pool-size}
+    element-hold-size: ${mp.scene.ext-var.element-hold-size}
     scene-handler-realtime-update: ${mp.scene.ext-var.scene-handler-realtime-update}
-    scene-process-save-realtime: true
-    element-process-save-realtime: true
+    scene-process-save-realtime: ${mp.scene.ext-var.scene-process-save-realtime}
+    element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
     dhcp-control: ${mp.scene.ext-var.dhcp-control:false}
   aggregation:
     export-image-timeout: 1200000

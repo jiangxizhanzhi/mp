@@ -75,10 +75,23 @@ mp:
     ext-var:
       gns3-ip: ${GNS3_IP:10.100.7.1}
       gns3-port: ${GNS3_PORT:8088}
+  sceneplugincloud:
+    ext-var:
+      cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
+      initiate-pool-size: ${MP_INITIATE_POOL_SIZE:100}
+      initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
+      create-pool-size: ${MP_CREATE_POOL_SIZE:10}
+      create-hold-size: ${MP_CREATE_HOLD_SIZE:20000}
   scene:
     ext-var:
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      scene-pool-size: ${MP_SCENE_POOL_SIZE:100}
+      scene-hold-size: ${MP_SCENE_HOLD_SIZE:10000}
+      element-pool-size: ${MP_ELEMENT_POOL_SIZE:100}
+      element-hold-size: ${MP_ELEMENT_HOLD_SIZE:10000}
       scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
+      scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
+      element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
 
 # for kaptcha
 #kaptcha:
