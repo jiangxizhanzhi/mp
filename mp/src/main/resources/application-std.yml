@@ -284,7 +284,7 @@ mp:
     scene-hold-size: 10000
     element-pool-size: 100
     element-hold-size: 10000
-    scene-handler-realtime-update: true
+    scene-handler-realtime-update: ${mp.scene.ext-var.scene-handler-realtime-update}
     scene-process-save-realtime: true
     element-process-save-realtime: true
     dhcp-control: ${mp.scene.ext-var.dhcp-control:false}

@@ -78,6 +78,7 @@ mp:
   scene:
     ext-var:
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
 
 # for kaptcha
 #kaptcha:
