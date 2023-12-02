@@ -1341,7 +1341,7 @@ public class InitiateHandler extends HandlerCommon {
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
         network.setDhcp(element.getDhcp());
-        network.setNetMode(element.getNetMode());
+        network.setNetMode(1);
     }
 
     protected void afterOrderElements(List<CloudPluginSceneElementBO> allElements) {
