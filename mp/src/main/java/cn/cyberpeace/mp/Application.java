@@ -26,7 +26,7 @@ public class Application {
         String port = env.getProperty("server.port", "8080");
         System.setProperty("user.timezone", "Asia/Shanghai");
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-        log.info("localdatetime : {}", LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
+        log.info("localdatetime : {}", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         try {
             log.info("Access URLs:\n----------------------------------------------------------\n\t"
