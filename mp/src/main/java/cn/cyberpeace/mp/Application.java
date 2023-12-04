@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.TimeZone;
 
 @Slf4j
 @EnableAsync
@@ -21,6 +22,9 @@ public class Application {
     public static void main(String[] args) {
         Environment env = SpringApplication.run(Application.class, args).getEnvironment();
         String port = env.getProperty("server.port", "8080");
+        System.setProperty("user.timezone", "Asia/Shanghai");
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+
         try {
             log.info("Access URLs:\n----------------------------------------------------------\n\t"
                             + "Local: \t\thttp://127.0.0.1:{}\n\t"
