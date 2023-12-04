@@ -291,7 +291,7 @@ public class TaiShiGuidesService {
         try {
             var response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             total = (int) response.getHits().getTotalHits().value;
-            Map<String, SceneElementBO> ip2ElementMap = sceneHandler.getAllIp2ElementMapForScene();
+            var mac2Elements = sceneHandler.getAllMac2ElementMapForScene();
             var eid2Elements = sceneHandler.getAllEid2ElementMap();
             for (var hit : response.getHits().getHits()) {
                 if (hit.getSourceAsMap().containsKey("agent")) {
@@ -301,7 +301,7 @@ public class TaiShiGuidesService {
                 } else {
                     var eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
                     eventData.setTimestamp(hit.getSourceAsMap().get("@timestamp").toString());
-                    var taishi = this.getEventInfoFrom(eventData, ip2ElementMap);
+                    var taishi = this.getEventInfoFrom(eventData, mac2Elements);
                     result.add(taishi);
                 }
             }
