@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 @Slf4j
@@ -24,6 +26,7 @@ public class Application {
         String port = env.getProperty("server.port", "8080");
         System.setProperty("user.timezone", "Asia/Shanghai");
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+        log.info("localdatetime : {}", LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
 
         try {
             log.info("Access URLs:\n----------------------------------------------------------\n\t"
