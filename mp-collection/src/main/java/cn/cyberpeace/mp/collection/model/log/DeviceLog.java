@@ -11,9 +11,11 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
 @Data
 @Document(indexName = DeviceLogConstant.DEVICE_LOG)
+@Setting(replicas = 0)
 @TypeAlias("device_log")
 public class DeviceLog {
     @ApiModelProperty(value = "文档索引ID，自动生成")
