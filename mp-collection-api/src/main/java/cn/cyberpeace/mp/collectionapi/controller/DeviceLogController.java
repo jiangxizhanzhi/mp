@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,21 @@ public class DeviceLogController {
     @Resource
     private CollectionConfig config;
 
+    /**
+     * 日志分sched 调度 和 dmf 扰动也叫裁决  两种日志。
+     * 业务主要需要扰动日志
+     */
+    private static final String DMF_LOG_TYPE = "dmf";
+    private static final int DEVICE_DMF_MAX_SEQ = 10;
+
     private static final List<DeviceLog> DEVICE_BUFFER = new ArrayList<DeviceLog>();
+
+    /**
+     * 选手造成的扰动日志发送数量过大，直接推送给业务，导致业务报500，
+     * 这里增加一个缓冲池。key是device_ip, 只缓存扰动日志。
+     * 当同一个设备扰动日志1s内发送数量超过10条时，指挥发送10条给业务。
+     */
+    private static final Map<String, Integer> PUSH_LOG_COUNT_BUFFER = new ConcurrentHashMap<>(8);
 
     /**
      * 测试环境业务AD client, 也需要推一下日志
@@ -66,10 +81,11 @@ public class DeviceLogController {
     @PostConstruct
     private void init() {
         testAdClient = HttpClient.builder().configServer(config.getAdApp()).configMaxConnTotal(100).configMaxConnPerRoute(75).configTimeout(30_000).build();
-
         // 每两秒执行一次，或者size>100 保存日志
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
+        ScheduledExecutorService deviceLogBufferScheduleExecutor = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService pushLogScheduleExecutor = Executors.newScheduledThreadPool(1);
+
+        deviceLogBufferScheduleExecutor.scheduleAtFixedRate(() -> {
             synchronized (DEVICE_BUFFER) {
                 if (!CollectionUtils.isEmpty(DEVICE_BUFFER)) {
                     deviceLogService.saveDocuments(DEVICE_BUFFER);
@@ -77,6 +93,15 @@ public class DeviceLogController {
                 }
             }
         }, 1, 2, TimeUnit.SECONDS);
+
+        //每过1s清理一下PUSH_LOG_COUNT_BUFFER记录的数目。因为如果扰动日志1s内，某设备记录数超过10条就不再发送了。
+        pushLogScheduleExecutor.scheduleAtFixedRate(() -> {
+            synchronized (PUSH_LOG_COUNT_BUFFER) {
+                if (!CollectionUtils.isEmpty(PUSH_LOG_COUNT_BUFFER)) {
+                    PUSH_LOG_COUNT_BUFFER.clear();
+                }
+            }
+        }, 1, 1, TimeUnit.SECONDS);
 
     }
 
@@ -132,6 +157,23 @@ public class DeviceLogController {
 
     // 把日志同时转发到上层应用，目前无性能要求所以不做异步处理
     private void forwardLog(DeviceLogBO logBO) {
+        if (Objects.isNull(logBO)) {
+            return;
+        } else if (Objects.isNull(logBO.getIp())) {
+            return;
+        } else if (DMF_LOG_TYPE.equals(logBO.getLogType())) {
+            synchronized (PUSH_LOG_COUNT_BUFFER) {
+                if (Objects.isNull(PUSH_LOG_COUNT_BUFFER.get(logBO.getIp()))) {
+                    PUSH_LOG_COUNT_BUFFER.put(logBO.getIp(), 1);
+                } else {
+                    PUSH_LOG_COUNT_BUFFER.put(logBO.getIp(), PUSH_LOG_COUNT_BUFFER.get(logBO.getIp()) + 1);
+                }
+                if (PUSH_LOG_COUNT_BUFFER.get(logBO.getIp()) > DEVICE_DMF_MAX_SEQ) {
+                    return;
+                }
+            }
+        }
+
         if (logBO.getMessage() instanceof String) {
             logBO.setMessage(JSON.parse(logBO.getMessage().toString()));
         }
