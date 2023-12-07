@@ -670,7 +670,8 @@ public class FlowInfoService {
         buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
         String ipTerm = "target_ip";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field("destination.ip");
+        long ipCount = getRequestIpCounts(esIpFieldBOS);
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field("destination.ip").size((int) ipCount);
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<CountBO> bos = Lists.newArrayList();
@@ -683,6 +684,14 @@ public class FlowInfoService {
         });
 
         return bos;
+    }
+
+    private long getRequestIpCounts(List<EsIpFieldBO> esIpFieldBOS) {
+        if (CollectionUtils.isEmpty(esIpFieldBOS)) {
+            return 0;
+        } else {
+            return esIpFieldBOS.stream().map(EsIpFieldBO::getIps).filter(ips -> !CollectionUtils.isEmpty(ips)).mapToLong(List::size).sum();
+        }
     }
 
     /**
