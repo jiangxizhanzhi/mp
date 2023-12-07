@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -9,8 +10,11 @@ import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.cscene.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
+import cn.cyberpeace.mp.cscene.response.ScreenshotDeleteConfigResponse;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -43,8 +47,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     private FileService fileService;
 
     @Autowired
-    public ScreenshotController(ScreenshotService screenshotService) {
+    private SysConfigService sysConfigService;
+
+    @Autowired
+    public ScreenshotController(ScreenshotService screenshotService, SysConfigService sysConfigService) {
         setModelService(screenshotService);
+        this.sysConfigService = sysConfigService;
     }
 
     @ApiOperation("截屏文件上传")
@@ -86,6 +94,37 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     @DeleteMapping("/batch_delete")
     public ServiceResult<Integer> batchDelete(@RequestBody @Validated ScreenshotBatchDeleteRequest request) {
         return getModelService().batchDelete(request);
+    }
+
+    @ApiOperation("查看自动删除截屏配置")
+    @GetMapping("/get_delete_config")
+    public ServiceResult<ScreenshotDeleteConfigResponse> getDeleteConfig() {
+        var conf = sysConfigService.getByKeyName("screenshot_del_conf");
+        var result = new ScreenshotDeleteConfigResponse();
+        if (conf == null) {
+            return new ServiceResult<>(result).asResult();
+        }
+        result.setMonths(Integer.parseInt(conf.getValue()));
+        return new ServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation("更新或保存自动删除截屏配置")
+    @ApiImplicitParam(name = "params", value = "配置", dataTypeClass = ScreenshotBatchDeleteRequest.class)
+    @PostMapping("/update_delete_config")
+    public ServiceResult<ScreenshotDeleteConfigResponse> updateDeleteConfig(@RequestBody ScreenshotDeleteConfigResponse params) {
+        var conf = sysConfigService.getByKeyName("screenshot_del_conf");
+        if (conf != null) {
+            conf.setValue(String.valueOf(params.getMonths()));
+            sysConfigService.update(conf);
+        } else {
+            SysConfigModel sysConfigModel = new SysConfigModel();
+            sysConfigModel.setValue(String.valueOf(params.getMonths()));
+            sysConfigModel.setInitValue(String.valueOf(params.getMonths()));
+            sysConfigModel.setKeyName("screenshot_del_conf");
+            sysConfigModel.setTenant("default");
+            sysConfigService.create(sysConfigModel);
+        }
+        return new ServiceResult<>(params).asResult();
     }
 
 }

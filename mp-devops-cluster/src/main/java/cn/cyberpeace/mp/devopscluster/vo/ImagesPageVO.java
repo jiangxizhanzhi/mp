@@ -140,4 +140,10 @@ public class ImagesPageVO extends BaseVO {
 
     @ApiModelProperty("业务标签")
     private Integer businessTag;
+
+    @ApiModelProperty(value = "引用过的次数")
+    private Integer referenceNums;
+
+    @ApiModelProperty(value = "靶标管理中启动过的时长")
+    private Integer useDuration;
 }

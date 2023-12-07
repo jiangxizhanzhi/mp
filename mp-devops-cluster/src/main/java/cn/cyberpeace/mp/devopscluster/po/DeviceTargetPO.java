@@ -169,6 +169,18 @@ public class DeviceTargetPO extends BaseModel {
     /**
      * 业务标签
      */
-    @DefaultStr
+    @DefaultInt
     private Integer businessTag;
+
+    /**
+     * 引用过的次数
+     */
+    @DefaultInt
+    private Integer referenceNums;
+
+    /**
+     * 靶标管理中启动过的时长
+     */
+    @DefaultInt
+    private Integer useDuration;
 }

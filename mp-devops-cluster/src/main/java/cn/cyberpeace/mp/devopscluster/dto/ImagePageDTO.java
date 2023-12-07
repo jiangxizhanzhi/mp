@@ -168,6 +168,22 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private String ordersType;
 
+
+    /**
+     * 业务标签
+     */
+    private Integer businessTag;
+
+    /**
+     * 引用过的次数
+     */
+    private Integer referenceNums;
+
+    /**
+     * 靶标管理中启动过的时长
+     */
+    private Integer useDuration;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

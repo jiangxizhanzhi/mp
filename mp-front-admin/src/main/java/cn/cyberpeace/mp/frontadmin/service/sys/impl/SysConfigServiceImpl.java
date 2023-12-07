@@ -53,6 +53,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     @Autowired
     private ConfigEventPublisher configEventPublisher;
 
+    @Override
+    public ObjServiceResult<SysConfigModel> create(SysConfigModel obj) {
+        getModelMapper().create(obj);
+        return new ObjServiceResult<>(obj);
+    }
 
     @Override
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {

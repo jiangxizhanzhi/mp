@@ -147,6 +147,8 @@ public class ImagesConverter implements BaseConverter{
                             imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
                         }
                     }
+                    imageConvertModel.setReferenceNums(supportExports.get(imageConvertModel.getUuid()).getReferenceNums());
+                    imageConvertModel.setUseDuration(supportExports.get(imageConvertModel.getUuid()).getUseDuration());
                     imageConvertModel.setBusinessTag(supportExports.get(imageConvertModel.getUuid()).getBusinessTag());
                 }
             }
@@ -178,6 +180,8 @@ public class ImagesConverter implements BaseConverter{
         Device device = deviceService.findByUuid(id);
         var m = deviceTargetMapper.findByUuid(device.getUuid());
         device.setBusinessTag(m.getBusinessTag());
+        device.setUseDuration(m.getUseDuration());
+        device.setReferenceNums(m.getReferenceNums());
         return wrapperImageConvertModel(device);
     }
 

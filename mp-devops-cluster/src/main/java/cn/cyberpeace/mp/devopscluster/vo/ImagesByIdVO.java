@@ -143,4 +143,16 @@ public class ImagesByIdVO extends BaseVO {
      */
     @ApiModelProperty(value = "业务标签")
     private Integer businessTag;
+
+    /**
+     * 引用过的次数
+     */
+    @ApiModelProperty(value = "引用过的次数")
+    private Integer referenceNums;
+
+    /**
+     * 靶标管理中启动过的时长
+     */
+    @ApiModelProperty(value = "靶标管理中启动过的时长")
+    private Integer useDuration;
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -199,4 +200,14 @@ public class Device extends BaseCloudPlatformResult {
      * 业务标签
      */
     private Integer businessTag;
+
+    /**
+     * 引用过的次数
+     */
+    private Integer referenceNums;
+
+    /**
+     * 靶标管理中启动过的时长
+     */
+    private Integer useDuration;
 }

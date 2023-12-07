@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -10,6 +11,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
+import cn.cyberpeace.mp.cscene.response.ScreenshotDeleteConfigResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -33,10 +36,13 @@ import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devopscluster.task.CleanJob;
 import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
@@ -100,6 +106,9 @@ public class ImagesController {
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private SysConfigService sysConfigService ;
 
     @NonNull
     private InjectFileUploadService injectFileUploadService;
@@ -175,6 +184,8 @@ public class ImagesController {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setBusinessTag(model.getBusinessTag());
+        imagesByIdVO.setReferenceNums(model.getReferenceNums());
+        imagesByIdVO.setUseDuration(model.getUseDuration());
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());
@@ -603,6 +614,37 @@ public class ImagesController {
         return new ServiceResult<>(true).asResult();
     }
 
+    @ApiOperation("查看自动删除靶标配置")
+    @GetMapping("/get_delete_config")
+    public ServiceResult<CleanJob.ImageDelConfig> getDeleteConfig() {
+        var conf = sysConfigService.getByKeyName(CleanJob.IMAGE_DEL_CONFIG);
+        if (conf == null) {
+            return new ServiceResult<>(new CleanJob.ImageDelConfig()).asResult();
+        } else {
+            var result = JsonCommon.parse(conf.getValue(), CleanJob.ImageDelConfig.class);
+            return new ServiceResult<>(result).asResult();
+        }
+    }
+
+    @ApiOperation("更新自动删除靶标配置")
+    @ApiImplicitParam(name = "params", value = "配置", dataTypeClass = CleanJob.ImageDelConfig.class)
+    @PostMapping("/update_delete_config")
+    public ServiceResult<CleanJob.ImageDelConfig> updateDeleteConfig(@RequestBody CleanJob.ImageDelConfig params) {
+        var conf = sysConfigService.getByKeyName(CleanJob.IMAGE_DEL_CONFIG);
+        if (conf != null) {
+            conf.setValue(JsonCommon.stringify(params));
+            sysConfigService.update(conf);
+        }else{
+            SysConfigModel sysConfigModel = new SysConfigModel();
+            sysConfigModel.setValue(JsonCommon.stringify(params));
+            sysConfigModel.setInitValue(sysConfigModel.getValue());
+            sysConfigModel.setKeyName(CleanJob.IMAGE_DEL_CONFIG);
+            sysConfigModel.setTenant("default");
+            sysConfigService.create(sysConfigModel);
+        }
+        return new ServiceResult<>(params).asResult();
+    }
+
     /**
      * 验证请求参数
      * @param request
@@ -634,6 +676,8 @@ public class ImagesController {
                     .isInternal(v.getIsInternal())
                     .allowExport(true)
                     .businessTag(v.getBusinessTag())
+                    .referenceNums(v.getReferenceNums())
+                    .useDuration(v.getUseDuration())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
