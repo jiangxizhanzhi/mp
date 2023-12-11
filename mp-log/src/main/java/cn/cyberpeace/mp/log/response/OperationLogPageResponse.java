@@ -18,6 +18,12 @@ import java.time.LocalDateTime;
 public class OperationLogPageResponse {
 
     /**
+     * 日志ID
+     */
+    @ApiModelProperty(value = "日志ID")
+    private String ID;
+
+    /**
      * 操作主题
      */
     @ApiModelProperty(value = "操作主题")

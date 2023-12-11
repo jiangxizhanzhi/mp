@@ -40,4 +40,6 @@ public class LogConstant {
      */
     public static final String LOG_DB_SQL = "sql";
 
+    public static final String EXCEL_EXPORT_NAME = "log.op.target.excel_name";
+
 }

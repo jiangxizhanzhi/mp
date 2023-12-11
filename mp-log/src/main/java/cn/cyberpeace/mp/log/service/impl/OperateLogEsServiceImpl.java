@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
+import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
 import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
@@ -236,4 +238,15 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
             return msgKey;
         }
     }
+
+    @Override
+    public ServiceResult<Integer> DeleteByIds(String[] ids){
+        return  null;
+    }
+
+    @Override
+    public List<OperateLogSqlModel> getLogs(String[] ids, Integer module, Integer type){
+        return  null;
+    }
+
 }

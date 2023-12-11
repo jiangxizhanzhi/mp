@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.constant.LogConstant;
@@ -119,6 +120,26 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
     }
 
     @Override
+    public ServiceResult<Integer> DeleteByIds(String[] ids){
+        return super.bulkDelete(ids);
+    }
+
+    @Override
+    public List<OperateLogSqlModel> getLogs(String[] ids, Integer module, Integer type){
+        HumanCondition humanCondition = new HumanCondition();
+        if(Objects.nonNull(module)){
+            humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, module);
+        }
+        if(Objects.nonNull(type)){
+            humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, type);
+        }
+        if (Objects.nonNull(ids) && ids.length > 0) {
+            humanCondition.filterIn(OperateLogSqlModel::getId, ids);
+        }
+        return getModelMapper().list(humanCondition);
+    }
+
+    @Override
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
 
@@ -126,7 +147,12 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
             humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
         }
 
-        if (Objects.nonNull(request.getModule())) {
+        //modules数组不为空则无视module
+        if (Objects.nonNull(request.getModules())) {
+            Integer[] modules = request.getModules();
+            humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, modules);
+        }
+        else if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
             List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
