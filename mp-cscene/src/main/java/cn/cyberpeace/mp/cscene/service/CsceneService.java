@@ -705,4 +705,48 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         return ids;
     }
+
+    public void UpdateReference(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
+        List<String> image_uuids = new ArrayList<>();
+        var elements = csceneBO.getSceneConfig().getTopology().getElements();
+        for (var element : elements) {
+            if (element.getEid() == null) {
+                try {
+                    SceneConfigDataBO sceneConfig = csceneBO.getSceneConfig();
+                    if (sceneConfig != null) {
+                        Map<String, ScenePluginDataBO> plugins = sceneConfig.getPlugins();
+                        if (plugins != null && plugins.containsKey("cpcloud")) {
+                            ScenePluginDataBO cpcloud = plugins.get("cpcloud");
+                            var cpcloudelements = cpcloud.getElements();
+                            if (cpcloudelements != null && cpcloudelements.containsKey(element.getId())) {
+                                var image = cpcloudelements.get(element.getId());
+                                if (image != null && image.get("image_uuid") != null) {
+                                    image_uuids.add(image.get("image_uuid").toString());
+                                }
+                            } else {
+                                // 处理元素不存在的情况
+                                log.error("cpcloud elements is empty");
+                            }
+                        } else {
+                            // 处理插件不存在的情况
+                            log.error("plugins is null or not contains cpcloud");
+                        }
+                    } else {
+                        // 处理场景配置不存在的情况
+                        log.error("sceneConfig is null");
+                    }
+                } catch (Exception e) {
+                    // 处理其他潜在的异常
+                    log.error("UpdateReference Exception: ", e);
+                }
+            }
+        }
+        if (!image_uuids.isEmpty()) {
+            UpdateReference bean = BeanCommon.getBean(UpdateReference.class);
+            bean.update(image_uuids);
+        }
+    }
 }

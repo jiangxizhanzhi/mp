@@ -79,10 +79,7 @@ public class OperateLogController {
     @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        if (ids.length < 1) {
-            log.error("delete logs , logs ids is empty");
-        } else
-            log.info("delete logs , logs ids is {}", JsonCommon.stringify(ids));
+
         return operateLogService.bulkDeleteByIds(ids).asResult();
     }
 

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.log.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -18,6 +19,7 @@ import cn.cyberpeace.mp.log.service.OperateLogDbService;
 import cn.cyberpeace.mp.log.service.OperateLogService;
 import com.alibaba.excel.EasyExcel;
 import com.sun.jna.platform.unix.solaris.LibKstat;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
  * @Author shgang
  * @Date 2022/9/14
  */
+@Slf4j
 @Repository
 public class OperateLogServiceImpl implements OperateLogService {
 
@@ -75,8 +78,10 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Override
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids) {
         if (ids.length < 1) {
+            log.error("delete logs , logs ids is empty");
             return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID);
         }
+        log.info("delete logs , logs ids is {}", JsonCommon.stringify(ids));
         return operateLogDbService.DeleteByIds(ids);
     }
 

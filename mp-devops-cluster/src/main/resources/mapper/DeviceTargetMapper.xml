@@ -129,7 +129,6 @@
             <if test="businessTag != null">
                 and i.business_tag = #{businessTag}
             </if>
-
         </where>
     </sql>
 
@@ -362,7 +361,7 @@
                 in_position = #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="useStatus != null">
-                use_status = #{useStatus},
+                use_status = #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="referenceStatus != null">
                 reference_status = #{referenceStatus},
@@ -398,10 +397,16 @@
                 is_init = #{isInit},
             </if>
             <if test="instanceCreateUser != null">
-                instance_create_user = #{instanceCreateUser}
+                instance_create_user = #{instanceCreateUser},
             </if>
             <if test="businessTag != null">
-                business_tag = #{businessTag}
+                business_tag = #{businessTag},
+            </if>
+            <if test="referenceNums!= null">
+                reference_nums = #{referenceNums},
+            </if>
+            <if test="useDuration != null">
+                use_duration = #{useDuration}
             </if>
         </set>
         where uuid = #{uuid}
@@ -457,7 +462,7 @@
         role, image_type,is_public, quick_create_support,
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
-        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,business_tag)
+        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,business_tag,reference_nums,use_duration)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (

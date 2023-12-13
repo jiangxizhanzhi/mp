@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.UpdateReference;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
@@ -152,6 +154,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
+        modelService.UpdateReference(csceneBO);
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null, true).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
