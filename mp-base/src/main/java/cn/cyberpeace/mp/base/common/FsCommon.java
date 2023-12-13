@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.util.remotefile.FileClient;
+import cn.cyberpeace.mp.base.util.remotefile.LfsClient;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -11,8 +12,8 @@ public class FsCommon {
 
     public static FileClient fileClient;
 
-    private FsCommon(FdfsCommon fdfsCommon) {
-        FsCommon.fileClient = FdfsCommon.fdfsClient;
+    private FsCommon(LfsCommon fdfsCommon) {
+        FsCommon.fileClient = LfsCommon.lfsClient;
     }
 
     public static String genHttpUrl(String fileKey) {
