@@ -105,6 +105,9 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "排序字段")
     private String orders;
 
+    @ApiModelProperty(value = "业务标签")
+    private Integer businessTag;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

@@ -199,6 +199,9 @@
             <if test="imageStatus != null and searchType != 0">
                 and i.image_status = #{imageStatus}
             </if>
+            <if test="businessTag != null">
+                and i.business_tag = #{businessTag}
+            </if>
             <if test="baseImageSupport != null and baseImageSupport == true">
                 and i.image_source in (2,3)
             </if>

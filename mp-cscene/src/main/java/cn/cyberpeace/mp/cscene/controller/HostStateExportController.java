@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.HostStateExportService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.UrlResource;
@@ -33,6 +35,10 @@ public class HostStateExportController {
 
 
     @ApiOperation(value = "导出cpu 内存 磁盘使用率")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "type", value = "导出的数据类型,1:cpu 内存 磁盘,2:文件变更和注册表变更,3:漏洞信息", dataTypeClass = String.class)
+    })
     @GetMapping("/file")
     public ResponseEntity<org.springframework.core.io.Resource> exportHost(String id, int type) {
         File file = null;
