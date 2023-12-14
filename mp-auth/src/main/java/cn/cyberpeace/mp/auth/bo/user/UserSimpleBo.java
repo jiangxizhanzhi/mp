@@ -21,7 +21,7 @@ public class UserSimpleBo {
     @ApiModelProperty(value = "ID")
     private String id;
 
-    @ApiModelProperty(value = "用户姓名")
+    @ApiModelProperty(value = "用户别名")
     @DefaultStr
     private String name;
 

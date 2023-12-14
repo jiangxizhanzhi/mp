@@ -17,7 +17,7 @@ public class UserOnlineReportBo {
     @ApiModelProperty(value = "用户名")
     private String username;
 
-    @ApiModelProperty(value = "用户姓名")
+    @ApiModelProperty(value = "用户别名")
     private String name;
 
     @ApiModelProperty(value = "组织")

@@ -19,7 +19,7 @@ public class ExportUserBo {
     @ColumnWidth(15)
     private String username;
 
-    @ExcelProperty("姓名")
+    @ExcelProperty("别名")
     @ColumnWidth(12)
     private String name;
 

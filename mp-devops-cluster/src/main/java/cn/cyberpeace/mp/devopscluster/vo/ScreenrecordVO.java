@@ -102,7 +102,7 @@ public class ScreenrecordVO extends BaseModel {
         // 组织： 管理员|分公司01
         String org = record.getDepartment();
         if (StringUtils.isNotBlank(org) && org.contains("|")) {
-            // 将组织拆分成姓名和组织
+            // 将组织拆分成别名和组织
             int start = org.indexOf("|");
             String userName = org.substring(0, start);
             String orgName = org.substring(start + 1);
