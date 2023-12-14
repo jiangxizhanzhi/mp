@@ -97,9 +97,9 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 用户id
         model.setUserId(loginUser.getId());
         UserBo userBo = userService.getUserDto(loginUser.getId());
-        // 别名
+        // 昵称
         if (StringUtils.isEmpty(userBo.getName())) {
-            // 别名为空时，使用用户名
+            // 昵称为空时，使用用户名
             model.setUserName(userBo.getUsername());
         } else {
             model.setUserName(userBo.getName());

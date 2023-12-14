@@ -19,7 +19,7 @@ public class UserOlReportCntBo {
     @ApiModelProperty("用户名")
     private String username;
 
-    @ApiModelProperty("用户别名")
+    @ApiModelProperty("用户昵称")
     private String uname;
 
     @ApiModelProperty("在线用户数")

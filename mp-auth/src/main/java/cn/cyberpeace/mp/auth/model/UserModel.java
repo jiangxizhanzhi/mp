@@ -85,7 +85,7 @@ public class UserModel extends BaseModel implements Serializable {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String tokenSecret;
 
-    @ApiModelProperty(value = "用户别名")
+    @ApiModelProperty(value = "用户昵称")
     @DefaultStr
     private String name;
 

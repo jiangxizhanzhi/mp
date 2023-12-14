@@ -21,7 +21,7 @@ public class ImportUserBo {
     // 用户名，不能重复
     private String username;
 
-    // 用户别名
+    // 用户昵称
     private String name;
 
     // 密码，通过Excel导入的用户，密码为明文，且忽略密码强度限制

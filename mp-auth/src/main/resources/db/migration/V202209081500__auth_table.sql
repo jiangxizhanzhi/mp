@@ -159,7 +159,7 @@ CREATE TABLE `mp_auth_user`
     `identifier`   varchar(64)            COMMENT '编号',
     `password`     varchar(128)  NOT NULL COMMENT '密码',
     `token_secret` varchar(128)  NOT NULL COMMENT 'token密钥',
-    `name`         varchar(128)  NOT NULL COMMENT '别名',
+    `name`         varchar(128)  NOT NULL COMMENT '昵称',
     `nickname`     varchar(128)  NOT NULL COMMENT '昵称',
     `avatar`       varchar(2048) NOT NULL COMMENT '头像',
     `birthday`     date          NOT NULL COMMENT '生日',

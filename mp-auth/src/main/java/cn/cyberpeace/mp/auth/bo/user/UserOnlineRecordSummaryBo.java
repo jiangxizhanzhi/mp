@@ -23,7 +23,7 @@ public class UserOnlineRecordSummaryBo {
     @ApiModelProperty(value = "用户名")
     private String username;
 
-    @ApiModelProperty(value = "别名")
+    @ApiModelProperty(value = "昵称")
     private String name;
 
     @ApiModelProperty(value = "累计在线时长（分钟）")

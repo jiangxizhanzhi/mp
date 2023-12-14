@@ -23,7 +23,7 @@ public class RegisterRequest {
     @NotBlank
     private String password;
 
-    @ApiModelProperty(value = "别名", example = "")
+    @ApiModelProperty(value = "昵称", example = "")
     private String name;
 
     @ApiModelProperty(value = "昵称", example = "")
