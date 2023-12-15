@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.base.util.remotefile;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.hutool.core.io.FileUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -10,7 +12,10 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.csource.common.MyException;
 import org.csource.fastdfs.*;
+import org.springframework.util.StreamUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -77,16 +82,8 @@ public class FdfsClient implements FileClient {
 
     @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
-        String fdfsFilePath;
-        try (is; var connection = getConnection()) {
-            fdfsFilePath = connection.getStorageClient().upload_file1(null, filesize,
-                    new UploadStream(is, filesize), fileSuffix, null);
-        } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs upload with input stream error: %s", e.getMessage());
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-        return fdfsFilePath;
+        LfsClient lfsClient = new LfsClient("/root/.mp/resources/default_img/fdfs/group1");
+        return lfsClient.upload(is,filesize,fileSuffix);
     }
 
     @Override
