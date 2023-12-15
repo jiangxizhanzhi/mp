@@ -83,7 +83,7 @@ public class FdfsClient implements FileClient {
     @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
         LfsClient lfsClient = new LfsClient("/root/.mp/resources/default_img/fdfs/group1");
-        return lfsClient.upload(is,filesize,fileSuffix);
+        return "group1/default/"+lfsClient.upload(is,filesize,fileSuffix);
     }
 
     @Override
