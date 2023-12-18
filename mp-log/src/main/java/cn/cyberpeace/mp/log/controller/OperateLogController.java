@@ -100,11 +100,7 @@ public class OperateLogController {
     @PostMapping("/excel/export")
     //@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public void exportLogExcel(HttpServletResponse response, @RequestBody LogExportRequest exportRequest) throws IOException {
-        String[] ids = exportRequest.getIds();
-        List<String> userIds = null;
-        if (Objects.nonNull(ids) && ids.length > 0) {
-            userIds = Arrays.asList(ids);
-        }
+
         operateLogService.exportExcel(response, exportRequest);
     }
 
