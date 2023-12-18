@@ -1,15 +1,20 @@
 package cn.cyberpeace.mp.devopscluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -183,4 +188,7 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultInt
     private Integer useDuration;
+
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime lastCreateTime;
 }

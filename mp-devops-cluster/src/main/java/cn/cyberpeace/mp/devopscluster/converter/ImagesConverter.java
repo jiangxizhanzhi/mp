@@ -40,6 +40,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -349,10 +351,11 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+//        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        updateTargetModel.setLastCreateTime(LocalDateTime.now());
         deviceTargetMapper.updateById(updateTargetModel);
     }
 
@@ -364,9 +367,12 @@ public class ImagesConverter implements BaseConverter{
         if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
+//        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
+        var device = deviceTargetMapper.findByUuid(request.getUuid());
+        var use = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - device.getLastCreateTime().toEpochSecond(ZoneOffset.UTC);
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(request.getUuid());
+        updateTargetModel.setUseDuration((int) use + device.getUseDuration());
         updateTargetModel.setInstanceCreateUser(StringUtils.EMPTY);
         deviceTargetMapper.updateById(updateTargetModel);
     }

@@ -4,6 +4,7 @@ alter table mp_devops_target add column reference_nums int(11) not null default 
 alter table mp_devops_target add column use_duration int(11) not null default 0 comment '靶标管理中启动过的时长' ;
 alter table mp_scene_scene_element add column physical_location varchar(128) not null default '' comment '物理位置' ;
 alter table mp_scene_scene_config_element add column physical_location varchar(128) not null default '' comment '物理位置' ;
+alter table mp_devops_target add column last_create_time datetime(6) COMMENT '上一次启动时间' ;
 
 INSERT INTO mp_sys_config (id, tenant, key_name, value, init_value, create_time, update_time)VALUES ('8b4191259f6c405ca103abcc5c00c001', 'default', 'screenshot_del_conf', '6', '6', now(), now());
 INSERT INTO mp_sys_config (id, tenant, key_name, value, init_value, create_time, update_time)VALUES ('8b4191259f6c405ca103abcc5c00c002', 'default', 'image_del_config', '{"referenceNums":10,"useDuration":10}','{"referenceNums":10,"useDuration":10}', now(), now());

@@ -56,7 +56,11 @@ public class HostStateExportService implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        FileUtils.cleanDirectory(new File("data_export"));
+        try {
+            FileUtils.cleanDirectory(new File("data_export"));
+        }catch (Exception e){
+
+        }
     }
 
     @Scheduled(cron = "0 0/10 * * * ?")
