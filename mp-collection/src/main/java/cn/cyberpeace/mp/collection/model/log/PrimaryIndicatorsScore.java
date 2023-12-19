@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class PrimaryIndicatorsScore {
 
-    @JsonProperty("预防能力")
+    @JsonProperty("预测能力")
     private PredictiveAbility predictiveAbility;
 
     @JsonProperty("承受能力")
