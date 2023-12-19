@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class PrimaryIndicatorsScore {
 
-    @JsonProperty("预测能力")
+    @JsonProperty("预防能力")
     private PredictiveAbility predictiveAbility;
 
     @JsonProperty("承受能力")
@@ -32,6 +32,18 @@ public class PrimaryIndicatorsScore {
 
         @JsonProperty("威胁事件分析")
         private Integer eventAnalyse;
+
+        @JsonProperty("态势感知")
+        private Integer taishiganzhi;
+
+        @JsonProperty("协同防御")
+        private Integer xietongfangyu;
+
+        @JsonProperty("检查分析")
+        private Integer jianchafenxi;
+
+        @JsonProperty("供应链弹性")
+        private Integer gongyingliantanxing;
     }
 
     @Data
@@ -44,6 +56,9 @@ public class PrimaryIndicatorsScore {
 
         @JsonProperty("生存性")
         private Integer live;
+
+        @JsonProperty("遏制")
+        private Integer ezhi;
     }
 
     @Data
@@ -56,6 +71,9 @@ public class PrimaryIndicatorsScore {
 
         @JsonProperty("功能异构冗余度")
         private Integer functionDuplicate;
+
+        @JsonProperty("灾难备份")
+        private Integer zainanbeifen;
 
     }
 
