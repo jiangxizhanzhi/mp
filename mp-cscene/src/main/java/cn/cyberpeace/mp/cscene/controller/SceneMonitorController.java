@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,9 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Description:
@@ -83,6 +88,26 @@ public class SceneMonitorController {
                 } else {
                     result.add(e);
                 }
+            }
+        }
+        File file = new File("order");
+        if (file.exists()) {
+            List<ElementMonitorBasicInfo> head = new ArrayList<>();
+            List<ElementMonitorBasicInfo> tail = new ArrayList<>();
+            try {
+                var aa = FileUtils.readLines(file, "utf8");
+                Set<String> last = new HashSet<>(aa);
+                for (var e : result) {
+                    if (last.contains(e.getName())) {
+                        tail.add(e);
+                    } else {
+                        head.add(e);
+                    }
+                }
+                head.addAll(tail);
+                return ResultCommon.success(head);
+            } catch (Exception e) {
+                return ResultCommon.success(result);
             }
         }
         return ResultCommon.success(result);
