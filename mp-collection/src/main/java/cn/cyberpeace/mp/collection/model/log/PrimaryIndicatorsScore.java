@@ -84,6 +84,18 @@ public class PrimaryIndicatorsScore {
 
         @JsonProperty("基于目标环境的重构")
         private Integer refactor;
+
+        @JsonProperty("自主管理")
+        private Integer zizhuguanli;
+
+        @JsonProperty("重构")
+        private Integer chonggou;
+
+        @JsonProperty("节点适应性")
+        private Integer jiedianshiyingxing;
+
+        @JsonProperty("网络适应性")
+        private Integer wangluoshiyingxing;
     }
 
 
