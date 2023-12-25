@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.constant.LogErrorCode;
@@ -9,11 +10,17 @@ import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.model.CloudPlatformItemsResult;
 import cn.cyberpeace.mp.log.po.CpCloudLogPO;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import cn.cyberpeace.mp.log.service.LogFileService;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.Header;
@@ -26,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -50,8 +58,10 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
 
     private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
 
-    private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
+    private static final String DELETE_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
 
+
+    private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
     public static final int INDEX_NOT_FOUND = -1;
 
     @Override
@@ -72,7 +82,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         if (Objects.isNull(t)) {
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
         }
-        if (!t.isSuccess()){
+        if (!t.isSuccess()) {
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(t.getMessage()));
         }
         List<CpCloudLogPO> list = JSONObject.parseArray(JSONObject.toJSONString(t.getItems()), CpCloudLogPO.class);
@@ -83,6 +93,8 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
                 fileName = LogReportTypeEnum.CP.getPrefix() + fileName;
             }
             dto.setHostIp(v.getHostIp());
+            dto.setHostName(v.getHostname());
+            dto.setPath(v.getPath());
             dto.setFileName(fileName);
             dto.setFileSize(v.getFileSize());
             dto.setUpdateTime(v.getUpdatetime());
@@ -96,9 +108,9 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("filename",downloadDTO.getFileName());
-        jsonObject.put("path",downloadDTO.getPath());
-        jsonObject.put("hostname",downloadDTO.getHostname());
+        jsonObject.put("filename", downloadDTO.getFileName());
+        jsonObject.put("path", downloadDTO.getPath());
+        jsonObject.put("hostname", downloadDTO.getHostname());
         String downLoadFileName = null;
         ByteArrayOutputStream bos = null;
         InputStream inputStream = null;
@@ -179,8 +191,41 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
      */
     @Data
     @NoArgsConstructor
-    private class LogListParams{
+    private class LogListParams {
 
         private List<String> hosts;
+    }
+
+    @Override
+    public Integer delete(List<LogFileDeleteRequest> list) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode itemsArray = mapper.createArrayNode();
+        Integer delete_num = list.size();
+        for (LogFileDeleteRequest request : list) {
+            ObjectNode item = mapper.createObjectNode();
+            item.put("filename", request.getLog_name().replaceFirst(request.getLog_report_type_enum().getPrefix(), ""));
+            item.put("path", request.getPath());
+            item.put("hostname", request.getHostName());
+            itemsArray.add(item);
+        }
+        ObjectNode root = mapper.createObjectNode();
+        root.set("items", itemsArray);
+
+        String jsonString = null;
+        try {
+            jsonString = mapper.writeValueAsString(root);
+        } catch (Exception e) {
+            log.error("JSON conversion failed, {}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(LogErrorCode.DELETE_LOG_FILE_ERROR.format("JSON conversion failed"));
+        }
+
+        try {
+            super.sendDelete(DELETE_URL, jsonString, CloudPlatformItemsResult.class);
+        } catch (Exception e) {
+            log.error("delete cp log error, {}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(LogErrorCode.DELETE_LOG_FILE_ERROR.format("CP Service Error"));
+        }
+        return delete_num;
     }
 }

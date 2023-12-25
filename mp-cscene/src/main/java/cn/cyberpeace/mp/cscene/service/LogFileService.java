@@ -19,6 +19,17 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.log.dto.LogReportDTO;
+import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
+import cn.cyberpeace.mp.log.request.BasePageRequest;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
+import cn.cyberpeace.mp.log.service.LogFileServiceFactory;
+import cn.cyberpeace.mp.log.service.impl.BCLogFileServiceImpl;
+import cn.cyberpeace.mp.log.service.impl.CpLogFileServiceImpl;
+import cn.cyberpeace.mp.log.service.impl.MpLogFileServiceImpl;
+import cn.cyberpeace.mp.log.service.impl.ReportLogFileServiceImpl;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -29,9 +40,14 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMa
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import com.github.pagehelper.PageInfo;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,6 +66,11 @@ import java.util.stream.Collectors;
 public class LogFileService {
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
+    private static final Integer DEFAULT_INTERVAL = 15;
+
+    private static final String INTERVAL_CONFIG = "interval_delete_config";
+
 
     @Autowired
     private CsceneCommonService csceneCommonService;
@@ -72,9 +93,26 @@ public class LogFileService {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
+
+    @Autowired
+    private SysConfigService sysConfigService;
+
+    @Autowired
+    private LogFileServiceFactory logFileServiceFactory;
+
+    @Autowired
+    private MpLogFileServiceImpl mpLogFileService;
+
+    @Autowired
+    private BCLogFileServiceImpl BCLogFileService;
+
+    @Autowired
+    private CpLogFileServiceImpl cpLogFileService;
+
     /**
      * 分页查询日志文件列表
      * （假分页）
+     *
      * @param pageRequest
      * @return
      */
@@ -130,7 +168,7 @@ public class LogFileService {
 
     public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
         var cscene = csceneInstanceMapper.get(csceneId);
-        if(cscene == null){
+        if (cscene == null) {
             return new ConcurrentHashMap<>();
         }
         String sceneId = cscene.getScene();
@@ -182,6 +220,7 @@ public class LogFileService {
 
     /**
      * 根据systemType查询节点osType
+     *
      * @return
      */
     private String getOsType(String systemType) {
@@ -199,6 +238,7 @@ public class LogFileService {
     /**
      * 触发自定义探针脚本，执行上传指定日志文件到文件服务器
      * 并生成下载url返回
+     *
      * @return
      */
     public List<LogFileDownloadUrlDto> getDownloadUrls(LogFileDownloadUrlRequest request) {
@@ -211,11 +251,11 @@ public class LogFileService {
         String osType = request.getOsType();
         List<String> paths = request.getPaths();
         List<WazuhControl.ControlFileParam> uploadParams =
-            paths.stream().map(path -> {
-                WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
-                uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
-                return uploadParam;
-            }).collect(Collectors.toList());
+                paths.stream().map(path -> {
+                    WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
+                    uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
+                    return uploadParam;
+                }).collect(Collectors.toList());
 
         Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
@@ -246,6 +286,7 @@ public class LogFileService {
 
     /**
      * 转换WazuhControl.QueryLogCollectFileData到LogFileDto
+     *
      * @param logFiles
      * @param elementId
      * @param agentName
@@ -290,6 +331,127 @@ public class LogFileService {
         String date1 = StringUtils.substringBeforeLast(datetime, ".");
         date1 = date1.concat("Z");
         return TimeUtils.utcStringToLocalDateTime(date1);
+    }
+
+    /**
+     * 设置删除间隔时间
+     *
+     * @param interval
+     * @return
+     */
+    public Integer setInterval(Integer interval) {
+
+        //时间校验，最大100天，最小1天，默认15天
+        if (interval < 1 || interval > 100) {
+            interval = DEFAULT_INTERVAL;
+        }
+
+        //查询数据库是否有该配置，没有则添加该配置
+        SysConfigModel model = sysConfigService.getByKeyName(INTERVAL_CONFIG);
+        if (model == null) {
+            model = new SysConfigModel();
+            model.setValue(String.valueOf(interval));
+            model.setInitValue(String.valueOf(DEFAULT_INTERVAL));
+            model.setKeyName(INTERVAL_CONFIG);
+            model.setTenant("default");
+            sysConfigService.create(model);
+        } else {
+            model.setValue(String.valueOf(interval));
+            sysConfigService.updateByKeyName(model);
+        }
+
+        return interval;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public class Composite {
+        private List<LogFileDeleteRequest> list;
+        private cn.cyberpeace.mp.log.service.LogFileService iface;
+    }
+
+    private Composite createComposite(LogReportTypeEnum type, List<LogFileDeleteRequest> list) {
+        cn.cyberpeace.mp.log.service.LogFileService logFileService = null;
+        switch (type) {
+            case MP:
+                logFileService = mpLogFileService;
+                break;
+            case BC:
+                logFileService = BCLogFileService;
+                break;
+            case CP:
+                logFileService = cpLogFileService;
+                break;
+            default:
+                break;
+        }
+        return new Composite(list, logFileService);
+    }
+
+    /**
+     * 定时删除日志任务 每天执行一次
+     */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void IntervalDeleteJob() {
+
+        SysConfigModel model = sysConfigService.getByKeyName(INTERVAL_CONFIG);
+        if (model == null) {
+            model = new SysConfigModel();
+            model.setValue(String.valueOf(DEFAULT_INTERVAL));
+            model.setInitValue(String.valueOf(DEFAULT_INTERVAL));
+            model.setKeyName(INTERVAL_CONFIG);
+            model.setTenant("default");
+            sysConfigService.create(model);
+        }
+        Integer interval = Integer.valueOf(model.getValue());
+        //获取需要删除的时间点
+        LocalDateTime specificTime = LocalDateTime.now().minusDays(interval);
+        //调用日志工厂查询所有运行相关日志
+        List<LogReportDTO> loglist = logFileServiceFactory.listAll(new BasePageRequest());
+        //筛选时间
+        if (CollectionUtils.isNotEmpty(loglist)) {
+            loglist = loglist.stream().filter(logReportDTO -> logReportDTO.getUpdateTime().isBefore(specificTime))
+                    .collect(Collectors.toList());
+        }
+
+        if (loglist.isEmpty()) {
+            return;
+        }
+
+        //日志归类
+        Map<LogReportTypeEnum, Composite> map = new HashMap<>();
+        Map<LogReportTypeEnum, List<LogReportDTO>> dto_map = loglist.stream()
+                .collect(Collectors.groupingBy(LogReportDTO::getLogReportTypeEnum));
+
+        for (Map.Entry<LogReportTypeEnum, List<LogReportDTO>> entry : dto_map.entrySet()) {
+            LogReportTypeEnum type = entry.getKey();
+            List<LogReportDTO> dto_list = entry.getValue();
+            List<LogFileDeleteRequest> list = new ArrayList<>();
+            for(var element:dto_list){
+                LogFileDeleteRequest request = new LogFileDeleteRequest();
+                request.setHostName(element.getHostName());
+                request.setLog_name(element.getFileName());
+                request.setPath(element.getPath());
+                request.setLog_report_type_enum(element.getLogReportTypeEnum());
+                list.add(request);
+            }
+            map.put(type, createComposite(type, list));
+        }
+
+        //遍历调用接口删除
+        Integer delete_num = 0;
+        Integer rel_delete_num = 0;
+        for (Composite composite : map.values()) {
+            List<LogFileDeleteRequest> list = composite.getList();
+            delete_num += list.size();
+            var iface = composite.getIface();
+            rel_delete_num += iface.delete(list);
+        }
+
+        //校验删除结果
+        if (rel_delete_num != delete_num) {
+            log.warn("{} files need to be deleted, but {} files are actually deleted", delete_num, rel_delete_num);
+        }
     }
 
 }

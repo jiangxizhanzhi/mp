@@ -44,6 +44,12 @@ public class RunTimeLogDTO {
     @ApiModelProperty(value = "节点ip")
     private String hostIp;
 
+    @ApiModelProperty(value = "节点名称")
+    private String hostName;
+
+    @ApiModelProperty(value = "日志路径")
+    private String path;
+
     /**
      * 日志类型
      */

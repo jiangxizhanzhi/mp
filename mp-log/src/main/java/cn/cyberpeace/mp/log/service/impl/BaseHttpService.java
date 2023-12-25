@@ -72,4 +72,21 @@ public class BaseHttpService {
         T model = JsonUtils.toSnakeObject(result, valueType);
         return model;
     }
+
+    protected <T extends BaseModel> T sendDelete(String url, String body, Class<T> valueType) {
+        String result = "";
+        try {
+            result = HttpUtils.sendDelete(url, body);
+        } catch (IOException e) {
+            log.error("send delete error:", e);
+            throw new MpRuntimeException("send delete error");
+        }
+
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+
+        T model = JsonUtils.toSnakeObject(result, valueType);
+        return model;
+    }
 }

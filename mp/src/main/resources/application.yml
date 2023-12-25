@@ -82,6 +82,7 @@ management:
 logging:
   file:
     path: ${user.home}/logs
+    bc-path: ${user.home}/bc_logs
 
 mp:
   base:

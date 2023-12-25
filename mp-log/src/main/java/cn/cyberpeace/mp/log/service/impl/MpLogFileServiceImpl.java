@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.log.constant.LogErrorCode;
 import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import cn.cyberpeace.mp.log.service.LogFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +34,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * MP中台日志模块
+ *
  * @description:
  * @author：Geek Wang
  * @date: 2022/6/15
@@ -82,7 +84,7 @@ public class MpLogFileServiceImpl implements LogFileService {
 
 
     @Override
-    public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
+    public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException {
         String fileName = downloadDTO.getFileName();
         var bos = new ByteArrayOutputStream();
         var logFile = new File(logPath);
@@ -132,5 +134,37 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Override
     public int getOrder() {
         return 10;
+    }
+
+    /**
+     * 日志文件删除
+     *
+     * @param list 文件列表
+     * @return
+     */
+    @Override
+    public Integer delete(List<LogFileDeleteRequest> list) {
+        if (list == null || list.isEmpty()) {
+            return 0;
+        }
+
+        File dir = new File(logPath);
+        int deletedCount = 0;
+        if (dir.exists() && dir.isDirectory()) {
+            for (var element : list) {
+                String fileName = element.getLog_name();
+                File file = new File(dir, fileName);
+                if (file.exists() && file.isFile()) {
+                    if (file.delete()) {
+                        deletedCount++;
+                    }
+                } else {
+                    log.error("The file {} does not exist or is not a file", file.toString());
+                }
+            }
+        } else {
+            log.error("The directory {} does not exist or is empty", dir.toString());
+        }
+        return deletedCount;
     }
 }

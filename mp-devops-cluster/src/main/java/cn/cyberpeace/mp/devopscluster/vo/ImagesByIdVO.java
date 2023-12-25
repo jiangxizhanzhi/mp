@@ -153,6 +153,6 @@ public class ImagesByIdVO extends BaseVO {
     /**
      * 靶标管理中启动过的时长
      */
-    @ApiModelProperty(value = "靶标管理中启动过的时长")
+    @ApiModelProperty(value = "靶标管理 中启动过的时长")
     private Integer useDuration;
 }

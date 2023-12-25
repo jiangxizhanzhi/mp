@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.log.service.impl;
 
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.log.config.LogConfig;
 import cn.cyberpeace.mp.log.model.BaseModel;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,18 @@ public class BaseCpHttpService extends BaseHttpService {
     @Override
     protected <T extends BaseModel> T sendPost(String api, String body, Class<T> valueType) {
         return super.sendPost(logConfig.getCpUrl().concat(api), body, valueType);
+    }
+
+    /**
+     * 通过Delete删除日志
+     *
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendDelete(String api, String body, Class<T> valueType) {
+        return super.sendDelete(logConfig.getCpUrl().concat(api), body, valueType);
     }
 
     /**

@@ -25,4 +25,12 @@ public interface LogReportService {
      * @return
      */
     List<LogReportDTO> list(String type);
+
+    /**
+     * 删除日志
+     * @param type
+     * @param list
+     * @return 成功个数
+     */
+    Integer delete(String type, List<String> list);
 }

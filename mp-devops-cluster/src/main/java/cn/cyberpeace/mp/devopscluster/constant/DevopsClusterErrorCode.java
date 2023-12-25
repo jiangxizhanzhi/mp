@@ -25,7 +25,8 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     BUILD_IN_TARGET_NOT_ALLOWED_EXPORT("mp-110615", "build_in_target_not_allowed_export"),
     ISO_REFERENCE_SCENE_WITH_NAME("mp-110616", "iso_reference_scene_with_name"),
     USB_NUM_EXCEEDS_LIMIT("MP-110617", "usb_num_exceeds_limit"),
-    USB_REFERENCED_SCENE("MP-110618", "usb_referenced_scene");
+    USB_REFERENCED_SCENE("MP-110618", "usb_referenced_scene"),
+    OFFLINE_UPGRADE_IMAGE("MP-110619", "offline_upgrade_image");
 
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);

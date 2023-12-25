@@ -3,15 +3,18 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
+import cn.cyberpeace.mp.cscene.request.logfile.LogFileIntervalRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import io.swagger.annotations.Api;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,6 +53,7 @@ public class LogFileController {
 
     @Autowired
     private CscenePluginDataRecordService dataRecordService;
+
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -109,6 +114,15 @@ public class LogFileController {
         List<LogFileDownloadUrlDto> downloadUrlDtos = logFileService.getDownloadUrls(request);
         return new ListObjServiceResult(new ListObjResult(downloadUrlDtos, downloadUrlDtos.size())).asResult();
 
+    }
+
+    @ApiOperation(value = "设置日志保存时间")
+    @PostMapping("/set_delete_interval")
+    public ServiceResult<Integer> setDeleteInterval(LogFileIntervalRequest request) {
+        Integer interval = logFileService.setInterval(request.getInterval());
+        //每次更新重新执行一下定时任务
+        //logFileService.IntervalDeleteJob();
+        return new ServiceResult<>(interval).asResult();
     }
 
 }

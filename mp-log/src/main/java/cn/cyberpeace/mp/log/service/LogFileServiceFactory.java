@@ -10,8 +10,10 @@ import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
  * @author：Geek Wang
  * @date: 2022/6/15
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LogFileServiceFactory {
@@ -39,15 +42,16 @@ public class LogFileServiceFactory {
 
     private final List<LogFileService> fileServiceList;
 
-    private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
+    private Map<String, LogFileService> logFileServiceMap = new ConcurrentHashMap();
 
     @PostConstruct
-    public void init(){
+    public void init() {
         logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
     }
 
     /**
      * 查询全部日志上报数据
+     *
      * @return
      */
     public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
@@ -98,14 +102,25 @@ public class LogFileServiceFactory {
 
     /**
      * 下载日志
+     *
      * @param downloadDTO
      */
     public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
         String logReportType = downloadDTO.getType();
         LogFileService logFileService = logFileServiceMap.get(logReportType);
-        if (Objects.isNull(logFileService)){
+        if (Objects.isNull(logFileService)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         return logFileService.download(downloadDTO);
+    }
+
+
+    public Integer deleteLog(LogReportTypeEnum type, List<LogFileDeleteRequest> list) {
+        LogFileService logFileService = logFileServiceMap.get(type.toValue());
+        if (logFileService != null) {
+            return logFileService.delete(list);
+        }
+        log.error("The corresponding {} service does not exist", type);
+        return 0;
     }
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import cn.cyberpeace.mp.log.service.LogFileService;
 import cn.cyberpeace.mp.log.service.LogReportService;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +45,11 @@ public class ReportLogFileServiceImpl implements LogFileService {
     @Override
     public int getOrder() {
         return 20;
+    }
+
+    @Override
+    public Integer delete(List<LogFileDeleteRequest> file_list) {
+
+        return 0;
     }
 }

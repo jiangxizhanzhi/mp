@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.log.converter.RunTimeLogDTOConverter;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
+import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class RuntimeLogService {
 
     /**
      * 分页查询
+     *
      * @param basePageRequest
      * @return
      */
@@ -42,8 +45,8 @@ public class RuntimeLogService {
         if (CollectionUtils.isNotEmpty(allLogReportDTOList)) {
             if (Objects.nonNull(basePageRequest.getStartDate()) && Objects.nonNull(basePageRequest.getEndDate())) {
                 allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
-                        logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
-                                && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime()))
+                                logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
+                                        && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime()))
                         .collect(Collectors.toList());
             }
 

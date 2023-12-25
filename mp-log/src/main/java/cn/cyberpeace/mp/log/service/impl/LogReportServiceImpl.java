@@ -35,14 +35,14 @@ public class LogReportServiceImpl implements LogReportService {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual("type", logReportTypeEnum.toValue());
         int delete = logReportMapper.filterDelete(condition);
-        log.info("delete history log report type:{}, num：{}",logReportTypeEnum,delete);
+        log.info("delete history log report type:{}, num：{}", logReportTypeEnum, delete);
         List<LogReportPO> logReportPOS = logReportDTOConverter.sourceToTarget(list);
         logReportPOS.forEach(v -> v.setType(logReportTypeEnum));
         return logReportMapper.bulkCreate(logReportPOS).getSuccessCount();
     }
 
     @Override
-    public List<LogReportDTO> list(String type){
+    public List<LogReportDTO> list(String type) {
         HumanCondition humanCondition = new HumanCondition();
         if (StringUtils.isNotBlank(type)) {
             humanCondition.filterEqual("type", type);
@@ -57,5 +57,26 @@ public class LogReportServiceImpl implements LogReportService {
             }
         });
         return logReportDTOConverter.targetToSource(list);
+    }
+
+    @Override
+    public Integer delete(String type, List<String> list) {
+        HumanCondition humanCondition = new HumanCondition();
+        if (StringUtils.isNotBlank(type)) {
+            humanCondition.filterEqual("type", type);
+        }
+        if (!list.isEmpty()) {
+            String[] fileNameArray = list.toArray(new String[0]);
+            humanCondition.filterIn(LogReportPO::getFileName, fileNameArray);
+        }
+        List<LogReportPO> delete_list = logReportMapper.list(humanCondition);
+
+        String[] ids = new String[delete_list.size()];
+        // 遍历delete_list，并将ID存储在数组中
+        for (int i = 0; i < delete_list.size(); i++) {
+            // 获取每个LogReportPO对象的ID
+            ids[i] = delete_list.get(i).getId();
+        }
+        return logReportMapper.bulkDelete(ids).getSuccessCount();
     }
 }

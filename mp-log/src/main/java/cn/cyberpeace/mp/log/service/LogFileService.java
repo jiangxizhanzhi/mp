@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.log.service;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.log.dto.LogReportDTO;
+import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
 import org.springframework.core.Ordered;
 
 import java.io.IOException;
@@ -33,5 +34,8 @@ public interface LogFileService extends Ordered {
      * @return
      */
     LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException;
+
+
+    Integer delete(List<LogFileDeleteRequest> file_list);
 
 }
