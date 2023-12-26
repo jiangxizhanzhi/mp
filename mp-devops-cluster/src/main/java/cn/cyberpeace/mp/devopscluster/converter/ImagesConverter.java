@@ -7,9 +7,18 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.QuickCreateParam;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ContainerService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
@@ -21,15 +30,26 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.UploadTypeEnum;
-import cn.cyberpeace.mp.devopscluster.model.*;
+import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devopscluster.model.ContainerActionCloudPlatformModel;
+import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
+import cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount;
+import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
-import cn.cyberpeace.mp.devopscluster.request.*;
+import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesAuthRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.devopscluster.vo.ImageVO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -42,12 +62,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ImagesConverter implements BaseConverter{
+public class ImagesConverter implements BaseConverter {
 
     private final ImagesService imagesService;
 
@@ -149,9 +174,7 @@ public class ImagesConverter implements BaseConverter{
                             imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
                         }
                     }
-                    imageConvertModel.setReferenceNums(supportExports.get(imageConvertModel.getUuid()).getReferenceNums());
-                    imageConvertModel.setUseDuration(supportExports.get(imageConvertModel.getUuid()).getUseDuration());
-                    imageConvertModel.setBusinessTag(supportExports.get(imageConvertModel.getUuid()).getBusinessTag());
+                    this.setImageBusinessProperties(imageConvertModel, supportExports.get(imageConvertModel.getUuid()));
                 }
             }
         }
@@ -169,7 +192,7 @@ public class ImagesConverter implements BaseConverter{
     public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
-        device.setBusinessTag(request.getBusinessTag());
+        this.setImageBusinessProperties(device, request);
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -181,9 +204,7 @@ public class ImagesConverter implements BaseConverter{
     public ImageConvertModel findByUuid(String id) {
         Device device = deviceService.findByUuid(id);
         var m = deviceTargetMapper.findByUuid(device.getUuid());
-        device.setBusinessTag(m.getBusinessTag());
-        device.setUseDuration(m.getUseDuration());
-        device.setReferenceNums(m.getReferenceNums());
+        this.setImageBusinessProperties(device, m);
         return wrapperImageConvertModel(device);
     }
 
@@ -209,8 +230,8 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public void update(ImageRequest request) {
-        Device device = imagesService.update(request.getUuid(),convertRequest(request));
-        device.setBusinessTag(request.getBusinessTag());
+        Device device = imagesService.update(request.getUuid(), convertRequest(request));
+        this.setImageBusinessProperties(device, request);
         devopsTargetService.updateById(device);
     }
 
@@ -503,7 +524,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
-        imageModel.setBusinessTag(device.getBusinessTag());
+        this.setImageBusinessProperties(imageModel, device);
         return imageModel;
     }
 
@@ -518,6 +539,34 @@ public class ImagesConverter implements BaseConverter{
         } else {
             return new CloudPlatformPageResult<>(new ArrayList<>());
         }
+    }
+
+    public void setImageBusinessProperties(ImageVO target, ImageConvertModel source) {
+        target.setBusinessTag(source.getBusinessTag());
+        target.setReferenceNums(source.getReferenceNums());
+        target.setUseDuration(source.getUseDuration());
+    }
+
+    private void setImageBusinessProperties(ImageConvertModel target, DeviceTargetPO source) {
+        target.setBusinessTag(source.getBusinessTag());
+        target.setReferenceNums(source.getReferenceNums());
+        target.setUseDuration(source.getUseDuration());
+    }
+
+    private void setImageBusinessProperties(Device target, ImageRequest source) {
+        target.setBusinessTag(source.getBusinessTag());
+    }
+
+    private void setImageBusinessProperties(Device target, DeviceTargetPO source) {
+        target.setBusinessTag(source.getBusinessTag());
+        target.setReferenceNums(source.getReferenceNums());
+        target.setUseDuration(source.getUseDuration());
+    }
+
+    private void setImageBusinessProperties(ImageConvertModel target, Device source) {
+        target.setBusinessTag(source.getBusinessTag());
+        target.setUseDuration(source.getUseDuration());
+        target.setReferenceNums(source.getReferenceNums());
     }
 
 }

@@ -75,7 +75,8 @@ public class DevopsTargetService {
         if (Objects.nonNull(oldDeviceTargetPO)) {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
-            return deviceTargetMapper.updateById(deviceTargetPO);
+            var ret = deviceTargetMapper.update(deviceTargetPO);
+            return ret ? 1 : 0;
         }
         return 0;
     }
@@ -99,8 +100,10 @@ public class DevopsTargetService {
         deviceTargetPOS.forEach(d -> {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
+            d.setInPosition(StatusEnum.NO);
         });
-        return deviceTargetMapper.batchInsert(deviceTargetPOS);
+        var ret = deviceTargetMapper.bulkCreate(deviceTargetPOS);
+        return ret.getSuccessCount();
     }
 
     public void updateInPosition(List<Device> deviceList) {
@@ -234,7 +237,7 @@ public class DevopsTargetService {
             deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
             deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
-        deviceTargetPO.setBusinessTag(device.getBusinessTag());
+        this.setImageBusinessProperties(deviceTargetPO, device);
 
         return deviceTargetPO;
     }
@@ -261,6 +264,10 @@ public class DevopsTargetService {
             }
         }
         return true;
+    }
+
+    private void setImageBusinessProperties(DeviceTargetPO target, Device source) {
+        target.setBusinessTag(source.getBusinessTag());
     }
 
 }

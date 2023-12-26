@@ -46,8 +46,6 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -57,7 +55,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
@@ -184,9 +181,6 @@ public class ImagesController {
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
-        imagesByIdVO.setBusinessTag(model.getBusinessTag());
-        imagesByIdVO.setReferenceNums(model.getReferenceNums());
-        imagesByIdVO.setUseDuration(model.getUseDuration());
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
         imagesByIdVO.setCategory(model.getMainCategory());
@@ -216,6 +210,7 @@ public class ImagesController {
         } else {
             imagesByIdVO.setAllowChangeIso(true);
         }
+        this.imagesConverter.setImageBusinessProperties(imagesByIdVO, model);
         return new Result<>(imagesByIdVO);
     }
 
@@ -691,74 +686,76 @@ public class ImagesController {
     /**
      * 转换BO to VO
      *
-     * @param model
+     * @param models
      * @return
      */
-    private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> model) {
-        return model.getList().stream().map(v -> {
-            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
-            ExtVm extVm = v.getExtVm();
-            ExtImageInfo extImageInfo = v.getExtImageInfo();
-            var vo = ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
-                    .logo(v.getLogo())
-                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
-                    .imageType(v.getImageType())
-                    .isImport(v.getIsImport())
-                    .isInternal(v.getIsInternal())
-                    .allowExport(true)
-                    .businessTag(v.getBusinessTag())
-                    .referenceNums(v.getReferenceNums())
-                    .useDuration(v.getUseDuration())
-                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
-                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
-                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
-                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
-            if (vo.getExtDocker() != null && vo.getExtDocker().getExtInfo() != null && vo.getExtDocker().getExtInfo() instanceof Map) {
-                Map map = (Map) vo.getExtDocker().getExtInfo();
-                if (map.containsKey("message")) {
-                    var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
-                    if (result != null) {
-                        map.put("message", result);
-                    }
+    private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> models) {
+        return models.getList().stream()
+                .map(v -> convertBOToPageVO(v))
+                .collect(Collectors.toList());
+    }
+
+    private ImagesPageVO convertBOToPageVO(ImageConvertModel model){
+        ExtSystemInfo extSystemInfo = model.getExtSystemInfo();
+        ExtVm extVm = model.getExtVm();
+        ExtImageInfo extImageInfo = model.getExtImageInfo();
+        var vo = ImagesPageVO.builder().uuid(model.getUuid()).name(model.getName())
+                .logo(model.getLogo())
+                .mainCategory(model.getMainCategory()).subCategory(model.getSubCategory()).thirdCategory(model.getThirdCategory())
+                .imageType(model.getImageType())
+                .isImport(model.getIsImport())
+                .isInternal(model.getIsInternal())
+                .allowExport(true)
+                .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
+                .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
+                .description(model.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
+                .authTotal(model.getAuthTotal()).isPublic(model.getIsPublic()).extSystemInfo(model.getExtSystemInfo())
+                .extGateway(model.getExtGateway()).extVm(model.getExtVm()).extImageInfo(model.getExtImageInfo()).extDocker(model.getExtDocker()).build();
+        imagesConverter.setImageBusinessProperties(vo, model);
+        if (vo.getExtDocker() != null && vo.getExtDocker().getExtInfo() != null && vo.getExtDocker().getExtInfo() instanceof Map) {
+            Map map = (Map) vo.getExtDocker().getExtInfo();
+            if (map.containsKey("message")) {
+                var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                if (result != null) {
+                    map.put("message", result);
                 }
             }
-            if (vo.getExtVm() != null && vo.getExtVm().getExtInfo() != null && vo.getExtVm().getExtInfo() instanceof Map) {
-                Map map = (Map) vo.getExtVm().getExtInfo();
-                if (map.containsKey("message")) {
-                    var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
-                    if (result != null) {
-                        map.put("message", result);
-                    }
+        }
+        if (vo.getExtVm() != null && vo.getExtVm().getExtInfo() != null && vo.getExtVm().getExtInfo() instanceof Map) {
+            Map map = (Map) vo.getExtVm().getExtInfo();
+            if (map.containsKey("message")) {
+                var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                if (result != null) {
+                    map.put("message", result);
                 }
             }
-            // 禁止导出所有靶标
-            if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
-                // 内置靶标不可导出
-                if (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal()))) {
-                    vo.setAllowExport(false);
-                } else if (v.getExtImageInfo() != null && StringUtils.isNotEmpty(v.getExtImageInfo().getBaseImageName())) {
-                    // 有基础镜像的 以基础镜像为准设置是否可导出
-                    ImagePageDTO pageDTO = new ImagePageDTO();
-                    pageDTO.setName(v.getExtImageInfo().getBaseImageName());
-                    pageDTO.setLikeName(false);
-                    var result = this.imagesConverter.page(pageDTO);
-                    var list = result.getList();
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        ImageConvertModel baseImage = list.get(0);
-                        if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
-                            vo.setAllowExport(false);
-                        } else if (Boolean.FALSE.equals(v.getSupportExport())) {
-                            vo.setAllowExport(false);
-                        }
+        }
+        // 禁止导出所有靶标
+        if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
+            // 内置靶标不可导出
+            if (Boolean.TRUE.equals(model.getIsImport() || Boolean.TRUE.equals(model.getIsInit()) || Boolean.TRUE.equals(model.getIsInternal()))) {
+                vo.setAllowExport(false);
+            } else if (model.getExtImageInfo() != null && StringUtils.isNotEmpty(model.getExtImageInfo().getBaseImageName())) {
+                // 有基础镜像的 以基础镜像为准设置是否可导出
+                ImagePageDTO pageDTO = new ImagePageDTO();
+                pageDTO.setName(model.getExtImageInfo().getBaseImageName());
+                pageDTO.setLikeName(false);
+                var result = this.imagesConverter.page(pageDTO);
+                var list = result.getList();
+                if (CollectionUtils.isNotEmpty(list)) {
+                    ImageConvertModel baseImage = list.get(0);
+                    if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
+                        vo.setAllowExport(false);
+                    } else if (Boolean.FALSE.equals(model.getSupportExport())) {
+                        vo.setAllowExport(false);
                     }
-                } else if (Boolean.FALSE.equals(v.getSupportExport())) {
-                    vo.setAllowExport(false);
                 }
+            } else if (Boolean.FALSE.equals(model.getSupportExport())) {
+                vo.setAllowExport(false);
             }
-            vo.setCreateUserName(v.getCreateUserName());
-            return vo;
-        }).collect(Collectors.toList());
+        }
+        vo.setCreateUserName(model.getCreateUserName());
+        return vo;
     }
 
     private void checkISOReference(String isoTmpdirUuid) {

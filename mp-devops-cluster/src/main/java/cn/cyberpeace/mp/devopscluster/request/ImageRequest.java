@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.vo.ImageVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ImageRequest extends BaseRequest {
+public class ImageRequest extends ImageVO {
 
     /**
      * UUID
@@ -125,21 +126,4 @@ public class ImageRequest extends BaseRequest {
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
 
-    /**
-     * 业务标签
-     */
-    @ApiModelProperty(value = "业务标签")
-    private Integer businessTag;
-
-    /**
-     * 引用过的次数
-     */
-    @ApiModelProperty(value = "引用过的次数")
-    private Integer referenceNums;
-
-    /**
-     * 靶标管理中启动过的时长
-     */
-    @ApiModelProperty(value = "靶标管理中启动过的时长")
-    private Integer useDuration;
 }

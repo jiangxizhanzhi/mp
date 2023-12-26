@@ -23,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "根据ID查询返回信息")
-public class ImagesByIdVO extends BaseVO {
+public class ImagesByIdVO extends ImageVO {
 
     /**
      * UUID
@@ -138,21 +138,4 @@ public class ImagesByIdVO extends BaseVO {
     @ApiModelProperty(value = "容器信息")
     private ExtDocker extDocker;
 
-    /**
-     * 业务标签
-     */
-    @ApiModelProperty(value = "业务标签")
-    private Integer businessTag;
-
-    /**
-     * 引用过的次数
-     */
-    @ApiModelProperty(value = "引用过的次数")
-    private Integer referenceNums;
-
-    /**
-     * 靶标管理中启动过的时长
-     */
-    @ApiModelProperty(value = "靶标管理 中启动过的时长")
-    private Integer useDuration;
 }

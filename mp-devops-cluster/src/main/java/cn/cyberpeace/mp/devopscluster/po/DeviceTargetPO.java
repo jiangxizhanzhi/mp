@@ -151,6 +151,7 @@ public class DeviceTargetPO extends BaseModel {
     /**
      * 靶标实例创建用户
      */
+    @DefaultStr
     private String instanceCreateUser;
 
     /**
@@ -189,6 +190,6 @@ public class DeviceTargetPO extends BaseModel {
     @DefaultInt
     private Integer useDuration;
 
-    @ApiModelProperty(value = "更新时间")
+    @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastCreateTime;
 }

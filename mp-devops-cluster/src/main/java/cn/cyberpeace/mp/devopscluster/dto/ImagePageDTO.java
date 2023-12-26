@@ -194,7 +194,7 @@ public class ImagePageDTO extends BasePageDTO{
      * @param request
      */
     public ImagePageDTO(ImagePageRequest request){
-        this.setBusinessTag(request.getBusinessTag());
+        this.setImageBusinessProperties(request);
         this.setRole(request.getRole());
         this.setMainCategory(request.getMainCategory());
         this.setSubCategory(request.getSubCategory());
@@ -284,5 +284,9 @@ public class ImagePageDTO extends BasePageDTO{
         this.setImageTypeList(request.getImageTypeList());
         this.setPreTypeList(request.getPreTypeList());
         this.setParentSystemType(request.getParentSystemType());
+    }
+
+    private void setImageBusinessProperties(ImagePageRequest request) {
+        this.setBusinessTag(request.getBusinessTag());
     }
 }

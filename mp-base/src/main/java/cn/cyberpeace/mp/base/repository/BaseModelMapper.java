@@ -170,7 +170,11 @@ public interface BaseModelMapper<M extends BaseModel> {
                 if (fieldValue == null) {
                     return new Object[0];
                 }
-                createFieldValues[j] = fieldValue;
+                if (fieldValue instanceof Enum) {
+                    createFieldValues[j] = ((Enum) fieldValue).ordinal();
+                } else {
+                    createFieldValues[j] = fieldValue;
+                }
             }
             createFieldValuesList[i] = createFieldValues;
         }
@@ -209,7 +213,11 @@ public interface BaseModelMapper<M extends BaseModel> {
                 if (fieldValue == null) {
                     return new Object[0];
                 }
-                updateFieldValues[j] = fieldValue;
+                if (fieldValue instanceof Enum) {
+                    updateFieldValues[j] = ((Enum) fieldValue).ordinal();
+                } else {
+                    updateFieldValues[j] = fieldValue;
+                }
             }
             updateFieldValuesList[i] = updateFieldValues;
         }

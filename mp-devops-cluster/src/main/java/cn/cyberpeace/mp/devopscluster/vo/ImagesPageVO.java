@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "镜像分页返回信息")
-public class ImagesPageVO extends BaseVO {
+public class ImagesPageVO extends ImageVO {
 
     /**
      * UUID
@@ -138,12 +138,4 @@ public class ImagesPageVO extends BaseVO {
     @ApiModelProperty("靶标创建用户名称")
     private String createUserName;
 
-    @ApiModelProperty("业务标签")
-    private Integer businessTag;
-
-    @ApiModelProperty(value = "引用过的次数")
-    private Integer referenceNums;
-
-    @ApiModelProperty(value = "靶标管理中启动过的时长")
-    private Integer useDuration;
 }
