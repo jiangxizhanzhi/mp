@@ -40,6 +40,9 @@ public class CleanJob {
     @Resource
     private ImagesConverter imagesConverter;
 
+    @Resource
+    private CsceneMapper csceneMapper ;
+
     //    @Scheduled(cron = "0 0/1 * * * ?")
     public void execute() {
         // 清除截屏
