@@ -20,4 +20,7 @@ public class AggregationConfig {
     @Value("${mp.aggregation.export-image-timeout:1200000}")
     private Integer exportImageTimeout;
 
+    @Value("${mp.aggregation.export-scene-image-limit-enable:true}")
+    private Boolean exportSceneImageLimitEnable;
+
 }
