@@ -130,8 +130,19 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                     }
                 }
             }
-            var outerinfo = ningboClient.get(authConfig.getNingboUrl(), params, OuterUserInfo.class);
-            log.info("get outer user info , {}", JsonCommon.stringify(outerinfo));
+            OuterUserInfo outerinfo = null;
+            for (int i = 0; i < 3; i++) {
+                log.info("get outer user info at times {} , {}", i, JsonCommon.stringify(outerinfo));
+                outerinfo = ningboClient.get(authConfig.getNingboUrl(), params, OuterUserInfo.class);
+                if (outerinfo.getUn() != null) {
+                    break;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             if (outerinfo.getUn() == null) {
                 throw new MpRuntimeException(outerinfo.getMsg());
             }
