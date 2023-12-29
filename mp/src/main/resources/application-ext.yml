@@ -90,6 +90,14 @@ mp:
       authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
       authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
       authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
+      ningbo-server: ${NINGBO_SERVER:http://39.105.173.29}
+      ningbo-url: ${NINGBO_URL:/open/api/v2/token}
+      ningbo-appid: ${NINGBO_APPID:10000}
+      ningbo-secret: ${NINGBO_SECRET:DDO7jw9TAZlLwRLRKSpBWXIlYZe9PKaD5Wc1S5ZQ0U8=}
+      ningbo-default-role: ${NINGBO_DEFAULT_ROLE:eac59e27badd4eb18affba4fe813f164}
+      ningbo-default-avatar: ${NINGBO_DEFAULT_AVATAR:/test/atata}
+      ningbo-default-passwd: ${NINGBO_DEFAULT_PASSWD:d8165e80c4abed2dcc1dd06df1a8be31}
+      ningbo-default-org: ${NINGBO_DEFAULT_ORG:a13262d600fe40c799d63dce5c1485af}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}

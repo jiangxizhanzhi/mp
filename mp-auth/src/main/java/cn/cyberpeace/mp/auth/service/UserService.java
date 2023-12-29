@@ -32,6 +32,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserModel add(UserRequest createRequest);
 
+    UserModel add2(UserRequest createRequest);
+
     UserModel modify(UserRequest modifyRequest);
 
     UserModel getByUserName(String userName);

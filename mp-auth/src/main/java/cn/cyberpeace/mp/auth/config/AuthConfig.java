@@ -54,4 +54,13 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    private String ningboServer;
+    private String ningboUrl;
+    private String ningboAppid;
+    private String ningboSecret;
+    private String ningboDefaultRole;
+    private String ningboDefaultPasswd;
+    private String ningboDefaultOrg;
+    private String ningboDefaultAvatar;
 }

@@ -1,29 +1,43 @@
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.KaptchaUtil;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -79,10 +93,62 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         return true;
     }
 
+    @Getter
+    @Setter
+    private class Params implements SnakeHttpParam {
+        private String ticket;
+        private String appid;
+        private String signature;
+    }
+
+    private static CloudHttpClient ningboClient = null;
+
+    private static Object lock = new Object();
 
     private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+        String ticket = loginData.getOrDefault("ticket", StringUtils.EMPTY);
+        String token = loginData.getOrDefault("token", StringUtils.EMPTY);
+        if (StringUtils.isNotEmpty(ticket)) {
+            AuthConfig authConfig = BeanCommon.getBean(AuthConfig.class);
+            String appId = authConfig.getNingboAppid();
+            String secret = authConfig.getNingboSecret();
+            String signature = DigestUtils.md5Hex(ticket + appId + secret);
+
+            Params params = new Params();
+            params.setAppid(appId);
+            params.setTicket(ticket);
+            params.setSignature(signature);
+            if (ningboClient == null) {
+                synchronized (lock) {
+                    if (ningboClient == null) {
+                        ningboClient = new CloudHttpClient(authConfig.getNingboServer(), 20000, 100);
+                    }
+                }
+            }
+            var outerinfo = ningboClient.get("/open/api/v2/token", params, OuterUserInfo.class);
+            log.info("get outer user info , {}", JsonCommon.stringify(outerinfo));
+            if (outerinfo.getUn() == null) {
+                throw new MpRuntimeException(outerinfo.getMsg());
+            }
+            UserService userService = BeanCommon.getBean(UserService.class);
+            var user = userService.getByUserName(outerinfo.getUn());
+            if (user == null) {
+                UserRequest request1 = new UserRequest();
+                request1.setAvatar(authConfig.getDefaultUserAvatar());
+                request1.setPassword(authConfig.getNingboDefaultPasswd());
+                request1.setUsername(outerinfo.getUn());
+                request1.setName(outerinfo.getDis());
+                request1.setOrgIds(new ArrayList<>());
+                request1.getOrgIds().add(authConfig.getNingboDefaultOrg());
+                request1.setRoleIds(new ArrayList<>());
+                request1.getRoleIds().add(authConfig.getNingboDefaultRole());
+                userService.add2(request1);
+            }
+            username = outerinfo.getUn();
+            decryptedPwd = authConfig.getNingboDefaultPasswd();
+        }
 
         if (StringUtils.isNotBlank(username)) {
             request.setAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME, username);

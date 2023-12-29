@@ -214,6 +214,14 @@ mp:
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
+    ningbo-server: ${mp.auth.ext-var.ningbo-server:http://39.105.173.29}
+    ningbo-url: ${mp.auth.ext-var.ningbo-url:/open/api/v2/token}
+    ningbo-appid: ${mp.auth.ext-var.ningbo-appid:10000}
+    ningbo-secret: ${mp.auth.ext-var.ningbo-secret:DDO7jw9TAZlLwRLRKSpBWXIlYZe9PKaD5Wc1S5ZQ0U8=}
+    ningbo-default-role: ${mp.auth.ext-var.ningbo-default-role:eac59e27badd4eb18affba4fe813f164}
+    ningbo-default-avatar: ${mp.auth.ext-var.ningbo-avatar:/test/atata}
+    ningbo-default-passwd: ${mp.auth.ext-var.ningbo-passwd:d8165e80c4abed2dcc1dd06df1a8be31}
+    ningbo-default-org: ${mp.auth.ext-var.ningbo-org:a13262d600fe40c799d63dce5c1485af}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

@@ -113,7 +113,7 @@ public class CloudHttpClient {
                 CloudSingleton.cloudAppConfig.getCpcloudHttpPoolSize());
     }
 
-    private CloudHttpClient(String server, Integer timeout, Integer poolSize) {
+    public CloudHttpClient(String server, Integer timeout, Integer poolSize) {
         httpClient = HttpClient.builder()
                 .configServer(server)
                 .configTimeout(timeout)

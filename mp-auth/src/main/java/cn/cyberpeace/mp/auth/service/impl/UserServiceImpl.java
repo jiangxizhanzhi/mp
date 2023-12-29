@@ -390,6 +390,69 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public UserModel add2(UserRequest createRequest) {
+        ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
+
+        // 保存用户
+        UserModel userModel = new UserModel();
+        BeanUtils.copyProperties(createRequest, userModel);
+
+        String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
+        userModel.setPassword(decryptedPwd);
+        userModel.setTokenSecret(null);
+        userModel.setId(null);
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 如果ident为空，设置为null
+            userModel.setIdentifier(null);
+        }
+        if (StringUtils.isNotBlank(userModel.getAvatar())) {
+            userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
+        }
+
+        createCheckService.check(userModel);
+
+        // create中会对密码加密，外层不需要再次加密
+        ObjServiceResult<UserModel> result = create(userModel);
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
+
+        UserModel userCreated = result.getSource().getObj();
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
+            createRequest.getOrgIds().forEach(id -> {
+                boolean isOrgExist = orgService.exists(id);
+                if (!isOrgExist) {
+                    log.error("org id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
+                }
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+            });
+        }
+
+        // 保存角色-用户关系
+        if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
+            createRequest.getRoleIds().forEach(id -> {
+                boolean isRoleExist = roleService.exists(id);
+                if (!isRoleExist) {
+                    log.error("role id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
+                }
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            });
+        }
+
+        userCacheService.evictAllUserCache();
+        return userModel;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
         if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
             // 如果操作的对象不是自己，则进行权限校验
