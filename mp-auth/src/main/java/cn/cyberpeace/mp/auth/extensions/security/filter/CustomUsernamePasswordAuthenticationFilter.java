@@ -132,8 +132,8 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             }
             OuterUserInfo outerinfo = null;
             for (int i = 0; i < 3; i++) {
-                log.info("get outer user info at times {} , {}", i, JsonCommon.stringify(outerinfo));
                 outerinfo = ningboClient.get(authConfig.getNingboUrl(), params, OuterUserInfo.class);
+                log.info("get outer user info at times {} , {}", i, JsonCommon.stringify(outerinfo));
                 if (outerinfo.getUn() != null) {
                     break;
                 }
