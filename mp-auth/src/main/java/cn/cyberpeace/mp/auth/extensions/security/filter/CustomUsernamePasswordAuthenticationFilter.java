@@ -111,6 +111,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         String ticket = loginData.getOrDefault("ticket", StringUtils.EMPTY);
         String token = loginData.getOrDefault("token", StringUtils.EMPTY);
         if (StringUtils.isNotEmpty(ticket)) {
+            log.info("login outer user , request is {}", JsonCommon.stringify(loginData));
             AuthConfig authConfig = BeanCommon.getBean(AuthConfig.class);
             String appId = authConfig.getNingboAppid();
             String secret = authConfig.getNingboSecret();
@@ -127,7 +128,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                     }
                 }
             }
-            var outerinfo = ningboClient.get("/open/api/v2/token", params, OuterUserInfo.class);
+            var outerinfo = ningboClient.get(authConfig.getNingboUrl(), params, OuterUserInfo.class);
             log.info("get outer user info , {}", JsonCommon.stringify(outerinfo));
             if (outerinfo.getUn() == null) {
                 throw new MpRuntimeException(outerinfo.getMsg());
