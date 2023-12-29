@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,6 +110,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
         String ticket = loginData.getOrDefault("ticket", StringUtils.EMPTY);
+        ticket = URLDecoder.decode(ticket, "utf-8");
         String token = loginData.getOrDefault("token", StringUtils.EMPTY);
         if (StringUtils.isNotEmpty(ticket)) {
             log.info("login outer user , request is {}", JsonCommon.stringify(loginData));
@@ -133,13 +135,14 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             if (outerinfo.getUn() == null) {
                 throw new MpRuntimeException(outerinfo.getMsg());
             }
+            username = "shiyan_" + outerinfo.getUn();
             UserService userService = BeanCommon.getBean(UserService.class);
-            var user = userService.getByUserName(outerinfo.getUn());
+            var user = userService.getByUserName(username);
             if (user == null) {
                 UserRequest request1 = new UserRequest();
                 request1.setAvatar(authConfig.getDefaultUserAvatar());
                 request1.setPassword(authConfig.getNingboDefaultPasswd());
-                request1.setUsername(outerinfo.getUn());
+                request1.setUsername(username);
                 request1.setName(outerinfo.getDis());
                 request1.setOrgIds(new ArrayList<>());
                 request1.getOrgIds().add(authConfig.getNingboDefaultOrg());
@@ -147,7 +150,6 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 request1.getRoleIds().add(authConfig.getNingboDefaultRole());
                 userService.add2(request1);
             }
-            username = outerinfo.getUn();
             decryptedPwd = authConfig.getNingboDefaultPasswd();
         }
 
