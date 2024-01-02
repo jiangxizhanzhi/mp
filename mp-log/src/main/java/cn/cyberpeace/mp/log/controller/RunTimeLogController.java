@@ -92,7 +92,7 @@ public class RunTimeLogController {
     }
 
     @ApiOperation("批量删除日志")
-    @ApiImplicitParam(name = "requests", value = "删除数据请求体", dataTypeClass = String[].class)
+    @ApiImplicitParam(name = "requests", value = "删除数据请求体", dataTypeClass = LogFileDeleteRequest[].class)
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Boolean> bulkDelete(@RequestBody LogFileDeleteRequest[] requests) {
         Integer delete_num = requests.length;
