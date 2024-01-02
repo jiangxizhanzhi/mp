@@ -35,6 +35,7 @@ import cn.cyberpeace.mp.devopscluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount;
 import cn.cyberpeace.mp.devopscluster.model.ImagesCreateInstanceCloudPlatform;
+import cn.cyberpeace.mp.devopscluster.model.ImagesDeleteInstanceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
@@ -389,7 +390,7 @@ public class ImagesConverter implements BaseConverter {
         if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-//        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
+        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
         var device = deviceTargetMapper.findByUuid(request.getUuid());
         var use = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - device.getLastCreateTime().toEpochSecond(ZoneOffset.UTC);
         var updateTargetModel = new DeviceTargetPO();
