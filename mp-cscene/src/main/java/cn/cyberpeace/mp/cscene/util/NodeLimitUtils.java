@@ -28,6 +28,7 @@ public final class NodeLimitUtils {
         this.add(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
         this.add(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
         this.add(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        this.add(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
     }};
 
     private static CsceneAppConfig csceneAppConfig;
@@ -164,7 +165,9 @@ public final class NodeLimitUtils {
             return false;
         }
         if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE ||
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
             return true;
         }
         return false;
