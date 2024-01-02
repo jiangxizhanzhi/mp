@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -118,7 +119,7 @@ public class LogFileController {
 
     @ApiOperation(value = "设置日志保存时间")
     @PostMapping("/set_delete_interval")
-    public ServiceResult<Integer> setDeleteInterval(LogFileIntervalRequest request) {
+    public ServiceResult<Integer> setDeleteInterval(@RequestBody LogFileIntervalRequest request) {
         Integer interval = logFileService.setInterval(request.getInterval());
         //每次更新重新执行一下定时任务
         //logFileService.IntervalDeleteJob();
