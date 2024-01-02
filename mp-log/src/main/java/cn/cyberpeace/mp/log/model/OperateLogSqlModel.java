@@ -20,13 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table("mp_devops_log_operation")
 public class OperateLogSqlModel extends BaseModel {
-
-    /**
-     * 日志id
-     */
-    @DefaultInt
-    private String id;
-
     /**
      * 站点类型：应用、中台、前端、平台
      */
