@@ -17,6 +17,9 @@ allprojects {
         maven {
             url 'https://maven.aliyun.com/repository/public/'
         }
+        jcenter {
+            url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'
+        }
         mavenLocal()
         mavenCentral()
     }
