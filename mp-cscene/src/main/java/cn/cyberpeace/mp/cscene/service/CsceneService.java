@@ -706,8 +706,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return ids;
     }
 
-    public void UpdateReference(CsceneBO csceneBO) {
-        if (csceneBO == null) {
+    public void updateReference(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null || csceneBO.getSceneConfig().getTopology().getElements() == null
+                || csceneBO.getSceneConfig().getTopology().getElements().size() == 0) {
             return;
         }
         List<String> image_uuids = new ArrayList<>();
