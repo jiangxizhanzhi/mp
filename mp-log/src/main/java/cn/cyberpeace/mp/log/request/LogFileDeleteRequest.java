@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.log.request;
 
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+@ApiModel("运行日志删除请求参数")
 @Data
 @NoArgsConstructor
 public class LogFileDeleteRequest  {
