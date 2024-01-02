@@ -126,4 +126,13 @@ public class LogFileController {
         return new ServiceResult<>(interval).asResult();
     }
 
+    @ApiOperation(value = "设置日志保存时间")
+    @GetMapping("/get_delete_interval")
+    public ServiceResult<Integer> getDeleteInterval() {
+        Integer interval = logFileService.getInterval();
+        //每次更新重新执行一下定时任务
+        //logFileService.IntervalDeleteJob();
+        return new ServiceResult<>(interval).asResult();
+    }
+
 }

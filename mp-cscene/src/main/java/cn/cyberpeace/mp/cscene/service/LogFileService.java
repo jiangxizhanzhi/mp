@@ -363,6 +363,21 @@ public class LogFileService {
         return interval;
     }
 
+    /**
+     * 设置删除间隔时间
+     *
+     * @return
+     */
+    public Integer getInterval() {
+        //查询数据库是否有该配置，没有则添加该配置
+        SysConfigModel model = sysConfigService.getByKeyName(INTERVAL_CONFIG);
+        if (model == null) {
+            return 15;
+        } else {
+            return Integer.valueOf(model.getValue());
+        }
+    }
+
     @Data
     @AllArgsConstructor
     public class Composite {
