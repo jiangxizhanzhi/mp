@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount;
+import cn.cyberpeace.mp.devopscluster.model.ImagesCreateInstanceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
@@ -372,7 +373,7 @@ public class ImagesConverter implements BaseConverter {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-//        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
