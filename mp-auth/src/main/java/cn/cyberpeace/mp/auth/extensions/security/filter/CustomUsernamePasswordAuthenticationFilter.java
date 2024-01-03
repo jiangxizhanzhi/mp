@@ -113,7 +113,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         ticket = URLDecoder.decode(ticket, "utf-8");
         String token = loginData.getOrDefault("token", StringUtils.EMPTY);
         if (StringUtils.isNotEmpty(ticket)) {
-            log.info("login outer user , request is {}", JsonCommon.stringify(loginData));
+            log.info("login outer user , request is {},decode ticket is {}", JsonCommon.stringify(loginData), ticket);
             AuthConfig authConfig = BeanCommon.getBean(AuthConfig.class);
             String appId = authConfig.getNingboAppid();
             String secret = authConfig.getNingboSecret();
@@ -138,7 +138,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                     break;
                 }
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
