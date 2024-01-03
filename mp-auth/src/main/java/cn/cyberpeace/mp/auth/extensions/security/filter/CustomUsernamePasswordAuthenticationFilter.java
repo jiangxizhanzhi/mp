@@ -110,7 +110,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
         String ticket = loginData.getOrDefault("ticket", StringUtils.EMPTY);
-        ticket = URLDecoder.decode(ticket, "utf-8");
+//        ticket = URLDecoder.decode(ticket, "utf-8");
         String token = loginData.getOrDefault("token", StringUtils.EMPTY);
         if (StringUtils.isNotEmpty(ticket)) {
             log.info("login outer user , request is {},decode ticket is {}", JsonCommon.stringify(loginData), ticket);
