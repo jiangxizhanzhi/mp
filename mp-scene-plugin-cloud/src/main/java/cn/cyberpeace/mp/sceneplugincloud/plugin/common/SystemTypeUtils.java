@@ -43,7 +43,7 @@ public class SystemTypeUtils {
             new SystemTypeItem("108", "Windows-Server2000", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000),
             new SystemTypeItem("109", "Windows11", BaseSceneElementModel.SystemType.WINDOWS_11),
 
-            new SystemTypeItem("201", "FreeBSD", BaseSceneElementModel.SystemType.LINUX),
+            new SystemTypeItem("201", "FreeBSD", BaseSceneElementModel.SystemType.FREEBSD),
             new SystemTypeItem("202", "OpenBSD", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("203", "NetBSD", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("204", "DragonFly BSD", BaseSceneElementModel.SystemType.LINUX),

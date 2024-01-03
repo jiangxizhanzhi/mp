@@ -12,6 +12,8 @@ public class SystemTypeCommandUtils {
 
     public static final String OS_TYPE_LINUX = "linux";
 
+    public static final String OS_TYPE_FREEBSD = "freebsd";
+
     public static final String COMMAND_AND_SEPARATOR = " && ";
 
     public static final String WINDOWS_COMMAND_INLINE_SEPARATOR = " & ";
@@ -39,6 +41,7 @@ public class SystemTypeCommandUtils {
             put(BaseSceneElementModel.SystemType.UBUNTU, OS_TYPE_LINUX);
             put(BaseSceneElementModel.SystemType.KALI, OS_TYPE_LINUX);
             put(BaseSceneElementModel.SystemType.OTHER, OS_TYPE_LINUX);
+            put(BaseSceneElementModel.SystemType.FREEBSD, OS_TYPE_FREEBSD);
 
             put(BaseSceneElementModel.SystemType.WINDOWS, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.LINUX, OS_TYPE_LINUX);
@@ -51,6 +54,10 @@ public class SystemTypeCommandUtils {
 
     public static boolean isWindows(String systemType) {
         return OS_TYPE_WINDOWS.equals(getOsType(systemType));
+    }
+
+    public static boolean isFreebsd(String systemType) {
+        return OS_TYPE_FREEBSD.equals(getOsType(systemType));
     }
 
     public static boolean isLinux(String systemType) {
