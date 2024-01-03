@@ -51,9 +51,9 @@ public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
+    public ExportResult export(SceneParseResourceCenterV1.Result resultV1, SceneParseResourceCenterV2.Result resultV2,
+                               String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         // 生成topo.yml
-        SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
             resultV1.getYmlResult().getNodes().forEach(n -> {
                 if (StringUtils.isNotEmpty(n.getImage())) {
@@ -66,9 +66,8 @@ public class SceneExporter {
         }
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
-        SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
-        if (CollectionUtils.isNotEmpty(parseResult.getYmlResult().getNodes())) {
-            parseResult.getYmlResult().getNodes().forEach(n -> {
+        if (CollectionUtils.isNotEmpty(resultV2.getYmlResult().getNodes())) {
+            resultV2.getYmlResult().getNodes().forEach(n -> {
                 if (StringUtils.isNotEmpty(n.getImage())) {
                     n.setImage(sceneNumber + n.getImage());
                 }
@@ -78,14 +77,14 @@ public class SceneExporter {
                 if (CollectionUtils.isNotEmpty(n.getStaticRouters())) {
                     for (var sr : n.getStaticRouters()) {
                         if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
-                            sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
+                            sr.setNexthopNode(resultV2.getIdConvert().get(sr.getNexthopNode()));
                         }
                     }
                 }
                 if (CollectionUtils.isNotEmpty(n.getStaticRoutes())) {
                     for (var sr : n.getStaticRoutes()) {
                         if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
-                            sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
+                            sr.setNexthopNode(resultV2.getIdConvert().get(sr.getNexthopNode()));
                         }
                     }
                 }
@@ -93,13 +92,13 @@ public class SceneExporter {
                     ExtNodeInfo extNodeInfo = n.getExtInfo();
                     if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
                         for (var p : extNodeInfo.getPortProtocols()) {
-                            p.setConnectNode(parseResult.getIdConvert().get(p.getConnectNode()));
+                            p.setConnectNode(resultV2.getIdConvert().get(p.getConnectNode()));
                         }
                     }
                 }
             });
         }
-        this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
+        this.createSceneYml(resultV2.getYmlResult(), envPath, "topo2");
 
         // 下载附件
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
@@ -109,7 +108,7 @@ public class SceneExporter {
         }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
-        parseResult.getIdConvert().forEach((k, v) -> {
+        resultV2.getIdConvert().forEach((k, v) -> {
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
             convertInfo.setId(v);
             convertInfo.setOriginId(k);

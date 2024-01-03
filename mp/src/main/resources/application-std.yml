@@ -179,11 +179,11 @@ mp:
   # mp-log 模块
   log:
     ext-var:
-      #      es-ip: ${LOG_ES_IP:10.100.7.1}
-      #      es-port: ${LOG_ES_PORT:9205}
-      #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-      #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
-      #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+    #      es-ip: ${LOG_ES_IP:10.100.7.1}
+    #      es-port: ${LOG_ES_PORT:9205}
+    #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+    #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+    #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
@@ -284,9 +284,11 @@ mp:
     scene-process-save-realtime: ${mp.scene.ext-var.scene-process-save-realtime}
     element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
     dhcp-control: ${mp.scene.ext-var.dhcp-control}
+    scene-export-limit-linux-size: ${mp.scene.ext-var.scene-export-limit-linux-size}
+    scene-export-limit-win-size: ${mp.scene.ext-var.scene-export-limit-win-size}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
-
+    export-scene-image-limit-enable: ${mp.aggregation.ext-var.export-scene-image-limit-enable}
 # for kaptcha
 kaptcha:
   border:

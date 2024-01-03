@@ -93,6 +93,7 @@ public class BaseSceneParseResourceCenter {
                 }
                 Device device = new Device();
                 device.setImageUuid(node.getImageUuid());
+                device.setSystemType(node.getSrcElement().getSystemType());
                 device.setImage(node.getImage());
                 device.setAccessModes(new ArrayList<>());
                 // 虚拟机导出时才有自定义的flavor信息
@@ -136,6 +137,7 @@ public class BaseSceneParseResourceCenter {
         private Integer cpu;
         private Integer ram;
         private Integer disk;
+        private String systemType;
         private List<AccessMode> accessModes;
     }
 

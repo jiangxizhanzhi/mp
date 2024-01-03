@@ -38,6 +38,7 @@ mp:
   aggregation:
     ext-var:
       export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
+      export-scene-image-limit-enable: ${MP_SCENE_IMAGE_LIMIT_ENABLE:true}
   cscene:
     ext-var:
       has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
@@ -134,7 +135,7 @@ mp:
       es-port: ${LOG_ES_PORT:9205}
       es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
-      dynamic-level-keeping:  ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
       dynamic-level-only-root: ${DYNAMIC_LEVEL_ONLY_ROOT:false}
   # mp-auth 模块配置
   auth:
@@ -165,6 +166,9 @@ mp:
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      scene-export-limit-linux-size: ${MP_SCENE_EXPORT_LIMIT_LINUX_SIZE:8}
+      scene-export-limit-win-size: ${MP_SCENE_EXPORT_LIMIT_WIN_SIZE:20}
+
 
 # for kaptcha
 #kaptcha:

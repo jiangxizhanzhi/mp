@@ -1,9 +1,13 @@
 package cn.cyberpeace.mp.aggregation.service;
 
+import cn.cyberpeace.mp.aggregation.config.AggregationConfig;
+import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneExporter;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneParseResourceCenterV1;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneParseResourceCenterV2;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -14,16 +18,25 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Description
@@ -45,11 +58,22 @@ public class ResourceCenterService {
     private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock -o nfsvers=3  %s:%s %s";
     private static String UMOUNT_CMD = "umount %s";
 
+    private static String DEVICE_QUERY_URL = "/v1/volumes/snapshots";
+
+    @Value("${mp.scene.scene-export-limit-linux-size:8}")
+    private Integer EXPORT_LINUX_LIMIT_SIZE;
+
+    @Value("${mp.scene.scene-export-limit-win-size:20}")
+    private Integer EXPORT_WIN_LIMIT_SIZE;
+
     @Resource
     private CsceneService csceneService;
 
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
+
+    @Autowired
+    private AggregationConfig aggregationConfig;
 
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
@@ -95,6 +119,66 @@ public class ResourceCenterService {
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        //获取场景id，根据场景id解析信息
+        String sceneId = cscene.getSource().getObj().getSceneConfig();
+        SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
+        SceneParseResourceCenterV2.Result resultV2 = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
+        //场景导出限制开关，默认为开
+        if (aggregationConfig.getExportSceneImageLimitEnable()) {
+            //遍历每个设备进行大小检查
+            for (var device : resultV1.getDevices()) {
+                var params = new DeviceQueryParams();
+                params.setName(device.getImage());
+                CloudResponse<Map> result;
+                try {
+                    //调用接口查询镜像信息
+                    result = new Remote().cloudGet(DEVICE_QUERY_URL, params, new TypeReference<CloudResponse<Map>>() {
+                    }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
+                } catch (MpRuntimeException exception) {
+                    exception.setServiceCode(CsceneErrorCode.SCENE_EXPORT_ERROR);
+                    exception.setDetail(String.format("Failed to query information about device %s",params.getName()));
+                    throw exception;
+                }
+
+                var data = result.getData();
+                if (data.containsKey("data")) {
+                    LinkedHashMap<String, Object> linkedHashMap = (LinkedHashMap<String, Object>) data.get("data");
+                    if (!linkedHashMap.containsKey("list")) {
+                        throw new MpRuntimeException(CsceneErrorCode.SCENE_EXPORT_ERROR, "key 'list' is not exist.");
+                    }
+                    ArrayList<Object> arrayList = (ArrayList<Object>) linkedHashMap.get("list");
+
+                    for (Object obj : arrayList) {
+                        if (!(obj instanceof Map)) {
+                            throw new MpRuntimeException(CsceneErrorCode.SCENE_EXPORT_ERROR, "The elements in ArrayList are not of Map type.");
+                        }
+                        LinkedHashMap<String, Object> item = (LinkedHashMap<String, Object>) obj;
+                        if (item.containsKey("name") && item.get("name") != null &&
+                                device.getImage().equals(item.get("name").toString()))
+                            if (item.containsKey("size") && item.get("size") != null) {
+                                Integer size = Integer.valueOf(item.get("size").toString());
+                                Integer maxSize = 0;
+                                //根据系统类型获取最大限制
+                                if (SystemTypeCommandUtils.isLinux(device.getSystemType())) {
+                                    maxSize = EXPORT_LINUX_LIMIT_SIZE;
+                                } else {
+                                    maxSize = EXPORT_WIN_LIMIT_SIZE;
+                                }
+                                if (size > maxSize) {
+                                    throw new MpRuntimeException(CsceneErrorCode.SCENE_EXPORT_ERROR,
+                                            String.format("scene image %s is too big, " +
+                                                            "The export maximum size is %dGB, but its size is %dGB.",
+                                                    device.getImage(), maxSize, size));
+                                }
+                            }
+                    }
+                } else {
+                    //所有查不到的直接默认导出不判断大小
+                }
+            }
+        }
+
+
         String logo = cscene.getSource().getObj().getLogo();
         //存在logo图片则导出
         if (StringUtils.isNotEmpty(logo)) {
@@ -108,7 +192,8 @@ public class ResourceCenterService {
             }
         }
 
-        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
+        var result = new SceneExporter().export(resultV1, resultV2,
+                envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
         return new ServiceResult<>(result);
     }
 
@@ -134,5 +219,11 @@ public class ResourceCenterService {
             log.error("Exec shell error! command=[{}], catch error:{}", shell, ExceptionUtils.getStackTrace(e));
         }
         log.info("End exec shell!");
+    }
+
+    @Setter
+    @Getter
+    private class DeviceQueryParams implements CloudHttpParam {
+        private String name;
     }
 }
