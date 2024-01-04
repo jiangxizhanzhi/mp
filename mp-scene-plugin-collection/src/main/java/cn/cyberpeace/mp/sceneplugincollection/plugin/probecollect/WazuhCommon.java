@@ -137,10 +137,29 @@ public class WazuhCommon {
                             "sleep 10",
                             "sh start.sh"
                     ));
+        } else if (SystemTypeCommandUtils.isFreebsd(systemType)) {
+            resource = new InstallerUtils.Installer();
+            resource.setFile(StringUtils.EMPTY);
+            resource.setInstallCommand(
+                    StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                            "sh /opt/wazuha/stop.sh",
+                            "sh /opt/wazuha/uninstall.sh",
+                            String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
+                                    WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                            String.format("cd %s/agent-installer/agent-freebsd", linuxInstallDir),
+                            "sh install.sh",
+                            String.format("cd %s", linuxInstallDir),
+//                            "rm -rf agent-installer",
+                            "cd /opt/wazuha",
+                            String.format("sh config.sh %s %s %s %s ", wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            String.format("/usr/local/bin/python2.7 %s", probeCommand),
+                            "sleep 10",
+                            "sh start.sh"
+                    ));
         }
         List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
-        if (SystemTypeCommandUtils.isLinux(systemType)) {
+        if (SystemTypeCommandUtils.isLinux(systemType) || SystemTypeCommandUtils.isFreebsd(systemType)) {
             String addCommand;
             if (isContainer) {
                 // 容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令

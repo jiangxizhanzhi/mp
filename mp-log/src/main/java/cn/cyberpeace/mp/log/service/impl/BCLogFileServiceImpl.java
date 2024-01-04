@@ -29,7 +29,7 @@ public class BCLogFileServiceImpl implements LogFileService {
         return 50;
     }
 
-    @Value("${logging.file.bc-path}")
+    @Value("${logging.file.bc-path:/home}")
     private String logPath;
 
     @Override

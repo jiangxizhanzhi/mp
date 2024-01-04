@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.log.dto.RunTimeLogDTO;
 import cn.cyberpeace.mp.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.log.request.BasePageRequest;
 import cn.cyberpeace.mp.log.request.LogFileDeleteRequest;
+import cn.cyberpeace.mp.log.request.LogFilesDeleteRequest;
 import cn.cyberpeace.mp.log.request.RunTimeLogDownloadRequest;
 import cn.cyberpeace.mp.log.service.LogFileServiceFactory;
 import cn.cyberpeace.mp.log.service.MpOperateLogService;
@@ -92,9 +93,9 @@ public class RunTimeLogController {
     }
 
     @ApiOperation("批量删除日志")
-    @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
-    public ServiceResult<Boolean> bulkDelete(@RequestBody LogFileDeleteRequest[] requests) {
+    public ServiceResult<Boolean> bulkDelete(@RequestBody LogFilesDeleteRequest request) {
+        var requests = request.getLogFiles();
         Integer delete_num = requests.length;
         Integer rel_delete_num = 0;
         var result = new ServiceResult<Boolean>();

@@ -35,6 +35,7 @@ import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.CsceneLegalUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -706,8 +707,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return ids;
     }
 
-    public void UpdateReference(CsceneBO csceneBO) {
-        if (csceneBO == null) {
+    public void updateReference(CsceneBO csceneBO) {
+        if (CsceneLegalUtils.isEmptyElements(csceneBO)) {
             return;
         }
         List<String> image_uuids = new ArrayList<>();

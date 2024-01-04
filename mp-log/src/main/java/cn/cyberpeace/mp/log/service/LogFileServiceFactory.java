@@ -61,7 +61,10 @@ public class LogFileServiceFactory {
             if (Objects.isNull(logFileService)) {
                 result.addAll(logFileServiceMap.get(LogReportTypeEnum.REPORT.name()).list(basePageRequest.getType().name()));
             } else {
-                result.addAll(logFileService.list(basePageRequest.getType().name()));
+                var list = logFileService.list(basePageRequest.getType().name());
+                if (list != null) {
+                    result.addAll(list);
+                }
             }
         } else {
             var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
