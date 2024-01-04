@@ -410,10 +410,10 @@
                 reference_nums = #{referenceNums},
             </if>
             <if test="useDuration != null">
-                use_duration = #{useDuration}
+                use_duration = #{useDuration},
             </if>
             <if test="lastCreateTime != null">
-                last_create_time = #{lastCreateTime}
+                last_create_time = #{lastCreateTime},
             </if>
         </set>
         where uuid = #{uuid}
