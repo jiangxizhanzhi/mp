@@ -543,19 +543,14 @@ public class ImagesController {
     }
 
     /**
-     * 检测镜像状态是否在使用中
+     * 离线升级也可用于检测镜像状态是否在使用中
      *
      * @param request
      * @return
      */
-    @ApiOperation("检测镜像状态")
+    @ApiOperation("离线升级镜像/检测镜像状态是否在使用中")
     @PostMapping(value = "/offline_upgrade")
     public ServiceResult<Boolean> OfflineUpgrade(@RequestBody OfflineUpgradeRequest request) {
-        String name = request.getCurrentImageName();
-        if (name == null || name.length() == 0){
-            throw new MpRuntimeException(DevopsClusterErrorCode.OFFLINE_UPGRADE_IMAGE.format("Current ImageName is Empty"));
-        }
-
         String[] imageName = new String[]{request.getCurrentImageName()};
         var status = csceneSpecialService.statDeviceReferCsceneInstances(imageName);
 

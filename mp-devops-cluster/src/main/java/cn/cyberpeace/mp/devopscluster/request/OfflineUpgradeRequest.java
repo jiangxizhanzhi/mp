@@ -5,16 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * 网络分页请求信息
  */
 @Data
 public class OfflineUpgradeRequest {
 
-    @ApiModelProperty(value = "镜像uuid")
+    @NotEmpty
+    @ApiModelProperty(value = "镜像uuid", required = true)
     private String uuid;
 
-    @ApiModelProperty(value = "当前镜像名称")
+    @NotEmpty
+    @ApiModelProperty(value = "当前镜像名称", required = true)
     private String currentImageName;
 
     @ApiModelProperty(value = "上传镜像的名称")

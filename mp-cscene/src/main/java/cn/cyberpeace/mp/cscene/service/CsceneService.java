@@ -742,6 +742,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 } catch (Exception e) {
                     // 处理其他潜在的异常
                     log.error("UpdateReference Exception: ", e);
+                    throw new MpRuntimeException(CsceneErrorCode.SCENE_REFERENCE_ERROR,e.getMessage());
                 }
             }
         }

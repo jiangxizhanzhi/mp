@@ -372,10 +372,15 @@ public class LogFileService {
         //查询数据库是否有该配置，没有则添加该配置
         SysConfigModel model = sysConfigService.getByKeyName(INTERVAL_CONFIG);
         if (model == null) {
-            return 15;
-        } else {
-            return Integer.valueOf(model.getValue());
-        }
+            model = new SysConfigModel();
+            model.setValue(String.valueOf(DEFAULT_INTERVAL));
+            model.setInitValue(String.valueOf(DEFAULT_INTERVAL));
+            model.setKeyName(INTERVAL_CONFIG);
+            model.setTenant("default");
+            sysConfigService.create(model);
+        } 
+        return Integer.valueOf(model.getValue());
+
     }
 
     @Data

@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.cscene.request.logfile;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -11,7 +13,8 @@ import lombok.Data;
 @Data
 public class LogFileIntervalRequest {
 
-    @ApiModelProperty(value = "间隔时间")
+    @NotEmpty
+    @ApiModelProperty(value = "间隔时间", required = true)
     private Integer Interval;
 
 }

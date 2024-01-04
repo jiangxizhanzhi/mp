@@ -121,8 +121,6 @@ public class LogFileController {
     @PostMapping("/set_delete_interval")
     public ServiceResult<Integer> setDeleteInterval(@RequestBody LogFileIntervalRequest request) {
         Integer interval = logFileService.setInterval(request.getInterval());
-        //每次更新重新执行一下定时任务
-        //logFileService.IntervalDeleteJob();
         return new ServiceResult<>(interval).asResult();
     }
 
@@ -130,8 +128,6 @@ public class LogFileController {
     @GetMapping("/get_delete_interval")
     public ServiceResult<Integer> getDeleteInterval() {
         Integer interval = logFileService.getInterval();
-        //每次更新重新执行一下定时任务
-        //logFileService.IntervalDeleteJob();
         return new ServiceResult<>(interval).asResult();
     }
 
