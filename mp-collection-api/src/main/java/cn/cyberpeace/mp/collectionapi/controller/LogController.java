@@ -29,11 +29,13 @@ public class LogController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查询日志列表")
-    public ListObjServiceResult<LogVO> list(LogQueryPageRequest request, @RequestBody LogQueryPageRequest bodyParams) {
+    public ListObjServiceResult<LogVO> list(LogQueryPageRequest request, @RequestBody(required = false) LogQueryPageRequest bodyParams) {
         if (FlowController.debugLogFlag) {
             log.info("list params: request = {}, bodyParams = {}", request, bodyParams);
         }
-        request.setIps(bodyParams.getIps());
+        if (bodyParams != null && bodyParams.getIps() != null) {
+            request.setIps(bodyParams.getIps());
+        }
         return logQueryService.queryContestLog(request).asResult();
     }
 
