@@ -53,7 +53,7 @@ logging:
     path: /home/mp/logs
 mp:
   base:
-    run-init: true
+    run-init: false
   auth:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/reset_menu_visibility,/sys/activation/license_status,/sys/activation/status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
   frontbusiness:

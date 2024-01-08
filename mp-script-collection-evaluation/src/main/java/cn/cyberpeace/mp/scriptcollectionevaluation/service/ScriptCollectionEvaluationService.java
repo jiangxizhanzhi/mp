@@ -164,7 +164,15 @@ public class ScriptCollectionEvaluationService {
         cloudElement.setCategory2(imageConvertModel.getSubCategory());
         cloudElement.setCategory3(imageConvertModel.getThirdCategory());
         cloudElement.setDhcp(true);
-        cloudElement.setImage(imageConvertModel.getName());
+
+        String image;
+        if (imageConvertModel.getExtImageInfo() != null && imageConvertModel.getExtImageInfo().getBaseImageName() != null) {
+            image = imageConvertModel.getExtImageInfo().getBaseImageName();
+        } else {
+            image = imageConvertModel.getName();
+        }
+        cloudElement.setImage(image);
+
         cloudElement.setImageUuid(imageConvertModel.getUuid());
         cloudElement.setIsBuildIn(imageConvertModel.getIsInternal());
         cloudElement.setRole(imageConvertModel.getRole());
@@ -302,7 +310,7 @@ public class ScriptCollectionEvaluationService {
             return new ServiceResult<>(result);
         }
 
-        if (SceneModel.Event.DELETE != sceneModel.getEvent()) {
+        if (sceneModel != null && SceneModel.Event.DELETE != sceneModel.getEvent()) {
             this.execCommand(scene);
         }
 
