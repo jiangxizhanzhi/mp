@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.scene.model.base.*;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseScenePieceModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -47,16 +52,16 @@ public abstract class BaseSceneTopologyBO<
             setScene(scene.export());
         }
         if (areas != null) {
-            setAreas(areas.stream().map(EidBO::export).collect(Collectors.toList()));
+            setAreas(areas.stream().map(a -> a.export()).collect(Collectors.toList()));
         }
         if (elements != null) {
-            setElements(elements.stream().map(BaseSceneElementBO::export).collect(Collectors.toList()));
+            setElements(elements.stream().map(e -> e.export()).collect(Collectors.toList()));
         }
         if (connections != null) {
-            setConnections(connections.stream().map(EidBO::export).collect(Collectors.toList()));
+            setConnections(connections.stream().map(c -> c.export()).collect(Collectors.toList()));
         }
         if (pieces != null) {
-            setPieces(pieces.stream().map(EidBO::export).collect(Collectors.toList()));
+            setPieces(pieces.stream().map(p2 -> p2.export()).collect(Collectors.toList()));
         }
         return (T) this;
     }
