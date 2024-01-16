@@ -149,7 +149,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/flow.json");
         String json = FileUtils.readLine(resources);
 
-        var flow = JSONObject.parseObject(json,FlowTemplateBO.class);
+        FlowTemplateBO flow = JSONObject.parseObject(json,FlowTemplateBO.class);
 
         String destinationIp = request.getDestinationIp();
 
@@ -216,7 +216,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         source.put("@timestamp",dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 
-        var formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
 
         IndexRequest indexRequest = new IndexRequest(group.concat("_").concat(SESSION3).concat("-").concat(dateTime.format(formatter))).source(source);
 
@@ -246,14 +246,14 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
                 .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -303,13 +303,13 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
                 .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -375,14 +375,14 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"))
                 .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.from(0).size(request.getTopSize());
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("groupByDestinationPort  >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -428,14 +428,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         AggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity").field("suricata.severity")
                 .subAggregation(AggregationBuilders.terms("destination_ip").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("groupByDestinationIpAndSeverity >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -474,7 +474,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     public List<FlowLogBO> flowLog(FlowAnalysisRequest request){
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -489,7 +489,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             searchSourceBuilder.from(0).size(request.getTopSize());
         }
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -517,7 +517,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     public ListObjResult<FlowLogBO> flowLogWithTotal(FlowAnalysisRequest request){
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -532,7 +532,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             searchSourceBuilder.from(0).size(request.getTopSize());
         }
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -611,7 +611,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -639,7 +639,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         searchSourceBuilder.size(0);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("topByAggregationTypeEnum >>>> Search JSON query: {}", searchRequest.source().toString());
         try {
@@ -676,10 +676,10 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        SearchRequest searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
@@ -708,7 +708,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     public long count(FlowAnalysisRequest request){
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         CountRequest countRequest = new CountRequest();
         countRequest.indices(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
@@ -735,9 +735,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         TeamAttackBO teamAttackResultVO = new TeamAttackBO();
 
         // 1.创建并设置SearchSourceBuilder对象
-        var searchSourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
@@ -745,7 +745,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("queryOneTeamAttackSumList Search JSON query: {}", searchRequest.source().toString());
 
@@ -757,8 +757,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             //设置攻击手法
             List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
                     .map(bucket -> {
-                        var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
-                        var attackResult = new AttackWayAggregationBO();
+                        ParsedStringTerms.ParsedBucket parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
+                        AttackWayAggregationBO attackResult = new AttackWayAggregationBO();
                         attackResult.setAggregationType(parsedBucket.getKeyAsString());
                         attackResult.setAttackNumber(parsedBucket.getDocCount());
                         return attackResult;
@@ -803,7 +803,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             return attackResultVOS;
         }
         for (int i = 0; i < attackResultVOS.size(); i++) {
-            var attack = attackResultVOS.get(i);
+            AttackWayAggregationBO attack = attackResultVOS.get(i);
             if (i > 1 && i == attackResultVOS.size() - 1) {
                 BigDecimal beforeSum = attackResultVOS.subList(0, i).stream()
                         .map(attackWayAggregationBO -> attackWayAggregationBO.getAttackNumberPercent())
@@ -826,7 +826,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
-        var searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
@@ -840,7 +840,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
-        var boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder
                 .must(QueryBuilders.existsQuery("suricata.category"))
                 .mustNot(QueryBuilders.termsQuery("suricata.category", ""));

@@ -28,8 +28,8 @@ public class ServerMonitorConfig {
 
     @PostConstruct
     public void init() {
-        var cpCloudMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.CP_SRV_MONITORS), MonitorProbe.class);
-        var businessMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.BIZ_SRV_MONITORS), MonitorProbe.class);
+        MonitorProbe cpCloudMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.CP_SRV_MONITORS), MonitorProbe.class);
+        MonitorProbe businessMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.BIZ_SRV_MONITORS), MonitorProbe.class);
         if (StringUtils.isNotEmpty(situationAwareConfig.getMonitorCpCloudInterval())) {
             cpCloudMonitor.setInterval(situationAwareConfig.getMonitorCpCloudInterval());
         }
@@ -66,7 +66,7 @@ public class ServerMonitorConfig {
             cpCloudServers.add(cpCloudMonitor.getServiceList());
         }
         int i = 0;
-        for (var cpCloudServer : cpCloudServers) {
+        for (List<String> cpCloudServer : cpCloudServers) {
             i++;
             MonitorProbe cpCloud = new MonitorProbe();
             cpCloud.setInterval(cpCloudMonitor.getInterval());

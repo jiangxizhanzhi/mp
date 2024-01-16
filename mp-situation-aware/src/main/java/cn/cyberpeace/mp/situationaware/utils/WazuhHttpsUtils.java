@@ -23,6 +23,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -32,8 +33,8 @@ import java.util.List;
 public class WazuhHttpsUtils {
     public static CloseableHttpClient createIgnoreSSLHttpClient() {
         try {
-            var sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
-            var sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
+            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
             return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         } catch (Exception e) {
             log.error("{}", ExceptionUtils.getStackTrace(e));
@@ -134,7 +135,7 @@ public class WazuhHttpsUtils {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
         try {
-            var pass = userName + ":" + password;
+            String pass = userName + ":" + password;
             String encoding = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
             httpClient = createIgnoreSSLHttpClient();
 

@@ -46,11 +46,11 @@ public class AgentService extends RequestProcessor {
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
-        var requestUri = "/agents";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
+        String requestUri = "/agents";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {});
         log.info("{}", result);
         List<Agent> agents = result.getData().getAffectedItems();

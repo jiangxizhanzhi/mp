@@ -43,7 +43,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
                 .collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
-            var result = doQueryServiceMonitorDto(hostname, launchIds) ;
+            List<ServiceMonitorDto> result = doQueryServiceMonitorDto(hostname, launchIds) ;
             dtos.addAll(result);
         }
         return dtos;

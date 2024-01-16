@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -131,7 +132,7 @@ public class ProbeManagerController {
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
     @ApiImplicitParam(name = "probeRequest", value = "修改请求", dataTypeClass = ProbeRequest.class)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
+        ProbeScriptModel oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
         String oldMd5 = oldScript.getChecksum();
         Integer oldScriptType = oldScript.getScriptType();
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本

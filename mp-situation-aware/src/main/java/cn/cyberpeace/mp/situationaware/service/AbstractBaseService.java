@@ -40,7 +40,7 @@ public abstract class AbstractBaseService {
             return new String[]{};
         }
         List<String> indexList = indexListBuilder(groupList,startDate,endDate);
-        var indexArray = new String[indexList.size()];
+        String[] indexArray = new String[indexList.size()];
         return indexList.toArray(indexArray);
     }
 

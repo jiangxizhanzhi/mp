@@ -28,7 +28,7 @@ public class LocalDateUtils {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        var formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
         long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;

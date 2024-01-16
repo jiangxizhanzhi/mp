@@ -35,7 +35,7 @@ public class MessageCommonUtil {
         keys = new ArrayList<>();
         zhMap = new ConcurrentHashMap<>();
         enMap = new ConcurrentHashMap<>();
-        for (var message : messages) {
+        for (Message message : messages) {
             keys.add(message.getKey());
             zhMap.put(message.getKey(), message.getZhName());
             enMap.put(message.getKey(), message.getEnName());
