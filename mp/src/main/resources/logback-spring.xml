@@ -77,6 +77,42 @@
         </encoder>
     </appender>
 
+    <!-- 错误日志输出 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/mp.error.log</file>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 日志归档 -->
+            <fileNamePattern>${LOG_HOME}/mp_%d{yyyy-MM-dd}.%i.error.log.zip</fileNamePattern>
+            <!--日志文件保留天数-->
+            <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${LOG_FILE_MAX_SIZE}</maxFileSize>
+            <totalSizeCap>${LOG_FILE_TOTAL_SIZE}</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <!-- 过滤器设置输出的级别 -->
+        <!--
+            此日志文件只记录debug级别的
+            onMatch和onMismatch都有三个属性值，分别为Accept、DENY和NEUTRAL
+            onMatch="ACCEPT" 表示匹配该级别及以上
+            onMatch="DENY" 表示不匹配该级别及以上
+            onMatch="NEUTRAL" 表示该级别及以上的，由下一个filter处理，如果当前是最后一个，则表示匹配该级别及以上
+            onMismatch="ACCEPT" 表示匹配该级别以下
+            onMismatch="NEUTRAL" 表示该级别及以下的，由下一个filter处理，如果当前是最后一个，则不匹配该级别以下的
+            onMismatch="DENY" 表示不匹配该级别以下的
+        -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!-- 设置日志输出的级别 -->
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
     <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
     <appender name="ASYNC" class="cn.cyberpeace.mp.base.config.log.LogAsyncAppender">
         <!--队列的深度，该值会影响性能，默认256-->

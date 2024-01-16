@@ -18,7 +18,7 @@ public interface PluginSceneHandlerCommon<S extends BaseSceneBO<?, S>, E extends
         P extends BaseSceneElementPortBO<?, P, E>,
         H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
                 S, ?, P, E, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, H>> {
+                ?, H>> {
 
     H getSceneHandler();
 

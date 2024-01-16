@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -87,15 +88,6 @@ import java.util.stream.Collectors;
         ScenePluginHandler.class,
         SceneHandler.class,
 })
-@BeanFieldClasses({
-        SceneMapper.class,
-        SceneAreaMapper.class,
-        SceneElementMapper.class,
-        SceneElementPortMapper.class,
-        SceneElementPortConnectionMapper.class,
-        SceneElementPluginMapper.class,
-        ScenePieceMapper.class,
-})
 public class SceneHandler extends BaseSceneHandler<
         SceneModel,
         SceneAreaModel,
@@ -112,13 +104,6 @@ public class SceneHandler extends BaseSceneHandler<
         ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO,
-        SceneMapper,
-        SceneAreaMapper,
-        SceneElementMapper,
-        SceneElementPortMapper,
-        SceneElementPortConnectionMapper,
-        SceneElementPluginMapper,
-        ScenePieceMapper,
         SceneContextBO,
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
@@ -206,6 +191,17 @@ public class SceneHandler extends BaseSceneHandler<
     public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
         init(sceneId, areaId, isAreaMode, context);
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
+    }
+
+    @Override
+    protected void initMapper() {
+        super.sceneMapper = BeanCommon.getBean(SceneMapper.class);
+        super.sceneAreaMapper = BeanCommon.getBean(SceneAreaMapper.class);
+        super.sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        super.sceneElementPortMapper = BeanCommon.getBean(SceneElementPortMapper.class);
+        super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneElementPortConnectionMapper.class);
+        super.sceneElementPluginMapper = BeanCommon.getBean(SceneElementPluginMapper.class);
+        super.scenePieceMapper = BeanCommon.getBean(ScenePieceMapper.class);
     }
 
     @Override

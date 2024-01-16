@@ -117,7 +117,7 @@ public class SceneHandlerUtils {
         var taskIds = flows.stream()
                 .map(f -> f.getTaskId())
                 .collect(Collectors.toList());
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
         try {
             log.info("start flows for taskIds:[{}]", taskIds);
 

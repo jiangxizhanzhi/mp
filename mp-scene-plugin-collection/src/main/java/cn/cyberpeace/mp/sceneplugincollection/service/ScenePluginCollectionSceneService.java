@@ -26,7 +26,17 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
@@ -39,13 +49,32 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMa
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -80,7 +109,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -915,7 +952,9 @@ public class ScenePluginCollectionSceneService {
         // 执行查询
         List<AttackSeverityAndDestinationIpAggregationBO> boList = flowAnalysisService.groupByDestinationIpAndSeverity(request);
 
-        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream().sorted(Comparator.comparing(AttackSeverityAndDestinationIpAggregationBO::getSeverity)).collect(Collectors.toList());
+        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream()
+                .sorted(Comparator.comparing(attackSeverityAndDestinationIpAggregationBO -> attackSeverityAndDestinationIpAggregationBO.getSeverity()))
+                .collect(Collectors.toList());
 
         List<String> destinationIpList = new ArrayList<>();
 
@@ -1431,7 +1470,11 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+        List<WazuhProcessModel> resultList = totalList.stream()
+                .filter(wazuhProcessModel -> Objects.nonNull(wazuhProcessModel))
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
 
         List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
 
@@ -1464,7 +1507,11 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhSystemUserModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+        List<WazuhSystemUserModel> resultList = totalList.stream()
+                .filter(wazuhSystemUserModel -> Objects.nonNull(wazuhSystemUserModel))
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
 
         List<SystemUser> systemUsers = resultList.stream().map(u -> {
             SystemUser systemUser = new SystemUser();

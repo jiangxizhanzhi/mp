@@ -213,7 +213,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
         var flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
@@ -250,7 +250,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
         var flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
@@ -286,7 +286,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         } else {
-            var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+            var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
             flowId2Ips.forEach(flowId2Ip -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
                 flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
@@ -336,7 +336,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         if (flowIds == null || flowIds.isEmpty()) {
             newFlows.addAll(flows);
         } else {
-            var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+            var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
             flowIds.forEach(flowId -> {
                 newFlows.add(flowMap.getOrDefault(flowId, null));
             });

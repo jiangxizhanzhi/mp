@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
-import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
@@ -77,8 +76,9 @@ public class WazuhCommon {
         }
         agentName = StringUtils.isEmpty(agentName) ? TextUtils.uuid() : agentName;
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getRemoteFile));
+        Map<String, String> nameFileMap = mappings.stream()
+                .collect(Collectors.toMap(localFileMappingModel -> localFileMappingModel.getName(),
+                        localFileMappingModel -> localFileMappingModel.getRemoteFile()));
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();

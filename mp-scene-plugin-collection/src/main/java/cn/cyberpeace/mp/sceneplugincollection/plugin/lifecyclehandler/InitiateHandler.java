@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
-import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
@@ -241,7 +240,9 @@ public class InitiateHandler extends HandlerCommon {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                List<String> collectPath = probe.getCollectPath().stream()
+                        .filter(s -> StringUtils.isNotEmpty(s))
+                        .collect(Collectors.toList());
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
@@ -249,7 +250,9 @@ public class InitiateHandler extends HandlerCommon {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                List<String> collectPath = probe.getCollectPath().stream()
+                        .filter(s -> StringUtils.isNotEmpty(s))
+                        .collect(Collectors.toList());
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
@@ -320,8 +323,9 @@ public class InitiateHandler extends HandlerCommon {
             return probeParam;
         }
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getRemoteFile));
+        Map<String, String> nameFileMap = mappings.stream()
+                .collect(Collectors.toMap(localFileMappingModel -> localFileMappingModel.getName(),
+                        localFileMappingModel -> localFileMappingModel.getRemoteFile()));
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         WazuhProbeConfig.DefaultProbe.NewProbe probe;
         if (type == FILE) {
