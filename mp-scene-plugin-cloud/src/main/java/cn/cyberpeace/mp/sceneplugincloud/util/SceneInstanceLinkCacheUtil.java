@@ -4,8 +4,11 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -73,7 +76,7 @@ public class SceneInstanceLinkCacheUtil {
                     .build(new CacheLoader<>() {
                         @Override
                         public List<NodeLinkStatusBO> load(String sceneId) {
-                            var nodeLinkStatusList = getNodeLinkStatusList(sceneId);
+                            List<NodeLinkStatusBO> nodeLinkStatusList = getNodeLinkStatusList(sceneId);
                             loadStatus(sceneId, nodeLinkStatusList);
                             return nodeLinkStatusList;
                         }
@@ -104,7 +107,7 @@ public class SceneInstanceLinkCacheUtil {
 
     public static void tryStartCronRefresh() {
         if (!startCronRefresh) {
-            var config = BeanCommon.getBean(CloudAppConfig.class);
+            CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
             int linkStatusRefreshPeriod = config.getLinkStatusRefreshPeriod();
             log.info("init link status cache , cache times is {} seconds", linkStatusRefreshPeriod);
             try {
@@ -121,7 +124,7 @@ public class SceneInstanceLinkCacheUtil {
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         List<NodeLinkStatusBO> nodeLinkStatusList = new ArrayList<>();
         sceneHandler.getElementMap().values().forEach(e -> {
-            var cloudElement = handler.getElement(e.getId());
+            CloudPluginSceneElementBO cloudElement = handler.getElement(e.getId());
             Integer virtualType = cloudElement.getVirtualType();
             if (virtualType != null && (
                     virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
@@ -131,15 +134,15 @@ public class SceneInstanceLinkCacheUtil {
                 nodeStatus.setResourceId(handler.getElement(e.getId()).getResourceId());
                 nodeLinkStatusList.add(nodeStatus);
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
-                    for (var p : e.getPorts()) {
+                    for (SceneElementPortBO p : e.getPorts()) {
                         if (StringUtils.isEmpty(nodeStatus.getDefaultNetworkId())) {
                             // 设置一个默认网络,如果没有连线,则使用该网络查询状态
-                            var cloudPort = handler.getPort(p.getId());
+                            CloudPluginSceneElementPortBO cloudPort = handler.getPort(p.getId());
                             if (cloudPort != null && cloudPort.getAuxiliaryNetworkId() != null) {
                                 nodeStatus.setDefaultNetworkId(cloudPort.getAuxiliaryNetworkId());
                             }
                         }
-                        var connectPort = sceneHandler.getPortIdConnectedPortIdMap().get(p.getId());
+                        String connectPort = sceneHandler.getPortIdConnectedPortIdMap().get(p.getId());
                         if (connectPort != null) {
                             String connectionId = null;
                             String key = StringUtils.joinWith(":", p.getId(), connectPort);
@@ -165,9 +168,9 @@ public class SceneInstanceLinkCacheUtil {
         try {
             List<Runnable> tasks = new ArrayList<>();
             Remote remote = new Remote();
-            for (var n : nodeLinkStatusList) {
+            for (NodeLinkStatusBO n : nodeLinkStatusList) {
                 if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
-                    for (var p : n.getConnectionStatusList()) {
+                    for (NodeLinkStatusBO.ConnectionStatus p : n.getConnectionStatusList()) {
                         String taskKey = getKey(n.getResourceId(), p.getNetworkId());
                         // 已有相同任务,则不处理
                         if (!existsNodeTask.contains(taskKey)) {
@@ -182,7 +185,7 @@ public class SceneInstanceLinkCacheUtil {
                                         p.setStatus(OFFLINE);
                                     } else {
                                         if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                            var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                            CloudResponse<LinkStatusResultData> result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                                             }, true);
                                             if (result.isSuccess()) {
                                                 n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
@@ -211,7 +214,7 @@ public class SceneInstanceLinkCacheUtil {
                                 params.setInstanceId(n.getResourceId());
                                 params.setNetworkId(n.getDefaultNetworkId());
                                 if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                    var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                    CloudResponse<LinkStatusResultData> result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                                     }, true);
                                     if (result.isSuccess()) {
                                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);

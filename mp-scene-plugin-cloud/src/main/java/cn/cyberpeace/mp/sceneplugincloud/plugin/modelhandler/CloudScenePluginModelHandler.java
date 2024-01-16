@@ -101,8 +101,8 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
     }
 
     public int updateElementNetworks(String sceneElement) {
-        var deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
-        var existNetworks = this.readElementNetworks(sceneElement);
+        List<ConnectedNetworkBO> deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
+        List<CloudPluginSceneElementNetworkModel> existNetworks = this.readElementNetworks(sceneElement);
         Map<String, CloudPluginSceneElementNetworkModel> toUpdateMap = new HashMap<>();
         deriveNetworks.forEach(deriveNetwork -> toUpdateMap.put(deriveNetwork.getNetwork().getId(), deriveNetwork.getNetwork().toModel()));
         Map<String, CloudPluginSceneElementNetworkModel> existMap = new HashMap<>();
@@ -130,9 +130,9 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
 
     private DiffTargets<CloudPluginSceneElementNetworkModel> diffTargets(Map<String, CloudPluginSceneElementNetworkModel> targetMap,
                                                                          Map<String, CloudPluginSceneElementNetworkModel> existTargetMap) {
-        var diff = new DiffTargets<CloudPluginSceneElementNetworkModel>();
+        DiffTargets<CloudPluginSceneElementNetworkModel> diff = new DiffTargets<CloudPluginSceneElementNetworkModel>();
         targetMap.forEach((key, target) -> {
-            var existTarget = existTargetMap.getOrDefault(key, null);
+            CloudPluginSceneElementNetworkModel existTarget = existTargetMap.getOrDefault(key, null);
             if (existTarget == null) {
                 diff.getAddingTargets().add(target);
             } else {

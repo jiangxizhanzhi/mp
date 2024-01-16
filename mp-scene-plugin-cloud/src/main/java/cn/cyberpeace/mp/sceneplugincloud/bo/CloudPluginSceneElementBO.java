@@ -53,7 +53,7 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
     }
 
     public CloudPluginSceneElementModel toModel(String... ignoreFields) {
-        var obj = super.toModel("fwdnsIps");
+        CloudPluginSceneElementModel obj = super.toModel("fwdnsIps");
         if (fwdnsIps != null) {
             obj.setFwdnsIps(JsonCommon.stringify(fwdnsIps));
         }

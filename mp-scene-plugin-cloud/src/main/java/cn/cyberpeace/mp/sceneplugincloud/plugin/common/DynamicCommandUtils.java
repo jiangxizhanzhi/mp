@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import lombok.Getter;
@@ -68,10 +70,10 @@ public class DynamicCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
-            for (var port : paramsWrapper.ports) {
+            for (SceneElementPortBO port : paramsWrapper.ports) {
                 if (StringUtils.isNotEmpty(port.getIp()) && paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port) != null) {
                     cmds.add(CHOOSE_INT.replace("${interfaceName}", port.getName()));
-                    var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port);
+                    CloudPluginSceneElementNetworkBO net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(port);
                     if (StringUtils.isNotEmpty(net.getCidr())) {
                         IpParser ipParser = new IpParser(net.getCidr(), paramsWrapper.element);
                         cmds.add(SET_IP.replace("${ip_addr}", port.getIp()).replace("${mask}", ipParser.mask));
@@ -102,7 +104,7 @@ public class DynamicCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
-            for (var staticRoute : paramsWrapper.element.getStaticRoutes()) {
+            for (StaticRoute staticRoute : paramsWrapper.element.getStaticRoutes()) {
                 IpParser ipParser = new IpParser(staticRoute.getDestination(), paramsWrapper.element);
                 cmds.add(ADD_ROUTE.replace("${dest}", ipParser.getNet()).replace("${mask}", ipParser.getMask()).replace("${nexthop}", staticRoute.getNexthop()));
             }

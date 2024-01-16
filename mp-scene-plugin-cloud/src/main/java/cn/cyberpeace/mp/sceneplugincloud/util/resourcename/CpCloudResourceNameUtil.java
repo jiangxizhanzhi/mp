@@ -34,7 +34,7 @@ public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNamePa
         if (sp.length == 0) {
             return new ResourceParseWrapper<>();
         }
-        var result = new RsourceNameParams();
+        RsourceNameParams result = new RsourceNameParams();
         result.setNodeId(sp[0]);
         if (sp.length > 1) {
             if (NumberUtil.isNumber(sp[1])) {

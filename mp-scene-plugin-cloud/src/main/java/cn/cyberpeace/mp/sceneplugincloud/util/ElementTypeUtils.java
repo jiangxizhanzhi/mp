@@ -48,11 +48,11 @@ public class ElementTypeUtils {
     }
 
     public static boolean isEntityGateway(CloudPluginSceneElementBO cloudElement) {
-        var entityType = BaseCloudPluginSceneElementModel.ImageType.ENTITY;
-        var routerRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER;
-        var switchRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH;
-        var firewallRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL;
-        var role = cloudElement.getRole();
+        String entityType = BaseCloudPluginSceneElementModel.ImageType.ENTITY;
+        int routerRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER;
+        int switchRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH;
+        int firewallRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL;
+        Integer role = cloudElement.getRole();
         if (entityType.equals(cloudElement.getImageType()) && role != null && (role == routerRole || role == switchRole || role == firewallRole)) {
             return true;
         }
@@ -79,7 +79,7 @@ public class ElementTypeUtils {
 
     public static boolean isVirtualNode(CloudPluginSceneElementBO element) {
         Integer virtualType = element.getVirtualType();
-        var isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+        boolean isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);

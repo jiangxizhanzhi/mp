@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -159,20 +160,20 @@ public class ModifyHandler extends HandlerCommon {
                 getPluginHandler().getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
             });
             // 处理加入的网络
-            for (var e : allElements) {
+            for (CloudPluginSceneElementBO e : allElements) {
                 if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
                     Set<String> findedNetPortIds = new HashSet<>();
                     CloudPluginSceneElementPortBO defaultCreatedNetPluginPort = null;
-                    for (var p : e.getSrcElement().getPorts()) {
-                        var pluginPort = getPluginHandler().getPort(p.getId());
-                        var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                    for (SceneElementPortBO p : e.getSrcElement().getPorts()) {
+                        CloudPluginSceneElementPortBO pluginPort = getPluginHandler().getPort(p.getId());
+                        SceneElementPortBO to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                         if (pluginPort != null) {
                             boolean handlerd = false ;
                             if (e.getSrcElement().getType() != null && e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
                                 // 终端,优先看对端网络
                                 if (to != null) {
                                     // 未构建网络看对端端口
-                                    var pluginToPort = getPluginHandler().getPort(to.getId());
+                                    CloudPluginSceneElementPortBO pluginToPort = getPluginHandler().getPort(to.getId());
                                     if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                         if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
                                             ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
@@ -204,7 +205,7 @@ public class ModifyHandler extends HandlerCommon {
                                     }
                                 } else if (to != null) {
                                     // 未构建网络看对端端口
-                                    var pluginToPort = getPluginHandler().getPort(to.getId());
+                                    CloudPluginSceneElementPortBO pluginToPort = getPluginHandler().getPort(to.getId());
                                     if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                         if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
                                             ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
@@ -218,7 +219,7 @@ public class ModifyHandler extends HandlerCommon {
                         }
                     }
                     if (defaultCreatedNetPluginPort != null) {
-                        for (var p : e.getSrcElement().getPorts()) {
+                        for (SceneElementPortBO p : e.getSrcElement().getPorts()) {
                             if (findedNetPortIds.contains(p.getId())) {
                                 continue;
                             }
@@ -227,8 +228,8 @@ public class ModifyHandler extends HandlerCommon {
                                     || e.getSrcElement().getType() == BaseSceneElementModel.Type.ROUTER
                                     || e.getSrcElement().getType() == BaseSceneElementModel.Type.FIREWALL)) {
                                 // 网关设备新增的端口 需要加到原有的网络上
-                                var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
-                                var pluginPort = getPluginHandler().getPort(p.getId());
+                                SceneElementPortBO to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                                CloudPluginSceneElementPortBO pluginPort = getPluginHandler().getPort(p.getId());
                                 pluginPort.setLogicNetworkId(defaultCreatedNetPluginPort.getLogicNetworkId());
                                 networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
                             }
@@ -236,7 +237,7 @@ public class ModifyHandler extends HandlerCommon {
                     }
                 }
             }
-            for (var net : networks) {
+            for (CloudPluginSceneElementNetworkModel net : networks) {
                 getHandlerUtils().getCreatedNetworks().add(net.getId());
             }
         }
@@ -342,7 +343,7 @@ public class ModifyHandler extends HandlerCommon {
             // 删除网络信息
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
             List<String> deleteNets = new ArrayList<>();
-            for (var net : networks) {
+            for (CloudPluginSceneElementNetworkModel net : networks) {
                 if (deletedNodeIds.contains(net.getSceneElement())) {
                     deleteNets.add(net.getId());
                 }

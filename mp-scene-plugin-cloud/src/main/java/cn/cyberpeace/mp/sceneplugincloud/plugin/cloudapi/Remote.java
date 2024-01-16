@@ -95,7 +95,7 @@ public class Remote extends CloudClient {
 
     public String enableRecording(String connectionId, String sceneName,String sceneId, String nodeName,String nodeId, String username,
                                   String department) {
-        var enableGuacamoleRecordingData = new EnableGuacamoleRecordingData();
+        EnableGuacamoleRecordingData enableGuacamoleRecordingData = new EnableGuacamoleRecordingData();
         enableGuacamoleRecordingData.setConnectionId(connectionId);
         enableGuacamoleRecordingData.setUsername(username == null ? StringUtils.EMPTY : username);
         enableGuacamoleRecordingData.setDepartment(department == null ? StringUtils.EMPTY : department);
@@ -103,7 +103,7 @@ public class Remote extends CloudClient {
         enableGuacamoleRecordingData.setHost(nodeName == null ? StringUtils.EMPTY : nodeName);
         enableGuacamoleRecordingData.setSceneId(sceneId);
         enableGuacamoleRecordingData.setHostId(nodeId);
-        var result = getHttpClient().put(CloudUrlConstant.ENABLE_RECORDING_URL,
+        EnableGuacamoleRecordingResult result = getHttpClient().put(CloudUrlConstant.ENABLE_RECORDING_URL,
                 enableGuacamoleRecordingData, null,
                 EnableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
@@ -117,7 +117,7 @@ public class Remote extends CloudClient {
     }
 
     public String disableRecording(String connectionId) {
-        var result = getHttpClient().put(CloudUrlConstant.DISABLE_RECORDING_URL,
+        DisableGuacamoleRecordingResult result = getHttpClient().put(CloudUrlConstant.DISABLE_RECORDING_URL,
                 new DisableGuacamoleRecordingData(connectionId), null,
                 DisableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
@@ -127,7 +127,7 @@ public class Remote extends CloudClient {
     }
 
     public String convertRecording(String connectionId) {
-        var result = getHttpClient().put(CloudUrlConstant.CONVERT_RECORDING_URL,
+        DisableGuacamoleRecordingResult result = getHttpClient().put(CloudUrlConstant.CONVERT_RECORDING_URL,
                 new DisableGuacamoleRecordingData(connectionId), null,
                 DisableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
@@ -138,17 +138,17 @@ public class Remote extends CloudClient {
     }
 
     public void deleteRecords(List<String> recordingNames) {
-        var deleteGuacamoleRecordingData = new DeleteGuacamoleRecordingData();
+        DeleteGuacamoleRecordingData deleteGuacamoleRecordingData = new DeleteGuacamoleRecordingData();
         deleteGuacamoleRecordingData.setRecordingFile(recordingNames);
-        var result = getHttpClient().delete(CloudUrlConstant.DELETE_RECORDING_URL, deleteGuacamoleRecordingData, null
+        DeleteGuacamoleRecordingResultData result = getHttpClient().delete(CloudUrlConstant.DELETE_RECORDING_URL, deleteGuacamoleRecordingData, null
                 , DeleteGuacamoleRecordingResultData.class);
     }
 
     public List<String> getRecords(List<String> connectionIds) {
         List<String> recordFiles = new ArrayList<>();
-        var getGuacamoleRecordsData = new GetGuacamoleRecordsData();
+        GetGuacamoleRecordsData getGuacamoleRecordsData = new GetGuacamoleRecordsData();
         getGuacamoleRecordsData.setConnectionId(connectionIds);
-        var result = getHttpClient().post(CloudUrlConstant.GET_RECORDING_NAME_URL, getGuacamoleRecordsData,
+        GetGuacamoleRecordingResult result = getHttpClient().post(CloudUrlConstant.GET_RECORDING_NAME_URL, getGuacamoleRecordsData,
                 null, GetGuacamoleRecordingResult.class);
         if (result == null) {
             return new ArrayList<>();

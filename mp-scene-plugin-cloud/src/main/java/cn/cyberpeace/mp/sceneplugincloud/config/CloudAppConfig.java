@@ -225,7 +225,7 @@ public class CloudAppConfig {
             return externalNetCidr;
         }
 
-        var netId = getExternalNetId();
+        String netId = getExternalNetId();
         if (StringUtils.isEmpty(netId)) {
             return null;
         }
@@ -256,7 +256,7 @@ public class CloudAppConfig {
         if (networkData != null) {
             mgmtNetId = networkData.getId();
         } else {
-            var message = "Unable to find mgmt network with name `mgmt`";
+            String message = "Unable to find mgmt network with name `mgmt`";
             log.error("Try to get mgmt net failed: {}", message);
             throw new MpRuntimeException(message);
         }

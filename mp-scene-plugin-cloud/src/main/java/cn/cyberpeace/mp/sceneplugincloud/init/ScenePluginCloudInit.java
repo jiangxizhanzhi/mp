@@ -41,7 +41,7 @@ public class ScenePluginCloudInit implements ApplicationRunner {
         List<AbstractInitJob> syncJobs = new ArrayList<>();
         syncJobs.add(cloudMessageConvertInitJob);
         syncJobs.add(cloudInstanceLinkInitJob);
-        for (var job : syncJobs) {
+        for (AbstractInitJob job : syncJobs) {
             try {
                 job.executed();
             } catch (Exception e) {

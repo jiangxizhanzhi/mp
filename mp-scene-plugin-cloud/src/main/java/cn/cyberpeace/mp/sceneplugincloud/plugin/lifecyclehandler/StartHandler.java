@@ -125,7 +125,7 @@ public class StartHandler extends HandlerCommon{
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setVirtualUsbUuids(usbUuids);
         virtualMachine.attachVirtualUsbs(data);
     }

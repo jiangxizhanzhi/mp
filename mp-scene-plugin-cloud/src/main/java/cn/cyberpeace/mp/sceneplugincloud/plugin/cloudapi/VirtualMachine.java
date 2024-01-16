@@ -80,7 +80,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是暂停状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.PAUSED.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -95,7 +95,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否是活动状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -124,7 +124,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是活动状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -139,7 +139,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是挂起状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.SUSPENDED.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -154,7 +154,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否是活动状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -169,7 +169,7 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
                 // 判断实例是否已是暂停状态
-                var instance = this.get(instanceId);
+                VirtualMachineGetResult instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.SHUTOFF.equalsIgnoreCase(instance.getStatus())) {
                     return true;
                 }
@@ -193,7 +193,7 @@ public class VirtualMachine extends CloudClient {
     }
 
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
-        var param = new ConsoleInfoGetParam();
+        ConsoleInfoGetParam param = new ConsoleInfoGetParam();
         param.setInstanceUuid(instanceId);
         param.setHostname(hostname);
         return getHttpClient().get(CloudUrlConstant.CONSOLE_INFO_GET_URL, param,
@@ -201,7 +201,7 @@ public class VirtualMachine extends CloudClient {
     }
 
     public ComInfoGetResult getComInfo(String instanceId, String hostname) {
-        var param = new ComInfoGetParam();
+        ComInfoGetParam param = new ComInfoGetParam();
         param.setInstanceUuid(instanceId);
         param.setHostname(hostname);
         return getHttpClient().get(CloudUrlConstant.COM_INFO_GET_URL, param,
@@ -220,7 +220,7 @@ public class VirtualMachine extends CloudClient {
 
     private String instanceResize(VirtualMachineResizeData httpData) {
         try {
-            var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<VirtualMachineInstanceResizeResult>>() {
+            CloudResponse<VirtualMachineInstanceResizeResult> response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<VirtualMachineInstanceResizeResult>>() {
             }, true);
             return response.getData() == null ? "" : response.getData().getHostname();
         } catch (Exception e) {
@@ -248,7 +248,7 @@ public class VirtualMachine extends CloudClient {
     }
 
     public VirtualMachineAddPortResult addPort(String instanceId, VirtualMachineAddPortData port) {
-        var response = cloudPost(CloudUrlConstant.ADD_VM_PORTS.replace("{instance_id}", instanceId), port, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
+        CloudResponse<VirtualMachineAddPortResult> response = cloudPost(CloudUrlConstant.ADD_VM_PORTS.replace("{instance_id}", instanceId), port, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
         log.info("VirtualMachine add port response is {}", JsonCommon.stringify(response));
         return response.getData();
@@ -271,18 +271,18 @@ public class VirtualMachine extends CloudClient {
         params.setName(snapshotName);
         params.setDescription(desc);
         params.setExtInfo(extInfo);
-        var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
+        CloudResponse<SnapshotResultData> response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
         }, true);
         return response.getData();
     }
 
     public void uploadFile(VirtualMachineUploadFileData data) {
-        var response = cloudPost(CloudUrlConstant.SCP_FILE, data, null, new TypeReference<CloudResponse<Object>>() {
+        CloudResponse<Object> response = cloudPost(CloudUrlConstant.SCP_FILE, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
     public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
-        var virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
+        VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
         return virtualMachineExecuteResult;
     }
 

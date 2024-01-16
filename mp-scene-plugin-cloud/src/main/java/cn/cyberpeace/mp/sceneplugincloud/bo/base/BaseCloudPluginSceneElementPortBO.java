@@ -93,7 +93,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getAccessModes)));
         if (firewallRules != null) {
