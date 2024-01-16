@@ -49,7 +49,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
@@ -85,7 +84,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Flow;
 import java.util.stream.Collectors;
 
 /**
@@ -457,7 +455,9 @@ public class FlowAnalysisService extends AbstractBaseService {
                 Aggregations bucketAggregations = bucket.getAggregations();
                 ParsedTerms terms = bucketAggregations.get("destination_ip");
                 List<? extends Terms.Bucket> aggregationBuckets = terms.getBuckets();
-                List<String> destinationIpList = aggregationBuckets.stream().map(MultiBucketsAggregation.Bucket::getKeyAsString).collect(Collectors.toList());
+                List<String> destinationIpList = aggregationBuckets.stream()
+                        .map(bucket1 -> bucket1.getKeyAsString())
+                        .collect(Collectors.toList());
                 bo.setDestinationIpList(destinationIpList);
                 return bo;
             }).collect(Collectors.toList());
@@ -798,20 +798,25 @@ public class FlowAnalysisService extends AbstractBaseService {
      * 攻击手法-攻击次数百分比
      */
     private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
-        Long totalNumber = attackResultVOS.stream().mapToLong(AttackWayAggregationBO::getAttackNumber).sum();
+        Long totalNumber = attackResultVOS.stream().mapToLong(a -> a.getAttackNumber()).sum();
         if (Long.valueOf(0).equals(totalNumber)) {
             return attackResultVOS;
         }
         for (int i = 0; i < attackResultVOS.size(); i++) {
             var attack = attackResultVOS.get(i);
             if (i > 1 && i == attackResultVOS.size() - 1) {
-                BigDecimal beforeSum = attackResultVOS.subList(0, i).stream().map(AttackWayAggregationBO::getAttackNumberPercent).reduce((a, b) -> a.add(b)).get();
+                BigDecimal beforeSum = attackResultVOS.subList(0, i).stream()
+                        .map(attackWayAggregationBO -> attackWayAggregationBO.getAttackNumberPercent())
+                        .reduce((a, b) -> a.add(b))
+                        .get();
                 attack.setAttackNumberPercent(BigDecimal.valueOf(100).compareTo(beforeSum) == -1 ? BigDecimal.ZERO : BigDecimal.valueOf(100).subtract(beforeSum));
             } else {
                 attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)));
             }
         }
-        attackResultVOS = attackResultVOS.stream().sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed()).collect(Collectors.toList());
+        attackResultVOS = attackResultVOS.stream()
+                .sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed())
+                .collect(Collectors.toList());
         return attackResultVOS;
     }
 

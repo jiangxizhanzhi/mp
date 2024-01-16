@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -37,8 +36,10 @@ public class AttackClassificationBO {
    }
 
    public static AttackClassificationBO getBoFromJsonModel(FlowClassificationFromJsonModel flowClassificationFromJsonModel) {
-      List<Classification> classificationsFromJsonModel = flowClassificationFromJsonModel.getClassifications().stream().map(FlowClassificationFromJsonModel.FlowType::getFlow_events)
-              .flatMap(List::stream).collect(Collectors.toList());
+      List<Classification> classificationsFromJsonModel = flowClassificationFromJsonModel.getClassifications().stream()
+              .map(flowType -> flowType.getFlow_events())
+              .flatMap(List::stream)
+              .collect(Collectors.toList());
       AttackClassificationBO attackClassificationBO = new AttackClassificationBO(classificationsFromJsonModel);
       return attackClassificationBO;
    }

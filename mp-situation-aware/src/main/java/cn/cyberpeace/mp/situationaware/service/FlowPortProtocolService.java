@@ -57,11 +57,13 @@ public class FlowPortProtocolService {
      * 转成Map格式
      * @return
      */
-    public Map<String,String> convertToMap(){
+    public Map<String, String> convertToMap() {
         List<FlowPortProtocolModel> modelList = this.findAll();
-        if (CollectionUtils.isEmpty(modelList)){
+        if (CollectionUtils.isEmpty(modelList)) {
             return Maps.newHashMap();
         }
-        return modelList.stream().collect(Collectors.toMap(FlowPortProtocolModel::getPort,FlowPortProtocolModel::getProtocol));
+        return modelList.stream()
+                .collect(Collectors.toMap(flowPortProtocolModel -> flowPortProtocolModel.getPort(),
+                        flowPortProtocolModel -> flowPortProtocolModel.getProtocol()));
     }
 }
