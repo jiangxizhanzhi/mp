@@ -72,9 +72,11 @@ public class LocalCallServerListener extends FileModifyListener {
 
         LocalCallServerListener localCallServerListener = new LocalCallServerListener(messageFilepath);
         Map<String, Object> serverBeans = context.getBeansWithAnnotation(LocalCallServer.class);
-        serverBeans.forEach((serverBeanName, serverBean) -> {
+        for (Map.Entry<String, Object> entry : serverBeans.entrySet()) {
+            String serverBeanName = entry.getKey();
+            Object serverBean = entry.getValue();
             localCallServerListener.getLocalCallServerMap().put(serverBean.getClass().getName(), serverBean);
-        });
+        }
 
         if (SystemUtils.IS_OS_WINDOWS) {
             prepareWindowsClientScript(baseAppConfig.getHomeDir(), messageFilepath);
@@ -90,7 +92,8 @@ public class LocalCallServerListener extends FileModifyListener {
         log.info("Local call client script file: {}", scriptFilePath);
 
         FileUtil.mkParentDirs(scriptFilePath);
-        List<String> contentLines = Stream.of(
+        List<String> contentLines = new ArrayList<>();
+        for (String s : Arrays.asList(
                 "@echo off",
                 "set allparam=",
                 "",
@@ -110,7 +113,9 @@ public class LocalCallServerListener extends FileModifyListener {
                 ":end",
                 "",
                 "echo %allparam%>> " + messageFilepath
-        ).collect(Collectors.toList());
+        )) {
+            contentLines.add(s);
+        }
         FileUtil.writeUtf8Lines(contentLines, scriptFilePath);
     }
 
@@ -119,7 +124,8 @@ public class LocalCallServerListener extends FileModifyListener {
         log.info("Local call client script file: {}", scriptFilePath);
 
         FileUtil.mkParentDirs(scriptFilePath);
-        List<String> contentLines = Stream.of(
+        List<String> contentLines = new ArrayList<>();
+        for (String s : Arrays.asList(
                 "#/bin/bash",
                 "allparam=",
                 "",
@@ -134,7 +140,9 @@ public class LocalCallServerListener extends FileModifyListener {
                 "done",
                 "",
                 "echo $allparam>> " + messageFilepath
-        ).collect(Collectors.toList());
+        )) {
+            contentLines.add(s);
+        }
         FileUtil.writeUtf8Lines(contentLines, scriptFilePath);
 
         try {
@@ -178,7 +186,7 @@ public class LocalCallServerListener extends FileModifyListener {
         }
 
         List<Runnable> tasks = new ArrayList<>();
-        lines.forEach(line -> {
+        for (String line : lines) {
             line = line.trim();
             List<String> lineParts = new ArrayList<>(Arrays.asList(
                     TextUtils.coupleStrip(line, "\"").split("\" \"")));
@@ -196,7 +204,7 @@ public class LocalCallServerListener extends FileModifyListener {
             final String taskMethodName = methodName;
             final String[] taskMethodArgs = methodArgs.toArray(new String[0]);
             tasks.add(() -> call(taskMethodName, taskMethodArgs));
-        });
+        }
 
         TaskCommon.runTasks(tasks, true, true);
     }

@@ -15,9 +15,11 @@ public interface SnakeHttpData extends HttpData {
 
     static Map<String, Object> toMultipart(Object httpData) {
         Map<String, Object> map = new HashMap<>();
-        BeanUtils.getMap(httpData).forEach((fieldName, fieldValue) -> {
+        for (Map.Entry<String, Object> entry : BeanUtils.getMap(httpData).entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
             map.put(TextUtils.humpToLine(fieldName), fieldValue);
-        });
+        }
         return map;
     }
 

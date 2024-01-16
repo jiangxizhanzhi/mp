@@ -30,9 +30,11 @@ public abstract class BaseServer {
     private static final Map<Class<?>, ConcurrentHashMap<String, BaseServer>> serverSessionMap = new HashMap<>();
 
     public static void initServerSessionMap() {
-        BeanCommon.getBeanType(BaseServer.class).forEach((name, server) -> {
+        for (Map.Entry<String, BaseServer> entry : BeanCommon.getBeanType(BaseServer.class).entrySet()) {
+            String name = entry.getKey();
+            BaseServer server = entry.getValue();
             serverSessionMap.put(server.getClass(), new ConcurrentHashMap<>());
-        });
+        }
     }
 
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
@@ -48,7 +50,11 @@ public abstract class BaseServer {
 
     public static <T> void sendToAllSessions(Class<?> serverClass, T data, String type, Map<String, Object> context) {
         ConcurrentHashMap<String, BaseServer> sessionMap = serverSessionMap.get(serverClass);
-        sessionMap.forEach((sessionKey, server) -> server.send(data, type, context));
+        for (Map.Entry<String, BaseServer> entry : sessionMap.entrySet()) {
+            String key = entry.getKey();
+            BaseServer server = entry.getValue();
+            server.send(data, type, context);
+        }
     }
 
     public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {

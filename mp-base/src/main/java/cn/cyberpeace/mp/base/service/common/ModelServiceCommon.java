@@ -23,9 +23,11 @@ public class ModelServiceCommon {
         ListObjResult<M> modelData = modelResult.getData();
         ListObjResult<T> boSource = null;
         if (modelData != null) {
-            List<T> bos = modelData.getList().stream()
-                    .map(obj -> ClassUtils.createInstance(tClass).fromModel(obj))
-                    .collect(Collectors.toList());
+            List<T> bos = new ArrayList<>();
+            for (M obj : modelData.getList()) {
+                T t = ClassUtils.createInstance(tClass).fromModel(obj);
+                bos.add(t);
+            }
             boSource = new ListObjResult<>(bos, modelData.getTotal());
         }
         return new ListObjServiceResult<>(boSource, modelResult.getServiceCode(), modelResult.getDetail());
@@ -52,9 +54,11 @@ public class ModelServiceCommon {
         } else {
             objs = modelData.getList();
         }
-        List<T> exportData = objs.stream()
-                .map(obj -> ClassUtils.createInstance(textResourceClass).fromModel(obj))
-                .collect(Collectors.toList());
+        List<T> exportData = new ArrayList<>();
+        for (M obj : objs) {
+            T t = ClassUtils.createInstance(textResourceClass).fromModel(obj);
+            exportData.add(t);
+        }
         if (exportData.isEmpty()) {
             ExcelCommon.writeHeaderOnly(textResourceClass, os);
         } else {
@@ -65,7 +69,12 @@ public class ModelServiceCommon {
     public static <M extends BaseModel, T extends ModelBO<M, T>> List<M> importListExcel(InputStream is,
                                                                                          Class<T> textResourceClass) {
         List<T> bos = ExcelCommon.read(is, textResourceClass);
-        return bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
+        List<M> list = new ArrayList<>();
+        for (T bo : bos) {
+            M model = bo.toModel();
+            list.add(model);
+        }
+        return list;
     }
 
 }

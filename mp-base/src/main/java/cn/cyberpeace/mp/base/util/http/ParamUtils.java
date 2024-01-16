@@ -30,14 +30,14 @@ public class ParamUtils {
         String result = "";
         StringBuffer joinerStr = new StringBuffer();
         final BeanWrapper objWrapper = new BeanWrapperImpl(object);
-        fieldList.stream().forEach(field -> {
+        for (Field field : fieldList) {
             field.setAccessible(true);
             String fieldName = field.getName();
             Object fieldVal = objWrapper.getPropertyValue(fieldName);
             if (Objects.nonNull(fieldVal)) {
                 joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
             }
-        });
+        }
         result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
         return StringUtils.isBlank(result) ? "" : "?" + result;
     }
@@ -53,17 +53,17 @@ public class ParamUtils {
         String result = "";
         StringBuffer joinerStr = new StringBuffer();
         final BeanWrapper objWrapper = new BeanWrapperImpl(object);
-        fieldList.stream().forEach(field -> {
+        for (Field field : fieldList) {
             field.setAccessible(true);
             String fieldName = field.getName();
             Object fieldVal = objWrapper.getPropertyValue(fieldName);
-            if (humpToLine){
+            if (humpToLine) {
                 fieldName = TextUtils.humpToLine(fieldName);
             }
             if (Objects.nonNull(fieldVal)) {
                 joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
             }
-        });
+        }
         result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
         return StringUtils.isBlank(result) ? "" : "?" + result;
     }
@@ -104,7 +104,14 @@ public class ParamUtils {
      */
     public static String wrapperGetParamsByObject(Object object,String... ignoreFields){
         List<Field> fieldList = getFieldsByObject(object);
-        fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
+        fieldList = fieldList.stream().filter(field -> {
+            for (String f : ignoreFields) {
+                if (field.getName().equals(f)) {
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toList());
         return wrapperGetParamsByFieldsAndObject(fieldList,object,Boolean.FALSE);
     }
 
@@ -116,7 +123,14 @@ public class ParamUtils {
      */
     public static String wrapperGetParamsByObject(Boolean humpToLine,Object object,String... ignoreFields){
         List<Field> fieldList = getFieldsByObject(object);
-        fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
+        fieldList = fieldList.stream().filter(field -> {
+            for (String f : ignoreFields) {
+                if (field.getName().equals(f)) {
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toList());
         return wrapperGetParamsByFieldsAndObject(fieldList,object,humpToLine);
     }
     

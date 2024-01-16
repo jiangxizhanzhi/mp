@@ -28,7 +28,9 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -68,10 +70,18 @@ public class HttpClient {
         }
         Map<String, String> mergedHeaders = new HashMap<>();
         if (headers != null) {
-            headers.forEach(mergedHeaders::put);
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                mergedHeaders.put(key, value);
+            }
         }
         if (mergingHeaders != null) {
-            mergingHeaders.forEach(mergedHeaders::put);
+            for (Map.Entry<String, String> entry : mergingHeaders.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                mergedHeaders.put(key, value);
+            }
         }
         return mergedHeaders;
     }
@@ -84,16 +94,21 @@ public class HttpClient {
 
         Map<String, String> mergedHeaders = mergeHeaders(headers);
         if (mergedHeaders != null) {
-            request.setHeaders(mergedHeaders.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
-            ).toArray(Header[]::new));
+            List<BasicHeader> list = new ArrayList<>();
+            for (Map.Entry<String, String> v : mergedHeaders.entrySet()) {
+                BasicHeader basicHeader = new BasicHeader(v.getKey(), v.getValue());
+                list.add(basicHeader);
+            }
+            request.setHeaders(list.toArray(new Header[0]));
         }
         if (data != null && request instanceof HttpEntityEnclosingRequestBase) {
             HttpEntity entity;
             if (data.multipart()) {
                 Map<String, Object> multipart = data.toMultipart();
                 MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
-                multipart.forEach((fieldName, fieldValue) -> {
+                for (Map.Entry<String, Object> entry : multipart.entrySet()) {
+                    String fieldName = entry.getKey();
+                    Object fieldValue = entry.getValue();
                     if (fieldValue instanceof String) {
                         multipartEntity.addTextBody(fieldName, (String) fieldValue);
                     } else if (fieldValue instanceof File) {
@@ -105,7 +120,7 @@ public class HttpClient {
                     } else if (fieldValue instanceof ContentBody) {
                         multipartEntity.addPart(fieldName, (ContentBody) fieldValue);
                     }
-                });
+                }
                 entity = multipartEntity.build();
             } else {
                 StringEntity stringEntity = new StringEntity(data.toContent(), charset);

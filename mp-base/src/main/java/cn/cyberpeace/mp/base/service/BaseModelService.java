@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,12 +93,20 @@ public interface BaseModelService<M extends BaseModel, Q> {
     }
 
     default <T extends ModelBO<M, T>> ServiceResult<Integer> bulkCreateBO(List<T> bos, Class<T> boClass) {
-        List<M> objs = bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
+        List<M> objs = new ArrayList<>();
+        for (T bo : bos) {
+            M model = bo.toModel();
+            objs.add(model);
+        }
         return bulkCreate(objs);
     }
 
     default <T extends ModelBO<M, T>> ServiceResult<Integer> bulkUpdateBO(List<T> bos, Class<T> boClass) {
-        List<M> objs = bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
+        List<M> objs = new ArrayList<>();
+        for (T bo : bos) {
+            M model = bo.toModel();
+            objs.add(model);
+        }
         return bulkUpdate(objs);
     }
 
