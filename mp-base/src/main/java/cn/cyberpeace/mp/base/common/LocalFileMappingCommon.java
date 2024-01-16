@@ -37,7 +37,7 @@ public class LocalFileMappingCommon {
     public static List<LocalFileMappingModel> syncMap(String group, Map<String, String> namePathMap) {
         List<LocalFileMappingModel> mappings = new ArrayList<>();
         namePathMap.forEach((name, filepath) -> {
-            var mapping = new LocalFileMappingModel();
+            LocalFileMappingModel mapping = new LocalFileMappingModel();
             mapping.setName(name);
             mapping.setLocalFile(filepath);
             mappings.add(mapping);
@@ -52,7 +52,7 @@ public class LocalFileMappingCommon {
         fileNames.forEach(fileName -> {
             namePathMap.put(fileName, StringUtils.joinWith(FileUtil.FILE_SEPARATOR, localDir, fileName));
         });
-        var result = syncMap(group, namePathMap);
+        List<LocalFileMappingModel> result = syncMap(group, namePathMap);
         log.info("sync file end, diff is {}", JsonCommon.stringify(result));
         return result;
     }

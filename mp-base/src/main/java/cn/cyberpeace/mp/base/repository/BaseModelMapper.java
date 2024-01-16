@@ -151,21 +151,21 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     private Object[] convertCreateParams(List<M> objs) {
-        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         String[] createFields = Arrays.stream(allModelFields.getFields())
                 .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
-        var createColumnFields = new String[createFields.length];
-        for (var i = 0; i < createFields.length; i++) {
+        String[] createColumnFields = new String[createFields.length];
+        for (int i = 0; i < createFields.length; i++) {
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
         }
 
-        var createFieldValuesList = new Object[objs.size()][createFields.length];
-        for (var i = 0; i < objs.size(); i++) {
+        Object[][] createFieldValuesList = new Object[objs.size()][createFields.length];
+        for (int i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             obj.initDefault();
 
-            var createFieldValues = new Object[createFields.length];
-            for (var j = 0; j < createFields.length; j++) {
+            Object[] createFieldValues = new Object[createFields.length];
+            for (int j = 0; j < createFields.length; j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, createFields[j]);
                 if (fieldValue == null) {
                     return new Object[0];
@@ -179,11 +179,11 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     private Object[] convertUpdateParams(List<M> objs) {
-        var sampleObj = objs.get(0);
+        M sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
         sampleObj.initDefault(BaseModel::getUpdateTime);
 
-        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         String[] availableFields = Arrays.stream(allModelFields.getFields())
                 .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
 
@@ -197,14 +197,14 @@ public interface BaseModelMapper<M extends BaseModel> {
             }
         }
 
-        var updateFieldValuesList = new Object[objs.size()][updateFields.size()];
-        for (var i = 0; i < objs.size(); i++) {
+        Object[][] updateFieldValuesList = new Object[objs.size()][updateFields.size()];
+        for (int i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             sampleObj.setUpdateTime(null);
             obj.initDefault(BaseModel::getUpdateTime);
 
-            var updateFieldValues = new Object[updateFields.size()];
-            for (var j = 0; j < updateFields.size(); j++) {
+            Object[] updateFieldValues = new Object[updateFields.size()];
+            for (int j = 0; j < updateFields.size(); j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
                 if (fieldValue == null) {
                     return new Object[0];
@@ -226,7 +226,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         Map<String, List<M>> validFieldsObjs = new HashMap<>();
         objs.forEach(obj -> {
             String key = DigestUtils.md5Hex(StringUtils.joinWith(":", (Object[]) BeanUtils.getNotNullPropertyNames(obj)));
-            var keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
+            List<M> keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
             keyObjs.add(obj);
             validFieldsObjs.put(key, keyObjs);
         });
@@ -237,7 +237,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     default Class<M> getModelClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
-        var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
+        ModelClass modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
         if (modelClassAnnotation != null) {
             actualModelClassSource = modelClassAnnotation.value();
         } else {
@@ -290,7 +290,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Map<String, Object>> mapList = originList(humanCondition);
         List<T> objs = new ArrayList<>();
         mapList.forEach(map -> {
-            var obj = mapToObj(map, objClass);
+            T obj = mapToObj(map, objClass);
             if (obj != null) {
                 objs.add(obj);
             }
@@ -397,7 +397,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result.addFail(objs);
         }
 
-        var successCount = bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+        int successCount = bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
         if (successCount == 0) {
             return result.addFail(objs);
         } else {
@@ -415,7 +415,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(objs, batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkCreate(batchList);
+                BulkResult<M> batchResult = bulkCreate(batchList);
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -439,14 +439,14 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result;
         }
 
-        for (var validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+        for (List<M> validFieldsObjs: groupValidFieldsObjs(objs).values()) {
             Object[] updateParams = convertUpdateParams(validFieldsObjs);
             if (updateParams.length == 0) {
                 result.addFail(objs);
                 log.error("Service bulk update {} has empty field", objs);
                 continue;
             }
-            var successCount = bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+            int successCount = bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
             if (successCount == 0) {
                 result.addFail(objs);
             } else {
@@ -470,7 +470,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(objs, batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkUpdate(batchList);
+                BulkResult<M> batchResult = bulkUpdate(batchList);
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -488,7 +488,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Map<String, Object>> mapList = getCommonMapper().list(tableName, condition, selectFields);
         List<M> objs = new ArrayList<>();
         mapList.forEach(map -> {
-            var obj = mapToObj(map);
+            M obj = mapToObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
@@ -515,7 +515,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M logicGet(String id) {
-        var obj = get(id);
+        M obj = get(id);
         return (obj != null && obj.hasDeleted()) ? null : obj;
     }
 
@@ -569,7 +569,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result;
         }
 
-        var successCount = getCommonMapper().bulkDelete(getTableName(), ids);
+        int successCount = getCommonMapper().bulkDelete(getTableName(), ids);
         if (successCount == 0) {
             return result.addFail(Arrays.asList(ids));
         } else {
@@ -587,7 +587,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkDelete(batchList.toArray(new String[0]));
+                BulkResult<String> batchResult = bulkDelete(batchList.toArray(new String[0]));
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -616,7 +616,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<M> logicObjs = new ArrayList<>();
         List<String> rawIds = new ArrayList<>();
         try {
-            for (var id: ids) {
+            for (String id: ids) {
                 M obj = actualModelClass.getDeclaredConstructor().newInstance();
                 obj.setId(id);
                 if (obj.prepareDeleteFlag()) {
@@ -631,7 +631,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         if (!logicObjs.isEmpty()) {
-            var updateResult = bulkUpdate(logicObjs);
+            BulkResult<M> updateResult = bulkUpdate(logicObjs);
             result.addSuccessCount(updateResult.getSuccessCount());
             if (updateResult.getFail() != null) {
                 result.addFail(updateResult.getFail().stream().map(BaseModel::getId).collect(Collectors.toList()));
@@ -654,7 +654,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkLogicDelete(batchList.toArray(new String[0]));
+                BulkResult<String> batchResult = bulkLogicDelete(batchList.toArray(new String[0]));
                 synchronized (result) {
                     result.add(batchResult);
                 }

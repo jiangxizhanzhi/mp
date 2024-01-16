@@ -8,9 +8,12 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.LoggerFactory;
 import net.schmizz.sshj.common.StreamCopier;
 import net.schmizz.sshj.connection.channel.direct.Parameters;
+import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.forwarded.RemotePortForwarder;
 import net.schmizz.sshj.connection.channel.forwarded.SocketForwardingConnectListener;
+import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
+import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -90,7 +93,7 @@ public class SshClient implements Closeable {
             innerClient.connect(host, port);
             innerClient.authPassword(username, password);
         } catch (IOException e) {
-            var msg = String.format("Ssh client connect to %s@%s:%s by password error: %s",
+            String msg = String.format("Ssh client connect to %s@%s:%s by password error: %s",
                     username, host, port, e.getMessage());
             log.error(msg);
             close(false);
@@ -101,12 +104,12 @@ public class SshClient implements Closeable {
     private void initConnByPrivateKey() {
         log.info("Ssh client connect to {}@{}:{} by privateKey", username, host, port);
         try {
-            var keyProvider = innerClient.loadKeys(privateKey, null, null);
+            KeyProvider keyProvider = innerClient.loadKeys(privateKey, null, null);
             innerClient.addHostKeyVerifier(new PromiscuousVerifier());
             innerClient.connect(host, port);
             innerClient.authPublickey(username, keyProvider);
         } catch (IOException e) {
-            var msg = String.format("Ssh client connect to %s@%s:%s by privateKey error: %s",
+            String msg = String.format("Ssh client connect to %s@%s:%s by privateKey error: %s",
                     username, host, port, e.getMessage());
             log.error(msg);
             close(false);
@@ -121,7 +124,7 @@ public class SshClient implements Closeable {
             innerClient.connect(host, port);
             innerClient.authPublickey(username);
         } catch (IOException e) {
-            var msg = String.format("Ssh client connect to %s@%s:%s by known hosts error: %s",
+            String msg = String.format("Ssh client connect to %s@%s:%s by known hosts error: %s",
                     username, host, port, e.getMessage());
             log.error(msg);
             close(false);
@@ -137,7 +140,7 @@ public class SshClient implements Closeable {
         this.privateKey = privateKey;
         this.keepAlive = keepAlive;
 
-        var defaultConfig = new DefaultConfig();
+        DefaultConfig defaultConfig = new DefaultConfig();
         if (this.keepAlive != null) {
             defaultConfig.setKeepAliveProvider(KeepAliveProvider.KEEP_ALIVE);
         }
@@ -164,7 +167,7 @@ public class SshClient implements Closeable {
     }
 
     public String execReturn(String command, Long timeout) {
-        var os = new ByteArrayOutputStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
         exec(command, os, timeout);
         return os.toString(StandardCharsets.UTF_8);
     }
@@ -182,17 +185,17 @@ public class SshClient implements Closeable {
     }
 
     public void exec(String command, OutputStream os, Long timeout) {
-        var timeoutFlag = timeout != null && timeout.compareTo(0L) > 0;
-        try (var session = innerClient.startSession()) {
+        boolean timeoutFlag = timeout != null && timeout.compareTo(0L) > 0;
+        try (Session session = innerClient.startSession()) {
             session.allocateDefaultPTY();
-            var cmd = session.exec(command);
+            Session.Command cmd = session.exec(command);
             if (timeoutFlag) {
                 if (os != null) {
                     new Thread(() -> {
                         try {
                             new StreamCopier(cmd.getInputStream(), os, LoggerFactory.DEFAULT).copy();
                         } catch (IOException e) {
-                            var msg = String.format("Ssh client run command on %s@%s:%s error: %s",
+                            String msg = String.format("Ssh client run command on %s@%s:%s error: %s",
                                     username, host, port, e.getMessage());
                             log.warn(msg);
                         }
@@ -206,11 +209,11 @@ public class SshClient implements Closeable {
             }
         } catch (IOException e) {
             if (timeoutFlag && e.getCause().getClass().equals(TimeoutException.class)) {
-                var msg = String.format("Ssh client run command on %s@%s:%s timeout: %s",
+                String msg = String.format("Ssh client run command on %s@%s:%s timeout: %s",
                         username, host, port, timeout);
                 log.warn(msg);
             } else {
-                var msg = String.format("Ssh client run command on %s@%s:%s error: %s",
+                String msg = String.format("Ssh client run command on %s@%s:%s error: %s",
                         username, host, port, e.getMessage());
                 log.error(msg);
                 throw new MpRuntimeException(msg);
@@ -222,7 +225,7 @@ public class SshClient implements Closeable {
         try {
             innerClient.newSCPFileTransfer().download(remotePath, localPath);
         } catch (IOException e) {
-            var msg = String.format("Ssh client download %s on %s@%s:%s to %s by scp error: %s",
+            String msg = String.format("Ssh client download %s on %s@%s:%s to %s by scp error: %s",
                     remotePath, username, host, port, localPath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
@@ -233,7 +236,7 @@ public class SshClient implements Closeable {
         try {
             innerClient.newSCPFileTransfer().upload(localPath, remotePath);
         } catch (IOException e) {
-            var msg = String.format("Ssh client upload %s to %s on %s@%s:%s by scp error: %s",
+            String msg = String.format("Ssh client upload %s to %s on %s@%s:%s by scp error: %s",
                     localPath, remotePath, username, host, port, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
@@ -241,10 +244,10 @@ public class SshClient implements Closeable {
     }
 
     public void sftpDownload(String remotePath, String localPath) {
-        try (var sftp = innerClient.newSFTPClient()) {
+        try (SFTPClient sftp = innerClient.newSFTPClient()) {
             sftp.get(remotePath, localPath);
         } catch (IOException e) {
-            var msg = String.format("Ssh client download %s on %s@%s:%s to %s by sftp error: %s",
+            String msg = String.format("Ssh client download %s on %s@%s:%s to %s by sftp error: %s",
                     remotePath, username, host, port, localPath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
@@ -252,10 +255,10 @@ public class SshClient implements Closeable {
     }
 
     public void sftpUpload(String localPath, String remotePath) {
-        try (var sftp = innerClient.newSFTPClient()) {
+        try (SFTPClient sftp = innerClient.newSFTPClient()) {
             sftp.put(localPath, remotePath);
         } catch (IOException e) {
-            var msg = String.format("Ssh client upload %s to %s on %s@%s:%s by sftp error: %s",
+            String msg = String.format("Ssh client upload %s to %s on %s@%s:%s by sftp error: %s",
                     localPath, remotePath, username, host, port, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
@@ -265,7 +268,7 @@ public class SshClient implements Closeable {
     public void localPortForwarding(String localHost, int localPort, String remoteHost, int remotePort) {
         log.info("Ssh client local port forwarding {}:{} to {}:{} on {}@{}:{}",
                 localHost, localPort, remoteHost, remotePort, username, host, port);
-        var params = new Parameters(localHost, localPort, remoteHost, remotePort);
+        Parameters params = new Parameters(localHost, localPort, remoteHost, remotePort);
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket();
@@ -274,7 +277,7 @@ public class SshClient implements Closeable {
             localPortForwardingSockets.add(serverSocket);
             innerClient.newLocalPortForwarder(params, serverSocket).listen();
         } catch (IOException e) {
-            var msg = String.format(
+            String msg = String.format(
                     "Ssh client local port forwarding %s:%s to %s:%s on %s@%s:%s error: %s",
                     localHost, localPort, remoteHost, remotePort, username, host, port, e.getMessage());
             log.error(msg);
@@ -295,7 +298,7 @@ public class SshClient implements Closeable {
                     new SocketForwardingConnectListener(new InetSocketAddress(localHost, localPort)));
             innerClient.getTransport().join();
         } catch (IOException e) {
-            var msg = String.format(
+            String msg = String.format(
                     "Ssh client remote port forwarding %s on %s@%s:%s to %s:%s error: %s",
                     remotePort, username, host, port, localHost, localPort, e.getMessage());
             log.error(msg);
@@ -309,7 +312,7 @@ public class SshClient implements Closeable {
     }
 
     public void close(boolean raiseException) {
-        for (var serverSocket : localPortForwardingSockets.toArray(new ServerSocket[0])) {
+        for (ServerSocket serverSocket : localPortForwardingSockets.toArray(new ServerSocket[0])) {
             localPortForwardingSockets.remove(serverSocket);
         }
 
@@ -317,7 +320,7 @@ public class SshClient implements Closeable {
             try {
                 this.innerClient.close();
             } catch (IOException e) {
-                var msg = String.format("Ssh client close to %s@%s:%s error: %s",
+                String msg = String.format("Ssh client close to %s@%s:%s error: %s",
                         username, host, port, e.getMessage());
                 log.error(msg);
                 if (raiseException) {
@@ -332,7 +335,7 @@ public class SshClient implements Closeable {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            var msgI = String.format("Ssh client local port forwarding %s:%s to %s@%s:%s close socket error: %s",
+            String msgI = String.format("Ssh client local port forwarding %s:%s to %s@%s:%s close socket error: %s",
                     serverSocket.getInetAddress().getHostAddress(), serverSocket.getLocalPort(), username, host, port,
                     e.getMessage());
             log.error(msgI);

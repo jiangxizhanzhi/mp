@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
+
 /**
  * @Description 写入images目录中解析出来的镜像信息
  * @Author maojun
@@ -18,7 +20,7 @@ class SceneFilePathConverter implements IConverter {
         if (StringUtils.isEmpty(sceneFilePath)) {
             return;
         }
-        var cloudElementMap = container.getCloudPluginElements();
+        Map<String, CloudPluginSceneConfigElementBO> cloudElementMap = container.getCloudPluginElements();
         if (CollectionUtils.isNotEmpty(container.getNodeElements())) {
             container.getNodeElements().forEach(e -> {
                 CloudPluginSceneConfigElementBO cloudElement = cloudElementMap.get(e.getId());

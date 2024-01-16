@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
 import java.util.*;
 
 public class BeanUtils {
@@ -75,7 +76,7 @@ public class BeanUtils {
     public static Map<String, Object> getMap(Object obj) {
         Map<String, Object> map = new HashMap<>();
         final BeanWrapper wrapper = new BeanWrapperImpl(obj);
-        var propertyDescriptors = wrapper.getPropertyDescriptors();
+        PropertyDescriptor[] propertyDescriptors = wrapper.getPropertyDescriptors();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
             if (!StringUtils.equals("class", fieldName)) {

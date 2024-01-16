@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -65,12 +66,12 @@ public class LocalCallServerListener extends FileModifyListener {
      * run this method after bean initiated
      */
     public static void initStart(BaseAppConfig baseAppConfig, ApplicationContext context) {
-        var messageFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
+        String messageFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
                 FileUtil.getTmpDirPath(), baseAppConfig.getProjectName(), "local_call_message_file");
         log.info("Local call message file: {}", messageFilepath);
 
-        var localCallServerListener = new LocalCallServerListener(messageFilepath);
-        var serverBeans = context.getBeansWithAnnotation(LocalCallServer.class);
+        LocalCallServerListener localCallServerListener = new LocalCallServerListener(messageFilepath);
+        Map<String, Object> serverBeans = context.getBeansWithAnnotation(LocalCallServer.class);
         serverBeans.forEach((serverBeanName, serverBean) -> {
             localCallServerListener.getLocalCallServerMap().put(serverBean.getClass().getName(), serverBean);
         });
@@ -85,7 +86,7 @@ public class LocalCallServerListener extends FileModifyListener {
     }
 
     public static void prepareWindowsClientScript(String targetDir, String messageFilepath) {
-        var scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.bat");
+        String scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.bat");
         log.info("Local call client script file: {}", scriptFilePath);
 
         FileUtil.mkParentDirs(scriptFilePath);
@@ -114,7 +115,7 @@ public class LocalCallServerListener extends FileModifyListener {
     }
 
     public static void prepareLinuxClientScript(String targetDir, String messageFilepath) {
-        var scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.sh");
+        String scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.sh");
         log.info("Local call client script file: {}", scriptFilePath);
 
         FileUtil.mkParentDirs(scriptFilePath);
@@ -163,13 +164,13 @@ public class LocalCallServerListener extends FileModifyListener {
     }
 
     private void runFileChanged(String filePath) {
-        var file = new File(filePath);
+        File file = new File(filePath);
         if (file.length() == 0) {
             return;
         }
 
-        var lines = FileUtil.readUtf8Lines(file);
-        try (var fileWriter = new FileWriter(file);) {
+        List<String> lines = FileUtil.readUtf8Lines(file);
+        try (FileWriter fileWriter = new FileWriter(file);) {
             fileWriter.write(StringUtils.EMPTY);
             fileWriter.flush();
         } catch (IOException e) {
@@ -183,8 +184,8 @@ public class LocalCallServerListener extends FileModifyListener {
                     TextUtils.coupleStrip(line, "\"").split("\" \"")));
             String methodName = null;
             List<String> methodArgs = new ArrayList<>();
-            for (var i = 0; i < lineParts.size(); i++) {
-                var linePart = lineParts.get(i);
+            for (int i = 0; i < lineParts.size(); i++) {
+                String linePart = lineParts.get(i);
                 if (i == 0) {
                     methodName = linePart;
                 } else {
@@ -192,8 +193,8 @@ public class LocalCallServerListener extends FileModifyListener {
                 }
             }
 
-            final var taskMethodName = methodName;
-            final var taskMethodArgs = methodArgs.toArray(new String[0]);
+            final String taskMethodName = methodName;
+            final String[] taskMethodArgs = methodArgs.toArray(new String[0]);
             tasks.add(() -> call(taskMethodName, taskMethodArgs));
         });
 
@@ -207,33 +208,33 @@ public class LocalCallServerListener extends FileModifyListener {
             return;
         }
 
-        var className = methodPaths.get(0);
+        String className = methodPaths.get(0);
         Object serverBean = localCallServerMap.getOrDefault(className, null);
         if (serverBean == null) {
             log.error("Local call method({}) args({}) error: class({}) not found", formatMethodName, args, className);
             return;
         }
 
-        var methodName = methodPaths.get(1);
+        String methodName = methodPaths.get(1);
         if (StringUtils.isEmpty(methodName)) {
             log.error("Local call method({}) args({}) error: method not found", formatMethodName, args);
             return;
         }
 
         Class<?> serverClass = serverBean.getClass();
-        var parameterTypes = new Class[args.length];
-        for (var i = 0; i < args.length; i++) {
+        Class[] parameterTypes = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
             parameterTypes[i] = String.class;
         }
 
-        var method = ClassUtils.getMethod(serverClass, methodName, parameterTypes);
+        Method method = ClassUtils.getMethod(serverClass, methodName, parameterTypes);
         if (method == null) {
             log.error("Local call method({}) args({}) on class({}) error: method not found", formatMethodName, args,
                     serverClass);
             return;
         }
 
-        var localCallFuncAnnotation = method.getAnnotation(LocalCallFunc.class);
+        LocalCallFunc localCallFuncAnnotation = method.getAnnotation(LocalCallFunc.class);
         if (localCallFuncAnnotation == null) {
             log.error("Local call method({}) args({}) on class({}) error: no such method", formatMethodName, args,
                     serverClass);

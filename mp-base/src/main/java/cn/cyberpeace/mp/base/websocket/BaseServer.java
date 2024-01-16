@@ -37,8 +37,8 @@ public abstract class BaseServer {
 
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
                                          T data, String type, Map<String, Object> context) {
-        var sessionMap = serverSessionMap.get(serverClass);
-        var server = sessionMap.getOrDefault(sessionKey, null);
+        ConcurrentHashMap<String, BaseServer> sessionMap = serverSessionMap.get(serverClass);
+        BaseServer server = sessionMap.getOrDefault(sessionKey, null);
         if (server == null) {
             return;
         }
@@ -47,7 +47,7 @@ public abstract class BaseServer {
     }
 
     public static <T> void sendToAllSessions(Class<?> serverClass, T data, String type, Map<String, Object> context) {
-        var sessionMap = serverSessionMap.get(serverClass);
+        ConcurrentHashMap<String, BaseServer> sessionMap = serverSessionMap.get(serverClass);
         sessionMap.forEach((sessionKey, server) -> server.send(data, type, context));
     }
 
@@ -60,7 +60,7 @@ public abstract class BaseServer {
     }
 
     public static Map<String, Object> getHeaders(Session session) {
-        var headers = session.getUserProperties().getOrDefault(WebSocketConfig.Configurator.USER_HEADERS_KEY, null);
+        Object headers = session.getUserProperties().getOrDefault(WebSocketConfig.Configurator.USER_HEADERS_KEY, null);
         if (headers == null) {
             return new HashMap<>();
         }
@@ -82,7 +82,7 @@ public abstract class BaseServer {
      * 验证session合法性，重写本方法添加自定义的验证逻辑
      */
     protected void validateSession(Session session) throws ValidateException {
-        var sessionKey = retrieveSessionKey(session);
+        String sessionKey = retrieveSessionKey(session);
         if (StringUtils.isEmpty(sessionKey)) {
             throw new ValidateException("Session key not found");
         }
@@ -95,7 +95,7 @@ public abstract class BaseServer {
         try {
             validateSession(session);
         } catch (ValidateException e) {
-            var closeReason = new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage());
+            CloseReason closeReason = new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, e.getMessage());
             try {
                 session.close(closeReason);
             } catch (IOException ioException) {
@@ -146,7 +146,7 @@ public abstract class BaseServer {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
         log.debug("ws content:{}", JsonCommon.stringify(formatMessage));
 
-        var messageStr = getMessageConverter().toMessageString(formatMessage);
+        String messageStr = getMessageConverter().toMessageString(formatMessage);
         try {
             session.getBasicRemote().sendText(messageStr);
         } catch (IOException e) {

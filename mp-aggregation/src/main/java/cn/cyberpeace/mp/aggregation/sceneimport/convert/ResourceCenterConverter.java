@@ -55,7 +55,7 @@ public class ResourceCenterConverter {
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 
-        var csceneBO = container.toCsceneBO();
+        CsceneBO csceneBO = container.toCsceneBO();
         if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
             csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {

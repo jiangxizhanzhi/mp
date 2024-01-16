@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.model.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.stereotype.*;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
@@ -21,29 +22,29 @@ public class ModelUtils {
         try {
             defaultValue = clazz.getMethod(methodName);
         } catch (NoSuchMethodException e) {
-            var defaultBoolAnnotation = field.getAnnotation(DefaultBool.class);
+            DefaultBool defaultBoolAnnotation = field.getAnnotation(DefaultBool.class);
             if (defaultBoolAnnotation != null) {
                 defaultValue = defaultBoolAnnotation.value();
             }
 
-            var defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
+            DefaultInt defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
             if (defaultIntAnnotation != null) {
                 defaultValue = defaultIntAnnotation.value();
             }
 
-            var defaultLongAnnotation = field.getAnnotation(DefaultLong.class);
+            DefaultLong defaultLongAnnotation = field.getAnnotation(DefaultLong.class);
             if (defaultLongAnnotation != null) {
                 defaultValue = defaultLongAnnotation.value();
             }
 
-            var defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
+            DefaultStr defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
             if (defaultStrAnnotation != null) {
                 defaultValue = defaultStrAnnotation.value();
             }
 
-            var defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
+            DefaultGen defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
             if (defaultGenAnnotation != null) {
-                var generatorClass = defaultGenAnnotation.value();
+                Class<? extends Generator> generatorClass = defaultGenAnnotation.value();
                 defaultValue = BeanCommon.getBean(generatorClass);
             }
         }
@@ -52,7 +53,7 @@ public class ModelUtils {
     }
 
     public static <M> String getTableName(Class<M> clazz) {
-        var table = clazz.getAnnotation(Table.class);
+        Table table = clazz.getAnnotation(Table.class);
         return table != null ? table.value() : null;
     }
 
@@ -66,7 +67,7 @@ public class ModelUtils {
         String[] fieldNames = ClassUtils.getBeanClassFields(clazz);
         for (String fieldName: fieldNames) {
             Object defaultValue = null;
-            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            Field field = ClassUtils.getField(clazz, fieldName, true, false);
             if (field != null) {
                 defaultValue = parseDefaultValue(clazz, field);
             }

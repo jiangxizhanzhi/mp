@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -52,7 +53,7 @@ public class BaseSceneParseResourceCenter {
     protected void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
         Map<String, Integer> fileName2Index = new HashMap<>();
         fileName2Index.put("file", 1);
-        for (var node : nodes) {
+        for (NodeElementParseResult node : nodes) {
             if (StringUtils.isNotEmpty(node.getFile())) {
                 String file = node.getFile();
                 // 获取name
@@ -79,7 +80,7 @@ public class BaseSceneParseResourceCenter {
         CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Set<String> existImage = new HashSet<>();
         for (String nodeId : id2Node.keySet()) {
-            var node = pluginHandler.getElement(nodeId);
+            CloudPluginSceneConfigElementBO node = pluginHandler.getElement(nodeId);
             if (node != null) {
                 if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())
                         && !BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.getImageType())) {
@@ -102,10 +103,10 @@ public class BaseSceneParseResourceCenter {
                     device.setDisk(node.getSrcElement().getDisk());
                 }
                 devices.add(device);
-                var element = sceneHandler.getElement(nodeId);
+                SceneConfigElementBO element = sceneHandler.getElement(nodeId);
                 device.setLogo(element.getIcon2());
                 if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                    for (var p : element.getPorts()) {
+                    for (SceneConfigElementPortBO p : element.getPorts()) {
                         if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
                             device.getAccessModes().addAll(p.getAccessModes());
                         }

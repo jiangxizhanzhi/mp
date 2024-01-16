@@ -127,7 +127,7 @@ public abstract class BaseGroupServer extends BaseServer {
         BeanCommon.getBeanType(BaseGroupServer.class).forEach((name, groupServer) -> {
             int groupIndexSize = ClassUtils.getStaticFieldValue(groupServer.getClass(), "groupIndexSize", Integer.class);
             List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = new ArrayList<>();
-            for (var i = 0; i < groupIndexSize; i++) {
+            for (int i = 0; i < groupIndexSize; i++) {
                 groupSessionsList.add(new ConcurrentHashMap<>());
             }
             serverGroupSessionsListMap.put(groupServer.getClass(), groupSessionsList);
@@ -141,12 +141,12 @@ public abstract class BaseGroupServer extends BaseServer {
 
     public static <T> void sendToGroup(Class<?> serverClass, int groupIndex, String groupKey,
                                        T data, String type, Map<String, Object> context) {
-        var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
         }
-        var groupSessionsMap = groupSessionsList.get(groupIndex);
-        var sessions = groupSessionsMap.getOrDefault(groupKey, null);
+        ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = groupSessionsList.get(groupIndex);
+        ConcurrentHashMap<String, Session> sessions = groupSessionsMap.getOrDefault(groupKey, null);
         if (sessions == null) {
             return;
         }
@@ -156,11 +156,11 @@ public abstract class BaseGroupServer extends BaseServer {
 
     public static <T> void sendToGroupIndex(Class<?> serverClass, int groupIndex,
                                             T data, String type, Map<String, Object> context) {
-        var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
         }
-        var groupSessionsMap = groupSessionsList.get(groupIndex);
+        ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = groupSessionsList.get(groupIndex);
         groupSessionsMap.forEach((groupKey, sessions) -> {
             sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
         });
@@ -201,7 +201,7 @@ public abstract class BaseGroupServer extends BaseServer {
     }
 
     protected ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> getGroupSessionsMap(int groupIndex) {
-        var groupSessionsList = getGroupSessionsList();
+        List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = getGroupSessionsList();
         if (groupSessionsList.size() < groupIndex + 1) {
             return null;
         }
@@ -219,7 +219,7 @@ public abstract class BaseGroupServer extends BaseServer {
     @Override
     protected void validateSession(Session session) throws ValidateException {
         super.validateSession(session);
-        var groupKeys = retrieveGroupKeys(session);
+        List<String> groupKeys = retrieveGroupKeys(session);
         if (groupKeys == null || groupKeys.isEmpty()) {
             throw new ValidateException("Group key not found");
         }
@@ -235,9 +235,9 @@ public abstract class BaseGroupServer extends BaseServer {
         if (groupKeys == null || groupKeys.isEmpty()) {
             groupKeys = retrieveGroupKeys(session);
         }
-        for (var i = 0; i < groupKeys.size(); i++) {
-            var groupKey = groupKeys.get(i);
-            var groupSessionsMap = getGroupSessionsMap(i);
+        for (int i = 0; i < groupKeys.size(); i++) {
+            String groupKey = groupKeys.get(i);
+            ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = getGroupSessionsMap(i);
             if (groupSessionsMap == null) {
                 continue;
             }
@@ -249,14 +249,14 @@ public abstract class BaseGroupServer extends BaseServer {
     @OnClose
     public void onClose() {
         if (groupKeys != null && !groupKeys.isEmpty()) {
-            for (var i = 0; i < groupKeys.size(); i++) {
-                var groupKey = groupKeys.get(i);
-                var groupSessionsMap = getGroupSessionsMap(i);
+            for (int i = 0; i < groupKeys.size(); i++) {
+                String groupKey = groupKeys.get(i);
+                ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = getGroupSessionsMap(i);
                 if (groupSessionsMap == null) {
                     continue;
                 }
 
-                var sessions = groupSessionsMap.getOrDefault(groupKey, null);
+                ConcurrentHashMap<String, Session> sessions = groupSessionsMap.getOrDefault(groupKey, null);
                 if (sessions == null) {
                     continue;
                 }

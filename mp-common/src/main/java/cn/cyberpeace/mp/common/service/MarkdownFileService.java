@@ -29,7 +29,7 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
     }
 
     public ServiceResult<String> uploadImage(InputStream is, String fileSuffix) {
-        var validateResult = validateUploadImageInput(is, fileSuffix);
+        ServiceResult<Boolean> validateResult = validateUploadImageInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }
@@ -38,7 +38,7 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
     }
 
     public ServiceResult<String> uploadFile(InputStream is, String fileSuffix) {
-        var validateResult = validateUploadFileInput(is, fileSuffix);
+        ServiceResult<Boolean> validateResult = validateUploadFileInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }

@@ -79,7 +79,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
         }
 
         Object[] subItemRecords = null;
-        var swaggerDisplayEnum = AnnotationUtils.findAnnotation(rawPrimaryType, SwaggerDisplayEnum.class);
+        SwaggerDisplayEnum swaggerDisplayEnum = AnnotationUtils.findAnnotation(rawPrimaryType, SwaggerDisplayEnum.class);
         // 判断是否存在 @SwaggerDisplayEnum 注解，并且 rawPrimaryType 是枚举
         if (null != swaggerDisplayEnum && Enum.class.isAssignableFrom(rawPrimaryType)) {
             // 拿到枚举的所有的值

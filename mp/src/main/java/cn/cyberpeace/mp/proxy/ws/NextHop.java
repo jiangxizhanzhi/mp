@@ -33,7 +33,7 @@ public class NextHop {
     }
 
     private WebSocketHttpHeaders getClientHttpHeaders(final WebSocketSession serverSession) {
-        var headers = new WebSocketHttpHeaders();
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
         serverSession.getHandshakeHeaders().forEach((name, value) -> {
             headers.add(name, value.get(0));
         });
@@ -42,7 +42,7 @@ public class NextHop {
 
     private WebSocketSession createClientSession(WebSocketSession serverSession) {
         try {
-            var headers = getClientHttpHeaders(serverSession);
+            WebSocketHttpHeaders headers = getClientHttpHeaders(serverSession);
             return new StandardWebSocketClient()
                     .doHandshake(new WsProxyClientHandler(serverSession, targetConfig), headers, new URI(this.targetConfig.getTargetUrl()))
                     .get(targetConfig.getHandshakeTimeout(), TimeUnit.MILLISECONDS);

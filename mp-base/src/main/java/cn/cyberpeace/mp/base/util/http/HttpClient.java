@@ -15,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.springframework.http.MediaType;
@@ -53,7 +54,7 @@ public class HttpClient {
     private String contentType = DEFAULT_CONTENT_TYPE;
 
     private String formatUrl(String url, HttpParam param) {
-        var serverUrl = StringUtils.join(server, url);
+        String serverUrl = StringUtils.join(server, url);
         if (param == null) {
             return serverUrl;
         }
@@ -77,7 +78,7 @@ public class HttpClient {
 
     private <T extends HttpRequestBase> T genRequest(Class<T> requestClass, String url, HttpParam param, HttpData data,
                                                      Map<String, String> headers, Integer timeout) {
-        var request = ClassUtils.createInstance(requestClass);
+        T request = ClassUtils.createInstance(requestClass);
         request.setURI(URI.create(formatUrl(url, param)));
         request.setConfig(RequestConfig.custom().setSocketTimeout(timeout == null ? this.timeout : timeout).build());
 
@@ -90,8 +91,8 @@ public class HttpClient {
         if (data != null && request instanceof HttpEntityEnclosingRequestBase) {
             HttpEntity entity;
             if (data.multipart()) {
-                var multipart = data.toMultipart();
-                var multipartEntity = MultipartEntityBuilder.create();
+                Map<String, Object> multipart = data.toMultipart();
+                MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
                 multipart.forEach((fieldName, fieldValue) -> {
                     if (fieldValue instanceof String) {
                         multipartEntity.addTextBody(fieldName, (String) fieldValue);
@@ -107,7 +108,7 @@ public class HttpClient {
                 });
                 entity = multipartEntity.build();
             } else {
-                var stringEntity = new StringEntity(data.toContent(), charset);
+                StringEntity stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
                 if(!StringUtils.isEmpty(data.contentType())){
                     stringEntity.setContentType(data.contentType());
@@ -124,8 +125,8 @@ public class HttpClient {
     private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
                                                            HttpParam param, Map<String, String> headers,
                                                            Integer timeout, boolean loadResult) {
-        var request = genRequest(requestClass, url, param, data, headers, timeout);
-        var result = new HttpResult();
+        T request = genRequest(requestClass, url, param, data, headers, timeout);
+        HttpResult result = new HttpResult();
         result.setRequest(request);
         HttpResponse response;
         if (logRequest) {
@@ -204,7 +205,7 @@ public class HttpClient {
     private HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal,
                       String username, String password) {
         this.server = server;
-        var clientBuilder = HttpClients.custom().disableAutomaticRetries();
+        org.apache.http.impl.client.HttpClientBuilder clientBuilder = HttpClients.custom().disableAutomaticRetries();
         if (maxConnPerRoute != null) {
             clientBuilder.setMaxConnPerRoute(maxConnPerRoute);
         }
@@ -212,8 +213,8 @@ public class HttpClient {
             clientBuilder.setMaxConnTotal(maxConnTotal);
         }
         if (username != null && password != null) {
-            var credentialsProvider = new BasicCredentialsProvider();
-            var usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(username, password);
             credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
@@ -253,15 +254,15 @@ public class HttpClient {
 
     public HttpResult download(OutputStream os, String url, HttpParam param, Map<String, String> headers,
                                Integer timeout) {
-        var httpResult = streamGet(url, param, headers, timeout);
+        HttpResult httpResult = streamGet(url, param, headers, timeout);
         if (!httpResult.isSuccess()) {
-            var msg = String.format("download http file %s status error: %s", url, httpResult.getResult());
+            String msg = String.format("download http file %s status error: %s", url, httpResult.getResult());
             log.error(msg);
             httpResult.setException(new RuntimeException(msg));
             return httpResult;
         }
 
-        var entity = httpResult.getResponse().getEntity();
+        HttpEntity entity = httpResult.getResponse().getEntity();
         try {
             StreamUtils.copy(entity.getContent(), os);
         } catch (IOException e) {

@@ -73,7 +73,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
                 if (!StringUtils.equals(user.getId(), authConfig.getLogoutKeepSecretUser())) {
                     // 退出是否重置秘钥
-                    var updateUser = new UserModel();
+                    UserModel updateUser = new UserModel();
                     updateUser.setId(user.getId());
                     updateUser.initDefault("tokenSecret");
                     userService.update(updateUser);

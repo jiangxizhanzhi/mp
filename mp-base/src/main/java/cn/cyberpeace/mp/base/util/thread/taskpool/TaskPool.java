@@ -81,7 +81,7 @@ public class TaskPool {
      */
     private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokePoolTasks(List<T1> poolTasks,
                                                                                   boolean independent, boolean format) {
-        var latch = new CountDownLatch(poolTasks.size());
+        CountDownLatch latch = new CountDownLatch(poolTasks.size());
         poolTasks.forEach(poolTask -> {
             Runnable command = () -> {
                 invokeTask(poolTask);
@@ -120,7 +120,7 @@ public class TaskPool {
                                                                              boolean format, Class<T1> poolTaskClass) {
         List<T1> poolTasks = tasks.stream()
                 .map(task -> {
-                    var poolTask = ClassUtils.createInstance(poolTaskClass);
+                    T1 poolTask = ClassUtils.createInstance(poolTaskClass);
                     poolTask.setTask(task);
                     return poolTask;
                 })
@@ -157,7 +157,7 @@ public class TaskPool {
     }
 
     public void executeTask(Runnable task, boolean format) {
-        var poolTask = new DefaultPoolTask(task);
+        DefaultPoolTask poolTask = new DefaultPoolTask(task);
         Runnable command = () -> invokeTask(poolTask);
         if (format) {
             command = ThreadUtils.format(command);

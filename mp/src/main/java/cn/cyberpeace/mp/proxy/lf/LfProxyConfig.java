@@ -19,7 +19,7 @@ public class LfProxyConfig {
             return url;
         }
 
-        var formattedUrl = url;
+        String formattedUrl = url;
         if (!formattedUrl.endsWith(URL_SEPARATOR)) {
             formattedUrl = formattedUrl + URL_SEPARATOR;
         }
@@ -28,7 +28,7 @@ public class LfProxyConfig {
     }
 
     public String getLocation() {
-        var formattedLocation = location;
+        String formattedLocation = location;
         if (!(formattedLocation.startsWith(FILE_LOCATION_PREFIX) || formattedLocation.startsWith(CLASSPATH_LOCATION_PREFIX))) {
             formattedLocation = FILE_LOCATION_PREFIX + formattedLocation;
         }

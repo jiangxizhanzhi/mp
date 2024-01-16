@@ -367,7 +367,7 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
+        DynamicFields intersectFields = new DynamicFields();
         for (String field: targetFields) {
             Object intersectionValue = intersect(field, true);
             if (intersectionValue != null) {
@@ -383,7 +383,7 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
+        DynamicFields intersectFields = new DynamicFields();
         targetFields.forEach(field -> {
             Object intersectionValue = intersect(field, true);
             if (intersectionValue != null) {
@@ -399,7 +399,7 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
+        DynamicFields intersectFields = new DynamicFields();
         targetFieldsMap.forEach((field, value) -> {
             Object intersectionValue = intersect(field, value);
             if (intersectionValue != null) {
@@ -510,7 +510,7 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(String[] targetFields) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
             return subtractionFields;
         }
@@ -526,7 +526,7 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(List<String> targetFields) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
             return subtractionFields;
         }
@@ -542,7 +542,7 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(Map<String, Object> targetFieldsMap) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFieldsMap == null) {
             return subtractionFields;
         }

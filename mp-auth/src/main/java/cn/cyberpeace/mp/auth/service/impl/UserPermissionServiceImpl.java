@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -139,7 +140,7 @@ public class UserPermissionServiceImpl
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
-        var result = userService.get(userId);
+        ObjServiceResult<UserModel> result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ACCOUNT_NOT_EXISTED);
 
         if (cleanOldTargets) {
@@ -162,7 +163,7 @@ public class UserPermissionServiceImpl
             userPerm.setOwner(userId);
             userPerm.setTarget(tid);
             userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
-            var re = create(userPerm);
+            ObjServiceResult<UserPermissionModel> re = create(userPerm);
             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_TARGET_ADD_ERROR);
         });
 

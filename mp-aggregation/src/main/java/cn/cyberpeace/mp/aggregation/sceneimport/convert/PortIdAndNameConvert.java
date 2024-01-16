@@ -17,7 +17,7 @@ public class PortIdAndNameConvert implements IConverter {
 
     @Override
     public void convert2BO(ConvertDataContainer container) {
-        var cloudElementMap = container.getCloudPluginElements();
+        Map<String, CloudPluginSceneConfigElementBO> cloudElementMap = container.getCloudPluginElements();
         if (CollectionUtils.isNotEmpty(container.getAllElements())) {
             container.getAllElements().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {

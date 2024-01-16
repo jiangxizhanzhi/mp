@@ -125,7 +125,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
 
         // 表格内用户名重复内容校验
-        var duplicateElements = getDuplicateElements(users);
+        List<Map.Entry<String, Long>> duplicateElements = getDuplicateElements(users);
         if (CollectionUtils.isNotEmpty(duplicateElements)) {
             String duplicatedUserNames = duplicateElements.stream().map(Map.Entry::getKey).collect(Collectors.joining(","));
             log.error("import error! username {} duplicated!", duplicatedUserNames);
@@ -431,7 +431,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
 
     public List<Map.Entry<String, Long>> getDuplicateElements(List<ImportUserBo> users) {
-        var list = users.stream().collect(Collectors.groupingBy(u -> u.getUsername(), Collectors.counting())).entrySet().stream().filter(entry -> entry.getValue() > 1).collect(Collectors.toList());
+        List<Map.Entry<String, Long>> list = users.stream().collect(Collectors.groupingBy(u -> u.getUsername(), Collectors.counting())).entrySet().stream().filter(entry -> entry.getValue() > 1).collect(Collectors.toList());
         return list;
     }
 

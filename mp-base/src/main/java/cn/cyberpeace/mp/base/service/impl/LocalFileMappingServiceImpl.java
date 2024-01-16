@@ -28,7 +28,7 @@ public class LocalFileMappingServiceImpl
     }
 
     private void removeRemoteFiles(List<String> remoteFiles) {
-        for (var remoteFile : remoteFiles) {
+        for (String remoteFile : remoteFiles) {
             try {
                 FsCommon.delete(remoteFile);
             } catch (Exception e) {
@@ -51,16 +51,16 @@ public class LocalFileMappingServiceImpl
      */
     @Override
     public ServiceResult<List<LocalFileMappingModel>> syncMappings(String group, List<LocalFileMappingModel> mappings) {
-        for (var mapping : mappings) {
-            var localFile = mapping.getLocalFile();
-            var modifiedTime = new File(localFile).lastModified();
+        for (LocalFileMappingModel mapping : mappings) {
+            String localFile = mapping.getLocalFile();
+            long modifiedTime = new File(localFile).lastModified();
             mapping.setLocalFileModifiedTime(modifiedTime);
         }
 
         DiffTargets<LocalFileMappingModel> diff = diffObjMappings(group, mappings);
         List<String> savedRemoteFiles = new ArrayList<>();
-        for (var mapping : ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())) {
-            var existMapping = diff.getExistTargetMap().getOrDefault(mapping.getName(), null);
+        for (LocalFileMappingModel mapping : ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())) {
+            LocalFileMappingModel existMapping = diff.getExistTargetMap().getOrDefault(mapping.getName(), null);
             if (existMapping != null && existMapping.getLocalFile().equals(mapping.getLocalFile())
                     && existMapping.getLocalFileModifiedTime().equals(mapping.getLocalFileModifiedTime())) {
                 continue;

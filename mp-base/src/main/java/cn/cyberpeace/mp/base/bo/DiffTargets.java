@@ -60,7 +60,7 @@ public class DiffTargets<T> {
         diff.getExistTargetMap().putAll(existTargetMap);
         targetMap.forEach((key, target) -> {
             if (existTargetMapCopy.containsKey(key)) {
-                var existTarget = existTargetMapCopy.remove(key);
+                T existTarget = existTargetMapCopy.remove(key);
                 if (judgeKeepTarget == null) {
                     diff.getUpdatingTargets().add(target);
                 } else {

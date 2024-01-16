@@ -21,7 +21,7 @@ public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService>
     S getRemoteFileService();
 
     static <T extends FileUploadResponse> T toFileUploadResponse(String id, Class<T> responseClazz) {
-        var response = ClassUtils.createInstance(responseClazz);
+        T response = ClassUtils.createInstance(responseClazz);
         response.setId(id);
         return response;
     }

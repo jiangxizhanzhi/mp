@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
@@ -34,14 +36,14 @@ class Node2NodeConnectConverter implements IConverter {
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
             container.getNetworkElements().forEach(e -> networkIds.add(e.getId()));
         }
-        var node2NodePort = container.getNode2NodePort();
+        Map<String, SceneConfigElementPortBO> node2NodePort = container.getNode2NodePort();
         Set<String> connection = new HashSet<>();
         List<Node2Node> node2Nodes = new ArrayList<>();
-        for (var node : nodes) {
+        for (NodeElementParseResult node : nodes) {
             if (CollectionUtils.isEmpty(node.getNet())) {
                 continue;
             }
-            for (var net : node.getNet()) {
+            for (NetElementParseResult net : node.getNet()) {
                 // 和网络的连接已由 NetworkElementConverter 处理
                 if (networkIds.contains(net.getId())) {
                     continue;
@@ -57,11 +59,11 @@ class Node2NodeConnectConverter implements IConverter {
                 }
             }
         }
-        for (var node2Node : node2Nodes) {
+        for (Node2Node node2Node : node2Nodes) {
             String from = node2Node.getFrom();
             String to = node2Node.getTo();
-            var portFrom = node2NodePort.get(from + "_" + to);
-            var portTo = node2NodePort.get(to + "_" + from);
+            SceneConfigElementPortBO portFrom = node2NodePort.get(from + "_" + to);
+            SceneConfigElementPortBO portTo = node2NodePort.get(to + "_" + from);
             // 创建连线
             SceneConfigElementPortConnectionBO connectionBO = new SceneConfigElementPortConnectionBO();
             connectionBO.setId(TextUtils.uuid());
@@ -69,9 +71,9 @@ class Node2NodeConnectConverter implements IConverter {
             connectionBO.setTarget(portTo.getId());
             // 传递连线的前端属性
             if (container.getPortId2Protocol().get(portFrom.getId()) != null) {
-                var vertices = container.getPortId2Protocol().get(portFrom.getId()).getVertices();
+                String vertices = container.getPortId2Protocol().get(portFrom.getId()).getVertices();
                 if (StringUtils.isNotEmpty(vertices)) {
-                    var verticesList = JsonCommon.parse(vertices, new TypeReference<List<Map<String, Object>>>() {
+                    List<Map<String, Object>> verticesList = JsonCommon.parse(vertices, new TypeReference<List<Map<String, Object>>>() {
                     });
                     connectionBO.setVertices(verticesList);
                 } else {

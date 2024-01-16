@@ -8,7 +8,7 @@ public class BaseConnectorCondition implements BaseCondition {
     private final List<Object> conds = new ArrayList<>();
 
     public BaseConnectorCondition addCondition(String fieldName, Connector connector, Object fieldValue) {
-        var cond = new ConnectorCond(fieldName, connector.getOperator(), fieldValue);
+        ConnectorCond cond = new ConnectorCond(fieldName, connector.getOperator(), fieldValue);
         conds.add(cond);
         return this;
     }

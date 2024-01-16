@@ -70,9 +70,9 @@ public class RestCpcloudAllIpsService {
         } else {
             try {
                 //首先要找到所有的需要清理的数据
-                var allSceneInstances = getAllSceneInstances();
+                List<CsceneInstanceModel> allSceneInstances = getAllSceneInstances();
                 // 查询所有启动的靶标实例
-                var allInstances = getAllInstances();
+                List<DeviceTargetPO> allInstances = getAllInstances();
                 if (CollectionUtils.isNotEmpty(allSceneInstances)) {
                     CountDownLatch countDownLatch = new CountDownLatch(allSceneInstances.size());
                     allSceneInstances.stream().forEach(sceneInstance -> {
@@ -115,7 +115,7 @@ public class RestCpcloudAllIpsService {
     public ServiceResult<Boolean> resetAllIps(ResetCplcoudAllIpsData request) {
         if (checkHasClear()) {
             //调云平台接口
-            var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
+            OriginIpsResult response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
             if (response != null) {
                 if (response.getSuccess()) {
@@ -133,20 +133,20 @@ public class RestCpcloudAllIpsService {
 
     public OriginIpsResult getOriginIps() {
         //调云平台接口
-        var response = scenePluginCloudSceneService.getCpcloudOriginIps();
+        OriginIpsResult response = scenePluginCloudSceneService.getCpcloudOriginIps();
         log.info("get cpcloud origin ips response:{}", JsonCommon.stringify(response));
         return response;
     }
 
     private List<CsceneInstanceModel> getAllSceneInstances() {
-        var csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getDeleted, 0));
+        List<CsceneInstanceModel> csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getDeleted, 0));
         return csceneInstanceModels;
     }
 
     private List<DeviceTargetPO> getAllInstances() {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setVmStarted(true);
-        var allInstances = deviceTargetMapper.page(dto);
+        List<DeviceTargetPO> allInstances = deviceTargetMapper.page(dto);
         return allInstances;
     }
 

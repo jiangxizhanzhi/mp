@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * @Description 经过多层解析的处理仍没有值的属性, 在这里做默认的处理
@@ -11,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 class DefaultValueConverter implements IConverter {
     @Override
     public void convert2BO(ConvertDataContainer container) {
-        var cloudElementMap = container.getCloudPluginElements();
+        Map<String, CloudPluginSceneConfigElementBO> cloudElementMap = container.getCloudPluginElements();
         if (cloudElementMap != null) {
             cloudElementMap.forEach((id, e) -> {
                 if (e.getImageType() == null && id != null) {

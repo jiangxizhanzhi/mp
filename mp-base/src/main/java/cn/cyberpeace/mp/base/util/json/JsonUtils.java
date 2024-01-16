@@ -33,8 +33,8 @@ public class JsonUtils {
     private JsonUtils() {}
 
     private static ObjectMapper createDefaultObjectMapper() {
-        var objectMapper = new ObjectMapper();
-        var javaTimeModule = new JavaTimeModule();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATETIME_PATTERN)));
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_PATTERN)));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_TIME_PATTERN)));
@@ -49,7 +49,7 @@ public class JsonUtils {
     }
 
     private static ObjectMapper createDefaultSnakeObjectMapper() {
-        var objectMapper = createDefaultObjectMapper();
+        ObjectMapper objectMapper = createDefaultObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }

@@ -119,7 +119,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .addFilterBefore(licenseFilter, ClientAuthenticationFilter.class);
 
         // usernamePassword
-        var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
+        CustomUsernamePasswordAuthenticationFilter customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
         customUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
@@ -129,12 +129,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         // mobilePassword
-        var mobilePasswordAuthenticationFilter = new MobilePasswordAuthenticationFilter();
+        MobilePasswordAuthenticationFilter mobilePasswordAuthenticationFilter = new MobilePasswordAuthenticationFilter();
         mobilePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         mobilePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         mobilePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
         mobilePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_MOBILE_PATH);
-        var mobilePasswordAuthenticationProvider = new MobilePasswordAuthenticationProvider();
+        MobilePasswordAuthenticationProvider mobilePasswordAuthenticationProvider = new MobilePasswordAuthenticationProvider();
         mobilePasswordAuthenticationProvider.setUserDetailsService(userDetailsService);
 
         http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);

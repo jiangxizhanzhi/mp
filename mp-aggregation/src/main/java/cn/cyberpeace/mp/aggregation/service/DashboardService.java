@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -121,7 +122,7 @@ public class DashboardService {
     public ResourceStatisticsResponse resourceStatistics() {
         ResourceStatisticsResponse response = new ResourceStatisticsResponse();
         Map<String, Map<String, Object>> targetStatics = new HashMap<>();
-        var all = devopsTargetService.countTarget();
+        Map<String, Object> all = devopsTargetService.countTarget();
         // npc暂时只有1个
         all.put("npc", 1);
         targetStatics.put("all", all);
@@ -154,10 +155,10 @@ public class DashboardService {
         }
         response.setRunningScenePercent(runningScenePercent);
 
-        var instanceCount = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
+        List<CsceneInstanceCountByReferenceTypeBO> instanceCount = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
         if (CollectionUtils.isNotEmpty(instanceCount)) {
             int total = 0;
-            for (var cnt : instanceCount) {
+            for (CsceneInstanceCountByReferenceTypeBO cnt : instanceCount) {
                 total += (cnt.getTotal() == null ? 0 : cnt.getTotal());
             }
             response.setRunningSceneCount(total);
@@ -167,7 +168,7 @@ public class DashboardService {
     }
 
     public UserResourceResponse countUserResourceResponse() {
-        var userResource = UserResourceResponse
+        UserResourceResponse userResource = UserResourceResponse
                 .builder()
                 .containerCount(0)
                 .vmCount(0)
@@ -175,11 +176,11 @@ public class DashboardService {
                 .sceneCount(0)
                 .dynamips(0)
                 .build();
-        var user = UserCommon.getCurrentUser();
+        UserModel user = UserCommon.getCurrentUser();
         if (user == null) {
             return userResource;
         }
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
                 .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
         List<CsceneInstanceModel> csceneInstances;
@@ -197,8 +198,8 @@ public class DashboardService {
                 .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
                 .map(csceneInstance -> csceneInstance.getScene())
                 .collect(Collectors.toList());
-        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
-        var result = scenePluginCloudSceneService
+        String fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
+        Map<Object, Long> result = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
         userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
@@ -208,7 +209,7 @@ public class DashboardService {
     }
 
     public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false);
         List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(condition);
         if (csceneInstances.isEmpty()) {
@@ -218,8 +219,8 @@ public class DashboardService {
                 .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
                 .map(csceneInstance -> csceneInstance.getScene())
                 .collect(Collectors.toList());
-        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getRole);
-        var result = scenePluginCloudSceneService
+        String fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getRole);
+        Map<Object, Long> result = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
         SceneBusinessSummary sceneBusinessSummary = new SceneBusinessSummary();
         sceneBusinessSummary.setFirewallCount(this.groupSummary(SceneBusinessSummary.firewallType(), result));
@@ -287,7 +288,7 @@ public class DashboardService {
     }
 
     private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray())
                 .filterIn(CloudPluginSceneElementModel::getVirtualType, virtualTypes.toArray())
                 .filterIn(CloudPluginSceneElementModel::getRole, roles.toArray());
@@ -297,7 +298,7 @@ public class DashboardService {
 
     private int groupSummary(List<Integer> roleType, Map<Object, Long> result) {
         int sum = 0;
-        for (var role : roleType) {
+        for (Integer role : roleType) {
             if (result.containsKey(role)) {
                 sum += result.get(role);
             }

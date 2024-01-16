@@ -286,7 +286,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         deleteReleated(orgId);
 
-        var ret = super.delete(orgId);
+        ServiceResult<Boolean> ret = super.delete(orgId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(orgId), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);
@@ -306,7 +306,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
             deleteReleated(id);
         }
-        var ret = super.bulkDelete(ids);
+        ServiceResult<Integer> ret = super.bulkDelete(ids);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);

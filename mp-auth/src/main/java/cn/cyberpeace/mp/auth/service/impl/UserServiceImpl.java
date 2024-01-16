@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -52,6 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -277,7 +279,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             obj.setIdentifier(null);
         }
         obj.setUpdateTime(LocalDateTime.now());
-        var ret = super.update(obj, fields);
+        ObjServiceResult<UserModel> ret = super.update(obj, fields);
         userCacheService.evictAllUserCache();
         return ret;
     }
@@ -286,21 +288,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
 
-        var ret = super.bulkCreate(objs);
+        ServiceResult<Integer> ret = super.bulkCreate(objs);
         userCacheService.evictAllUserCache();
         return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs) {
-        var ret = super.bulkCreate(objs);
+        ServiceResult<Integer> ret = super.bulkCreate(objs);
         return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkUpdate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
-        var ret = super.bulkUpdate(objs);
+        ServiceResult<Integer> ret = super.bulkUpdate(objs);
         userCacheService.evictAllUserCache();
         return ret;
     }
@@ -315,7 +317,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         deleteReleated(userId);
 
-        var ret = super.delete(userId);
+        ServiceResult<Boolean> ret = super.delete(userId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
@@ -335,7 +337,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             deleteReleated(userId);
         }
 
-        var ret = super.bulkDelete(userIds);
+        ServiceResult<Integer> ret = super.bulkDelete(userIds);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(userIds, AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
@@ -385,7 +387,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                var re = tenantUserService.create(tenantUserModel);
+                ObjServiceResult<TenantUserModel> re = tenantUserService.create(tenantUserModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
@@ -399,7 +401,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
+                ObjServiceResult<UserRoleModel> re = userRoleService.create(userRoleModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
             });
         }
@@ -459,7 +461,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                var re = tenantUserService.create(tenantUserModel);
+                ObjServiceResult<TenantUserModel> re = tenantUserService.create(tenantUserModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
@@ -477,7 +479,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
+                ObjServiceResult<UserRoleModel> re = userRoleService.create(userRoleModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
             });
         }
@@ -511,7 +513,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
-        var currentUser = UserUtils.getLoginUser();
+        UserModel currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
@@ -543,7 +545,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
 
-        var source = get(userId).getSource();
+        ObjResult<UserModel> source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         if (Objects.isNull(user)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
@@ -825,7 +827,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             if (StringUtils.isNotBlank(filepath)) {
                 String httpUrl = FsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
-                var ret = getModelMapper().update(updateUser);
+                boolean ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();
                 return ret;
             } else {
@@ -1037,7 +1039,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(importUserBo.getPassword())
                         .build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
-            var expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
+            LocalDate expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
             userModel.setExpiredTime(expDate.atTime(23, 59, 59));
         }
         if (StringUtils.isNotBlank(importUserBo.getDescription())) {
@@ -1189,7 +1191,7 @@ class GroupConcat extends Aggregation<GroupConcat> {
     }
 
     public static GroupConcat f(String fieldName) {
-        var aggregation = new GroupConcat();
+        GroupConcat aggregation = new GroupConcat();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

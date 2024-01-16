@@ -108,8 +108,8 @@ public class HumanCondition {
         }
 
         String[] fieldNames = ClassUtils.getBeanClassFields(model);
-        var selectFieldNames = new String[fieldNames.length];
-        for (var i = 0; i < fieldNames.length; i++) {
+        String[] selectFieldNames = new String[fieldNames.length];
+        for (int i = 0; i < fieldNames.length; i++) {
             selectFieldNames[i] = TextUtils.humpToLine(genLinkFieldName(linkName, fieldNames[i]));
         }
 
@@ -121,7 +121,7 @@ public class HumanCondition {
      * @return mapper识别的condition对象
      */
     public Condition toCondition() {
-        var condition = new Condition();
+        Condition condition = new Condition();
         condition.setDistinct(distinct);
         condition.setPagination(new PaginationCondition(limit, offset));
         condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields.toArray(new String[0]))));
@@ -284,7 +284,7 @@ public class HumanCondition {
             String fieldName = aggregation.getFieldName();
             String funcName = aggregation.getFuncName();
             String outputFieldNameSuffix = funcName.substring(0, 1).toUpperCase() + funcName.substring(1);
-            var outputFieldName = StringUtils.join(fieldName, outputFieldNameSuffix);
+            String outputFieldName = StringUtils.join(fieldName, outputFieldNameSuffix);
             selectFields.put(aggregation.toSqlField(currentFieldName(fieldName)), outputFieldName);
         }
         return this;

@@ -2,7 +2,12 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,19 +28,19 @@ class NetConfigElementConvert implements IConverter {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), null);
         CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         // 处理核心路由
-        for (var element : container.getAllElements()) {
-            var cloudElement = container.getCloudPluginElements().get(element.getId());
+        for (SceneConfigElementBO element : container.getAllElements()) {
+            CloudPluginSceneConfigElementBO cloudElement = container.getCloudPluginElements().get(element.getId());
             if (cloudElement == null) {
                 continue;
             }
             if (CollectionUtils.isNotEmpty(cloudElement.getStaticRoutes())) {
-                for (var sr : cloudElement.getStaticRoutes()) {
+                for (StaticRoute sr : cloudElement.getStaticRoutes()) {
                     // 这里 NexthopPortId 其实还是从yml里解析出来的节点id
                     if (StringUtils.isNotEmpty(sr.getNexthopPortId())) {
                         String realNexthopPortId = null;
                         if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                            for (var p : element.getPorts()) {
-                                var connectedElement = sceneConfigHandler.getPortConnectedElement(p.getId());
+                            for (SceneConfigElementPortBO p : element.getPorts()) {
+                                SceneConfigElementBO connectedElement = sceneConfigHandler.getPortConnectedElement(p.getId());
                                 if (connectedElement != null && connectedElement.getId().equals(sr.getNexthopPortId())) {
                                     realNexthopPortId = p.getId();
                                     break;
@@ -53,16 +58,16 @@ class NetConfigElementConvert implements IConverter {
                 if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
                     Map<String, ExtNodeInfo.PortProtocolExportInfo> nodeId2Protocol = new HashMap<>();
                     Map<String, ExtNodeInfo.PortProtocolExportInfo> portId2Protocol = new HashMap<>();
-                    for (var ps : extNodeInfo.getPortProtocols()) {
+                    for (ExtNodeInfo.PortProtocolExportInfo ps : extNodeInfo.getPortProtocols()) {
                         nodeId2Protocol.put(ps.getConnectNode(), ps);
                     }
                     if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                        for (var port : element.getPorts()) {
-                            var connectElement = sceneConfigHandler.getPortConnectedElement(port.getId());
+                        for (SceneConfigElementPortBO port : element.getPorts()) {
+                            SceneConfigElementBO connectElement = sceneConfigHandler.getPortConnectedElement(port.getId());
                             if (connectElement != null) {
-                                var portProtocol = nodeId2Protocol.get(connectElement.getId());
+                                ExtNodeInfo.PortProtocolExportInfo portProtocol = nodeId2Protocol.get(connectElement.getId());
                                 if (portProtocol != null && container.getCloudPluginPorts().get(port.getId()) != null) {
-                                    var cloudPort = container.getCloudPluginPorts().get(port.getId());
+                                    CloudPluginSceneConfigElementPortBO cloudPort = container.getCloudPluginPorts().get(port.getId());
                                     port.setDelay(portProtocol.getDelay());
                                     port.setLoss(portProtocol.getLoss());
                                     port.setEgress(portProtocol.getEgress());

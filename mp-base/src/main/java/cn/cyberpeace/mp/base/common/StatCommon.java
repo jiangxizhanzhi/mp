@@ -9,10 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -76,7 +73,7 @@ public class StatCommon {
         Map<String, Map<T, S>> sumResult = new HashMap<>();
         List<CountField> countFields = new ArrayList<>();
         List<SumField> sumFields = new ArrayList<>();
-        for (var statField: statFields) {
+        for (AggStatField statField: statFields) {
             statField.loadToCondition(condition);
 
             if (statField instanceof CountField) {
@@ -88,14 +85,14 @@ public class StatCommon {
             }
         }
 
-        var statLines = mapper.originList(condition);
-        for (var statLine: statLines) {
+        List<Map<String, Object>> statLines = mapper.originList(condition);
+        for (Map<String, Object> statLine: statLines) {
             T groupValue = (T) statLine.get(groupFieldName);
-            for (var coundField: countFields) {
+            for (CountField coundField: countFields) {
                 countResult.get(coundField.getName())
                         .put(groupValue, Long.valueOf(statLine.get(coundField.getQueryKey()).toString()));
             }
-            for (var sumField: sumFields) {
+            for (SumField sumField: sumFields) {
                 sumResult.get(sumField.getName())
                         .put(groupValue, (S) statLine.get(sumField.getQueryKey()));
             }
@@ -119,17 +116,17 @@ public class StatCommon {
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName,
             Map<String, Function<List<Object>, Object>> fieldCalcMap) {
         condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
-        var fieldNames = fieldCalcMap.keySet();
+        Set<String> fieldNames = fieldCalcMap.keySet();
         fieldNames.forEach(fieldName -> condition.selectAs(fieldName, fieldName));
 
-        var result = mapper.originList(condition);
+        List<Map<String, Object>> result = mapper.originList(condition);
         Map<String, Map<T, List<Object>>> fieldGroupValuesMap = new HashMap<>();
         result.forEach(resultItem -> {
             fieldNames.forEach(fieldName -> {
-                var fieldGroupValues = fieldGroupValuesMap.getOrDefault(fieldName, new HashMap<>());
-                var groupValue = (T) resultItem.get(groupFieldName);
-                var groupValues = fieldGroupValues.getOrDefault(groupValue, new ArrayList<>());
-                var fieldValue = resultItem.get(fieldName);
+                Map<T, List<Object>> fieldGroupValues = fieldGroupValuesMap.getOrDefault(fieldName, new HashMap<>());
+                T groupValue = (T) resultItem.get(groupFieldName);
+                List<Object> groupValues = fieldGroupValues.getOrDefault(groupValue, new ArrayList<>());
+                Object fieldValue = resultItem.get(fieldName);
                 groupValues.add(fieldValue);
                 fieldGroupValues.put(groupValue, groupValues);
                 fieldGroupValuesMap.put(fieldName, fieldGroupValues);
@@ -141,8 +138,8 @@ public class StatCommon {
             fieldGroupCalcValueMap.put(fieldName, new HashMap<>());
         });
         fieldGroupValuesMap.forEach((fieldName, fieldGroupValues) -> {
-            var fieldGroupCalcValue = fieldGroupCalcValueMap.get(fieldName);
-            var calc = fieldCalcMap.get(fieldName);
+            Map<T, Object> fieldGroupCalcValue = fieldGroupCalcValueMap.get(fieldName);
+            Function<List<Object>, Object> calc = fieldCalcMap.get(fieldName);
             fieldGroupValues.forEach((groupValue, groupValues) -> {
                 fieldGroupCalcValue.put(groupValue, calc.apply(groupValues));
             });
@@ -195,7 +192,7 @@ public class StatCommon {
         Map<String, S> sumResult = new HashMap<>();
         List<CountField> countFields = new ArrayList<>();
         List<SumField> sumFields = new ArrayList<>();
-        for (var statField: statFields) {
+        for (AggStatField statField: statFields) {
             statField.loadToCondition(condition);
 
             if (statField instanceof CountField) {
@@ -207,13 +204,13 @@ public class StatCommon {
             }
         }
 
-        var statLines = mapper.originList(condition);
+        List<Map<String, Object>> statLines = mapper.originList(condition);
 
-        for (var statLine: statLines) {
-            for (var coundField: countFields) {
+        for (Map<String, Object> statLine: statLines) {
+            for (CountField coundField: countFields) {
                 countResult.put(coundField.getName(), Long.valueOf(statLine.get(coundField.getQueryKey()).toString()));
             }
-            for (var sumField: sumFields) {
+            for (SumField sumField: sumFields) {
                 sumResult.put(sumField.getName(), (S) statLine.get(sumField.getQueryKey()));
             }
         }
@@ -232,14 +229,14 @@ public class StatCommon {
      */
     public static Map<String, Object> calc(BaseModelMapper<?> mapper, HumanCondition condition,
                                            Map<String, Function<List<Object>, Object>> fieldCalcMap) {
-        var fieldNames = fieldCalcMap.keySet();
+        Set<String> fieldNames = fieldCalcMap.keySet();
         fieldNames.forEach(fieldName -> condition.selectAs(fieldName, fieldName));
-        var result = mapper.originList(condition);
+        List<Map<String, Object>> result = mapper.originList(condition);
         Map<String, List<Object>> fieldValuesMap = new HashMap<>();
         result.forEach(resultItem -> {
             fieldNames.forEach(fieldName -> {
-                var fieldValue = resultItem.get(fieldName);
-                var fieldValues = fieldValuesMap.getOrDefault(fieldName, new ArrayList<>());
+                Object fieldValue = resultItem.get(fieldName);
+                List<Object> fieldValues = fieldValuesMap.getOrDefault(fieldName, new ArrayList<>());
                 fieldValues.add(fieldValue);
                 fieldValuesMap.put(fieldName, fieldValues);
             });
@@ -283,7 +280,7 @@ public class StatCommon {
         }
 
         public static CountField f(String name, boolean distinct) {
-            var field = new CountField();
+            CountField field = new CountField();
             field.setName(name);
             field.setDistinct(distinct);
             return field;
@@ -302,7 +299,7 @@ public class StatCommon {
     @Data
     public static class SumField extends AggStatField {
         public static SumField f(String name) {
-            var field = new SumField();
+            SumField field = new SumField();
             field.setName(name);
             return field;
         }

@@ -20,10 +20,10 @@ public class ModelServiceCommon {
     public static <T extends ModelBO<M, T>, M extends BaseModel> ListObjServiceResult<T> toListBOResult(
             ListObjServiceResult<M> modelResult, Class<T> tClass) {
         modelResult = modelResult.asResult();
-        var modelData = modelResult.getData();
+        ListObjResult<M> modelData = modelResult.getData();
         ListObjResult<T> boSource = null;
         if (modelData != null) {
-            var bos = modelData.getList().stream()
+            List<T> bos = modelData.getList().stream()
                     .map(obj -> ClassUtils.createInstance(tClass).fromModel(obj))
                     .collect(Collectors.toList());
             boSource = new ListObjResult<>(bos, modelData.getTotal());
@@ -34,10 +34,10 @@ public class ModelServiceCommon {
     public static <T extends ModelBO<M, T>, M extends BaseModel> ObjServiceResult<T> toBOResult(
             ObjServiceResult<M> modelResult, Class<T> tClass) {
         modelResult = modelResult.asResult();
-        var modelData = modelResult.getData();
+        M modelData = modelResult.getData();
         ObjResult<T> boSource = null;
         if (modelData != null) {
-            var bo = ClassUtils.createInstance(tClass).fromModel(modelData);
+            T bo = ClassUtils.createInstance(tClass).fromModel(modelData);
             boSource = new ObjResult<>(bo);
         }
         return new ObjServiceResult<>(boSource, modelResult.getServiceCode(), modelResult.getDetail());
@@ -45,14 +45,14 @@ public class ModelServiceCommon {
 
     public static <M extends BaseModel, T extends ModelBO<M, T>> void exportListExcel(
             ListObjServiceResult<M> modelResult, OutputStream os, Class<T> textResourceClass) {
-        var modelData = modelResult.asResult().getData();
+        ListObjResult<M> modelData = modelResult.asResult().getData();
         List<M> objs;
         if (modelData == null || modelData.getList() == null) {
             objs = new ArrayList<>();
         } else {
             objs = modelData.getList();
         }
-        var exportData = objs.stream()
+        List<T> exportData = objs.stream()
                 .map(obj -> ClassUtils.createInstance(textResourceClass).fromModel(obj))
                 .collect(Collectors.toList());
         if (exportData.isEmpty()) {
@@ -64,7 +64,7 @@ public class ModelServiceCommon {
 
     public static <M extends BaseModel, T extends ModelBO<M, T>> List<M> importListExcel(InputStream is,
                                                                                          Class<T> textResourceClass) {
-        var bos = ExcelCommon.read(is, textResourceClass);
+        List<T> bos = ExcelCommon.read(is, textResourceClass);
         return bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
     }
 

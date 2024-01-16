@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -170,7 +171,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
-        var objResult = userService.get(userId).getSource();
+        ObjResult<UserModel> objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
@@ -208,7 +209,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
-        var objResult = roleService.get(roleId).getSource();
+        ObjResult<RoleModel> objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }
@@ -297,7 +298,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         opUserPermService.checkByTargetUserIds(userIds);
 
-        var objResult = roleService.get(roleId).getSource();
+        ObjResult<RoleModel> objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }

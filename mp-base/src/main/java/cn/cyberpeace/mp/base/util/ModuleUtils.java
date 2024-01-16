@@ -30,7 +30,7 @@ public class ModuleUtils {
     public static String[] getModuleNames() {
         Set<String> moduleNames = new LinkedHashSet<>();
         for (String packageName: findPackageNamesStartingWith(GROUP_NAME)) {
-            var name = packageName.substring(GROUP_NAME.length());
+            String name = packageName.substring(GROUP_NAME.length());
             if (!StringUtils.isEmpty(name)) {
                 moduleNames.add(name.split("\\.")[1]);
             }

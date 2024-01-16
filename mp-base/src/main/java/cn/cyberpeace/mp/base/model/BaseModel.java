@@ -57,7 +57,7 @@ public class BaseModel {
             return;
         }
 
-        var field = (Field) value[0];
+        Field field = (Field) value[0];
         if (ClassUtils.getFieldValue(field, this) != null) {
             return;
         }

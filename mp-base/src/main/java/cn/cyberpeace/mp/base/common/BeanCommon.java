@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
 @Component
@@ -39,11 +40,11 @@ public class BeanCommon implements ApplicationContextAware {
 
     public static void loadBeanFields(Object obj) {
         Class<?> clazz = obj.getClass();
-        var beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
+        BeanFieldNames beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
         if (beanFieldNamesAnnotation == null) {
             return;
         }
-        var beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
+        BeanFieldClasses beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
         if (beanFieldClassesAnnotation == null) {
             return;
         }
@@ -54,9 +55,9 @@ public class BeanCommon implements ApplicationContextAware {
             return;
         }
 
-        for (var i = 0; i < fieldNames.length; i++) {
+        for (int i = 0; i < fieldNames.length; i++) {
             String fieldName = fieldNames[i];
-            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            Field field = ClassUtils.getField(clazz, fieldName, true, false);
             if (field == null) {
                 continue;
             }

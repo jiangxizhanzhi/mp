@@ -41,7 +41,7 @@ public class MarkdownFileController {
     @PostMapping("/image_upload")
     public ServiceResult<FsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
             throws IOException {
-        var uploadResult = getMarkdownFileService().uploadImage(file.getInputStream(),
+        ServiceResult<String> uploadResult = getMarkdownFileService().uploadImage(file.getInputStream(),
                 FileUtil.getSuffix(file.getOriginalFilename()));
         return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FsFileUploadResponse.class)
                 .asResult();
@@ -55,7 +55,7 @@ public class MarkdownFileController {
     @PostMapping("/file_upload")
     public ServiceResult<FsFileUploadResponse> uploadFile(@RequestParam(value = "file") MultipartFile file)
             throws IOException {
-        var uploadResult = getMarkdownFileService().uploadFile(file.getInputStream(),
+        ServiceResult<String> uploadResult = getMarkdownFileService().uploadFile(file.getInputStream(),
                 FileUtil.getSuffix(file.getOriginalFilename()));
         return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FsFileUploadResponse.class)
                 .asResult();

@@ -95,7 +95,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public ServiceResult<Boolean> delete(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         deleteReleated(roleId);
-        var ret = super.delete(roleId);
+        ServiceResult<Boolean> ret = super.delete(roleId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             userCacheService.evictAllTargetsCache();
@@ -111,7 +111,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             deleteReleated(id);
         }
 
-        var ret = super.bulkDelete(ids);
+        ServiceResult<Integer> ret = super.bulkDelete(ids);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             userCacheService.evictAllTargetsCache();
@@ -155,7 +155,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
-            var orders = Arrays.asList(rolePageRequest.getOrders());
+            List<String> orders = Arrays.asList(rolePageRequest.getOrders());
             if (CollectionUtils.isNotEmpty(orders)) {
                 for (String order : orders) {
                     humanCondition.orderBy(order);
@@ -328,7 +328,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<String> getSystemUnVisibleRoleIds() {
-        var models = getModelMapper().list(new HumanCondition().filterEqual(RoleModel::getVisible, false));
+        List<RoleModel> models = getModelMapper().list(new HumanCondition().filterEqual(RoleModel::getVisible, false));
         if (CollectionUtils.isEmpty(models)) {
             return new ArrayList<>();
         }

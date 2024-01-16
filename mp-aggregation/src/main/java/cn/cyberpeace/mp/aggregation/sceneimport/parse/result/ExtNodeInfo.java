@@ -22,7 +22,7 @@ public class ExtNodeInfo {
         }
         int notEmptyPortProtocolNum = 0;
         if (CollectionUtils.isNotEmpty(portProtocols)) {
-            for (var portProtocol : portProtocols) {
+            for (PortProtocolExportInfo portProtocol : portProtocols) {
                 if (portProtocol.isNotEmpty()) {
                     notEmptyPortProtocolNum++;
                 }

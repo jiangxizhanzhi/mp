@@ -136,7 +136,7 @@ class ImageInfoConverter implements IConverter {
     }
 
     private List<AccessMode> getManageAccessModes(List<AccessModeParseResult> results) {
-        var result = getAccessModes(results, new ArrayList<>());
+        List<AccessMode> result = getAccessModes(results, new ArrayList<>());
         result.forEach(r -> r.setManageMode(true));
         return result;
     }
@@ -146,7 +146,7 @@ class ImageInfoConverter implements IConverter {
             return new ArrayList<>();
         }
         List<AccessMode> filterResults = new ArrayList<>();
-        var list = results.stream()
+        List<AccessMode> list = results.stream()
                 .map(result -> {
                     AccessMode accessMode = new AccessMode();
                     this.loadAccessModeInfo(accessMode, result);
@@ -170,7 +170,7 @@ class ImageInfoConverter implements IConverter {
     }
 
     private List<CloudAccessMode> getManageCloudAccessModes(List<AccessModeParseResult> results) {
-        var result = getCloudAccessModes(results, new ArrayList<>());
+        List<CloudAccessMode> result = getCloudAccessModes(results, new ArrayList<>());
         result.forEach(r -> r.setManageMode(true));
         return result;
     }
@@ -180,7 +180,7 @@ class ImageInfoConverter implements IConverter {
             return new ArrayList<>();
         }
         List<CloudAccessMode> filterResults = new ArrayList<>();
-        var list = results.stream()
+        List<CloudAccessMode> list = results.stream()
                 .map(result -> {
                     CloudAccessMode accessMode = new CloudAccessMode();
                     this.loadAccessModeInfo(accessMode, result);

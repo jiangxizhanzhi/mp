@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 public class Sum extends Aggregation<Sum> {
 
     public static Sum f(String fieldName) {
-        var aggregation = new Sum();
+        Sum aggregation = new Sum();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

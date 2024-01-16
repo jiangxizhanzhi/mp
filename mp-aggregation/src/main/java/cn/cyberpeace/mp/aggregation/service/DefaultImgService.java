@@ -44,7 +44,7 @@ public class DefaultImgService {
         }
         pathName = pathName.concat(endPathName);
 
-        var logFile = new File(pathName);
+        File logFile = new File(pathName);
 
         File[] listFiles = logFile.listFiles();
 

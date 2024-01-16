@@ -40,7 +40,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
         List<T> objs = new ArrayList<>();
         mapList.forEach(map -> {
-            var obj = mapToTargetObj(map);
+            T obj = mapToTargetObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
@@ -118,7 +118,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     private Class<P> getPermissionClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
-        var modelClassAnnotation = mapperInterface.getAnnotation(PermissionModelClass.class);
+        PermissionModelClass modelClassAnnotation = mapperInterface.getAnnotation(PermissionModelClass.class);
         if (modelClassAnnotation != null) {
             actualModelClassSource = modelClassAnnotation.permissionClass();
         } else {
@@ -140,7 +140,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     private Class<T> getTargetClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
-        var modelClassAnnotation = mapperInterface.getAnnotation(PermissionModelClass.class);
+        PermissionModelClass modelClassAnnotation = mapperInterface.getAnnotation(PermissionModelClass.class);
         if (modelClassAnnotation != null) {
             actualModelClassSource = modelClassAnnotation.targetClass();
         } else {

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -119,7 +120,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     public boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
-        var result = roleService.get(roleId);
+        ObjServiceResult<RoleModel> result = roleService.get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
 
         if (cleanOldTargets) {

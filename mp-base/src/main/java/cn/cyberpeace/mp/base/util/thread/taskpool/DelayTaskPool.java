@@ -103,7 +103,7 @@ public class DelayTaskPool {
             runTaskMap.forEach((key, task) -> taskPool.executeTask(task, false));
         }
 
-        var runNext = false;
+        boolean runNext = false;
         synchronized (status) {
             status.setRunning(false);
             // 运行任务完成后，判断是否存在执行请求

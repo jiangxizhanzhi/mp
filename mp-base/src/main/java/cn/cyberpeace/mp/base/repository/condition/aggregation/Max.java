@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 public class Max extends Aggregation<Max> {
 
     public static Max f(String fieldName) {
-        var aggregation = new Max();
+        Max aggregation = new Max();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

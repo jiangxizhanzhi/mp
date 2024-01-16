@@ -26,13 +26,13 @@ public class CheckUtils {
         timeout = timeout <= 0 ? DEFAULT_LOOP_CHECK_TIMEOUT : timeout;
         stopCheckIntervalCount = stopCheckIntervalCount <= 0 ? 1 : stopCheckIntervalCount;
 
-        var stopCheckCount = 0;
-        var allTime = 0;
+        int stopCheckCount = 0;
+        int allTime = 0;
         while (true) {
-            var enterMoment = System.currentTimeMillis();
+            long enterMoment = System.currentTimeMillis();
             log.info("Loop check {} - {}s", targetName, allTime / 1000);
 
-            var checkFlag = false;
+            boolean checkFlag = false;
             try {
                 checkFlag = check.call();
             } catch (Exception e) {
@@ -48,8 +48,8 @@ public class CheckUtils {
             }
 
             // 限制探测频率
-            var checkConsumeTime = System.currentTimeMillis() - enterMoment;
-            var remainStepTime = stepTime - checkConsumeTime;
+            long checkConsumeTime = System.currentTimeMillis() - enterMoment;
+            long remainStepTime = stepTime - checkConsumeTime;
             if (remainStepTime > 0) {
                 try {
                     Thread.sleep(remainStepTime);
@@ -72,7 +72,7 @@ public class CheckUtils {
                 // 每隔一定次数进行停止检查
                 stopCheckCount += 1;
                 if (stopCheckCount == stopCheckIntervalCount) {
-                    var stopCheckFlag = false;
+                    boolean stopCheckFlag = false;
                     try {
                         stopCheckFlag = stopCheck.call();
                     } catch (Exception e) {

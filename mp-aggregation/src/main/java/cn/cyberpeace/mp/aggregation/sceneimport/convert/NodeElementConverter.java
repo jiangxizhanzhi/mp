@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.AclsInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
@@ -71,7 +72,7 @@ class NodeElementConverter implements IConverter {
         sceneConfigElementBO.setName(node.getName());
         if (CollectionUtils.isNotEmpty(node.getInitCommands())) {
             List<String> result = new ArrayList<>();
-            for (var initCommand : node.getInitCommands()) {
+            for (InitCommandParseResult initCommand : node.getInitCommands()) {
                 if (initCommand != null) {
                     result.addAll(initCommand.getAllCommands());
                 }

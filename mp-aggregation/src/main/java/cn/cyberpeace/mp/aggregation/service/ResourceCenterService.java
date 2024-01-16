@@ -9,10 +9,12 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseRes
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -91,7 +93,7 @@ public class ResourceCenterService {
     }
 
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
-        var cscene = csceneService.get(csceneId);
+        ObjServiceResult<CsceneModel> cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
@@ -108,7 +110,7 @@ public class ResourceCenterService {
             }
         }
 
-        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
+        ExportResult result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
         return new ServiceResult<>(result);
     }
 

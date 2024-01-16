@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 public class Avg extends Aggregation<Avg> {
 
     public static Avg f(String fieldName) {
-        var aggregation = new Avg();
+        Avg aggregation = new Avg();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

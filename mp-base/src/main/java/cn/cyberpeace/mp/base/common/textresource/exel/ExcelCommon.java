@@ -14,7 +14,7 @@ public class ExcelCommon {
 
     public static List<LinkedHashMap<String, String>> read(InputStream is, Map<String, String> headerFieldMap) {
         List<Map<Integer, String>> sourceLines = EasyExcel.read(is).headRowNumber(0).sheet().doReadSync();
-        var lines = sourceLines.stream().map(sourceLine -> {
+        List<List<String>> lines = sourceLines.stream().map(sourceLine -> {
             List<Object[]> orderingLine = new ArrayList<>();
             sourceLine.forEach((seq, value) -> orderingLine.add(new Object[]{seq, value}));
             return orderingLine.stream()
@@ -27,7 +27,7 @@ public class ExcelCommon {
 
     public static <T> List<T> read(InputStream is, Class<T> clazz) {
         Map<String, String> headerFieldMap = TextResourceBase.getHeaderFieldMap(clazz);
-        var maps = read(is, headerFieldMap);
+        List<LinkedHashMap<String, String>> maps = read(is, headerFieldMap);
         return TextResourceBase.mapToObjs(maps, clazz);
     }
 
@@ -37,7 +37,7 @@ public class ExcelCommon {
             return;
         }
 
-        var lines = TextResourceBase.mapToLines(maps, headerFieldMap);
+        List<List<String>> lines = TextResourceBase.mapToLines(maps, headerFieldMap);
         EasyExcel.write(os).sheet().doWrite(lines);
     }
 
@@ -46,9 +46,9 @@ public class ExcelCommon {
             return;
         }
 
-        var clazz = objs.get(0).getClass();
+        Class<?> clazz = objs.get(0).getClass();
         Map<String, String> fieldHeaderMap = TextResourceBase.getFieldHeaderMap(clazz);
-        var maps = TextResourceBase.objToMaps(objs);
+        List<LinkedHashMap<String, String>> maps = TextResourceBase.objToMaps(objs);
         write(maps, os, fieldHeaderMap);
     }
 

@@ -23,7 +23,7 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
 
     @Override
     public Map<String, String> getValue() {
-        var locale = LocaleContextHolder.getLocale();
+        Locale locale = LocaleContextHolder.getLocale();
         return Map.of(LANGUAGE_KEY, locale.getLanguage(), COUNTRY_KEY, locale.getCountry(), VARIANT_KEY,
                 locale.getVariant());
     }

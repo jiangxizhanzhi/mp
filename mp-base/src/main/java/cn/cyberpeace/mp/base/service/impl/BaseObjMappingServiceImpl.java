@@ -34,15 +34,15 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
                 .collect(Collectors.toMap(BaseObjMappingModel::getName, m -> m));
 
         Map<String, M> nameMapping = new HashMap<>();
-        for (var i = 0; i < objMappings.size(); i++) {
-            var objMapping = objMappings.get(i);
+        for (int i = 0; i < objMappings.size(); i++) {
+            M objMapping = objMappings.get(i);
             objMapping.setGroup(group);
             objMapping.setSeq(i + 1);
             objMapping.initDefault(BaseObjMappingModel::getName);
-            var name = objMapping.getName();
+            String name = objMapping.getName();
             nameMapping.put(name, objMapping);
 
-            var existObjMapping = existNameMapping.getOrDefault(name, null);
+            M existObjMapping = existNameMapping.getOrDefault(name, null);
             if (existObjMapping != null) {
                 objMapping.setId(existObjMapping.getId());
             }

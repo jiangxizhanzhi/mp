@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -69,7 +70,7 @@ public class ClassUtils {
 
     @SuppressWarnings("java:S3011")
     public static boolean setFieldValue(Field field, Object obj, Object value) {
-        var flag = true;
+        boolean flag = true;
         synchronized (field) {
             boolean canAccess = field.canAccess(obj);
             if (!canAccess) {
@@ -105,7 +106,7 @@ public class ClassUtils {
     }
 
     public static Object getFieldValue(Class<?> clazz, String fieldName, Object obj) {
-        var field = getField(clazz, fieldName, true, false);
+        Field field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return null;
         }
@@ -119,7 +120,7 @@ public class ClassUtils {
     }
 
     public static boolean setFieldValue(Class<?> clazz, String fieldName, Object obj, Object value) {
-        var field = getField(clazz, fieldName, true, false);
+        Field field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return false;
         }
@@ -184,7 +185,7 @@ public class ClassUtils {
     private static List<Field> getClassDeclaredFields(Class<?> clazz, boolean findSuper) {
         List<Field> fields = new ArrayList<>();
         if (findSuper) {
-            var superClass = clazz.getSuperclass();
+            Class<?> superClass = clazz.getSuperclass();
             if (superClass != null) {
                 fields.addAll(getClassDeclaredFields(superClass, true));
             }
@@ -200,7 +201,7 @@ public class ClassUtils {
         }
 
         final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
-        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        PropertyDescriptor[] propertyDescriptors = clazzWrapper.getPropertyDescriptors();
         Map<String, String> fieldPool = new HashMap<>();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
@@ -210,10 +211,10 @@ public class ClassUtils {
         }
 
         if (tryOrder) {
-            var allFields = getClassDeclaredFields(clazz, true);
+            List<Field> allFields = getClassDeclaredFields(clazz, true);
             List<String> orderedFields = new ArrayList<>();
             allFields.forEach(field -> {
-                var fieldName = field.getName();
+                String fieldName = field.getName();
                 if (fieldPool.containsKey(fieldName)) {
                     fieldPool.remove(fieldName);
                     orderedFields.add(fieldName);
@@ -237,7 +238,7 @@ public class ClassUtils {
         }
 
         final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
-        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        PropertyDescriptor[] propertyDescriptors = clazzWrapper.getPropertyDescriptors();
         fieldTypes = new HashMap<>();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
@@ -261,11 +262,11 @@ public class ClassUtils {
 
     public static void loadClassFields(Object obj) {
         Class<?> clazz = obj.getClass();
-        var classFieldNamesAnnotation = clazz.getAnnotation(ClassFieldNames.class);
+        ClassFieldNames classFieldNamesAnnotation = clazz.getAnnotation(ClassFieldNames.class);
         if (classFieldNamesAnnotation == null) {
             return;
         }
-        var classFieldClassesAnnotation = clazz.getAnnotation(ClassFieldClasses.class);
+        ClassFieldClasses classFieldClassesAnnotation = clazz.getAnnotation(ClassFieldClasses.class);
         if (classFieldClassesAnnotation == null) {
             return;
         }
@@ -276,9 +277,9 @@ public class ClassUtils {
             return;
         }
 
-        for (var i = 0; i < fieldNames.length; i++) {
+        for (int i = 0; i < fieldNames.length; i++) {
             String fieldName = fieldNames[i];
-            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            Field field = ClassUtils.getField(clazz, fieldName, true, false);
             if (field == null) {
                 continue;
             }
@@ -292,7 +293,7 @@ public class ClassUtils {
         SerializedLambda serializedLambda = null;
         for (Class<?> cl = func.getClass(); cl != null; cl = cl.getSuperclass()) {
             try {
-                var method = cl.getDeclaredMethod("writeReplace");
+                Method method = cl.getDeclaredMethod("writeReplace");
                 method.setAccessible(true);
                 Object replacement = method.invoke(func);
                 if (replacement instanceof SerializedLambda) {

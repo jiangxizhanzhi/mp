@@ -82,7 +82,7 @@ public class RegisterService {
             String roleId = adminConfigService.getRegisterDefaultRoleId();
             RoleModel roleModel = null;
             if (StringUtils.isNotBlank(roleId)) {
-                var result =  roleService.get(roleId);
+                ObjServiceResult<RoleModel> result =  roleService.get(roleId);
                 roleModel = result.getSource().getObj();
             }
 
@@ -107,7 +107,7 @@ public class RegisterService {
         }
 
         TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(AuthConstant.ROOT_ORG_ID).build();
-        var re = tenantUserService.create(tenantUserModel);
+        ObjServiceResult<TenantUserModel> re = tenantUserService.create(tenantUserModel);
         ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
 
         userCacheService.evictAllUserCache();

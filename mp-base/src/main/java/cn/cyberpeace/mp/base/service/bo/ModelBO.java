@@ -45,7 +45,7 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      * @return 表模型数据对象
      */
     public M toModel(String... ignoreFields) {
-        var obj = createModel();
+        M obj = createModel();
         BeanUtils.copyPropertiesIgnoreNull(this, obj, ignoreFields);
         return obj;
     }
@@ -90,7 +90,7 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      * @return 平行资源数据
      */
     public <P> P export(Class<P> pClass, String... ignoreFields) {
-        var pObj = ClassUtils.createInstance(pClass);
+        P pObj = ClassUtils.createInstance(pClass);
         BeanUtils.copyPropertiesIgnoreNull(export(), pObj, ignoreFields);
         return pObj;
     }

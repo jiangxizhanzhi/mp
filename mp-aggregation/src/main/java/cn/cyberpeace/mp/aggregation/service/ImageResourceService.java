@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -52,7 +53,7 @@ public class ImageResourceService {
 
     public Boolean exportImageByUuid(String uuid, String imagePath) {
         if (StringUtils.isNotEmpty(uuid)) {
-            var imageInfo = deviceTargetMapper.findByUuid(uuid);
+            DeviceTargetPO imageInfo = deviceTargetMapper.findByUuid(uuid);
             if (Objects.isNull(imageInfo)) {
                 log.error("failed to get image information by uuid:{}", uuid);
                 throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
@@ -73,7 +74,7 @@ public class ImageResourceService {
             file.mkdirs();
         }
         // 生成镜像
-        var image = exportImage(imageName, imagePath);
+        Image image = exportImage(imageName, imagePath);
 
         // 下载图片
         image.setLOGO(exportLogo(logoPath, imagePath));
@@ -86,9 +87,9 @@ public class ImageResourceService {
         ExportImageParams params = new ExportImageParams();
         params.setImageName(imageName);
         params.setDestPath(imagePath);
-        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
+        CloudResponse<Map> result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
         }, true);
-        var imageMap = result.getData();
+        Map imageMap = result.getData();
         if (imageMap.containsKey("Cloud-init")) {
             imageMap.put("cloudInit", imageMap.get("Cloud-init"));
         }
@@ -145,7 +146,7 @@ public class ImageResourceService {
         if (CollectionUtils.isNotEmpty(deviceAccessModes)) {
             List<AccessModeParseResult> normal = new ArrayList<>();
             List<AccessModeParseResult> manage = new ArrayList<>();
-            for (var m : deviceAccessModes) {
+            for (AccessMode m : deviceAccessModes) {
                 AccessModeParseResult accessModeParseResult = new AccessModeParseResult();
                 accessModeParseResult.setDesc(m.getDesc());
                 accessModeParseResult.setProtocol(m.getProtocol());

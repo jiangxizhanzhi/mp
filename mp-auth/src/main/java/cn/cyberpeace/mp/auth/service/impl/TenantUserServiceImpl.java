@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -240,7 +241,7 @@ public class TenantUserServiceImpl
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         opUserPermService.checkByTargetUserIds(userIds);
 
-        var objResult = orgService.get(orgId).getSource();
+        ObjResult<OrgModel> objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }

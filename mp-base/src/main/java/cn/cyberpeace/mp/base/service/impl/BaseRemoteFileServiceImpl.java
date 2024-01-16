@@ -16,7 +16,7 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
 
     @Override
     public ServiceResult<String> upload(String localFilepath) {
-        var validateResult = validateUploadLocalFile(localFilepath);
+        ServiceResult<Boolean> validateResult = validateUploadLocalFile(localFilepath);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }
@@ -33,7 +33,7 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
 
     @Override
     public ServiceResult<String> uploadContent(String content, String fileSuffix) {
-        var validateResult = validateUploadContent(content, fileSuffix);
+        ServiceResult<Boolean> validateResult = validateUploadContent(content, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }
@@ -50,7 +50,7 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
 
     @Override
     public ServiceResult<String> upload(InputStream is, String fileSuffix) {
-        var validateResult = validateUploadInput(is, fileSuffix);
+        ServiceResult<Boolean> validateResult = validateUploadInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }
@@ -120,7 +120,7 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
 
     @Override
     public ServiceResult<String> upload(InputStream is, long fileSize, String fileSuffix) {
-        var validateResult = validateUploadInput(is, fileSuffix);
+        ServiceResult<Boolean> validateResult = validateUploadInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
             return new ServiceResult<>(null, validateResult.getServiceCode(), validateResult.getDetail());
         }

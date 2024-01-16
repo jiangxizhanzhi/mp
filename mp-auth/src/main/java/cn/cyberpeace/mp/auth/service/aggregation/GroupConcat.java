@@ -22,7 +22,7 @@ public class GroupConcat extends Aggregation<GroupConcat> {
     }
 
     public static GroupConcat f(String fieldName) {
-        var aggregation = new GroupConcat();
+        GroupConcat aggregation = new GroupConcat();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }
