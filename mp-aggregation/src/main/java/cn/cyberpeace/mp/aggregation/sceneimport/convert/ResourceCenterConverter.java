@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description
@@ -27,13 +30,15 @@ public class ResourceCenterConverter {
         ConvertDataContainer container = new ConvertDataContainer();
         container.setSceneFilePath(sceneFilePath);
         if (CollectionUtils.isNotEmpty(imageInfos)) {
-            imageInfos.stream().forEach(imageInfo -> {
+            for (ImageParseResult imageInfo : imageInfos) {
                 if (imageInfo.getServers() != null) {
-                    imageInfo.getServers().forEach((id, server) -> {
+                    for (Map.Entry<String, ImageInfoParseResult> entry : imageInfo.getServers().entrySet()) {
+                        String id = entry.getKey();
+                        ImageInfoParseResult server = entry.getValue();
                         container.putImageInfo(id, server);
-                    });
+                    }
                 }
-            });
+            }
         }
 
         // 构建转换的责任链路
@@ -53,11 +58,13 @@ public class ResourceCenterConverter {
         converters.add(new NetConfigElementConvert());
         converters.add(new ConnectionDisplayElementConvert());
         // 依次执行链路
-        converters.forEach(converter -> converter.convert2BO(container));
+        for (IConverter converter : converters) {
+            converter.convert2BO(container);
+        }
 
         CsceneBO csceneBO = container.toCsceneBO();
         if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
-            csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+            for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
                     String prefix = (e.getType() != null && e.getType() == BaseSceneElementModel.Type.TERMINAL) ? "eth0" : "E0";
                     for (int i = 0; i < e.getPorts().size(); i++) {
@@ -67,7 +74,7 @@ public class ResourceCenterConverter {
                         e.getPorts().get(i).setName(prefix + "/" + (i + 1));
                     }
                 }
-            });
+            }
         }
 
         return csceneBO;

@@ -16,7 +16,9 @@ class DefaultValueConverter implements IConverter {
     public void convert2BO(ConvertDataContainer container) {
         Map<String, CloudPluginSceneConfigElementBO> cloudElementMap = container.getCloudPluginElements();
         if (cloudElementMap != null) {
-            cloudElementMap.forEach((id, e) -> {
+            for (Map.Entry<String, CloudPluginSceneConfigElementBO> entry : cloudElementMap.entrySet()) {
+                String id = entry.getKey();
+                CloudPluginSceneConfigElementBO e = entry.getValue();
                 if (e.getImageType() == null && id != null) {
                     // 处理下 imageType
                     if (id.toLowerCase().startsWith("router")) {
@@ -48,7 +50,7 @@ class DefaultValueConverter implements IConverter {
                         }
                     }
                 }
-            });
+            }
         }
     }
 }

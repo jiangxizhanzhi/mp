@@ -56,7 +56,11 @@ public class DefaultImgController {
         List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
         List<String> urlList =
-                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+                new ArrayList<>();
+        for (LocalFileMappingModel model : modelList) {
+            String s = FsCommon.genHttpUrl(model.getRemoteFile());
+            urlList.add(s);
+        }
 
         return ResultCommon.success(urlList);
     }
@@ -77,7 +81,11 @@ public class DefaultImgController {
             List<String> groupList = Collections.singletonList(styleEnum.getGroup());
             List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
             DefaultImgTarget defaultImgTarget = new DefaultImgTarget();
-            List<String> urlList = modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+            List<String> urlList = new ArrayList<>();
+            for (LocalFileMappingModel model : modelList) {
+                String s = FsCommon.genHttpUrl(model.getRemoteFile());
+                urlList.add(s);
+            }
             defaultImgTarget.setImgs(urlList);
             defaultImgTarget.setStyle(styleEnum.getStyle());
             defaultImgTarget.setName(styleEnum.getName());
@@ -96,7 +104,9 @@ public class DefaultImgController {
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
         Map<String, String> urlMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(modelList)) {
-            modelList.forEach(model -> urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile())));
+            for (LocalFileMappingModel model : modelList) {
+                urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile()));
+            }
         }
 
         return ResultCommon.success(urlMap);
@@ -108,7 +118,14 @@ public class DefaultImgController {
      * @return
      */
     private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
-        return defaultImgDirEnums.stream().map(v -> defaultImgService.getFileByDefaultImgDirEnum(v)).flatMap(List::stream).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (DefaultImgDirEnum v : defaultImgDirEnums) {
+            List<String> fileByDefaultImgDirEnum = defaultImgService.getFileByDefaultImgDirEnum(v);
+            for (String string : fileByDefaultImgDirEnum) {
+                list.add(string);
+            }
+        }
+        return list;
     }
 
 

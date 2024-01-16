@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
@@ -11,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,11 +45,11 @@ public final class ResourceCenterYmlParser {
         }
 
         if (CollectionUtils.isNotEmpty(result.getNodes())) {
-            result.getNodes().forEach(node -> {
+            for (NodeElementParseResult node : result.getNodes()) {
                 if (StringUtils.isNotEmpty(node.getFile())) {
                     node.setFile(filePath + FILE_PATH_SEPARATOR + node.getFile());
                 }
-            });
+            }
         }
         return result;
     }
@@ -85,7 +83,9 @@ public final class ResourceCenterYmlParser {
 
         // imageFilePath 下的目录
         if (CollectionUtils.isNotEmpty(imageFilePathList)) {
-            imageFilePathList.forEach(imageFilePath -> results.addAll(parseServicesYml(imageFilePath)));
+            for (String imageFilePath : imageFilePathList) {
+                results.addAll(parseServicesYml(imageFilePath));
+            }
         }
 
         // env 下的server.yml
@@ -107,17 +107,22 @@ public final class ResourceCenterYmlParser {
         }
         File[] imageFiles = file.listFiles();
         // 取images目录下存在的servers.yml文件路径
-        List<String> serversYmlPaths = Arrays.asList(imageFiles).stream()
-                .map(imageFile -> imageFile.getPath() + FILE_PATH_SEPARATOR + "servers.yml")
-                .filter(serversYmlPath -> new File(serversYmlPath).exists())
-                .collect(Collectors.toList());
+        List<String> serversYmlPaths = new ArrayList<>();
+        for (File imageFile : Arrays.asList(imageFiles)) {
+            String s = imageFile.getPath() + FILE_PATH_SEPARATOR + "servers.yml";
+            if (new File(s).exists()) {
+                serversYmlPaths.add(s);
+            }
+        }
         if (CollectionUtils.isEmpty(serversYmlPaths)) {
             return new ArrayList<>();
         }
         // 解析所有的 servers.yml
-        List<ImageParseResult> imageParseResult = serversYmlPaths.stream()
-                .map(serversYmlPath -> new FilePathYmlParser<>(serversYmlPath, ImageParseResult.class).parse())
-                .collect(Collectors.toList());
+        List<ImageParseResult> imageParseResult = new ArrayList<>();
+        for (String serversYmlPath : serversYmlPaths) {
+            ImageParseResult parse = new FilePathYmlParser<>(serversYmlPath, ImageParseResult.class).parse();
+            imageParseResult.add(parse);
+        }
 
         for (int i = 0; i < imageParseResult.size(); i++) {
             Map<String, ImageInfoParseResult> servers = imageParseResult.get(i).getServers();
@@ -130,8 +135,18 @@ public final class ResourceCenterYmlParser {
 
     private static void addAllPrivateKey(Map<String, ImageInfoParseResult> servers, String path) {
         if (servers != null && !servers.isEmpty()) {
-            List<AccessModeParseResult> accessModes = servers.values().stream().findFirst().get().getAccessModes();
-            List<AccessModeParseResult> manageAccessModes = servers.values().stream().findFirst().get().getManageAccessModes();
+            Optional<ImageInfoParseResult> result = Optional.empty();
+            for (ImageInfoParseResult infoParseResult : servers.values()) {
+                result = Optional.of(infoParseResult);
+                break;
+            }
+            List<AccessModeParseResult> accessModes = result.get().getAccessModes();
+            Optional<ImageInfoParseResult> found = Optional.empty();
+            for (ImageInfoParseResult imageInfoParseResult : servers.values()) {
+                found = Optional.of(imageInfoParseResult);
+                break;
+            }
+            List<AccessModeParseResult> manageAccessModes = found.get().getManageAccessModes();
 
             if (CollectionUtils.isNotEmpty(accessModes)) {
                 for (AccessModeParseResult accessMode : accessModes) {

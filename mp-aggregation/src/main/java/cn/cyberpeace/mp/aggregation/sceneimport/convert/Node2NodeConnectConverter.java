@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResu
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -34,7 +35,9 @@ class Node2NodeConnectConverter implements IConverter {
     public void convert2BO(ConvertDataContainer container) {
         Set<String> networkIds = new HashSet<>();
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
-            container.getNetworkElements().forEach(e -> networkIds.add(e.getId()));
+            for (SceneConfigElementBO e : container.getNetworkElements()) {
+                networkIds.add(e.getId());
+            }
         }
         Map<String, SceneConfigElementPortBO> node2NodePort = container.getNode2NodePort();
         Set<String> connection = new HashSet<>();

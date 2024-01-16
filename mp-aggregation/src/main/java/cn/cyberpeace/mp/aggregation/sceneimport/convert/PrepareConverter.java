@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetworkElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,7 +26,9 @@ class PrepareConverter implements IConverter {
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(parseResult.getNetworks()) && CollectionUtils.isNotEmpty(parseResult.getNodes())) {
             Set<String> simpleSwitchIds = new HashSet<>();
-            parseResult.getNetworks().forEach(n -> simpleSwitchIds.add("router-" + n.getId()));
+            for (NetworkElementParseResult n : parseResult.getNetworks()) {
+                simpleSwitchIds.add("router-" + n.getId());
+            }
             Iterator<NodeElementParseResult> it = parseResult.getNodes().iterator();
             while (it.hasNext()) {
                 NodeElementParseResult node = it.next();
