@@ -21,7 +21,9 @@ public class CollectionBaseService {
      * @return
      */
     public List<String> agentNamesExcludeNullValue(List<String> agentNames) {
-        List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> nullExcludedAgentNames = agentNames.stream()
+                .filter(agentName -> Objects.nonNull(agentName))
+                .collect(Collectors.toList());
         return nullExcludedAgentNames;
     }
 

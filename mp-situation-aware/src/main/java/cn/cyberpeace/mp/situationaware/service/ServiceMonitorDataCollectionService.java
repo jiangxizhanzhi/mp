@@ -11,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +38,9 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream()
+                .map(monitorProbe -> monitorProbe.getLaunchId())
+                .collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             var result = doQueryServiceMonitorDto(hostname, launchIds) ;
@@ -50,7 +56,9 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = ServerMonitorConfig.businessSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = ServerMonitorConfig.businessSrvMonitors.stream()
+                .map(monitorProbe -> monitorProbe.getLaunchId())
+                .collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));

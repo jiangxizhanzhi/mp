@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -70,7 +69,9 @@ public class FlowClassificationsService {
         if (CollectionUtils.isEmpty(categoryDicList)){
             return Maps.newHashMap();
         }
-        return categoryDicList.stream().collect(Collectors.toMap(FlowClassificationModel::getCategoryEn, Function.identity()));
+        return categoryDicList.stream()
+                .collect(Collectors.toMap(flowClassificationModel -> flowClassificationModel.getCategoryEn(),
+                        flowClassificationModel -> flowClassificationModel));
     }
 
     /**

@@ -51,10 +51,14 @@ public class NetworkTrafficGroupService {
             String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks?fetch_all=true");
             log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
-            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network -> {
-                SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
-                log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
-            });
+            networkList.stream().filter(json -> json instanceof JSONObject)
+                    .map(json -> (JSONObject) json)
+                    .filter(json -> ARKIMENETWORKNAME.equals(json.get("name")))
+                    .findFirst()
+                    .ifPresent(network -> {
+                        SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+                        log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
+                    });
         } catch (Exception e) {
             log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
         }
@@ -75,9 +79,13 @@ public class NetworkTrafficGroupService {
         }
         JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
         AtomicReference<String> containerId = new AtomicReference<>("");
-        networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> groupId.equals(json.get("name"))).findFirst().ifPresent(container ->{
-            containerId.set((String) container.get("id"));
-        });
+        networkList.stream().filter(json -> json instanceof JSONObject)
+                .map(json -> (JSONObject) json)
+                .filter(json -> groupId.equals(json.get("name")))
+                .findFirst()
+                .ifPresent(container -> {
+                    containerId.set((String) container.get("id"));
+                });
 
         //删除实例镜像
         var deleteParam = new JSONObject();

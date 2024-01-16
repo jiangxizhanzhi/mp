@@ -135,7 +135,8 @@ public class SysCollectorService extends RequestProcessor {
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
         List<NetAddr> netAddrs = listNetAddrs(agentId, null, "ipv4");
-        Map<String, String> ifacToAddressMap = Optional.ofNullable(netAddrs).orElse(new ArrayList<>()).stream().collect(Collectors.toMap(NetAddr::getIface, NetAddr::getAddress, (a, b) -> a));
+        Map<String, String> ifacToAddressMap = Optional.ofNullable(netAddrs).orElse(new ArrayList<>()).stream()
+                .collect(Collectors.toMap(netAddr -> netAddr.getIface(), netAddr -> netAddr.getAddress(), (a, b) -> a));
 
         netifaces.forEach(n -> {
             if (!CollectionUtils.isEmpty(ifacToAddressMap)) {

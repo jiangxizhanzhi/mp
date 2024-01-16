@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionModel;
+import cn.cyberpeace.mp.situationaware.model.SessionRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionResult;
+import cn.cyberpeace.mp.situationaware.model.SessionSourceModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -100,7 +104,9 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+            sessionResults = sessionModelList.stream()
+                    .map(sessionModel -> this.convertSession(sessionModel))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,7 +167,9 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+            sessionResults = sessionModelList.stream()
+                    .map(sessionModel -> this.convertSession(sessionModel))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }

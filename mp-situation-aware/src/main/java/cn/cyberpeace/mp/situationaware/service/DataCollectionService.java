@@ -539,7 +539,10 @@ public class DataCollectionService extends CollectionBaseService {
                             .collect(Collectors.groupingBy(root -> root.getAgent().getId(),
                                     Collectors.maxBy(Comparator.comparing(WazuhMonitorRoot::getTimestamp))));
 
-            wazuhFileRootList = wazuhMonitorMap.values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            wazuhFileRootList = wazuhMonitorMap.values().stream()
+                    .filter(wazuhMonitorRoot -> wazuhMonitorRoot.isPresent())
+                    .map(wazuhMonitorRoot -> wazuhMonitorRoot.get())
+                    .collect(Collectors.toList());
             var wazuhModelList = wazuhFileRootList.stream()
                     .filter(model -> model.getFullLog().contains("MonitorMessage:")).map(model -> {
                         var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
@@ -1205,7 +1208,9 @@ public class DataCollectionService extends CollectionBaseService {
                                        MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
         // macId集合都转换成小写
-        macIds = macIds.stream().map(String::toLowerCase).collect(Collectors.toList());
+        macIds = macIds.stream()
+                .map(macId -> macId.toLowerCase())
+                .collect(Collectors.toList());
         var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
     }
@@ -1270,7 +1275,9 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
                                               BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-        List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream().map(DataCollectionType::getRuleId).collect(Collectors.toList());
+        List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream()
+                .map(dataCollectionType -> dataCollectionType.getRuleId())
+                .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(ruleIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
         }
@@ -1307,10 +1314,12 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
         // 转小写macId集合
-        List<String> lowerMacs = macs.stream().map(String::toLowerCase).collect(Collectors.toList());
+        List<String> lowerMacs = macs.stream()
+                .map(mac -> mac.toLowerCase())
+                .collect(Collectors.toList());
         Set<String> agentSet = Sets.newHashSet();
         allAgentMacAddr.forEach((key, macList) -> {
-            if (macList.stream().anyMatch(lowerMacs::contains)) {
+            if (macList.stream().anyMatch(mac -> lowerMacs.contains(mac))) {
                 agentSet.add(key);
             }
         });
