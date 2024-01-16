@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -86,15 +85,6 @@ import java.util.stream.Collectors;
         "scenePluginHandlerInterface",
         "sceneHandlerClass",
 })
-@BeanFieldNames({
-        "sceneMapper",
-        "sceneAreaMapper",
-        "sceneElementMapper",
-        "sceneElementPortMapper",
-        "sceneElementPortConnectionMapper",
-        "sceneElementPluginMapper",
-        "scenePieceMapper",
-})
 @Getter
 public abstract class BaseSceneHandler<
         S0 extends BaseSceneModel,
@@ -112,18 +102,10 @@ public abstract class BaseSceneHandler<
         P4 extends BaseScenePieceBO<P3, P4>,
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P3, S, A, P, E, C, P4, T>,
         D extends BaseSceneDataBO<S0, A0, E0, P0, C0, P3, S, A, P, E, C, P4, T, D>,
-        M1 extends BaseSceneMapper<S0>,
-        M2 extends BaseSceneAreaMapper<A0>,
-        M3 extends BaseSceneElementMapper<E0>,
-        M4 extends BaseSceneElementPortMapper<P0>,
-        M5 extends BaseSceneElementPortConnectionMapper<C0>,
-        M6 extends BaseSceneElementPluginMapper<P1>,
-        M7 extends BaseScenePieceMapper<P3>,
         C2 extends BaseSceneContextBO,
         P2 extends BasePluginHandler<?, ?, ?, ?>,
         H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, P3,
-                S, A, P, E, C, P4, T, D,
-                M1, M2, M3, M4, M5, M6, M7, C2, P2, H>> {
+                S, A, P, E, C, P4, T, D, C2, P2, H>> {
 
     /** 上下文 */
     private C2 context;
@@ -175,14 +157,13 @@ public abstract class BaseSceneHandler<
     private Class<P2> scenePluginHandlerInterface;
     private Class<H> sceneHandlerClass;
 
-    // 通过BeanFieldNames注解和实现类BeanFieldClasses注解，初始化调用BeanUtils.loadBeanFields(this)设置
-    private M1 sceneMapper;
-    private M2 sceneAreaMapper;
-    private M3 sceneElementMapper;
-    private M4 sceneElementPortMapper;
-    private M5 sceneElementPortConnectionMapper;
-    private M6 sceneElementPluginMapper;
-    private M7 scenePieceMapper;
+    protected BaseSceneMapper<S0> sceneMapper;
+    protected BaseSceneAreaMapper<A0> sceneAreaMapper;
+    protected BaseSceneElementMapper<E0> sceneElementMapper;
+    protected BaseSceneElementPortMapper<P0> sceneElementPortMapper;
+    protected BaseSceneElementPortConnectionMapper<C0> sceneElementPortConnectionMapper;
+    protected BaseSceneElementPluginMapper<P1> sceneElementPluginMapper;
+    protected BaseScenePieceMapper<P3> scenePieceMapper;
 
     /** 插件数据处理对象集合 */
     private final List<P2> plugins = new CopyOnWriteArrayList<>();
@@ -1172,7 +1153,7 @@ public abstract class BaseSceneHandler<
      */
     public void init(D sceneDataBO, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
-        BeanCommon.loadBeanFields(this);
+        this.initMapper();
         this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
@@ -1185,6 +1166,8 @@ public abstract class BaseSceneHandler<
         correctData();
     }
 
+    protected abstract void initMapper();
+
     /**
      * 从场景id初始化
      * @param sceneId 场景id
@@ -1193,7 +1176,7 @@ public abstract class BaseSceneHandler<
      */
     public void init(String sceneId, String areaId, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
-        BeanCommon.loadBeanFields(this);
+        this.initMapper();
         this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;
