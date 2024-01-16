@@ -106,7 +106,7 @@ public class ScenePluginFlowSceneService {
             return new ServiceResult<>();
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
         var flow = flowMap.getOrDefault(flowId, null);
         if (flow == null && !isBatch) {
             return new ServiceResult<>();
