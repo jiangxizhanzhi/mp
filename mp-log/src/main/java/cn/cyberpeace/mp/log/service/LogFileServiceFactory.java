@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.log.service;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -64,7 +65,7 @@ public class LogFileServiceFactory {
                 result.addAll(logFileService.list(basePageRequest.getType().name()));
             }
         } else {
-            var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
+            ServiceResult<List<OptionBO>> res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
             List<OptionBO> options = res.getSource();
             List<String> codes = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(options)) {
@@ -78,7 +79,7 @@ public class LogFileServiceFactory {
                     .filter(logFileService -> isReportTypeMatch(logFileService.logReportType(), codeSet))
                     .map(logFileService -> (Callable<List<LogReportDTO>>) () -> logFileService.list(null)).collect(Collectors.toList());
 
-            var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
+            LogFileService logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
             List<Callable<List<LogReportDTO>>> reportLogReportCallableList = codeSet.stream().map(code ->
                     (Callable<List<LogReportDTO>>) () -> logservice.list(code)).collect(Collectors.toList());
 

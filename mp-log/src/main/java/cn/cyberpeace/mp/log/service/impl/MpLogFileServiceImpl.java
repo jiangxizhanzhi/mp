@@ -54,7 +54,7 @@ public class MpLogFileServiceImpl implements LogFileService {
 
     @Override
     public List<LogReportDTO> list(String type) {
-        var logFile = new File(logPath);
+        File logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<LogReportDTO> logReportDTOList = fileList.stream().map(f -> {
             LogReportDTO dto = new LogReportDTO();
@@ -84,8 +84,8 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
         String fileName = downloadDTO.getFileName();
-        var bos = new ByteArrayOutputStream();
-        var logFile = new File(logPath);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        File logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<File> downloadFiles = fileList.stream().filter(file -> fileName.equals(file.getName())).collect(Collectors.toList());
 
@@ -95,7 +95,7 @@ public class MpLogFileServiceImpl implements LogFileService {
         }
 
         if (!fileName.endsWith(".zip")) {
-            var zout = new ZipOutputStream(bos);
+            ZipOutputStream zout = new ZipOutputStream(bos);
             for (File file : downloadFiles) {
                 try (FileInputStream fileInputStream = new FileInputStream(file)) {
                     ZipEntry zipFile = new ZipEntry(file.getName());
