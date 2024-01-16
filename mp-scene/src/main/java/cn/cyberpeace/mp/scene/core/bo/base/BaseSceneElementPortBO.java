@@ -63,7 +63,7 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementPortModel::getAccessModes)));
         obj.setPortId(id);
         if (accessModes != null) {

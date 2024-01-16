@@ -23,7 +23,7 @@ public class SceneInit implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         // 预热下SceneHandler中的属性,避免服务一启动就有高并发启动场景
         // 因为通过 FactoryBeanRegistrySupport.getObjectFromFactoryBean 获取bean有排它锁
-        var sceneHandler = new SceneHandler();
+        SceneHandler sceneHandler = new SceneHandler();
         ClassUtils.loadClassFields(sceneHandler);
         BeanCommon.loadBeanFields(sceneHandler);
         // 本地开发环境不运行资源的更新和删除

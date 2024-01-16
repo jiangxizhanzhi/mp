@@ -34,7 +34,7 @@ public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends Ba
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ignoreFields);
+        M obj = super.toModel(ignoreFields);
         obj.setNodeId(id);
         obj.setId(this.getEid());
         return obj;

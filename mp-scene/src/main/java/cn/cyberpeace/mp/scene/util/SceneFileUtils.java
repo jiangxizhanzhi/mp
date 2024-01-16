@@ -71,10 +71,10 @@ public class SceneFileUtils {
      * @return 初始化命令
      */
     public static List<String> genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
-        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-        var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
-        var filename = FileUtil.getName(toPath);
-        var toPathDir = toPath.substring(0, toPath.length() - filename.length());
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
+        String filename = FileUtil.getName(toPath);
+        String toPathDir = toPath.substring(0, toPath.length() - filename.length());
         List<String> commands;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             commands = List.of(
@@ -96,14 +96,14 @@ public class SceneFileUtils {
     }
 
     public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
-        var unzipDir = getSceneFileUnzipDir(systemType, sceneId);
-        var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
+        String unzipDir = getSceneFileUnzipDir(systemType, sceneId);
+        String toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
         return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
     }
 
     public static List<String> genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId) {
-        var unzipDir = getElementFileUnzipDir(systemType, sceneId, elementId);
-        var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
+        String unzipDir = getElementFileUnzipDir(systemType, sceneId, elementId);
+        String toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
         return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
     }
 

@@ -44,7 +44,7 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
 
     @Override
     public String getTargetName() {
-        var targetName = getTarget().getName();
+        String targetName = getTarget().getName();
         if (StringUtils.isEmpty(targetName)) {
             targetName = getTarget().getId();
         }

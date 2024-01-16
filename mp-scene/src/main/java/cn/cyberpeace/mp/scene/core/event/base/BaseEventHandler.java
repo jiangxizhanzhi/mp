@@ -74,7 +74,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         target.setProcessStatus(processStatus);
         target.setProcessMessage(processMessage);
 
-        var eventObj = ClassUtils.createInstance(eventModelClass);
+        E eventObj = ClassUtils.createInstance(eventModelClass);
         eventObj.setTarget(target.genTarget());
         eventObj.setEvent(event);
         eventObj.setEventStatus(eventStatus);
@@ -96,7 +96,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      */
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         if (acquireEventLock(event, eventStatus, process, processStatus)) {
-            var eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
+            E eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
             if (eventObj == null) {
                 releaseEventLock(event, eventStatus, process, processStatus);
                 log.error("{} save event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
@@ -114,7 +114,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     }
 
     private String getProcessName(String process) {
-        var eventProcess = eventProcessMap.getOrDefault(process, null);
+        EventProcess eventProcess = eventProcessMap.getOrDefault(process, null);
         if (eventProcess == null) {
             log.warn("{} event({}) process({}) not in process table", getTargetName(), event, process);
             return StringUtils.EMPTY;
@@ -149,7 +149,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     public String getTargetName() { return target.getClass().toString() + " instance"; }
 
     public void checkEvent() {
-        var validEvents = eventTransition.getOrDefault(EventTransition.genKey(target.getEvent(),
+        List<Integer> validEvents = eventTransition.getOrDefault(EventTransition.genKey(target.getEvent(),
                 target.getEventStatus()), null);
         if (validEvents == null || !validEvents.contains(event)) {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
@@ -168,7 +168,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 开始事件
      */
     public int startEvent() {
-        var processMessage = MessageCommon.get("scene.event.start_message", MessageCommon.get(eventName));
+        String processMessage = MessageCommon.get("scene.event.start_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.START, target.getProcess(), ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
@@ -177,7 +177,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 开始进程
      */
     public int startProcess(String process) {
-        var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
+        String processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
@@ -186,7 +186,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 进行中事件进程
      */
     public int progressProcess(String process) {
-        var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
+        String processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS,
                 formatProcessMessage(processMessage));
     }
@@ -195,7 +195,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 暂停事件
      */
     public int pauseProcess() {
-        var processMessage = MessageCommon.get("scene.event.pause_message",
+        String processMessage = MessageCommon.get("scene.event.pause_message",
                 getProcessName(target.getProcess()));
         return triggerEvent(target.getEvent(), EventStatus.PAUSE, target.getProcess(), ProcessStatus.PAUSE,
                 formatProcessMessage(processMessage));
@@ -205,7 +205,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 结束事件进程
      */
     public int overProcess() {
-        var processMessage = MessageCommon.get("scene.event.over_message",
+        String processMessage = MessageCommon.get("scene.event.over_message",
                 getProcessName(target.getProcess()));
         return triggerEvent(event, EventStatus.IN_PROGRESS, target.getProcess(), ProcessStatus.OVER,
                 formatProcessMessage(processMessage));
@@ -215,7 +215,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 结束事件
      */
     public int overEvent() {
-        var processMessage = MessageCommon.get("scene.event.over_message", MessageCommon.get(eventName));
+        String processMessage = MessageCommon.get("scene.event.over_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(),
                 formatProcessMessage(processMessage));
     }
@@ -224,12 +224,12 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 异常
      */
     public int error(String errorMessage) {
-        var processName = getProcessName(target.getProcess());
+        String processName = getProcessName(target.getProcess());
         if (StringUtils.isEmpty(processName)) {
             processName = MessageCommon.get(eventName);
         }
 
-        var processMessage = MessageCommon.get("scene.event.error_message", processName,
+        String processMessage = MessageCommon.get("scene.event.error_message", processName,
                 errorMessage);
         return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL,
                 formatProcessMessage(processMessage));

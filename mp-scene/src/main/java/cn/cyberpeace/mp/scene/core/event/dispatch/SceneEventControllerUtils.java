@@ -28,7 +28,7 @@ public class SceneEventControllerUtils {
         if (sceneEventControllers == null) {
             return;
         }
-        var scene = sceneEventControllers.get(sceneId);
+        SceneEventControl scene = sceneEventControllers.get(sceneId);
         // todo 极端并发下可能有问题
         if (scene != null && scene.releaseEventLock()) {
             sceneEventControllers.remove(sceneId);
@@ -36,7 +36,7 @@ public class SceneEventControllerUtils {
     }
 
     public static Integer getLatestEvent(String sceneId) {
-        var scene = sceneEventControllers.get(sceneId);
+        SceneEventControl scene = sceneEventControllers.get(sceneId);
         if (scene != null) {
             return scene.getLatestEvent();
         }
@@ -44,7 +44,7 @@ public class SceneEventControllerUtils {
     }
 
     public static boolean tryUpdateLatestEvent(String sceneId, int event, int eventStatus) {
-        var scene = sceneEventControllers.get(sceneId);
+        SceneEventControl scene = sceneEventControllers.get(sceneId);
         if (scene != null) {
             return scene.tryUpdateLatestEvent(event, eventStatus);
         }

@@ -59,7 +59,7 @@ public abstract class BaseSceneDataBO<
             P8 extends BaseSceneDataBO<?, ?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P7, T9, P8>> P8 export(
                     Class<P8> pClass, Class<T9> toplogyClass, Class<S9> sceneClass, Class<A9> areaClass,
                     Class<E9> elementClass, Class<P9> portClass, Class<C9> connectionClass, Class<P7> pieceClass) {
-        var pObj = ClassUtils.createInstance(pClass);
+        P8 pObj = ClassUtils.createInstance(pClass);
         if (topology != null) {
             pObj.setTopology(topology.export(toplogyClass, sceneClass, areaClass, elementClass, portClass,
                     connectionClass, pieceClass));

@@ -75,7 +75,7 @@ public abstract class BaseSceneTopologyBO<
             P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P7, P8>> P8 export(
             Class<P8> pClass, Class<S9> sceneClass, Class<A9> areaClass, Class<E9> elementClass, Class<P9> portClass,
             Class<C9> connectionClass, Class<P7> pieceClass) {
-        var pObj = ClassUtils.createInstance(pClass);
+        P8 pObj = ClassUtils.createInstance(pClass);
         pObj.setAreaId(areaId);
         if (scene != null) {
             pObj.setScene(scene.export(sceneClass));

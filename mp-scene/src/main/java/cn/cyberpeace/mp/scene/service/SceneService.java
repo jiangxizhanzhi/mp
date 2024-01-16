@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -78,14 +79,14 @@ public class SceneService {
 
         SceneStageRecorder.registerRecoder(sceneHandler.getSceneId(), sceneHandler.getSceneStageRecorder());
         SceneTaskPool.getInstance().executeTask(() -> {
-            var starTime = LocalDateTime.now();
+            LocalDateTime starTime = LocalDateTime.now();
             if (!sceneHandler.initiate(false)) {
                 return;
             }
             sceneHandler.create();
 
-            var endTime = LocalDateTime.now();
-            var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
+            LocalDateTime endTime = LocalDateTime.now();
+            long consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler.updateScene();
             if (callback != null) {
@@ -103,7 +104,7 @@ public class SceneService {
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
-        var sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null, null)
+        SceneConfigDataBO sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null, null)
                 .getSource();
 
         if (sceneConfigDataBO == null) {
@@ -138,7 +139,7 @@ public class SceneService {
     }
 
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneContextBO context) {
-        var result = 0;
+        int result = 0;
         for (String id : ids) {
             if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
                 result += 1;
@@ -163,12 +164,12 @@ public class SceneService {
 
         Queue<SceneElementBO> allElements = new ArrayDeque<>(updatedSceneHandler.getElementMap().values());
         while (!allElements.isEmpty()) {
-            var element = allElements.poll();
+            SceneElementBO element = allElements.poll();
             if (element != null) {
-                var connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
+                List<SceneElementPortBO> connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
                 if (CollectionUtils.isNotEmpty(connectPorts)) {
                     Set<String> ips = new HashSet<>();
-                    for (var p : connectPorts) {
+                    for (SceneElementPortBO p : connectPorts) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
                             if (ips.contains(p.getIp())) {
                                 throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
@@ -204,7 +205,7 @@ public class SceneService {
                 }
             });
 
-            for (var e : updatedSceneHandler.getElementMap().values()) {
+            for (SceneElementBO e : updatedSceneHandler.getElementMap().values()) {
                 if (updatedSceneHandler.isHandleNode(e.getId())) {
                     e.setEvent(SceneElementModel.Event.DEFAULT);
                     e.setEventStatus(EventStatus.INITIAL);
@@ -270,7 +271,7 @@ public class SceneService {
 //        sceneHandler.setRealTimeUpdate(true);
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         sceneHandler.getElementMap().values().forEach(e -> {
-            var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+            List<Integer> validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
                     EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
             );
             if (!validEvents.contains(SceneElementModel.Event.SUSPEND)) {
@@ -373,8 +374,8 @@ public class SceneService {
         newDataBO.getTopology().setScene(originHandler.getScene());
         SceneHandler updateHandler = new SceneHandler(newDataBO, context);
 
-        var originElement = originHandler.getElement(nodeId);
-        var newElement = updateHandler.getElement(nodeId);
+        SceneElementBO originElement = originHandler.getElement(nodeId);
+        SceneElementBO newElement = updateHandler.getElement(nodeId);
         newElement.setEid(originElement.getEid());
         newElement.setEvent(originElement.getEvent());
         newElement.setEventStatus(originElement.getEventStatus());
@@ -382,8 +383,8 @@ public class SceneService {
         newElement.setProcessMessage(originElement.getProcessMessage());
         newElement.setProcessStatus(originElement.getProcessStatus());
         if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
-            for (var newPort : newElement.getPorts()) {
-                var originPort = originHandler.getPort(newPort.getId());
+            for (SceneElementPortBO newPort : newElement.getPorts()) {
+                SceneElementPortBO originPort = originHandler.getPort(newPort.getId());
                 if (originPort != null) {
                     newPort.setEid(originPort.getEid());
                 }

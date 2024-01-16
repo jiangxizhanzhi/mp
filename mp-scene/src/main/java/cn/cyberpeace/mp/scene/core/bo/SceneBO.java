@@ -64,7 +64,7 @@ public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSce
 
     @Override
     public SceneModel toModel(String... ignoreFields) {
-        var obj = super.toModel(
+        SceneModel obj = super.toModel(
                 ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(SceneModel::getStageList)
                 ));
         if (stageList != null) {

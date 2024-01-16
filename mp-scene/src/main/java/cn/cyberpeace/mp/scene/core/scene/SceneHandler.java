@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
@@ -29,6 +30,9 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
@@ -142,13 +146,13 @@ public class SceneHandler extends BaseSceneHandler<
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
     public int errorScene(int event, String errorMessage) {
-        var flag = getSceneEventHandler(event).error(errorMessage);
+        int flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
             SceneStageRecorder.getRecorder(getSceneId()).refreshSceneBO(this.getScene());
             SceneStageRecorder.removeRecorder(getSceneId());
             String message = this.getScene().getProcessMessage();
-            for (var e : this.getElementMap().values()) {
+            for (SceneElementBO e : this.getElementMap().values()) {
                 if (e.getEventStatus() == 5) {
                     message += ";" + e.getProcessMessage();
                 }
@@ -163,7 +167,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int errorElement(String nodeId, int event, String errorMessage) {
-        var flag = getElementEventHandler(nodeId, event).error(errorMessage);
+        int flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
             asyncAckElementChanged(nodeId, false, true);
         }
@@ -210,7 +214,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public CollectedSceneBO getCollectedSceneBO() {
-        var collectedSceneBO = new CollectedSceneBO();
+        CollectedSceneBO collectedSceneBO = new CollectedSceneBO();
         SceneBO sceneBO = new SceneBO();
         BeanUtils.copyProperties(getScene(), sceneBO);
         collectedSceneBO.setScene(sceneBO);
@@ -235,7 +239,7 @@ public class SceneHandler extends BaseSceneHandler<
 
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
-            var pluginScene = plugin.getScene();
+            BasePluginSceneBO<?, ? extends BasePluginSceneBO<?, ?, SceneBO>, SceneBO> pluginScene = plugin.getScene();
             if (pluginScene != null) {
                 pluginData.put(plugin.getKey(), plugin.getScene());
             }
@@ -245,13 +249,13 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
-        var collectedSceneElementBO = new CollectedSceneElementBO();
+        CollectedSceneElementBO collectedSceneElementBO = new CollectedSceneElementBO();
         collectedSceneElementBO.setSceneId(getScene().getEid());
         // 深拷贝一个
-        var sceneElement = JsonCommon.parse(JsonCommon.stringify(getElement(nodeId)), SceneElementBO.class);
+        SceneElementBO sceneElement = JsonCommon.parse(JsonCommon.stringify(getElement(nodeId)), SceneElementBO.class);
         if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
             // 所有非辅助端口
-            var ports = sceneElement.getPorts().stream()
+            List<SceneElementPortBO> ports = sceneElement.getPorts().stream()
                     .filter(p -> !Boolean.TRUE.equals(p.getIsAuxiliary()))
                     .collect(Collectors.toList());
             sceneElement.setPorts(ports);
@@ -260,7 +264,7 @@ public class SceneHandler extends BaseSceneHandler<
             sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
         }
         collectedSceneElementBO.setSceneElement(sceneElement);
-        var sceneElementPorts = sceneElement.getPorts();
+        List<SceneElementPortBO> sceneElementPorts = sceneElement.getPorts();
         String message = null;
         if (sceneElement.getProcessMessage() != null) {
             message = sceneElement.getProcessMessage();
@@ -276,7 +280,7 @@ public class SceneHandler extends BaseSceneHandler<
         Map<String, Object> pluginData = new HashMap<>();
         Map<String, Map<String, Object>> portPluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
-            var pluginElement = plugin.getElement(nodeId);
+            BasePluginSceneElementBO<?, ? extends BasePluginSceneElementBO<?, ?, SceneElementBO>, SceneElementBO> pluginElement = plugin.getElement(nodeId);
             if (pluginElement != null) {
                 pluginData.put(plugin.getKey(), pluginElement);
             }
@@ -284,8 +288,8 @@ public class SceneHandler extends BaseSceneHandler<
             if (sceneElementPorts != null) {
                 Map<String, Object> pluginPorts = new HashMap<>();
                 sceneElementPorts.forEach(sceneElementPort -> {
-                    var portId = sceneElementPort.getId();
-                    var pluginPort = plugin.getPort(portId);
+                    String portId = sceneElementPort.getId();
+                    BasePluginSceneElementPortBO<?, ? extends BasePluginSceneElementPortBO<?, ?, SceneElementPortBO>, SceneElementPortBO> pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
                         pluginPorts.put(portId, pluginPort);
                     }
@@ -299,7 +303,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void reportSceneUpdated() {
-        var collectedScene = getCollectedSceneBO();
+        CollectedSceneBO collectedScene = getCollectedSceneBO();
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportScene(collectedScene)));
     }
 
@@ -308,7 +312,7 @@ public class SceneHandler extends BaseSceneHandler<
         if (getElement(nodeId) == null || Boolean.TRUE.equals(getElement(nodeId).getIsAuxiliary())) {
             return;
         }
-        var collectedSceneElement = getCollectedSceneElementBO(nodeId);
+        CollectedSceneElementBO collectedSceneElement = getCollectedSceneElementBO(nodeId);
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
@@ -368,7 +372,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public int progressSceneProcess(int event, String process) {
         getSceneStageRecorder().progress(process);
-        var flag = getSceneEventHandler(event).progressProcess(process);
+        int flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
         }
@@ -376,7 +380,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int progressElementProcess(String nodeId, int event, String process) {
-        var flag = getElementEventHandler(nodeId, event).progressProcess(process);
+        int flag = getElementEventHandler(nodeId, event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
             asyncAckElementChanged(nodeId, false, false);
         }
@@ -385,7 +389,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public int overSceneProcess(int event) {
         getSceneStageRecorder().overProgress(this.getScene().getProcess());
-        var flag = getSceneEventHandler(event).overProcess();
+        int flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
             boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime());
             boolean withPlugins = forceSave;
@@ -395,7 +399,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int overElementProcess(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).overProcess();
+        int flag = getElementEventHandler(nodeId, event).overProcess();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getElementProcessSaveRealtime());
@@ -406,7 +410,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void reformTopo() {
-        for (var plugin : getPlugins()) {
+        for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
             plugin.reformTopo();
         }
     }
@@ -420,7 +424,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         startAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.initiate();
             }
         } catch (Exception e) {
@@ -437,7 +441,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean prepare(boolean partialStart) {
-        for (var plugin : getPlugins()) {
+        for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
             plugin.prepare(partialStart);
         }
         return true;
@@ -447,7 +451,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.create();
             }
         } catch (Exception e) {
@@ -457,7 +461,7 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
-        for (var nodeId : getElementMap().keySet()) {
+        for (String nodeId : getElementMap().keySet()) {
             if (!isHandleNode(nodeId)) {
                 asyncAckElementChanged(nodeId, false, false);
             }
@@ -483,7 +487,7 @@ public class SceneHandler extends BaseSceneHandler<
         originSceneHandler.startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
 
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.modify(originSceneHandler, updateElementIds);
             }
         } catch (Exception e) {
@@ -498,11 +502,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean pause() {
-        for (var e : getElementMap().values()) {
+        for (SceneElementBO e : getElementMap().values()) {
             if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
                 this.addExcludeHandleNode(e.getId());
             } else {
-                var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                List<Integer> validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
                         EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
                 );
                 if (!validEvents.contains(SceneElementModel.Event.PAUSE)) {
@@ -513,7 +517,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         startAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.pause();
             }
         } catch (Exception e) {
@@ -529,11 +533,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean unpause() {
-        for (var e : getElementMap().values()) {
+        for (SceneElementBO e : getElementMap().values()) {
             if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
                 this.addExcludeHandleNode(e.getId());
             } else {
-                var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                List<Integer> validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
                         EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
                 );
                 if (!validEvents.contains(SceneElementModel.Event.UNPAUSE)) {
@@ -544,7 +548,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
         startAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.unpause();
             }
         } catch (Exception e) {
@@ -563,7 +567,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
         startAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.suspend();
             }
         } catch (Exception e) {
@@ -582,7 +586,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
         startAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
         try {
-            for (var plugin : getPlugins()) {
+            for (ScenePluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
                 plugin.resume();
             }
         } catch (Exception e) {
@@ -799,29 +803,29 @@ public class SceneHandler extends BaseSceneHandler<
         }
         overElementEvent(nodeId, SceneElementModel.Event.DELETE);
         // 去除 被删除节点 的数据
-        var scene = toData();
+        SceneDataBO scene = toData();
         Iterator<SceneElementBO> elementIts = scene.getTopology().getElements().iterator();
         while (elementIts.hasNext()) {
-            var s = elementIts.next();
+            SceneElementBO s = elementIts.next();
             if (s.getId().equals(nodeId)) {
                 elementIts.remove();
                 break;
             }
         }
         Set<String> deletePortIds = new HashSet<>();
-        for (var p : element.getPorts()) {
+        for (SceneElementPortBO p : element.getPorts()) {
             deletePortIds.add(p.getId());
         }
         Iterator<SceneElementPortConnectionBO> connectIts = scene.getTopology().getConnections().iterator();
         while (connectIts.hasNext()) {
-            var c = connectIts.next();
+            SceneElementPortConnectionBO c = connectIts.next();
             if (deletePortIds.contains(c.getSource()) || deletePortIds.contains(c.getTarget())) {
                 connectIts.remove();
             }
         }
-        for (var plugin : scene.getPlugins().values()) {
+        for (ScenePluginDataBO plugin : scene.getPlugins().values()) {
             plugin.getElements().remove(element.getId());
-            for (var port : element.getPorts()) {
+            for (SceneElementPortBO port : element.getPorts()) {
                 plugin.getElementPorts().remove(port.getId());
             }
         }
@@ -829,7 +833,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void modifyElement(String nodeId, SceneHandler originHandler) {
-        var element = getElement(nodeId);
+        SceneElementBO element = getElement(nodeId);
         if (element.getEvent() != SceneElementModel.Event.STOP) {
             prepareElementEvent(element, SceneElementModel.Event.MODIFY);
             startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
@@ -959,7 +963,7 @@ public class SceneHandler extends BaseSceneHandler<
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
         if (CollectionUtils.isNotEmpty(this.getScene().getStageList())) {
-            for (var stage : this.getScene().getStageList()) {
+            for (SceneStageRecorder.SceneStageRecord stage : this.getScene().getStageList()) {
                 total = total.add(BigDecimal.valueOf(100));
                 current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
             }
@@ -1001,7 +1005,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     private void prepareAllEvent(int sceneEvent, int elementEvent) {
         prepareSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
+        for (SceneElementBO element : getElementMap().values()) {
             if (isHandleNode(element.getId())) {
                 prepareElementEvent(element, elementEvent);
             }
@@ -1021,7 +1025,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private int startSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).startEvent();
+        int flag = getSceneEventHandler(event).startEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             // 推送场景最新的事件状态
@@ -1031,7 +1035,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private int startElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).startEvent();
+        int flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
             // 推送节点最新的事件状态
             asyncAckElementChanged(nodeId, false, false);
@@ -1040,7 +1044,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private int overSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).overEvent();
+        int flag = getSceneEventHandler(event).overEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
@@ -1049,7 +1053,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private int overElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).overEvent();
+        int flag = getElementEventHandler(nodeId, event).overEvent();
         if (isTriggerEventSuccess(flag)) {
             asyncAckElementChanged(nodeId, false, false);
         }
@@ -1058,7 +1062,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     private void startAllEvent(int sceneEvent, int elementEvent) {
         startSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
+        for (SceneElementBO element : getElementMap().values()) {
             if (isHandleNode(element.getId())) {
                 startElementEvent(element.getId(), elementEvent);
             }
@@ -1066,7 +1070,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private void overAllEvent(int sceneEvent, int elementEvent) {
-        for (var element : getElementMap().values()) {
+        for (SceneElementBO element : getElementMap().values()) {
             if (isHandleNode(element.getId())) {
                 overElementEvent(element.getId(), elementEvent);
             }

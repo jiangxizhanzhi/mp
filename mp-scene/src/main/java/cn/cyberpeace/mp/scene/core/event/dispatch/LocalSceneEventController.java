@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.event.interrupt.UpdateLatestEventStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -45,7 +46,7 @@ public class LocalSceneEventController implements SceneEventControl {
             int compareEvent = this.latestEvent != null ? this.latestEvent : this.event;
             int compareEventStatus = this.latestEventStatus != null ? this.latestEventStatus : this.eventStatus;
             log.info("scene {} , try update latest event , [{},{}] , compare event [{},{}]", sceneId, event, eventStatus, compareEvent, compareEventStatus);
-            var validEvents = SceneEventTransition.SCENE_EVENT_TRANSITION.getOrDefault(
+            List<Integer> validEvents = SceneEventTransition.SCENE_EVENT_TRANSITION.getOrDefault(
                     EventTransition.genKey(compareEvent, compareEventStatus), new ArrayList<>()
             );
             if (validEvents.contains(event) && event != compareEvent) {

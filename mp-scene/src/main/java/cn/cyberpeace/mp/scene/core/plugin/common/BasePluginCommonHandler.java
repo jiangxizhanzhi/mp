@@ -37,17 +37,17 @@ public abstract class BasePluginCommonHandler<
         implements PluginSceneHandlerCommon<S9, E9, P9, H> {
 
     public void syncSrcData() {
-        var scene = getScene();
+        S scene = getScene();
         if (scene != null) {
             scene.setSrcScene(getSrcScene());
         }
 
         getElementMap().forEach((nodeId, element) -> {
-            var srcElement = getSrcElement(nodeId);
+            E9 srcElement = getSrcElement(nodeId);
             element.setSrcElement(srcElement);
         });
         getElementPortMap().forEach((portId, port) -> {
-            var srcPort = getSrcPort(portId);
+            P9 srcPort = getSrcPort(portId);
             port.setSrcPort(srcPort);
         });
     }
@@ -57,13 +57,13 @@ public abstract class BasePluginCommonHandler<
     }
 
     public List<P> getPorts(E9 srcElement) {
-        var srcPorts = srcElement.getPorts();
+        List<P9> srcPorts = srcElement.getPorts();
         List<P> pluginPorts = new ArrayList<>();
         if (srcPorts == null) {
             return pluginPorts;
         }
         srcPorts.forEach(srcPort -> {
-            var pluginPort = getPort(srcPort.getId());
+            P pluginPort = getPort(srcPort.getId());
             if (pluginPort != null) {
                 pluginPorts.add(pluginPort);
             }
@@ -75,7 +75,7 @@ public abstract class BasePluginCommonHandler<
         getElementIds().add(nodeId);
         getElementMap().put(nodeId, pluginElement);
 
-        var srcElement = getSrcElement(nodeId);
+        E9 srcElement = getSrcElement(nodeId);
         pluginElement.setSrcElement(srcElement);
     }
 
@@ -83,7 +83,7 @@ public abstract class BasePluginCommonHandler<
         getElementPortIds().add(portId);
         getElementPortMap().put(portId, pluginPort);
 
-        var srcPort = getSrcPort(portId);
+        P9 srcPort = getSrcPort(portId);
         pluginPort.setSrcPort(srcPort);
     }
 

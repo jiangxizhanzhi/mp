@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 场景插件model实现处理基类
@@ -86,7 +87,7 @@ public class BasePluginModelHandler<
         if (scene == null) {
             return;
         }
-        var sceneBO = ClassUtils.createInstance(pluginSceneBOClass);
+        S sceneBO = ClassUtils.createInstance(pluginSceneBOClass);
         sceneBO.fromModel(scene);
         scenePluginHandler.setScene(sceneBO);
     }
@@ -99,9 +100,9 @@ public class BasePluginModelHandler<
         if (elements == null) {
             return;
         }
-        var elementMap = scenePluginHandler.getElementMap();
+        Map<String, E> elementMap = scenePluginHandler.getElementMap();
         elements.forEach(element -> {
-            var elementBO = ClassUtils.createInstance(pluginSceneElementBOClass);
+            E elementBO = ClassUtils.createInstance(pluginSceneElementBOClass);
             elementBO.fromModel(element);
             elementMap.put(element.getSceneElement(), elementBO);
         });
@@ -115,9 +116,9 @@ public class BasePluginModelHandler<
         if (elementPorts == null) {
             return;
         }
-        var elementPortMap = scenePluginHandler.getElementPortMap();
+        Map<String, P> elementPortMap = scenePluginHandler.getElementPortMap();
         elementPorts.forEach(elementPort -> {
-            var elementPortBO = ClassUtils.createInstance(pluginSceneElementPortBOClass);
+            P elementPortBO = ClassUtils.createInstance(pluginSceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortMap.put(elementPort.getSceneElementPort(), elementPortBO);
         });
@@ -128,7 +129,7 @@ public class BasePluginModelHandler<
      * @return 表模型-场景对象
      */
     public S0 readScene() {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneMapper.first(new HumanCondition().filterEqual(BasePluginSceneModel::getScene, sceneId));
     }
 
@@ -142,7 +143,7 @@ public class BasePluginModelHandler<
             return new ArrayList<>();
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
@@ -158,7 +159,7 @@ public class BasePluginModelHandler<
             return new ArrayList<>();
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementPortMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
@@ -168,19 +169,19 @@ public class BasePluginModelHandler<
      * 保存场景属性数据
      */
     public boolean saveScene() {
-        var scene = scenePluginHandler.getScene();
+        S scene = scenePluginHandler.getScene();
         if (scene == null) {
             return true;
         }
 
-        var existScene = readScene();
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        S0 existScene = readScene();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
         if (existScene != null) {
             sceneObj.setId(existScene.getId());
         }
-        var result = pluginSceneMapper.save(sceneObj);
+        boolean result = pluginSceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
         return result;
     }
@@ -189,15 +190,15 @@ public class BasePluginModelHandler<
      * 删除场景属性数据
      */
     public boolean deleteScene() {
-        var scene = scenePluginHandler.getScene();
+        S scene = scenePluginHandler.getScene();
         if (scene == null) {
             return true;
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
-        var result = pluginSceneMapper.filterDelete(new HumanCondition()
+        int result = pluginSceneMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneModel::getScene, sceneId));
 
         return result > 0;
@@ -208,16 +209,16 @@ public class BasePluginModelHandler<
      * @param elementIds 网元节点id
      */
     public int createElements(String... elementIds) {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
 
         // 删除存在的
         deleteElements(elementIds);
 
         // 创建
-        var elementMap = scenePluginHandler.getElementMap();
+        Map<String, E> elementMap = scenePluginHandler.getElementMap();
         List<E0> elements = new ArrayList<>();
         for (String elementId : elementIds) {
-            var elementBO = elementMap.getOrDefault(elementId, null);
+            E elementBO = elementMap.getOrDefault(elementId, null);
             if (elementBO == null) {
                 continue;
             }
@@ -235,26 +236,26 @@ public class BasePluginModelHandler<
      * @param elementIds 网元节点id
      */
     public int updateElements(String... elementIds) {
-        var elementMap = scenePluginHandler.getElementMap();
+        Map<String, E> elementMap = scenePluginHandler.getElementMap();
         List<E0> updatingElements = new ArrayList<>();
         List<String> creatingElementIds = new ArrayList<>(Arrays.asList(elementIds));
         // 更新已存在的
         List<E0> existElements = readElements(elementIds);
         existElements.forEach(existElement -> {
-            var elementId = existElement.getSceneElement();
+            String elementId = existElement.getSceneElement();
             creatingElementIds.remove(elementId);
-            var elementBO = elementMap.getOrDefault(elementId, null);
+            E elementBO = elementMap.getOrDefault(elementId, null);
             if (elementBO == null) {
                 return;
             }
-            var element = elementBO.toModel();
+            E0 element = elementBO.toModel();
             element.setId(existElement.getId());
             updatingElements.add(element);
         });
-        var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
+        int updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
 
         // 创建不存在的
-        var createCount = createElements(creatingElementIds.toArray(new String[0]));
+        int createCount = createElements(creatingElementIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
@@ -267,7 +268,7 @@ public class BasePluginModelHandler<
         if (elementIds.length == 0) {
             return 0;
         }
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
@@ -278,16 +279,16 @@ public class BasePluginModelHandler<
      * @param elementPortIds 网元端口id
      */
     public int createElementPorts(String... elementPortIds) {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
 
         // 删除存在的
         deleteElementPorts(elementPortIds);
 
         // 创建
-        var elementPortMap = scenePluginHandler.getElementPortMap();
+        Map<String, P> elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> elementPorts = new ArrayList<>();
         for (String elementPortId : elementPortIds) {
-            var elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
+            P elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
             if (elementPortBO == null) {
                 continue;
             }
@@ -305,26 +306,26 @@ public class BasePluginModelHandler<
      * @param elementPortIds 网元端口id
      */
     public int updateElementPorts(String... elementPortIds) {
-        var elementPortMap = scenePluginHandler.getElementPortMap();
+        Map<String, P> elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> updatingElementPorts = new ArrayList<>();
         List<String> creatingElementPortIds = new ArrayList<>(Arrays.asList(elementPortIds));
         // 更新已存在的
         List<P0> existElementPorts = readElementPorts(elementPortIds);
         existElementPorts.forEach(existElementPort -> {
-            var elementPortId = existElementPort.getSceneElementPort();
+            String elementPortId = existElementPort.getSceneElementPort();
             creatingElementPortIds.remove(elementPortId);
-            var elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
+            P elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
             if (elementPortBO == null) {
                 return;
             }
-            var elementPort = elementPortBO.toModel();
+            P0 elementPort = elementPortBO.toModel();
             elementPort.setId(existElementPort.getId());
             updatingElementPorts.add(elementPort);
         });
-        var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
+        int updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
 
         // 创建不存在的
-        var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
+        int createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
@@ -338,7 +339,7 @@ public class BasePluginModelHandler<
             return 0;
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementPortMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));

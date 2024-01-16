@@ -10,11 +10,13 @@ import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -79,19 +81,19 @@ public abstract class BasePluginHandler<S, E, P, C> {
      * @param pluginData 场景插件业务数据
      */
     public void fromData(ScenePluginDataBO pluginData) {
-        var sceneSrc = pluginData.getScene();
+        Map<String, Object> sceneSrc = pluginData.getScene();
         if (sceneSrc != null) {
             scene = JsonCommon.snakeMapToBean(sceneSrc, sceneBOClass);
         }
 
-        var elementMapSrc = pluginData.getElements();
+        Map<String, Map<String, Object>> elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
             elementMapSrc.forEach((nodeId, elementData) -> {
                 elementMap.put(nodeId, JsonCommon.snakeMapToBean(elementData, elementBOClass));
             });
         }
 
-        var elementPortMapSrc = pluginData.getElementPorts();
+        Map<String, Map<String, Object>> elementPortMapSrc = pluginData.getElementPorts();
         if (elementPortMapSrc != null) {
             elementPortMapSrc.forEach((portId, elementPortData) -> {
                 elementPortMap.put(portId, JsonCommon.snakeMapToBean(elementPortData, elementPortBOClass));
@@ -99,7 +101,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
         }
 
         // 验证数据字段
-        var validateData = new BaseScenePluginDataBO<S, E, P>();
+        BaseScenePluginDataBO<S, E, P> validateData = new BaseScenePluginDataBO<S, E, P>();
         validateData.setScene(scene);
         validateData.setElements(elementMap);
         validateData.setElementPorts(elementPortMap);
@@ -107,7 +109,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
     }
 
     protected void validateData(BaseScenePluginDataBO validateData) {
-        var validateResult = ValidationCommon.validate(validateData);
+        Set<ConstraintViolation<BaseScenePluginDataBO>> validateResult = ValidationCommon.validate(validateData);
         ValidationCommon.handleValidateResult(validateResult);
     }
 
@@ -126,7 +128,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
      * @return 场景插件业务数据
      */
     public ScenePluginDataBO toData() {
-        var pluginData = new ScenePluginDataBO();
+        ScenePluginDataBO pluginData = new ScenePluginDataBO();
         if (scene != null) {
             pluginData.setScene(JsonCommon.beanToSnakeMap(scene));
         }
@@ -150,7 +152,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
 
     public void initBase() {
         ClassUtils.loadClassFields(this);
-        var pluginKeyAnnotation = getClass().getAnnotation(PluginKey.class);
+        PluginKey pluginKeyAnnotation = getClass().getAnnotation(PluginKey.class);
         key = pluginKeyAnnotation.value();
         priority = pluginKeyAnnotation.priority();
     }
