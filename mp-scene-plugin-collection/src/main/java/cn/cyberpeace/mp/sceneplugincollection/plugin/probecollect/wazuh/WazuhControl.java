@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.remotefile.GodfsClient;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
@@ -221,9 +220,6 @@ public class WazuhControl {
     @Getter
     private WazuhLauncher wazuhLauncher;
 
-    @Getter
-    private GodfsClient godfsClient;
-
     public static class WazuhControlBuilder {
         private WazuhLauncher.WazuhLauncherBuilder wazuhLauncherBuilder;
         private String godfsServer;
@@ -269,12 +265,6 @@ public class WazuhControl {
 
     private WazuhControl(WazuhLauncher wazuhLauncher, String godfsServer) {
         this.wazuhLauncher = wazuhLauncher;
-        this.godfsClient = GodfsClient.builder()
-                .configServer(godfsServer)
-                .configTimeout(600000)
-                .configMaxConnTotal(200)
-                .configMaxConnPerRoute(200)
-                .build();
     }
 
     public static WazuhControlBuilder builder() {

@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
-import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.common.util.FileClient;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -51,8 +51,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -96,10 +94,6 @@ public class ImagesController {
     private final DevopsClusterConfig devopsClusterConfig;
 
     private final DynamipsService dynamipsService ;
-
-    @Qualifier("fastDfsFileServiceImpl")
-    @Autowired
-    private FileService fileService;
 
     @NonNull
     private InjectFileUploadService injectFileUploadService;
@@ -559,7 +553,7 @@ public class ImagesController {
     @ApiImplicitParam(name = "filePath", value = "文件路径", dataTypeClass = String.class)
     @GetMapping(value = "/file/download/ssh")
     public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
-        fileService.downloadFile(filePath, response);
+        FileClient.downloadFile(filePath, response);
     }
 
     /**

@@ -1,23 +1,16 @@
 package cn.cyberpeace.mp.common.service;
 
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.service.impl.BaseRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 
 @Service
 public class MarkdownFileService extends BaseRemoteFileServiceImpl {
-
-    @Autowired
-    public MarkdownFileService(FsCommon fsCommon) {
-        setFileClient(FsCommon.fileClient);
-    }
 
     public ServiceResult<Boolean> validateUploadImageInput(InputStream is, String fileSuffix) {
         // MD上传图片支持类型校验

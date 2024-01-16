@@ -3,13 +3,11 @@ package cn.cyberpeace.mp.devopscluster.service.upload;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.common.util.FileClient;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,13 +19,6 @@ import java.util.Objects;
  */
 @Service
 public class BaseUploadService extends BaseAbstractUploadService{
-
-    /**
-     * 文件上传客户端
-     */
-    @Qualifier("fastDfsFileServiceImpl")
-    @Autowired
-    private FileService fileService;
 
     /**
      * 存放上传文件后的返回结果
@@ -87,7 +78,7 @@ public class BaseUploadService extends BaseAbstractUploadService{
      */
     @Override
     protected void uploadFile() {
-        this.serviceResult = fileService.uploadFile(file);
+        this.serviceResult = FileClient.uploadFile(file);
     }
 
     /**

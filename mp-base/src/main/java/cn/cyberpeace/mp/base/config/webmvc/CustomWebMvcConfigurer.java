@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.config.webmvc;
 
-import cn.cyberpeace.mp.base.common.LfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,6 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
-    @Autowired
-    private LfsCommon lfsCommon;
-
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         if (Boolean.TRUE.equals(baseAppConfig.getSnakeApiMode())) {
@@ -30,7 +27,7 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(baseAppConfig.getLfsUrlPattern())
-                .addResourceLocations(String.format("file:%s%s", LfsCommon.lfsClient.getGroupDir(), FileUtil.FILE_SEPARATOR));
+                .addResourceLocations(String.format("file:%s%s", FsCommon.getGroupDir(), FileUtil.FILE_SEPARATOR));
 
         //W:add swagger resource mapping
         registry.addResourceHandler("doc.html")

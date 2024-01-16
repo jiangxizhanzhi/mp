@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -132,9 +132,6 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private CollectionPluginSceneMapper collectionPluginSceneMapper;
-
-    @Autowired
-    private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
 
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
@@ -1631,7 +1628,7 @@ public class ScenePluginCollectionSceneService {
                 var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
                 if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
                     String key = URLUtil.url(model.getFlowFile()).getPath();
-                    fdfsRemoteFileService.delete(key);
+                    FsCommon.delete(key);
                 }
             }
 
