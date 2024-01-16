@@ -12,6 +12,9 @@ import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -67,7 +70,7 @@ public class SceneHandlerUtils {
     }
 
     private boolean startFlow(Flow flow, Runnable stopCallback) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
 
         Consumer<String> formatStopCallback = new Consumer<String>() {
             @Override
@@ -114,7 +117,7 @@ public class SceneHandlerUtils {
         batchStartTaskBO.setTaskSipList(taskSipBOList);
         batchStartTaskBO.setRunType(runType);
 
-        var taskIds = flows.stream()
+        List<String> taskIds = flows.stream()
                 .map(f -> f.getTaskId())
                 .collect(Collectors.toList());
         Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
@@ -191,20 +194,20 @@ public class SceneHandlerUtils {
 
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp, Runnable stopCallback,
                              boolean async, Runnable asyncCallback) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             return startFlow(flow, stopCallback);
         } else {
             log.info("taskId is empty");
         }
 
-        var flowId = flow.getId();
+        String flowId = flow.getId();
         if (StringUtils.isEmpty(flowId)) {
             errorFLow(flow, "Empty flow id");
             return false;
         }
 
-        var executorId = pluginHandler.getScene().getExecutor();
+        String executorId = pluginHandler.getScene().getExecutor();
         if (StringUtils.isEmpty(executorId)) {
             errorFLow(flow, "Empty executor id");
             return false;
@@ -217,8 +220,8 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        var srcElement = flowElement.getSrcElement();
-        var srcPorts = srcElement.getPorts();
+        SceneElementBO srcElement = flowElement.getSrcElement();
+        List<SceneElementPortBO> srcPorts = srcElement.getPorts();
         if (srcPorts == null) {
             errorFLow(flow, "Network port not found");
             return false;
@@ -226,8 +229,8 @@ public class SceneHandlerUtils {
 
         String networkId = null;
         String ip = null;
-        for (var srcPort : srcPorts) {
-            var cloudPort = cloudPluginHandler.getPort(srcPort.getId());
+        for (SceneElementPortBO srcPort : srcPorts) {
+            CloudPluginSceneElementPortBO cloudPort = cloudPluginHandler.getPort(srcPort.getId());
             networkId = cloudPort.getAuxiliaryNetworkId();
             ip = srcPort.getIp();
             if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(ip)) {
@@ -289,7 +292,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean stopFlow(Flow flow) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
         if (StringUtils.isEmpty(taskId)) {
             errorFLow(flow, "Empty task id");
             return false;
@@ -311,7 +314,7 @@ public class SceneHandlerUtils {
 //        var needCreateTaskFlows = flowWithSourceIps.stream()
 //                .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
 //                .collect(Collectors.toList());
-        var flows = flowWithSourceIps.stream()
+        List<Flow> flows = flowWithSourceIps.stream()
                 .map(f -> f.getFlow())
                 .collect(Collectors.toList());
 
@@ -469,7 +472,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean  deleteFlow(Flow flow) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             try {
                 flowExecutor.deleteFlow(taskId);

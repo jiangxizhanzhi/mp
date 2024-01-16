@@ -34,7 +34,7 @@ public abstract class BaseFlowPluginSceneElementBO<M extends BaseFlowPluginScene
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseFlowPluginSceneElementModel::getFlows)));
         if (flows != null) {
             obj.setFlows(JsonCommon.stringify(flows));

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -141,7 +143,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
     @Override
     public void createElement(String nodeId) {
-        var element = getElement(nodeId);
+        FlowPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             return;
         }
@@ -154,7 +156,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             String networkId = "";
             if (CollectionUtils.isNotEmpty(getSceneHandler().getElement(nodeId).getPorts())) {
                 CloudScenePluginHandler cloudPluginHandler = getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                for (var p : getSceneHandler().getElement(nodeId).getPorts()) {
+                for (SceneElementPortBO p : getSceneHandler().getElement(nodeId).getPorts()) {
                     nodeIp = p.getIp();
                     if (StringUtils.isNotEmpty(nodeIp)) {
                         CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
@@ -201,7 +203,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
-        var flowElement = getElement(nodeId);
+        FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
         }
@@ -213,14 +215,14 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
-        var flow = flowMap.getOrDefault(flowId, null);
+        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        Flow flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
         }
 
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
-        var flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, () -> {
+        boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, () -> {
             asyncAckElementChanged(nodeId, true);
             if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
                 getSceneHandler().updateSceneElementWithPlugins(nodeId);
@@ -239,7 +241,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     public boolean stopFlow(String nodeId, String flowId) {
-        var flowElement = getElement(nodeId);
+        FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
         }
@@ -250,13 +252,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
-        var flow = flowMap.getOrDefault(flowId, null);
+        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        Flow flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
         }
 
-        var flag = handlerUtils.stopFlow(flow);
+        boolean flag = handlerUtils.stopFlow(flow);
         asyncAckElementChanged(nodeId, true);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             getSceneHandler().updateSceneElementWithPlugins(nodeId);
@@ -265,7 +267,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType) {
-        var flowElement = getElement(nodeId);
+        FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
         }
@@ -286,7 +288,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         } else {
-            var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+            Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
             flowId2Ips.forEach(flowId2Ip -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
                 flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
@@ -299,7 +301,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
+        boolean flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
                     log.info("batch tasks run stopCallback");
                     asyncAckElementChanged(nodeId, true);
                     if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
@@ -321,7 +323,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     public boolean stopFlows(String nodeId, List<String> flowIds) {
-        var flowElement = getElement(nodeId);
+        FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
         }
@@ -336,7 +338,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         if (flowIds == null || flowIds.isEmpty()) {
             newFlows.addAll(flows);
         } else {
-            var flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+            Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
             flowIds.forEach(flowId -> {
                 newFlows.add(flowMap.getOrDefault(flowId, null));
             });
@@ -346,7 +348,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flag = handlerUtils.stopFlows(newFlows);
+        boolean flag = handlerUtils.stopFlows(newFlows);
         asyncAckElementChanged(nodeId, true);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             getSceneHandler().updateSceneElementWithPlugins(nodeId);
@@ -355,7 +357,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     public Flow updateFlowParams(String nodeId, String flowId, String sourceIp) {
-        var flowElement = getElement(nodeId);
+        FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
             return null;
         }

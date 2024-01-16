@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.util;
 
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
@@ -32,7 +33,7 @@ public class SceneFlowCacheUtil {
                     if (sceneHandler != null) {
                         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                         if (pluginHandler != null) {
-                            var element = pluginHandler.getElement(nodeId);
+                            FlowPluginSceneElementBO element = pluginHandler.getElement(nodeId);
                             if (element != null) {
                                 return element.getFlows();
                             }
