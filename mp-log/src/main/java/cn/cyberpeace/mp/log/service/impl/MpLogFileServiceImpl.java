@@ -55,7 +55,9 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Override
     public List<LogReportDTO> list(String type) {
         File logFile = new File(logPath);
-        List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
+        List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles()))
+                .filter(file -> file.isFile())
+                .collect(Collectors.toList());
         List<LogReportDTO> logReportDTOList = fileList.stream().map(f -> {
             LogReportDTO dto = new LogReportDTO();
             String fileName = f.getName();
