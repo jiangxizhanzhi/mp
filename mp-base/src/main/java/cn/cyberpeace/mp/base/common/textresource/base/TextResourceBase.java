@@ -43,33 +43,39 @@ public class TextResourceBase {
     public static Map<String, String> getHeaderFieldMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, String> headerFieldMap = new HashMap<>();
-        fieldColumnAnnotationMap.forEach((fieldName, columnAnnotation) -> {
+        for (Map.Entry<String, TextResourceColumn> entry : fieldColumnAnnotationMap.entrySet()) {
+            String fieldName = entry.getKey();
+            TextResourceColumn columnAnnotation = entry.getValue();
             for (String headerName : columnAnnotation.headers()) {
                 headerFieldMap.put(headerName, fieldName);
             }
-        });
+        }
         return headerFieldMap;
     }
 
     public static Map<String, String> getFieldHeaderMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, String> fieldHeaderMap = new HashMap<>();
-        fieldColumnAnnotationMap.forEach((fieldName, columnAnnotation) -> {
+        for (Map.Entry<String, TextResourceColumn> entry : fieldColumnAnnotationMap.entrySet()) {
+            String fieldName = entry.getKey();
+            TextResourceColumn columnAnnotation = entry.getValue();
             String[] headers = columnAnnotation.headers();
             if (headers.length > 0) {
                 fieldHeaderMap.put(fieldName, headers[0]);
             }
-        });
+        }
         return fieldHeaderMap;
     }
 
     public static Map<String, Class<? extends TextResourceConverter>> getFieldConverterMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, Class<? extends TextResourceConverter>> fieldConverterMap = new HashMap<>();
-        fieldColumnAnnotationMap.forEach((fieldName, columnAnnotation) -> {
+        for (Map.Entry<String, TextResourceColumn> entry : fieldColumnAnnotationMap.entrySet()) {
+            String fieldName = entry.getKey();
+            TextResourceColumn columnAnnotation = entry.getValue();
             Class<? extends TextResourceConverter> converterClass = columnAnnotation.converter();
             fieldConverterMap.put(fieldName, converterClass);
-        });
+        }
         return fieldConverterMap;
     }
 
@@ -86,20 +92,27 @@ public class TextResourceBase {
             int seq = columnAnnotation.seq();
             seqFieldNames.add(new Object[]{seq, fieldName});
         }
-        return seqFieldNames.stream()
-                .sorted(Comparator.comparing(seqFieldName -> (int) seqFieldName[0]))
-                .map(seqFieldName -> (String) seqFieldName[1])
-                .collect(Collectors.toList());
+        List<Object[]> toSort = new ArrayList<>();
+        for (Object[] seqFieldName : seqFieldNames) {
+            toSort.add(seqFieldName);
+        }
+        toSort.sort(Comparator.comparing(seqFieldName -> (int) seqFieldName[0]));
+        List<String> list = new ArrayList<>();
+        for (Object[] seqFieldName : toSort) {
+            String s = (String) seqFieldName[1];
+            list.add(s);
+        }
+        return list;
     }
 
     public static List<String> getHeaderLine(Class<?> clazz) {
         List<String> headerLine = new ArrayList<>();
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         List<String> linkedFieldNames = getLinkedFields(clazz);
-        linkedFieldNames.forEach(fieldName -> {
+        for (String fieldName : linkedFieldNames) {
             TextResourceColumn columnAnnotation = fieldColumnAnnotationMap.getOrDefault(fieldName, null);
             if (columnAnnotation == null) {
-                return;
+                continue;
             }
 
             String[] headers = columnAnnotation.headers();
@@ -108,7 +121,7 @@ public class TextResourceBase {
             } else {
                 headerLine.add(fieldName);
             }
-        });
+        }
         return headerLine;
     }
 
@@ -156,7 +169,9 @@ public class TextResourceBase {
             LinkedHashMap<String, String> map = maps.get(i);
             List<String> dataLine = new ArrayList<>();
             final int currentIndex = i;
-            map.forEach((fieldName, fieldValue) -> {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                String fieldName = entry.getKey();
+                String fieldValue = entry.getValue();
                 if (currentIndex == 0) {
                     String headerName;
                     if (fieldHeaderMap == null) {
@@ -167,7 +182,7 @@ public class TextResourceBase {
                     headerLine.add(headerName);
                 }
                 dataLine.add(fieldValue);
-            });
+            }
 
             if (i == 0) {
                 lines.add(headerLine);
@@ -184,15 +199,17 @@ public class TextResourceBase {
 
         Map<String, Class<? extends TextResourceConverter>> fieldConverterMap = getFieldConverterMap(clazz);
         List<T> objs = new ArrayList<>();
-        maps.forEach(dataMap -> {
+        for (LinkedHashMap<String, String> dataMap : maps) {
             T obj = ClassUtils.createInstance(clazz);
-            dataMap.forEach((fieldName, fieldValue) -> {
+            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+                String fieldName = entry.getKey();
+                String fieldValue = entry.getValue();
                 Class<? extends TextResourceConverter> converterClass = fieldConverterMap.getOrDefault(fieldName, null);
                 Object convertValue = converterClass == null ? fieldValue : BeanCommon.getBean(converterClass).convert(fieldValue);
                 ClassUtils.setObjFieldValue(obj, fieldName, convertValue);
-            });
+            }
             objs.add(obj);
-        });
+        }
         return objs;
     }
 
@@ -205,16 +222,16 @@ public class TextResourceBase {
         Map<String, Class<? extends TextResourceConverter>> fieldConverterMap = getFieldConverterMap(clazz);
         List<String> linkedFieldNames = getLinkedFields(clazz);
         List<LinkedHashMap<String, String>> maps = new ArrayList<>();
-        objs.forEach(obj -> {
+        for (T obj : objs) {
             LinkedHashMap<String, String> dataMap = new LinkedHashMap<>();
-            linkedFieldNames.forEach(fieldName -> {
+            for (String fieldName : linkedFieldNames) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, fieldName);
                 Class<? extends TextResourceConverter> converterClass = fieldConverterMap.getOrDefault(fieldName, null);
                 String convertValue = converterClass == null ? (String) fieldValue : BeanCommon.getBean(converterClass).reconvert(fieldValue);
                 dataMap.put(fieldName, convertValue);
-            });
+            }
             maps.add(dataMap);
-        });
+        }
         return maps;
     }
 

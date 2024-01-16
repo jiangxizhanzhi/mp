@@ -78,7 +78,11 @@ public class BaseModel {
 
     public void initDefault() {
         Map<String, Object[]> initDefaultFields = ModelUtils.getInitDefaultFields(getClass());
-        initDefaultFields.forEach((fieldName, value) -> initDefault(fieldName));
+        for (Map.Entry<String, Object[]> entry : initDefaultFields.entrySet()) {
+            String fieldName = entry.getKey();
+            Object[] value = entry.getValue();
+            initDefault(fieldName);
+        }
     }
 
     public void initDefault(String fieldName) {

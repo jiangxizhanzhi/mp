@@ -22,7 +22,12 @@ public class BeanUtils {
     }
 
     public static <T> String[] getBeanGetterFieldNames(SerializableFunction<T>... fieldGetters){
-        return Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (SerializableFunction<T> fieldGetter : fieldGetters) {
+            String beanGetterFieldName = getBeanGetterFieldName(fieldGetter);
+            list.add(beanGetterFieldName);
+        }
+        return list.toArray(new String[0]);
     }
 
     public static String[] getNotNullPropertyNames(Object obj) {
@@ -88,7 +93,11 @@ public class BeanUtils {
 
     public static Map<String, Object> getSnakeMap(Object obj) {
         Map<String, Object> map = new HashMap<>();
-        getMap(obj).forEach((fieldName, fieldValue) -> map.put(TextUtils.humpToLine(fieldName), fieldValue));
+        for (Map.Entry<String, Object> entry : getMap(obj).entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
+            map.put(TextUtils.humpToLine(fieldName), fieldValue);
+        }
         return map;
     }
 

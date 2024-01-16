@@ -36,12 +36,14 @@ public class LocalFileMappingCommon {
 
     public static List<LocalFileMappingModel> syncMap(String group, Map<String, String> namePathMap) {
         List<LocalFileMappingModel> mappings = new ArrayList<>();
-        namePathMap.forEach((name, filepath) -> {
+        for (Map.Entry<String, String> entry : namePathMap.entrySet()) {
+            String name = entry.getKey();
+            String filepath = entry.getValue();
             LocalFileMappingModel mapping = new LocalFileMappingModel();
             mapping.setName(name);
             mapping.setLocalFile(filepath);
             mappings.add(mapping);
-        });
+        }
         return syncMappings(group, mappings);
     }
 
@@ -49,9 +51,9 @@ public class LocalFileMappingCommon {
         log.info("sync file begin, group is {},dir is {}", group, localDir);
         List<String> fileNames = FileUtil.listFileNames(localDir);
         Map<String, String> namePathMap = new LinkedHashMap<>();
-        fileNames.forEach(fileName -> {
+        for (String fileName : fileNames) {
             namePathMap.put(fileName, StringUtils.joinWith(FileUtil.FILE_SEPARATOR, localDir, fileName));
-        });
+        }
         List<LocalFileMappingModel> result = syncMap(group, namePathMap);
         log.info("sync file end, diff is {}", JsonCommon.stringify(result));
         return result;

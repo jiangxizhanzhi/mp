@@ -100,7 +100,11 @@ public class DelayTaskPool {
             }
         }
         if (runTaskMap != null) {
-            runTaskMap.forEach((key, task) -> taskPool.executeTask(task, false));
+            for (Map.Entry<String, Runnable> entry : runTaskMap.entrySet()) {
+                String key = entry.getKey();
+                Runnable task = entry.getValue();
+                taskPool.executeTask(task, false);
+            }
         }
 
         boolean runNext = false;

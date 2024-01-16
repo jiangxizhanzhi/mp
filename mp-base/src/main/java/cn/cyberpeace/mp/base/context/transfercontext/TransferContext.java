@@ -14,15 +14,19 @@ public interface TransferContext<T> {
 
     static Map<String, Object> getContextMap() {
         Map<String, Object> contextMap = new HashMap<>();
-        BeanCommon.getBeanType(TransferContext.class).forEach((name, transferContext) -> {
+        for (Map.Entry<String, TransferContext> entry : BeanCommon.getBeanType(TransferContext.class).entrySet()) {
+            String name = entry.getKey();
+            TransferContext transferContext = entry.getValue();
             contextMap.put(transferContext.getKey(), transferContext.getValue());
-        });
+        }
         return contextMap;
     }
 
     static void setContextMap(Map<String, Object> contextMap) {
-        BeanCommon.getBeanType(TransferContext.class).forEach((name, transferContext) -> {
+        for (Map.Entry<String, TransferContext> entry : BeanCommon.getBeanType(TransferContext.class).entrySet()) {
+            String name = entry.getKey();
+            TransferContext transferContext = entry.getValue();
             transferContext.setValue(contextMap.getOrDefault(transferContext.getKey(), null));
-        });
+        }
     }
 }

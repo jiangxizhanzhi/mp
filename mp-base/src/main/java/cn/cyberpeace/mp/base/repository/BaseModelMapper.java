@@ -75,7 +75,9 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(objClass);
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        fieldTypes.forEach((fieldName, fieldType) -> {
+        for (Map.Entry<String, Class<?>> entry : fieldTypes.entrySet()) {
+            String fieldName = entry.getKey();
+            Class<?> fieldType = entry.getValue();
             String mapFieldName = null;
             if (map.containsKey(fieldName)) {
                 mapFieldName = fieldName;
@@ -90,7 +92,7 @@ public interface BaseModelMapper<M extends BaseModel> {
                 Object fieldValue = handleRawFieldValue(fieldType, map.get(mapFieldName));
                 objWrapper.setPropertyValue(fieldName, fieldValue);
             }
-        });
+        }
 
         return obj;
     }
@@ -152,8 +154,13 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     private Object[] convertCreateParams(List<M> objs) {
         DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
-        String[] createFields = Arrays.stream(allModelFields.getFields())
-                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (String fieldName : allModelFields.getFields()) {
+            if (!fieldName.equals(pkFieldName)) {
+                list.add(fieldName);
+            }
+        }
+        String[] createFields = list.toArray(new String[0]);
         String[] createColumnFields = new String[createFields.length];
         for (int i = 0; i < createFields.length; i++) {
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
@@ -184,8 +191,13 @@ public interface BaseModelMapper<M extends BaseModel> {
         sampleObj.initDefault(BaseModel::getUpdateTime);
 
         DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
-        String[] availableFields = Arrays.stream(allModelFields.getFields())
-                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (String s : allModelFields.getFields()) {
+            if (!s.equals(pkFieldName)) {
+                list.add(s);
+            }
+        }
+        String[] availableFields = list.toArray(new String[0]);
 
         List<String> updateFields = new ArrayList<>();
         List<String> updateColumnFields = new ArrayList<>();
@@ -224,12 +236,12 @@ public interface BaseModelMapper<M extends BaseModel> {
      */
     private Map<String, List<M>> groupValidFieldsObjs(List<M> objs) {
         Map<String, List<M>> validFieldsObjs = new HashMap<>();
-        objs.forEach(obj -> {
+        for (M obj : objs) {
             String key = DigestUtils.md5Hex(StringUtils.joinWith(":", (Object[]) BeanUtils.getNotNullPropertyNames(obj)));
             List<M> keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
             keyObjs.add(obj);
             validFieldsObjs.put(key, keyObjs);
-        });
+        }
         return validFieldsObjs;
     }
 
@@ -289,12 +301,12 @@ public interface BaseModelMapper<M extends BaseModel> {
     default <T> List<T> list(HumanCondition humanCondition, Class<T> objClass) {
         List<Map<String, Object>> mapList = originList(humanCondition);
         List<T> objs = new ArrayList<>();
-        mapList.forEach(map -> {
+        for (Map<String, Object> map : mapList) {
             T obj = mapToObj(map, objClass);
             if (obj != null) {
                 objs.add(obj);
             }
-        });
+        }
         return objs;
     }
 
@@ -424,7 +436,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -479,7 +493,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -487,12 +503,12 @@ public interface BaseModelMapper<M extends BaseModel> {
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {
         List<Map<String, Object>> mapList = getCommonMapper().list(tableName, condition, selectFields);
         List<M> objs = new ArrayList<>();
-        mapList.forEach(map -> {
+        for (Map<String, Object> map : mapList) {
             M obj = mapToObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
-        });
+        }
         return objs;
     }
 
@@ -596,7 +612,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -634,7 +652,12 @@ public interface BaseModelMapper<M extends BaseModel> {
             BulkResult<M> updateResult = bulkUpdate(logicObjs);
             result.addSuccessCount(updateResult.getSuccessCount());
             if (updateResult.getFail() != null) {
-                result.addFail(updateResult.getFail().stream().map(BaseModel::getId).collect(Collectors.toList()));
+                List<String> list = new ArrayList<>();
+                for (M m : updateResult.getFail()) {
+                    String id = m.getId();
+                    list.add(id);
+                }
+                result.addFail(list);
             }
         }
         if (!rawIds.isEmpty()) {
@@ -663,7 +686,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }

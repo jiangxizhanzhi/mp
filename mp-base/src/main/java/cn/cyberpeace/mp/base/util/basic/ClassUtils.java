@@ -213,13 +213,13 @@ public class ClassUtils {
         if (tryOrder) {
             List<Field> allFields = getClassDeclaredFields(clazz, true);
             List<String> orderedFields = new ArrayList<>();
-            allFields.forEach(field -> {
+            for (Field field : allFields) {
                 String fieldName = field.getName();
                 if (fieldPool.containsKey(fieldName)) {
                     fieldPool.remove(fieldName);
                     orderedFields.add(fieldName);
                 }
-            });
+            }
             orderedFields.addAll(fieldPool.keySet());
             fields = orderedFields.toArray(new String[0]);
         } else {

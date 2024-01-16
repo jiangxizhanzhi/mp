@@ -6,7 +6,6 @@ import com.alibaba.excel.EasyExcel;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ExcelCommon {
 
@@ -14,14 +13,26 @@ public class ExcelCommon {
 
     public static List<LinkedHashMap<String, String>> read(InputStream is, Map<String, String> headerFieldMap) {
         List<Map<Integer, String>> sourceLines = EasyExcel.read(is).headRowNumber(0).sheet().doReadSync();
-        List<List<String>> lines = sourceLines.stream().map(sourceLine -> {
+        List<List<String>> lines = new ArrayList<>();
+        for (Map<Integer, String> integerStringMap : sourceLines) {
             List<Object[]> orderingLine = new ArrayList<>();
-            sourceLine.forEach((seq, value) -> orderingLine.add(new Object[]{seq, value}));
-            return orderingLine.stream()
-                    .sorted(Comparator.comparing(item -> (Integer) item[0]))
-                    .map(item -> item[1] == null ? null : (String) item[1])
-                    .collect(Collectors.toList());
-        }).collect(Collectors.toList());
+            for (Map.Entry<Integer, String> entry : integerStringMap.entrySet()) {
+                Integer seq = entry.getKey();
+                String value = entry.getValue();
+                orderingLine.add(new Object[]{seq, value});
+            }
+            List<Object[]> toSort = new ArrayList<>();
+            for (Object[] item : orderingLine) {
+                toSort.add(item);
+            }
+            toSort.sort(Comparator.comparing(item -> (Integer) item[0]));
+            List<String> apply = new ArrayList<>();
+            for (Object[] item : toSort) {
+                String s = item[1] == null ? null : (String) item[1];
+                apply.add(s);
+            }
+            lines.add(apply);
+        }
         return TextResourceBase.lineToMaps(lines, headerFieldMap);
     }
 

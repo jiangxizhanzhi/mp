@@ -19,10 +19,7 @@ import springfox.documentation.swagger.schema.ApiModelProperties;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -89,12 +86,16 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
             return;
         }
 
-        final List<String> displayValues = Arrays.stream(subItemRecords)
-                .filter(Objects::nonNull)
-                // 调用枚举类的 toString 方法
-                .map(Object::toString)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        // 调用枚举类的 toString 方法
+        final List<String> displayValues = new ArrayList<>();
+        for (Object subItemRecord : subItemRecords) {
+            if (subItemRecord != null) {
+                String string = subItemRecord.toString();
+                if (string != null) {
+                    displayValues.add(string);
+                }
+            }
+        }
 
         String joinText = " (" + String.join("; ", displayValues) + ")";
         try {

@@ -124,14 +124,16 @@ public abstract class BaseGroupServer extends BaseServer {
     private static final Map<Class<?>, List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>>> serverGroupSessionsListMap = new HashMap<>();
 
     public static void initServerGroupSessionsListMap() {
-        BeanCommon.getBeanType(BaseGroupServer.class).forEach((name, groupServer) -> {
+        for (Map.Entry<String, BaseGroupServer> entry : BeanCommon.getBeanType(BaseGroupServer.class).entrySet()) {
+            String name = entry.getKey();
+            BaseGroupServer groupServer = entry.getValue();
             int groupIndexSize = ClassUtils.getStaticFieldValue(groupServer.getClass(), "groupIndexSize", Integer.class);
             List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = new ArrayList<>();
             for (int i = 0; i < groupIndexSize; i++) {
                 groupSessionsList.add(new ConcurrentHashMap<>());
             }
             serverGroupSessionsListMap.put(groupServer.getClass(), groupSessionsList);
-        });
+        }
     }
 
     public static <T> void sendToGroup(Class<?> serverClass, String groupKey,
@@ -151,7 +153,11 @@ public abstract class BaseGroupServer extends BaseServer {
             return;
         }
 
-        sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
+        for (Map.Entry<String, Session> entry : sessions.entrySet()) {
+            String sessionKey = entry.getKey();
+            Session session = entry.getValue();
+            BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
+        }
     }
 
     public static <T> void sendToGroupIndex(Class<?> serverClass, int groupIndex,
@@ -161,9 +167,15 @@ public abstract class BaseGroupServer extends BaseServer {
             return;
         }
         ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> groupSessionsMap = groupSessionsList.get(groupIndex);
-        groupSessionsMap.forEach((groupKey, sessions) -> {
-            sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
-        });
+        for (Map.Entry<String, ConcurrentHashMap<String, Session>> e : groupSessionsMap.entrySet()) {
+            String groupKey = e.getKey();
+            ConcurrentHashMap<String, Session> sessions = e.getValue();
+            for (Map.Entry<String, Session> entry : sessions.entrySet()) {
+                String sessionKey = entry.getKey();
+                Session session = entry.getValue();
+                BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
+            }
+        }
     }
 
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,

@@ -39,12 +39,12 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         List<Map<String, Object>> mapList = originList(innerCondition);
 
         List<T> objs = new ArrayList<>();
-        mapList.forEach(map -> {
+        for (Map<String, Object> map : mapList) {
             T obj = mapToTargetObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
-        });
+        }
         return objs;
     }
 
@@ -179,13 +179,15 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
         Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(actualModelClass);
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        fieldTypes.forEach((fieldName, fieldType) -> {
+        for (Map.Entry<String, Class<?>> entry : fieldTypes.entrySet()) {
+            String fieldName = entry.getKey();
+            Class<?> fieldType = entry.getValue();
             String columnName = TextUtils.humpToLine(fieldName);
             if (map.containsKey(columnName)) {
                 Object fieldValue = handleRawFieldValue(fieldType, map.get(columnName));
                 objWrapper.setPropertyValue(fieldName, fieldValue);
             }
-        });
+        }
 
         return obj;
     }
@@ -242,9 +244,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
             return new HashMap<>();
         }
         Map<String, String> newSelectFields = new HashMap<>();
-        selectFields.forEach((k, v) -> {
+        for (Map.Entry<String, String> entry : selectFields.entrySet()) {
+            String k = entry.getKey();
+            String v = entry.getValue();
             newSelectFields.put(convertFieldName(currentLinkName, k), v);
-        });
+        }
 
         return newSelectFields;
     }
@@ -254,7 +258,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         if (CollectionUtils.isEmpty(groupFields)) {
             return new ArrayList<>();
         }
-        List<String> newGroupFields = groupFields.stream().map(g -> convertFieldName(currentLinkName, g)).collect(Collectors.toList());
+        List<String> newGroupFields = new ArrayList<>();
+        for (String g : groupFields) {
+            String s = convertFieldName(currentLinkName, g);
+            newGroupFields.add(s);
+        }
 
         return newGroupFields;
     }
@@ -264,7 +272,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         if (CollectionUtils.isEmpty(orders)) {
             return new ArrayList<>();
         }
-        List<String> newOrders = orders.stream().map(g -> convertFieldName(currentLinkName, g)).collect(Collectors.toList());
+        List<String> newOrders = new ArrayList<>();
+        for (String g : orders) {
+            String s = convertFieldName(currentLinkName, g);
+            newOrders.add(s);
+        }
 
         return newOrders;
     }
@@ -278,15 +290,15 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         List<Object> condList = (List<Object>) ClassUtils.getFieldValue(AndCondition.class, "conds", andCondition);
 
         assert condList != null;
-        condList.forEach(c -> {
+        for (Object c : condList) {
             if (c instanceof ConnectorCond) {
                 Field fNameField = ClassUtils.getField(ConnectorCond.class, "fieldName", false, false);
                 if (Objects.nonNull(fNameField)) {
-                    String oldFieldName =  (String) ClassUtils.getFieldValue(fNameField, c);
+                    String oldFieldName = (String) ClassUtils.getFieldValue(fNameField, c);
                     ClassUtils.setFieldValue(fNameField, c, convertFieldName(currentLinkName, oldFieldName));
                 }
             }
-        });
+        }
 
         return andCondition;
 
