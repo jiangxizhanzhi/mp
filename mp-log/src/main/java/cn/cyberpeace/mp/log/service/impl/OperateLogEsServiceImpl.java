@@ -38,7 +38,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -59,8 +58,9 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
     private MessageSource messageSource;
 
     @PostConstruct
-    public void init(){
-        operateLogServiceMap = mpOperateLogServiceList.stream().collect(Collectors.toMap(MpOperateLogService::siteType, Function.identity()));
+    public void init() {
+        operateLogServiceMap = mpOperateLogServiceList.stream()
+                .collect(Collectors.toMap(mpOperateLogService -> mpOperateLogService.siteType(), mpOperateLogService -> mpOperateLogService));
     }
 
     @Autowired

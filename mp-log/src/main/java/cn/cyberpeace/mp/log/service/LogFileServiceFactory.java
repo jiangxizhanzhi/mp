@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.log.service;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.thread.taskpool.BasePoolTask;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -27,7 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +45,9 @@ public class LogFileServiceFactory {
     private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
 
     @PostConstruct
-    public void init(){
-        logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
+    public void init() {
+        logFileServiceMap = fileServiceList.stream()
+                .collect(Collectors.toMap(logFileService -> logFileService.logReportType(), logFileService -> logFileService));
     }
 
     /**
@@ -86,8 +85,10 @@ public class LogFileServiceFactory {
             totalLogReportCallableList.addAll(logReportCallableList);
             totalLogReportCallableList.addAll(reportLogReportCallableList);
 
-            List<LogReportDTO> totalLogReportList = TaskCommon.callTasks(totalLogReportCallableList).stream().map(BasePoolTask::getResult)
-                    .flatMap(List::stream).collect(Collectors.toList());
+            List<LogReportDTO> totalLogReportList = TaskCommon.callTasks(totalLogReportCallableList).stream()
+                    .map(base -> base.getResult())
+                    .flatMap(logReportDTOS -> logReportDTOS.stream())
+                    .collect(Collectors.toList());
             result.addAll(totalLogReportList);
         }
 
