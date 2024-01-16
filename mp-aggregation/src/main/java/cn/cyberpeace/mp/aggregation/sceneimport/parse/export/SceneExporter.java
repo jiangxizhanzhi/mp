@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.StaticRoutesResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
@@ -57,20 +58,20 @@ public class SceneExporter {
         // 生成topo.yml
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
-            resultV1.getYmlResult().getNodes().forEach(n -> {
+            for (NodeElementParseResult n : resultV1.getYmlResult().getNodes()) {
                 if (StringUtils.isNotEmpty(n.getImage())) {
                     n.setImage(sceneNumber + n.getImage());
                 }
                 if (StringUtils.isNotEmpty(n.getImages())) {
                     n.setImages(sceneNumber + n.getImages());
                 }
-            });
+            }
         }
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
         SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(parseResult.getYmlResult().getNodes())) {
-            parseResult.getYmlResult().getNodes().forEach(n -> {
+            for (NodeElementParseResult n : parseResult.getYmlResult().getNodes()) {
                 if (StringUtils.isNotEmpty(n.getImage())) {
                     n.setImage(sceneNumber + n.getImage());
                 }
@@ -99,7 +100,7 @@ public class SceneExporter {
                         }
                     }
                 }
-            });
+            }
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
@@ -111,12 +112,14 @@ public class SceneExporter {
         }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
-        parseResult.getIdConvert().forEach((k, v) -> {
+        for (Map.Entry<String, String> entry : parseResult.getIdConvert().entrySet()) {
+            String k = entry.getKey();
+            String v = entry.getValue();
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
             convertInfo.setId(v);
             convertInfo.setOriginId(k);
             convertInfos.add(convertInfo);
-        });
+        }
         exportResult.setConvertInfos(convertInfos);
         return exportResult;
     }

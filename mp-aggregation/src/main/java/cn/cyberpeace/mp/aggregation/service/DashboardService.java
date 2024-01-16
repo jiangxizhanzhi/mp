@@ -102,14 +102,27 @@ public class DashboardService {
         }
         Collections.reverse(daylist);
 
-        String[] xAxis = daylist.stream().map(day -> df.format(day)).toArray(String[]::new);
-        Integer[] userCount = daylist.stream().map(day -> {
-            Integer cnt = userOnlineRecordService.getOnlinedUserCntByPeriod(day.atStartOfDay(), day.plusDays(1).atStartOfDay());
-            return cnt;
-        }).toArray(Integer[]::new);
+        List<String> list1 = new ArrayList<>();
+        for (LocalDate date : daylist) {
+            String format = df.format(date);
+            list1.add(format);
+        }
+        String[] xAxis = list1.toArray(new String[0]);
+        List<Integer> result = new ArrayList<>();
+        for (LocalDate localDate : daylist) {
+            Integer cnt = userOnlineRecordService.getOnlinedUserCntByPeriod(localDate.atStartOfDay(), localDate.plusDays(1).atStartOfDay());
+            Integer apply = cnt;
+            result.add(apply);
+        }
+        Integer[] userCount = result.toArray(new Integer[0]);
 
         // 每日活跃场景数量 todo,性能可优化
-        Integer[] sceneCount = daylist.stream().map(day -> csceneSpecialService.countActivitySceneByTime(day.atStartOfDay(), day.plusDays(1).atStartOfDay())).toArray(Integer[]::new);
+        List<Integer> list = new ArrayList<>();
+        for (LocalDate day : daylist) {
+            Integer countActivitySceneByTime = csceneSpecialService.countActivitySceneByTime(day.atStartOfDay(), day.plusDays(1).atStartOfDay());
+            list.add(countActivitySceneByTime);
+        }
+        Integer[] sceneCount = list.toArray(new Integer[0]);
 
         DailyUserActivityResponse response = DailyUserActivityResponse.builder().xAxis(xAxis).userCount(userCount).sceneCount(sceneCount).build();
         return response;
@@ -194,10 +207,13 @@ public class DashboardService {
         }
 
         userResource.setSceneCount(csceneInstances.size());
-        List<String> sceneIds = csceneInstances.stream()
-                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
-                .map(csceneInstance -> csceneInstance.getScene())
-                .collect(Collectors.toList());
+        List<String> sceneIds = new ArrayList<>();
+        for (CsceneInstanceModel csceneInstance : csceneInstances) {
+            if (!StringUtils.isEmpty(csceneInstance.getScene())) {
+                String scene = csceneInstance.getScene();
+                sceneIds.add(scene);
+            }
+        }
         String fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
         Map<Object, Long> result = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
@@ -215,10 +231,13 @@ public class DashboardService {
         if (csceneInstances.isEmpty()) {
             return new ServiceResult<>(new SceneBusinessSummary());
         }
-        List<String> sceneIds = csceneInstances.stream()
-                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
-                .map(csceneInstance -> csceneInstance.getScene())
-                .collect(Collectors.toList());
+        List<String> sceneIds = new ArrayList<>();
+        for (CsceneInstanceModel csceneInstance : csceneInstances) {
+            if (!StringUtils.isEmpty(csceneInstance.getScene())) {
+                String scene = csceneInstance.getScene();
+                sceneIds.add(scene);
+            }
+        }
         String fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getRole);
         Map<Object, Long> result = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
@@ -245,7 +264,11 @@ public class DashboardService {
         List<UserOnlineReportBo> userOnlineReportBoList = pageInfo.getList();
 
         //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
-        List<String> onlinedUserIds = userOnlineReportBoList.stream().map(UserOnlineReportBo::getUser).collect(Collectors.toList());
+        List<String> onlinedUserIds = new ArrayList<>();
+        for (UserOnlineReportBo onlineReportBo : userOnlineReportBoList) {
+            String user = onlineReportBo.getUser();
+            onlinedUserIds.add(user);
+        }
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(onlinedUserIds)) {
             ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
@@ -261,7 +284,13 @@ public class DashboardService {
             monitorDto.setHasNodeSession(false);
 
             if (CollectionUtils.isNotEmpty(userConnectionNumBOList)) {
-                Optional<UserConnectionNumBO> boOptional = userConnectionNumBOList.stream().filter(bo -> Objects.equals(bo.getUser(), userOnlineReportBo.getUser())).findFirst();
+                Optional<UserConnectionNumBO> boOptional = Optional.empty();
+                for (UserConnectionNumBO bo : userConnectionNumBOList) {
+                    if (Objects.equals(bo.getUser(), userOnlineReportBo.getUser())) {
+                        boOptional = Optional.of(bo);
+                        break;
+                    }
+                }
                 if (boOptional.isPresent() && boOptional.get().getConnectionNum() > 0) {
                     monitorDto.setNodeSessionCnt(boOptional.get().getConnectionNum());
                     monitorDto.setHasNodeSession(true);

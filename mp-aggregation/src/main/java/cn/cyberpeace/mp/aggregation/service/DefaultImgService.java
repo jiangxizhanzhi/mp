@@ -9,10 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,8 +49,19 @@ public class DefaultImgService {
             log.error("==========file dir not exist:{}==================", pathName);
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
-        List<File> fileList = Arrays.stream(listFiles).filter(File::isFile).sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
-        return fileList.stream().map(f -> endPathName.concat("/").concat(f.getName())).collect(Collectors.toList());
+        List<File> fileList = new ArrayList<>();
+        for (File listFile : listFiles) {
+            if (listFile.isFile()) {
+                fileList.add(listFile);
+            }
+        }
+        fileList.sort(Comparator.comparing(File::getName));
+        List<String> list = new ArrayList<>();
+        for (File f : fileList) {
+            String concat = endPathName.concat("/").concat(f.getName());
+            list.add(concat);
+        }
+        return list;
     }
 
     public String getDefaultImgFilePath(String relativePath) {

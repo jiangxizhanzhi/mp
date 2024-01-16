@@ -2,10 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.AclsInfo;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.*;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -51,7 +48,9 @@ class NodeElementConverter implements IConverter {
 
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(this.parseResult)) {
-            this.parseResult.stream().forEach(node -> this.createElementAndPort(node, container));
+            for (NodeElementParseResult node : this.parseResult) {
+                this.createElementAndPort(node, container);
+            }
         }
     }
 
@@ -130,15 +129,15 @@ class NodeElementConverter implements IConverter {
 
         // 路由器加入 static-routes
         if (CollectionUtils.isNotEmpty(node.getUsedStaticRoutes())) {
-            List<StaticRoute> routes = node.getUsedStaticRoutes().stream()
-                    .map(s -> {
-                        StaticRoute staticRoute = new StaticRoute();
-                        staticRoute.setDestination(s.getDestination());
-                        staticRoute.setNexthop(s.getGateway());
-                        staticRoute.setNexthopPortId(s.getNexthopNode());
-                        return staticRoute;
-                    })
-                    .collect(Collectors.toList());
+            List<StaticRoute> routes = new ArrayList<>();
+            for (StaticRoutesResult staticRoutesResult : node.getUsedStaticRoutes()) {
+                StaticRoute staticRoute = new StaticRoute();
+                staticRoute.setDestination(staticRoutesResult.getDestination());
+                staticRoute.setNexthop(staticRoutesResult.getGateway());
+                staticRoute.setNexthopPortId(staticRoutesResult.getNexthopNode());
+                StaticRoute apply = staticRoute;
+                routes.add(apply);
+            }
             pluginElement.setStaticRoutes(routes);
         }
         if (node.getExtInfo() != null) {
@@ -171,39 +170,46 @@ class NodeElementConverter implements IConverter {
     }
 
     private List<FirewallRule> buildFirewallRules(List<AclsInfo> aclsInfos) {
-        return aclsInfos.stream().map(aclsInfo -> {
+        // ip与端口
+        // 协议
+        // 方向
+        // 规则
+        List<FirewallRule> list = new ArrayList<>();
+        for (AclsInfo info : aclsInfos) {
             FirewallRule firewallRule = new FirewallRule();
             // ip与端口
-            firewallRule.setSourceIpAddress(aclsInfo.getSourceIP());
-            firewallRule.setSourcePort(aclsInfo.getSourcePort());
-            firewallRule.setDestinationIpAddress(aclsInfo.getTargetIP());
-            firewallRule.setDestinationPort(aclsInfo.getTargetPort());
+            firewallRule.setSourceIpAddress(info.getSourceIP());
+            firewallRule.setSourcePort(info.getSourcePort());
+            firewallRule.setDestinationIpAddress(info.getTargetIP());
+            firewallRule.setDestinationPort(info.getTargetPort());
             // 协议
-            firewallRule.setProtocol(aclsInfo.getProtocol());
-            String ipStr = StringUtils.isNotEmpty(aclsInfo.getSourceIP()) ? aclsInfo.getSourceIP() : aclsInfo.getTargetIP();
+            firewallRule.setProtocol(info.getProtocol());
+            String ipStr = StringUtils.isNotEmpty(info.getSourceIP()) ? info.getSourceIP() : info.getTargetIP();
             if (StringUtils.isEmpty(ipStr) || ipStr.length() <= 15) {
                 firewallRule.setIpVersion(IpVersion.IPV4);
             } else {
                 firewallRule.setIpVersion(IpVersion.IPV6);
             }
             // 方向
-            if ("up".equals(aclsInfo.getDirection())) {
+            if ("up".equals(info.getDirection())) {
                 firewallRule.setDirection(FirewallRuleDirection.EGRESS);
-            } else if ("down".equals(aclsInfo.getDirection())) {
+            } else if ("down".equals(info.getDirection())) {
                 firewallRule.setDirection(FirewallRuleDirection.INGRESS);
-            } else if ("two-way".equals(aclsInfo.getDirection())) {
+            } else if ("two-way".equals(info.getDirection())) {
                 firewallRule.setDirection(FirewallRuleDirection.BOTH);
             }
             // 规则
-            if ("deny".equals(aclsInfo.getAction())) {
+            if ("deny".equals(info.getAction())) {
                 firewallRule.setAction(FirewallRuleAction.DENY);
-            } else if ("allow".equals(aclsInfo.getAction())) {
+            } else if ("allow".equals(info.getAction())) {
                 firewallRule.setAction(FirewallRuleAction.ALLOW);
-            } else if ("reject".equals(aclsInfo.getAction())) {
+            } else if ("reject".equals(info.getAction())) {
                 firewallRule.setAction(FirewallRuleAction.REJECT);
             }
-            return firewallRule;
-        }).collect(Collectors.toList());
+            FirewallRule apply = firewallRule;
+            list.add(apply);
+        }
+        return list;
     }
 
     private double formatDouble(String number) {

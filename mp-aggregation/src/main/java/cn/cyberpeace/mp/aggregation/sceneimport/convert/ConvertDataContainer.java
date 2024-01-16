@@ -119,12 +119,17 @@ class ConvertDataContainer {
 
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(configDataBO);
-        csceneBO.getSceneConfig().getTopology().getElements().forEach(element -> {
+        for (SceneConfigElementBO element : csceneBO.getSceneConfig().getTopology().getElements()) {
             if (CollectionUtils.isNotEmpty(element.getInitCommands())) {
-                List<String> newCommand = element.getInitCommands().stream().filter(command -> command != null).collect(Collectors.toList());
+                List<String> newCommand = new ArrayList<>();
+                for (String command : element.getInitCommands()) {
+                    if (command != null) {
+                        newCommand.add(command);
+                    }
+                }
                 element.setInitCommands(newCommand);
             }
-        });
+        }
         return csceneBO;
     }
 
