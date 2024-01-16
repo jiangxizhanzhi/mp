@@ -63,7 +63,12 @@ public class FileCheckCommon {
 
     public static boolean checkSuffix(String fileName, List<String> suffixList) {
         String suffix = FileUtils.getSuffix(fileName);
-        return suffixList.stream().anyMatch(x -> x.equalsIgnoreCase(suffix));
+        for (String x : suffixList) {
+            if (x.equalsIgnoreCase(suffix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean checkSuffix(MultipartFile file, List<String> suffixList) {
@@ -76,7 +81,12 @@ public class FileCheckCommon {
             // 无法获取文件头信息，直接返回true
             return true;
         }
-        return magicHeaderList.stream().anyMatch(x -> x.equalsIgnoreCase(type));
+        for (String x : magicHeaderList) {
+            if (x.equalsIgnoreCase(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean checkMagicHeader(MultipartFile file, List<String> magicHeaderList) {

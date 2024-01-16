@@ -203,7 +203,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             while (StringUtils.isNotBlank(orgModel.getParent())) {
                 String parentId = orgModel.getParent();
                 Optional<OrgModel> orgModelOptional =
-                        orgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                        Optional.empty();
+                for (OrgModel org : orgModelList) {
+                    if (org.getId().equals(parentId)) {
+                        orgModelOptional = Optional.of(org);
+                        break;
+                    }
+                }
                 if (orgModelOptional.isPresent()) {
                     orgModel = orgModelOptional.get();
                     path = orgModel.getName().concat(AuthConstant.ORG_PATH_SEPARATOR).concat(path);
@@ -252,7 +258,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                     while (StringUtils.isNotBlank(orgModel.getParent())) {
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
-                                allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                                Optional.empty();
+                        for (OrgModel org : allOrgModelList) {
+                            if (org.getId().equals(parentId)) {
+                                orgModelOptional = Optional.of(org);
+                                break;
+                            }
+                        }
                         if (orgModelOptional.isPresent()) {
                             orgModel = orgModelOptional.get();
                             pathList.add(0, orgModel.getName());
@@ -323,12 +335,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                                 .filterOrEnd();
         List<OrgModel> orgs = getModelMapper().list(humanCondition);
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getPath(orgModel));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getPath(org));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -337,12 +351,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
         List<OrgModel> orgs = listByParentId(parentId);
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getPath(orgModel));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getPath(org));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -350,14 +366,21 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public List<OrgBO> listAll(String tenantId) {
         List<OrgModel> orgs = orgPathService.listByTenant(tenantId);
         // 租户所有组织使用了缓存，下面的组装路径需要使用Map索引，否则会导致过多查找
-        Map<String, OrgModel> orgMap = orgs.stream().collect(Collectors.toMap(OrgModel::getId, org -> org));
+        Map<String, OrgModel> orgMap = new HashMap<>();
+        for (OrgModel orgModel : orgs) {
+            if (orgMap.put(orgModel.getId(), orgModel) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getOrgPath(orgModel, orgMap));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getOrgPath(org, orgMap));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -561,11 +584,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     // 组织树排序
     private void sortTree(List<OrgDto> orgs) {
-        orgs.forEach(o -> {
+        for (OrgDto o : orgs) {
             if (CollectionUtils.isNotEmpty(o.getChildren())) {
                 sortTree(o.getChildren());
             }
-        });
+        }
 
         orgs.sort((o1, o2) -> o1.getPk() - o2.getPk());
     }

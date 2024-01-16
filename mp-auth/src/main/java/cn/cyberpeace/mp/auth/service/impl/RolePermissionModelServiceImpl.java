@@ -71,7 +71,9 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
                 .select(RolePermissionModel.QUERY_FIELD_TARGET);
         List<RolePermissionModel> rolePermissionModels = rolePermissionMapper.list(rolePermissionCondition);
         List<String> ids = new ArrayList<>();
-        rolePermissionModels.forEach(model -> ids.add(model.getTarget()));
+        for (RolePermissionModel model : rolePermissionModels) {
+            ids.add(model.getTarget());
+        }
         if (ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -138,14 +140,13 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
         // 添加角色权限
         List<RolePermissionModel> rolePerms = new ArrayList<>();
-        targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+        for (String tid : targetIds) {// todo 校验权限是否存在
             RolePermissionModel rolePerm = new RolePermissionModel();
             rolePerm.setOwner(roleId);
             rolePerm.setTarget(tid);
             rolePerm.setTenant(AuthConstant.DEFAULT_TENANT);
             rolePerms.add(rolePerm);
-        });
+        }
 
         bulkCreate(rolePerms);
         return true;

@@ -83,7 +83,14 @@ public class UserOnlineRecordScheduleService {
 
         for (UserModel userModel : removeList) {
             CopyOnWriteArrayList<LocalDateTime> beatList = heartbeatMap.get(userModel);
-            if (beatList.stream().anyMatch(t -> t.isAfter(begin))) {
+            boolean b = false;
+            for (LocalDateTime t : beatList) {
+                if (t.isAfter(begin)) {
+                    b = true;
+                    break;
+                }
+            }
+            if (b) {
                 CopyOnWriteArrayList timestampList = new CopyOnWriteArrayList();
                 timestampList.add(begin);
                 heartbeatMap.put(userModel, timestampList);

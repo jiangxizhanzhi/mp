@@ -55,7 +55,13 @@ public class MenuConfigService {
         }
         List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
         Set<String> authorityMenuIdsSet = new HashSet<>(authorityMenuIds);
-        targets = targets.stream().filter(t -> authorityMenuIdsSet.contains(t.getIdentifier())).collect(Collectors.toList());
+        List<MenuTemplateModel> list = new ArrayList<>();
+        for (MenuTemplateModel t : targets) {
+            if (authorityMenuIdsSet.contains(t.getIdentifier())) {
+                list.add(t);
+            }
+        }
+        targets = list;
         if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
@@ -144,11 +150,11 @@ public class MenuConfigService {
     }
 
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
 }

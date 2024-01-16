@@ -104,15 +104,15 @@ public class AuthUserDetailsService implements UserDetailsService {
             return authoritySet;
         }
         List<RoleModel> roles = userRoleService.listByUserId(userId);
-        roles.forEach(r -> {
+        for (RoleModel r : roles) {
             authoritySet.add(new SimpleGrantedAuthority("ROLE_" + r.getIdentifier()));
-        });
+        }
 
         // 加载权限
         List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
-        targets.forEach(t -> {
+        for (TargetModel t : targets) {
             authoritySet.add(new SimpleGrantedAuthority(t.getIdentifier()));
-        });
+        }
         return authoritySet;
     }
 

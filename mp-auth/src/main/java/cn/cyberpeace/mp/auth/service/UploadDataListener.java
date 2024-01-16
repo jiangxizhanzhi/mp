@@ -127,7 +127,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         // 表格内用户名重复内容校验
         List<Map.Entry<String, Long>> duplicateElements = getDuplicateElements(users);
         if (CollectionUtils.isNotEmpty(duplicateElements)) {
-            String duplicatedUserNames = duplicateElements.stream().map(Map.Entry::getKey).collect(Collectors.joining(","));
+            StringJoiner joiner = new StringJoiner(",");
+            for (Map.Entry<String, Long> duplicateElement : duplicateElements) {
+                String key = duplicateElement.getKey();
+                joiner.add(key);
+            }
+            String duplicatedUserNames = joiner.toString();
             log.error("import error! username {} duplicated!", duplicatedUserNames);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_DUPLICATED.format(duplicatedUserNames));
         }
@@ -174,7 +179,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * @param userName2IndexBoMap
      */
     private void checkUserNameFromDB(Map<String, Integer> userName2IndexBoMap) {
-        List<String> userNames = userName2IndexBoMap.keySet().stream().collect(Collectors.toList());
+        List<String> userNames = new ArrayList<>();
+        for (String s : userName2IndexBoMap.keySet()) {
+            userNames.add(s);
+        }
         List<String> existedUserNames = userService.listExistedUserNames(userNames, 1);
         if (CollectionUtils.isNotEmpty(existedUserNames)) {
             String username = existedUserNames.get(0);
@@ -299,7 +307,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
 
         user.setOrgIdList(new ArrayList<>());
-        Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+        for (String path : StringUtils.split(orgPaths, ",")) {
             OrgBO orgBO = orgService.getByPath(path.trim());
             if (Objects.isNull(orgBO)) {
                 log.error("No {} row error! org {} not existed!", index, path.trim());
@@ -307,7 +315,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             } else {
                 user.getOrgIdList().add(orgBO.getId());
             }
-        });
+        }
     }
 
 
@@ -332,17 +340,26 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         List<ImportUserBo> finalList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cfList)) {
             CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
-            CompletableFuture<List<List<ImportUserBo>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            CompletableFuture<List<List<ImportUserBo>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> {
+                List<List<ImportUserBo>> result = new ArrayList<>();
+                for (CompletableFuture<List<ImportUserBo>> listCompletableFuture : cfList) {
+                    List<ImportUserBo> join = listCompletableFuture.join();
+                    result.add(join);
+                }
+                return result;
+            });
             List<List<ImportUserBo>> result = finalCF.join();
-            result.forEach(list -> finalList.addAll(list));
+            for (List<ImportUserBo> importUserBos : result) {
+                finalList.addAll(importUserBos);
+            }
         }
     }
 
 
     private List<ImportUserBo> enPwd(List<ImportUserBo> list) {
-        list.forEach(u -> {
+        for (ImportUserBo u : list) {
             u.setPassword(PasswordUtils.encode(u.getPassword()));
-        });
+        }
         return list;
     }
 
@@ -370,7 +387,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             }
 
             user.setOrgIdList(new ArrayList<>());
-            Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+            for (String path : StringUtils.split(orgPaths, ",")) {
                 OrgBO orgBO = orgPath2ModelMap.get(path.trim());
                 if (Objects.isNull(orgBO)) {
                     orgBO = orgService.getByPath(path.trim());
@@ -382,7 +399,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 } else {
                     user.getOrgIdList().add(orgBO.getId());
                 }
-            });
+            }
         }
     }
 
@@ -431,7 +448,16 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
 
     public List<Map.Entry<String, Long>> getDuplicateElements(List<ImportUserBo> users) {
-        List<Map.Entry<String, Long>> list = users.stream().collect(Collectors.groupingBy(u -> u.getUsername(), Collectors.counting())).entrySet().stream().filter(entry -> entry.getValue() > 1).collect(Collectors.toList());
+        Map<String, Long> map = new HashMap<>();
+        for (ImportUserBo u : users) {
+            map.merge(u.getUsername(), 1L, Long::sum);
+        }
+        List<Map.Entry<String, Long>> list = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : map.entrySet()) {
+            if (entry.getValue() > 1) {
+                list.add(entry);
+            }
+        }
         return list;
     }
 

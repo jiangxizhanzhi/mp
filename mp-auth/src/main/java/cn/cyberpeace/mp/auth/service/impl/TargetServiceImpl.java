@@ -260,11 +260,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }

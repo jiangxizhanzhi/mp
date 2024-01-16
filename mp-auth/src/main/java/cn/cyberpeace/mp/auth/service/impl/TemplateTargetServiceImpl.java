@@ -64,7 +64,9 @@ public class TemplateTargetServiceImpl implements TargetService {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
         HumanCondition condition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getParent, parentId).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<MenuTemplateModel> targetModels = getModelMapper().list(condition);
-        targetModels.forEach(t -> t.setId(t.getMenuId()));
+        for (MenuTemplateModel t : targetModels) {
+            t.setId(t.getMenuId());
+        }
         return targetModels;
     }
 
@@ -189,11 +191,11 @@ public class TemplateTargetServiceImpl implements TargetService {
 
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }

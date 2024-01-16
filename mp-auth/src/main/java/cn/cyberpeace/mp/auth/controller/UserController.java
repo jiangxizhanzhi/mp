@@ -114,11 +114,11 @@ public class UserController {
         List<UserModel> userModels = userService.getUserModelNoRestrictByUserIds(ids);
 
         List<UserSimpleBo> userSimpleBos = new ArrayList<>();
-        userModels.forEach(userModel -> {
+        for (UserModel userModel : userModels) {
             UserSimpleBo userSimpleBo = new UserSimpleBo();
             BeanUtils.copyProperties(userModel, userSimpleBo);
             userSimpleBos.add(userSimpleBo);
-        });
+        }
 
         return ResultCommon.success(userSimpleBos);
     }

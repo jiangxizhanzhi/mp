@@ -154,9 +154,12 @@ public class OperatePermissionService {
      * @return
      */
     private boolean hasAdminRole(List<String> roleIds) {
-        return roleIds.stream()
-                .filter(r -> Objects.equals(r.trim(), AuthConstant.ROLE_ADMIN_ID))
-                .findAny().isPresent();
+        for (String r : roleIds) {
+            if (Objects.equals(r.trim(), AuthConstant.ROLE_ADMIN_ID)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

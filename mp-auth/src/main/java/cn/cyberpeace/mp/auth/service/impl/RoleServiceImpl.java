@@ -261,7 +261,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             // 对 targetIds 去重
             TreeSet<String> set = new TreeSet<>(targetIds);
 
-            set.forEach(id -> {
+            for (String id : set) {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("target id:{} not existed!", id);
@@ -273,7 +273,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
-            });
+            }
         }
 
         return roleCreated;
@@ -305,7 +305,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         // 保存角色-权限关系
         if (CollectionUtils.isNotEmpty(modifyRequest.getTargetIds())) {
-            modifyRequest.getTargetIds().forEach(id -> {
+            for (String id : modifyRequest.getTargetIds()) {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("target id:{} not existed!", id);
@@ -317,7 +317,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
-            });
+            }
         }
 
         userCacheService.evictAllUserCache();
@@ -332,7 +332,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (CollectionUtils.isEmpty(models)) {
             return new ArrayList<>();
         }
-        return models.stream().map(m -> m.getId()).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (RoleModel m : models) {
+            String id = m.getId();
+            list.add(id);
+        }
+        return list;
     }
 
 
@@ -378,13 +383,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     private List<PermissionBo> targetModel2PermissionDto(List<TargetModel> targets) {
         List<PermissionBo> permissionBos =
-                targets.stream().map(t -> {
-                    PermissionBo permissionBo = new PermissionBo();
-                    BeanUtils.copyProperties(t, permissionBo);
-                    permissionBo.setPerm("R/W/X");
-                    permissionBo.setIsEnabled(1);
-                    return permissionBo;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (TargetModel target : targets) {
+            PermissionBo permissionBo = new PermissionBo();
+            BeanUtils.copyProperties(target, permissionBo);
+            permissionBo.setPerm("R/W/X");
+            permissionBo.setIsEnabled(1);
+            PermissionBo apply = permissionBo;
+            permissionBos.add(apply);
+        }
         return permissionBos;
     }
 
@@ -450,7 +457,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         int total = getModelMapper().total(roleCondition);
         roleCondition.pagination(page, pageSize);
         List<RoleModel> roleModels = getModelMapper().list(roleCondition);
-        List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> roleIds = new ArrayList<>();
+        for (RoleModel model : roleModels) {
+            String id = model.getId();
+            roleIds.add(id);
+        }
 
         if (CollectionUtils.isEmpty(roleIds)) {
             roleIds.add("");
@@ -463,9 +474,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         List<Map<String, Object>> maps = userRoleMapper.originList(userRoleCondition);
         Map<String, Integer> roleCountMap = new HashMap<>(maps.size());
-        maps.stream().forEach(map -> {
+        for (Map<String, Object> map : maps) {
             roleCountMap.put((String) map.get("role"), ((Long) map.get("userCnt")).intValue());
-        });
+        }
 
         List<RoleBo> rolebos = new ArrayList<>();
         for (RoleModel roleModel : roleModels) {
@@ -477,11 +488,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
 
-        rolebos.forEach(r -> {
-            if (r.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
-                r.setTargets(allTargets);
+        for (RoleBo rolebo : rolebos) {
+            if (rolebo.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
+                rolebo.setTargets(allTargets);
             }
-        });
+        }
 
         List<String> roleBoIds =
                 rolebos.stream().map(r -> {
@@ -494,7 +505,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (CollectionUtils.isNotEmpty(roleBoIds)) {
             List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleBoIds);
             if (CollectionUtils.isNotEmpty(targetRoleBos)) {
-                rolebos.forEach(r -> {
+                for (RoleBo r : rolebos) {
                     List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
                         if (Objects.equals(tr.getRoleId(), r.getId())) {
                             TargetModel targetModel = new TargetModel();
@@ -504,7 +515,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                         return null;
                     }).filter(Objects::nonNull).collect(Collectors.toList());
                     r.setTargets(targetModels);
-                });
+                }
             }
         }
         ListObjServiceResult<RoleBo> result = new ListObjServiceResult(new ListObjResult(rolebos, total).asResult()).asResult();

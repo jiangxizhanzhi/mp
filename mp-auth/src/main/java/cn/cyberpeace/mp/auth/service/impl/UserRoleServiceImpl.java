@@ -112,7 +112,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .select(UserRoleModel::getRole);
         List<UserRoleModel> userRoleModels = getModelMapper().list(userRoleCondition);
         List<String> roleIds = new ArrayList<>();
-        userRoleModels.forEach(userRoleModel -> roleIds.add(userRoleModel.getRole()));
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            roleIds.add(userRoleModel.getRole());
+        }
         if (roleIds.isEmpty()) {
             return new ArrayList<>();
         }
@@ -132,12 +134,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         List<UserModel> userModels =
-            userOrgRoleBos.stream().map(uor -> {
-                UserModel userModel = new UserModel();
-                BeanUtils.copyProperties(uor, userModel);
-                userService.setDefaultIfNoAvatar(userModel);
-                return userModel;
-            }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
+            UserModel userModel = new UserModel();
+            BeanUtils.copyProperties(userOrgRoleBo, userModel);
+            userService.setDefaultIfNoAvatar(userModel);
+            UserModel apply = userModel;
+            userModels.add(apply);
+        }
 
         return userModels;
     }
@@ -190,14 +194,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 添加用户角色
-        roleIds.forEach(rid -> {
-            // todo 校验角色是否存在
+        for (String rid : roleIds) {// todo 校验角色是否存在
             UserRoleModel userRole = new UserRoleModel();
             userRole.setUser(userId);
             userRole.setRole(rid);
             userRole.setTenant(AuthConstant.DEFAULT_TENANT);
             create(userRole);
-        });
+        }
 
         userCacheService.evictAllUserCache();
         messageSender.send(roleIds, AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
@@ -220,14 +223,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 添加用户角色
-        userIds.forEach(uid -> {
-            // todo 校验角色是否存在
+        for (String uid : userIds) {// todo 校验角色是否存在
             UserRoleModel userRole = new UserRoleModel();
             userRole.setUser(uid);
             userRole.setRole(roleId);
             userRole.setTenant(AuthConstant.DEFAULT_TENANT);
             create(userRole);
-        });
+        }
 
         userCacheService.evictAllUserCache();
         messageSender.send(Collections.singletonList(roleId), AuthConstant.MSG_TYPE_ROLE_MODIFY, AuthConstant.ROUTING_KEY_ROLE_MODIFY, null);
@@ -275,7 +277,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .distinct();
         List<RoleModel> roleModels = roleMapper.list(roleCondition);
         Map<String, String> roleMap = new HashMap<>(roleModels.size());
-        roleModels.stream().forEach(roleModel -> roleMap.put(roleModel.getId(), roleModel.getName()));
+        for (RoleModel roleModel : roleModels) {
+            roleMap.put(roleModel.getId(), roleModel.getName());
+        }
 
         List<UserRoleStatisticBo> statistics = new ArrayList<>();
         for (Map<String, Object> roleCountMap : roleCountMaps) {
@@ -326,9 +330,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .filterEqual(UserRoleModel::getUser, userId)
                 .select(UserRoleModel::getRole);
         List<UserRoleModel> userRoleModels = getModelMapper().list(userRoleCondition);
-        List<String> roles = userRoleModels.stream()
-                .map(UserRoleModel::getRole)
-                .collect(Collectors.toList());
+        List<String> roles = new ArrayList<>();
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            String role = userRoleModel.getRole();
+            roles.add(role);
+        }
         if (CollectionUtils.isEmpty(roles)) {
             return new ArrayList<>();
         }
@@ -343,9 +349,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .filterEqual(UserRoleModel::getUser, userId)
                 .select(UserRoleModel::getRole);
         List<UserRoleModel> userRoleModels = getModelMapper().list(userRoleCondition);
-        List<String> roles = userRoleModels.stream()
-                .map(UserRoleModel::getRole)
-                .collect(Collectors.toList());
+        List<String> roles = new ArrayList<>();
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            String role = userRoleModel.getRole();
+            roles.add(role);
+        }
         if (CollectionUtils.isEmpty(roles)) {
             return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
         }
@@ -365,9 +373,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .select(UserRoleModel::getUser)
                 .distinct();
         List<UserRoleModel> userRoleModels = getModelMapper().list(roleIdCondition);
-        List<String> uIds = userRoleModels.stream()
-                .map(UserRoleModel::getUser)
-                .collect(Collectors.toList());
+        List<String> uIds = new ArrayList<>();
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            String user = userRoleModel.getUser();
+            uIds.add(user);
+        }
         if (CollectionUtils.isEmpty(uIds)) {
             return new ArrayList<>();
         }
@@ -386,9 +396,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
-        userOrgMaps.stream().forEach(map -> {
-            userOrgMap.put((String) map.get("user"), (String) map.getOrDefault("orgs", ""));
-        });
+        for (Map<String, Object> stringObjectMap : userOrgMaps) {
+            userOrgMap.put((String) stringObjectMap.get("user"), (String) stringObjectMap.getOrDefault("orgs", ""));
+        }
 
         HumanCondition roleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, uIds.toArray())
@@ -397,9 +407,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> userRoleMaps = getModelMapper().originList(roleCondition);
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
-        userRoleMaps.stream().forEach(map -> {
+        for (Map<String, Object> map : userRoleMaps) {
             userRoleMap.put((String) map.get("user"), (String) map.getOrDefault("roles", ""));
-        });
+        }
 
         List<UserOrgRoleBo> UserOrgRoleBos = new ArrayList<>(userModels.size());
         for (UserModel userModel : userModels) {
@@ -418,9 +428,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .select(UserRoleModel::getUser)
                 .distinct();
         List<UserRoleModel> userRoleModels = getModelMapper().list(roleIdCondition);
-        List<String> uIds = userRoleModels.stream()
-                .map(UserRoleModel::getUser)
-                .collect(Collectors.toList());
+        List<String> uIds = new ArrayList<>();
+        for (UserRoleModel userRoleModel : userRoleModels) {
+            String user = userRoleModel.getUser();
+            uIds.add(user);
+        }
         if (CollectionUtils.isEmpty(uIds)) {
             return new ListObjServiceResult(new ListObjResult(new ArrayList(), 0).asResult()).asResult();
         }
@@ -441,9 +453,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> userOrgMaps = tenantUserMapper.originList(orgCondition);
         Map<String, String> userOrgMap = new HashMap<>(userOrgMaps.size());
-        userOrgMaps.stream().forEach(map -> {
-            userOrgMap.put((String) map.get("user"), (String) map.getOrDefault("orgs", ""));
-        });
+        for (Map<String, Object> stringObjectMap : userOrgMaps) {
+            userOrgMap.put((String) stringObjectMap.get("user"), (String) stringObjectMap.getOrDefault("orgs", ""));
+        }
 
         HumanCondition roleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, uIds.toArray())
@@ -452,9 +464,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
                 .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> userRoleMaps = getModelMapper().originList(roleCondition);
         Map<String, String> userRoleMap = new HashMap<>(userRoleMaps.size());
-        userRoleMaps.stream().forEach(map -> {
+        for (Map<String, Object> map : userRoleMaps) {
             userRoleMap.put((String) map.get("user"), (String) map.getOrDefault("roles", ""));
-        });
+        }
 
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
         for (UserModel userModel : userModels) {

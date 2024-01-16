@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,9 +64,11 @@ public class OrgPermissionServiceImpl
                 .filterEqual(OrgPermissionModel::getOwner, orgId)
                 .select(OrgPermissionModel::getTarget);
         List<OrgPermissionModel> orgPermissionModels = getModelMapper().list(orgPermissionCondition);
-        List<String> targetIds = orgPermissionModels.stream()
-                .map(OrgPermissionModel::getTarget)
-                .collect(Collectors.toList());
+        List<String> targetIds = new ArrayList<>();
+        for (OrgPermissionModel orgPermissionModel : orgPermissionModels) {
+            String target = orgPermissionModel.getTarget();
+            targetIds.add(target);
+        }
         if (CollectionUtils.isEmpty(targetIds)) {
             return new HashSet<>();
         }
@@ -111,15 +114,14 @@ public class OrgPermissionServiceImpl
         }
 
         // 添加组织权限
-        targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+        for (String tid : targetIds) {// todo 校验权限是否存在
             OrgPermissionModel orgPerm = new OrgPermissionModel();
             orgPerm.setOwner(orgId);
             orgPerm.setTarget(tid);
             orgPerm.setTenant(AuthConstant.DEFAULT_TENANT);
             ObjServiceResult<OrgPermissionModel> re = orgPermissionService.create(orgPerm);
             ResultUtils.throwExceptionIfError(re, AuthErrorCode.ORG_TARGET_ADD_ERROR);
-        });
+        }
 
         return true;
 

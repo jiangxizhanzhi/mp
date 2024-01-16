@@ -90,7 +90,11 @@ public class UserPermissionServiceImpl
         }
 
         // 角色绑定的target
-        List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> roleIds = new ArrayList<>();
+        for (RoleModel role : roles) {
+            String id = role.getId();
+            roleIds.add(id);
+        }
         List<TargetModel> roleTargets = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(roleIds)) {
             roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
@@ -110,7 +114,10 @@ public class UserPermissionServiceImpl
         //});
         //authorizedTargetsSet.addAll(allTargetsByOrgSet);
 
-        List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());
+        List<TargetModel> targetModelList = new ArrayList<>();
+        for (TargetModel targetModel : authorizedTargetsSet) {
+            targetModelList.add(targetModel);
+        }
         return targetModelList;
     }
 
@@ -120,7 +127,13 @@ public class UserPermissionServiceImpl
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtils.isNotEmpty(targets)) {
-            return targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
+            List<TargetModel> list = new ArrayList<>();
+            for (TargetModel t : targets) {
+                if (Objects.equals(t.getType(), TargetModel.TYPE_MENU)) {
+                    list.add(t);
+                }
+            }
+            return list;
         }
         return Collections.emptyList();
     }
@@ -157,15 +170,14 @@ public class UserPermissionServiceImpl
         }
 
         // 添加用户角色
-        targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+        for (String tid : targetIds) {// todo 校验权限是否存在
             UserPermissionModel userPerm = new UserPermissionModel();
             userPerm.setOwner(userId);
             userPerm.setTarget(tid);
             userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
             ObjServiceResult<UserPermissionModel> re = create(userPerm);
             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_TARGET_ADD_ERROR);
-        });
+        }
 
         return true;
     }
@@ -217,7 +229,12 @@ public class UserPermissionServiceImpl
 
 
     public boolean hasAdminRole(List<RoleModel> roles) {
-        return roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
+        for (RoleModel r : roles) {
+            if (Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -251,7 +268,11 @@ public class UserPermissionServiceImpl
     @Override
     public List<String> listMenuIdentsByLoginUser() {
         List<TargetModel> menus = listMenusByLoginUser();
-        List<String> menuIdents = menus.stream().map(m -> m.getIdentifier()).collect(Collectors.toList());
+        List<String> menuIdents = new ArrayList<>();
+        for (TargetModel m : menus) {
+            String identifier = m.getIdentifier();
+            menuIdents.add(identifier);
+        }
         return menuIdents;
     }
 
@@ -260,9 +281,11 @@ public class UserPermissionServiceImpl
                 .filterEqual(UserPermissionModel::getTarget, targetId)
                 .select(UserPermissionModel::getOwner);
         List<UserPermissionModel> userPermissionModels = getModelMapper().list(permissionCondition);
-        List<String> owners = userPermissionModels.stream()
-                .map(UserPermissionModel::getOwner)
-                .collect(Collectors.toList());
+        List<String> owners = new ArrayList<>();
+        for (UserPermissionModel userPermissionModel : userPermissionModels) {
+            String owner = userPermissionModel.getOwner();
+            owners.add(owner);
+        }
         if (CollectionUtils.isEmpty(owners)) {
             return new ArrayList<>();
         }

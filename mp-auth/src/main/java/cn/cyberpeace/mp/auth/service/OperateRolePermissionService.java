@@ -7,6 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +60,11 @@ public class OperateRolePermissionService extends OperatePermissionService {
             return;
         }
         List<RoleModel> roleModels = roleService.listByNames(targetRoleNames);
-        List<String> targetRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> targetRoleIds = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            String id = roleModel.getId();
+            targetRoleIds.add(id);
+        }
         super.checkByTargetRoleIds(targetRoleIds);
     }
 

@@ -76,9 +76,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
 
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
-        List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
-                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
-                .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
+        List<String> onlinedUserIds = new ArrayList<>();
+        for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> userModelCopyOnWriteArrayListEntry : heartbeatMap.entrySet()) {
+            if (CollectionUtils.isNotEmpty(userModelCopyOnWriteArrayListEntry.getValue()) && userModelCopyOnWriteArrayListEntry.getValue().size() > 0) {
+                String id = userModelCopyOnWriteArrayListEntry.getKey().getId();
+                onlinedUserIds.add(id);
+            }
+        }
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
@@ -96,12 +100,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         }
 
         List<UserOnlineReportBo> reportDtos = new ArrayList<>();
-        summaryDtos.forEach(r -> {
+        for (UserOnlineRecordSummaryBo userOnlineRecordSummaryBo : summaryDtos) {
             UserOnlineReportBo reportDto = new UserOnlineReportBo();
-            BeanUtils.copyProperties(r, reportDto);
+            BeanUtils.copyProperties(userOnlineRecordSummaryBo, reportDto);
 
             reportDto.setTotalOnlineHours(0.0);
-            Long totalMins = r.getTotalOnlineMinutes();
+            Long totalMins = userOnlineRecordSummaryBo.getTotalOnlineMinutes();
             if (totalMins > 0) {
                 double totalHrs = totalMins / 60.0;
                 BigDecimal decimalValue = BigDecimal.valueOf(totalHrs);
@@ -111,7 +115,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
             // 只获取最新的一条日志
             OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
-            logPageRequest.setUserId(r.getUser());
+            logPageRequest.setUserId(userOnlineRecordSummaryBo.getUser());
             logPageRequest.setPage(1);
             logPageRequest.setPerPage(1);
             List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
@@ -123,9 +127,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
 
             boolean isOnline = false;
-            if (Objects.nonNull(heatbeatCntMap.get(r.getUser())) && heatbeatCntMap.get(r.getUser()) > 0) {
+            if (Objects.nonNull(heatbeatCntMap.get(userOnlineRecordSummaryBo.getUser())) && heatbeatCntMap.get(userOnlineRecordSummaryBo.getUser()) > 0) {
                 isOnline = true;
-            } else if (Objects.nonNull(r.getUnCompleteCnt()) && r.getUnCompleteCnt() > 0) {
+            } else if (Objects.nonNull(userOnlineRecordSummaryBo.getUnCompleteCnt()) && userOnlineRecordSummaryBo.getUnCompleteCnt() > 0) {
                 isOnline = true;
             }
 
@@ -136,23 +140,36 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
 
             reportDtos.add(reportDto);
-        });
+        }
 
 
         // orgpaths
-        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryBo::getUser).collect(Collectors.toList());
+        List<String> userIds = new ArrayList<>();
+        for (UserOnlineRecordSummaryBo summaryDto : summaryDtos) {
+            String user = summaryDto.getUser();
+            userIds.add(user);
+        }
         List<UserOrgBo> userOrgBos = tenantUserService.listUserOrgByUserIds(userIds);
-        reportDtos.forEach(r -> {
+        for (UserOnlineReportBo r : reportDtos) {
             List<OrgBO> orgBOList =
-                    userOrgBos.stream().filter(userOrgBo -> Objects.equals(userOrgBo.getUserId(), r.getUser())).map(dto-> {
-                        OrgBO orgBO = new OrgBO();
-                        BeanUtils.copyProperties(dto, orgBO);
-                        return orgBO;
-                    }).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(orgBOList)) {
-                r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
+                    new ArrayList<>();
+            for (UserOrgBo userOrgBo : userOrgBos) {
+                if (Objects.equals(userOrgBo.getUserId(), r.getUser())) {
+                    OrgBO orgBO = new OrgBO();
+                    BeanUtils.copyProperties(userOrgBo, orgBO);
+                    OrgBO apply = orgBO;
+                    orgBOList.add(apply);
+                }
             }
-        });
+            if (CollectionUtils.isNotEmpty(orgBOList)) {
+                StringJoiner joiner = new StringJoiner(",");
+                for (OrgBO orgBO : orgBOList) {
+                    String path = orgBO.getPath();
+                    joiner.add(path);
+                }
+                r.setOrg(joiner.toString());
+            }
+        }
 
         // 替换为reportDto
         pageInfo.setList(reportDtos);
@@ -242,9 +259,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             model.setPk(-1);
             notOnlines.add(model);
         }
-        List<Integer> notOnlinePks = notOnlines.stream()
-                .map(UserOnlineRecordModel::getPk)
-                .collect(Collectors.toList());
+        List<Integer> notOnlinePks = new ArrayList<>();
+        for (UserOnlineRecordModel notOnline : notOnlines) {
+            Integer userOnlineRecordModelPk = notOnline.getPk();
+            notOnlinePks.add(userOnlineRecordModelPk);
+        }
         HumanCondition onlineCondition = new HumanCondition()
                 .filterNotIn(UserOnlineRecordModel::getPk, notOnlinePks.toArray())
                 .select(UserOnlineRecordModel::getPk)
@@ -253,7 +272,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         if (CollectionUtils.isEmpty(onlines)) {
             return 0;
         }
-        List<Integer> onlinePks = onlines.stream().map(UserOnlineRecordModel::getPk).collect(Collectors.toList());
+        List<Integer> onlinePks = new ArrayList<>();
+        for (UserOnlineRecordModel online : onlines) {
+            Integer pk = online.getPk();
+            onlinePks.add(pk);
+        }
         HumanCondition countCondition = new HumanCondition()
                 .filterIn(UserOnlineRecordModel::getPk, onlinePks.toArray())
                 .selectAs(Count.f(UserOnlineRecordModel::getUser), "cnt");
