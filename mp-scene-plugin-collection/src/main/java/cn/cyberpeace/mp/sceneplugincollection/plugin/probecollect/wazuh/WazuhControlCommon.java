@@ -10,7 +10,7 @@ public class WazuhControlCommon {
     public static WazuhControl wazuhControl;
 
     private WazuhControlCommon(CollectionSingleton collectionSingleton) {
-        var builder =  WazuhControl.builder()
+        WazuhControl.WazuhControlBuilder builder =  WazuhControl.builder()
                 .configWazuh(
                         CollectionSingleton.collectionAppConfig.getWazuhApiServer(),
                         CollectionSingleton.collectionAppConfig.getWazuhApiUser(),
@@ -19,7 +19,7 @@ public class WazuhControlCommon {
                 .configEs(CollectionSingleton.collectionAppConfig.getWazuhEsServer())
                 .configGodfs(CollectionSingleton.collectionAppConfig.getWazuhGodfsServer());
 
-        var httpCallbackUrl = CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl();
+        String httpCallbackUrl = CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl();
         if (!StringUtils.isEmpty(httpCallbackUrl)) {
             builder.configCallbackSelf(true)
                     .configHttpCallbacks(new WazuhLauncher.RunCommandHttpCallback(httpCallbackUrl, null));

@@ -62,7 +62,7 @@ public class WazuhControl {
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
 
     public void controlConfigOld(String agentName, String osType, ControlConfigParam controlConfigParam) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
         runCommandItem.setCommand(genControlConfigCommandOld(osType, controlConfigParam, true));
@@ -83,12 +83,12 @@ public class WazuhControl {
         }
         List<Map<String, Object>> scriptParams = new ArrayList<>();
         if (controlConfigParam.getProbeParams() != null) {
-            for (var probeParam : controlConfigParam.getProbeParams()) {
+            for (ControlProbeParam probeParam : controlConfigParam.getProbeParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
             }
         }
         if (controlConfigParam.getLogCollectParams() != null) {
-            for (var logCollectParam : controlConfigParam.getLogCollectParams()) {
+            for (ControlLogCollectParam logCollectParam : controlConfigParam.getLogCollectParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
             }
         }
@@ -96,12 +96,12 @@ public class WazuhControl {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscheckParam()));
         }
         if (controlConfigParam.getFileModifyParams() != null) {
-            for (var fileModifyParam : controlConfigParam.getFileModifyParams()) {
+            for (ControlFileModifyParam fileModifyParam : controlConfigParam.getFileModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
             }
         }
         if (controlConfigParam.getRegistryModifyParams() != null) {
-            for (var registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
+            for (ControlRegistryModifyParam registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
         }
@@ -133,12 +133,12 @@ public class WazuhControl {
         }
         List<Map<String, Object>> scriptParams = new ArrayList<>();
         if (controlConfigParam.getProbeParams() != null) {
-            for (var probeParam : controlConfigParam.getProbeParams()) {
+            for (ControlProbeParam probeParam : controlConfigParam.getProbeParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
             }
         }
         if (controlConfigParam.getLogCollectParams() != null) {
-            for (var logCollectParam : controlConfigParam.getLogCollectParams()) {
+            for (ControlLogCollectParam logCollectParam : controlConfigParam.getLogCollectParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
             }
         }
@@ -146,12 +146,12 @@ public class WazuhControl {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscheckParam()));
         }
         if (controlConfigParam.getFileModifyParams() != null) {
-            for (var fileModifyParam : controlConfigParam.getFileModifyParams()) {
+            for (ControlFileModifyParam fileModifyParam : controlConfigParam.getFileModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
             }
         }
         if (controlConfigParam.getRegistryModifyParams() != null) {
-            for (var registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
+            for (ControlRegistryModifyParam registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
         }
@@ -205,7 +205,7 @@ public class WazuhControl {
         }
         List<Map<String, Object>> scriptParams = new ArrayList<>();
         if (controlFileParams != null) {
-            for (var controlFileParam : controlFileParams) {
+            for (ControlFileParam controlFileParam : controlFileParams) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(controlFileParam));
             }
         }
@@ -272,7 +272,7 @@ public class WazuhControl {
     }
 
     public void controlConfig(String agentName, String osType, ControlConfigParam controlConfigParam) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
         runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigParam, true));
@@ -280,7 +280,7 @@ public class WazuhControl {
     }
 
     public QueryConfigData queryConfig(String agentName, String osType) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
         runCommandItem.setCommand(genQueryConfigCommand(osType));
@@ -289,16 +289,16 @@ public class WazuhControl {
         runCommandItem.setCheckOutputInterval(5000);
         wazuhLauncher.runCommand(List.of(runCommandItem));
 
-        var error = runCommandItem.getError();
+        String error = runCommandItem.getError();
         if (!StringUtils.isEmpty(error)) {
             log.error("Query agent({}) osType({}) config error: {}", agentName, osType, error);
         }
 
-        var output = runCommandItem.getOutput();
+        Map<String, Object> output = runCommandItem.getOutput();
         if (output == null) {
             return null;
         }
-        var rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
+        Object rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
         if (rawOutput == null) {
             return null;
         }
@@ -317,11 +317,11 @@ public class WazuhControl {
     }
 
     public List<QueryLogCollectFileData> queryLogCollectFiles(String agentName, String osType) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
 
-        var specQueryParam = new SpecQueryParam();
+        SpecQueryParam specQueryParam = new SpecQueryParam();
         specQueryParam.setAction(SPEC_QUERY_ACTION_GET_LOG_COLLECT_FILES);
         runCommandItem.setCommand(genSpecQueryCommand(osType, specQueryParam));
         runCommandItem.setCheckOutput(true);
@@ -329,17 +329,17 @@ public class WazuhControl {
         runCommandItem.setCheckOutputInterval(5000);
         wazuhLauncher.runCommand(List.of(runCommandItem));
 
-        var error = runCommandItem.getError();
+        String error = runCommandItem.getError();
         if (!StringUtils.isEmpty(error)) {
             log.error("Query agent({}) osType({}) log collect files error: {}", agentName, osType, error);
         }
 
         List<QueryLogCollectFileData> result = new ArrayList<>();
-        var output = runCommandItem.getOutput();
+        Map<String, Object> output = runCommandItem.getOutput();
         if (output == null) {
             return result;
         }
-        var rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
+        Object rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
         if (rawOutput == null) {
             return result;
         }
@@ -360,7 +360,7 @@ public class WazuhControl {
                                                       boolean checkOutput,
                                                       Integer checkOutputTIme,
                                                       Integer checkOutputInterval) {
-        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
         runCommandItem.setCommand(genControlFileCommand(osType, controlFileParams));
@@ -375,16 +375,16 @@ public class WazuhControl {
         }
         wazuhLauncher.runCommand(List.of(runCommandItem));
 
-        var error = runCommandItem.getError();
+        String error = runCommandItem.getError();
         if (!StringUtils.isEmpty(error)) {
             log.error("Control agent({}) osType({}) file error: {}", agentName, osType, error);
         }
 
-        var output = runCommandItem.getOutput();
+        Map<String, Object> output = runCommandItem.getOutput();
         if (output == null) {
             return null;
         }
-        var rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
+        Object rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
         if (rawOutput == null) {
             return null;
         }

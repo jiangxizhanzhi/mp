@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
@@ -26,14 +27,14 @@ public class ElementCreateHandler extends HandlerCommon {
     }
 
     public void createElement(CollectionPluginSceneElementBO element) {
-        var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
+        String flowCollectorId = getPluginHandler().getScene().getFlowCollector();
         if (StringUtils.isNotEmpty(flowCollectorId)) {
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+            String sceneId = getPluginHandler().getSrcScene().getEid();
             Set<String> vmInstanceIds = new HashSet<>();
             Set<String> containerInstanceIds = new HashSet<>();
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             if (cloudPluginHandler != null) {
-                var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
+                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
                 if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                         vmInstanceIds.add(cloudElement.getResourceId());
@@ -48,10 +49,10 @@ public class ElementCreateHandler extends HandlerCommon {
         } else if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableFlowMirror())) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             if (cloudPluginHandler != null) {
-                var sceneId = getPluginHandler().getSrcScene().getEid();
+                String sceneId = getPluginHandler().getSrcScene().getEid();
                 Set<String> vmInstanceIds = new HashSet<>();
                 Set<String> containerInstanceIds = new HashSet<>();
-                var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
+                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
                 if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                         vmInstanceIds.add(cloudElement.getResourceId());

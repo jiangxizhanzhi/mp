@@ -6,11 +6,14 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
 import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -73,16 +77,16 @@ public class WazuhLauncher {
     private void runCommand(RunCommandItem runCommandItem) {
         runCommandItem.ensure();
 
-        var agentsHttpParam = new AgentsActiveResponseHttpParam();
+        AgentsActiveResponseHttpParam agentsHttpParam = new AgentsActiveResponseHttpParam();
         agentsHttpParam.setAgentsList(runCommandItem.getAgentId());
-        var activeResponseHttpData = new ActiveResponseHttpData();
+        ActiveResponseHttpData activeResponseHttpData = new ActiveResponseHttpData();
         if (OS_TYPE_WINDOWS.equals(runCommandItem.getOsType())) {
             activeResponseHttpData.setCommand("!ar-launcher.bat");
         } else {
             activeResponseHttpData.setCommand("!ar-launcher.py");
         }
 
-        var launchInput = new LaunchInput();
+        LaunchInput launchInput = new LaunchInput();
         launchInput.setMatcher(COMMAND_MATCHER_AR);
         launchInput.setGroup(launchInput.getMatcher());
         launchInput.setId(runCommandItem.getRunId());
@@ -90,7 +94,7 @@ public class WazuhLauncher {
         launchInput.setExile(runCommandItem.getExile());
         launchInput.setCommand(runCommandItem.getCommand());
 
-        var runCommandHttpCallbacks = runCommandItem.getHttpCallbacks();
+        List<RunCommandHttpCallback> runCommandHttpCallbacks = runCommandItem.getHttpCallbacks();
         if (runCommandHttpCallbacks == null) {
             runCommandHttpCallbacks = this.httpCallbacks;
         }
@@ -101,7 +105,7 @@ public class WazuhLauncher {
 
         log.info("Wazuh run command({}) on agent({}): {}", launchInput.getId(), runCommandItem.getAgentId(),
                 launchInput.getCommand());
-        var httpResult = wazuhClient.getWazuhHttpClient().put("/active-response", activeResponseHttpData,
+        HttpResult httpResult = wazuhClient.getWazuhHttpClient().put("/active-response", activeResponseHttpData,
                 agentsHttpParam, wazuhClient.genWazuhAuthHeaders(), null);
         if (!httpResult.isSuccess()) {
             wazuhClient.handleWazuhErrorResult(httpResult);
@@ -122,7 +126,7 @@ public class WazuhLauncher {
         }
 
         LaunchAlert launchAlert = null;
-        var runCommandCallbackSelf = runCommandItem.getCallbackSelf();
+        Boolean runCommandCallbackSelf = runCommandItem.getCallbackSelf();
         if (runCommandCallbackSelf == null) {
             runCommandCallbackSelf = this.callbackSelf;
         }
@@ -130,7 +134,7 @@ public class WazuhLauncher {
             // 轮询runCommandResultPool
             long timeout = runCommandItem.getCheckOutputTime() * (long) runCommandItem.getCheckOutputInterval();
             long checkConsumeMillis = 0;
-            var step = 250;
+            int step = 250;
             while (timeout >= checkConsumeMillis) {
                 try {
                     Thread.sleep(step);
@@ -151,7 +155,7 @@ public class WazuhLauncher {
             }
         } else {
             // 轮询db
-            for (var i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
+            for (int i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
                 try {
                     Thread.sleep(runCommandItem.getCheckOutputInterval());
                 } catch (InterruptedException e) {
@@ -185,15 +189,15 @@ public class WazuhLauncher {
     }
 
     private LaunchAlert queryCommandLaunchAlertOnEs(String agentId, String runId) {
-        var currentDayTime = LocalDateTime.now();
-        var currentDayAlertIndex = String.format("%s%s", WAZUH_ALERT_ES_INDEX_PREFIX,
+        LocalDateTime currentDayTime = LocalDateTime.now();
+        String currentDayAlertIndex = String.format("%s%s", WAZUH_ALERT_ES_INDEX_PREFIX,
                 TimeUtils.localDateTimeToString(currentDayTime, WAZUH_ALERT_ES_INDEX_DATE_FORMAT));
-        var esSearchRequest = new SearchRequest(currentDayAlertIndex);
-        var esBoolQueryBuilder = QueryBuilders.boolQuery();
+        SearchRequest esSearchRequest = new SearchRequest(currentDayAlertIndex);
+        BoolQueryBuilder esBoolQueryBuilder = QueryBuilders.boolQuery();
         esBoolQueryBuilder.filter(QueryBuilders.matchQuery("agent.id", agentId));
         esBoolQueryBuilder.filter(QueryBuilders.matchQuery("data.sic_launch_id", runId));
 
-        var esSourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder esSourceBuilder = new SearchSourceBuilder();
         esSearchRequest.source(esSourceBuilder.query(esBoolQueryBuilder));
         SearchHit[] esHits = null;
         try {
@@ -209,9 +213,9 @@ public class WazuhLauncher {
     }
 
     private LaunchAlert queryCommandLaunchAlertOnMongo(String agentId, String runId) {
-        var db = wazuhClient.getMongoClient().getDatabase(WAZUH_ALERT_MONGO_DB);
-        var collection = db.getCollection(WAZUH_ALERT_MONGO_COLLECTION);
-        var document = collection.find(Filters.eq("_source.agent.id", agentId))
+        MongoDatabase db = wazuhClient.getMongoClient().getDatabase(WAZUH_ALERT_MONGO_DB);
+        MongoCollection<Document> collection = db.getCollection(WAZUH_ALERT_MONGO_COLLECTION);
+        Document document = collection.find(Filters.eq("_source.agent.id", agentId))
                 .filter(Filters.eq("_source.data.sic_launch_id", runId)).first();
         if (document != null && document.containsKey("_source")) {
             return JsonCommon.snakeParse(JsonCommon.stringify(document.get("_source")), new TypeReference<LaunchAlert>() {});
@@ -221,7 +225,7 @@ public class WazuhLauncher {
     }
 
     private LaunchAlert localCheckRunCommandLaunchAlert(String runId) {
-        var launchAlert = runCommandResultPool.getIfPresent(runId);
+        LaunchAlert launchAlert = runCommandResultPool.getIfPresent(runId);
         if (launchAlert == null) {
             return null;
         }
@@ -282,7 +286,7 @@ public class WazuhLauncher {
 
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
         Set<String> queryIdNames = new HashSet<>();
-        for (var runCommandItem : runCommandItems) {
+        for (RunCommandItem runCommandItem : runCommandItems) {
             if (StringUtils.isEmpty(runCommandItem.getAgentId()) && !StringUtils.isEmpty(runCommandItem.getAgentName())) {
                 queryIdNames.add(runCommandItem.getAgentName());
             }
@@ -292,9 +296,9 @@ public class WazuhLauncher {
         Set<String> notfoundNames = new HashSet<>();
         List<Runnable> tasks = new ArrayList<>();
         List<RunCommandItem> result = new ArrayList<>();
-        for (var runCommandItem : runCommandItems) {
-            var agentId = runCommandItem.getAgentId();
-            var agentName = runCommandItem.getAgentName();
+        for (RunCommandItem runCommandItem : runCommandItems) {
+            String agentId = runCommandItem.getAgentId();
+            String agentName = runCommandItem.getAgentName();
             if (StringUtils.isEmpty(agentId)) {
                 agentId = agentIds.getOrDefault(agentName, null);
             }

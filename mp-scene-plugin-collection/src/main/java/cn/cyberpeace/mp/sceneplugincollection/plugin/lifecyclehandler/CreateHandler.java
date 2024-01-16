@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -50,7 +52,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void bindProbeCollectAgent(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
-        var srcElement = collectionElement.getSrcElement();
+        SceneElementBO srcElement = collectionElement.getSrcElement();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
@@ -58,7 +60,7 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
-        var cloudResourceId = cloudElement.getResourceId();
+        String cloudResourceId = cloudElement.getResourceId();
         if (cloudResourceId == null) {
             return;
         }
@@ -66,25 +68,25 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createProbeRouter() {
-        var sceneId = getPluginHandler().getSrcScene().getEid();
-        var routerPorts = getSceneProbeRouterPortMapper().list(
+        String sceneId = getPluginHandler().getSrcScene().getEid();
+        List<CollectionPluginSceneProbeRouterPortModel> routerPorts = getSceneProbeRouterPortMapper().list(
                 new HumanCondition().filterEqual(CollectionPluginSceneProbeRouterPortModel::getScene, sceneId));
-        var vrClient = new VirtualRouter();
+        VirtualRouter vrClient = new VirtualRouter();
         // 创建辅助路由
-        var createData = new VirtualRouterCreateData();
+        VirtualRouterCreateData createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(sceneId));
         List<VirtualNic> virtualNics = new ArrayList<>();
-        var externalVirtualNic = new VirtualNic();
+        VirtualNic externalVirtualNic = new VirtualNic();
         externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
         virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
-            var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
+            CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
             if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
-                for (var deriveNet : cloudElement.getDeriveNetworks()) {
+                for (ConnectedNetworkBO deriveNet : cloudElement.getDeriveNetworks()) {
                     if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
                         networkId = deriveNet.getNetwork().getResourceId();
                     }
@@ -94,14 +96,14 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
             routerPort.setNetworkId(networkId);
-            var virtualNic = new VirtualNic();
+            VirtualNic virtualNic = new VirtualNic();
             virtualNic.setNetworkId(networkId);
             virtualNic.setFixedIp(routerPort.getIp());
             virtualNics.add(virtualNic);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
         createData.setNetworks(virtualNics);
-        var virtualRouter = vrClient.create(createData);
+        VirtualRouterCreateData virtualRouter = vrClient.create(createData);
         getPluginHandler().getScene().setProbeRouter(virtualRouter.getId());
     }
 
@@ -118,13 +120,13 @@ public class CreateHandler extends HandlerCommon {
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
-            var portId = entry.getKey();
-            var collectionPort = entry.getValue();
+            String portId = entry.getKey();
+            CollectionPluginSceneElementPortBO collectionPort = entry.getValue();
             if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                 creatFlowCollector = true;
-                var srcPort = collectionPort.getSrcPort();
-                var srcElement = srcPort.getElement();
-                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                SceneElementPortBO srcPort = collectionPort.getSrcPort();
+                SceneElementBO srcElement = srcPort.getElement();
+                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                 if (cloudElement != null && cloudElement.getVirtualType() != null
                         && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
@@ -135,9 +137,9 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
             if (Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
-                var srcPort = collectionPort.getSrcPort();
-                var srcElement = srcPort.getElement();
-                var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                SceneElementPortBO srcPort = collectionPort.getSrcPort();
+                SceneElementBO srcElement = srcPort.getElement();
+                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                 if (cloudElement != null && cloudElement.getVirtualType() != null
                         && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
@@ -151,14 +153,14 @@ public class CreateHandler extends HandlerCommon {
         boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
         if (enableCollector) {
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+            String sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
+                String flowCollectorId = getFlowCollector().createCollector();
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
 
-            var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
+            String flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
                 // 绑定网络端口到流量采集器
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
@@ -166,27 +168,27 @@ public class CreateHandler extends HandlerCommon {
             });
         } else if (enableMirror) {
             // 镜像流量
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+            String sceneId = getPluginHandler().getSrcScene().getEid();
             // 绑定网络端口到流量采集器
             getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
                     new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
+                String flowCollectorId = getFlowCollector().createCollector();
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // 绑定探针agent到探针采集器
-        var probeCollectorId = getPluginHandler().getScene().getProbeCollector();
+        String probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
-            var containerElements = getPluginHandler().getElementMap().values().stream()
+            List<CollectionPluginSceneElementBO> containerElements = getPluginHandler().getElementMap().values().stream()
                     .filter(e -> Boolean.TRUE.equals(e.getEnableProbeCollect()))
                     .filter(e -> {
                         // 非macvlan模式下的容器 且 有探针安装需要的可以加路由
-                        var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
+                        CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
                         if (cloudElement == null || cloudElement.getVirtualType() == null) {
                             return false;
                         }
@@ -197,7 +199,7 @@ public class CreateHandler extends HandlerCommon {
                         allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
                         allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
                         boolean normalNet = true;
-                        for (var net : allNets) {
+                        for (ConnectedNetworkBO net : allNets) {
                             net.getNetwork().getNetMode();
                             if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.getNetwork().getNetMode())) {
                                 normalNet = false;
@@ -209,8 +211,8 @@ public class CreateHandler extends HandlerCommon {
                     .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(containerElements)) {
                 Container container = new Container();
-                var addRouterTasks = containerElements.stream().filter(c -> {
-                            var cloudElement = cloudPluginHandler.getElement(c.getSrcElement().getId());
+                List<Runnable> addRouterTasks = containerElements.stream().filter(c -> {
+                    CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(c.getSrcElement().getId());
                             if (cloudElement != null && StringUtils.isNotEmpty(cloudElement.getResourceId())) {
                                 return true;
                             } else {
@@ -218,7 +220,7 @@ public class CreateHandler extends HandlerCommon {
                             }
                         })
                         .map(e -> {
-                            var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
+                            CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
                             return (Runnable) () -> container.addRoute(cloudElement.getResourceId());
                         })
                         .collect(Collectors.toList());

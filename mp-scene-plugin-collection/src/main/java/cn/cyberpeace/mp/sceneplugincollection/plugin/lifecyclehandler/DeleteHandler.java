@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -9,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -43,7 +46,7 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected void unbindProbeCollectAgent(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
-        var srcElement = collectionElement.getSrcElement();
+        SceneElementBO srcElement = collectionElement.getSrcElement();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
@@ -51,7 +54,7 @@ public class DeleteHandler extends HandlerCommon {
             return;
         }
 
-        var cloudResourceId = cloudElement.getResourceId();
+        String cloudResourceId = cloudElement.getResourceId();
         if (cloudResourceId == null) {
             return;
         }
@@ -59,8 +62,8 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteProbeRouter(String probeRouterId) {
-        var vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
-        var deleteData = new VirtualRouterDeleteData();
+        VirtualRouter vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
+        VirtualRouterDeleteData deleteData = new VirtualRouterDeleteData();
         deleteData.setIds(List.of(probeRouterId));
         return vrClient.delete(deleteData);
     }
@@ -68,8 +71,8 @@ public class DeleteHandler extends HandlerCommon {
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
-        var scene = getPluginHandler().getScene();
-        var flowCollectorId = scene.getFlowCollector();
+        CollectionPluginSceneBO scene = getPluginHandler().getScene();
+        String flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
             // 先保存流量数据
             BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
@@ -78,7 +81,7 @@ public class DeleteHandler extends HandlerCommon {
                 if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                     return;
                 }
-                var macAttr = collectionPort.getSrcPort().getMacAddr();
+                String macAttr = collectionPort.getSrcPort().getMacAddr();
                 if (!StringUtils.isEmpty(macAttr)) {
                     flowCollectMacAddrs.add(macAttr);
                 }
@@ -102,9 +105,9 @@ public class DeleteHandler extends HandlerCommon {
                 CollectionPluginSceneElementPortBO collectionPort = entry.getValue();
                 if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                     enableFlowCollect = true;
-                    var srcPort = collectionPort.getSrcPort();
-                    var srcElement = srcPort.getElement();
-                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    SceneElementPortBO srcPort = collectionPort.getSrcPort();
+                    SceneElementBO srcElement = srcPort.getElement();
+                    CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                     if (cloudElement != null && cloudElement.getVirtualType() != null
                             && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                         if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
@@ -116,9 +119,9 @@ public class DeleteHandler extends HandlerCommon {
                 }
                 if (Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
                     enableFlowMirror = true;
-                    var srcPort = collectionPort.getSrcPort();
-                    var srcElement = srcPort.getElement();
-                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    SceneElementPortBO srcPort = collectionPort.getSrcPort();
+                    SceneElementBO srcElement = srcPort.getElement();
+                    CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                     if (cloudElement != null && cloudElement.getVirtualType() != null && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                         if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                             mirrorVmInstanceIds.add(cloudElement.getResourceId());
@@ -139,7 +142,7 @@ public class DeleteHandler extends HandlerCommon {
             });
         }
 
-        var probeCollectorId = scene.getProbeCollector();
+        String probeCollectorId = scene.getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
 //            var probeCollectionElements = getPluginHandler().getElementMap().values()
 //                    .stream()
@@ -157,7 +160,7 @@ public class DeleteHandler extends HandlerCommon {
             });
         }
 
-        var probeRouterId = scene.getProbeRouter();
+        String probeRouterId = scene.getProbeRouter();
         if (!StringUtils.isEmpty(probeRouterId)) {
             runSceneProgress(SceneProcess.DELETE_PROBE_ROUTER, () -> {
                 deleteProbeRouter(probeRouterId);
