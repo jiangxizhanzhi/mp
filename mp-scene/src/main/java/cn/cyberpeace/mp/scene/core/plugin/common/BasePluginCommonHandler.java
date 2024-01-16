@@ -32,7 +32,7 @@ public abstract class BasePluginCommonHandler<
         C,
         H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
                 S9, ?, P9, E9, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, H>>
+                ?, H>>
         extends BasePluginHandler<S, E, P, C>
         implements PluginSceneHandlerCommon<S9, E9, P9, H> {
 

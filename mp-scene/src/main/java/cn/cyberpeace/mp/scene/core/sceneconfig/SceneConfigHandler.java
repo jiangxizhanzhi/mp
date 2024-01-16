@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.sceneconfig;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
@@ -56,13 +57,6 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigPieceBO,
         SceneConfigTopologyBO,
         SceneConfigDataBO,
-        SceneConfigMapper,
-        SceneConfigAreaMapper,
-        SceneConfigElementMapper,
-        SceneConfigElementPortMapper,
-        SceneConfigElementPortConnectionMapper,
-        SceneConfigElementPluginMapper,
-        SceneConfigPieceMapper,
         SceneConfigContextBO,
         SceneConfigPluginHandler<?, ?, ?, ?>,
         SceneConfigHandler> {
@@ -83,6 +77,17 @@ public class SceneConfigHandler extends BaseSceneHandler<
 
     public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode, SceneConfigContextBO context) {
         init(sceneId, areaId, isAreaMode, context);
+    }
+
+    @Override
+    protected void initMapper() {
+        super.sceneMapper = BeanCommon.getBean(SceneConfigMapper.class);
+        super.sceneAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
+        super.sceneElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
+        super.sceneElementPortMapper = BeanCommon.getBean(SceneConfigElementPortMapper.class);
+        super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneConfigElementPortConnectionMapper.class);
+        super.sceneElementPluginMapper = BeanCommon.getBean(SceneConfigElementPluginMapper.class);
+        super.scenePieceMapper = BeanCommon.getBean(SceneConfigPieceMapper.class);
     }
 
     @Override
