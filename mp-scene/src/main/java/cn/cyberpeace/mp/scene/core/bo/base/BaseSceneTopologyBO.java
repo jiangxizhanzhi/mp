@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,16 +53,36 @@ public abstract class BaseSceneTopologyBO<
             setScene(scene.export());
         }
         if (areas != null) {
-            setAreas(areas.stream().map(a -> a.export()).collect(Collectors.toList()));
+            List<A> list = new ArrayList<>();
+            for (A a : areas) {
+                A export = a.export();
+                list.add(export);
+            }
+            setAreas(list);
         }
         if (elements != null) {
-            setElements(elements.stream().map(e -> e.export()).collect(Collectors.toList()));
+            List<E> list = new ArrayList<>();
+            for (E e : elements) {
+                E export = e.export();
+                list.add(export);
+            }
+            setElements(list);
         }
         if (connections != null) {
-            setConnections(connections.stream().map(c -> c.export()).collect(Collectors.toList()));
+            List<C> list = new ArrayList<>();
+            for (C c : connections) {
+                C export = c.export();
+                list.add(export);
+            }
+            setConnections(list);
         }
         if (pieces != null) {
-            setPieces(pieces.stream().map(p2 -> p2.export()).collect(Collectors.toList()));
+            List<P2> list = new ArrayList<>();
+            for (P2 p2 : pieces) {
+                P2 export = p2.export();
+                list.add(export);
+            }
+            setPieces(list);
         }
         return (T) this;
     }
@@ -81,19 +102,36 @@ public abstract class BaseSceneTopologyBO<
             pObj.setScene(scene.export(sceneClass));
         }
         if (areas != null) {
-            pObj.setAreas(areas.stream().map(area -> area.export(areaClass)).collect(Collectors.toList()));
+            List<A9> list = new ArrayList<>();
+            for (A area : areas) {
+                A9 export = area.export(areaClass);
+                list.add(export);
+            }
+            pObj.setAreas(list);
         }
         if (elements != null) {
-            pObj.setElements(elements.stream().map(element -> element.export(elementClass, portClass))
-                    .collect(Collectors.toList()));
+            List<E9> list = new ArrayList<>();
+            for (E element : elements) {
+                E9 export = element.export(elementClass, portClass);
+                list.add(export);
+            }
+            pObj.setElements(list);
         }
         if (connections != null) {
-            pObj.setConnections(connections.stream().map(connection -> connection.export(connectionClass))
-                    .collect(Collectors.toList()));
+            List<C9> list = new ArrayList<>();
+            for (C connection : connections) {
+                C9 export = connection.export(connectionClass);
+                list.add(export);
+            }
+            pObj.setConnections(list);
         }
         if (pieces != null) {
-            pObj.setPieces(pieces.stream().map(piece -> piece.export(pieceClass))
-                    .collect(Collectors.toList()));
+            List<P7> list = new ArrayList<>();
+            for (P2 piece : pieces) {
+                P7 export = piece.export(pieceClass);
+                list.add(export);
+            }
+            pObj.setPieces(list);
         }
         return pObj;
     }

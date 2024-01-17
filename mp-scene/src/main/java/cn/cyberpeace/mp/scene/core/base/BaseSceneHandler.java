@@ -600,8 +600,12 @@ public abstract class BaseSceneHandler<
         if (elementPorts == null) {
             return;
         }
-        Map<String, E> elementIdElementBOMap = elementMap.values().stream().collect(
-                Collectors.toMap(e -> e.getEid(), element -> element));
+        Map<String, E> elementIdElementBOMap = new HashMap<>();
+        for (E e : elementMap.values()) {
+            if (elementIdElementBOMap.put(e.getEid(), e) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         Collections.sort(elementPorts, Comparator.comparingInt(BaseSceneElementPortModel::getOrder));
         elementPorts.forEach(elementPort -> {
             E elementBO = elementIdElementBOMap.getOrDefault(elementPort.getSceneElement(), null);
@@ -695,10 +699,14 @@ public abstract class BaseSceneHandler<
         List<A0> areas = sceneAreaMapper.list(condition);
 
         if (isAreaMode) {
-            String[] openAreaIds = areas.stream()
-                    .filter(BaseSceneAreaModel::getOpen)
-                    .map(BaseSceneNodeModel::getNodeId)
-                    .toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            for (A0 area : areas) {
+                if (area.getOpen()) {
+                    String nodeId = area.getNodeId();
+                    list.add(nodeId);
+                }
+            }
+            String[] openAreaIds = list.toArray(new String[0]);
             if (openAreaIds.length > 0) {
                 areas.addAll(readAreas(openAreaIds));
             }
@@ -873,9 +881,12 @@ public abstract class BaseSceneHandler<
      * @param <O> 目标元素的表mapper类
      */
     private <M extends BaseModel, O extends BaseModelMapper<M>> void saveDiff(O modelMapper, DiffTargets<M> diff) {
-        String[] removingTargetIds = diff.getRemovingTargets().stream()
-                .map(BaseModel::getId)
-                .toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (M m : diff.getRemovingTargets()) {
+            String id = m.getId();
+            list.add(id);
+        }
+        String[] removingTargetIds = list.toArray(new String[0]);
         int deleteResult = modelMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();
         if (deleteResult < removingTargetIds.length) {
             throw new SceneUpdateException("Scene diff delete failed");
@@ -1287,8 +1298,14 @@ public abstract class BaseSceneHandler<
         String[] filterAreaIds = new String[0];
         if (isAreaMode) {
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
-            filterAreaIds = ArrayUtils.addAll(areaMap.values().stream().filter(a -> a.getOpen())
-                    .map(a -> a.getId()).toArray(String[]::new), currentAreaId);
+            List<String> list = new ArrayList<>();
+            for (A a : areaMap.values()) {
+                if (a.getOpen()) {
+                    String id = a.getId();
+                    list.add(id);
+                }
+            }
+            filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
         loadPieces(readPieces(filterAreaIds));
         loadElements(readElements(filterAreaIds));
@@ -1335,24 +1352,90 @@ public abstract class BaseSceneHandler<
         boolean isCreate = StringUtils.isEmpty(sceneId);
         saveScene();
 
-        Map<String, A0> existAreaMap = isCreate ? new HashMap<>() : readAreas().stream()
-                .collect(Collectors.toMap(BaseSceneAreaModel::getNodeId, x -> x));
+        Map<String, A0> existAreaMap;
+        if (isCreate) {
+            existAreaMap = new HashMap<>();
+        } else {
+            Map<String, A0> map = new HashMap<>();
+            for (A0 x : readAreas()) {
+                if (map.put(x.getNodeId(), x) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existAreaMap = map;
+        }
         String[] filterAreaIds = new String[0];
         if (isAreaMode) {
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
-            filterAreaIds = ArrayUtils.addAll(existAreaMap.values().stream().filter(a0 -> a0.getOpen())
-                    .map(a0 -> a0.getNodeId()).toArray(String[]::new), currentAreaId);
+            List<String> list = new ArrayList<>();
+            for (A0 a0 : existAreaMap.values()) {
+                if (a0.getOpen()) {
+                    String nodeId = a0.getNodeId();
+                    list.add(nodeId);
+                }
+            }
+            filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
-        Map<String, P3> existPieceMap = isCreate ? new HashMap<>() : readPieces(filterAreaIds).stream()
-                .collect(Collectors.toMap(p3 -> p3.getNodeId(), x -> x));
-        Map<String, E0> existElementMap = isCreate ? new HashMap<>() : readElements(filterAreaIds).stream()
-                .collect(Collectors.toMap(e0 -> e0.getNodeId(), x -> x));
-        Map<String, P0> existElementPortMap = isCreate ? new HashMap<>() : readElementPorts(filterAreaIds).stream()
-                .collect(Collectors.toMap(p0 -> p0.getPortId(), x -> x));
-        Map<String, C0> existElementPortConnectionMap = isCreate ? new HashMap<>() : readElementPortConnections(filterAreaIds).stream()
-                .collect(Collectors.toMap(c0 -> this.elementPortConnectionKey(c0), x -> x));
-        Map<String, P1> existElementPluginMap = isCreate ? new HashMap<>() : readElementPlugins(filterAreaIds).stream()
-                .collect(Collectors.toMap(p1 -> this.elementPluginKey(p1), x -> x));
+        Map<String, P3> existPieceMap;
+        if (isCreate) {
+            existPieceMap = new HashMap<>();
+        } else {
+            Map<String, P3> map = new HashMap<>();
+            for (P3 p3 : readPieces(filterAreaIds)) {
+                if (map.put(p3.getNodeId(), p3) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existPieceMap = map;
+        }
+        Map<String, E0> existElementMap;
+        if (isCreate) {
+            existElementMap = new HashMap<>();
+        } else {
+            Map<String, E0> map = new HashMap<>();
+            for (E0 e0 : readElements(filterAreaIds)) {
+                if (map.put(e0.getNodeId(), e0) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existElementMap = map;
+        }
+        Map<String, P0> existElementPortMap;
+        if (isCreate) {
+            existElementPortMap = new HashMap<>();
+        } else {
+            Map<String, P0> map = new HashMap<>();
+            for (P0 p0 : readElementPorts(filterAreaIds)) {
+                if (map.put(p0.getPortId(), p0) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existElementPortMap = map;
+        }
+        Map<String, C0> existElementPortConnectionMap;
+        if (isCreate) {
+            existElementPortConnectionMap = new HashMap<>();
+        } else {
+            Map<String, C0> map = new HashMap<>();
+            for (C0 c0 : readElementPortConnections(filterAreaIds)) {
+                if (map.put(this.elementPortConnectionKey(c0), c0) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existElementPortConnectionMap = map;
+        }
+        Map<String, P1> existElementPluginMap;
+        if (isCreate) {
+            existElementPluginMap = new HashMap<>();
+        } else {
+            Map<String, P1> map = new HashMap<>();
+            for (P1 p1 : readElementPlugins(filterAreaIds)) {
+                if (map.put(this.elementPluginKey(p1), p1) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existElementPluginMap = map;
+        }
 
         // 保存区域，可能会跨区域连接
         DiffTargets<A0> diffAreas = saveAreas(existAreaMap);
@@ -1361,31 +1444,65 @@ public abstract class BaseSceneHandler<
         DiffTargets<P0> diffElementPorts = saveElementPorts(existElementPortMap);
         // 此时可能存在已被删除的跨区域连接，可优化
         if (isAreaMode && !existElementPortConnectionMap.isEmpty()) {
-            existElementPortConnectionMap = sceneElementPortConnectionMapper.list(new HumanCondition()
-                    .filterIn(SceneElementPortConnectionModel::getId, existElementPortConnectionMap.values()
-                            .stream().map(c0 -> c0.getId()).toArray(String[]::new))
-            ).stream().collect(Collectors.toMap(c0 -> this.elementPortConnectionKey(c0), x -> x));
+            List<String> list = new ArrayList<>();
+            for (C0 c01 : existElementPortConnectionMap.values()) {
+                String id = c01.getId();
+                list.add(id);
+            }
+            Map<String, C0> map = new HashMap<>();
+            for (C0 c0 : sceneElementPortConnectionMapper.list(new HumanCondition()
+                    .filterIn(SceneElementPortConnectionModel::getId, list.toArray(new String[0]))
+            )) {
+                if (map.put(this.elementPortConnectionKey(c0), c0) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
+            existElementPortConnectionMap = map;
         }
         DiffTargets<C0> diffElementPortConnections = saveElementPortConnections(existElementPortConnectionMap);
         // elementPlugin 由于通过服务端id映射，在拓扑保存后才能获取
         DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
 
         // 保存插件数据
-        plugins.forEach(plugin -> {
+        for (P2 plugin : plugins) {
             plugin.saveScene();
-            plugin.createElements(diffElements.getAddingTargets().stream().map(e0 -> e0.getNodeId())
-                    .toArray(String[]::new));
-            plugin.updateElements(diffElements.getUpdatingTargets().stream().map(e0 -> e0.getNodeId())
-                    .toArray(String[]::new));
-            plugin.deleteElements(diffElements.getRemovingTargets().stream().map(e0 -> e0.getNodeId())
-                    .toArray(String[]::new));
-            plugin.createElementPorts(diffElementPorts.getAddingTargets().stream()
-                    .map(p0 -> p0.getPortId()).toArray(String[]::new));
-            plugin.updateElementPorts(diffElementPorts.getUpdatingTargets().stream()
-                    .map(p0 -> p0.getPortId()).toArray(String[]::new));
-            plugin.deleteElementPorts(diffElementPorts.getRemovingTargets().stream()
-                    .map(p0 -> p0.getPortId()).toArray(String[]::new));
-        });
+            List<String> list = new ArrayList<>();
+            for (E0 e01 : diffElements.getAddingTargets()) {
+                String nodeId = e01.getNodeId();
+                list.add(nodeId);
+            }
+            plugin.createElements(list.toArray(new String[0]));
+            List<String> result = new ArrayList<>();
+            for (E0 e01 : diffElements.getUpdatingTargets()) {
+                String nodeId = e01.getNodeId();
+                result.add(nodeId);
+            }
+            plugin.updateElements(result.toArray(new String[0]));
+            List<String> list1 = new ArrayList<>();
+            for (E0 e0 : diffElements.getRemovingTargets()) {
+                String nodeId = e0.getNodeId();
+                list1.add(nodeId);
+            }
+            plugin.deleteElements(list1.toArray(new String[0]));
+            List<String> result1 = new ArrayList<>();
+            for (P0 p01 : diffElementPorts.getAddingTargets()) {
+                String portId = p01.getPortId();
+                result1.add(portId);
+            }
+            plugin.createElementPorts(result1.toArray(new String[0]));
+            List<String> list2 = new ArrayList<>();
+            for (P0 p01 : diffElementPorts.getUpdatingTargets()) {
+                String portId = p01.getPortId();
+                list2.add(portId);
+            }
+            plugin.updateElementPorts(list2.toArray(new String[0]));
+            List<String> result2 = new ArrayList<>();
+            for (P0 p0 : diffElementPorts.getRemovingTargets()) {
+                String portId = p0.getPortId();
+                result2.add(portId);
+            }
+            plugin.deleteElementPorts(result2.toArray(new String[0]));
+        }
     }
 
     /**
@@ -1417,39 +1534,84 @@ public abstract class BaseSceneHandler<
             }
 
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
-            filterAreaIds = ArrayUtils.addAll(areas.stream().filter(a0 -> a0.getOpen())
-                    .map(a0 -> a0.getNodeId()).toArray(String[]::new), currentAreaId);
+            List<String> list = new ArrayList<>();
+            for (A0 a0 : areas) {
+                if (a0.getOpen()) {
+                    String nodeId = a0.getNodeId();
+                    list.add(nodeId);
+                }
+            }
+            filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
         List<P3> pieces = readPieces(filterAreaIds);
         List<E0> elements = readElements(filterAreaIds);
         List<P0> elementPorts = readElementPorts(filterAreaIds);
         List<P1> elementPlugins = readElementPlugins(filterAreaIds);
         if (!areas.isEmpty()) {
-            sceneAreaMapper.bulkDelete(areas.stream().map(a0 -> a0.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (A0 a0 : areas) {
+                String id = a0.getId();
+                list.add(id);
+            }
+            sceneAreaMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!pieces.isEmpty()) {
-            scenePieceMapper.bulkDelete(pieces.stream().map(p3 -> p3.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (P3 p3 : pieces) {
+                String id = p3.getId();
+                list.add(id);
+            }
+            scenePieceMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elements.isEmpty()) {
-            sceneElementMapper.bulkDelete(elements.stream().map(e0 -> e0.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (E0 e0 : elements) {
+                String id = e0.getId();
+                list.add(id);
+            }
+            sceneElementMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elementPorts.isEmpty()) {
-            sceneElementPortMapper.bulkDelete(elementPorts.stream().map(p0 -> p0.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (P0 p0 : elementPorts) {
+                String id = p0.getId();
+                list.add(id);
+            }
+            sceneElementPortMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elementPlugins.isEmpty()) {
-            sceneElementPluginMapper.bulkDelete(elementPlugins.stream().map(p1 -> p1.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (P1 p1 : elementPlugins) {
+                String id = p1.getId();
+                list.add(id);
+            }
+            sceneElementPluginMapper.bulkDelete(list.toArray(new String[0]));
         }
 
         List<C0> elementPortConnections = readElementPortConnections(filterAreaIds);
         if (!elementPortConnections.isEmpty()) {
-            sceneElementPortConnectionMapper.bulkDelete(elementPortConnections.stream().map(c0 -> c0.getId()).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (C0 c0 : elementPortConnections) {
+                String id = c0.getId();
+                list.add(id);
+            }
+            sceneElementPortConnectionMapper.bulkDelete(list.toArray(new String[0]));
         }
 
         // 删除插件数据
         plugins.forEach(plugin -> {
-            plugin.deleteElements(elements.stream().map(e0 -> e0.getNodeId()).toArray(String[]::new));
-            plugin.deleteElementPorts(elementPorts.stream().map(p0 -> p0.getPortId())
-                    .toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (E0 e0 : elements) {
+                String nodeId = e0.getNodeId();
+                list.add(nodeId);
+            }
+            plugin.deleteElements(list.toArray(new String[0]));
+            List<String> result = new ArrayList<>();
+            for (P0 p0 : elementPorts) {
+                String portId = p0.getPortId();
+                result.add(portId);
+            }
+            plugin.deleteElementPorts(result.toArray(new String[0]));
         });
     }
 
@@ -1524,8 +1686,16 @@ public abstract class BaseSceneHandler<
             if (CollectionUtils.isEmpty(list)) {
                 return new ArrayList<>();
             }
-            List<String> result = list.stream().map(p -> p.getPortId()).collect(Collectors.toList());
-            List<String> deleteIds = list.stream().map(p -> p.getId()).collect(Collectors.toList());
+            List<String> result = new ArrayList<>();
+            for (P0 p0 : list) {
+                String portId = p0.getPortId();
+                result.add(portId);
+            }
+            List<String> deleteIds = new ArrayList<>();
+            for (P0 p : list) {
+                String id = p.getId();
+                deleteIds.add(id);
+            }
             sceneElementPortMapper.bulkDelete(deleteIds.toArray(new String[]{}));
             return result;
         }
@@ -1541,7 +1711,12 @@ public abstract class BaseSceneHandler<
         for (P2 plugin : plugins) {
             plugin.updateElements(nodeId);
             if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
-                plugin.updateElementPorts(elementPortBOs.stream().map(p -> p.getId()).toArray(String[]::new));
+                List<String> result = new ArrayList<>();
+                for (P p : elementPortBOs) {
+                    String id = p.getId();
+                    result.add(id);
+                }
+                plugin.updateElementPorts(result.toArray(new String[0]));
             }else if(CollectionUtils.isNotEmpty(list)){
                 plugin.deleteElementPorts(list.toArray(new String[]{}));
             }

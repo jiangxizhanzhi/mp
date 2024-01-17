@@ -255,9 +255,12 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementBO sceneElement = JsonCommon.parse(JsonCommon.stringify(getElement(nodeId)), SceneElementBO.class);
         if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
             // 所有非辅助端口
-            List<SceneElementPortBO> ports = sceneElement.getPorts().stream()
-                    .filter(p -> !Boolean.TRUE.equals(p.getIsAuxiliary()))
-                    .collect(Collectors.toList());
+            List<SceneElementPortBO> ports = new ArrayList<>();
+            for (SceneElementPortBO p : sceneElement.getPorts()) {
+                if (!Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                    ports.add(p);
+                }
+            }
             sceneElement.setPorts(ports);
         }
         if (StringUtils.isNotEmpty(sceneElement.getIcon2()) && !FsCommon.isFileServerOuterUrl(sceneElement.getIcon2())) {

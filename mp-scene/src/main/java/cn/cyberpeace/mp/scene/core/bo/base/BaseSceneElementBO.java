@@ -68,7 +68,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     public T export() {
         T pObj = super.export();
         if (ports != null) {
-            pObj.setPorts(ports.stream().map(port -> port.export()).collect(Collectors.toList()));
+            List<P> list = new ArrayList<>();
+            for (P port : ports) {
+                P export = port.export();
+                list.add(export);
+            }
+            pObj.setPorts(list);
         }
 
         return pObj;
@@ -83,7 +88,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
             Class<P1> pClass, Class<P2> portClass, SerializableFunction<T>... ignoreFieldGetters) {
         P1 pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (ports != null) {
-            pObj.setPorts(ports.stream().map(port -> port.export(portClass)).collect(Collectors.toList()));
+            List<P2> list = new ArrayList<>();
+            for (P port : ports) {
+                P2 export = port.export(portClass);
+                list.add(export);
+            }
+            pObj.setPorts(list);
         }
 
         return pObj;
