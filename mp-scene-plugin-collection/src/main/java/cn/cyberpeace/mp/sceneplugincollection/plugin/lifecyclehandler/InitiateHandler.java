@@ -130,10 +130,12 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
-        List<CollectionPluginSceneElementBO> probeCollectionElements = getPluginHandler().getElementMap().values()
-                .stream()
-                .filter(collectionElement -> Boolean.TRUE.equals(collectionElement.getEnableProbeCollect()))
-                .collect(Collectors.toList());
+        List<CollectionPluginSceneElementBO> probeCollectionElements = new ArrayList<>();
+        for (CollectionPluginSceneElementBO collectionPluginSceneElementBO : getPluginHandler().getElementMap().values()) {
+            if (Boolean.TRUE.equals(collectionPluginSceneElementBO.getEnableProbeCollect())) {
+                probeCollectionElements.add(collectionPluginSceneElementBO);
+            }
+        }
         if (!probeCollectionElements.isEmpty()) {
             // 准备采集路由
             runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
@@ -245,9 +247,12 @@ public class InitiateHandler extends HandlerCommon {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream()
-                        .filter(s -> StringUtils.isNotEmpty(s))
-                        .collect(Collectors.toList());
+                List<String> collectPath = new ArrayList<>();
+                for (String s : probe.getCollectPath()) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        collectPath.add(s);
+                    }
+                }
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
@@ -255,9 +260,12 @@ public class InitiateHandler extends HandlerCommon {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream()
-                        .filter(s -> StringUtils.isNotEmpty(s))
-                        .collect(Collectors.toList());
+                List<String> collectPath = new ArrayList<>();
+                for (String s : probe.getCollectPath()) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        collectPath.add(s);
+                    }
+                }
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
@@ -328,9 +336,12 @@ public class InitiateHandler extends HandlerCommon {
             return probeParam;
         }
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream()
-                .collect(Collectors.toMap(localFileMappingModel -> localFileMappingModel.getName(),
-                        localFileMappingModel -> localFileMappingModel.getRemoteFile()));
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            if (nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         WazuhProbeConfig.DefaultProbe.NewProbe probe;
         if (type == FILE) {

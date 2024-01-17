@@ -17,9 +17,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class WazuhCommon {
 
@@ -76,9 +76,12 @@ public class WazuhCommon {
         }
         agentName = StringUtils.isEmpty(agentName) ? TextUtils.uuid() : agentName;
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream()
-                .collect(Collectors.toMap(localFileMappingModel -> localFileMappingModel.getName(),
-                        localFileMappingModel -> localFileMappingModel.getRemoteFile()));
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            if (nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();

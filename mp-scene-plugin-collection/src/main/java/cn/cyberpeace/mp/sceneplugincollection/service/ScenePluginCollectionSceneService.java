@@ -121,10 +121,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -283,28 +285,50 @@ public class ScenePluginCollectionSceneService {
 
         List<FlowLogBO> flowLogBOS = flowLogBOSResult.getObjs();
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)) {
-                List<String> categoryList;
-                List<String> categoryListAtt;
-                if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
-                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttCkWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
-                } else {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
-                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttCkWay(c, allCategoryDicMap)).collect(Collectors.toList());
+        for (FlowLogBO v : flowLogBOS) {
+            if (Objects.nonNull(v.getSuricata())) {
+                if (MapUtils.isNotEmpty(allCategoryDicMap)) {
+                    List<String> categoryList;
+                    List<String> categoryListAtt;
+                    if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
+                        List<String> list = new ArrayList<>();
+                        for (String s : v.getSuricata().getCategory()) {
+                            String globalizedWithAttackWay = this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap);
+                            list.add(globalizedWithAttackWay);
+                        }
+                        categoryList = list;
+                        List<String> result = new ArrayList<>();
+                        for (String c : v.getSuricata().getCategory()) {
+                            String s = this.globalizedWithAttCkWay(queryParams.getAttackTypes().get(0), allCategoryDicMap);
+                            result.add(s);
+                        }
+                        categoryListAtt = result;
+                    } else {
+                        List<String> list = new ArrayList<>();
+                        for (String s : v.getSuricata().getCategory()) {
+                            String globalizedWithAttackWay = this.globalizedWithAttackWay(s, allCategoryDicMap);
+                            list.add(globalizedWithAttackWay);
+                        }
+                        categoryList = list;
+                        List<String> result = new ArrayList<>();
+                        for (String c : v.getSuricata().getCategory()) {
+                            String s = this.globalizedWithAttCkWay(c, allCategoryDicMap);
+                            result.add(s);
+                        }
+                        categoryListAtt = result;
+                    }
+
+                    v.getSuricata().setCategory(categoryList);
+                    v.getSuricata().setCategoryAtt(categoryListAtt);
                 }
-
-                flowLogBO.getSuricata().setCategory(categoryList);
-                flowLogBO.getSuricata().setCategoryAtt(categoryListAtt);
             }
-        });
+        }
 
-        List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
+        List<CollectionFlowBO> list = new ArrayList<>();
+        for (FlowLogBO flowLogBO : flowLogBOSResult.getObjs()) {
+            CollectionFlowBO collectionFlowBO = this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap());
+            list.add(collectionFlowBO);
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
@@ -408,9 +432,11 @@ public class ScenePluginCollectionSceneService {
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
-        List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
-            return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
-        }).collect(Collectors.toList());
+        List<CollectionHostStateBO> hostStates = new ArrayList<>();
+        for (WazuhHostStateModel srcHostState : result) {
+            CollectionHostStateBO collectionHostStateBO = hostStateModel2BO(sceneId, agentName2Element, srcHostState);
+            hostStates.add(collectionHostStateBO);
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
     }
 
@@ -420,9 +446,11 @@ public class ScenePluginCollectionSceneService {
         Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
         Map<String, List<CollectionHostStateBO>> convertedMap = new HashMap<>();
         map.forEach((agentName, result) -> {
-            List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
-                return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
-            }).collect(Collectors.toList());
+            List<CollectionHostStateBO> hostStates = new ArrayList<>();
+            for (WazuhHostStateModel srcHostState : result) {
+                CollectionHostStateBO collectionHostStateBO = hostStateModel2BO(sceneId, agentName2Element, srcHostState);
+                hostStates.add(collectionHostStateBO);
+            }
 
             convertedMap.put(agentName, hostStates);
         });
@@ -504,7 +532,13 @@ public class ScenePluginCollectionSceneService {
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
-            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2File.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByCatagories.addAll(ruleIds);
         }
 
@@ -512,7 +546,13 @@ public class ScenePluginCollectionSceneService {
         List<String> ruleIdsByAppNames = new ArrayList<>();
         Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
         if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
-            List<String> ruleIds = ruleId2AppNames.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2AppNames.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByAppNames.addAll(ruleIds);
         }
 
@@ -522,7 +562,15 @@ public class ScenePluginCollectionSceneService {
         WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>(agentNameElementMap.keySet()));
         if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
             // 取交集
-            List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
+            List<String> intersectionRuleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String item : ruleIdsByCatagories) {
+                if (ruleIdsByAppNames.contains(item)) {
+                    if (uniqueValues.add(item)) {
+                        intersectionRuleIds.add(item);
+                    }
+                }
+            }
             request.setRuleIds(intersectionRuleIds);
         } else {
             List<String> ruleIds = new ArrayList<>();
@@ -959,9 +1007,11 @@ public class ScenePluginCollectionSceneService {
         // 执行查询
         List<AttackSeverityAndDestinationIpAggregationBO> boList = flowAnalysisService.groupByDestinationIpAndSeverity(request);
 
-        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream()
-                .sorted(Comparator.comparing(attackSeverityAndDestinationIpAggregationBO -> attackSeverityAndDestinationIpAggregationBO.getSeverity()))
-                .collect(Collectors.toList());
+        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = new ArrayList<>();
+        for (AttackSeverityAndDestinationIpAggregationBO severityAndDestinationIpAggregationBO : boList) {
+            sortedList.add(severityAndDestinationIpAggregationBO);
+        }
+        sortedList.sort(Comparator.comparing(attackSeverityAndDestinationIpAggregationBO -> attackSeverityAndDestinationIpAggregationBO.getSeverity()));
 
         List<String> destinationIpList = new ArrayList<>();
 
@@ -972,7 +1022,12 @@ public class ScenePluginCollectionSceneService {
             result.setSeverity(bo.getSeverity());
             List<String> ipList = bo.getDestinationIpList();
             if (CollectionUtils.isNotEmpty(ipList)) {
-                List<String> ips = ipList.stream().filter(v -> !destinationIpList.contains(v)).collect(Collectors.toList());
+                List<String> ips = new ArrayList<>();
+                for (String v : ipList) {
+                    if (!destinationIpList.contains(v)) {
+                        ips.add(v);
+                    }
+                }
                 result.setDestinationIpList(ips);
                 result.setNum(ips.size());
                 destinationIpList.addAll(ips);
@@ -1483,7 +1538,11 @@ public class ScenePluginCollectionSceneService {
                 .limit(pageSize)
                 .collect(Collectors.toList());
 
-        List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
+        List<Process> processes = new ArrayList<>();
+        for (WazuhProcessModel p : resultList) {
+            Process process = convertWazuhProcess2Process(p);
+            processes.add(process);
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
     }
@@ -1622,7 +1681,11 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
 
         // 根据每一个有效的eid(agentName)查询ElementBO
-        List<SceneElementBO> elementBOS = nodeId2Eidmap.values().stream().map(eid -> batchSceneHandler.getNodeByEid(eid)).collect(Collectors.toList());
+        List<SceneElementBO> elementBOS = new ArrayList<>();
+        for (String eid : nodeId2Eidmap.values()) {
+            SceneElementBO nodeByEid = batchSceneHandler.getNodeByEid(eid);
+            elementBOS.add(nodeByEid);
+        }
         return new ServiceResult<>(elementBOS);
     }
 
@@ -1704,7 +1767,12 @@ public class ScenePluginCollectionSceneService {
     private List<String> getTypeIds(List<String> types) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getType, types.toArray());
         List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String id = t.getId();
+            list.add(id);
+        }
+        return list;
     }
 
     /**
@@ -1716,7 +1784,12 @@ public class ScenePluginCollectionSceneService {
     private List<String> getTypeIdsByCodes(List<String> codes) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getCode, codes.toArray());
         List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String id = t.getId();
+            list.add(id);
+        }
+        return list;
     }
 
     /**
@@ -1728,7 +1801,12 @@ public class ScenePluginCollectionSceneService {
     private List<String> getTypes(List<String> typeIds) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
         List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String type = t.getType();
+            list.add(type);
+        }
+        return list;
     }
 
     /**
@@ -1759,7 +1837,13 @@ public class ScenePluginCollectionSceneService {
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class).filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
         List<CollectionPluginWazuhRuleModel> ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
-        return new ServiceResult<>(ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile())));
+        Map<String, String> map = new HashMap<>();
+        for (CollectionPluginWazuhRuleModel r : ruleModels) {
+            if (map.put(r.getId(), r.getFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return new ServiceResult<>(map);
     }
 
     /**
@@ -1782,7 +1866,13 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(ruleModels)) {
             return new HashMap<>();
         }
-        return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
+        Map<String, String> map = new HashMap<>();
+        for (CollectionPluginWazuhRuleModel r : ruleModels) {
+            if (map.put(r.getId(), r.getFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 
     /**
@@ -1801,7 +1891,14 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        Set<CollectionPluginWazuhRuleTypeRelationModel> uniqueValues = new HashSet<>();
+        for (CollectionPluginWazuhRuleTypeRelationModel r : relationModels) {
+            if (uniqueValues.add(r)) {
+                String ruleId = r.getRuleId();
+                ruleIds.add(ruleId);
+            }
+        }
         return getRuleId2FileByIds(ruleIds);
     }
 
@@ -2002,7 +2099,14 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new HashMap<>();
         }
-        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        Set<CollectionPluginWazuhRuleTypeRelationModel> uniqueValues = new HashSet<>();
+        for (CollectionPluginWazuhRuleTypeRelationModel r : relationModels) {
+            if (uniqueValues.add(r)) {
+                String ruleId = r.getRuleId();
+                ruleIds.add(ruleId);
+            }
+        }
         return getRuleId2FileByIds(ruleIds).getSource();
     }
 
@@ -2021,7 +2125,14 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ArrayList<>();
         }
-        List<String> typeIds = relationModels.stream().distinct().map(r -> r.getTypeId()).collect(Collectors.toList());
+        List<String> typeIds = new ArrayList<>();
+        Set<CollectionPluginWazuhRuleTypeRelationModel> uniqueValues = new HashSet<>();
+        for (CollectionPluginWazuhRuleTypeRelationModel r : relationModels) {
+            if (uniqueValues.add(r)) {
+                String typeId = r.getTypeId();
+                typeIds.add(typeId);
+            }
+        }
         return getTypes(typeIds);
     }
 
