@@ -165,9 +165,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     private Map<String, String> configs2Map(List<SysConfigModel> configs) {
         Map<String, String> configMap = new HashMap();
-        configs.forEach(model -> {
+        for (SysConfigModel model : configs) {
             configMap.put(model.getKeyName(), model.getValue());
-        });
+        }
         return configMap;
     }
 

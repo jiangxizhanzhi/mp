@@ -129,7 +129,12 @@ public class SysDespireCronJob {
 
         List<String> userIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(users)) {
-            userIds = users.stream().map(UserModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (UserModel user : users) {
+                String id = user.getId();
+                list.add(id);
+            }
+            userIds = list;
         }
         SysNoticeRequest sysNoticeRequest =
                 SysNoticeRequest.builder()

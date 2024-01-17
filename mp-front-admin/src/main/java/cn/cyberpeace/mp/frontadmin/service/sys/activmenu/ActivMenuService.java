@@ -124,15 +124,29 @@ public class ActivMenuService {
 
 
     private void check(List<TargetModel> targetModels) {
-        var notEqualList = targetModels.stream().filter(t -> !Objects.equals(t.getId(), t.getIdentifier())).collect(Collectors.toList());
+        var notEqualList = new ArrayList<>();
+        for (TargetModel targetModel : targetModels) {
+            if (!Objects.equals(targetModel.getId(), targetModel.getIdentifier())) {
+                notEqualList.add(targetModel);
+            }
+        }
         if (CollectionUtils.isNotEmpty(notEqualList)) {
             log.error("json file error! value not equals with authority:{}", notEqualList.get(0).getId());
             throw new MpRuntimeException("json file error! value not equals with authority:" + notEqualList.get(0).getId());
         }
 
         // 检查是否有重复
-        Map<String, Long> map = targetModels.stream().collect(Collectors.groupingBy(t -> t.getId(), Collectors.counting()));
-        Map.Entry<String, Long> entry = map.entrySet().stream().filter(e -> e.getValue() > 1).findFirst().orElse(null);
+        Map<String, Long> map = new HashMap<>();
+        for (TargetModel t : targetModels) {
+            map.merge(t.getId(), 1L, Long::sum);
+        }
+        Map.Entry<String, Long> entry = null;
+        for (Map.Entry<String, Long> e : map.entrySet()) {
+            if (e.getValue() > 1) {
+                entry = e;
+                break;
+            }
+        }
         if (Objects.nonNull(entry)) {
             log.error("json file has duplicated:{}", entry.getKey());
             throw new MpRuntimeException("json file error! duplicated:" + entry.getKey());
@@ -194,7 +208,13 @@ public class ActivMenuService {
             return;
         }
 
-        List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
+        List<String> activedKeys = new ArrayList<>();
+        for (Map.Entry<String, String> entry : activeItemMap.entrySet()) {
+            if (Objects.equals(entry.getValue(), "1")) {
+                String stringStringEntryKey = entry.getKey();
+                activedKeys.add(stringStringEntryKey);
+            }
+        }
         OptionQueryParams queryParams = new OptionQueryParams();
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
@@ -215,14 +235,26 @@ public class ActivMenuService {
             }
             String[] metaActiveKeyArr = metaModel.getActivKeys().split(",");
             List<String> metaActiveKeyList = Arrays.asList(metaActiveKeyArr);
-            boolean isNoAuth = metaActiveKeyList.stream().filter(key -> Objects.equals(key, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)).findAny().isPresent();
+            boolean isNoAuth = false;
+            for (String s : metaActiveKeyList) {
+                if (Objects.equals(s, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)) {
+                    isNoAuth = true;
+                    break;
+                }
+            }
             if (isNoAuth) {
                 metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_YES);
             } else {
                 if (CollectionUtils.isEmpty(activedKeys)) {
                     metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_NO);
                 } else {
-                    boolean isVisible = metaActiveKeyList.stream().filter(key -> activedKeys.contains(key)).findAny().isPresent();
+                    boolean isVisible = false;
+                    for (String key : metaActiveKeyList) {
+                        if (activedKeys.contains(key)) {
+                            isVisible = true;
+                            break;
+                        }
+                    }
                     if (isVisible) {
                         metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_YES);
                     } else {
@@ -279,11 +311,19 @@ public class ActivMenuService {
         menuExtraInfo.setMenu(menuDTO.getId());
 
         if (CollectionUtils.isNotEmpty(menuDTO.getActive())) {
-            menuExtraInfo.setActivKeys(menuDTO.getActive().stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String s : menuDTO.getActive()) {
+                joiner.add(s);
+            }
+            menuExtraInfo.setActivKeys(joiner.toString());
         }
 
         if (CollectionUtils.isNotEmpty(menuDTO.getEdition())) {
-            menuExtraInfo.setEditions(menuDTO.getEdition().stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String s : menuDTO.getEdition()) {
+                joiner.add(s);
+            }
+            menuExtraInfo.setEditions(joiner.toString());
         }
 
         return menuExtraInfo;
@@ -370,24 +410,29 @@ public class ActivMenuService {
         String edition = String.valueOf(activationResponse.getEdition());
         List<String> positiveKeys = new ArrayList<>();
         positiveKeys.add(AdminConstant.MENU_NO_AUTH);
-        items.stream().forEach(item -> {
+        for (ActivationItem item : items) {
             if (Objects.nonNull(item.getType()) && Objects.equals(item.getType(), 1)) {
                 if (Objects.nonNull(item.getValue()) && Objects.equals("1", item.getValue())) {
                     positiveKeys.add(item.getKey());
                 }
             }
-        });
+        }
 
         log.info("positiveKeys:{}", positiveKeys);
 
-        menuExtraInfos.forEach(mi -> {
-
+        for (MenuExtraInfoModel mi : menuExtraInfos) {
             String menuId = mi.getMenu();
-            Optional<TargetModel> targetModelOptional = targetModels.stream().filter(t -> Objects.equals(t.getId(), menuId)).findFirst();
+            Optional<TargetModel> targetModelOptional = Optional.empty();
+            for (TargetModel t : targetModels) {
+                if (Objects.equals(t.getId(), menuId)) {
+                    targetModelOptional = Optional.of(t);
+                    break;
+                }
+            }
 
             if (!targetModelOptional.isPresent()) {
                 // 不存在的直接返回
-                return;
+                continue;
             }
 
             boolean editionMatch = false;
@@ -439,7 +484,7 @@ public class ActivMenuService {
             } else {
                 targetModel.setVisible(TargetModel.VISIBILITY_NO);
             }
-        });
+        }
 
     }
 

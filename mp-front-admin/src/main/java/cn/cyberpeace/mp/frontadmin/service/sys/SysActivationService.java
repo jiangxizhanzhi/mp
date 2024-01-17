@@ -326,7 +326,13 @@ public class SysActivationService {
         }
 
         List<ActivationItem> items = activationResponse.getItems();
-        Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
+        Optional<ActivationItem> itemOptional = Optional.empty();
+        for (ActivationItem i : items) {
+            if (i.getKey().equals(key)) {
+                itemOptional = Optional.of(i);
+                break;
+            }
+        }
         if (!itemOptional.isPresent()) {
             log.error("config key {} not existed!", key);
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(key));
@@ -375,22 +381,22 @@ public class SysActivationService {
         JSONObject jsonObject = new JSONObject();
 
         JSONArray moduleArray = new JSONArray();
-        moduleItems.forEach(m -> {
+        for (ActivationModuleItem m : moduleItems) {
             JSONObject module = new JSONObject();
             module.put("identifier", m.getIdentifier());
             module.put("name", m.getName());
             moduleArray.add(module);
-        });
+        }
 
         JSONArray resourceArray = new JSONArray();
-        resourceItems.forEach(r -> {
+        for (ActivationResourceItem r : resourceItems) {
             JSONObject resource = new JSONObject();
             resource.put("identifier", r.getIdentifier());
             resource.put("module", r.getModule());
             resource.put("restrictName", r.getRestrictName());
             resource.put("maxValue", r.getMaxValue());
             resourceArray.add(resource);
-        });
+        }
 
         jsonObject.put("modules", moduleArray);
         jsonObject.put("resources", resourceArray);
@@ -552,9 +558,9 @@ public class SysActivationService {
     private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
         ParamCheck.notEmpty(items, AuthBasei18nCode.REQUEST_PARAMS);
         Map<String, String> map = new HashMap<>();
-        items.forEach(i -> {
+        for (ActivationItem i : items) {
             map.put(i.getKey(), i.getValue());
-        });
+        }
         return map;
     }
 
@@ -734,7 +740,12 @@ public class SysActivationService {
         ModuleInfoResponse cr = ModuleInfoResponse.builder().moduleName(ModuleEnums.CR.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         moduleInfoList.addAll(Arrays.asList(ad, oj, cr));
 
-        Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
+        Map<String, ActivationItem> key2ItemMap = new HashMap<>();
+        for (ActivationItem item : items) {
+            if (key2ItemMap.put(item.getKey(), item) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         // 任意一项激活项勾选，则该模块被激活
         for (String key : AD_MODULE_KEYS) {

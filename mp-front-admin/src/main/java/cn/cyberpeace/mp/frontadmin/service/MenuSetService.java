@@ -97,7 +97,13 @@ public class MenuSetService {
         Set<String> visibleMenuIds = new HashSet<>();
         for (var mi : menuExtraInfos) {
             String menuId = mi.getMenu();
-            Optional<TargetModel> targetModelOptional = targetModels.stream().filter(t -> Objects.equals(t.getId(), menuId)).findFirst();
+            Optional<TargetModel> targetModelOptional = Optional.empty();
+            for (TargetModel t : targetModels) {
+                if (Objects.equals(t.getId(), menuId)) {
+                    targetModelOptional = Optional.of(t);
+                    break;
+                }
+            }
             if (!targetModelOptional.isPresent()) {
                 continue;
             }
@@ -116,7 +122,12 @@ public class MenuSetService {
 
     public List<TargetBo> getSystemTreeMenusBy(Set<String> visibleMenuIds) {
         var userMenus = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
-        var userVisibleMenus = userMenus.stream().filter(m -> visibleMenuIds.contains(m.getIdentifier())).collect(Collectors.toList());
+        var userVisibleMenus = new ArrayList<>();
+        for (MenuTemplateModel m : userMenus) {
+            if (visibleMenuIds.contains(m.getIdentifier())) {
+                userVisibleMenus.add(m);
+            }
+        }
         List<TargetBo> tree = toTree(userVisibleMenus);
         sortTree(tree);
         return tree;
@@ -125,7 +136,12 @@ public class MenuSetService {
     public List<TargetBo> getCurrentUserTreeMenusBy(Set<String> visibleMenuIds) {
         var user = UserUtils.getLoginUser();
         var userMenus = this.getUserAllMenus(user.getId());
-        var userVisibleMenus = userMenus.stream().filter(m -> visibleMenuIds.contains(m.getIdentifier())).collect(Collectors.toList());
+        var userVisibleMenus = new ArrayList<>();
+        for (MenuTemplateModel m : userMenus) {
+            if (visibleMenuIds.contains(m.getIdentifier())) {
+                userVisibleMenus.add(m);
+            }
+        }
         List<TargetBo> tree = toTree(userVisibleMenus);
         sortTree(tree);
         return tree;
@@ -276,11 +292,11 @@ public class MenuSetService {
 
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
@@ -309,13 +325,13 @@ public class MenuSetService {
         List<ActivationItem> items = activationResponse.getItems();
         List<String> positiveKeys = new ArrayList<>();
         positiveKeys.add(AdminConstant.MENU_NO_AUTH);
-        items.stream().forEach(item -> {
+        for (ActivationItem item : items) {
             if (Objects.nonNull(item.getType()) && Objects.equals(item.getType(), 1)) {
                 if (Objects.nonNull(item.getValue()) && Objects.equals("1", item.getValue())) {
                     positiveKeys.add(item.getKey());
                 }
             }
-        });
+        }
         return positiveKeys;
     }
 
