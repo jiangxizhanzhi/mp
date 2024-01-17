@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortM
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,13 +88,21 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
 
     public int createElementNetworks(List<ConnectedNetworkBO> deriveNetworks) {
         // 删除原来的
-        this.cloudPluginSceneElementNetworkMapper.bulkDelete(deriveNetworks.stream()
-                .map(d -> d.getNetwork().getId())
-                .collect(Collectors.toList())
+        List<String> list = new ArrayList<>();
+        for (ConnectedNetworkBO deriveNetwork : deriveNetworks) {
+            String id = deriveNetwork.getNetwork().getId();
+            list.add(id);
+        }
+        this.cloudPluginSceneElementNetworkMapper.bulkDelete(list
                 .toArray(new String[]{})
         );
         // 新建
-        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList())).getSuccessCount();
+        List<CloudPluginSceneElementNetworkModel> result = new ArrayList<>();
+        for (ConnectedNetworkBO d : deriveNetworks) {
+            CloudPluginSceneElementNetworkModel cloudPluginSceneElementNetworkModel = d.getNetwork().toModel();
+            result.add(cloudPluginSceneElementNetworkModel);
+        }
+        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(result).getSuccessCount();
     }
 
     public void deleteElementNetworks(String... networkIds) {
@@ -118,9 +127,12 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
             result += r;
         }
         if (CollectionUtils.isNotEmpty(diffTargets.getRemovingTargets())) {
-            int r = this.cloudPluginSceneElementNetworkMapper.bulkDelete(diffTargets.getRemovingTargets().stream()
-                    .map(e -> e.getId())
-                    .collect(Collectors.toList())
+            List<String> list = new ArrayList<>();
+            for (CloudPluginSceneElementNetworkModel e : diffTargets.getRemovingTargets()) {
+                String id = e.getId();
+                list.add(id);
+            }
+            int r = this.cloudPluginSceneElementNetworkMapper.bulkDelete(list
                     .toArray(new String[]{})
             ).getSuccessCount();
             result += r;

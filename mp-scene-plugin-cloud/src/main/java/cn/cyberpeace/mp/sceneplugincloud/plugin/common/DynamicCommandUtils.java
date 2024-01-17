@@ -48,7 +48,14 @@ public class DynamicCommandUtils {
             if (CollectionUtils.isEmpty(element.getSrcElement().getPorts())) {
                 this.pluginPorts = new ArrayList<>();
             } else {
-                pluginPorts = element.getSrcElement().getPorts().stream().map(p -> pluginHandler.getPort(p.getId())).filter(p -> p != null).collect(Collectors.toList());
+                List<CloudPluginSceneElementPortBO> list = new ArrayList<>();
+                for (SceneElementPortBO p : element.getSrcElement().getPorts()) {
+                    CloudPluginSceneElementPortBO port = pluginHandler.getPort(p.getId());
+                    if (port != null) {
+                        list.add(port);
+                    }
+                }
+                pluginPorts = list;
             }
         }
     }

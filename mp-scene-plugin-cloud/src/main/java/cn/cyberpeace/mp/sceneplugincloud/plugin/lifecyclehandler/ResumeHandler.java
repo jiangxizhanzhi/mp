@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.ResumeTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,9 +45,11 @@ public class ResumeHandler extends HandlerCommon {
 
     public void resume() {
         prepareEventProcess(SceneModel.Event.RESUME, SceneProcess.class, ElementProcess.class);
-        List<Runnable> tasks = getPluginHandler().getElementMap().values().stream()
-                .map(element -> (Runnable) () -> this.resumeElement(element))
-                .collect(Collectors.toList());
+        List<Runnable> tasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : getPluginHandler().getElementMap().values()) {
+            Runnable runnable = () -> this.resumeElement(element);
+            tasks.add(runnable);
+        }
         runSceneProgress(SceneProcess.RESUME_TERMINALS, () -> runTasks(tasks));
     }
 

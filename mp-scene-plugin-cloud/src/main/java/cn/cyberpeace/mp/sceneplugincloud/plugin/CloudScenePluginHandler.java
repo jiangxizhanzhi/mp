@@ -516,9 +516,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void reformTopo() {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
-        List<CloudPluginSceneElementBO> coreRouters = getElementMap().values().stream()
-                .filter(e -> ElementTypeUtils.isCoreRouter(e))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> coreRouters = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : getElementMap().values()) {
+            if (ElementTypeUtils.isCoreRouter(e)) {
+                coreRouters.add(e);
+            }
+        }
         if (CollectionUtils.isNotEmpty(coreRouters)) {
             // 存在核心路由器 需要新增一个隐藏的交换机节点
             TopoReformUtils.ElementWrapper hiddenSwitch = topoReformUtils.addAuxiliarySwitchNode();
@@ -790,40 +793,66 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     public List<CloudPluginSceneElementBO> getAuxiliaryNetworkElement() {
-        return getElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                if (!cloudElement.getDeriveNetworks().isEmpty()) {
+                    list.add(cloudElement);
+                }
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getGatewayElements() {
-        return getGatewayElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getGatewayElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getFirewallElements() {
-        return getFirewallElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getFirewallElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getTerminalExcludeNpcElements() {
-        return getTerminalElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .filter(cloudElement -> cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                    list.add(cloudElement);
+                }
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getNpcElements() {
-        return getTerminalElementMap().values().stream()
-                .filter(cloudElement -> cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
+            if (cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getDynamicElements() {
-        return new ArrayList<>(getElementMap().values()).stream()
-                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : new ArrayList<>(getElementMap().values())) {
+            if (e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS) {
+                list.add(e);
+            }
+        }
+        return list;
     }
 }

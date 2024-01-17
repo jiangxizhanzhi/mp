@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
@@ -285,7 +286,14 @@ public class ElementModifyHandler extends HandlerCommon {
         if (CollectionUtils.isEmpty(originCloudElement.getDeriveNetworks())) {
             return;
         }
-        CloudPluginSceneElementNetworkBO currentElementNetwork = originCloudElement.getDeriveNetworks().stream().filter(n -> n.getNetwork().getCidr().equals(originCloudElement.getCidr())).findFirst().orElse(new ConnectedNetworkBO(null, null)).network;
+        ConnectedNetworkBO found = new ConnectedNetworkBO(null, null);
+        for (ConnectedNetworkBO n : originCloudElement.getDeriveNetworks()) {
+            if (n.getNetwork().getCidr().equals(originCloudElement.getCidr())) {
+                found = n;
+                break;
+            }
+        }
+        CloudPluginSceneElementNetworkBO currentElementNetwork = found.network;
         if (currentElementNetwork == null) {
             return;
         }
@@ -329,8 +337,16 @@ public class ElementModifyHandler extends HandlerCommon {
             return true;
         }
         // 内容不同
-        Set<String> newContent = newStaticRoutes.stream().map(h -> h.getDestination() + "_" + h.getNexthop()).collect(Collectors.toSet());
-        Set<String> originContent = originStaticRoutes.stream().map(h -> h.getDestination() + "_" + h.getNexthop()).collect(Collectors.toSet());
+        Set<String> newContent = new HashSet<>();
+        for (StaticRoute newStaticRoute : newStaticRoutes) {
+            String s = newStaticRoute.getDestination() + "_" + newStaticRoute.getNexthop();
+            newContent.add(s);
+        }
+        Set<String> originContent = new HashSet<>();
+        for (StaticRoute h : originStaticRoutes) {
+            String s = h.getDestination() + "_" + h.getNexthop();
+            originContent.add(s);
+        }
         newContent.removeAll(originContent);
         if (newContent.size() != 0) {
             return true;
@@ -356,8 +372,16 @@ public class ElementModifyHandler extends HandlerCommon {
         if (currentElementNetwork.getAllocationPools().size() != newCloudElement.getAllocationPools().size()) {
             dhcpPoolsChange = true;
         } else {
-            Set<String> newDhcpPools = newCloudElement.getAllocationPools().stream().map(p -> p.getStart() + "_" + p.getEnd()).collect(Collectors.toSet());
-            Set<String> originDhcpPools = currentElementNetwork.getAllocationPools().stream().map(p -> p.getStart() + "_" + p.getEnd()).collect(Collectors.toSet());
+            Set<String> newDhcpPools = new HashSet<>();
+            for (AllocationPool allocationPool : newCloudElement.getAllocationPools()) {
+                String s = allocationPool.getStart() + "_" + allocationPool.getEnd();
+                newDhcpPools.add(s);
+            }
+            Set<String> originDhcpPools = new HashSet<>();
+            for (AllocationPool p : currentElementNetwork.getAllocationPools()) {
+                String s = p.getStart() + "_" + p.getEnd();
+                originDhcpPools.add(s);
+            }
             newDhcpPools.removeAll(originDhcpPools);
             if (newDhcpPools.size() != 0) {
                 dhcpPoolsChange = true;
@@ -427,10 +451,20 @@ public class ElementModifyHandler extends HandlerCommon {
         Set<String> mayUpdatePortIds = new ConcurrentHashSet<>();
         Set<String> originPortIds = new ConcurrentHashSet<>();
         if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
-            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+            Set<String> set = new HashSet<>();
+            for (SceneElementPortBO p : originCloudElement.getSrcElement().getPorts()) {
+                String id = p.getId();
+                set.add(id);
+            }
+            originPortIds = set;
         }
         if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
-            mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+            Set<String> set = new HashSet<>();
+            for (SceneElementPortBO p : newCloudElement.getSrcElement().getPorts()) {
+                String id = p.getId();
+                set.add(id);
+            }
+            mayUpdatePortIds = set;
         }
         mayUpdatePortIds.retainAll(originPortIds);
         if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
@@ -569,8 +603,16 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        Set<String> mayUpdatePortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
-        Set<String> originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+        Set<String> mayUpdatePortIds = new HashSet<>();
+        for (SceneElementPortBO sceneElementPortBO : newCloudElement.getSrcElement().getPorts()) {
+            String id = sceneElementPortBO.getId();
+            mayUpdatePortIds.add(id);
+        }
+        Set<String> originPortIds = new HashSet<>();
+        for (SceneElementPortBO p : originCloudElement.getSrcElement().getPorts()) {
+            String id = p.getId();
+            originPortIds.add(id);
+        }
         mayUpdatePortIds.retainAll(originPortIds);
         if (CollectionUtils.isNotEmpty(mayUpdatePortIds)) {
             for (String portId : mayUpdatePortIds) {
@@ -584,8 +626,16 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private boolean isFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
-        Set<String> newFirewallRules = newCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
-        Set<String> originFirewallRules = originCloudPort.getFirewallRules().stream().map(f -> StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress())).collect(Collectors.toSet());
+        Set<String> newFirewallRules = new HashSet<>();
+        for (FirewallRule firewallRule : newCloudPort.getFirewallRules()) {
+            String s = StringUtils.joinWith(":", firewallRule.getAction(), firewallRule.getProtocol(), firewallRule.getDirection(), firewallRule.getIpVersion(), firewallRule.getSourcePort(), firewallRule.getSourceIpAddress(), firewallRule.getDestinationPort(), firewallRule.getDestinationIpAddress());
+            newFirewallRules.add(s);
+        }
+        Set<String> originFirewallRules = new HashSet<>();
+        for (FirewallRule f : originCloudPort.getFirewallRules()) {
+            String s = StringUtils.joinWith(":", f.getAction(), f.getProtocol(), f.getDirection(), f.getIpVersion(), f.getSourcePort(), f.getSourceIpAddress(), f.getDestinationPort(), f.getDestinationIpAddress());
+            originFirewallRules.add(s);
+        }
         // 数量不同
         if (newFirewallRules.size() != originFirewallRules.size()) {
             return true;
@@ -625,12 +675,22 @@ public class ElementModifyHandler extends HandlerCommon {
         Set<String> newPortIds;
         Set<String> originPortIds;
         if (newCloudElement != null && newCloudElement.getSrcElement() != null && newCloudElement.getSrcElement().getPorts() != null) {
-            newPortIds = newCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+            Set<String> set = new HashSet<>();
+            for (SceneElementPortBO p : newCloudElement.getSrcElement().getPorts()) {
+                String id = p.getId();
+                set.add(id);
+            }
+            newPortIds = set;
         } else {
             newPortIds = new ConcurrentHashSet<>();
         }
         if (originCloudElement != null && originCloudElement.getSrcElement() != null && originCloudElement.getSrcElement().getPorts() != null) {
-            originPortIds = originCloudElement.getSrcElement().getPorts().stream().map(p -> p.getId()).collect(Collectors.toSet());
+            Set<String> set = new HashSet<>();
+            for (SceneElementPortBO p : originCloudElement.getSrcElement().getPorts()) {
+                String id = p.getId();
+                set.add(id);
+            }
+            originPortIds = set;
         } else {
             originPortIds = new ConcurrentHashSet<>();
         }

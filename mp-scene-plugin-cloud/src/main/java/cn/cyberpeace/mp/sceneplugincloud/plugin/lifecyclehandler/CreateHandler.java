@@ -22,10 +22,12 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.DockerParams;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
@@ -460,9 +462,12 @@ public class CreateHandler extends HandlerCommon {
 
         List<CloudAccessMode> accessModes = sampleCloudPort.getAccessModes();
         if (accessModes != null && !accessModes.isEmpty()) {
-            List<CloudAccessMode> legalAccessModes = accessModes.stream()
-                    .filter(m -> StringUtils.isNotEmpty(m.getProtocol()))
-                    .collect(Collectors.toList());
+            List<CloudAccessMode> legalAccessModes = new ArrayList<>();
+            for (CloudAccessMode m : accessModes) {
+                if (StringUtils.isNotEmpty(m.getProtocol())) {
+                    legalAccessModes.add(m);
+                }
+            }
             virtualNic.setAccessModes(legalAccessModes.stream().map(accessMode -> {
                 VirtualNic.AccessMode accessModeParam = new VirtualNic.AccessMode();
                 accessModeParam.setProtocol(accessMode.getProtocol());
@@ -924,8 +929,12 @@ public class CreateHandler extends HandlerCommon {
                     }
                 }
 
-                Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
-                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = new HashMap<>();
+                for (EntityNodeCreateData.Interface.AccessMode accessModesDatum : accessModesData) {
+                    if (accessModeDataMap.put(genAccessModeKey(accessModesDatum), accessModesDatum) != null) {
+                        throw new IllegalStateException("Duplicate key");
+                    }
+                }
                 cloudPort.getAccessModes().forEach(accessMode -> {
                     EntityNodeCreateData.Interface.AccessMode accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
                     if (accessModeData == null) {
@@ -1274,9 +1283,11 @@ public class CreateHandler extends HandlerCommon {
 
         // 先创建辅助网络(包含虚拟交换机)
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
-        List<Runnable> createAuxiliaryNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
-                .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : getPluginHandler().getAuxiliaryNetworkElement()) {
+            Runnable runnable = () -> createAuxiliaryNetworkProcess(cloudPluginSceneElementBO);
+            createAuxiliaryNetworkTasks.add(runnable);
+        }
 
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
@@ -1291,12 +1302,16 @@ public class CreateHandler extends HandlerCommon {
         // 再创建网关 和 防火墙
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
 
-        List<Runnable> createGatewayTasks = getPluginHandler().getGatewayElements().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
-                .collect(Collectors.toList());
-        List<Runnable> createFirewallTasks = getPluginHandler().getFirewallElements().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> createGatewayTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : getPluginHandler().getGatewayElements()) {
+            Runnable runnable = () -> createElementProcess(cloudPluginSceneElementBO);
+            createGatewayTasks.add(runnable);
+        }
+        List<Runnable> createFirewallTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : getPluginHandler().getFirewallElements()) {
+            Runnable runnable = () -> createElementProcess(cloudPluginSceneElementBO);
+            createFirewallTasks.add(runnable);
+        }
         if (!createGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
                 runTasks(createGatewayTasks);
@@ -1317,8 +1332,11 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
         // 再创建终端
         List<CloudPluginSceneElementBO> npcNodes = getPluginHandler().getNpcElements();
-        List<Runnable> createTerminalTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+        List<Runnable> createTerminalTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : getPluginHandler().getTerminalExcludeNpcElements()) {
+            Runnable runnable = () -> createElementProcess(cloudPluginSceneElementBO);
+            createTerminalTasks.add(runnable);
+        }
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
                 runTasks(createTerminalTasks);
@@ -1344,9 +1362,11 @@ public class CreateHandler extends HandlerCommon {
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
         // 下发配置
-        List<Runnable> sendDynamicConfigs = getPluginHandler().getDynamicElements().stream()
-                .map(cloudElement -> (Runnable) () -> createConfigDynamipsTask(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> sendDynamicConfigs = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getPluginHandler().getDynamicElements()) {
+            Runnable runnable = () -> createConfigDynamipsTask(cloudElement);
+            sendDynamicConfigs.add(runnable);
+        }
         if (!sendDynamicConfigs.isEmpty()) {
             runSceneProgress(SceneProcess.CONFIGURE, () -> {
                 runTasks(sendDynamicConfigs);
@@ -1427,16 +1447,23 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void configDynamic(List<CloudPluginSceneElementBO> elementBOS) {
-        List<CloudPluginSceneElementBO> dynamicElements = elementBOS.stream()
-                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> dynamicElements = new ArrayList<>();
+        for (CloudPluginSceneElementBO elementBO : elementBOS) {
+            if (elementBO.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS) {
+                dynamicElements.add(elementBO);
+            }
+        }
         if (dynamicElements.isEmpty()) {
             return;
         }
 
-        List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
-            createConfigDynamipsTask(e);
-        }).collect(Collectors.toList());
+        List<Runnable> configDynamicIps = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : dynamicElements) {
+            Runnable runnable = () -> {
+                createConfigDynamipsTask(e);
+            };
+            configDynamicIps.add(runnable);
+        }
         runTasks(configDynamicIps);
     }
 
@@ -1556,7 +1583,11 @@ public class CreateHandler extends HandlerCommon {
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String> usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (VirtualUsb u : cloudElement.getVirtualUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setVirtualUsbUuids(usbUuids);
         vmClient.attachVirtualUsbs(data);
     }
@@ -1565,7 +1596,11 @@ public class CreateHandler extends HandlerCommon {
         log.info("CreateHandler.attachEntityUsbs begin. cloudElement:{}", cloudElement);
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (EntityUsb u : cloudElement.getEntityUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setEntityUsbUuids(usbUuids);
         vmClient.attachEntityUsbs(data);
     }

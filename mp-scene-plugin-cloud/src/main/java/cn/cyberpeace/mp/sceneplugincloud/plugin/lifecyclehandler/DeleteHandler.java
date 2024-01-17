@@ -3,12 +3,15 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -268,8 +271,12 @@ public class DeleteHandler extends HandlerCommon {
         EntityNodeDeleteData deleteData = new EntityNodeDeleteData();
         List<String> interfaceNames = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-            interfaceNames = cloudElement.getSrcElement().getPorts().stream()
-                    .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (SceneElementPortBO sceneElementPortBO : cloudElement.getSrcElement().getPorts()) {
+                String name = sceneElementPortBO.getName();
+                list.add(name);
+            }
+            interfaceNames = list;
         }
         deleteData.setInterfaces(interfaceNames);
         ElementExtraCloudInfo extraInfo = collectElementExtraCloudInfo(cloudElement);
@@ -343,19 +350,31 @@ public class DeleteHandler extends HandlerCommon {
         });
         Set<String> deletedNodeIds = new HashSet<>();
         if (CollectionUtils.isNotEmpty(entities)) {
-            List<Runnable> deleteEntities = entities.stream()
-                    .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
-            entities.stream().forEach(e -> deletedNodeIds.add(e.getSrcElement().getId()));
+            List<Runnable> deleteEntities = new ArrayList<>();
+            for (CloudPluginSceneElementBO cloudElement : entities) {
+                Runnable runnable = () -> deleteElementProcess(cloudElement);
+                deleteEntities.add(runnable);
+            }
+            for (CloudPluginSceneElementBO e : entities) {
+                deletedNodeIds.add(e.getSrcElement().getId());
+            }
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
         }
 
         // 删除终端
-        List<CloudPluginSceneElementBO> terminals = getPluginHandler().getTerminalElementMap().values().stream()
-                .filter(t -> !deletedNodeIds.contains(t.getSrcElement().getId()))
-                .filter(t -> getPluginHandler().getSceneHandler().isHandleNode(t.getSrcElement().getId()))
-                .collect(Collectors.toList());
-        List<Runnable> deleteTerminalTasks = terminals.stream()
-                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> terminals = new ArrayList<>();
+        for (CloudPluginSceneElementBO t : getPluginHandler().getTerminalElementMap().values()) {
+            if (!deletedNodeIds.contains(t.getSrcElement().getId())) {
+                if (getPluginHandler().getSceneHandler().isHandleNode(t.getSrcElement().getId())) {
+                    terminals.add(t);
+                }
+            }
+        }
+        List<Runnable> deleteTerminalTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO terminal : terminals) {
+            Runnable runnable = () -> deleteElementProcess(terminal);
+            deleteTerminalTasks.add(runnable);
+        }
         if (!deleteTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
         }
@@ -366,21 +385,33 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         // 删除防火墙
-        List<CloudPluginSceneElementBO> firewalls = getPluginHandler().getFirewallElementMap().values().stream()
-                .filter(f -> !deletedNodeIds.contains(f.getSrcElement().getId()))
-                .collect(Collectors.toList());
-        List<Runnable> deleteFirewallTasks = firewalls.stream()
-                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> firewalls = new ArrayList<>();
+        for (CloudPluginSceneElementBO f : getPluginHandler().getFirewallElementMap().values()) {
+            if (!deletedNodeIds.contains(f.getSrcElement().getId())) {
+                firewalls.add(f);
+            }
+        }
+        List<Runnable> deleteFirewallTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO firewall : firewalls) {
+            Runnable runnable = () -> deleteElementProcess(firewall);
+            deleteFirewallTasks.add(runnable);
+        }
         if (!deleteFirewallTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_FIREWALLS, () -> runTasks(deleteFirewallTasks));
         }
 
         // 删除网关
-        List<CloudPluginSceneElementBO> gateways = getPluginHandler().getGatewayElementMap().values().stream()
-                .filter(g -> !deletedNodeIds.contains(g.getSrcElement().getId()))
-                .collect(Collectors.toList());
-        List<Runnable> deleteGatewayTasks = gateways.stream()
-                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> gateways = new ArrayList<>();
+        for (CloudPluginSceneElementBO g : getPluginHandler().getGatewayElementMap().values()) {
+            if (!deletedNodeIds.contains(g.getSrcElement().getId())) {
+                gateways.add(g);
+            }
+        }
+        List<Runnable> deleteGatewayTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO gateway : gateways) {
+            Runnable runnable = () -> deleteElementProcess(gateway);
+            deleteGatewayTasks.add(runnable);
+        }
         if (!deleteGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));
         }
@@ -493,10 +524,13 @@ public class DeleteHandler extends HandlerCommon {
         );
         Set<String> result = new HashSet<>();
         if (CollectionUtils.isNotEmpty(connectionModels)) {
-            List<String> connectionIds = connectionModels.stream()
-                    .filter(connectionModel -> connectionModel.getConnectionId() != null)
-                    .map(connectionModel -> connectionModel.getConnectionId())
-                    .collect(Collectors.toList());
+            List<String> connectionIds = new ArrayList<>();
+            for (CloudPluginSceneConnectionModel connectionModel : connectionModels) {
+                if (connectionModel.getConnectionId() != null) {
+                    String connectionId = connectionModel.getConnectionId();
+                    connectionIds.add(connectionId);
+                }
+            }
             result.addAll(connectionIds);
         }
         return result;
@@ -509,7 +543,11 @@ public class DeleteHandler extends HandlerCommon {
     private void deleteVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String> usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (VirtualUsb u : cloudElement.getVirtualUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setVirtualUsbUuids(usbUuids);
         vmClient.deleteVirtualUsbs(data);
     }
@@ -518,7 +556,11 @@ public class DeleteHandler extends HandlerCommon {
         log.info("CreateHandler.deleteEntityUsbs begin. cloudElement:{}", cloudElement);
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String>  usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (EntityUsb u : cloudElement.getEntityUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setEntityUsbUuids(usbUuids);
         vmClient.deleteEntityUsbs(data);
     }

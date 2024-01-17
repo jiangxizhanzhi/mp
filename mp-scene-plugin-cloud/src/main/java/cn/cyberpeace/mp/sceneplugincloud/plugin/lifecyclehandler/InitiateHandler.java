@@ -131,9 +131,11 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 初始化节点属性
-        List<Runnable> initiateElementTasks = cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElementBasePropertiesProcess(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> initiateElementTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudElements) {
+            Runnable runnable = () -> initiateElementBasePropertiesProcess(cloudPluginSceneElementBO);
+            initiateElementTasks.add(runnable);
+        }
         if (!initiateElementTasks.isEmpty()) {
             runSceneProgress(SceneProcess.INITIATE_BASE_PROPERTIES, () -> {
                 initiateElementTasks.forEach(task -> task.run());
@@ -143,10 +145,13 @@ public class InitiateHandler extends HandlerCommon {
         getPluginHandler().createElementNetworks();
 
         // 初始化ip池
-        List<Runnable> initiateElementIpPoolTasks = cloudElements.stream()
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> initiateElementIpPoolTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : cloudElements) {
+            if (!cloudElement.getDeriveNetworks().isEmpty()) {
+                Runnable runnable = () -> initiateElementIpPoolProcess(cloudElement);
+                initiateElementIpPoolTasks.add(runnable);
+            }
+        }
         if (!initiateElementIpPoolTasks.isEmpty()) {
             runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> {
                 initiateElementIpPoolTasks.forEach(task -> task.run());
@@ -165,9 +170,12 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 存在需要重新分配的ip，重新分配ip
-        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
-                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> networkElements = new ArrayList<>();
+        for (CloudPluginSceneElementBO c : cloudElements) {
+            if (CollectionUtils.isNotEmpty(c.getDeriveNetworks())) {
+                networkElements.add(c);
+            }
+        }
         if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
             if (CollectionUtils.isNotEmpty(networkElements)) {
                 runSceneProgress(SceneProcess.PORT_CHECK, () -> {
@@ -220,9 +228,11 @@ public class InitiateHandler extends HandlerCommon {
         Collections.sort(cloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
 
         // 初始化节点属性
-        List<Runnable> initiateElementTasks = cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElementBaseProperties(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> initiateElementTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudElements) {
+            Runnable runnable = () -> initiateElementBaseProperties(cloudPluginSceneElementBO);
+            initiateElementTasks.add(runnable);
+        }
         if (!initiateElementTasks.isEmpty()) {
             initiateElementTasks.forEach(task -> task.run());
         }
@@ -234,10 +244,13 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 初始化ip池
-        List<Runnable> initiateElementIpPoolTasks = cloudElements.stream()
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement))
-                .collect(Collectors.toList());
+        List<Runnable> initiateElementIpPoolTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudElements) {
+            if (!cloudPluginSceneElementBO.getDeriveNetworks().isEmpty()) {
+                Runnable runnable = () -> initIpPool(cloudPluginSceneElementBO);
+                initiateElementIpPoolTasks.add(runnable);
+            }
+        }
         if (!initiateElementIpPoolTasks.isEmpty()) {
             initiateElementIpPoolTasks.forEach(task -> task.run());
         }
@@ -245,30 +258,28 @@ public class InitiateHandler extends HandlerCommon {
         // 初始化端口, 先初始化路由端口, 再初始化其它端口
         List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
         List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
-        cloudElements
-                .stream()
-                .forEach(cloudElement -> {
-                    Integer virtualType = cloudElement.getVirtualType();
-                    if (virtualType != null
-                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
-                        Runnable task = () -> initiateElementPorts(cloudElement);
-                        Integer type = cloudElement.getSrcElement().getType();
-                        // 防火墙也看作路由
-                        if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
-                                || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
-                            initiateRouterElementPortsTasks.add(task);
-                        } else {
-                            initiateOtherElementPortsTasks.add(task);
-                        }
-                    } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
-                        // 辅助节点也需要处理下端口
-                        initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
-                    }
-                });
+        for (CloudPluginSceneElementBO cloudElement : cloudElements) {
+            Integer virtualType = cloudElement.getVirtualType();
+            if (virtualType != null
+                    && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
+                Runnable task = () -> initiateElementPorts(cloudElement);
+                Integer type = cloudElement.getSrcElement().getType();
+                // 防火墙也看作路由
+                if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
+                        || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
+                    initiateRouterElementPortsTasks.add(task);
+                } else {
+                    initiateOtherElementPortsTasks.add(task);
+                }
+            } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
+                // 辅助节点也需要处理下端口
+                initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
+            }
+        }
         if (!initiateRouterElementPortsTasks.isEmpty()) {
             runTasks(initiateRouterElementPortsTasks);
         }
@@ -277,9 +288,12 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 存在需要重新分配的ip，重新分配ip
-        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
-                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> networkElements = new ArrayList<>();
+        for (CloudPluginSceneElementBO c : cloudElements) {
+            if (CollectionUtils.isNotEmpty(c.getDeriveNetworks())) {
+                networkElements.add(c);
+            }
+        }
         if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
             if (CollectionUtils.isNotEmpty(networkElements)) {
                 portCheck(networkElements);
@@ -574,7 +588,11 @@ public class InitiateHandler extends HandlerCommon {
      * @param cloudElement 网元节点
      */
     private void initiateAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-        List<CloudPluginSceneElementNetworkBO> networks = cloudElement.getDeriveNetworks().stream().map(n -> n.network).collect(Collectors.toList());
+        List<CloudPluginSceneElementNetworkBO> networks = new ArrayList<>();
+        for (ConnectedNetworkBO n : cloudElement.getDeriveNetworks()) {
+            CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = n.network;
+            networks.add(cloudPluginSceneElementNetworkBO);
+        }
         for (CloudPluginSceneElementNetworkBO network : networks) {
             Integer role = cloudElement.getRole();
             if (Boolean.TRUE.equals(network.getExternal())) {
@@ -1193,37 +1211,36 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private void loadInitaitePortsTasks(List<CloudPluginSceneElementBO> cloudElements, List<Runnable> initiateRouterElementPortsTasks, List<Runnable> initiateOtherElementPortsTasks) {
-        cloudElements
-                .stream()
-                .forEach(cloudElement -> {
-                    Integer virtualType = cloudElement.getVirtualType();
-                    if (virtualType != null
-                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS))) {
-                        Runnable task = () -> initiateElementPortsProcess(cloudElement);
-                        Integer type = cloudElement.getSrcElement().getType();
-                        // 防火墙也看作路由
-                        if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
-                                || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
-                            initiateRouterElementPortsTasks.add(task);
-                        } else {
-                            initiateOtherElementPortsTasks.add(task);
-                        }
-                    } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
-                        // 辅助节点也需要处理下端口
-                        initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
-                    }
-                });
+        for (CloudPluginSceneElementBO cloudElement : cloudElements) {
+            Integer virtualType = cloudElement.getVirtualType();
+            if (virtualType != null
+                    && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS))) {
+                Runnable task = () -> initiateElementPortsProcess(cloudElement);
+                Integer type = cloudElement.getSrcElement().getType();
+                // 防火墙也看作路由
+                if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER)
+                        || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
+                    initiateRouterElementPortsTasks.add(task);
+                } else {
+                    initiateOtherElementPortsTasks.add(task);
+                }
+            } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
+                // 辅助节点也需要处理下端口
+                initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
+            }
+        }
     }
 
     private List<CloudPluginSceneElementBO> getOrderedAllCloudElements() {
-        List<CloudPluginSceneElementBO> allCloudElements = new ArrayList<>(getPluginHandler().getElementMap().values())
-                .stream()
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> allCloudElements = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : new ArrayList<>(getPluginHandler().getElementMap().values())) {
+            allCloudElements.add(cloudPluginSceneElementBO);
+        }
 
         // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
         // 使初始化结果不受数据库数据顺序的影响

@@ -116,9 +116,12 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      */
     public <T> Map<String, Map<T, Long>> groupCalcCountElement(List<String> sceneIds, List<String> nodeIds,
                                                                String groupFieldName, List<String> fieldNames) {
-        Map<String, Function<List<Object>, Object>> fieldCalcMap = fieldNames.stream()
-                .collect(Collectors.toMap(fieldName -> fieldName,
-                         fieldName -> CALC_COUNT_ELEMENT_FIELD_CALC_MAP.getOrDefault(fieldName, List::size)));
+        Map<String, Function<List<Object>, Object>> fieldCalcMap = new HashMap<>();
+        for (String s : fieldNames) {
+            if (fieldCalcMap.put(s, CALC_COUNT_ELEMENT_FIELD_CALC_MAP.getOrDefault(s, List::size)) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         HumanCondition condition = genNodeCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementMapper().getModelClass());
         Map<String, Map<T, Object>> result;
@@ -171,9 +174,12 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
     public Map<String, Long> calcCountElement(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
-        Map<String, Function<List<Object>, Object>> fieldCalcMap = fieldNames.stream()
-                .collect(Collectors.toMap(fieldName -> fieldName,
-                        fieldName -> CALC_COUNT_ELEMENT_FIELD_CALC_MAP.getOrDefault(fieldName, List::size)));
+        Map<String, Function<List<Object>, Object>> fieldCalcMap = new HashMap<>();
+        for (String s : fieldNames) {
+            if (fieldCalcMap.put(s, CALC_COUNT_ELEMENT_FIELD_CALC_MAP.getOrDefault(s, List::size)) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         HumanCondition condition = genNodeCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementMapper().getModelClass());
         Map<String, Object> result;
@@ -222,9 +228,12 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
     public Map<String, Long> calcCountPort(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
-        Map<String, Function<List<Object>, Object>> fieldCalcMap = fieldNames.stream()
-                .collect(Collectors.toMap(fieldName -> fieldName,
-                        fieldName -> CALC_COUNT_PORT_FIELD_CALC_MAP.getOrDefault(fieldName, List::size)));
+        Map<String, Function<List<Object>, Object>> fieldCalcMap = new HashMap<>();
+        for (String s : fieldNames) {
+            if (fieldCalcMap.put(s, CALC_COUNT_PORT_FIELD_CALC_MAP.getOrDefault(s, List::size)) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         HumanCondition condition = genNodePortCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementPortMapper().getModelClass());
         Map<String, Object> result;

@@ -145,10 +145,13 @@ public class CloudInitConfigCommon {
                         }
                     }
                 });
-                List<String> formatCommands = splitCmds.stream()
-                        .filter(s -> StringUtils.isNotEmpty(s))
-                        .map(s -> "  - " + s)
-                        .collect(Collectors.toList());
+                List<String> formatCommands = new ArrayList<>();
+                for (String s : splitCmds) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        String s1 = "  - " + s;
+                        formatCommands.add(s1);
+                    }
+                }
                 list.addAll(formatCommands);
             }
 

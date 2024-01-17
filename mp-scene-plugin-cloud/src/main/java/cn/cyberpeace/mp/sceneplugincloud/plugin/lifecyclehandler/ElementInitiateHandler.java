@@ -398,7 +398,13 @@ public class ElementInitiateHandler extends HandlerCommon {
         getPluginHandler().createElementNetworks();
 
         // 初始化ip池
-        List<Runnable> initiateElementIpPoolTasks = cloudElements.stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement)).collect(Collectors.toList());
+        List<Runnable> initiateElementIpPoolTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudPluginSceneElementBO : cloudElements) {
+            if (!cloudPluginSceneElementBO.getDeriveNetworks().isEmpty()) {
+                Runnable runnable = () -> initiateElementIpPoolProcess(cloudPluginSceneElementBO);
+                initiateElementIpPoolTasks.add(runnable);
+            }
+        }
         if (!initiateElementIpPoolTasks.isEmpty()) {
             initiateElementIpPoolTasks.forEach(task -> task.run());
         }

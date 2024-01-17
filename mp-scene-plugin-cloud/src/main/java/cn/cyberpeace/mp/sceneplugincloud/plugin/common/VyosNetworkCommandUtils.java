@@ -91,10 +91,14 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(element.getSrcElement().getPorts())) {
                 this.pluginPorts = new ArrayList<>();
             } else {
-                pluginPorts = element.getSrcElement().getPorts().stream()
-                        .map(p -> pluginHandler.getPort(p.getId()))
-                        .filter(p -> p != null)
-                        .collect(Collectors.toList());
+                List<CloudPluginSceneElementPortBO> list = new ArrayList<>();
+                for (SceneElementPortBO p : element.getSrcElement().getPorts()) {
+                    CloudPluginSceneElementPortBO port = pluginHandler.getPort(p.getId());
+                    if (port != null) {
+                        list.add(port);
+                    }
+                }
+                pluginPorts = list;
             }
         }
     }
@@ -200,9 +204,12 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
                 return new ArrayList<>();
             }
-            List<CloudPluginSceneElementPortBO> bgpPorts = paramsWrapper.pluginPorts.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getBgpAs()))
-                    .collect(Collectors.toList());
+            List<CloudPluginSceneElementPortBO> bgpPorts = new ArrayList<>();
+            for (CloudPluginSceneElementPortBO pluginPort : paramsWrapper.pluginPorts) {
+                if (StringUtils.isNotEmpty(pluginPort.getBgpAs())) {
+                    bgpPorts.add(pluginPort);
+                }
+            }
             if (CollectionUtils.isEmpty(bgpPorts)) {
                 return new ArrayList<>();
             }
@@ -258,9 +265,12 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
                 return new ArrayList<>();
             }
-            List<CloudPluginSceneElementPortBO> ripPorts = paramsWrapper.pluginPorts.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getRipIp()))
-                    .collect(Collectors.toList());
+            List<CloudPluginSceneElementPortBO> ripPorts = new ArrayList<>();
+            for (CloudPluginSceneElementPortBO pluginPort : paramsWrapper.pluginPorts) {
+                if (StringUtils.isNotEmpty(pluginPort.getRipIp())) {
+                    ripPorts.add(pluginPort);
+                }
+            }
             if (CollectionUtils.isEmpty(ripPorts)) {
                 return new ArrayList<>();
             }

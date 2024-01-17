@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +69,13 @@ public class Remote extends CloudClient {
             return null;
         }
 
-        return result.getData().stream().collect(Collectors.toMap(m -> m.getConnectionId(), m -> m));
+        Map<String, GuacamoleMonitorData.MonitorInfo> map = new HashMap<>();
+        for (GuacamoleMonitorData.MonitorInfo m : result.getData()) {
+            if (map.put(m.getConnectionId(), m) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 
     public Map<String, GuacamoleAssistanceData.AssistanceInfo> getAssistances(String[] connectionIds) {
@@ -79,7 +86,13 @@ public class Remote extends CloudClient {
             return null;
         }
 
-        return result.getData().stream().collect(Collectors.toMap(m -> m.getConnectionId(), m -> m));
+        Map<String, GuacamoleAssistanceData.AssistanceInfo> map = new HashMap<>();
+        for (GuacamoleAssistanceData.AssistanceInfo m : result.getData()) {
+            if (map.put(m.getConnectionId(), m) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 
     public ListObjResult<GuacamoleRecordingData.RecordingInfo> getRecordings(GetGuacamoleRecordingData queryData) {
