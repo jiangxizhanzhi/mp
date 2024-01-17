@@ -40,15 +40,13 @@ public class OperateLogServiceImpl implements OperateLogService {
         ListObjServiceResult<OperationLogPageResponse> result = operateLogDbService.search(request, locale);
         List<OperationLogPageResponse> logList = result.getSource().getObjs();
         LocalDateTime now = LocalDateTime.now();
-        logList.forEach(
-                log -> {
-                    LocalDateTime opTime = log.getOpTime();
-                    long seconds = Duration.between(opTime, now).getSeconds();
-                    seconds = seconds <= 0 ? 1 : seconds;
-                    long millSeconds = seconds * 1000;
-                    log.setOpMillSecondsBefore(millSeconds);
-                }
-        );
+        for (OperationLogPageResponse log : logList) {
+            LocalDateTime opTime = log.getOpTime();
+            long seconds = Duration.between(opTime, now).getSeconds();
+            seconds = seconds <= 0 ? 1 : seconds;
+            long millSeconds = seconds * 1000;
+            log.setOpMillSecondsBefore(millSeconds);
+        }
         return result;
     }
 

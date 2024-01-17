@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,9 +56,12 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Override
     public List<LogReportDTO> list(String type) {
         File logFile = new File(logPath);
-        List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles()))
-                .filter(file -> file.isFile())
-                .collect(Collectors.toList());
+        List<File> fileList = new ArrayList<>();
+        for (File file : Objects.requireNonNull(logFile.listFiles())) {
+            if (file.isFile()) {
+                fileList.add(file);
+            }
+        }
         List<LogReportDTO> logReportDTOList = fileList.stream().map(f -> {
             LogReportDTO dto = new LogReportDTO();
             String fileName = f.getName();
@@ -88,8 +92,18 @@ public class MpLogFileServiceImpl implements LogFileService {
         String fileName = downloadDTO.getFileName();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         File logFile = new File(logPath);
-        List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
-        List<File> downloadFiles = fileList.stream().filter(file -> fileName.equals(file.getName())).collect(Collectors.toList());
+        List<File> fileList = new ArrayList<>();
+        for (File file1 : Objects.requireNonNull(logFile.listFiles())) {
+            if (file1.isFile()) {
+                fileList.add(file1);
+            }
+        }
+        List<File> downloadFiles = new ArrayList<>();
+        for (File file1 : fileList) {
+            if (fileName.equals(file1.getName())) {
+                downloadFiles.add(file1);
+            }
+        }
 
         if (CollectionUtils.isEmpty(downloadFiles)) {
             log.error("download file is empty for {}", fileName);

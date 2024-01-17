@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,8 +60,13 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
 
     @PostConstruct
     public void init() {
-        operateLogServiceMap = mpOperateLogServiceList.stream()
-                .collect(Collectors.toMap(mpOperateLogService -> mpOperateLogService.siteType(), mpOperateLogService -> mpOperateLogService));
+        Map<SiteTypeEnums, MpOperateLogService> map = new HashMap<>();
+        for (MpOperateLogService mpOperateLogService : mpOperateLogServiceList) {
+            if (map.put(mpOperateLogService.siteType(), mpOperateLogService) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        operateLogServiceMap = map;
     }
 
     @Autowired
