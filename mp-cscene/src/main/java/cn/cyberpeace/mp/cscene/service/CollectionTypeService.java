@@ -112,19 +112,32 @@ public class CollectionTypeService {
         Map<String, String> ruleId2FileMap = result.getSource();
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
         log.info("ruleFiles:{}", ruleFiles);
-        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
-            ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
-            String appName = appNameResult.getSource();
-            CollectionApp app = null;
-            if (StringUtils.isNotBlank(appName)) {
-                app = new CollectionApp();
-                app.setName(appName);
+        List<String> toSort = new ArrayList<>();
+        for (String r : ruleFiles) {
+            toSort.add(r);
+        }
+        toSort.sort(null);
+        List<CollectionApp> apps = new ArrayList<>();
+        for (String r : toSort) {
+            CollectionApp collectionApp = getCollectionApp(r);
+            if (collectionApp != null) {
+                apps.add(collectionApp);
             }
-            return app;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
 
         log.info("apps:{}", apps);
         return apps;
+    }
+
+    private CollectionApp getCollectionApp(String r) {
+        ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
+        String appName = appNameResult.getSource();
+        CollectionApp app = null;
+        if (StringUtils.isNotBlank(appName)) {
+            app = new CollectionApp();
+            app.setName(appName);
+        }
+        return app;
     }
 
     /**

@@ -2,17 +2,22 @@ package cn.cyberpeace.mp.cscene;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,26 +66,20 @@ public class CscenePluginDataRecordService {
                 for (var element : collectPlugin.getElementMap().values()) {
                     var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(ports)) {
-                        var models = ports.stream().map(p -> {
-                            CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
-                            model.setType(CollectionPluginSceneDataModel.Type.PORT);
-                            model.setScene(instance.getScene());
-                            model.setSceneElement(element.getSrcElement().getId());
-                            model.setData(JsonCommon.stringify(p));
-                            return model;
-                        }).collect(Collectors.toList());
+                        List<CollectionPluginSceneDataModel> models = new ArrayList<>();
+                        for (Port p : ports) {
+                            CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, p);
+                            models.add(collectionPluginSceneDataModel);
+                        }
                         result.addAll(models);
                     }
                     var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
-                        var models = netifaces.stream().map(n -> {
-                            CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
-                            model.setType(CollectionPluginSceneDataModel.Type.NETIFACE);
-                            model.setScene(instance.getScene());
-                            model.setSceneElement(element.getSrcElement().getId());
-                            model.setData(JsonCommon.stringify(n));
-                            return model;
-                        }).collect(Collectors.toList());
+                        List<CollectionPluginSceneDataModel> models = new ArrayList<>();
+                        for (Netiface n : netifaces) {
+                            CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(instance, element, n);
+                            models.add(collectionPluginSceneDataModel);
+                        }
                         result.addAll(models);
                     }
                     BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
@@ -90,14 +89,11 @@ public class CscenePluginDataRecordService {
                     request.setPageSize(10);
                     var logfiles = logFileService.pageByElementId(request).getSource().getObjs();
                     if (CollectionUtils.isNotEmpty(logfiles)) {
-                        var models = logfiles.stream().map(n -> {
-                            CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
-                            model.setType(CollectionPluginSceneDataModel.Type.LOGFile);
-                            model.setScene(instance.getScene());
-                            model.setSceneElement(element.getSrcElement().getId());
-                            model.setData(JsonCommon.stringify(n));
-                            return model;
-                        }).collect(Collectors.toList());
+                        List<CollectionPluginSceneDataModel> models = new ArrayList<>();
+                        for (LogFileVO n : logfiles) {
+                            CollectionPluginSceneDataModel collectionPluginSceneDataModel = getCollectionPluginSceneDataModel(CollectionPluginSceneDataModel.Type.LOGFile, instance, element, JsonCommon.stringify(n));
+                            models.add(collectionPluginSceneDataModel);
+                        }
                         result.addAll(models);
                     }
                 }
@@ -109,6 +105,33 @@ public class CscenePluginDataRecordService {
                 log.error(e.getMessage(), e);
             }
         }
+    }
+
+    private static CollectionPluginSceneDataModel getCollectionPluginSceneDataModel(int LOGFile, CsceneInstanceModel instance, CollectionPluginSceneElementBO element, String n) {
+        CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
+        model.setType(LOGFile);
+        model.setScene(instance.getScene());
+        model.setSceneElement(element.getSrcElement().getId());
+        model.setData(n);
+        return model;
+    }
+
+    private static CollectionPluginSceneDataModel getCollectionPluginSceneDataModel(CsceneInstanceModel instance, CollectionPluginSceneElementBO element, Netiface n) {
+        CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
+        model.setType(CollectionPluginSceneDataModel.Type.NETIFACE);
+        model.setScene(instance.getScene());
+        model.setSceneElement(element.getSrcElement().getId());
+        model.setData(JsonCommon.stringify(n));
+        return model;
+    }
+
+    private static CollectionPluginSceneDataModel getCollectionPluginSceneDataModel(CsceneInstanceModel instance, CollectionPluginSceneElementBO element, Port p) {
+        CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
+        model.setType(CollectionPluginSceneDataModel.Type.PORT);
+        model.setScene(instance.getScene());
+        model.setSceneElement(element.getSrcElement().getId());
+        model.setData(JsonCommon.stringify(p));
+        return model;
     }
 
     public List<CollectionPluginSceneDataModel> getData(TimeListPageInfoQueryParams params, int type,

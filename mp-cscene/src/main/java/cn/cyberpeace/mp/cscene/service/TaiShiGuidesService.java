@@ -231,19 +231,25 @@ public class TaiShiGuidesService {
             Aggregations aggregations = searchResponse.getAggregations();
             ParsedDateHistogram parsedTerms = aggregations.get("histogram");
             List<? extends Histogram.Bucket>  buckets = parsedTerms.getBuckets();
-            var flowTrends = buckets.stream().map(bucket -> {
-                FlowTrend bo = new FlowTrend();
-                LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket.getKeyAsString(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-                bo.setTime(time);
-                Aggregations bucketAggregations = bucket.getAggregations();
-                ParsedValueCount parsedValueCount = bucketAggregations.get("count");
-                bo.setDataSize(parsedValueCount.getValue());
-                return bo;
-            }).collect(Collectors.toList());
+            List<FlowTrend> flowTrends = new ArrayList<>();
+            for (Histogram.Bucket bucket : buckets) {
+                FlowTrend flowTrend = getFlowTrend(bucket.getKeyAsString(), bucket.getAggregations());
+                flowTrends.add(flowTrend);
+            }
             return new ServiceResult<>(flowTrends);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static FlowTrend getFlowTrend(String bucket, Aggregations bucket1) {
+        FlowTrend bo = new FlowTrend();
+        LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket, TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+        bo.setTime(time);
+        Aggregations bucketAggregations = bucket1;
+        ParsedValueCount parsedValueCount = bucketAggregations.get("count");
+        bo.setDataSize(parsedValueCount.getValue());
+        return bo;
     }
 
     private ServiceResult<List<FlowTrend>> getResultHistogram(Set<String> indexes, BoolQueryBuilder mergeQuery) {
@@ -265,15 +271,11 @@ public class TaiShiGuidesService {
             Aggregations aggregations = searchResponse.getAggregations();
             ParsedDateHistogram parsedTerms = aggregations.get("histogram");
             List<? extends Histogram.Bucket> buckets = parsedTerms.getBuckets();
-            var flowTrends = buckets.stream().map(bucket -> {
-                FlowTrend bo = new FlowTrend();
-                LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket.getKeyAsString(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-                bo.setTime(time);
-                Aggregations bucketAggregations = bucket.getAggregations();
-                ParsedValueCount parsedValueCount = bucketAggregations.get("count");
-                bo.setDataSize(parsedValueCount.getValue());
-                return bo;
-            }).collect(Collectors.toList());
+            List<FlowTrend> flowTrends = new ArrayList<>();
+            for (Histogram.Bucket bucket : buckets) {
+                FlowTrend flowTrend = getFlowTrend(bucket.getKeyAsString(), bucket.getAggregations());
+                flowTrends.add(flowTrend);
+            }
             return new ServiceResult<>(flowTrends);
         } catch (IOException e) {
             throw new RuntimeException(e);

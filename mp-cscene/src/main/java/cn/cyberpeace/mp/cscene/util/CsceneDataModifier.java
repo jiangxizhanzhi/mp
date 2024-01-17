@@ -493,20 +493,26 @@ public class CsceneDataModifier {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
                 if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
-                    List<String> s = e.getInitCommands().stream().map(c -> {
-                        // TODO: 临时兼容业务界面
-                        if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
-                            return c;
-                        } else {
-                            return "s:" + c;
-                        }
-                    }).collect(Collectors.toList());
+                    List<String> s = new ArrayList<>();
+                    for (String c : e.getInitCommands()) {
+                        String string = getString(c);
+                        s.add(string);
+                    }
                     e.setInitCommands(s);
                 }
                 if (StringUtils.isNotBlank(e.getNodeCommand())) {
                     e.getInitCommands().add("n:" + e.getNodeCommand());
                 }
             }
+        }
+    }
+
+    private static String getString(String c) {
+        // TODO: 临时兼容业务界面
+        if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
+            return c;
+        } else {
+            return "s:" + c;
         }
     }
 
@@ -731,29 +737,33 @@ public class CsceneDataModifier {
     private static void handlerNodeCommand(BaseSceneDataBO baseSceneDataBO) {
         if (baseSceneDataBO.getTopology() != null) {
             if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
-                baseSceneDataBO.getTopology().getElements().stream().forEach(e -> {
-                    BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
-                    if (CollectionUtils.isNotEmpty(sceneElement.getInitCommands())) {
-                        List<String> nodeCommands = new ArrayList<>();
-                        List<String> initCommands = new ArrayList<>();
-                        sceneElement.getInitCommands().forEach(c -> {
-                            if (c != null) {
-                                if (c.toString().startsWith("n:")) {
-                                    nodeCommands.add(StringUtils.replaceOnce(c.toString(), "n:", ""));
-                                } else if (c.toString().startsWith("s:")) {
-                                    initCommands.add(StringUtils.replaceOnce(c.toString(), "s:", ""));
-                                } else {
-                                    initCommands.add(c.toString());
-                                }
-                            }
-                        });
-                        sceneElement.setInitCommands(initCommands);
-                        if (CollectionUtils.isNotEmpty(nodeCommands)) {
-                            // 暂时只有一个命令
-                            sceneElement.setNodeCommand(nodeCommands.get(0));
-                        }
-                    }
+                baseSceneDataBO.getTopology().getElements().forEach(e -> {
+                    extracted((BaseSceneElementBO) e);
                 });
+            }
+        }
+    }
+
+    private static void extracted(BaseSceneElementBO e) {
+        BaseSceneElementBO sceneElement = e;
+        if (CollectionUtils.isNotEmpty(sceneElement.getInitCommands())) {
+            List<String> nodeCommands = new ArrayList<>();
+            List<String> initCommands = new ArrayList<>();
+            sceneElement.getInitCommands().forEach(c -> {
+                if (c != null) {
+                    if (c.toString().startsWith("n:")) {
+                        nodeCommands.add(StringUtils.replaceOnce(c.toString(), "n:", ""));
+                    } else if (c.toString().startsWith("s:")) {
+                        initCommands.add(StringUtils.replaceOnce(c.toString(), "s:", ""));
+                    } else {
+                        initCommands.add(c.toString());
+                    }
+                }
+            });
+            sceneElement.setInitCommands(initCommands);
+            if (CollectionUtils.isNotEmpty(nodeCommands)) {
+                // 暂时只有一个命令
+                sceneElement.setNodeCommand(nodeCommands.get(0));
             }
         }
     }

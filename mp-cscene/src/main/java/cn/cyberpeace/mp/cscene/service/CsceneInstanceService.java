@@ -843,15 +843,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         ListObjServiceResult<CollectionFlowBO> serviceResult = scenePluginCollectionSceneService.listFlows(new ArrayList<>(sceneId2CsceneId.keySet()), queryParams);
         List<CollectionFlowBO> flowBOS = serviceResult.getSource().getObjs();
-        List<CsceneCollectionFlowBO> result = flowBOS.stream().map(bo -> {
-            CsceneCollectionFlowBO csceneCollectionFlowBO = new CsceneCollectionFlowBO();
-            BeanUtils.copyProperties(bo, csceneCollectionFlowBO);
-            if (bo.getSceneId() != null) {
-                csceneCollectionFlowBO.setSceneId(sceneId2CsceneId.get(bo.getSceneId()));
-            }
-            return csceneCollectionFlowBO;
-        }).collect(Collectors.toList());
+        List<CsceneCollectionFlowBO> result = new ArrayList<>();
+        for (CollectionFlowBO bo : flowBOS) {
+            CsceneCollectionFlowBO csceneCollectionFlowBO = getCsceneCollectionFlowBO(sceneId2CsceneId, bo);
+            result.add(csceneCollectionFlowBO);
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(result, serviceResult.getSource().getTotal()));
+    }
+
+    private static CsceneCollectionFlowBO getCsceneCollectionFlowBO(Map<String, String> sceneId2CsceneId, CollectionFlowBO bo) {
+        CsceneCollectionFlowBO csceneCollectionFlowBO = new CsceneCollectionFlowBO();
+        BeanUtils.copyProperties(bo, csceneCollectionFlowBO);
+        if (bo.getSceneId() != null) {
+            csceneCollectionFlowBO.setSceneId(sceneId2CsceneId.get(bo.getSceneId()));
+        }
+        return csceneCollectionFlowBO;
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String id, HostStateQueryParams queryParams) {

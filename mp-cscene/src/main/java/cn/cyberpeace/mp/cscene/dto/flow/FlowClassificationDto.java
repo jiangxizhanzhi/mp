@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -49,17 +50,23 @@ public class FlowClassificationDto {
             String attackType = getValueByLocal(locale, classification.getType_en(), classification.getType_cn());
 
             FlowClassificationDto flowClassificationDto = new FlowClassificationDto().setAttackType(attackType);
-            List<FlowEvent> flowEvents = classification.getFlow_events().stream().map(event -> {
-                String flowEventType = getValueByLocal(locale, event.getEn_desc(), event.getZh_desc());
-
-                return new FlowEvent()
-                        .setFlowEventType(flowEventType)
-                        .setSeverityDesc(event.getSeverity());
-            }).collect(Collectors.toList());
+            List<FlowEvent> flowEvents = new ArrayList<>();
+            for (AttackClassificationBO.Classification event : classification.getFlow_events()) {
+                FlowEvent flowEvent = getFlowEvent(locale, event);
+                flowEvents.add(flowEvent);
+            }
             flowClassificationDto.setFlowEvents(flowEvents);
             classificationDtoList.add(flowClassificationDto);
         }
         return classificationDtoList;
+    }
+
+    private static FlowEvent getFlowEvent(Locale locale, AttackClassificationBO.Classification event) {
+        String flowEventType = getValueByLocal(locale, event.getEn_desc(), event.getZh_desc());
+
+        return new FlowEvent()
+                .setFlowEventType(flowEventType)
+                .setSeverityDesc(event.getSeverity());
     }
 
     private static String getValueByLocal(Locale locale, String enValue, String cnValue) {

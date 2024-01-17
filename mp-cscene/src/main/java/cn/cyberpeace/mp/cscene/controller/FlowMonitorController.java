@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -302,16 +303,22 @@ public class FlowMonitorController {
     @GetMapping("/attack_types")
     public ServiceResult<FlowAttackConfigInfo> getFlowAttackType() {
         var result = flowClassificationsService.findAll();
-        var list = result.stream().map(r -> {
-            FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
-            type.setValue(r.getCategoryEn());
-            type.setSeverity(r.getSeverity());
-            type.setName(r.getCategoryZh());
-            return type;
-        }).collect(Collectors.toList());
+        List<FlowAttackConfigInfo.FlowAttackType> list = new ArrayList<>();
+        for (FlowClassificationModel r : result) {
+            FlowAttackConfigInfo.FlowAttackType flowAttackType = getFlowAttackType(r);
+            list.add(flowAttackType);
+        }
         FlowAttackConfigInfo info = new FlowAttackConfigInfo();
         info.setTypes(list);
         return new ServiceResult<>(info).asResult();
+    }
+
+    private static FlowAttackConfigInfo.FlowAttackType getFlowAttackType(FlowClassificationModel r) {
+        FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
+        type.setValue(r.getCategoryEn());
+        type.setSeverity(r.getSeverity());
+        type.setName(r.getCategoryZh());
+        return type;
     }
 
     @ApiOperation(value = "流量分页接口")

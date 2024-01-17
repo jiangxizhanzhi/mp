@@ -345,13 +345,18 @@ public class CsceneHandler extends BaseCsceneHandler<
                             List<String> sceneNames = new ArrayList<>();
                             String sceneName = StringUtils.EMPTY;
                             if (MapUtils.isNotEmpty(useStateMap)) {
-                                useStateMap.forEach((k, v) -> {
-                                    var names = v.stream()
-                                            .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
-                                            .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
-                                            .collect(Collectors.toList());
+                                for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
+                                    String k = entry.getKey();
+                                    List<DeviceReferCsceneInstanceStat> v = entry.getValue();
+                                    List<String> names = new ArrayList<>();
+                                    for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
+                                        if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
+                                            String name = deviceReferCsceneInstanceStat.getName();
+                                            names.add(name);
+                                        }
+                                    }
                                     sceneNames.addAll(names);
-                                });
+                                }
                                 if (CollectionUtils.isNotEmpty(sceneNames)) {
                                     List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
                                     sceneName = StringUtils.join(names, ",");
@@ -378,10 +383,13 @@ public class CsceneHandler extends BaseCsceneHandler<
                                 ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbUsedCscenes(uuid);
                                 List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
                                 if (CollectionUtils.isNotEmpty(referStateUsbList)) {
-                                    List<String> sceneUsbNames = referStateUsbList.stream()
-                                            .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                                            .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                                            .collect(Collectors.toList());
+                                    List<String> sceneUsbNames = new ArrayList<>();
+                                    for (DeviceReferCsceneStat deviceReferCsceneStat : referStateUsbList) {
+                                        if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                                            String name = deviceReferCsceneStat.getName();
+                                            sceneUsbNames.add(name);
+                                        }
+                                    }
                                     String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
                                     throw new MpRuntimeException(CsceneErrorCode.USB_USED_SCENE.format(sceneUsbName));
                                 }

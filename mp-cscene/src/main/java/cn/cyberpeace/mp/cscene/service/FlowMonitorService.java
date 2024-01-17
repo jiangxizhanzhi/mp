@@ -173,14 +173,21 @@ public class FlowMonitorService {
         if (CollectionUtils.isEmpty(boList)) {
             return Lists.newArrayList();
         }
-        return boList.stream().map(v -> {
-            FlowGroupPortWithProtocolVO vo = new FlowGroupPortWithProtocolVO();
-            vo.setProtocol(v.getProtocol());
-            vo.setPort(v.getPort());
-            vo.setAttackNumber(v.getAttackNumber());
-            vo.setTrafficSize(v.getTrafficSize());
-            return vo;
-        }).collect(Collectors.toList());
+        List<FlowGroupPortWithProtocolVO> list = new ArrayList<>();
+        for (FlowGroupPortWithProtocolBO v : boList) {
+            FlowGroupPortWithProtocolVO flowGroupPortWithProtocolVO = getFlowGroupPortWithProtocolVO(v);
+            list.add(flowGroupPortWithProtocolVO);
+        }
+        return list;
+    }
+
+    private static FlowGroupPortWithProtocolVO getFlowGroupPortWithProtocolVO(FlowGroupPortWithProtocolBO v) {
+        FlowGroupPortWithProtocolVO vo = new FlowGroupPortWithProtocolVO();
+        vo.setProtocol(v.getProtocol());
+        vo.setPort(v.getPort());
+        vo.setAttackNumber(v.getAttackNumber());
+        vo.setTrafficSize(v.getTrafficSize());
+        return vo;
     }
 
 

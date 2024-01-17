@@ -242,11 +242,11 @@ public class LogFileService {
         String osType = request.getOsType();
         List<String> paths = request.getPaths();
         List<WazuhControl.ControlFileParam> uploadParams =
-            paths.stream().map(path -> {
-                WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
-                uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
-                return uploadParam;
-            }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (String s : paths) {
+            WazuhControl.ControlFileParam controlFileParam = getControlFileParam(s);
+            uploadParams.add(controlFileParam);
+        }
 
         Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
@@ -276,6 +276,12 @@ public class LogFileService {
         return dtos;
     }
 
+    private static WazuhControl.ControlFileParam getControlFileParam(String path) {
+        WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
+        uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
+        return uploadParam;
+    }
+
 
     /**
      * 转换WazuhControl.QueryLogCollectFileData到LogFileDto
@@ -295,27 +301,33 @@ public class LogFileService {
 
             if (CollectionUtil.isNotEmpty(relatedFiles)) {
 
-                List<LogFileVO> subDtos = relatedFiles.stream().map(f -> {
-                    LogFileVO dto =
-                            LogFileVO.builder()
-                                    .path(f.getPath())
-                                    .name(FileUtil.getName(f.getPath()))
-                                    .size(f.getSize())
-                                    .createTime(parseDateTime(f.getCreateTime()))
-                                    .modifyTime(parseDateTime(f.getModifyTime()))
-                                    .accessTime(parseDateTime(f.getAccessTime()))
-                                    .elementId(elementId)
-                                    .agentName(agentName)
-                                    .osType(osType)
-                                    .build();
-                    return dto;
-                }).collect(Collectors.toList());
+                List<LogFileVO> subDtos = new ArrayList<>();
+                for (WazuhControl.QueryLogCollectRelatedFileInfo f : relatedFiles) {
+                    LogFileVO logFileVO = getLogFileVO(elementId, agentName, osType, f);
+                    subDtos.add(logFileVO);
+                }
 
                 logFileVOS.addAll(subDtos);
             }
         }
 
         return logFileVOS;
+    }
+
+    private LogFileVO getLogFileVO(String elementId, String agentName, String osType, WazuhControl.QueryLogCollectRelatedFileInfo f) {
+        LogFileVO dto =
+                LogFileVO.builder()
+                        .path(f.getPath())
+                        .name(FileUtil.getName(f.getPath()))
+                        .size(f.getSize())
+                        .createTime(parseDateTime(f.getCreateTime()))
+                        .modifyTime(parseDateTime(f.getModifyTime()))
+                        .accessTime(parseDateTime(f.getAccessTime()))
+                        .elementId(elementId)
+                        .agentName(agentName)
+                        .osType(osType)
+                        .build();
+        return dto;
     }
 
 

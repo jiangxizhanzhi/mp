@@ -196,31 +196,47 @@ public class SceneMonitorService {
             basicInfos.add(basicInfo);
         }
         if (Boolean.TRUE.equals(supportProbe)) {
-            basicInfos = basicInfos.stream().filter(element -> {
-                if (element.getVirtualType() == null) {
-                    return false;
+            List<ElementMonitorBasicInfo> list = new ArrayList<>();
+            for (ElementMonitorBasicInfo element : basicInfos) {
+                if (extracted(element)) {
+                    list.add(element);
                 }
-                // 容器  非核心路由器的虚拟机支持采集
-                boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
-                boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
-                boolean isCoreRouter = ElementTypeUtils.isCoreRouter(element.getImageName());
-                if ((isVm || isContainer) && !isCoreRouter) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }).collect(Collectors.toList());
+            }
+            basicInfos = list;
         }
         if (Boolean.TRUE.equals(supportFlow)) {
-            basicInfos = basicInfos.stream().filter(element -> {
-                boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
-                boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
-                boolean isEntity = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE;
-                boolean isDynamips = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS;
-                return isVm || isContainer || isEntity || isDynamips;
-            }).collect(Collectors.toList());
+            List<ElementMonitorBasicInfo> list = new ArrayList<>();
+            for (ElementMonitorBasicInfo element : basicInfos) {
+                if (extracted1(element)) {
+                    list.add(element);
+                }
+            }
+            basicInfos = list;
         }
         return basicInfos;
+    }
+
+    private static boolean extracted1(ElementMonitorBasicInfo element) {
+        boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+        boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+        boolean isEntity = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE;
+        boolean isDynamips = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS;
+        return isVm || isContainer || isEntity || isDynamips;
+    }
+
+    private static boolean extracted(ElementMonitorBasicInfo element) {
+        if (element.getVirtualType() == null) {
+            return false;
+        }
+        // 容器  非核心路由器的虚拟机支持采集
+        boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+        boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+        boolean isCoreRouter = ElementTypeUtils.isCoreRouter(element.getImageName());
+        if ((isVm || isContainer) && !isCoreRouter) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

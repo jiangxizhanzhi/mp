@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
@@ -354,18 +355,25 @@ public class SceneElementMonitorService {
         var ports = sceneElementBO.getPorts();
         List<ElementPort> ePorts = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(ports)) {
-            ePorts = ports.stream().map(p -> {
-                ElementPort port = new ElementPort();
-                port.setIp(p.getIp());
-                port.setName(p.getName());
-                port.setId(p.getId());
-                port.setAccessModes(p.getAccessModes());
-                return port;
-            }).collect(Collectors.toList());
+            List<ElementPort> list = new ArrayList<>();
+            for (SceneElementPortBO p : ports) {
+                ElementPort elementPort = getElementPort(p);
+                list.add(elementPort);
+            }
+            ePorts = list;
         }
         basicInfo.setPorts(ePorts);
 
         formatHostStateBySceneElementBo(basicInfo, sceneElementBO);
+    }
+
+    private static ElementPort getElementPort(SceneElementPortBO p) {
+        ElementPort port = new ElementPort();
+        port.setIp(p.getIp());
+        port.setName(p.getName());
+        port.setId(p.getId());
+        port.setAccessModes(p.getAccessModes());
+        return port;
     }
 
     /**
