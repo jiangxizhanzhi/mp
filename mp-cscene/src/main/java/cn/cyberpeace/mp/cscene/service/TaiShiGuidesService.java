@@ -100,7 +100,12 @@ public class TaiShiGuidesService {
     public List<FlowClassificationDto> listAllFlowClassifications() {
         FlowClassificationFromJsonModel flowClassificationFromJsonModel = flowMonitorService.getFlowClassificationFromJsonModel();
         List<FlowClassificationDto> flowClassificationDtoList = FlowClassificationDto.getDtoListFromModel(flowClassificationFromJsonModel);
-        List<FlowClassificationDto> attackTypeNotEmptyDtoList = flowClassificationDtoList.stream().filter(dto -> StringUtils.isNotBlank(dto.getAttackType())).collect(Collectors.toList());
+        List<FlowClassificationDto> attackTypeNotEmptyDtoList = new ArrayList<>();
+        for (FlowClassificationDto dto : flowClassificationDtoList) {
+            if (StringUtils.isNotBlank(dto.getAttackType())) {
+                attackTypeNotEmptyDtoList.add(dto);
+            }
+        }
         return attackTypeNotEmptyDtoList;
     }
 
@@ -132,9 +137,11 @@ public class TaiShiGuidesService {
 
         var formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
         if (CollectionUtils.isNotEmpty(formatDefenseReq.getDefenseTypes())) {
-            var formatDefenseTypes = formatDefenseReq.getDefenseTypes().stream()
-                    .map(d -> ClassificationConvert.getEngageKey(d))
-                    .collect(Collectors.toList());
+            List<String> formatDefenseTypes = new ArrayList<>();
+            for (String d : formatDefenseReq.getDefenseTypes()) {
+                String engageKey = ClassificationConvert.getEngageKey(d);
+                formatDefenseTypes.add(engageKey);
+            }
             formatDefenseReq.setDefenseTypes(formatDefenseTypes);
         } else {
             formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
@@ -142,9 +149,11 @@ public class TaiShiGuidesService {
 
         var formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
         if (CollectionUtils.isNotEmpty(formatAttCkReq.getDefenseTypes())) {
-            var formatDefenseTypes = formatAttCkReq.getDefenseTypes().stream()
-                    .map(d -> ClassificationConvert.getAttCkKey(d))
-                    .collect(Collectors.toList());
+            List<String> formatDefenseTypes = new ArrayList<>();
+            for (String d : formatAttCkReq.getDefenseTypes()) {
+                String attCkKey = ClassificationConvert.getAttCkKey(d);
+                formatDefenseTypes.add(attCkKey);
+            }
             formatAttCkReq.setDefenseTypes(formatDefenseTypes);
         } else {
             formatAttCkReq.setDefenseTypes(ClassificationConvert.getAllAttCkKeys());
@@ -330,9 +339,11 @@ public class TaiShiGuidesService {
         agentQuery.must(rangeQueryBuilder);
 
         if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
-            List<String> types = request.getDefenseTypes().stream()
-                    .map(d -> FlowAttackTypeConvert.getFormatType(d))
-                    .collect(Collectors.toList());
+            List<String> types = new ArrayList<>();
+            for (String d : request.getDefenseTypes()) {
+                String formatType = FlowAttackTypeConvert.getFormatType(d);
+                types.add(formatType);
+            }
             agentQuery.must(QueryBuilders.termsQuery("rule.mitre.tactic", types));
         }
 
@@ -422,9 +433,11 @@ public class TaiShiGuidesService {
 
         var formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
         if (CollectionUtils.isNotEmpty(formatDefenseReq.getDefenseTypes())) {
-            var formatDefenseTypes = formatDefenseReq.getDefenseTypes().stream()
-                    .map(d -> ClassificationConvert.getEngageKey(d))
-                    .collect(Collectors.toList());
+            List<String> formatDefenseTypes = new ArrayList<>();
+            for (String d : formatDefenseReq.getDefenseTypes()) {
+                String engageKey = ClassificationConvert.getEngageKey(d);
+                formatDefenseTypes.add(engageKey);
+            }
             formatDefenseReq.setDefenseTypes(formatDefenseTypes);
         } else {
             formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
@@ -432,9 +445,11 @@ public class TaiShiGuidesService {
 
         var formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
         if (CollectionUtils.isNotEmpty(formatAttCkReq.getDefenseTypes())) {
-            var formatDefenseTypes = formatAttCkReq.getDefenseTypes().stream()
-                    .map(d -> ClassificationConvert.getAttCkKey(d))
-                    .collect(Collectors.toList());
+            List<String> formatDefenseTypes = new ArrayList<>();
+            for (String d : formatAttCkReq.getDefenseTypes()) {
+                String attCkKey = ClassificationConvert.getAttCkKey(d);
+                formatDefenseTypes.add(attCkKey);
+            }
             formatAttCkReq.setDefenseTypes(formatDefenseTypes);
         } else {
             formatAttCkReq.setDefenseTypes(ClassificationConvert.getAllAttCkKeys());
@@ -566,9 +581,9 @@ public class TaiShiGuidesService {
         }
 
         List<FlowTrend> hostTrends = new ArrayList<>();
-        flowTrendMap.entrySet().forEach(entry -> {
+        for (Map.Entry<LocalDateTime, FlowTrend> entry : flowTrendMap.entrySet()) {
             hostTrends.add(entry.getValue());
-        });
+        }
         hostTrends.sort(Comparator.comparing(FlowTrend::getTime));
         return hostTrends;
     }
@@ -705,9 +720,12 @@ public class TaiShiGuidesService {
         if (CollectionUtils.isEmpty(attCks)) {
             return new ArrayList<>();
         }
-        return attCks.stream()
-                .map(a -> this.getAttCkTypeName(a))
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (String a : attCks) {
+            String attCkTypeName = this.getAttCkTypeName(a);
+            list.add(attCkTypeName);
+        }
+        return list;
     }
 
     private String getAttCkTypeName(String attCk) {
@@ -810,20 +828,24 @@ public class TaiShiGuidesService {
                     log.error("failed to parse classification info", error);
                 }
                 if (CollectionUtils.isNotEmpty(CONVERT_INFO.attCk)) {
-                    CONVERT_INFO.attCk.forEach(a -> {
+                    for (ClassificationInfo a : CONVERT_INFO.attCk) {
                         KEY_2_ATT_CK_INFO.put(a.key, a);
                         if (a.alias != null) {
-                            a.alias.forEach(alia -> ALIAS_2_ATT_CK_KEY.put(alia, a.key));
+                            for (String alia : a.alias) {
+                                ALIAS_2_ATT_CK_KEY.put(alia, a.key);
+                            }
                         }
-                    });
+                    }
                 }
                 if (CollectionUtils.isNotEmpty(CONVERT_INFO.engage)) {
-                    CONVERT_INFO.engage.forEach(a -> {
+                    for (ClassificationInfo a : CONVERT_INFO.engage) {
                         KEY_2_ENGAGE_INFO.put(a.key, a);
                         if (a.alias != null) {
-                            a.alias.forEach(alia -> ALIAS_2_ENGAGE_KEY.put(alia, a.key));
+                            for (String alia : a.alias) {
+                                ALIAS_2_ENGAGE_KEY.put(alia, a.key);
+                            }
                         }
-                    });
+                    }
                 }
             }
         }

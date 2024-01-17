@@ -27,14 +27,14 @@ public class NetClearJob extends AbstractClearJob<NetworkData> {
     @Override
     protected Map<String, NetworkData> getEid2Node(List<NetworkData> nets) {
         Map<String, NetworkData> result = new HashMap<>();
-        nets.forEach(net -> {
+        for (NetworkData net : nets) {
             if (net.getName() != null && net.getId() != null) {
                 String eid = super.getEid(net.getName());
                 if (StringUtils.isNotEmpty(eid)) {
                     result.put(eid, net);
                 }
             }
-        });
+        }
         return result;
     }
 

@@ -216,7 +216,12 @@ public class HostStateService {
             log.error("cp cloud ip or port is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        List<String> agentNames = getAgentNames().stream().filter(name -> Objects.nonNull(name) && name.contains("controller")).collect(Collectors.toList());
+        List<String> agentNames = new ArrayList<>();
+        for (String name : getAgentNames()) {
+            if (Objects.nonNull(name) && name.contains("controller")) {
+                agentNames.add(name);
+            }
+        }
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
@@ -334,10 +339,12 @@ public class HostStateService {
         queryParams.setPageSize(request.getPageSize());
         Map<String, List<CollectionHostStateBO>> map = csceneInstanceService.mapHostStatesByAgentNames(request.getAgentNames(), queryParams);
         Map<String, List<HostState>> convertedMap = new HashMap<>();
-        map.forEach((k, v) -> {
+        for (Map.Entry<String, List<CollectionHostStateBO>> entry : map.entrySet()) {
+            String k = entry.getKey();
+            List<CollectionHostStateBO> v = entry.getValue();
             List<HostState> hostStates = collectionHostStateBOs2HostStates(v);
             convertedMap.put(k, hostStates);
-        });
+        }
 
         return convertedMap;
     }
@@ -424,9 +431,9 @@ public class HostStateService {
         }
 
         List<HostState> hostStates = new ArrayList<>();
-        hostStateMap.entrySet().forEach(entry -> {
+        for (Map.Entry<LocalDateTime, HostState> entry : hostStateMap.entrySet()) {
             hostStates.add(entry.getValue());
-        });
+        }
         hostStates.sort(Comparator.comparing(HostState::getTime));
 
         return hostStates;
@@ -458,7 +465,11 @@ public class HostStateService {
                 endTime = LocalDateTime.now();
             }
             var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
-            var ports = dataModels.stream().map(d -> JsonCommon.parse(d.getData(), Port.class)).collect(Collectors.toList());
+            var ports = new ArrayList<>();
+            for (CollectionPluginSceneDataModel d : dataModels) {
+                Port parse = JsonCommon.parse(d.getData(), Port.class);
+                ports.add(parse);
+            }
             return new ListObjServiceResult(new ListObjResult<>(ports, ports.size()).asResult()).asResult();
         } else {
             return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
@@ -478,7 +489,7 @@ public class HostStateService {
         ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
         List<Process> processes = listResult.getSource().getList();
         // KB -> MB
-        processes.forEach(p -> {
+        for (Process p : processes) {
             if (Objects.nonNull(p.getSize())) {
                 Long megabytes = DataSize.ofKilobytes(p.getSize()).toMegabytes();
                 p.setSize(megabytes);
@@ -488,7 +499,7 @@ public class HostStateService {
                 Long megabytes = DataSize.ofKilobytes(p.getVmSize()).toMegabytes();
                 p.setVmSize(megabytes);
             }
-        });
+        }
 
         return listResult;
     }
@@ -540,9 +551,11 @@ public class HostStateService {
                 endTime = LocalDateTime.now();
             }
             var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
-            var netifaces = dataModels.stream().map(d -> {
-                return JsonCommon.parse(d.getData(), Netiface.class);
-            }).collect(Collectors.toList());
+            var netifaces = new ArrayList<>();
+            for (CollectionPluginSceneDataModel d : dataModels) {
+                Netiface parse = JsonCommon.parse(d.getData(), Netiface.class);
+                netifaces.add(parse);
+            }
             return new ListObjServiceResult(new ListObjResult<>(netifaces, netifaces.size()).asResult()).asResult();
         } else {
             ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
@@ -616,7 +629,11 @@ public class HostStateService {
             return new ArrayList<>();
         }
         List<Map<String, String>> list = (List<Map<String, String>>) data.get("list");
-        List<String> agentNames = list.stream().map(map -> map.getOrDefault("hostname", "")).collect(Collectors.toList());
+        List<String> agentNames = new ArrayList<>();
+        for (Map<String, String> map : list) {
+            String hostname = map.getOrDefault("hostname", "");
+            agentNames.add(hostname);
+        }
         return agentNames;
     }
 

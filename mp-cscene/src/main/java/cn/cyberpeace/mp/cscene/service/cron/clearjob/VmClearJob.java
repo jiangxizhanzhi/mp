@@ -27,14 +27,14 @@ public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
     @Override
     protected Map<String, VirtualMachineGetData> getEid2Node(List<VirtualMachineGetData> vms) {
         Map<String, VirtualMachineGetData> result = new HashMap<>();
-        vms.forEach(vm -> {
+        for (VirtualMachineGetData vm : vms) {
             if (vm.getName() != null && vm.getId() != null) {
                 String eid = super.getEid(vm.getName());
                 if (StringUtils.isNotEmpty(eid)) {
                     result.put(eid, vm);
                 }
             }
-        });
+        }
         return result;
     }
 

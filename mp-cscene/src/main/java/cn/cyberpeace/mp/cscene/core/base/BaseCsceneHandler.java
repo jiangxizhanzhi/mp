@@ -112,7 +112,7 @@ public abstract class BaseCsceneHandler<
         }
         Map<String, R> roleBOMap = new HashMap<>();
         Map<String, String> roleParentMap = new HashMap<>();
-        roleObjs.forEach(roleObj -> {
+        for (R0 roleObj : roleObjs) {
             var roleBO = ClassUtils.createInstance(roleBOClass);
             roleBO.fromModel(roleObj);
             roleBOMap.put(roleObj.getId(), roleBO);
@@ -120,19 +120,21 @@ public abstract class BaseCsceneHandler<
             if (StringUtils.isEmpty(roleObj.getParent())) {
                 roleBOs.add(roleBO);
             }
-        });
-        roleBOMap.forEach((roleId, roleBO) -> {
+        }
+        for (Map.Entry<String, R> entry : roleBOMap.entrySet()) {
+            String roleId = entry.getKey();
+            R roleBO = entry.getValue();
             var parentId = roleParentMap.getOrDefault(roleId, null);
             var parentRoleBO = roleBOMap.getOrDefault(parentId, null);
             if (parentRoleBO == null) {
-                return;
+                continue;
             }
 
             if (parentRoleBO.getChildren() == null) {
                 parentRoleBO.setChildren(new ArrayList<>());
             }
             parentRoleBO.getChildren().add(roleBO);
-        });
+        }
 
         return roleBOs;
     }
@@ -149,7 +151,7 @@ public abstract class BaseCsceneHandler<
             return roleObjs;
         }
 
-        roleBOs.forEach(roleBO -> {
+        for (R roleBO : roleBOs) {
             var roleObj = roleBO.toModel();
             roleObj.setParent(parentId);
             roleObj.initDefault(BaseModel::getId);
@@ -159,7 +161,7 @@ public abstract class BaseCsceneHandler<
             if (children != null) {
                 roleObjs.addAll(convertToRoleObjs(children, roleObj.getId()));
             }
-        });
+        }
         return roleObjs;
     }
 
@@ -223,12 +225,16 @@ public abstract class BaseCsceneHandler<
      */
     private void saveCsceneRoles() {
         List<R0> roleObjs = convertToRoleObjs(cscene.getRoles(), null);
-        Map<String, R0> existRoleObjMap = readCsceneRoles().stream()
-                .collect(Collectors.toMap(BaseModel::getId, x -> x));
+        Map<String, R0> existRoleObjMap = new HashMap<>();
+        for (R0 x : readCsceneRoles()) {
+            if (existRoleObjMap.put(x.getId(), x) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         List<R0> addingTargets = new ArrayList<>();
         List<R0> updatingTargets = new ArrayList<>();
-        roleObjs.forEach(roleObj -> {
+        for (R0 roleObj : roleObjs) {
             roleObj.setCscene(csceneId);
             String roleId = roleObj.getId();
             if (existRoleObjMap.containsKey(roleId)) {
@@ -237,7 +243,7 @@ public abstract class BaseCsceneHandler<
             } else {
                 addingTargets.add(roleObj);
             }
-        });
+        }
         String[] removingTargetIds = existRoleObjMap.keySet().toArray(new String[0]);
 
         var deleteResult = csceneRoleMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();

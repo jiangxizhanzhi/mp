@@ -5,11 +5,9 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
-import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -17,8 +15,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.cscene.bo.*;
-import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
@@ -54,8 +55,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -249,13 +257,22 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(csceneAuthModels)) {
             return new ServiceResult<>(csceneAuthorizeBO);
         }
-        List<String> userIds = csceneAuthModels.stream().map(m -> m.getOwner()).collect(Collectors.toList());
+        List<String> userIds = new ArrayList<>();
+        for (CsceneAuthModel m : csceneAuthModels) {
+            String owner = m.getOwner();
+            userIds.add(owner);
+        }
         OrgUserPageRequest request = new OrgUserPageRequest();
         request.setIds(userIds.toArray(new String[0]));
         request.setPage(1);
         request.setPageSize(userIds.size());
         var users = tenantUserService.pageUsersByOrg(request);
-        Map<String, UserBo> userId2User = users.getList().stream().collect(Collectors.toMap(userDto -> userDto.getId(), userDto -> userDto));
+        Map<String, UserBo> userId2User = new HashMap<>();
+        for (UserBo userDto : users.getList()) {
+            if (userId2User.put(userDto.getId(), userDto) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         for (String userId : userIds) {
             CsceneAuthorizeBO.SharedUser sharedUser = new CsceneAuthorizeBO.SharedUser();
             var user = userId2User.get(userId);
@@ -296,7 +313,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         // 自定义授权 每个用户生成一条授权信息
         if (CsceneModel.AuthType.SHARED == authType) {
             // 用户id去重
-            userIds = userIds.stream().distinct().collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : userIds) {
+                if (uniqueValues.add(s)) {
+                    list.add(s);
+                }
+            }
+            userIds = list;
             List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
             for (String userId : userIds) {
                 for (String id : csceneIds) {
@@ -321,9 +345,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 return new ListObjServiceResult<>(new ArrayList<>(), 0);
             }
             if (Objects.nonNull(queryParams.getIds())) {
-                queryParams.setIds(Arrays.stream(queryParams.getIds())
-                        .filter(s -> ids.contains(s))
-                        .toArray(String[]::new));
+                List<String> list = new ArrayList<>();
+                for (String s : queryParams.getIds()) {
+                    if (ids.contains(s)) {
+                        list.add(s);
+                    }
+                }
+                queryParams.setIds(list.toArray(new String[0]));
             } else {
                 queryParams.setIds(ids.toArray(new String[0]));
             }
@@ -341,19 +369,30 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
 
-        var csceneObjMap = listResult.getSource().getObjs().stream()
-                .collect(Collectors.toMap(BaseModel::getId, x -> x));
-        var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
-                .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
+        Map<String,CsceneModel> csceneObjMap = new HashMap<>();
+        for (CsceneModel x : listResult.getSource().getObjs()) {
+            if (csceneObjMap.put(x.getId(), x) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        Map<String,List<CsceneRoleModel>> csceneRoleObjMap = new HashMap<>();
+        for (CsceneRoleModel csceneRoleModel : readCsceneRoles(csceneObjMap.keySet()
+                .toArray(new String[0]))) {
+            csceneRoleObjMap.computeIfAbsent(csceneRoleModel.getCscene(), k -> new ArrayList<>()).add(csceneRoleModel);
+        }
         List<CsceneBO> csceneBOs = new ArrayList<>();
         Map<String, CsceneBO> csceneBOMap = new HashMap<>();
-        csceneObjMap.forEach((csceneId, csceneObj) -> {
+        for (Map.Entry<String, CsceneModel> entry : csceneObjMap.entrySet()) {
+            String csceneId = entry.getKey();
+            CsceneModel csceneObj = entry.getValue();
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
             csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
-        });
+        }
         // 转为Map后顺序被打乱，此时再次排序
-        listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
+        for (CsceneModel m : listResult.getSource().getObjs()) {
+            csceneBOs.add(csceneBOMap.get(m.getId()));
+        }
         if (CollectionUtils.isNotEmpty(listResult.getSource().getObjs())) {
             for (CsceneBO temp : csceneBOs) {
                 if (StringUtils.isNotEmpty(temp.getCreateUsername())) {
@@ -373,8 +412,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         // 设置场景模板授权用户列表
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
+            List<String> list = new ArrayList<>();
+            for (CsceneBO csceneBO : csceneBOs) {
+                String id = csceneBO.getId();
+                list.add(id);
+            }
             HumanCondition humanCondition = new HumanCondition()
-                    .filterIn(CsceneAuthModel::getTarget, csceneBOs.stream().map(BaseCsceneBO::getId).toArray());
+                    .filterIn(CsceneAuthModel::getTarget, list.toArray());
             var csceneAuthModels = csceneAuthMapper.list(humanCondition);
             Map<String, List<String>> csceneId2UserIds = new HashMap<>();
             for (var csceneAuthModel : csceneAuthModels) {
@@ -383,7 +427,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 }
                 csceneId2UserIds.get(csceneAuthModel.getTarget()).add(csceneAuthModel.getOwner());
             }
-            csceneBOs.forEach(bo -> bo.setSharedUsers(csceneId2UserIds.getOrDefault(bo.getId(), new ArrayList<>())));
+            for (CsceneBO bo : csceneBOs) {
+                bo.setSharedUsers(csceneId2UserIds.getOrDefault(bo.getId(), new ArrayList<>()));
+            }
         }
     }
 
@@ -627,7 +673,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(models)) {
             return new ArrayList<>();
         } else {
-            return models.stream().map(m -> m.getScene()).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (CsceneInstanceModel m : models) {
+                String scene = m.getScene();
+                list.add(scene);
+            }
+            return list;
         }
     }
 
@@ -675,8 +726,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CsceneAuthModel::getOwner, currentUserId);
-        List<String> csceneIds = csceneAuthMapper.list(humanCondition).stream()
-                .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+        List<String> csceneIds = new ArrayList<>();
+        for (CsceneAuthModel csceneAuthModel : csceneAuthMapper.list(humanCondition)) {
+            String target = csceneAuthModel.getTarget();
+            csceneIds.add(target);
+        }
         HumanCondition condition = new HumanCondition()
                 .filterOrStart()
                 .orEqual(CsceneModel::getAuthType, CsceneModel.AuthType.PUBLIC)
@@ -685,18 +739,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 .andEqual(CsceneModel::getCreateUser, currentUserId)
                 .orAndEnd()
                 .filterOrEnd();
-        csceneIds.addAll(getModelMapper().list(condition).stream()
-                .map(m -> m.getId())
-                .collect(Collectors.toList()));
+        List<String> list = new ArrayList<>();
+        for (CsceneModel m : getModelMapper().list(condition)) {
+            String id = m.getId();
+            list.add(id);
+        }
+        csceneIds.addAll(list);
         return csceneIds;
     }
 
     private void deleteCsceneAuthByIds(List<String> csceceIds) {
         HumanCondition humanCondition = new HumanCondition()
                 .filterIn(CsceneAuthModel::getTarget, csceceIds.toArray());
-        csceneAuthMapper.bulkDelete(csceneAuthMapper.list(humanCondition).stream()
-                .map(m -> m.getId())
-                .toArray(String[]::new));
+        List<String> list = new ArrayList<>();
+        for (CsceneAuthModel m : csceneAuthMapper.list(humanCondition)) {
+            String id = m.getId();
+            list.add(id);
+        }
+        csceneAuthMapper.bulkDelete(list.toArray(new String[0]));
     }
 
     public List<String> getOneSceneInstanceAllElementIds(String sceneId) {
@@ -704,7 +764,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var sceneElementModels = BeanCommon.getBean(SceneElementMapper.class).list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, sceneId));
         if (CollectionUtils.isNotEmpty(sceneElementModels)) {
-            ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (SceneElementModel sceneElementModel : sceneElementModels) {
+                String nodeId = sceneElementModel.getNodeId();
+                list.add(nodeId);
+            }
+            ids = list;
         }
         return ids;
     }

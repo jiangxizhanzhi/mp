@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -127,9 +128,12 @@ public class FlowMonitorController {
             flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
         }
         if (CollectionUtils.isNotEmpty(flowTrends)) {
-            count = flowTrends.stream()
-                    .mapToLong(FlowTrend::getDataSize)
-                    .sum();
+            long sum = 0L;
+            for (FlowTrend flowTrend : flowTrends) {
+                long dataSize = flowTrend.getDataSize();
+                sum += dataSize;
+            }
+            count = sum;
         }
 
         return ResultCommon.success(count);
@@ -335,20 +339,47 @@ public class FlowMonitorController {
 
         List<AssetsStatisticsResponse> responseList = new ArrayList<>();
         // 统计资产数量
-        sceneIds.forEach(id -> {
-            SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
+        for (String id : sceneIds) {
+            Optional<SceneAssetsBO> found = Optional.empty();
+            for (SceneAssetsBO list : sceneAssetsList) {
+                if (id.equals(list.getSceneId())) {
+                    found = Optional.of(list);
+                    break;
+                }
+            }
+            SceneAssetsBO sceneAssetsBO = found.get();
             List<CategoryGroupBO> categoryGroups = sceneAssetsBO.getCategoryGroups();
             // 操作系统
-            List<CategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
+            List<CategoryGroupBO> osList = new ArrayList<>();
+            for (CategoryGroupBO groupBO : categoryGroups) {
+                if (groupBO.getCategory() == 1) {
+                    osList.add(groupBO);
+                }
+            }
             // 应用系统
-            List<CategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
+            List<CategoryGroupBO> asList = new ArrayList<>();
+            for (CategoryGroupBO categoryGroupBO : categoryGroups) {
+                if (categoryGroupBO.getCategory() == 2) {
+                    asList.add(categoryGroupBO);
+                }
+            }
             // 网络设备
-            List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
+            List<CategoryGroupBO> networkList = new ArrayList<>();
+            for (CategoryGroupBO categoryGroup : categoryGroups) {
+                if (categoryGroup.getCategory() == 3) {
+                    networkList.add(categoryGroup);
+                }
+            }
             // 安全设备
-            List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
+            List<CategoryGroupBO> ssList = new ArrayList<>();
+            for (CategoryGroupBO group : categoryGroups) {
+                if (group.getCategory() == 4) {
+                    ssList.add(group);
+                }
+            }
             AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneAssetsBO.getNodeCount()).ipTotal(sceneAssetsBO.getIpCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
             responseList.add(response);
-        });
+        }
 
         return ResultCommon.success(responseList);
     }
@@ -368,13 +399,33 @@ public class FlowMonitorController {
         // 统计资产数量
         List<SceneConfigCategoryGroupBO> categoryGroups = sceneConfigAsset.getCategoryGroups();
         // 操作系统
-        List<SceneConfigCategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
+        List<SceneConfigCategoryGroupBO> osList = new ArrayList<>();
+        for (SceneConfigCategoryGroupBO configCategoryGroupBO : categoryGroups) {
+            if (configCategoryGroupBO.getCategory() == 1) {
+                osList.add(configCategoryGroupBO);
+            }
+        }
         // 应用系统
-        List<SceneConfigCategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
+        List<SceneConfigCategoryGroupBO> asList = new ArrayList<>();
+        for (SceneConfigCategoryGroupBO sceneConfigCategoryGroupBO : categoryGroups) {
+            if (sceneConfigCategoryGroupBO.getCategory() == 2) {
+                asList.add(sceneConfigCategoryGroupBO);
+            }
+        }
         // 网络设备
-        List<SceneConfigCategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
+        List<SceneConfigCategoryGroupBO> networkList = new ArrayList<>();
+        for (SceneConfigCategoryGroupBO categoryGroup : categoryGroups) {
+            if (categoryGroup.getCategory() == 3) {
+                networkList.add(categoryGroup);
+            }
+        }
         // 安全设备
-        List<SceneConfigCategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
+        List<SceneConfigCategoryGroupBO> ssList = new ArrayList<>();
+        for (SceneConfigCategoryGroupBO group : categoryGroups) {
+            if (group.getCategory() == 4) {
+                ssList.add(group);
+            }
+        }
         AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneConfigAsset.getNodeCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
         responseList.add(response);
 

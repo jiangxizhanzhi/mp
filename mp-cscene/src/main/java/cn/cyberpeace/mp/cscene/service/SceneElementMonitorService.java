@@ -13,7 +13,15 @@ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.*;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -39,6 +47,7 @@ import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -55,8 +64,17 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -149,7 +167,12 @@ public class SceneElementMonitorService {
         List<ConnectionState> connectionStates = new ArrayList<>();
         if (Objects.nonNull(netConns.getSource()) && CollUtil.isNotEmpty(netConns.getSource().getList())) {
             List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
-            connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
+            List<ConnectionState> result = new ArrayList<>();
+            for (WazuhNetworkConnectionModel model : list) {
+                ConnectionState connectionState = convertWazuhNetConn2ConnState(model);
+                result.add(connectionState);
+            }
+            connectionStates = result;
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
@@ -220,7 +243,13 @@ public class SceneElementMonitorService {
 
         var topology = csceneInstanceBO.getScene().getTopology();
         var topologyElements = topology.getElements();
-        Optional<SceneElementBO> tpoEleOptional = topologyElements.stream().filter(e -> Objects.equals(elementId, e.getId())).findFirst();
+        Optional<SceneElementBO> tpoEleOptional = Optional.empty();
+        for (SceneElementBO e : topologyElements) {
+            if (Objects.equals(elementId, e.getId())) {
+                tpoEleOptional = Optional.of(e);
+                break;
+            }
+        }
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
@@ -238,7 +267,14 @@ public class SceneElementMonitorService {
 
         var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
         var pluginElements = scenePluginDataBO.getElements();
-        var pluginEleOptional = pluginElements.entrySet().stream().filter(entry -> Objects.equals(entry.getKey(), elementId)).map(Map.Entry::getValue).findFirst();
+        var pluginEleOptional = Optional.<Map<String, Object>>empty();
+        for (Map.Entry<String, Map<String, Object>> entry : pluginElements.entrySet()) {
+            if (Objects.equals(entry.getKey(), elementId)) {
+                Map<String, Object> value = entry.getValue();
+                pluginEleOptional = Optional.of(value);
+                break;
+            }
+        }
 
         if (pluginEleOptional.isPresent()) {
             CloudPluginSceneElementBO cloudPluginSceneElementBO = JsonCommon.snakeMapToBean(pluginEleOptional.get(), CloudPluginSceneElementBO.class);
@@ -394,7 +430,12 @@ public class SceneElementMonitorService {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 不传节点id默认查询全部节点
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
-            pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
+            List<String> list = new ArrayList<>();
+            for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+                String id = e.getId();
+                list.add(id);
+            }
+            pageRequest.setElementIds(list);
         }
         processRequest(pageRequest, sceneHandler);
         HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
@@ -449,8 +490,10 @@ public class SceneElementMonitorService {
             request.setPath(null);
         }
 
-        Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
-                .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
+        Map<String, SceneElementBO> eidMap = new HashMap<>();
+        for (SceneElementBO sceneElementBO : sceneHandler.getElementMap().values()) {
+            eidMap.put(sceneElementBO.getEid(), sceneElementBO);
+        }
         ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
         if (CollectionUtils.isNotEmpty(fileEventModels.getObjs())) {
             List<FileEventModel> list = new ArrayList<>();
@@ -555,9 +598,11 @@ public class SceneElementMonitorService {
         var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
 
         if (CollectionUtil.isNotEmpty(resultMap)) {
-            resultMap.forEach((key, value) -> {
+            for (Map.Entry<String, Long> entry : resultMap.entrySet()) {
+                String key = entry.getKey();
+                Long value = entry.getValue();
                 infos.add(ElementHistogramInfo.builder().time(key).count(Objects.isNull(value) ? 0 : value.intValue()).build());
-            });
+            }
         }
 
         //LocalDateTime endTime = null;
@@ -567,7 +612,12 @@ public class SceneElementMonitorService {
         //    endTime = LocalDateTime.now();
         //}
         //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
-        List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
+        List<ElementHistogramInfo> finalList = new ArrayList<>();
+        long limit = bucketSize;
+        for (ElementHistogramInfo info : infos) {
+            if (limit-- == 0) break;
+            finalList.add(info);
+        }
         Collections.reverse(finalList);
         return finalList;
     }
@@ -631,7 +681,12 @@ public class SceneElementMonitorService {
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
+        Map<String, String> elementEid2Name = new HashMap<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (elementEid2Name.put(e.getEid(), e.getName()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
@@ -646,7 +701,7 @@ public class SceneElementMonitorService {
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
-        result.getObjs().forEach(r -> {
+        for (WazuhVulnerabilityInfoModel r : result.getObjs()) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
@@ -660,7 +715,7 @@ public class SceneElementMonitorService {
             vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
             vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
             vulnerabilityInfos.add(vulnerabilityInfo);
-        });
+        }
         return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
     }
 
@@ -720,16 +775,20 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(result)) {
             return new ArrayList<>();
         }
-        result = result.stream()
-                .filter(countModel -> !countModel.getFieldName().equals("-"))
-                .collect(Collectors.toList());
+        List<WazuhVulnerabilityInfoCountModel> list = new ArrayList<>();
+        for (WazuhVulnerabilityInfoCountModel wazuhVulnerabilityInfoCountModel : result) {
+            if (!wazuhVulnerabilityInfoCountModel.getFieldName().equals("-")) {
+                list.add(wazuhVulnerabilityInfoCountModel);
+            }
+        }
+        result = list;
         long i = 0;
         for (WazuhVulnerabilityInfoCountModel countModel : result) {
             i = countModel.getCount() + i;
         }
         long sum = i;
         List<ElementVulnerabilityPieChartInfo> pieChartInfos = new ArrayList<>();
-        result.forEach(r -> {
+        for (WazuhVulnerabilityInfoCountModel r : result) {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
             // 漏洞等级转化为小写，便于前端转化
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
@@ -746,7 +805,7 @@ public class SceneElementMonitorService {
             // 计算百分比 单位：%
             pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
-        });
+        }
         pieChartInfos.sort(Comparator.comparing(ElementVulnerabilityPieChartInfo::getSeverityLevel));
         return pieChartInfos;
     }
@@ -778,12 +837,12 @@ public class SceneElementMonitorService {
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 true, "data.vulnerability.package.name", "package_name");
         List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();
-        result.forEach(r -> {
+        for (WazuhVulnerabilityInfoCountModel r : result) {
             ElementVulnerabilityCountInfo countInfo = new ElementVulnerabilityCountInfo();
             countInfo.setPackageName(r.getFieldName());
             countInfo.setCount((int) r.getCount());
             countInfos.add(countInfo);
-        });
+        }
         return countInfos;
     }
 
@@ -819,10 +878,14 @@ public class SceneElementMonitorService {
 
     private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         List<String> agentNames;
-        agentNames = sceneHandler.getElementMap().values().stream()
-                .filter(e -> pageRequest.getElementIds().contains(e.getId()))
-                .map(e -> e.getEid())
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (pageRequest.getElementIds().contains(e.getId())) {
+                String eid = e.getEid();
+                list.add(eid);
+            }
+        }
+        agentNames = list;
         return agentNames;
     }
 

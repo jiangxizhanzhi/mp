@@ -71,7 +71,12 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     public T export() {
         setId(null);
         if (children != null) {
-            setChildren(children.stream().map(BaseCsceneRoleBO::export).collect(Collectors.toList()));
+            List<T> list = new ArrayList<>();
+            for (T child : children) {
+                T export = child.export();
+                list.add(export);
+            }
+            setChildren(list);
         }
         return (T) this;
     }
@@ -86,8 +91,12 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
                                                                     SerializableFunction<T>... ignoreFieldGetters) {
         var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (children != null) {
-            pObj.setChildren(children.stream().map(child -> child.exportIgnore2(pClass, ignoreFieldGetters))
-                    .collect(Collectors.toList()));
+            List<P> list = new ArrayList<>();
+            for (T child : children) {
+                P p = child.exportIgnore2(pClass, ignoreFieldGetters);
+                list.add(p);
+            }
+            pObj.setChildren(list);
         }
         return pObj;
     }

@@ -150,21 +150,21 @@ public class CsceneSpecialService {
                 .selectAs(SceneConfigElementModel::getType, CsceneElementStat::getElementType)
                 .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount);
         List<CsceneElementStat> csceneElementStats = csceneMapper.list(elementStatCondition, CsceneElementStat.class);
-        csceneElementStats.forEach(elementStat -> {
-            var stat = statMap.get(elementStat.getCsceneId());
-            var elementType = elementStat.getElementType();
+        for (CsceneElementStat csceneElementStat : csceneElementStats) {
+            var stat = statMap.get(csceneElementStat.getCsceneId());
+            var elementType = csceneElementStat.getElementType();
             if (elementType.equals(BaseSceneElementModel.Type.SWITCH)) {
-                stat.setSwitchCount(elementStat.getElementTypeCount());
+                stat.setSwitchCount(csceneElementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.ROUTER)) {
-                stat.setRouterCount(elementStat.getElementTypeCount());
+                stat.setRouterCount(csceneElementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.FIREWALL)) {
-                stat.setFirewallCount(elementStat.getElementTypeCount());
+                stat.setFirewallCount(csceneElementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.TERMINAL)) {
-                stat.setTerminalCount(elementStat.getElementTypeCount());
+                stat.setTerminalCount(csceneElementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
-                stat.setNpcCount(elementStat.getElementTypeCount());
+                stat.setNpcCount(csceneElementStat.getElementTypeCount());
             }
-        });
+        }
 
 
         var virtualStatCondition = new HumanCondition()
@@ -180,13 +180,13 @@ public class CsceneSpecialService {
                 .selectAs(CloudPluginSceneConfigElementModel::getVirtualType, CsceneElementVirtualStat::getVirtualType)
                 .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType), CsceneElementVirtualStat::getVirtualTypeCount);
         List<CsceneElementVirtualStat> csceneElementVirtualStats = csceneMapper.list(virtualStatCondition, CsceneElementVirtualStat.class);
-        csceneElementVirtualStats.forEach(elementStat -> {
+        for (CsceneElementVirtualStat elementStat : csceneElementVirtualStats) {
             var stat = statMap.get(elementStat.getCsceneId());
             var virtualType = elementStat.getVirtualType();
             if (NodeLimitUtils.isLimitedNode(virtualType)) {
                 stat.setResourceOccupiedNums(stat.getResourceOccupiedNums() + elementStat.getVirtualTypeCount());
             }
-        });
+        }
 
         var testSceneStatCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
@@ -202,10 +202,10 @@ public class CsceneSpecialService {
                 .filterEqual(SceneModel::getDeleted, false);
         List<CsceneTestInstanceStat> csceneTestInstanceStats = csceneInstanceMapper.list(testSceneStatCondition,
                 CsceneTestInstanceStat.class);
-        csceneTestInstanceStats.forEach(testInstanceStat -> {
+        for (CsceneTestInstanceStat testInstanceStat : csceneTestInstanceStats) {
             var stat = statMap.get(testInstanceStat.getCsceneId());
             stat.setTestSceneCount(testInstanceStat.getTestInstanceCount());
-        });
+        }
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
     }
@@ -372,7 +372,7 @@ public class CsceneSpecialService {
             data = csceneInstanceMapper.list(humanCondition, CsceneInstanceStat.class);
             // 场景运行时长
             if (CollectionUtils.isNotEmpty(data)) {
-                data.forEach(s -> {
+                for (CsceneInstanceStat s : data) {
                     if (StringUtils.isNotEmpty(s.getReferenceMetaData())) {
                         try {
                             Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
@@ -397,7 +397,7 @@ public class CsceneSpecialService {
                         s.setEvent(SceneModel.Event.DELETE);
                         s.setEventStatus(EventStatus.START);
                     }
-                });
+                }
             }
             total = csceneInstanceMapper.total(humanCondition);
         } catch (Exception e) {
@@ -413,7 +413,11 @@ public class CsceneSpecialService {
                     }
                 }
             }
-            List<String> sceneIds = data.stream().map(d -> d.getId()).collect(Collectors.toList());
+            List<String> sceneIds = new ArrayList<>();
+            for (CsceneInstanceStat datum : data) {
+                String id = datum.getId();
+                sceneIds.add(id);
+            }
 
             var humanCondition2 = new HumanCondition()
                     .link(CsceneInstanceModel.class, SceneModel.class, SceneElementModel.class,
@@ -536,12 +540,12 @@ public class CsceneSpecialService {
                 DeviceReferCsceneStat.class);
 
         Map<String, List<DeviceReferCsceneStat>> result = new HashMap<>();
-        deviceReferCsceneStats.forEach(stat -> {
+        for (DeviceReferCsceneStat stat : deviceReferCsceneStats) {
             var image = stat.getReferenceImage();
             var referList = result.getOrDefault(image, new ArrayList<>());
             referList.add(stat);
             result.put(image, referList);
-        });
+        }
 
         return new ServiceResult<>(result);
     }
@@ -581,12 +585,12 @@ public class CsceneSpecialService {
                 DeviceReferCsceneStat.class);
 
         Map<String, List<DeviceReferCsceneStat>> result = new HashMap<>();
-        deviceReferCsceneStats.forEach(stat -> {
+        for (DeviceReferCsceneStat stat : deviceReferCsceneStats) {
             var image = stat.getReferenceImage();
             var referList = result.getOrDefault(image, new ArrayList<>());
             referList.add(stat);
             result.put(image, referList);
-        });
+        }
 
         return new ServiceResult<>(result);
     }
@@ -750,7 +754,11 @@ public class CsceneSpecialService {
         if (CollectionUtils.isEmpty(isoReferCsceneStats)) {
             return new ServiceResult<>(new ArrayList<>());
         }
-        var result = isoReferCsceneStats.stream().map(DeviceReferCsceneStat::getName).collect(Collectors.toList());
+        List<String> result = new ArrayList<>();
+        for (DeviceReferCsceneStat isoReferCsceneStat : isoReferCsceneStats) {
+            String name = isoReferCsceneStat.getName();
+            result.add(name);
+        }
         return new ServiceResult<>(result);
     }
 
@@ -813,12 +821,12 @@ public class CsceneSpecialService {
                 DeviceReferCsceneInstanceStat.class);
 
         Map<String, List<DeviceReferCsceneInstanceStat>> result = new HashMap<>();
-        deviceReferCsceneStats.forEach(stat -> {
+        for (DeviceReferCsceneInstanceStat stat : deviceReferCsceneStats) {
             var image = stat.getReferenceImage();
             var referList = result.getOrDefault(image, new ArrayList<>());
             referList.add(stat);
             result.put(image, referList);
-        });
+        }
 
         return new ServiceResult<>(result);
 
@@ -864,12 +872,12 @@ public class CsceneSpecialService {
                 DeviceReferCsceneInstanceStat.class);
 
         Map<String, List<DeviceReferCsceneInstanceStat>> result = new HashMap<>();
-        deviceReferCsceneStats.forEach(stat -> {
+        for (DeviceReferCsceneInstanceStat stat : deviceReferCsceneStats) {
             var image = stat.getReferenceImage();
             var referList = result.getOrDefault(image, new ArrayList<>());
             referList.add(stat);
             result.put(image, referList);
-        });
+        }
 
         return new ServiceResult<>(result);
     }
@@ -948,9 +956,9 @@ public class CsceneSpecialService {
                     .filterOrEnd();
         }
         List<CsceneInstanceCountStat> csceneInstanceCountStats = csceneInstanceMapper.list(statCondition, CsceneInstanceCountStat.class);
-        csceneInstanceCountStats.forEach(instanceStat -> {
+        for (CsceneInstanceCountStat instanceStat : csceneInstanceCountStats) {
             result.put(instanceStat.getCsceneId(), instanceStat.getInstanceCount());
-        });
+        }
         return new ServiceResult<>(result);
     }
 
@@ -1003,13 +1011,12 @@ public class CsceneSpecialService {
             return new ServiceResult<>(new HashMap<>());
         }
         Map<String, CsceneNodeInfoBO> result = new HashMap<>();
-        infos.forEach(info -> {
-            // 转换场景实例状态
+        for (CsceneNodeInfoBO info : infos) {// 转换场景实例状态
             var status = SceneStatusUtil.getSceneStatus(info.getDeleted(), info.getEvent(), info.getEventStatus());
             info.setSceneStatus(status.getSceneStatus());
             info.setSceneStatusDesc(status.getSceneStatusDesc());
             result.put(info.getResourceName(), info);
-        });
+        }
         return new ServiceResult<>(result);
     }
 
@@ -1019,7 +1026,7 @@ public class CsceneSpecialService {
             return;
         }
         for (String name : resourceNames) {
-            resourceNameUtilMap.values().forEach(util -> {
+            for (IResourceName util : resourceNameUtilMap.values()) {
                 var parseResult = util.parse(name);
                 if (parseResult.isSuccess()) {
                     RsourceNameParams params = parseResult.getResult();
@@ -1036,7 +1043,7 @@ public class CsceneSpecialService {
                         nodeEid2Name.get(params.getNodeId()).add(name);
                     }
                 }
-            });
+            }
         }
     }
 
@@ -1089,26 +1096,29 @@ public class CsceneSpecialService {
 
     private List<CsceneNodeInfoBO> assembleInfos(List<CsceneNodeInfoBO> infoBOS, Map<String, List<String>> nameMap, Function<CsceneNodeInfoBO, String> getFlag) {
         List<CsceneNodeInfoBO> result = new ArrayList<>();
-        var sceneIds = infoBOS.stream()
-                .map(p -> p.getInternalSceneEid())
-                .filter(p -> StringUtils.isNotEmpty(p))
-                .collect(Collectors.toList());
+        var sceneIds = new ArrayList<>();
+        for (CsceneNodeInfoBO p : infoBOS) {
+            String internalSceneEid = p.getInternalSceneEid();
+            if (StringUtils.isNotEmpty(internalSceneEid)) {
+                sceneIds.add(internalSceneEid);
+            }
+        }
         Map<String, SceneModel> sceneMaps = new HashMap<>();
         if (CollectionUtils.isNotEmpty(sceneIds)) {
             var sceneModels = sceneMapper.list(new HumanCondition().filterIn(SceneModel::getId, sceneIds.toArray(new String[]{})));
             if (CollectionUtils.isNotEmpty(sceneModels)) {
-                sceneModels.stream().forEach(s -> {
+                for (SceneModel s : sceneModels) {
                     sceneMaps.put(s.getId(), s);
-                });
+                }
             }
         }
 
-        infoBOS.forEach(e -> {
+        for (CsceneNodeInfoBO e : infoBOS) {
             List<String> names = nameMap.get(getFlag.apply(e));
             if (CollectionUtils.isEmpty(names)) {
-                return;
+                continue;
             }
-            names.forEach(name -> {
+            for (String name : names) {
                 CsceneNodeInfoBO nodeInfoBO = new CsceneNodeInfoBO();
                 BeanUtils.copyProperties(e, nodeInfoBO);
                 nodeInfoBO.setResourceName(name);
@@ -1119,8 +1129,8 @@ public class CsceneSpecialService {
                     nodeInfoBO.setProcessMessage(scene.getProcessMessage());
                 }
                 result.add(nodeInfoBO);
-            });
-        });
+            }
+        }
         return result;
     }
 
@@ -1173,18 +1183,18 @@ public class CsceneSpecialService {
         }
         Set<String> sceneIds = new HashSet<>();
         Set<String> sceneElementIds = new HashSet<>();
-        list.forEach(l -> {
+        for (NodeSessionBO l : list) {
             sceneIds.add(l.getSceneId());
             sceneElementIds.add(l.getNodeId());
-        });
+        }
         var nodes = sceneElementMapper.list(new HumanCondition()
                 .filterIn(SceneElementModel::getScene, sceneIds.toArray())
                 .filterIn(SceneElementModel::getNodeId, sceneElementIds.toArray()));
         if (CollectionUtils.isNotEmpty(nodes)) {
             Map<String, SceneElementModel> key2Model = new HashMap<>();
-            nodes.forEach(m -> {
+            for (SceneElementModel m : nodes) {
                 key2Model.put(m.getScene() + "_" + m.getNodeId(), m);
-            });
+            }
             for (var nodeSession : list) {
                 String key = nodeSession.getSceneId() + "_" + nodeSession.getNodeId();
                 if (key2Model.containsKey(key)) {
@@ -1197,9 +1207,9 @@ public class CsceneSpecialService {
         );
         if (CollectionUtils.isNotEmpty(scenes)) {
             Map<String, CsceneInstanceModel> key2Model = new HashMap<>();
-            scenes.forEach(s -> {
+            for (CsceneInstanceModel s : scenes) {
                 key2Model.put(s.getScene(), s);
-            });
+            }
             for (var nodeSession : list) {
                 var m = key2Model.get(nodeSession.getSceneId());
                 if (m != null) {

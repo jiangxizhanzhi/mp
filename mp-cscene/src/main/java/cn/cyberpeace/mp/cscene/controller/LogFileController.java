@@ -79,9 +79,11 @@ public class LogFileController {
             params.setNodeIds(pageRequest.getElementIds());
             var dataModels = dataRecordService.getData(params, CollectionPluginSceneDataModel.Type.LOGFile, startTime,
                     endTime);
-            var logs = dataModels.stream().map(d -> {
-                return JsonCommon.parse(d.getData(), LogFileVO.class);
-            }).collect(Collectors.toList());
+            List<LogFileVO> logs = new ArrayList<>();
+            for (CollectionPluginSceneDataModel d : dataModels) {
+                LogFileVO parse = JsonCommon.parse(d.getData(), LogFileVO.class);
+                logs.add(parse);
+            }
             Set<String> exists = new HashSet<>();
             List<LogFileVO> finalResult = new ArrayList<>();
             for (var log : logs) {

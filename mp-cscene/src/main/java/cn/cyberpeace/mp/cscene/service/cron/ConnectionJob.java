@@ -64,7 +64,11 @@ public class ConnectionJob {
             log.info("No scene should send connection info.");
             return;
         }
-        List<String> idList = sceneModelList.stream().map(SceneModel::getId).collect(Collectors.toList());
+        List<String> idList = new ArrayList<>();
+        for (SceneModel sceneModel : sceneModelList) {
+            String id = sceneModel.getId();
+            idList.add(id);
+        }
         HumanCondition humanConditionConnection = new HumanCondition();
         humanConditionConnection.filterIn(CloudPluginSceneConnectionModel::getScene, idList.toArray());
         humanConditionConnection.filterEqual(CloudPluginSceneConnectionModel::getDisable, false);
@@ -77,7 +81,11 @@ public class ConnectionJob {
             log.info("CloudPluginSceneConnectionModelList is empty. No connection should been send.");
             return;
         }
-        List<String> connectionIdList = cloudPluginSceneConnectionModelList.stream().map(CloudPluginSceneConnectionModel::getConnectionId).collect(Collectors.toList());
+        List<String> connectionIdList = new ArrayList<>();
+        for (CloudPluginSceneConnectionModel cloudPluginSceneConnectionModel : cloudPluginSceneConnectionModelList) {
+            String connectionId = cloudPluginSceneConnectionModel.getConnectionId();
+            connectionIdList.add(connectionId);
+        }
         List<String> activeConnectionIdList = new Remote().activeConnection(connectionIdList);
         if (activeConnectionIdList.size() == connectionIdList.size()) {
             log.info("List size is same. No connection should been send.");

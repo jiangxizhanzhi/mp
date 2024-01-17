@@ -33,6 +33,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -91,24 +92,32 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (StringUtils.isEmpty(getCsceneId())) {
             return false;
         }
-        var csceneInstanceObjMap = readCsceneInstances().stream()
-                .collect(Collectors.toMap(BaseModel::getId, x -> x));
-        var instanceRoleObjsMap = readCsceneInstanceRoles(csceneInstanceObjMap.keySet()
-                .toArray(new String[0])).stream().collect(
-                Collectors.groupingBy(CsceneInstanceRoleModel::getCscene));
+        var csceneInstanceObjMap = new HashMap<String,CsceneInstanceModel>();
+        for (CsceneInstanceModel x : readCsceneInstances()) {
+            if (csceneInstanceObjMap.put(x.getId(), x) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        var instanceRoleObjsMap = new HashMap<String, List<CsceneInstanceRoleModel>>();
+        for (CsceneInstanceRoleModel csceneInstanceRoleModel : readCsceneInstanceRoles(csceneInstanceObjMap.keySet()
+                .toArray(new String[0]))) {
+            instanceRoleObjsMap.computeIfAbsent(csceneInstanceRoleModel.getCscene(), k -> new ArrayList<>()).add(csceneInstanceRoleModel);
+        }
 
         List<CsceneInstanceBO> testScenes = new ArrayList<>();
         List<CsceneInstanceBO> appScenes = new ArrayList<>();
-        csceneInstanceObjMap.forEach((instanceId, csceneInstanceObj) -> {
+        for (Map.Entry<String,CsceneInstanceModel> entry : csceneInstanceObjMap.entrySet()) {
+            String instanceId = entry.getKey();
+            CsceneInstanceModel csceneInstanceObj = entry.getValue();
             var roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
-            var csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
+            CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
             var type = csceneInstanceObj.getType();
             if (type != null && type.equals(CsceneInstanceModel.Type.TEST)) {
                 testScenes.add(csceneInstanceHandler.toData());
             } else if (type != null && type.equals(CsceneInstanceModel.Type.APP)) {
                 appScenes.add(csceneInstanceHandler.toData());
             }
-        });
+        }
         getCscene().setTestScenes(testScenes);
         getCscene().setAppScenes(appScenes);
         return true;
@@ -327,10 +336,10 @@ public class CsceneHandler extends BaseCsceneHandler<
             var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
             if (elements != null && !elements.isEmpty()) {
                 CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
-                elements.values().forEach(e -> {
+                for (Map<String, Object> e : elements.values()) {
                     if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                         String image = e.get("image").toString();
-                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
+                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image});
                         if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
                             Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = serviceResult.getSource();
                             List<String> sceneNames = new ArrayList<>();
@@ -358,9 +367,9 @@ public class CsceneHandler extends BaseCsceneHandler<
                         }
                     }
 
-                    if (e.get("entity_usbs")!= null) {
+                    if (e.get("entity_usbs") != null) {
                         List<String> entityUsbUuids = new ArrayList<>();
-                        List<Map<String, Object>> entityUsbMap = (List<Map<String, Object>>)e.get("entity_usbs");
+                        List<Map<String, Object>> entityUsbMap = (List<Map<String, Object>>) e.get("entity_usbs");
                         for (Map<String, Object> tmp : entityUsbMap) {
                             entityUsbUuids.add(String.valueOf(tmp.get("uuid")));
                         }
@@ -379,7 +388,7 @@ public class CsceneHandler extends BaseCsceneHandler<
                             }
                         }
                     }
-                });
+                }
             }
         }
     }

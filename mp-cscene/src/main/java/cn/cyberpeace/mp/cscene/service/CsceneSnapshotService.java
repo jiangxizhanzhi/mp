@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -267,25 +266,29 @@ public class CsceneSnapshotService {
         if (CollectionUtils.isEmpty(csceneSnapshots)) {
             return;
         }
-        var snapshotIds = csceneSnapshots.stream().map(s -> s.getSnapshotId()).collect(Collectors.toList());
+        List<String> snapshotIds = new ArrayList<>();
+        for (CsceneSnapshotModel csceneSnapshot : csceneSnapshots) {
+            String snapshotId = csceneSnapshot.getSnapshotId();
+            snapshotIds.add(snapshotId);
+        }
         var snapshots = sceneSnapshotService.getElementSnapshots(snapshotIds).getSource();
         if (CollectionUtils.isNotEmpty(snapshots)) {
             Set<String> names = new HashSet<>();
             Set<String> sourceNames = new HashSet<>();
             Map<String, SceneElementSnapshotModel> name2Model = new HashMap<>();
-            snapshots.forEach(s -> {
-                names.add(s.getName());
-                sourceNames.add(s.getSourceName());
-                name2Model.put(s.getName(), s);
-            });
+            for (SceneElementSnapshotModel sceneElementSnapshotModel : snapshots) {
+                names.add(sceneElementSnapshotModel.getName());
+                sourceNames.add(sceneElementSnapshotModel.getSourceName());
+                name2Model.put(sceneElementSnapshotModel.getName(), sceneElementSnapshotModel);
+            }
             Queue<SceneElementSnapshotModel> queue = new LinkedList<>();
             Set<String> queueAdded = new HashSet<>();
-            snapshots.forEach(s -> {
+            for (SceneElementSnapshotModel s : snapshots) {
                 if (!sourceNames.contains(s.getName())) {
                     queue.add(s);
                     queueAdded.add(s.getId());
                 }
-            });
+            }
             int times = 0;
             while (!queue.isEmpty()) {
                 if (times > snapshots.size()) {

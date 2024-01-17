@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
@@ -28,11 +29,11 @@ public class SceneStatusUtil {
             zh = new HashMap<>();
             var optionService = (OptionService) BeanCommon.getBean("sysOptionServiceImpl");
             var optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
-            optionModels.forEach(optionModel -> {
+            for (OptionModel optionModel : optionModels) {
                 Integer status = Integer.parseInt(optionModel.getCode());
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
-            });
+            }
             // 添加删除中的场景实例状态
             en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "Deleting");
             zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "正在删除");

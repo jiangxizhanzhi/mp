@@ -134,7 +134,9 @@ public class CsceneAppConfig {
     public Set<Integer> getHasOwnRecordingSet() {
         String[] values = this.hasOwnRecordingSet.split(",");
         Set<Integer> set = new HashSet<>();
-        Arrays.stream(values).forEach(v -> set.add(Integer.parseInt(v)));
+        for (String v : values) {
+            set.add(Integer.parseInt(v));
+        }
         return set;
     }
 }

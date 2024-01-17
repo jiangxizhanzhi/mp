@@ -45,7 +45,7 @@ public class FlowClassificationDto {
     public static List<FlowClassificationDto> getDtoListFromModel(FlowClassificationFromJsonModel flowClassificationFromJsonModel) {
         Locale locale = LocaleContextHolder.getLocale();
         List<FlowClassificationDto> classificationDtoList = new ArrayList<>();
-        flowClassificationFromJsonModel.getClassifications().forEach(classification -> {
+        for (FlowClassificationFromJsonModel.FlowType classification : flowClassificationFromJsonModel.getClassifications()) {
             String attackType = getValueByLocal(locale, classification.getType_en(), classification.getType_cn());
 
             FlowClassificationDto flowClassificationDto = new FlowClassificationDto().setAttackType(attackType);
@@ -58,7 +58,7 @@ public class FlowClassificationDto {
             }).collect(Collectors.toList());
             flowClassificationDto.setFlowEvents(flowEvents);
             classificationDtoList.add(flowClassificationDto);
-        });
+        }
         return classificationDtoList;
     }
 

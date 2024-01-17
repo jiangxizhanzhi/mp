@@ -124,13 +124,28 @@ public class CsceneFlowService {
         }
 
         // 过滤未添加流量的节点
-        request.setDetails(request.getDetails().stream().filter(detail -> CollectionUtils.isNotEmpty(detail.getFlowInfos())).collect(Collectors.toList()));
+        List<AddFlowTaskTaskDetail> list = new ArrayList<>();
+        for (AddFlowTaskTaskDetail addFlowTaskTaskDetail : request.getDetails()) {
+            if (CollectionUtils.isNotEmpty(addFlowTaskTaskDetail.getFlowInfos())) {
+                list.add(addFlowTaskTaskDetail);
+            }
+        }
+        request.setDetails(list);
 
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (AddFlowTaskTaskDetail detail : request.getDetails()) {
             HumanCondition condition = new HumanCondition();
-            List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
-            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+            List<String> flowIds = new ArrayList<>();
+            for (AddFlowTaskFlowInfo obj : detail.getFlowInfos()) {
+                String flowId = obj.getFlowId();
+                flowIds.add(flowId);
+            }
+            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = new HashMap<>();
+            for (AddFlowTaskFlowInfo addFlowTaskFlowInfo : detail.getFlowInfos()) {
+                if (addFlowTaskFlowInfoMap.put(addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
             condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
             List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
             //保存流量任务信息
@@ -275,7 +290,11 @@ public class CsceneFlowService {
         List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.pageBySceneId(request);
         //统计实时速率
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
-            List<String> ids = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getId).collect(Collectors.toList());
+            List<String> ids = new ArrayList<>();
+            for (FlowTaskPageResponse flowTaskPageResponse : flowTaskPageResponseList) {
+                String id = flowTaskPageResponse.getId();
+                ids.add(id);
+            }
             List<FlowStatisticalCondition> conditions = this.getRealTimeCondition();
             Map<String, List<FlowRealTimeRate>> tealTimeRateMap = flowTaskRecordService.realTimeRate(ids, conditions);
             for (FlowTaskPageResponse temp : flowTaskPageResponseList) {
@@ -284,16 +303,27 @@ public class CsceneFlowService {
         }
 
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
-            String[] nodeIds = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getNodeId).distinct().toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (FlowTaskPageResponse flowTaskPageResponse : flowTaskPageResponseList) {
+                String nodeId = flowTaskPageResponse.getNodeId();
+                if (uniqueValues.add(nodeId)) {
+                    list.add(nodeId);
+                }
+            }
+            String[] nodeIds = list.toArray(new String[0]);
             List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
             if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
-                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
-                flowTaskPageResponseList.forEach(node -> {
+                Map<String, String> nodeIdAndNameMap = new HashMap<>();
+                for (SceneElementModel sceneElementModel : sceneElementModelList) {
+                    nodeIdAndNameMap.putIfAbsent(sceneElementModel.getNodeId(), sceneElementModel.getName());
+                }
+                for (FlowTaskPageResponse node : flowTaskPageResponseList) {
                     String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
                     if (StringUtils.isNotBlank(realNodeName)) {
                         node.setNodeName(realNodeName);
                     }
-                });
+                }
             }
         }
 
@@ -317,7 +347,12 @@ public class CsceneFlowService {
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByCondition(request);
         List<String> taskIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
-            taskIds = flowTaskTaskModels.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModels) {
+                String id = flowTaskTaskModel.getId();
+                list.add(id);
+            }
+            taskIds = list;
         }
 
         return ResultCommon.success(taskIds);
@@ -514,20 +549,38 @@ public class CsceneFlowService {
         List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
 
         if (CollectionUtils.isNotEmpty(nodeList)) {
-            String[] nodeIds = nodeList.stream().map(FlowTaskNode::getNodeId).distinct().toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (FlowTaskNode flowTaskNode : nodeList) {
+                String nodeId = flowTaskNode.getNodeId();
+                if (uniqueValues.add(nodeId)) {
+                    list.add(nodeId);
+                }
+            }
+            String[] nodeIds = list.toArray(new String[0]);
             List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
             if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
-                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
-                nodeList.forEach(node -> {
+                Map<String, String> nodeIdAndNameMap = new HashMap<>();
+                for (SceneElementModel sceneElementModel : sceneElementModelList) {
+                    nodeIdAndNameMap.putIfAbsent(sceneElementModel.getNodeId(), sceneElementModel.getName());
+                }
+                for (FlowTaskNode node : nodeList) {
                     String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
                     if (StringUtils.isNotBlank(realNodeName)) {
                         node.setNodeName(realNodeName);
                     }
-                });
+                }
             }
         }
 
-        nodeList = nodeList.stream().distinct().collect(Collectors.toList());
+        List<FlowTaskNode> list = new ArrayList<>();
+        Set<FlowTaskNode> uniqueValues = new HashSet<>();
+        for (FlowTaskNode flowTaskNode : nodeList) {
+            if (uniqueValues.add(flowTaskNode)) {
+                list.add(flowTaskNode);
+            }
+        }
+        nodeList = list;
 
         log.info("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
         return nodeList;
@@ -556,13 +609,21 @@ public class CsceneFlowService {
         List<String> portIds = new ArrayList<>();
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, SceneElementPortBO> portMap = sceneHandler.getElementPortMap();
-        portMap.forEach((key, value) -> {
-            if (cloudPluginHandler.getPort(value.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(value.getId()).getResourceId())) {
-                portIds.add(cloudPluginHandler.getPort(value.getId()).getResourceId());
+        for (Map.Entry<String, SceneElementPortBO> entry : portMap.entrySet()) {
+            String key = entry.getKey();
+            SceneElementPortBO v = entry.getValue();
+            if (cloudPluginHandler.getPort(v.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(v.getId()).getResourceId())) {
+                portIds.add(cloudPluginHandler.getPort(v.getId()).getResourceId());
             }
-        });
+        }
         if (CollectionUtils.isNotEmpty(portIds) && totalSecond > 0) {
-            List<String> newPortIds = portIds.stream().distinct().collect(Collectors.toList());
+            List<String> newPortIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String portId : portIds) {
+                if (uniqueValues.add(portId)) {
+                    newPortIds.add(portId);
+                }
+            }
             NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond);
             if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
                 Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size() - 1) * networkFlowRateResult.getTimeInt();
@@ -639,10 +700,13 @@ public class CsceneFlowService {
             if (CollectionUtils.isNotEmpty(findNet.getToPorts())) {
                 ports.addAll(findNet.getToPorts());
             }
-            var ips = ports.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getIp()))
-                    .map(p -> p.getIp())
-                    .collect(Collectors.toList());
+            List<String> ips = new ArrayList<>();
+            for (SceneElementPortBO p : ports) {
+                if (StringUtils.isNotEmpty(p.getIp())) {
+                    String ip = p.getIp();
+                    ips.add(ip);
+                }
+            }
             var allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
             if (CollectionUtils.isNotEmpty(allocateIp)) {
                 return allocateIp.get(0);

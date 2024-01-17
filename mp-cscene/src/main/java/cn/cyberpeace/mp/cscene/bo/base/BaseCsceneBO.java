@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,12 @@ public abstract class BaseCsceneBO<
             Class<P> pClass, Class<R9> roleClass, SerializableFunction<T>... ignoreFieldGetters) {
         var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (roles != null) {
-            pObj.setRoles(roles.stream().map(role -> role.exportIgnore2(roleClass)).collect(Collectors.toList()));
+            List<R9> list = new ArrayList<>();
+            for (R role : roles) {
+                R9 r9 = role.exportIgnore2(roleClass);
+                list.add(r9);
+            }
+            pObj.setRoles(list);
         }
         return pObj;
     }

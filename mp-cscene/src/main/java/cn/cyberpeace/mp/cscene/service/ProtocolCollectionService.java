@@ -131,11 +131,11 @@ public class ProtocolCollectionService {
      * @return void
      */
     private void sortTree(List<MibFileInfo> mibs) {
-        mibs.forEach(mib -> {
+        for (MibFileInfo mib : mibs) {
             if (CollectionUtils.isNotEmpty(mib.getChildren())) {
                 sortTree(mib.getChildren());
             }
-        });
+        }
         mibs.stream().sorted(Comparator.comparing(MibFileInfo::getName));
     }
 

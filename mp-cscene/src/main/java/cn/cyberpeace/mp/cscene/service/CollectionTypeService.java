@@ -51,7 +51,9 @@ public class CollectionTypeService {
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
-        types.forEach(type -> processCollectionType(type));
+        for (CollectionType type : types) {
+            processCollectionType(type);
+        }
         return types;
     }
 
@@ -65,7 +67,13 @@ public class CollectionTypeService {
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = scenePluginCollectionSceneService.getRuleId2FileByCodes(appRequest.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
-            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2File.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByCatagories.addAll(ruleIds);
         }
 
@@ -89,7 +97,13 @@ public class CollectionTypeService {
         // 根据ruleIdsByCatagories筛选一道
         List<String> filteredRuleIds = null;
         if (CollectionUtil.isNotEmpty(ruleIdsByCatagories)) {
-            filteredRuleIds = ruleIdsByAgentName.stream().filter(rid -> ruleIdsByCatagories.contains(rid)).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (String rid : ruleIdsByAgentName) {
+                if (ruleIdsByCatagories.contains(rid)) {
+                    list.add(rid);
+                }
+            }
+            filteredRuleIds = list;
         } else {
             filteredRuleIds = ruleIdsByAgentName;
         }
@@ -253,11 +267,11 @@ public class CollectionTypeService {
         if (CollectionUtils.isEmpty(type.getChildren())) {
             return;
         }
-        type.getChildren().forEach(t -> {
+        for (CollectionType t : type.getChildren()) {
             String key = String.format(SituationBase18nCode.COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX, t.getCode());
             String childrenName = MessageCommonUtil.convertMessage(key);
             t.setName(childrenName);
             processCollectionTypeChildren(t);
-        });
+        }
     }
 }
