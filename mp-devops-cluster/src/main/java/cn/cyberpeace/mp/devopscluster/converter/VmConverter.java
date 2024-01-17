@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,14 +37,20 @@ public class VmConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto, ignoreFields);
         CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
-        List<InstanceBO> list = model.getList().stream().map(instanceModel ->
-                InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
-                        .id(instanceModel.getId())
-                        .runningTime(instanceModel.getRunningTime())
-                        .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
-                                .collect(Collectors.toList()))
-                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
-        ).collect(Collectors.toList());
+        List<InstanceBO> list = new ArrayList<>();
+        for (InstanceModel instanceModel : model.getList()) {
+            List<String> result = new ArrayList<>();
+            for (InstanceModel.Address address : instanceModel.getAddresses()) {
+                String ip = address.getIp();
+                result.add(ip);
+            }
+            InstanceBO build = InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
+                    .id(instanceModel.getId())
+                    .runningTime(instanceModel.getRunningTime())
+                    .addressList(result)
+                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build();
+            list.add(build);
+        }
         BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());

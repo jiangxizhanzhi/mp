@@ -55,20 +55,25 @@ public class SnapshotConverter {
      */
     public BasePageBO<SnapshotConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
-        List<SnapshotConvertModel> list = model.getList().stream().map(item -> {
-                    var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
-                            item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
-                    result.setImageName(item.getImageName());
-                    if (item.getExtInfo() != null) {
-                        result.setSceneId(item.getExtInfo().getSceneId());
-                    }
-                    return result;
-                })
-                .collect(Collectors.toList());
+        List<SnapshotConvertModel> list = new ArrayList<>();
+        for (Snapshot item : model.getList()) {
+            SnapshotConvertModel snapshotConvertModel = getSnapshotConvertModel(item);
+            list.add(snapshotConvertModel);
+        }
         BasePageBO<SnapshotConvertModel> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setSuccess(model.isSuccess());
         return convertModel;
+    }
+
+    private static SnapshotConvertModel getSnapshotConvertModel(Snapshot item) {
+        var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
+                item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
+        result.setImageName(item.getImageName());
+        if (item.getExtInfo() != null) {
+            result.setSceneId(item.getExtInfo().getSceneId());
+        }
+        return result;
     }
 
     /**
@@ -93,11 +98,13 @@ public class SnapshotConverter {
             convertModel.setItems(resultList);
             return convertModel;
         }
-        List<SnapshotConvertModel> list = model.getSnapshots().stream().map(item ->
-                new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
-                        item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
-                        TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
-                .collect(Collectors.toList());
+        List<SnapshotConvertModel> list = new ArrayList<>();
+        for (Snapshot item : model.getSnapshots()) {
+            SnapshotConvertModel snapshotConvertModel1 = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
+                    item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
+                    TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
+            list.add(snapshotConvertModel1);
+        }
         resultList.addAll(list);
         resultList.add(0,snapshotConvertModel);
         convertModel.setItems(resultList);
@@ -150,13 +157,18 @@ public class SnapshotConverter {
         String sceneName = StringUtils.EMPTY;
 
         if (MapUtils.isNotEmpty(referStateMap)) {
-            referStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneStat>> entry : referStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneStat> v = entry.getValue();
+                List<String> names = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        names.add(name);
+                    }
+                }
                 sceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(sceneNames)) {
                 List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
@@ -168,13 +180,18 @@ public class SnapshotConverter {
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)) {
-            useStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
-                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneInstanceStat> v = entry.getValue();
+                List<String> names = new ArrayList<>();
+                for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
+                        String name = deviceReferCsceneInstanceStat.getName();
+                        names.add(name);
+                    }
+                }
                 sceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(sceneNames)) {
                 List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");

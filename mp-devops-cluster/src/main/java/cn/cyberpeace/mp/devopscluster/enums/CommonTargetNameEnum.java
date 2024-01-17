@@ -29,9 +29,9 @@ public enum CommonTargetNameEnum {
     public static final Map<String, CommonTargetNameEnum> map = new HashMap<>();
 
     static {
-        Arrays.stream(CommonTargetNameEnum.values()).forEach(
-                t -> map.put(t.getState(), t)
-        );
+        for (CommonTargetNameEnum t : CommonTargetNameEnum.values()) {
+            map.put(t.getState(), t);
+        }
     }
 
     private String state;

@@ -75,11 +75,16 @@ public class TargetConverter{
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
-        deviceTargetPOS.stream().forEach(d -> {
-            supportExports.put(d.getUuid(), d);
-        });
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            supportExports.put(targetPO.getUuid(), targetPO);
+        }
 
-        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = new ArrayList<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            String id = deviceTargetPO.getId();
+            Integer parseInt = Integer.parseInt(id);
+            ids.add(parseInt);
+        }
 
         BasePageBO<Device> sceneConvertModel = new BasePageBO<>();
         sceneConvertModel.setTotal(targetPageModel.getTotal());
@@ -112,7 +117,12 @@ public class TargetConverter{
      */
     public List<String> findByImagePageDTO(ImagePageDTO dto){
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
-        return targetPageModel.getList().stream().map(DeviceTargetPO::getName).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (DeviceTargetPO deviceTargetPO : targetPageModel.getList()) {
+            String name = deviceTargetPO.getName();
+            list.add(name);
+        }
+        return list;
     }
 
     /**
@@ -138,12 +148,17 @@ public class TargetConverter{
     public void validTargetCanDelete(List<String> uuids) {
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
-        deviceTargetPOS.forEach(deviceTargetPO -> {
-            if (Boolean.TRUE.equals(deviceTargetPO.getIsInit())) {
-                throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(deviceTargetPO.getName()));
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            if (Boolean.TRUE.equals(targetPO.getIsInit())) {
+                throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(targetPO.getName()));
             }
-        });
-        String[] imageUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).toArray(String[]::new);
+        }
+        List<String> list = new ArrayList<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            String deviceTargetPOUuid = deviceTargetPO.getUuid();
+            list.add(deviceTargetPOUuid);
+        }
+        String[] imageUuids = list.toArray(new String[0]);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByImageUuid(uuids.toArray(new String[0]));
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
@@ -152,13 +167,18 @@ public class TargetConverter{
         String sceneName = StringUtils.EMPTY;
 
         if (MapUtils.isNotEmpty(referStateMap)) {
-            referStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneStat>> entry : referStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneStat> v = entry.getValue();
+                var names = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        names.add(name);
+                    }
+                }
                 csceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(csceneNames)) {
                 List<String> names = csceneNames.subList(0, Math.min(csceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
@@ -170,13 +190,18 @@ public class TargetConverter{
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)) {
-            useStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
-                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneInstanceStat> v = entry.getValue();
+                var names = new ArrayList<>();
+                for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
+                        String name = deviceReferCsceneInstanceStat.getName();
+                        names.add(name);
+                    }
+                }
                 csceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(csceneNames)) {
                 List<String> names = csceneNames.subList(0, Math.min(csceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
@@ -187,10 +212,13 @@ public class TargetConverter{
             ServiceResult<List<DeviceReferCsceneStat>> referStateServiceUsbResult = csceneSpecialService.statEntityUsbReferCscenes(uuid);
             List<DeviceReferCsceneStat> referStateUsbList = referStateServiceUsbResult.getSource();
             if (CollectionUtils.isNotEmpty(referStateUsbList)) {
-                List<String> sceneUsbNames = referStateUsbList.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+                List<String> sceneUsbNames = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : referStateUsbList) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        sceneUsbNames.add(name);
+                    }
+                }
                 String sceneUsbName = StringUtils.join(sceneUsbNames, ",");
                 throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneUsbName));
             }
@@ -200,7 +228,12 @@ public class TargetConverter{
     public void validTargetCanMerge(List<String> uuids) {
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
-        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            String deviceTargetPOName = deviceTargetPO.getName();
+            list.add(deviceTargetPOName);
+        }
+        String[] imageNames = list.toArray(new String[0]);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
@@ -209,13 +242,18 @@ public class TargetConverter{
         String sceneName = StringUtils.EMPTY;
 
         if (MapUtils.isNotEmpty(referStateMap)) {
-            referStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneStat>> entry : referStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneStat> v = entry.getValue();
+                var names = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        names.add(name);
+                    }
+                }
                 sceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(sceneNames)) {
                 List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
@@ -227,13 +265,18 @@ public class TargetConverter{
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)) {
-            useStateMap.forEach((k, v) -> {
-                var names = v.stream()
-                        .filter(deviceReferCsceneInstanceStat -> StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName()))
-                        .map(deviceReferCsceneInstanceStat -> deviceReferCsceneInstanceStat.getName())
-                        .collect(Collectors.toList());
+            for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
+                String k = entry.getKey();
+                List<DeviceReferCsceneInstanceStat> v = entry.getValue();
+                var names = new ArrayList<>();
+                for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
+                        String name = deviceReferCsceneInstanceStat.getName();
+                        names.add(name);
+                    }
+                }
                 sceneNames.addAll(names);
-            });
+            }
             if (CollectionUtils.isNotEmpty(sceneNames)) {
                 List<String> names = sceneNames.subList(0, Math.min(sceneNames.size(), 3));
                 sceneName = StringUtils.join(names, ",");
@@ -253,7 +296,11 @@ public class TargetConverter{
         if (CollectionUtils.isEmpty(deviceIds)){
             return new DeviceAsyncBO();
         }
-        List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
+        List<String> ids = new ArrayList<>();
+        for (Integer integer : deviceIds) {
+            String s = String.valueOf(integer);
+            ids.add(s);
+        }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByIds(ids);
         List<Integer> notExistedList;
         List<Integer> existedList;
@@ -261,9 +308,25 @@ public class TargetConverter{
             notExistedList = deviceIds;
             existedList = Lists.newArrayList();
         }else{
-            List<Integer> targetIds = deviceTargetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
-            notExistedList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
-            existedList = deviceIds.stream().filter(v -> targetIds.contains(v)).collect(Collectors.toList());
+            List<Integer> targetIds = new ArrayList<>();
+            for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+                Integer parseInt = Integer.parseInt(deviceTargetPO.getId());
+                targetIds.add(parseInt);
+            }
+            List<Integer> result = new ArrayList<>();
+            for (Integer deviceId : deviceIds) {
+                if (!targetIds.contains(deviceId)) {
+                    result.add(deviceId);
+                }
+            }
+            notExistedList = result;
+            List<Integer> list = new ArrayList<>();
+            for (Integer v : deviceIds) {
+                if (targetIds.contains(v)) {
+                    list.add(v);
+                }
+            }
+            existedList = list;
         }
         bo.setNotExistedList(notExistedList);
         bo.setExistedList(existedList);

@@ -30,9 +30,9 @@ public enum ImageTypeEnum {
     private static Map<String, ImageTypeEnum> map = new ConcurrentHashMap<>();
 
     static {
-        Arrays.stream(ImageTypeEnum.values()).forEach(
-                t -> map.put(t.name().toLowerCase(Locale.ROOT), t)
-        );
+        for (ImageTypeEnum t : ImageTypeEnum.values()) {
+            map.put(t.name().toLowerCase(Locale.ROOT), t);
+        }
     }
 
     @JsonCreator

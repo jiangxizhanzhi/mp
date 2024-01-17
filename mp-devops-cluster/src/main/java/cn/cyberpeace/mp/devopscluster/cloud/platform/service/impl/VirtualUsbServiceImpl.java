@@ -34,8 +34,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
@@ -201,7 +203,9 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             log.error("VirtualUsbServiceImpl.upload error",e);
         } finally {
             if (CollectionUtils.isNotEmpty(fileList)) {
-                fileList.forEach(File::delete);
+                for (File file1 : fileList) {
+                    file1.delete();
+                }
             }
         }
         log.info("VirtualUsbServiceImpl.upload end.");
@@ -268,21 +272,34 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             List<DeviceReferCsceneStat> usedStateList = usedStateServiceResult.getSource();
             List<String> names = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(referStateList)) {
-                List<String> sceneNames = referStateList.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+                List<String> sceneNames = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : referStateList) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        sceneNames.add(name);
+                    }
+                }
                 names.addAll(sceneNames);
             }
             if (CollectionUtils.isNotEmpty(usedStateList)) {
-                List<String> sceneNames = usedStateList.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+                List<String> sceneNames = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : usedStateList) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        sceneNames.add(name);
+                    }
+                }
                 names.addAll(sceneNames);
             }
             if (CollectionUtils.isNotEmpty(names)) {
-                names = names.stream().distinct().collect(Collectors.toList());
+                List<String> list = new ArrayList<>();
+                Set<String> uniqueValues = new HashSet<>();
+                for (String name : names) {
+                    if (uniqueValues.add(name)) {
+                        list.add(name);
+                    }
+                }
+                names = list;
                 String sceneName = StringUtils.join(names, ",");
                 throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneName));
             }

@@ -146,7 +146,11 @@ public class VmController {
      */
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
-        List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
+        List<String> instanceNames = new ArrayList<>();
+        for (InstanceBO instance : instances) {
+            String name = instance.getName();
+            instanceNames.add(name);
+        }
         List<UserBo> userBoList = new ArrayList<>();
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
@@ -156,7 +160,11 @@ public class VmController {
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
             if (CollectionUtils.isNotEmpty(values)) {
-                List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
+                List<String> userIdList = new ArrayList<>();
+                for (CsceneNodeInfoBO value : values) {
+                    String userId = value.getUserId();
+                    userIdList.add(userId);
+                }
                 if (CollectionUtils.isNotEmpty(userIdList)) {
                     var list = userService.listByUserIds(userIdList.toArray(new String[]{}));
                     if (CollectionUtils.isNotEmpty(list)) {
@@ -167,59 +175,87 @@ public class VmController {
         }
         // 镜像管理实例的创建用户
         if (CollectionUtils.isNotEmpty(devopsResult)) {
-            List<String> userIdList = devopsResult.stream()
-                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
-                    .map(DeviceTargetPO::getInstanceCreateUser)
-                    .collect(Collectors.toList());
-            uuid2UserId = devopsResult.stream()
-                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
-                    .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));
+            List<String> userIdList = new ArrayList<>();
+            for (DeviceTargetPO targetPO : devopsResult) {
+                if (StringUtils.isNotEmpty(targetPO.getInstanceCreateUser())) {
+                    String instanceCreateUser = targetPO.getInstanceCreateUser();
+                    userIdList.add(instanceCreateUser);
+                }
+            }
+            Map<String, String> map = new HashMap<>();
+            for (DeviceTargetPO deviceTargetPO : devopsResult) {
+                if (StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser())) {
+                    if (map.put(deviceTargetPO.getUuid(), deviceTargetPO.getInstanceCreateUser()) != null) {
+                        throw new IllegalStateException("Duplicate key");
+                    }
+                }
+            }
+            uuid2UserId = map;
             if (CollectionUtils.isNotEmpty(userIdList)) {
                 userBoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
             }
         }
         List<UserBo> tmpUserBoList = userBoList;
         Map<String, String> uuid2User = uuid2UserId;
-        return instances.stream().map(instanceModel -> {
-            CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
-            if (Objects.nonNull(source.get(instanceModel.getName()))) {
-                csceneNodeInfoBO = source.get(instanceModel.getName());
-            }
-            String userName = "";
-            String userRealname = "";
-            String userId = csceneNodeInfoBO.getUserId();
-            if (StringUtils.isNotBlank(userId)) {
-                Optional<UserBo> optional =
-                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
-                if (optional.isPresent()) {
-                    userName = optional.get().getUsername();
-                    userRealname = optional.get().getName();
-                }
-            } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
-                String createUser = uuid2User.get(instanceModel.getName());
-                Optional<UserBo> optional =
-                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
-                if (optional.isPresent()) {
-                    userName = optional.get().getUsername();
-                    userRealname = optional.get().getName();
-                }
-            }
+        List<InstancePageVO> list = new ArrayList<>();
+        for (InstanceBO instanceModel : instances) {
+            InstancePageVO instancePageVO = getInstancePageVO(source, tmpUserBoList, uuid2User, instanceModel);
+            list.add(instancePageVO);
+        }
+        return list;
+    }
 
-            return InstancePageVO.builder().name(instanceModel.getName())
-                    .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
-                    .id(instanceModel.getId())
-                    .node(instanceModel.getNode())
-                    .addressList(instanceModel.getAddressList())
-                    .userName(userName)
-                    .userRealname(userRealname)
-                    .referenceType(csceneNodeInfoBO.getReferenceType())
-                    .event(csceneNodeInfoBO.getEvent())
-                    .eventStatus(csceneNodeInfoBO.getEventStatus())
-                    .sceneStatus(csceneNodeInfoBO.getSceneStatus())
-                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
-                    .runningTime(instanceModel.getRunningTime())
-                    .processMessage(csceneNodeInfoBO.getProcessMessage())
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
-        }).collect(Collectors.toList());
+    private static InstancePageVO getInstancePageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, Map<String, String> uuid2User, InstanceBO instanceModel) {
+        CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
+        if (Objects.nonNull(source.get(instanceModel.getName()))) {
+            csceneNodeInfoBO = source.get(instanceModel.getName());
+        }
+        String userName = "";
+        String userRealname = "";
+        String userId = csceneNodeInfoBO.getUserId();
+        if (StringUtils.isNotBlank(userId)) {
+            Optional<UserBo> optional =
+                    Optional.empty();
+            for (UserBo userDto : tmpUserBoList) {
+                if (userDto.getId().equals(userId)) {
+                    optional = Optional.of(userDto);
+                    break;
+                }
+            }
+            if (optional.isPresent()) {
+                userName = optional.get().getUsername();
+                userRealname = optional.get().getName();
+            }
+        } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
+            String createUser = uuid2User.get(instanceModel.getName());
+            Optional<UserBo> optional =
+                    Optional.empty();
+            for (UserBo userDto : tmpUserBoList) {
+                if (userDto.getId().equals(createUser)) {
+                    optional = Optional.of(userDto);
+                    break;
+                }
+            }
+            if (optional.isPresent()) {
+                userName = optional.get().getUsername();
+                userRealname = optional.get().getName();
+            }
+        }
+
+        return InstancePageVO.builder().name(instanceModel.getName())
+                .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                .id(instanceModel.getId())
+                .node(instanceModel.getNode())
+                .addressList(instanceModel.getAddressList())
+                .userName(userName)
+                .userRealname(userRealname)
+                .referenceType(csceneNodeInfoBO.getReferenceType())
+                .event(csceneNodeInfoBO.getEvent())
+                .eventStatus(csceneNodeInfoBO.getEventStatus())
+                .sceneStatus(csceneNodeInfoBO.getSceneStatus())
+                .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
+                .runningTime(instanceModel.getRunningTime())
+                .processMessage(csceneNodeInfoBO.getProcessMessage())
+                .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
     }
 }

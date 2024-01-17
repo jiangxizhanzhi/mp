@@ -51,26 +51,26 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                 List<SystemAlarmModel> addAlarmList = new ArrayList<>();
                 List<SystemAlarmModel> updateAlarmList = new ArrayList<>();
                 List<SystemAlarmModel> delAlarmList = new ArrayList<>();
-                systemAlarmModels.forEach(systemAlarmModel -> {
+                for (SystemAlarmModel alarmModel : systemAlarmModels) {
                     boolean isExist = false;
                     for (SystemAlarmModel enabledAlarm : enabledAlarms) {
-                        if (systemAlarmModel.getServername().equals(enabledAlarm.getServername())
-                                && Objects.equals(systemAlarmModel.getAlarmType(), enabledAlarm.getAlarmType())) {
+                        if (alarmModel.getServername().equals(enabledAlarm.getServername())
+                                && Objects.equals(alarmModel.getAlarmType(), enabledAlarm.getAlarmType())) {
                             // 已存在告警，更新告警时间
                             Duration duration = Duration.between(enabledAlarm.getCreateTime(), LocalDateTime.now());
                             int runningTime = Long.valueOf(duration.toMillis() / 1000).intValue();
                             enabledAlarm.setRunningTime(runningTime);
                             enabledAlarm.setUpdateTime(LocalDateTime.now());
-                            enabledAlarm.setAlarmMsg(systemAlarmModel.getAlarmMsg());
+                            enabledAlarm.setAlarmMsg(alarmModel.getAlarmMsg());
                             updateAlarmList.add(enabledAlarm);
                             isExist = true;
                         }
                     }
 
                     if (!isExist) {
-                        addAlarmList.add(systemAlarmModel);
+                        addAlarmList.add(alarmModel);
                     }
-                });
+                }
 
                 // 本次更新告警
                 if (CollectionUtils.isNotEmpty(updateAlarmList)) {
@@ -82,7 +82,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                     this.getModelMapper().bulkCreate(addAlarmList);
                 }
 
-                enabledAlarms.forEach(enabledAlarm -> {
+                for (SystemAlarmModel enabledAlarm : enabledAlarms) {
                     boolean isExist = false;
                     for (SystemAlarmModel systemAlarmModel : systemAlarmModels) {
                         if (systemAlarmModel.getServername().equals(enabledAlarm.getServername())
@@ -96,7 +96,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                         enabledAlarm.setUpdateTime(LocalDateTime.now());
                         delAlarmList.add(enabledAlarm);
                     }
-                });
+                }
                 if (CollectionUtils.isNotEmpty(delAlarmList)) {
                     this.getModelMapper().bulkUpdate(delAlarmList);
                 }
@@ -107,10 +107,10 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
 
         } else {
             // 没有新告警信息，之前告警都设置为失效状态
-            enabledAlarms.forEach(enabledAlarm -> {
+            for (SystemAlarmModel enabledAlarm : enabledAlarms) {
                 enabledAlarm.setAlarmStatus(AlarmStatusEnum.DISABLED.toValue());
                 enabledAlarm.setUpdateTime(LocalDateTime.now());
-            });
+            }
             this.getModelMapper().bulkUpdate(enabledAlarms);
         }
     }
@@ -165,7 +165,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                 .groupBy(SystemAlarmModel::getAlarmType);
         List<Map<String, Object>> resultMaps = getModelMapper().originList(humanCondition);
         AlarmDistributionVo distributionVo = new AlarmDistributionVo();
-        resultMaps.forEach(map -> {
+        for (Map<String, Object> map : resultMaps) {
             Integer alarmType = (Integer) map.get(SystemAlarmModel.QUERY_FIELD_ALARM_TYPE);
             Long count = (Long) map.getOrDefault(SystemAlarmModel.QUERY_FIELD_CNT, 0);
             switch (alarmType) {
@@ -179,7 +179,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                     distributionVo.setServerAlarmCount(count);
                     break;
             }
-        });
+        }
         return new ServiceResult<>(distributionVo).asResult();
     }
 }

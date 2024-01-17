@@ -89,7 +89,13 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         LocalDate date = startDate.plusDays(1);
         while (!date.isAfter(nowDate)) {
             LocalDate finalDate = date;
-            Optional<AlarmStatisticsVO> optional = voList.stream().filter(vo -> vo.getAlarmDate().isEqual(finalDate)).findFirst();
+            Optional<AlarmStatisticsVO> optional = Optional.empty();
+            for (AlarmStatisticsVO alarmStatisticsVO : voList) {
+                if (alarmStatisticsVO.getAlarmDate().isEqual(finalDate)) {
+                    optional = Optional.of(alarmStatisticsVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {
@@ -217,7 +223,13 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();
         while (!endTime.isBefore(startTime)) {
             String calculatedTimeBucket = dtf.format(endTime);
-            Optional<AlarmStatisticsTrendVO> optional = trendVOList.stream().filter(vo -> Objects.equals(vo.getTimeBucket(), calculatedTimeBucket)).findFirst();
+            Optional<AlarmStatisticsTrendVO> optional = Optional.empty();
+            for (AlarmStatisticsTrendVO alarmStatisticsTrendVO : trendVOList) {
+                if (Objects.equals(alarmStatisticsTrendVO.getTimeBucket(), calculatedTimeBucket)) {
+                    optional = Optional.of(alarmStatisticsTrendVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {

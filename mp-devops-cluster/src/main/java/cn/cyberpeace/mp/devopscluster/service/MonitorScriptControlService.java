@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -175,10 +176,18 @@ public class MonitorScriptControlService {
             return;
         }
 
-        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getRemoteFile));
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel mapping : mappings) {
+            if (nameFileMap.put(mapping.getName(), mapping.getRemoteFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         List<CpNodeMonitorScriptConfigModel> configedNodeList = listAll();
-        List<String> hostNameList = hypervisorBOs.stream().map(HypervisorBO::getName).collect(Collectors.toList());
+        List<String> hostNameList = new ArrayList<>();
+        for (HypervisorBO hypervisorBO : hypervisorBOs) {
+            String name = hypervisorBO.getName();
+            hostNameList.add(name);
+        }
 
         List<String> toInstallList = new ArrayList<>();
         // 判断节点是否需要安装（重装）脚本，比如增加了计算节点，修改了节点hostName，再比如yaml配置有变化（interval，scriptUrl等）
@@ -186,8 +195,17 @@ public class MonitorScriptControlService {
             toInstallList = hostNameList;
         } else {
             // 本次新增或者节点名称修改了的节点
-            List<String> configedNodeNames = configedNodeList.stream().map(CpNodeMonitorScriptConfigModel::getAgentName).collect(Collectors.toList());
-            List<String> newAddedNodes = hostNameList.stream().filter(host -> !configedNodeNames.contains(host)).collect(Collectors.toList());
+            List<String> configedNodeNames = new ArrayList<>();
+            for (CpNodeMonitorScriptConfigModel cpNodeMonitorScriptConfigModel : configedNodeList) {
+                String agentName = cpNodeMonitorScriptConfigModel.getAgentName();
+                configedNodeNames.add(agentName);
+            }
+            List<String> newAddedNodes = new ArrayList<>();
+            for (String host : hostNameList) {
+                if (!configedNodeNames.contains(host)) {
+                    newAddedNodes.add(host);
+                }
+            }
             log.info("newAddedNodes:{}", newAddedNodes);
             toInstallList.addAll(newAddedNodes);
 
@@ -209,8 +227,7 @@ public class MonitorScriptControlService {
         if (CollectionUtils.isNotEmpty(toInstallList)) {
             log.info("toInstallList:{}", toInstallList);
             // 发送安装指令
-            toInstallList.forEach(hostName -> {
-                // 未安装探针的节点，或者探针不是active的节点不发送指令
+            for (String hostName : toInstallList) {// 未安装探针的节点，或者探针不是active的节点不发送指令
                 AgentRequest agentRequest = new AgentRequest();
                 agentRequest.setName(hostName);
                 agentRequest.setStatus("active");
@@ -221,7 +238,7 @@ public class MonitorScriptControlService {
                 } else {
                     log.info("install host:{} not found active wazuh agent!", hostName);
                 }
-            });
+            }
         }
 
         // 给所有不在此次安装之列的服务发送status命令
@@ -235,10 +252,13 @@ public class MonitorScriptControlService {
 
     private List<String> getTryInstallAgainNodes(List<CpNodeMonitorScriptConfigModel> configedNodeList, Set<String> toInstallListMap) {
         // 15分钟内的可能是装失败的 尝试再次重装
-        List<String> tryInstallAgainNodes = configedNodeList.stream()
-                .filter(n -> LocalDateTime.now().isBefore(n.getCreateTime().plusMinutes(15)))
-                .map(n -> n.getAgentName())
-                .collect(Collectors.toList());
+        List<String> tryInstallAgainNodes = new ArrayList<>();
+        for (CpNodeMonitorScriptConfigModel n : configedNodeList) {
+            if (LocalDateTime.now().isBefore(n.getCreateTime().plusMinutes(15))) {
+                String agentName = n.getAgentName();
+                tryInstallAgainNodes.add(agentName);
+            }
+        }
         List<String> result = new ArrayList<>();
         for (var s : tryInstallAgainNodes) {
             if (!toInstallListMap.contains(s)) {

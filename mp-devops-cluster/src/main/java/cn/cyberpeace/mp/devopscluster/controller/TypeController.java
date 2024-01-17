@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -152,7 +153,13 @@ public class TypeController {
         }
         if (Objects.nonNull(firstTypeId)) {
             List<TargetType> l2AndL3TypeList = l1AndL2AndL3Type.getList();
-            l2AndL3TypeList = l2AndL3TypeList.stream().filter(type -> Objects.equals(firstTypeId, type.getId())).collect(Collectors.toList());
+            List<TargetType> list = new ArrayList<>();
+            for (TargetType type : l2AndL3TypeList) {
+                if (Objects.equals(firstTypeId, type.getId())) {
+                    list.add(type);
+                }
+            }
+            l2AndL3TypeList = list;
             l1AndL2AndL3Type.setList(l2AndL3TypeList);
         }
         return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));

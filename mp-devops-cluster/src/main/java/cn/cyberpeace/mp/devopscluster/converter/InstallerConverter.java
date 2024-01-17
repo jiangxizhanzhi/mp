@@ -49,8 +49,11 @@ public class InstallerConverter implements BaseConverter{
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
         CloudPlatformPageResult<Installer> model = installerService.page(getParams);
         BasePageBO<InstallerConvertModel> convertModel = new BasePageBO<>();
-        List<InstallerConvertModel> modelList = model.getList().stream()
-                .map(this::convertInstaller).collect(Collectors.toList());
+        List<InstallerConvertModel> modelList = new ArrayList<>();
+        for (Installer installer : model.getList()) {
+            InstallerConvertModel installerConvertModel = convertInstaller(installer);
+            modelList.add(installerConvertModel);
+        }
         convertModel.setList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
@@ -125,9 +128,11 @@ public class InstallerConverter implements BaseConverter{
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
             model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
-            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource ->
-                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")))
-            );
+            for (Resource resource : model.getResourceList()) {
+                if (StringUtils.isNotBlank(resource.getPlatforms())) {
+                    resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
+                }
+            }
         }
         model.setDeviceCount(installer.getDeviceCount());
         model.setExtNormal(extNormal);
@@ -152,7 +157,17 @@ public class InstallerConverter implements BaseConverter{
         installer.setTmpdirUuid(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getTmpdirUuid() : null);
         installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserFilename() : null);
         if (StringUtils.isNotBlank(request.getCategories())){
-            installer.setCategories(Arrays.stream(request.getCategories().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
+            boolean seen = false;
+            String acc = null;
+            for (String s : request.getCategories().split("\\|")) {
+                if (!seen) {
+                    seen = true;
+                    acc = s;
+                } else {
+                    acc = acc.concat(s);
+                }
+            }
+            installer.setCategories(seen ? acc : "");
         }
         installer.setDeployType(request.getDeployType());
         if (Objects.nonNull(request.getDockerInstallerData())
@@ -160,12 +175,22 @@ public class InstallerConverter implements BaseConverter{
             installer.setSettings(JsonUtils.toUnderlineJSONString(request.getDockerInstallerData().getStartUpParameterList()));
         }
         if (Objects.nonNull(request.getResourceList())) {
-            request.getResourceList().forEach(resource -> {
+            for (Resource resource : request.getResourceList()) {
                 resource.setFile(UUID.randomUUID().toString());
-                if (StringUtils.isNotBlank(resource.getPlatforms())){
-                    resource.setPlatforms(Arrays.stream(resource.getPlatforms().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
+                if (StringUtils.isNotBlank(resource.getPlatforms())) {
+                    boolean seen = false;
+                    String acc = null;
+                    for (String s : resource.getPlatforms().split("\\|")) {
+                        if (!seen) {
+                            seen = true;
+                            acc = s;
+                        } else {
+                            acc = acc.concat(s);
+                        }
+                    }
+                    resource.setPlatforms(seen ? acc : "");
                 }
-            });
+            }
             installer.setResources(JsonUtils.toUnderlineJSONString(request.getResourceList()));
         }
         return installer;

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,33 +58,26 @@ public class NetworkController {
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
         BasePageBO<NetworkBO> model = networkConverter.page(new NetworkPageDTO(request));
         List<NetworkBO> networks = model.getList();
-        List<NetworkPageVO> networkList = networks.stream().map(networkModel -> {
-            List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
-            List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
-            if (CollectionUtils.isNotEmpty(subnetList)) {
-                subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps())).collect(Collectors.toList());
-            }
-            return NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
-                    .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
-                    .downloadSpeed(networkModel.getDownloadSpeed())
-                    .uploadSpeed(networkModel.getUploadSpeed())
-                    //.freeIps(networkModel.getFreeIps())
-                    //.usedIps(networkModel.getUsedIps())
-                    .nodeNum(networkModel.getNodeNum())
-                    .build();
-                }
-        ).collect(Collectors.toList());
+        List<NetworkPageVO> networkList = new ArrayList<>();
+        for (NetworkBO networkModel : networks) {
+            NetworkPageVO pageVO = getNetworkPageVO(networkModel);
+            networkList.add(pageVO);
+        }
 
         // 处理场景信息
-        List<String> networkNames = networkList.stream().map(NetworkPageVO::getName).collect(Collectors.toList());
+        List<String> networkNames = new ArrayList<>();
+        for (NetworkPageVO networkPageVO : networkList) {
+            String name = networkPageVO.getName();
+            networkNames.add(name);
+        }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
-            networkList.forEach(net -> {
+            for (NetworkPageVO net : networkList) {
                 var csceneNodeInfoBO = map.get(net.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     net.setReferenceType(csceneNodeInfoBO.getReferenceType());
                 }
-            });
+            }
         };
 
         sceneInfoService.processSceneInfo(networkNames, consumer);
@@ -91,7 +85,26 @@ public class NetworkController {
         return new PageResult<>(networkList,model.getTotal());
     }
 
-
+    private static NetworkPageVO getNetworkPageVO(NetworkBO networkModel) {
+        List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
+        List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(subnetList)) {
+            List<NetworkPageVO.Subnet> list = new ArrayList<>();
+            for (NetworkSubnetBO subnet : subnetList) {
+                NetworkPageVO.Subnet subnet1 = new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps());
+                list.add(subnet1);
+            }
+            subnets = list;
+        }
+        return NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+                .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
+                .downloadSpeed(networkModel.getDownloadSpeed())
+                .uploadSpeed(networkModel.getUploadSpeed())
+                //.freeIps(networkModel.getFreeIps())
+                //.usedIps(networkModel.getUsedIps())
+                .nodeNum(networkModel.getNodeNum())
+                .build();
+    }
 
 
     /**

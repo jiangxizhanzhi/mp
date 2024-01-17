@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,12 +36,14 @@ public class ElasticIpConverter implements BaseConverter {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<ElasticIpModel> model = networkService.pageElasticIp(getParams);
-        List<ElasticIpBO> list = model.getList().stream().map(elasticIpModel ->
-                ElasticIpBO.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
-                        .fixedIpAddress(elasticIpModel.getFixedIpAddress())
-                        .status(elasticIpModel.getStatus())
-                        .createdAt(elasticIpModel.getCreatedAt()).build()
-        ).collect(Collectors.toList());
+        List<ElasticIpBO> list = new ArrayList<>();
+        for (ElasticIpModel elasticIpModel : model.getList()) {
+            ElasticIpBO build = ElasticIpBO.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
+                    .fixedIpAddress(elasticIpModel.getFixedIpAddress())
+                    .status(elasticIpModel.getStatus())
+                    .createdAt(elasticIpModel.getCreatedAt()).build();
+            list.add(build);
+        }
 
         BasePageBO<ElasticIpBO> convertModel = new BasePageBO();
         convertModel.setList(list);

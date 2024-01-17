@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,30 +48,40 @@ public class DynamipsConverter implements BaseConverter {
             convertModel.setTotal(result.getTotal());
             return convertModel;
         }
-        List<InstanceBO> list = result.getItems().stream().map(v -> {
-            InstanceBO instanceBO = new InstanceBO();
-            instanceBO.setId(v.getInstanceId() == null ? StringUtils.EMPTY : v.getInstanceId());
-            instanceBO.setName(v.getName());
-            instanceBO.setCreateTime(v.getCreatedAt());
-            var createTime = TimeUtils.stringToLocalDateTime(v.getCreatedAt(), TimeUtils.tzDateTimeFormatter);
-            var utcCurrentTimeStr = TimeUtils.localDateTimeToUtcString(LocalDateTime.now());
-            var utcCurrentTime = TimeUtils.stringToLocalDateTime(utcCurrentTimeStr, TimeUtils.tzDateTimeFormatter);
-            instanceBO.setRunningTime(utcCurrentTime.toEpochSecond(ZoneOffset.UTC) - createTime.toEpochSecond(ZoneOffset.UTC));
-            instanceBO.setStatus(v.getStatus());
-            instanceBO.setNode(v.getHost());
-            if (CollectionUtils.isEmpty(v.getNetworks())) {
-                instanceBO.setAddressList(new ArrayList<>());
-            } else {
-                var ips = v.getNetworks().stream().map(n -> n.getFixedIp()).collect(Collectors.toList());
-                instanceBO.setAddressList(ips);
-            }
-            return instanceBO;
-        }).collect(Collectors.toList());
+        List<InstanceBO> list = new ArrayList<>();
+        for (VirtualDynamicCreateData v : result.getItems()) {
+            InstanceBO instanceBO = getInstanceBO(v);
+            list.add(instanceBO);
+        }
 
         BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setTotal(result.getTotal());
         return convertModel;
+    }
+
+    private static InstanceBO getInstanceBO(VirtualDynamicCreateData v) {
+        InstanceBO instanceBO = new InstanceBO();
+        instanceBO.setId(v.getInstanceId() == null ? StringUtils.EMPTY : v.getInstanceId());
+        instanceBO.setName(v.getName());
+        instanceBO.setCreateTime(v.getCreatedAt());
+        var createTime = TimeUtils.stringToLocalDateTime(v.getCreatedAt(), TimeUtils.tzDateTimeFormatter);
+        var utcCurrentTimeStr = TimeUtils.localDateTimeToUtcString(LocalDateTime.now());
+        var utcCurrentTime = TimeUtils.stringToLocalDateTime(utcCurrentTimeStr, TimeUtils.tzDateTimeFormatter);
+        instanceBO.setRunningTime(utcCurrentTime.toEpochSecond(ZoneOffset.UTC) - createTime.toEpochSecond(ZoneOffset.UTC));
+        instanceBO.setStatus(v.getStatus());
+        instanceBO.setNode(v.getHost());
+        if (CollectionUtils.isEmpty(v.getNetworks())) {
+            instanceBO.setAddressList(new ArrayList<>());
+        } else {
+            List<String> ips = new ArrayList<>();
+            for (VirtualDynamicCreateData.Network n : v.getNetworks()) {
+                String fixedIp = n.getFixedIp();
+                ips.add(fixedIp);
+            }
+            instanceBO.setAddressList(ips);
+        }
+        return instanceBO;
     }
 
     /**

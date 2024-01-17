@@ -73,28 +73,48 @@ public class InitRegisterService extends BaseCpService {
             return res;
         }
         List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
-        List<String> uuids = deviceList.stream().map(device -> device.getUuid()).collect(Collectors.toList());
+        List<String> uuids = new ArrayList<>();
+        for (Device device2 : deviceList) {
+            String deviceUuid = device2.getUuid();
+            uuids.add(deviceUuid);
+        }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
-        List<String> existedUuids = deviceTargetPOS.stream().map(p -> p.getUuid()).collect(Collectors.toList());
+        List<String> existedUuids = new ArrayList<>();
+        for (DeviceTargetPO p : deviceTargetPOS) {
+            String uuid = p.getUuid();
+            existedUuids.add(uuid);
+        }
         List<Device> notExistedList = new ArrayList<>();
         List<Device> existedList = new ArrayList<>();
         if (CollectionUtils.isEmpty(deviceTargetPOS)) {
             notExistedList.addAll(deviceList);
         } else {
-            notExistedList.addAll(deviceList.stream()
-                    .filter(device -> !existedUuids.contains(device.getUuid()))
-                    .collect(Collectors.toList()));
-            existedList.addAll(deviceList.stream()
-                    .filter(device -> existedUuids.contains(device.getUuid()))
-                    .collect(Collectors.toList()));
+            List<Device> list1 = new ArrayList<>();
+            for (Device device1 : deviceList) {
+                if (!existedUuids.contains(device1.getUuid())) {
+                    list1.add(device1);
+                }
+            }
+            notExistedList.addAll(list1);
+            List<Device> list = new ArrayList<>();
+            for (Device device : deviceList) {
+                if (existedUuids.contains(device.getUuid())) {
+                    list.add(device);
+                }
+            }
+            existedList.addAll(list);
         }
         if (CollectionUtils.isNotEmpty(notExistedList)) {
-            notExistedList.forEach(device -> device.setIsHide(Boolean.FALSE));
+            for (Device device : notExistedList) {
+                device.setIsHide(Boolean.FALSE);
+            }
             res += devopsTargetService.insert(notExistedList);
         }
         if (CollectionUtils.isNotEmpty(existedList)) {
-            existedList.forEach(e -> devopsTargetService.updateById(e));
+            for (Device e : existedList) {
+                devopsTargetService.updateById(e);
+            }
             res += existedList.size();
         }
         return res;

@@ -93,13 +93,16 @@ public class DevopsTargetService {
         for (var d : deviceList) {
             d.setSupportExport(this.getSupportExport(d));
         }
-        List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
-                                                       .collect(Collectors.toList());
+        List<DeviceTargetPO> deviceTargetPOS = new ArrayList<>();
+        for (Device device : deviceList) {
+            DeviceTargetPO deviceTargetPO = convertToTargetModel(device);
+            deviceTargetPOS.add(deviceTargetPO);
+        }
         var user = UserCommon.getCurrentUser();
-        deviceTargetPOS.forEach(d -> {
+        for (DeviceTargetPO d : deviceTargetPOS) {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
-        });
+        }
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
 

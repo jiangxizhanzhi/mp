@@ -35,9 +35,9 @@ public enum CloudPlatformEnum{
     private static final Map<String, CloudPlatformEnum> map = new HashMap<>();
 
     static {
-        Arrays.stream(CloudPlatformEnum.values()).forEach(
-                t -> map.put(t.getState(), t)
-        );
+        for (CloudPlatformEnum t : CloudPlatformEnum.values()) {
+            map.put(t.getState(), t);
+        }
     }
 
     private String state;

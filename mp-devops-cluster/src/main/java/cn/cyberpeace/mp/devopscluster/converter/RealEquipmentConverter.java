@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -91,11 +92,21 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(dto);
-        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            String deviceTargetPO1Name = targetPO.getName();
+            list.add(deviceTargetPO1Name);
+        }
+        String[] imageNames = list.toArray(new String[0]);
         var referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
         var useStateMap = csceneSpecialService.statDeviceReferCsceneInstances(imageNames).getSource();
 
-        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = new ArrayList<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            String id = deviceTargetPO.getId();
+            Integer parseInt = Integer.parseInt(id);
+            ids.add(parseInt);
+        }
         if (CollectionUtils.isEmpty(ids)){
             convertModel.setList(Lists.newArrayList());
             return convertModel;
@@ -107,25 +118,31 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
         POLogoUtils.changeLogoPathToUrl(model.getList());
-        List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
-            RealEquipmentBO realEquipmentBO = convertDevice(device);
-            List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
-            List<DeviceReferCsceneInstanceStat> useStateList = new ArrayList<>();
-            String name = device.getName();
-            if (MapUtils.isNotEmpty(referStateMap)) {
-                referStateList = referStateMap.get(name);
-            }
-            if (MapUtils.isNotEmpty(useStateMap)) {
-                useStateList = useStateMap.get(name);
-            }
-            realEquipmentBO.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
-            realEquipmentBO.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
-            return realEquipmentBO;
-        }).collect(Collectors.toList());
+        List<RealEquipmentBO> modelList = new ArrayList<>();
+        for (Device device : model.getList()) {
+            RealEquipmentBO realEquipmentBO = getRealEquipmentBO(referStateMap, useStateMap, device);
+            modelList.add(realEquipmentBO);
+        }
 
         convertModel.setList(modelList);
         convertModel.setTotal(total);
         return convertModel;
+    }
+
+    private RealEquipmentBO getRealEquipmentBO(Map<String, List<DeviceReferCsceneStat>> referStateMap, Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap, Device device) {
+        RealEquipmentBO realEquipmentBO = convertDevice(device);
+        List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
+        List<DeviceReferCsceneInstanceStat> useStateList = new ArrayList<>();
+        String name = device.getName();
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateList = referStateMap.get(name);
+        }
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateList = useStateMap.get(name);
+        }
+        realEquipmentBO.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
+        realEquipmentBO.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
+        return realEquipmentBO;
     }
 
 
@@ -264,7 +281,12 @@ public class RealEquipmentConverter implements BaseConverter{
                     refreshDto.setLimit(50);
                     refreshDto.setImageType(ImageTypeEnum.ENTITY.toValue());
                     List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(refreshDto);
-                    List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+                    List<Integer> ids = new ArrayList<>();
+                    for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+                        String id = deviceTargetPO.getId();
+                        Integer parseInt = Integer.parseInt(id);
+                        ids.add(parseInt);
+                    }
                     if (CollectionUtils.isNotEmpty(ids)) {
                         CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
                         if (model != null && CollectionUtils.isNotEmpty(model.getList())) {

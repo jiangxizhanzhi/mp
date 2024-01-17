@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.HypervisorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SwitchService;
@@ -79,14 +80,16 @@ public class HypervisorConverter implements BaseConverter {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
-        List<HypervisorBO> list = model.getList().stream().map(hypervisor ->
-                HypervisorBO.builder().name(hypervisor.getHostname())
-                        .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
-                        .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
-                        .serviceStatus(false)
-                        .diskUsed(hypervisor.getDiskUsed()).build()
-        ).collect(Collectors.toList());
+        List<HypervisorBO> list = new ArrayList<>();
+        for (Hypervisor hypervisor : model.getList()) {
+            HypervisorBO build = HypervisorBO.builder().name(hypervisor.getHostname())
+                    .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                    .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
+                    .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
+                    .serviceStatus(false)
+                    .diskUsed(hypervisor.getDiskUsed()).build();
+            list.add(build);
+        }
 
         BasePageBO<HypervisorBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
@@ -126,14 +129,21 @@ public class HypervisorConverter implements BaseConverter {
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 
         if (Objects.nonNull(modelCloudPlatformPageResult) && CollectionUtils.isNotEmpty(modelCloudPlatformPageResult.getList())){
-            resultList.addAll(modelCloudPlatformPageResult.getList().stream().map(instanceOsServiceModel ->
-                    new HypervisorServiceStateConvertModel(instanceOsServiceModel.getBinary(),instanceOsServiceModel.getState())
-            ).collect(Collectors.toList()));
+            List<HypervisorServiceStateConvertModel> list = new ArrayList<>();
+            for (InstanceOsServiceModel instanceOsServiceModel : modelCloudPlatformPageResult.getList()) {
+                HypervisorServiceStateConvertModel hypervisorServiceStateConvertModel = new HypervisorServiceStateConvertModel(instanceOsServiceModel.getBinary(), instanceOsServiceModel.getState());
+                list.add(hypervisorServiceStateConvertModel);
+            }
+            resultList.addAll(list);
         }
 
         if (Objects.nonNull(networks) && CollectionUtils.isNotEmpty(networks.getList())){
-            resultList.addAll(networks.getList().stream().map(networkAgentModel ->
-                    new HypervisorServiceStateConvertModel(networkAgentModel.getBinary(),networkAgentModel.getAlive())).collect(Collectors.toList())
+            List<HypervisorServiceStateConvertModel> list = new ArrayList<>();
+            for (NetworkAgentModel networkAgentModel : networks.getList()) {
+                HypervisorServiceStateConvertModel hypervisorServiceStateConvertModel = new HypervisorServiceStateConvertModel(networkAgentModel.getBinary(), networkAgentModel.getAlive());
+                list.add(hypervisorServiceStateConvertModel);
+            }
+            resultList.addAll(list
             );
         }
         return resultList;
@@ -148,10 +158,12 @@ public class HypervisorConverter implements BaseConverter {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
             return null;
         }
-        List<VirtualRealSwitchBO> list = model.getSwitchs().stream().map(v ->
-                VirtualRealSwitchBO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
-                        .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build()
-        ).collect(Collectors.toList());
+        List<VirtualRealSwitchBO> list = new ArrayList<>();
+        for (Switches v : model.getSwitchs()) {
+            VirtualRealSwitchBO build = VirtualRealSwitchBO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
+                    .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build();
+            list.add(build);
+        }
 
         ListResult<VirtualRealSwitchBO> convertModel = new ListResult<>();
         convertModel.setList(list);

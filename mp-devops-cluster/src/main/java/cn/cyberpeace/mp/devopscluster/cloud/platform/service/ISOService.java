@@ -35,7 +35,9 @@ public class ISOService extends BaseCpService {
         } catch (IOException e) {
             log.error("upload file error", e);
         } finally {
-            files.forEach(File::delete);
+            for (File file : files) {
+                file.delete();
+            }
         }
         super.checkResult(result);
         return result;

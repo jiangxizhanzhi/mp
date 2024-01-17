@@ -57,7 +57,13 @@ public class BaseUploadService extends BaseAbstractUploadService{
         }
 
         String suffix = originalFilename.substring(index + 1);
-        boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
+        boolean anyMatch = false;
+        for (String s : supportUploadTypeList) {
+            if (suffix.equals(s)) {
+                anyMatch = true;
+                break;
+            }
+        }
         if (!anyMatch) {
             throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR.format(StringUtils.join(supportUploadTypeList,",")));
         }

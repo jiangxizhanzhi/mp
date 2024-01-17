@@ -34,6 +34,11 @@ public enum TimeSlotEnums {
     }
 
     public static TimeSlotEnums fromUnit(String unit) {
-        return Arrays.stream(values()).filter(e -> e.getUnit().equals(unit)).findFirst().orElse(null);
+        for (TimeSlotEnums e : values()) {
+            if (e.getUnit().equals(unit)) {
+                return e;
+            }
+        }
+        return null;
     }
 }
