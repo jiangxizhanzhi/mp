@@ -389,13 +389,19 @@ public class ActivMenuService {
 
     private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivBo> activDtos) {
         List<TargetModel> targetModels =
-                activDtos.stream().map(a -> {
-                    TargetModel model = new TargetModel();
-                    BeanUtils.copyProperties(a, model);
-                    return model;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (TargetActivBo a : activDtos) {
+            TargetModel targetModel = getTargetModel(a);
+            targetModels.add(targetModel);
+        }
 
         return targetModels;
+    }
+
+    private static TargetModel getTargetModel(TargetActivBo a) {
+        TargetModel model = new TargetModel();
+        BeanUtils.copyProperties(a, model);
+        return model;
     }
 
     /**

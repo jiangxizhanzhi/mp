@@ -185,22 +185,28 @@ public class MenuSetService {
         MenuTemplate menuTemplate = new MenuTemplate();
         menuTemplate.setTemplateId(templateId);
         menuTemplate.setMenuTree(inputTreeTargets);
-        List<MenuTemplateModel> models = listTargets.stream().map(t -> {
-            MenuTemplateModel model = new MenuTemplateModel();
-            model.setTemplateId(menuTemplate.templateId);
-            model.setName(t.getName());
-            model.setEnName(t.getEnName());
-            model.setParent(t.getParent());
-            model.setIdentifier(t.getIdentifier());
-            model.setMenuId(t.getIdentifier());
-            model.setPath(t.getPath());
-            model.setType(t.getType());
-            model.setVisible(t.getVisible());
-            model.setTenant(t.getTenant());
-            return model;
-        }).collect(Collectors.toList());
+        List<MenuTemplateModel> models = new ArrayList<>();
+        for (TargetBo t : listTargets) {
+            MenuTemplateModel menuTemplateModel = getMenuTemplateModel(menuTemplate, t);
+            models.add(menuTemplateModel);
+        }
         menuTemplateMapper.bulkCreate(models);
         return menuTemplate;
+    }
+
+    private static MenuTemplateModel getMenuTemplateModel(MenuTemplate menuTemplate, TargetBo t) {
+        MenuTemplateModel model = new MenuTemplateModel();
+        model.setTemplateId(menuTemplate.templateId);
+        model.setName(t.getName());
+        model.setEnName(t.getEnName());
+        model.setParent(t.getParent());
+        model.setIdentifier(t.getIdentifier());
+        model.setMenuId(t.getIdentifier());
+        model.setPath(t.getPath());
+        model.setType(t.getType());
+        model.setVisible(t.getVisible());
+        model.setTenant(t.getTenant());
+        return model;
     }
 
     public void updateRoleMenuTemplate(String roleId, String templateId) {

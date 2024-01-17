@@ -533,11 +533,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         if (CollectionUtils.isNotEmpty(userModels)) {
-            List<UserSimpleBo> userSimpleBos = userModels.stream().map(userModel -> {
-                UserSimpleBo userSimpleBo = new UserSimpleBo();
-                BeanUtils.copyProperties(userModel, userSimpleBo);
-                return userSimpleBo;
-            }).collect(Collectors.toList());
+            List<UserSimpleBo> userSimpleBos = new ArrayList<>();
+            for (UserModel userModel : userModels) {
+                UserSimpleBo userSimpleBo = getUserSimpleBo(userModel);
+                userSimpleBos.add(userSimpleBo);
+            }
             noticeDto.setUsers(userSimpleBos);
         }
 
@@ -577,15 +577,27 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDto;
     }
 
+    private static UserSimpleBo getUserSimpleBo(UserModel userModel) {
+        UserSimpleBo userSimpleBo = new UserSimpleBo();
+        BeanUtils.copyProperties(userModel, userSimpleBo);
+        return userSimpleBo;
+    }
+
     private void convert2NoticeDtoPageInfo(PageInfo pageInfo, boolean checkCurrentUserIsRead) {
         List<SysNoticeModel> noticeModels = pageInfo.getList();
 
-        List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
-            SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
-            return noticeDto;
-        }).collect(Collectors.toList());
+        List<SysNoticeDto> noticeDtos = new ArrayList<>();
+        for (SysNoticeModel n : noticeModels) {
+            SysNoticeDto sysNoticeDto = getSysNoticeDto(checkCurrentUserIsRead, n);
+            noticeDtos.add(sysNoticeDto);
+        }
 //
         pageInfo.setList(noticeDtos);
+    }
+
+    private SysNoticeDto getSysNoticeDto(boolean checkCurrentUserIsRead, SysNoticeModel n) {
+        SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
+        return noticeDto;
     }
 
     private List<UserModel> listByNoticeIds(List<String> noticeIds) {
@@ -660,10 +672,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     private List<SysNoticeDto> convert2NoticeDto(List<SysNoticeModel> noticeModels, boolean checkCurrentUserIsRead) {
-        List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
-            SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
-            return noticeDto;
-        }).collect(Collectors.toList());
+        List<SysNoticeDto> noticeDtos = new ArrayList<>();
+        for (SysNoticeModel n : noticeModels) {
+            SysNoticeDto sysNoticeDto = getSysNoticeDto(checkCurrentUserIsRead, n);
+            noticeDtos.add(sysNoticeDto);
+        }
         return noticeDtos;
     }
 
