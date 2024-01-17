@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -108,7 +109,12 @@ public class ScenePluginFlowSceneService {
             return new ServiceResult<>();
         }
 
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        Map<String, Flow> flowMap = new HashMap<>();
+        for (Flow flow1 : flows) {
+            if (flowMap.put(flow1.getId(), flow1) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         Flow flow = flowMap.getOrDefault(flowId, null);
         if (flow == null && !isBatch) {
             return new ServiceResult<>();

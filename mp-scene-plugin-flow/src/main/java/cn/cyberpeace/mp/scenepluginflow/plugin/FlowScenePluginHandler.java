@@ -31,9 +31,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -215,7 +217,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        Map<String, Flow> flowMap = new HashMap<>();
+        for (Flow flow1 : flows) {
+            if (flowMap.put(flow1.getId(), flow1) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         Flow flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
@@ -252,7 +259,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        Map<String, Flow> flowMap = new HashMap<>();
+        for (Flow flow1 : flows) {
+            if (flowMap.put(flow1.getId(), flow1) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         Flow flow = flowMap.getOrDefault(flowId, null);
         if (flow == null) {
             return false;
@@ -288,7 +300,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                 flowWithSourceIps.add(flowWithSourceIp);
             });
         } else {
-            Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+            Map<String, Flow> flowMap = new HashMap<>();
+            for (Flow flow : flows) {
+                if (flowMap.put(flow.getId(), flow) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
             flowId2Ips.forEach(flowId2Ip -> {
                 FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
                 flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
@@ -338,7 +355,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         if (flowIds == null || flowIds.isEmpty()) {
             newFlows.addAll(flows);
         } else {
-            Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+            Map<String, Flow> flowMap = new HashMap<>();
+            for (Flow flow : flows) {
+                if (flowMap.put(flow.getId(), flow) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
             flowIds.forEach(flowId -> {
                 newFlows.add(flowMap.getOrDefault(flowId, null));
             });
@@ -367,7 +389,14 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         if (flows == null) {
             return null;
         }
-        Flow flow = flows.stream().filter(f -> flowId.equals(f.getId())).findFirst().get();
+        Optional<Flow> found = Optional.empty();
+        for (Flow f : flows) {
+            if (flowId.equals(f.getId())) {
+                found = Optional.of(f);
+                break;
+            }
+        }
+        Flow flow = found.get();
         if (flow != null) {
             flow.setSourceIp(sourceIp);
             getSceneHandler().updateSceneElementWithPlugins(nodeId);

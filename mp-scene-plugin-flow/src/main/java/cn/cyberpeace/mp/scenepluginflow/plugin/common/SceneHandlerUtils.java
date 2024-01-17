@@ -28,6 +28,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,10 +118,17 @@ public class SceneHandlerUtils {
         batchStartTaskBO.setTaskSipList(taskSipBOList);
         batchStartTaskBO.setRunType(runType);
 
-        List<String> taskIds = flows.stream()
-                .map(f -> f.getTaskId())
-                .collect(Collectors.toList());
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(flow -> flow.getId(), flow -> flow));
+        List<String> taskIds = new ArrayList<>();
+        for (Flow f : flows) {
+            String taskId = f.getTaskId();
+            taskIds.add(taskId);
+        }
+        Map<String, Flow> flowMap = new HashMap<>();
+        for (Flow flow1 : flows) {
+            if (flowMap.put(flow1.getId(), flow1) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         try {
             log.info("start flows for taskIds:[{}]", taskIds);
 
@@ -314,9 +322,11 @@ public class SceneHandlerUtils {
 //        var needCreateTaskFlows = flowWithSourceIps.stream()
 //                .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
 //                .collect(Collectors.toList());
-        List<Flow> flows = flowWithSourceIps.stream()
-                .map(f -> f.getFlow())
-                .collect(Collectors.toList());
+        List<Flow> flows = new ArrayList<>();
+        for (FlowWithSourceIp f : flowWithSourceIps) {
+            Flow fFlow = f.getFlow();
+            flows.add(fFlow);
+        }
 
         String sceneId = pluginHandler.getSourceSceneId();
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndSceneId(nodeId, sceneId);
@@ -446,10 +456,13 @@ public class SceneHandlerUtils {
     }
 
     public boolean stopFlows(List<Flow> flows) {
-        List<String> taskIds = flows.stream()
-                .filter(flow -> flow.getTaskId() != null)
-                .map(flow -> flow.getTaskId())
-                .collect(Collectors.toList());
+        List<String> taskIds = new ArrayList<>();
+        for (Flow flow1 : flows) {
+            if (flow1.getTaskId() != null) {
+                String taskId = flow1.getTaskId();
+                taskIds.add(taskId);
+            }
+        }
         if (taskIds.isEmpty()) {
             flows.forEach(flow -> {
                 errorFLow(flow, "Empty task id");
