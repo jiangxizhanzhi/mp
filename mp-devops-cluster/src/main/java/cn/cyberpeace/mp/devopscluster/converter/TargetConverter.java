@@ -170,7 +170,7 @@ public class TargetConverter{
             for (Map.Entry<String, List<DeviceReferCsceneStat>> entry : referStateMap.entrySet()) {
                 String k = entry.getKey();
                 List<DeviceReferCsceneStat> v = entry.getValue();
-                var names = new ArrayList<>();
+                List<String> names = new ArrayList<>();
                 for (DeviceReferCsceneStat deviceReferCsceneStat : v) {
                     if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
                         String name = deviceReferCsceneStat.getName();
@@ -193,7 +193,7 @@ public class TargetConverter{
             for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
                 String k = entry.getKey();
                 List<DeviceReferCsceneInstanceStat> v = entry.getValue();
-                var names = new ArrayList<>();
+                List<String> names = new ArrayList<>();
                 for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
                     if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
                         String name = deviceReferCsceneInstanceStat.getName();
@@ -245,7 +245,7 @@ public class TargetConverter{
             for (Map.Entry<String, List<DeviceReferCsceneStat>> entry : referStateMap.entrySet()) {
                 String k = entry.getKey();
                 List<DeviceReferCsceneStat> v = entry.getValue();
-                var names = new ArrayList<>();
+                List<String> names = new ArrayList<>();
                 for (DeviceReferCsceneStat deviceReferCsceneStat : v) {
                     if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
                         String name = deviceReferCsceneStat.getName();
@@ -268,7 +268,7 @@ public class TargetConverter{
             for (Map.Entry<String, List<DeviceReferCsceneInstanceStat>> entry : useStateMap.entrySet()) {
                 String k = entry.getKey();
                 List<DeviceReferCsceneInstanceStat> v = entry.getValue();
-                var names = new ArrayList<>();
+                List<String> names = new ArrayList<>();
                 for (DeviceReferCsceneInstanceStat deviceReferCsceneInstanceStat : v) {
                     if (StringUtils.isNotEmpty(deviceReferCsceneInstanceStat.getName())) {
                         String name = deviceReferCsceneInstanceStat.getName();
