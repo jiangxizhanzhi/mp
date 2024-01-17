@@ -1265,7 +1265,23 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+        String queryKeyword = listPageInfoQueryParams.getKeyword();
+
+        totalList = totalList.stream()
+                .filter(m -> {
+                    if (StringUtils.isEmpty(queryKeyword)) {
+                        return true;
+                    } else {
+                        String cmd = m.getCommand();
+                        return StringUtils.isNotEmpty(cmd) && cmd.contains(queryKeyword);
+                    }
+                }).collect(Collectors.toList());
+
+        List<WazuhProcessModel> resultList = totalList.stream()
+                .filter(Objects::nonNull)
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
 
         List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
 
