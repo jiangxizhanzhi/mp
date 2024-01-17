@@ -124,7 +124,7 @@ public class ActivMenuService {
 
 
     private void check(List<TargetModel> targetModels) {
-        var notEqualList = new ArrayList<>();
+        List<TargetModel> notEqualList = new ArrayList<>();
         for (TargetModel targetModel : targetModels) {
             if (!Objects.equals(targetModel.getId(), targetModel.getIdentifier())) {
                 notEqualList.add(targetModel);

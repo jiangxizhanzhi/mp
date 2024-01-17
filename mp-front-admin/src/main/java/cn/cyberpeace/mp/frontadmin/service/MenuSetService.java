@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.MenuTemplateModel;
 import cn.cyberpeace.mp.auth.model.MenuTemplateRoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateMapper;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateRoleMapper;
@@ -75,7 +76,7 @@ public class MenuSetService {
      * @return
      */
     public Set<String> getSystemAllVisibleMenuIds() {
-        var activationResponse = activationService.status();
+        ActivationResponse activationResponse = activationService.status();
         List<String> allPositiveKeys = this.getPositiveKeys(activationResponse);
         return getVisibleMenuIdsBy(allPositiveKeys);
     }
@@ -88,14 +89,14 @@ public class MenuSetService {
      * @return
      */
     public Set<String> getVisibleMenuIdsBy(List<String> positiveKeys) {
-        var activationResponse = activationService.status();
+        ActivationResponse activationResponse = activationService.status();
         String edition = String.valueOf(activationResponse.getEdition());
 
-        var targetModels = targetService.listAll(null, null);
-        var menuExtraInfos = menuExtraInfoService.listAll();
+        List<TargetModel> targetModels = targetService.listAll(null, null);
+        List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
 
         Set<String> visibleMenuIds = new HashSet<>();
-        for (var mi : menuExtraInfos) {
+        for (MenuExtraInfoModel mi : menuExtraInfos) {
             String menuId = mi.getMenu();
             Optional<TargetModel> targetModelOptional = Optional.empty();
             for (TargetModel t : targetModels) {
@@ -121,8 +122,8 @@ public class MenuSetService {
     }
 
     public List<TargetBo> getSystemTreeMenusBy(Set<String> visibleMenuIds) {
-        var userMenus = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
-        var userVisibleMenus = new ArrayList<>();
+        List<MenuTemplateModel> userMenus = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
+        List<MenuTemplateModel> userVisibleMenus = new ArrayList<>();
         for (MenuTemplateModel m : userMenus) {
             if (visibleMenuIds.contains(m.getIdentifier())) {
                 userVisibleMenus.add(m);
@@ -134,9 +135,9 @@ public class MenuSetService {
     }
 
     public List<TargetBo> getCurrentUserTreeMenusBy(Set<String> visibleMenuIds) {
-        var user = UserUtils.getLoginUser();
-        var userMenus = this.getUserAllMenus(user.getId());
-        var userVisibleMenus = new ArrayList<>();
+        UserModel user = UserUtils.getLoginUser();
+        List<MenuTemplateModel> userMenus = this.getUserAllMenus(user.getId());
+        List<MenuTemplateModel> userVisibleMenus = new ArrayList<>();
         for (MenuTemplateModel m : userMenus) {
             if (visibleMenuIds.contains(m.getIdentifier())) {
                 userVisibleMenus.add(m);
@@ -148,7 +149,7 @@ public class MenuSetService {
     }
 
     public MenuTemplate importDefaultTemplate(MultipartFile file) {
-        var content = readJsonStrFromMultipartFile(file);
+        String content = readJsonStrFromMultipartFile(file);
         MenuTemplate menuTemplate = JsonCommon.snakeParse(content, new TypeReference<MenuTemplate>() {
         });
         return this.refreshTemplate(menuTemplate.getMenuTree(), "1");
@@ -168,9 +169,9 @@ public class MenuSetService {
         List<TargetBo> queue = new LinkedList<>();
         queue.addAll(inputTreeTargets);
         while (!queue.isEmpty()) {
-            var headTargetBo = queue.remove(0);
+            TargetBo headTargetBo = queue.remove(0);
             if (CollectionUtils.isNotEmpty(headTargetBo.getChildren())) {
-                for (var child : headTargetBo.getChildren()) {
+                for (TargetBo child : headTargetBo.getChildren()) {
                     child.setParent(headTargetBo.getIdentifier());
                 }
                 queue.addAll(headTargetBo.getChildren());
@@ -203,7 +204,7 @@ public class MenuSetService {
     }
 
     public void updateRoleMenuTemplate(String roleId, String templateId) {
-        var existModel = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
+        MenuTemplateRoleModel existModel = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
         if (existModel != null) {
             MenuTemplateRoleModel updateModel = new MenuTemplateRoleModel();
             updateModel.setId(existModel.getId());
@@ -218,7 +219,7 @@ public class MenuSetService {
     }
 
     private List<MenuTemplateModel> getUserAllMenus(String userId) {
-        var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
+        List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
         if (CollectionUtils.isEmpty(roles)) {
             targets = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");

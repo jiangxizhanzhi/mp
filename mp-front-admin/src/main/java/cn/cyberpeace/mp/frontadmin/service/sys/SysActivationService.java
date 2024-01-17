@@ -726,12 +726,12 @@ public class SysActivationService {
      * @return
      */
     public List<ModuleInfoResponse> getModuleInfoList() {
-        var content = status();
+        ActivationResponse content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
         if (Objects.isNull(content) || CollectionUtils.isEmpty(content.getItems())) {
             return moduleInfoList;
         }
-        var items = content.getItems();
+        List<ActivationItem> items = content.getItems();
         // 竞赛
         ModuleInfoResponse ad = ModuleInfoResponse.builder().moduleName(ModuleEnums.AD.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         // 实训
