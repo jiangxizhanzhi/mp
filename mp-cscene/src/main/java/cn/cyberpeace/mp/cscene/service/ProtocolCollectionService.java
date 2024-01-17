@@ -136,7 +136,7 @@ public class ProtocolCollectionService {
                 sortTree(mib.getChildren());
             }
         }
-        mibs.stream().sorted(Comparator.comparing(MibFileInfo::getName));
+        Collections.sort(mibs, Comparator.comparing(MibFileInfo::getName));
     }
 
 
