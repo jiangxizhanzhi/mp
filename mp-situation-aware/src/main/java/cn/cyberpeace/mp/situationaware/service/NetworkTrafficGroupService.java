@@ -51,14 +51,16 @@ public class NetworkTrafficGroupService {
             String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks?fetch_all=true");
             log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
-            networkList.stream().filter(json -> json instanceof JSONObject)
-                    .map(json -> (JSONObject) json)
-                    .filter(json -> ARKIMENETWORKNAME.equals(json.get("name")))
-                    .findFirst()
-                    .ifPresent(network -> {
-                        SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+            for (Object json : networkList) {
+                if (json instanceof JSONObject) {
+                    JSONObject jsonObject = (JSONObject) json;
+                    if (ARKIMENETWORKNAME.equals(jsonObject.get("name"))) {
+                        SituationalAwareConstant.ArkimeNetworkId = (String) jsonObject.get("id");
                         log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
-                    });
+                        break;
+                    }
+                }
+            }
         } catch (Exception e) {
             log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
         }
@@ -79,13 +81,15 @@ public class NetworkTrafficGroupService {
         }
         JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
         AtomicReference<String> containerId = new AtomicReference<>("");
-        networkList.stream().filter(json -> json instanceof JSONObject)
-                .map(json -> (JSONObject) json)
-                .filter(json -> groupId.equals(json.get("name")))
-                .findFirst()
-                .ifPresent(container -> {
-                    containerId.set((String) container.get("id"));
-                });
+        for (Object json : networkList) {
+            if (json instanceof JSONObject) {
+                JSONObject jsonObject = (JSONObject) json;
+                if (groupId.equals(jsonObject.get("name"))) {
+                    containerId.set((String) jsonObject.get("id"));
+                    break;
+                }
+            }
+        }
 
         //删除实例镜像
         JSONObject deleteParam = new JSONObject();

@@ -84,6 +84,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -348,9 +349,9 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         Map<String, String> convertToMap = flowPortProtocolService.convertToMap();
 
-        boList.stream().forEach(v ->
-            v.setProtocol(convertToMap.get(v.getPort()))
-        );
+        for (AttackPortAggregationBO v : boList) {
+            v.setProtocol(convertToMap.get(v.getPort()));
+        }
 
         return boList;
     }
@@ -455,9 +456,11 @@ public class FlowAnalysisService extends AbstractBaseService {
                 Aggregations bucketAggregations = bucket.getAggregations();
                 ParsedTerms terms = bucketAggregations.get("destination_ip");
                 List<? extends Terms.Bucket> aggregationBuckets = terms.getBuckets();
-                List<String> destinationIpList = aggregationBuckets.stream()
-                        .map(bucket1 -> bucket1.getKeyAsString())
-                        .collect(Collectors.toList());
+                List<String> destinationIpList = new ArrayList<>();
+                for (Terms.Bucket bucket1 : aggregationBuckets) {
+                    String keyAsString = bucket1.getKeyAsString();
+                    destinationIpList.add(keyAsString);
+                }
                 bo.setDestinationIpList(destinationIpList);
                 return bo;
             }).collect(Collectors.toList());
@@ -569,13 +572,18 @@ public class FlowAnalysisService extends AbstractBaseService {
             return Lists.newArrayList();
         }
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
-                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
-                flowLogBO.getSuricata().setCategory(categoryList);
+        for (FlowLogBO v : flowLogBOS) {
+            if (Objects.nonNull(v.getSuricata())) {
+                if (MapUtils.isNotEmpty(allCategoryDicMap)) {
+                    List<String> categoryList = new ArrayList<>();
+                    for (String c : v.getSuricata().getCategory()) {
+                        String s = this.globalizedWithAttackWay(c, allCategoryDicMap);
+                        categoryList.add(s);
+                    }
+                    v.getSuricata().setCategory(categoryList);
+                }
             }
-        });
+        }
 
         return flowLogBOS;
     }
@@ -782,7 +790,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isEmpty(groupList)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        String[] indices = groupList.stream().filter(v -> v.startsWith("mp_")).map(v -> v.concat("_*")).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (String v : groupList) {
+            if (v.startsWith("mp_")) {
+                String concat = v.concat("_*");
+                list.add(concat);
+            }
+        }
+        String[] indices = list.toArray(new String[0]);
         DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
         deleteIndexRequest.indices(indices);
         deleteIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -798,25 +813,42 @@ public class FlowAnalysisService extends AbstractBaseService {
      * 攻击手法-攻击次数百分比
      */
     private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
-        Long totalNumber = attackResultVOS.stream().mapToLong(a -> a.getAttackNumber()).sum();
+        long sum = 0L;
+        for (AttackWayAggregationBO attackResultVO : attackResultVOS) {
+            long attackNumber = attackResultVO.getAttackNumber();
+            sum += attackNumber;
+        }
+        Long totalNumber = sum;
         if (Long.valueOf(0).equals(totalNumber)) {
             return attackResultVOS;
         }
         for (int i = 0; i < attackResultVOS.size(); i++) {
             AttackWayAggregationBO attack = attackResultVOS.get(i);
             if (i > 1 && i == attackResultVOS.size() - 1) {
-                BigDecimal beforeSum = attackResultVOS.subList(0, i).stream()
-                        .map(attackWayAggregationBO -> attackWayAggregationBO.getAttackNumberPercent())
-                        .reduce((a, b) -> a.add(b))
+                boolean seen = false;
+                BigDecimal acc = null;
+                for (AttackWayAggregationBO attackWayAggregationBO : attackResultVOS.subList(0, i)) {
+                    BigDecimal attackNumberPercent = attackWayAggregationBO.getAttackNumberPercent();
+                    if (!seen) {
+                        seen = true;
+                        acc = attackNumberPercent;
+                    } else {
+                        acc = acc.add(attackNumberPercent);
+                    }
+                }
+                BigDecimal beforeSum = (seen ? Optional.of(acc) : Optional.<BigDecimal>empty())
                         .get();
                 attack.setAttackNumberPercent(BigDecimal.valueOf(100).compareTo(beforeSum) == -1 ? BigDecimal.ZERO : BigDecimal.valueOf(100).subtract(beforeSum));
             } else {
                 attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)));
             }
         }
-        attackResultVOS = attackResultVOS.stream()
-                .sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed())
-                .collect(Collectors.toList());
+        List<AttackWayAggregationBO> list = new ArrayList<>();
+        for (AttackWayAggregationBO attackResultVO : attackResultVOS) {
+            list.add(attackResultVO);
+        }
+        list.sort(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed());
+        attackResultVOS = list;
         return attackResultVOS;
     }
 
@@ -854,9 +886,23 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", request.getAttackSeverities()));
         } else {
             if (Objects.nonNull(request.getSeverityEnum())){
-                List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
-                List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
-                        allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
+                List<Integer> allSeverityList = new ArrayList<>();
+                for (SeverityEnum severityEnum : SeverityEnum.values()) {
+                    Integer ordinal = severityEnum.ordinal();
+                    allSeverityList.add(ordinal);
+                }
+                List<Integer> severityList;
+                if (request.getSeverityEnum() == SeverityEnum.ALL) {
+                    severityList = allSeverityList;
+                } else {
+                    List<Integer> list = new ArrayList<>();
+                    for (Integer v : allSeverityList) {
+                        if (v <= request.getSeverityEnum().ordinal()) {
+                            list.add(v);
+                        }
+                    }
+                    severityList = list;
+                }
                 boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
             }
         }
@@ -933,10 +979,10 @@ public class FlowAnalysisService extends AbstractBaseService {
             return;
         }
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        aggregationBOS.stream().forEach(bo ->{
-            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(),allCategoryDicMap);
+        for (AttackWayAggregationBO bo : aggregationBOS) {
+            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(), allCategoryDicMap);
             bo.setAggregationType(aggregationType);
-        });
+        }
     }
 
     /**

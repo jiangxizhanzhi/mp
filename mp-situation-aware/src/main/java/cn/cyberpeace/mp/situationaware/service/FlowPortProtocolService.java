@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -62,8 +62,12 @@ public class FlowPortProtocolService {
         if (CollectionUtils.isEmpty(modelList)) {
             return Maps.newHashMap();
         }
-        return modelList.stream()
-                .collect(Collectors.toMap(flowPortProtocolModel -> flowPortProtocolModel.getPort(),
-                        flowPortProtocolModel -> flowPortProtocolModel.getProtocol()));
+        Map<String, String> map = new HashMap<>();
+        for (FlowPortProtocolModel flowPortProtocolModel : modelList) {
+            if (map.put(flowPortProtocolModel.getPort(), flowPortProtocolModel.getProtocol()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 }

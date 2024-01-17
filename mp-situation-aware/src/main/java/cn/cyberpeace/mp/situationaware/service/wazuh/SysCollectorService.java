@@ -35,11 +35,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -135,8 +135,10 @@ public class SysCollectorService extends RequestProcessor {
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
         List<NetAddr> netAddrs = listNetAddrs(agentId, null, "ipv4");
-        Map<String, String> ifacToAddressMap = Optional.ofNullable(netAddrs).orElse(new ArrayList<>()).stream()
-                .collect(Collectors.toMap(netAddr -> netAddr.getIface(), netAddr -> netAddr.getAddress(), (a, b) -> a));
+        Map<String, String> ifacToAddressMap = new HashMap<>();
+        for (NetAddr netAddr : Optional.ofNullable(netAddrs).orElse(new ArrayList<>())) {
+            ifacToAddressMap.putIfAbsent(netAddr.getIface(), netAddr.getAddress());
+        }
 
         netifaces.forEach(n -> {
             if (!CollectionUtils.isEmpty(ifacToAddressMap)) {

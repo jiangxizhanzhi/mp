@@ -20,8 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.StringJoiner;
 
 /**
  * @Description: wazuh agent api
@@ -76,7 +77,11 @@ public class AgentService extends RequestProcessor {
     public List<String> listAgentIds(List<String> agentNames) {
         AgentRequest agentRequest = new AgentRequest();
         if (CollectionUtils.isNotEmpty(agentNames)) {
-            agentRequest.setName(agentNames.stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String agentName : agentNames) {
+                joiner.add(agentName);
+            }
+            agentRequest.setName(joiner.toString());
         }
         List<Agent> agents = listAgents(agentRequest);
 
@@ -84,7 +89,11 @@ public class AgentService extends RequestProcessor {
             return null;
         }
 
-        List<String> ids = agents.stream().map(a -> a.getId()).collect(Collectors.toList());
+        List<String> ids = new ArrayList<>();
+        for (Agent a : agents) {
+            String id = a.getId();
+            ids.add(id);
+        }
         return ids;
     }
 

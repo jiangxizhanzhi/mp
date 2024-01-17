@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -78,10 +79,14 @@ public class ProbeService {
         //新增探针，默认为自定义探针
         probeModel.setType(ProbeModel.TYPE_CUSTOM);
 
-        String osTypes = probeRequest.getOsTypes().stream()
-                .filter(osType -> Objects.nonNull(osType))
-                .map(t -> String.valueOf(t))
-                .collect(Collectors.joining(","));
+        StringJoiner joiner = new StringJoiner(",");
+        for (Integer osType : probeRequest.getOsTypes()) {
+            if (Objects.nonNull(osType)) {
+                String s = String.valueOf(osType);
+                joiner.add(s);
+            }
+        }
+        String osTypes = joiner.toString();
         probeModel.setOsType(osTypes);
         probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
@@ -167,10 +172,14 @@ public class ProbeService {
         //probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
 
         if (CollectionUtils.isNotEmpty(probeRequest.getOsTypes())) {
-            String osTypes = probeRequest.getOsTypes().stream()
-                    .filter(osType -> Objects.nonNull(osType))
-                    .map(t -> String.valueOf(t))
-                    .collect(Collectors.joining(","));
+            StringJoiner joiner = new StringJoiner(",");
+            for (Integer osType : probeRequest.getOsTypes()) {
+                if (Objects.nonNull(osType)) {
+                    String s = String.valueOf(osType);
+                    joiner.add(s);
+                }
+            }
+            String osTypes = joiner.toString();
             probeModelToUpdate.setOsType(osTypes);
         }
         probeModelToUpdate.setId(probeId);

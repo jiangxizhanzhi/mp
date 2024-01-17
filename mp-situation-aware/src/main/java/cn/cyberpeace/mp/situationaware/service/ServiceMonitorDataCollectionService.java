@@ -38,9 +38,11 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream()
-                .map(monitorProbe -> monitorProbe.getLaunchId())
-                .collect(Collectors.toList());
+        List<String> launchIds = new ArrayList<>();
+        for (ServerMonitorConfig.MonitorProbe monitorProbe : ServerMonitorConfig.cpCloudSrvMonitors) {
+            String launchId = monitorProbe.getLaunchId();
+            launchIds.add(launchId);
+        }
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             List<ServiceMonitorDto> result = doQueryServiceMonitorDto(hostname, launchIds) ;
@@ -56,9 +58,11 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = ServerMonitorConfig.businessSrvMonitors.stream()
-                .map(monitorProbe -> monitorProbe.getLaunchId())
-                .collect(Collectors.toList());
+        List<String> launchIds = new ArrayList<>();
+        for (ServerMonitorConfig.MonitorProbe monitorProbe : ServerMonitorConfig.businessSrvMonitors) {
+            String launchId = monitorProbe.getLaunchId();
+            launchIds.add(launchId);
+        }
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));

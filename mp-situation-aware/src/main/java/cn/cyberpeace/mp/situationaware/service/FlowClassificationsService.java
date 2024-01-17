@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,9 +70,13 @@ public class FlowClassificationsService {
         if (CollectionUtils.isEmpty(categoryDicList)){
             return Maps.newHashMap();
         }
-        return categoryDicList.stream()
-                .collect(Collectors.toMap(flowClassificationModel -> flowClassificationModel.getCategoryEn(),
-                        flowClassificationModel -> flowClassificationModel));
+        Map<String, FlowClassificationModel> map = new HashMap<>();
+        for (FlowClassificationModel flowClassificationModel : categoryDicList) {
+            if (map.put(flowClassificationModel.getCategoryEn(), flowClassificationModel) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 
     /**

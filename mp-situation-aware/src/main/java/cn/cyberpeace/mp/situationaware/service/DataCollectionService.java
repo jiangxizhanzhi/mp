@@ -206,8 +206,16 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+            List<WazuhFileRoot> wazuhFileRootList = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                WazuhFileRoot wazuhFileRoot = JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class);
+                wazuhFileRootList.add(wazuhFileRoot);
+            }
+            List<FileEventModel> fileEventModelList = new ArrayList<>();
+            for (WazuhFileRoot root : wazuhFileRootList) {
+                FileEventModel fileEventModel = this.getFileEventModel(root, null);
+                fileEventModelList.add(fileEventModel);
+            }
 
             String responseScrollId = response.getScrollId();
             if (wazuhEventRequest.isScroll()) {
@@ -306,8 +314,16 @@ public class DataCollectionService extends CollectionBaseService {
         scrollRequest.scroll(scroll);
         try {
             SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
-            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+            List<WazuhFileRoot> wazuhFileRootList = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                WazuhFileRoot wazuhFileRoot = JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class);
+                wazuhFileRootList.add(wazuhFileRoot);
+            }
+            List<FileEventModel> fileEventModelList = new ArrayList<>();
+            for (WazuhFileRoot root : wazuhFileRootList) {
+                FileEventModel fileEventModel = this.getFileEventModel(root, null);
+                fileEventModelList.add(fileEventModel);
+            }
 
             String responseScrollId = response.getScrollId();
             fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
@@ -626,10 +642,13 @@ public class DataCollectionService extends CollectionBaseService {
             return Collections.emptyList();
         }
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE);
-        List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
         List<WazuhHostStateModel> wazuhModelList = wazuhFileRootList.stream().map(model -> {
             if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
@@ -669,10 +688,13 @@ public class DataCollectionService extends CollectionBaseService {
                 if (Objects.nonNull(b.getAggregations())) {
                     String key = b.getKeyAsString();
                     TopHits topHits = b.getAggregations().get(subAggName);
-                    List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(topHits
-                            .getHits().getHits()).map(hit ->
-                            JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
-                            })).collect(Collectors.toList());
+                    List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+                    for (SearchHit hit : topHits
+                            .getHits().getHits()) {
+                        WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+                        });
+                        wazuhFileRootList.add(launchWazuhMonitorRoot);
+                    }
 
                     List<WazuhHostStateModel> wazuhModelList = wazuhFileRootList.stream().map(model -> {
                         if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
@@ -977,10 +999,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     public JSONObject processBaseChangeOutput(SearchResponse response) {
-        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
         if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
@@ -1018,10 +1043,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     public JSONObject processBaseRawOutput(SearchResponse response) {
-        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
         if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
@@ -1209,9 +1237,12 @@ public class DataCollectionService extends CollectionBaseService {
                                        MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
         // macId集合都转换成小写
-        macIds = macIds.stream()
-                .map(macId -> macId.toLowerCase())
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (String macId : macIds) {
+            String s = macId.toLowerCase();
+            list.add(s);
+        }
+        macIds = list;
         Sets.SetView<String> currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
     }
@@ -1276,9 +1307,11 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
                                               BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-        List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream()
-                .map(dataCollectionType -> dataCollectionType.getRuleId())
-                .collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        for (DataCollectionType dataCollectionType : EnumSet.allOf(DataCollectionType.class)) {
+            String ruleId = dataCollectionType.getRuleId();
+            ruleIds.add(ruleId);
+        }
         if (!CollectionUtils.isEmpty(ruleIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
         }
@@ -1315,13 +1348,18 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
         // 转小写macId集合
-        List<String> lowerMacs = macs.stream()
-                .map(mac -> mac.toLowerCase())
-                .collect(Collectors.toList());
+        List<String> lowerMacs = new ArrayList<>();
+        for (String s : macs) {
+            String toLowerCase = s.toLowerCase();
+            lowerMacs.add(toLowerCase);
+        }
         Set<String> agentSet = Sets.newHashSet();
         allAgentMacAddr.forEach((key, macList) -> {
-            if (macList.stream().anyMatch(mac -> lowerMacs.contains(mac))) {
-                agentSet.add(key);
+            for (String mac : macList) {
+                if (lowerMacs.contains(mac)) {
+                    agentSet.add(key);
+                    break;
+                }
             }
         });
 
@@ -1608,7 +1646,14 @@ public class DataCollectionService extends CollectionBaseService {
             builder.description(wazuhFileRoot.getRule().getDescription())
                     .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
             if (!CollectionUtils.isEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
-                fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
+                FileEventType b = FileEventType.FILE;
+                for (String s : wazuhFileRoot.getRule().getGroups()) {
+                    if ("syscheck_registry".equals(s)) {
+                        b = FileEventType.REGISTRY;
+                        break;
+                    }
+                }
+                fileEventType = b;
             }
         }
         builder.fileEventType(fileEventType);
@@ -1850,7 +1895,12 @@ public class DataCollectionService extends CollectionBaseService {
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
-        return dateStringList.stream().map(dateString -> WAZUH_ALERT_INDEX_PREFIX + dateString).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (String dateString : dateStringList) {
+            String s = WAZUH_ALERT_INDEX_PREFIX + dateString;
+            list.add(s);
+        }
+        return list;
     }
 
     /**

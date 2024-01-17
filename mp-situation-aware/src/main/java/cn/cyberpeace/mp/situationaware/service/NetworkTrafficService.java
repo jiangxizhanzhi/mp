@@ -37,6 +37,7 @@ import org.springframework.util.ObjectUtils;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +106,12 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream()
-                    .map(sessionModel -> this.convertSession(sessionModel))
-                    .collect(Collectors.toList());
+            List<SessionResult> list = new ArrayList<>();
+            for (SessionModel sessionModel : sessionModelList) {
+                SessionResult sessionResult = this.convertSession(sessionModel);
+                list.add(sessionResult);
+            }
+            sessionResults = list;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -168,9 +172,12 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream()
-                    .map(sessionModel -> this.convertSession(sessionModel))
-                    .collect(Collectors.toList());
+            List<SessionResult> list = new ArrayList<>();
+            for (SessionModel sessionModel : sessionModelList) {
+                SessionResult sessionResult = this.convertSession(sessionModel);
+                list.add(sessionResult);
+            }
+            sessionResults = list;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -273,9 +280,23 @@ public class NetworkTrafficService extends AbstractBaseService{
             boolQueryBuilder.filter(QueryBuilders.termsQuery("source.mac", sessionRequest.getMacIds()));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getSeverityEnum())){
-            List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
-            List<Integer> severityList = sessionRequest.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
-                    allSeverityList.stream().filter(v -> v <= sessionRequest.getSeverityEnum().ordinal()).collect(Collectors.toList());
+            List<Integer> allSeverityList = new ArrayList<>();
+            for (SeverityEnum severityEnum : SeverityEnum.values()) {
+                Integer ordinal = severityEnum.ordinal();
+                allSeverityList.add(ordinal);
+            }
+            List<Integer> severityList;
+            if (sessionRequest.getSeverityEnum() == SeverityEnum.ALL) {
+                severityList = allSeverityList;
+            } else {
+                List<Integer> list = new ArrayList<>();
+                for (Integer v : allSeverityList) {
+                    if (v <= sessionRequest.getSeverityEnum().ordinal()) {
+                        list.add(v);
+                    }
+                }
+                severityList = list;
+            }
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
         }
     }

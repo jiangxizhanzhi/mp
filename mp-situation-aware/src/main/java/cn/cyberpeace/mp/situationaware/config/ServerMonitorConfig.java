@@ -73,9 +73,13 @@ public class ServerMonitorConfig {
             cpCloud.setLaunchId(cpCloudMonitor.getLaunchId() + i);
             cpCloud.setProbeName(cpCloudMonitor.getProbeName());
             cpCloud.setServiceList(cpCloudServer);
-            cpCloud.setRestartRestrictList(cpCloudMonitor.getRestartRestrictList().stream()
-                    .filter(r -> cpCloudServer.contains(r))
-                    .collect(Collectors.toList()));
+            List<String> list = new ArrayList<>();
+            for (String r : cpCloudMonitor.getRestartRestrictList()) {
+                if (cpCloudServer.contains(r)) {
+                    list.add(r);
+                }
+            }
+            cpCloud.setRestartRestrictList(list);
             cpCloudSrvMonitors.add(cpCloud);
         }
 
