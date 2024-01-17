@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -380,8 +381,16 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        List<String> flowPortIds = flowTaskModels.stream().map(FlowTaskModel::getFlowPortId).collect(Collectors.toList());
-        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
+        List<String> flowPortIds = new ArrayList<>();
+        for (FlowTaskModel taskModel : flowTaskModels) {
+            String flowPortId = taskModel.getFlowPortId();
+            flowPortIds.add(flowPortId);
+        }
+        List<String> thirdTaskIds = new ArrayList<>();
+        for (FlowTaskModel flowTaskModel : flowTaskModels) {
+            String thirdTaskId = flowTaskModel.getThirdTaskId();
+            thirdTaskIds.add(thirdTaskId);
+        }
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete app task");
@@ -782,7 +791,12 @@ public class AsyncPlatFlowTaskService {
         if (Objects.nonNull(batchStartTaskBO)) {
             // 有batchStartTaskBO，是靶场测评调用
             runType = batchStartTaskBO.getRunType();
-            taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (TaskSipBO taskSipBO : batchStartTaskBO.getTaskSipList()) {
+                String taskId = taskSipBO.getTaskId();
+                list.add(taskId);
+            }
+            taskIds = list;
         }
 
         // 任务存在校验
@@ -794,13 +808,22 @@ public class AsyncPlatFlowTaskService {
 
         // 任务状态校验
         List<String> notRunningTaskIds = new ArrayList<>();
-        List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        List<FlowTaskTaskModel> notRunningTasks = new ArrayList<>();
+        for (FlowTaskTaskModel taskTaskModel : flowTaskTaskModels) {
+            if (TaskTaskStatusEnum.RUNNING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != taskTaskModel.getTaskStatus()) {
+                notRunningTasks.add(taskTaskModel);
+            }
+        }
         if (CollectionUtils.isEmpty(notRunningTasks)) {
             log.error("some tasks are already running");
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
         } else {
-            notRunningTaskIds = notRunningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel notRunningTask : notRunningTasks) {
+                String id = notRunningTask.getId();
+                list.add(id);
+            }
+            notRunningTaskIds = list;
             flowTaskTaskModels = flowTaskTaskService.listByTaskIds(notRunningTaskIds);
         }
 
@@ -822,17 +845,28 @@ public class AsyncPlatFlowTaskService {
         flowTaskRecordService.batchUpdateStatus(0, taskIds);
 
         List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
-        flowTaskTaskModels.forEach(flowTaskTaskModel -> {
-            // 解析任务配置
-            FlowTaskConfModel flowTaskConfModel = flowTaskConfModels.stream().filter(taskConfModel ->
-                    taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())).findFirst().get();
+        for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModels) {// 解析任务配置
+            Optional<FlowTaskConfModel> result = Optional.empty();
+            for (FlowTaskConfModel taskConfModel : flowTaskConfModels) {
+                if (taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())) {
+                    result = Optional.of(taskConfModel);
+                    break;
+                }
+            }
+            FlowTaskConfModel flowTaskConfModel = result.get();
             FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
 
             if (Objects.nonNull(batchStartTaskBO)) {
                 // 靶场测评，不支持持续运行
                 flowTaskConfModel.setKeepRunning(0);
-                TaskSipBO sipBO = batchStartTaskBO.getTaskSipList().stream().filter(taskSipBO ->
-                        flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())).findFirst().get();
+                Optional<TaskSipBO> found = Optional.empty();
+                for (TaskSipBO taskSipBO : batchStartTaskBO.getTaskSipList()) {
+                    if (flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())) {
+                        found = Optional.of(taskSipBO);
+                        break;
+                    }
+                }
+                TaskSipBO sipBO = found.get();
 
                 // 设置源ip
                 String sourceIp = sipBO.getSourceIp();
@@ -878,7 +912,7 @@ public class AsyncPlatFlowTaskService {
                     .attackConfs(flowTaskConf.getAttackConfs())
                     .build();
             flowTaskStartList.add(flowTaskStart);
-        });
+        }
 
         BatchStartFlowTaskRequest batchStartFlowTaskRequest = BatchStartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
@@ -1002,13 +1036,22 @@ public class AsyncPlatFlowTaskService {
 
         List<String> runningTaskIds = new ArrayList<>();
         // 任务状态校验
-        List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        List<FlowTaskTaskModel> runningTasks = new ArrayList<>();
+        for (FlowTaskTaskModel taskTaskModel : flowTaskTaskModels) {
+            if (TaskStatusEnum.RUNNING.toValue() == taskTaskModel.getTaskStatus()) {
+                runningTasks.add(taskTaskModel);
+            }
+        }
         if (CollectionUtils.isEmpty(runningTasks)) {
             log.error("some tasks are not running");
             throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
         } else {
-            runningTaskIds = runningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel runningTask : runningTasks) {
+                String id = runningTask.getId();
+                list.add(id);
+            }
+            runningTaskIds = list;
         }
 
         BatchStopFlowTaskRequest batchStopFlowTaskRequest = BatchStopFlowTaskRequest.builder()
@@ -1109,7 +1152,7 @@ public class AsyncPlatFlowTaskService {
      */
     private void delPorts(FlowActuatorModel flowActuatorModel, List<String> flowPortIds) {
         List<FlowPortModel> flowPortModels = flowPortMapper.selectByPortIds(flowPortIds);
-        flowPortModels.forEach(flowPortModel -> {
+        for (FlowPortModel flowPortModel : flowPortModels) {
             try {
                 // 删除网口信息
                 if (StringUtils.isNotBlank(flowPortModel.getServerPortId())) {
@@ -1136,7 +1179,7 @@ public class AsyncPlatFlowTaskService {
             } catch (Exception e) {
                 log.error("del port error, {}", ExceptionUtils.getStackTrace(e));
             }
-        });
+        }
     }
 
     /**
@@ -1167,10 +1210,10 @@ public class AsyncPlatFlowTaskService {
     public void deleteFlowFile(List<FlowInfoModel> infoModelList) {
         try {
             if (CollectionUtils.isNotEmpty(infoModelList)) {
-                infoModelList.forEach(infoModel -> {
+                for (FlowInfoModel infoModel : infoModelList) {
                     String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
                     FsCommon.delete(filePath);
-                });
+                }
             }
         } catch (Exception e) {
             log.error("delete flow file error, {}", ExceptionUtils.getStackTrace(e));
@@ -1395,8 +1438,16 @@ public class AsyncPlatFlowTaskService {
             return false;
         }
 
-        List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).collect(Collectors.toList());
-        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
+        List<String> taskIds = new ArrayList<>();
+        for (FlowTaskModel model : flowTaskModels) {
+            String id = model.getId();
+            taskIds.add(id);
+        }
+        List<String> thirdTaskIds = new ArrayList<>();
+        for (FlowTaskModel flowTaskModel : flowTaskModels) {
+            String taskId = flowTaskModel.getThirdTaskId();
+            thirdTaskIds.add(taskId);
+        }
         try {
             JSONObject statusObj = new JSONObject();
             JSONArray statusArray = new JSONArray();
@@ -1411,9 +1462,13 @@ public class AsyncPlatFlowTaskService {
                 JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
                     // 校验是否有运行中的任务
-                    long count = rows.stream().filter(row ->
-                            TaskStatusEnum.INIT.toValue() == ((JSONObject) row).getInteger("status")
-                                    || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) row).getInteger("status")).count();
+                    long count = 0L;
+                    for (Object o : rows) {
+                        if (TaskStatusEnum.INIT.toValue() == ((JSONObject) o).getInteger("status")
+                                || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) o).getInteger("status")) {
+                            count++;
+                        }
+                    }
                     if (count > 0) {
                         log.info("batch actuator task is still running for hostUrl: {}", hostUrl);
                         return false;
@@ -1421,10 +1476,17 @@ public class AsyncPlatFlowTaskService {
 
                     List<FlowTaskModel> successTaskModels = new ArrayList<>();
                     List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                    rows.forEach(row -> {
+                    for (Object row : rows) {
                         JSONObject resultObj = (JSONObject) row;
                         String thirdTaskId = resultObj.getString("uuid");
-                        FlowTaskModel taskModel = flowTaskModels.stream().filter(task -> Objects.equals(task.getThirdTaskId(), thirdTaskId)).findFirst().get();
+                        Optional<FlowTaskModel> found = Optional.empty();
+                        for (FlowTaskModel task : flowTaskModels) {
+                            if (Objects.equals(task.getThirdTaskId(), thirdTaskId)) {
+                                found = Optional.of(task);
+                                break;
+                            }
+                        }
+                        FlowTaskModel taskModel = found.get();
 
                         // 判断任务是否运行成功
                         Integer isSuccess = resultObj.getInteger("result");
@@ -1436,7 +1498,7 @@ public class AsyncPlatFlowTaskService {
                             log.info("flow execute error:[{}]", taskModel.getId());
                             errorTaskModels.add(taskModel);
                         }
-                    });
+                    }
 
                     // 批量更新流量任务状态为停止
                     flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);

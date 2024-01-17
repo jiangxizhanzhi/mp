@@ -57,8 +57,13 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         List<FlowScriptDemoModel> flowScriptDemoModels = getModelMapper().listAll(type);
 
         if (CollectionUtils.isNotEmpty(flowScriptDemoModels)) {
-            scriptDemoList = flowScriptDemoModels.stream().map(demo -> new QueryFlowScriptDemoResponse.ScriptDemo(demo.getUrl(),
-                    baseAppConfig.getFdfsOuterHttpServer() + File.separator + demo.getUrl(), demo.getScriptName())).collect(Collectors.toList());
+            List<QueryFlowScriptDemoResponse.ScriptDemo> list = new ArrayList<>();
+            for (FlowScriptDemoModel demo : flowScriptDemoModels) {
+                QueryFlowScriptDemoResponse.ScriptDemo scriptDemo = new QueryFlowScriptDemoResponse.ScriptDemo(demo.getUrl(),
+                        baseAppConfig.getFdfsOuterHttpServer() + File.separator + demo.getUrl(), demo.getScriptName());
+                list.add(scriptDemo);
+            }
+            scriptDemoList = list;
         }
         response.setDemoList(scriptDemoList);
 

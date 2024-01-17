@@ -316,13 +316,19 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
             List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
             if (CollectionUtils.isNotEmpty(taskTaskModels)) {
-                int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
+                long count = 0L;
+                for (FlowTaskTaskModel taskModel : taskTaskModels) {
+                    if (taskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()) {
+                        count++;
+                    }
+                }
+                int runningCount = (int) count;
                 if (runningCount == 0) {
                     // 回调参数封装
                     BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
                     List<FlowTaskModel> successTaskModels = new ArrayList<>();
                     List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                    taskTaskModels.forEach(taskTaskModel -> {
+                    for (FlowTaskTaskModel taskTaskModel : taskTaskModels) {
                         FlowTaskModel flowTaskModel = new FlowTaskModel();
                         flowTaskModel.setFlowId(taskTaskModel.getFlowId());
                         flowTaskModel.setId(taskTaskModel.getId());
@@ -331,7 +337,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                         } else {
                             errorTaskModels.add(flowTaskModel);
                         }
-                    });
+                    }
                     batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
                     batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
 

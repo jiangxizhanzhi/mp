@@ -80,7 +80,11 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
-                        relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+                        new ArrayList<>();
+                for (FlowCollectionRelModel relModel : relModels) {
+                    String flowId = relModel.getFlowId();
+                    idList.add(flowId);
+                }
                 flowInfoModels = this.selectByFlowIds(idList);
             }
         }
@@ -100,7 +104,11 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
-                        relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+                        new ArrayList<>();
+                for (FlowCollectionRelModel relModel : relModels) {
+                    String flowId = relModel.getFlowId();
+                    idList.add(flowId);
+                }
                 flowInfoModels = this.selectByFlowIds(idList);
             }
         }
@@ -124,7 +132,12 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         List<String> addFlowIds = addRequest.getFlowIds();
         List<FlowInfoModel> existFlowInfos = this.selectByFlowIds(addFlowIds);
         if (CollectionUtils.isNotEmpty(existFlowInfos)) {
-            addFlowIds = existFlowInfos.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowInfoModel existFlowInfo : existFlowInfos) {
+                String id = existFlowInfo.getId();
+                list.add(id);
+            }
+            addFlowIds = list;
         } else {
             log.warn("flows not exist for ids:{}", addFlowIds);
             return ResultCommon.success(0);
@@ -132,13 +145,12 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
         if (CollectionUtils.isNotEmpty(addFlowIds)) {
             List<FlowCollectionRelModel> addRelModels = new ArrayList<>();
-            addFlowIds.forEach(flowId -> {
-                // 遍历生成关联对象集合
+            for (String flowId : addFlowIds) {// 遍历生成关联对象集合
                 FlowCollectionRelModel relModel = new FlowCollectionRelModel();
                 relModel.setCollectionId(addRequest.getCollectionId());
                 relModel.setFlowId(flowId);
                 addRelModels.add(relModel);
-            });
+            }
 
             // 更新关联流量数量
             updateRelFlowCount(modelResult.getObj(), addFlowIds, true);
@@ -183,9 +195,21 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(flowIds);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
             // 背景流量数量
-            int backgroundCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.BACKGROUND.toValue() == model.getInteractiveType()).count();
+            long result = 0L;
+            for (FlowInfoModel flowInfoModel : flowInfoModels) {
+                if (InteractiveTypeEnum.BACKGROUND.toValue() == flowInfoModel.getInteractiveType()) {
+                    result++;
+                }
+            }
+            int backgroundCount = (int) result;
             // 攻击流量数量
-            int attackCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()).count();
+            long count = 0L;
+            for (FlowInfoModel model : flowInfoModels) {
+                if (InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()) {
+                    count++;
+                }
+            }
+            int attackCount = (int) count;
             if (isIncrease) {
                 // 增加
                 collectionModel.setBackgroundFlowCount(collectionModel.getBackgroundFlowCount() + backgroundCount);
@@ -232,7 +256,11 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(flowCollectionModel.getId());
         if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
-            List<String> flowIds = request.getFlowInfoList().stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            List<String> flowIds = new ArrayList<>();
+            for (FlowInfoModel flowInfoModel : request.getFlowInfoList()) {
+                String id = flowInfoModel.getId();
+                flowIds.add(id);
+            }
             relRequest.setFlowIds(flowIds);
         }
         this.addCollectionRel(relRequest);
@@ -262,7 +290,11 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(request.getId());
         if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
-            List<String> flowIds = request.getFlowInfoList().stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            List<String> flowIds = new ArrayList<>();
+            for (FlowInfoModel flowInfoModel : request.getFlowInfoList()) {
+                String id = flowInfoModel.getId();
+                flowIds.add(id);
+            }
             relRequest.setFlowIds(flowIds);
             this.addCollectionRel(relRequest);
         }

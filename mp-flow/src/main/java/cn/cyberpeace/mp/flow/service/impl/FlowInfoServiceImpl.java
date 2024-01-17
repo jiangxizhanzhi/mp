@@ -162,12 +162,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
             // 遍历删除流量集合关联信息
-            flowCollectionRelModels.forEach(rel -> {
+            for (FlowCollectionRelModel rel : flowCollectionRelModels) {
                 DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
                 delRelRequest.setCollectionId(rel.getCollectionId());
                 delRelRequest.setFlowIds(Collections.singletonList(id));
                 flowCollectionService.delCollectionRel(delRelRequest);
-            });
+            }
         }
 
         ObjServiceResult<FlowInfoModel> serviceResult = get(id);
@@ -213,15 +213,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
             // 按流量集合id分组关联信息
             Map<String, List<String>> relMap =
-                    flowCollectionRelModels.stream().collect(Collectors.groupingBy(FlowCollectionRelModel::getCollectionId,
-                            Collectors.mapping(FlowCollectionRelModel::getFlowId, Collectors.toList())));
+                    new HashMap<>();
+            for (FlowCollectionRelModel flowCollectionRelModel : flowCollectionRelModels) {
+                String flowId = flowCollectionRelModel.getFlowId();
+                relMap.computeIfAbsent(flowCollectionRelModel.getCollectionId(), k -> new ArrayList<>()).add(flowId);
+            }
             // 遍历删除流量集合关联信息
-            relMap.forEach((collectionId, flowIds) -> {
+            for (Map.Entry<String, List<String>> entry : relMap.entrySet()) {
+                String collectionId = entry.getKey();
+                List<String> flowIds = entry.getValue();
                 DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
                 delRelRequest.setCollectionId(collectionId);
                 delRelRequest.setFlowIds(flowIds);
                 flowCollectionService.delCollectionRel(delRelRequest);
-            });
+            }
         }
 
         List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(idList);
@@ -231,9 +236,18 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             // 过滤攻击流量
             List<FlowInfoModel> attackFlows =
-                    flowInfoModels.stream().filter(flow -> InteractiveTypeEnum.ATTACK.toValue() == flow.getInteractiveType()).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (FlowInfoModel flow : flowInfoModels) {
+                if (InteractiveTypeEnum.ATTACK.toValue() == flow.getInteractiveType()) {
+                    attackFlows.add(flow);
+                }
+            }
             if (CollectionUtils.isNotEmpty(attackFlows)) {
-                List<String> attackFlowIds = attackFlows.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+                List<String> attackFlowIds = new ArrayList<>();
+                for (FlowInfoModel attackFlow : attackFlows) {
+                    String id = attackFlow.getId();
+                    attackFlowIds.add(id);
+                }
                 // 根据流量id批量删除对应的脚本参数信息
                 flowScriptParamService.deleteByFlowIds(attackFlowIds);
             }
@@ -260,32 +274,50 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowInfoResponse> responseList = new ArrayList<>();
         List<FlowInfoModel> flowInfoModels = listObjServiceResult.getSource().getObjs();
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
-            List<String> flowIds = flowInfoModels.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            List<String> flowIds = new ArrayList<>();
+            for (FlowInfoModel flowInfoModel : flowInfoModels) {
+                String id = flowInfoModel.getId();
+                flowIds.add(id);
+            }
             List<FlowScriptParamModel> flowScriptParamModels = flowScriptParamService.selectByFlowIds(flowIds);
-            responseList = listObjServiceResult.getSource().getObjs().stream()
-                    .map(model -> {
-                        List<FlowScriptParamModel> currentFlowParamModels = new ArrayList<>();
-                        if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
-                            currentFlowParamModels =
-                                    flowScriptParamModels.stream().map(scriptParam -> {
-                                        // ip、port的参数说明进行国际化处理
-                                        if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
-                                            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
-                                        } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
-                                            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
-                                        }
-
-                                        return scriptParam;
-                                    }).filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
-                        }
-                        this.internationalize(model);
-                        FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
-                        return response;
-                    })
-                    .collect(Collectors.toList());
+            List<FlowInfoResponse> list = new ArrayList<>();
+            for (FlowInfoModel model : listObjServiceResult.getSource().getObjs()) {
+                FlowInfoResponse flowInfoResponse = getFlowInfoResponse(flowScriptParamModels, model);
+                list.add(flowInfoResponse);
+            }
+            responseList = list;
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+    }
+
+    private FlowInfoResponse getFlowInfoResponse(List<FlowScriptParamModel> flowScriptParamModels, FlowInfoModel model) {
+        List<FlowScriptParamModel> currentFlowParamModels = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
+            List<FlowScriptParamModel> list = new ArrayList<>();
+            for (FlowScriptParamModel scriptParam : flowScriptParamModels) {
+                FlowScriptParamModel param = getFlowScriptParamModel(scriptParam);
+                if (model.getId().equals(param.getFlowId())) {
+                    list.add(param);
+                }
+            }
+            currentFlowParamModels =
+                    list;
+        }
+        this.internationalize(model);
+        FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
+        return response;
+    }
+
+    private static FlowScriptParamModel getFlowScriptParamModel(FlowScriptParamModel scriptParam) {
+        // ip、port的参数说明进行国际化处理
+        if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
+            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
+        } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
+            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
+        }
+
+        return scriptParam;
     }
 
     /**
@@ -330,7 +362,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         List<String> flowIds =
-                flowCollectionRelModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+                new ArrayList<>();
+        for (FlowCollectionRelModel flowCollectionRelModel : flowCollectionRelModels) {
+            String flowId = flowCollectionRelModel.getFlowId();
+            flowIds.add(flowId);
+        }
         FlowInfoQueryParams queryParams = new FlowInfoQueryParams();
         queryParams.setIds(flowIds.toArray(new String[0]));
         ListObjServiceResult<FlowInfoResponse> listObjServiceResult = pageFlowInfo(queryParams);
@@ -412,13 +448,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
                 flowScriptParamModels.stream().map(scriptParam -> {
                     // ip、port的参数说明进行国际化处理
-                    if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
-                        scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
-                    } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
-                        scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
-                    }
-
-                    return scriptParam;
+                    return getFlowScriptParamModel(scriptParam);
                 }).collect(Collectors.toList());
             }
 
@@ -557,7 +587,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (StringUtils.isNotBlank(addRequest.getParameter())) {
                 List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
                 JSONObject paramObj = JSONObject.parseObject(addRequest.getParameter());
-                paramObj.keySet().forEach(paramKey -> {
+                for (String paramKey : paramObj.keySet()) {
                     FlowScriptParamModel paramModel = new FlowScriptParamModel();
                     paramModel.setParamKey(paramKey);
 
@@ -588,7 +618,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     }
 
                     scriptParamModels.add(paramModel);
-                });
+                }
 
                 addRequest.setScriptParamModels(scriptParamModels);
             }
@@ -622,7 +652,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 批量保存流量脚本参数信息
             List<FlowScriptParamModel> scriptParamModels = addRequest.getScriptParamModels();
             if (CollectionUtils.isNotEmpty(scriptParamModels)) {
-                scriptParamModels.forEach(model -> model.setFlowId(resultModel.getId()));
+                for (FlowScriptParamModel model : scriptParamModels) {
+                    model.setFlowId(resultModel.getId());
+                }
                 flowScriptParamService.bulkCreate(scriptParamModels);
             }
 
@@ -758,7 +790,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (StringUtils.isNotBlank(modifyRequest.getParameter())) {
                 List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
                 JSONObject paramObj = JSONObject.parseObject(modifyRequest.getParameter());
-                paramObj.keySet().forEach(paramKey -> {
+                for (String paramKey : paramObj.keySet()) {
                     FlowScriptParamModel paramModel = new FlowScriptParamModel();
                     paramModel.setParamKey(paramKey);
 
@@ -781,7 +813,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     // 参数描述
                     paramModel.setParamDesc(paramArray.getString(2));
                     scriptParamModels.add(paramModel);
-                });
+                }
 
                 modifyRequest.setScriptParamModels(scriptParamModels);
             }
@@ -841,7 +873,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
             if (CollectionUtils.isNotEmpty(scriptParamModels)) {
                 flowScriptParamService.deleteByFlowId(modifyRequest.getId());
-                scriptParamModels.forEach(model -> model.setFlowId(modifyRequest.getId()));
+                for (FlowScriptParamModel model : scriptParamModels) {
+                    model.setFlowId(modifyRequest.getId());
+                }
                 flowScriptParamService.bulkCreate(scriptParamModels);
             }
 
@@ -1032,10 +1066,19 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowScriptParamModel> scriptParamModelList  = flowScriptParamService.getModelMapper().list(new HumanCondition());
 
         // 已经初始化的流量参数
-        Set<String> flowIds = scriptParamModelList.stream().map(FlowScriptParamModel::getFlowId).collect(Collectors.toSet());
+        Set<String> flowIds = new HashSet<>();
+        for (FlowScriptParamModel flowScriptParamModel : scriptParamModelList) {
+            String flowId = flowScriptParamModel.getFlowId();
+            flowIds.add(flowId);
+        }
 
         // 针对攻击脚本类型的流量，检测是否存在参数，不存在则补充创建
-        List<FlowInfoModel> unInitialedModels = flowInfoModelList.stream().filter(info -> !flowIds.contains(info.getId())).collect(Collectors.toList());
+        List<FlowInfoModel> unInitialedModels = new ArrayList<>();
+        for (FlowInfoModel info : flowInfoModelList) {
+            if (!flowIds.contains(info.getId())) {
+                unInitialedModels.add(info);
+            }
+        }
         if(unInitialedModels.isEmpty()){
             log.info("all default flow script params are valid, ignore");
             return;
@@ -1068,7 +1111,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 }
                 List<FlowInfoModel> flowInfoModelList = new ArrayList<>();
 
-                list.forEach(flowFile -> {
+                for (File flowFile : list) {
                     if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
                         String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
                         FlowInfoModel flowInfoModel = new FlowInfoModel();
@@ -1094,7 +1137,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     } else {
                         log.info("过滤非脚本文件:{}", flowFile.getName());
                     }
-                });
+                }
 
                 if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
                     bulkCreate(flowInfoModelList);
@@ -1115,7 +1158,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     private void addDefaultScriptParams(List<FlowInfoModel> flowInfoModelList) {
         List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
-        flowInfoModelList.forEach(flowInfo -> {
+        for (FlowInfoModel flowInfo : flowInfoModelList) {
             log.info("build default script params of flow {}/{}", flowInfo.getId(), flowInfo.getTitle());
             FlowInfoModel flowInfoModel = this.selectByTitle(flowInfo.getTitle());
             FlowScriptParamModel scriptParamIp = new FlowScriptParamModel();
@@ -1132,7 +1175,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             scriptParamPort.setParamType(2);
             scriptParamPort.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
             scriptParamModelList.add(scriptParamPort);
-        });
+        }
 
         flowScriptParamService.bulkCreate(scriptParamModelList);
     }
@@ -1178,7 +1221,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                                 readmeList.add(s);
                             }
                             // 过滤空行数据
-                            readmeList = readmeList.stream().filter(text -> StringUtils.isNotBlank(text)).collect(Collectors.toList());
+                            List<String> list = new ArrayList<>();
+                            for (String text : readmeList) {
+                                if (StringUtils.isNotBlank(text)) {
+                                    list.add(text);
+                                }
+                            }
+                            readmeList = list;
                         } catch (FileNotFoundException e) {
                             log.error("flow info import error for FileNotFoundException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
@@ -1294,7 +1343,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<String> existNameList = new ArrayList<>();
         List<FlowInfoModel> flowInfoModels = getModelMapper().selectByTitles(request.getFileNames());
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
-            existNameList = flowInfoModels.stream().map(FlowInfoModel::getTitle).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowInfoModel flowInfoModel : flowInfoModels) {
+                String title = flowInfoModel.getTitle();
+                list.add(title);
+            }
+            existNameList = list;
         }
 
         return ResultCommon.success(existNameList);
@@ -1421,7 +1475,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
         if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
             List<Runnable> tasks = new ArrayList<>();
-            flowInfoModelList.forEach(flowInfoModel -> tasks.add(() -> initPcapProtocols(flowInfoModel)));
+            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                tasks.add(() -> initPcapProtocols(flowInfoModel));
+            }
             TaskCommon.runTasks(tasks, true, true);
         }
         log.info("end init pcap analyse");
@@ -1439,11 +1495,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 批量更新flowPcap的pcapFile
             List<FlowPcapModel> flowPcapModels = flowPcapService.listAll();
             if (CollectionUtils.isNotEmpty(flowPcapModels)) {
-                flowPcapModels.forEach(flowPcapModel -> flowInfoModelList.forEach(flowInfoModel -> {
-                    if (flowPcapModel.getFlowId().equals(flowInfoModel.getId())) {
-                        flowPcapModel.setPcapFile(flowInfoModel.getPcapFile());
+                for (FlowPcapModel flowPcapModel : flowPcapModels) {
+                    for (FlowInfoModel flowInfoModel : flowInfoModelList) {
+                        if (flowPcapModel.getFlowId().equals(flowInfoModel.getId())) {
+                            flowPcapModel.setPcapFile(flowInfoModel.getPcapFile());
+                        }
                     }
-                }));
+                }
                 flowPcapService.bulkUpdate(flowPcapModels);
             }
         }

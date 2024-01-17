@@ -132,12 +132,15 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ListObjResult<FlowTaskModel> listObjResult = list(queryParams).getSource();
         if (CollectionUtils.isNotEmpty(listObjResult.getList())) {
             // 过滤Trex流量发生平台：状态为执行中和停止中的任务
-            List<FlowTaskModel> taskModelList = listObjResult.getList().stream().filter(model ->
-                    FlowPlatformEnum.TREX.toValue() == model.getFlowPlatform() &&
-                            StringUtils.isNotBlank(model.getThirdTaskId()) &&
-                            (TaskStatusEnum.RUNNING.toValue() == model.getTaskStatus() ||
-                                    (TaskStatusEnum.STOPING.toValue() == model.getTaskStatus())))
-                    .collect(Collectors.toList());
+            List<FlowTaskModel> taskModelList = new ArrayList<>();
+            for (FlowTaskModel model : listObjResult.getList()) {
+                if (FlowPlatformEnum.TREX.toValue() == model.getFlowPlatform() &&
+                        StringUtils.isNotBlank(model.getThirdTaskId()) &&
+                        (TaskStatusEnum.RUNNING.toValue() == model.getTaskStatus() ||
+                                (TaskStatusEnum.STOPING.toValue() == model.getTaskStatus()))) {
+                    taskModelList.add(model);
+                }
+            }
 
             if (CollectionUtils.isNotEmpty(taskModelList)) {
                 // 流量执行器信息查询
@@ -148,11 +151,15 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 }
 
                 List<String> thirdTaskIds =
-                        taskModelList.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
+                        new ArrayList<>();
+                for (FlowTaskModel flowTaskModel : taskModelList) {
+                    String thirdTaskId = flowTaskModel.getThirdTaskId();
+                    thirdTaskIds.add(thirdTaskId);
+                }
 
                 JSONArray rows = this.queryTaskStatus(thirdTaskIds, CommonUtil.getHostUrl(flowActuatorModel.getIp()));
                 if (Objects.nonNull(rows)) {
-                    taskModelList.forEach(task -> {
+                    for (FlowTaskModel task : taskModelList) {
                         for (int i = 0; i < rows.size(); i++) {
                             JSONObject obj = rows.getJSONObject(i);
                             if (task.getThirdTaskId().equals(obj.getString("uuid"))) {
@@ -160,7 +167,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                                 task.setTaskStatus(obj.getInteger("status"));
                             }
                         }
-                    });
+                    }
 
                     // 批量更新本地任务状态
                     bulkUpdate(taskModelList);
@@ -361,7 +368,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             FlowInfoQueryParams flowInfoParams = new FlowInfoQueryParams();
-            String[] flowInfoDelIds = flowTaskList.stream().map(FlowTaskModel::getFlowId).toArray(String[]::new);
+            List<String> list1 = new ArrayList<>();
+            for (FlowTaskModel taskModel : flowTaskList) {
+                String flowId = taskModel.getFlowId();
+                list1.add(flowId);
+            }
+            String[] flowInfoDelIds = list1.toArray(new String[0]);
             flowInfoParams.setIds(flowInfoDelIds);
             flowInfoParams.setPage(BaseConstants.DEFAULT_PAGE);
             flowInfoParams.setPageSize(BaseSingleton.baseAppConfig.getMaxPageSize());
@@ -371,17 +383,39 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             if (CollectionUtils.isNotEmpty(infoModelList)) {
                 // 过滤出所有pcap数据
                 List<String> pcapIdList =
-                        infoModelList.stream().filter(model -> (ResourceTypeEnum.PACP.toValue() == model.getResourceType())).map(FlowInfoModel::getId).collect(Collectors.toList());
-                pcapTaskModels = flowTaskList.stream().filter(task ->
-                                FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
-                                        pcapIdList.contains(task.getFlowId())).collect(Collectors.toList());
+                        new ArrayList<>();
+                for (FlowInfoModel flowInfoModel : infoModelList) {
+                    if ((ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType())) {
+                        String flowInfoModelId = flowInfoModel.getId();
+                        pcapIdList.add(flowInfoModelId);
+                    }
+                }
+                List<FlowTaskModel> result = new ArrayList<>();
+                for (FlowTaskModel flowTaskModel : flowTaskList) {
+                    if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform() &&
+                            pcapIdList.contains(flowTaskModel.getFlowId())) {
+                        result.add(flowTaskModel);
+                    }
+                }
+                pcapTaskModels = result;
 
                 // 过滤出所有script数据
                 List<String> scriptIdList =
-                        infoModelList.stream().filter(model -> (ResourceTypeEnum.SCRIPT.toValue() == model.getResourceType())).map(FlowInfoModel::getId).collect(Collectors.toList());
-                scriptTaskModels = flowTaskList.stream().filter(task ->
-                                FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
-                                        scriptIdList.contains(task.getFlowId())).collect(Collectors.toList());
+                        new ArrayList<>();
+                for (FlowInfoModel model : infoModelList) {
+                    if ((ResourceTypeEnum.SCRIPT.toValue() == model.getResourceType())) {
+                        String id = model.getId();
+                        scriptIdList.add(id);
+                    }
+                }
+                List<FlowTaskModel> list = new ArrayList<>();
+                for (FlowTaskModel task : flowTaskList) {
+                    if (FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
+                            scriptIdList.contains(task.getFlowId())) {
+                        list.add(task);
+                    }
+                }
+                scriptTaskModels = list;
             } else {
                 log.warn("no flow file to delete");
             }
@@ -899,8 +933,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         List<FlowTaskModel> flowTaskModels = objServiceResult.getSource().getObjs();
         if (TaskActionEnum.STOP.toValue() != request.getTaskAction()) {
             // 流量任务状态校验
-            List<String> runningTaskIds = flowTaskModels.stream().filter(flowTaskModel ->
-                    flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()).map(FlowTaskModel::getId).collect(Collectors.toList());
+            List<String> runningTaskIds = new ArrayList<>();
+            for (FlowTaskModel flowTaskModel : flowTaskModels) {
+                if (flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()) {
+                    String id = flowTaskModel.getId();
+                    runningTaskIds.add(id);
+                }
+            }
             if (CollectionUtils.isNotEmpty(runningTaskIds)) {
                 log.error("tasks [{}] are running, can not batch actuator tasks", runningTaskIds);
                 return ResultCommon.fail(FlowErrorCode.TASK_IS_RUNNING);
@@ -916,17 +955,30 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 按顺序封装第三方任务id集合
         List<String> thirdTaskIds = new ArrayList<>();
-        request.getTaskIds().forEach(taskId -> {
+        for (String taskId : request.getTaskIds()) {
             Optional<FlowTaskModel> optionalFlowTaskModel =
-                    flowTaskModels.stream().filter(taskModel -> taskId.equals(taskModel.getId())).findFirst();
+                    Optional.empty();
+            for (FlowTaskModel taskModel : flowTaskModels) {
+                if (taskId.equals(taskModel.getId())) {
+                    optionalFlowTaskModel = Optional.of(taskModel);
+                    break;
+                }
+            }
             if (optionalFlowTaskModel.isPresent()) {
                 FlowTaskModel sortTaskModel = optionalFlowTaskModel.get();
                 thirdTaskIds.add(sortTaskModel.getThirdTaskId());
             }
-        });
+        }
         log.info("Batch actuator flow thirdTaskIds: {}", thirdTaskIds);
         // 任务id集合
-        List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
+        List<String> taskIds = new ArrayList<>();
+        Set<String> uniqueValues = new HashSet<>();
+        for (FlowTaskModel flowTaskModel : flowTaskModels) {
+            String id = flowTaskModel.getId();
+            if (uniqueValues.add(id)) {
+                taskIds.add(id);
+            }
+        }
 
         // 执行任务参数
         JSONObject object = new JSONObject();
