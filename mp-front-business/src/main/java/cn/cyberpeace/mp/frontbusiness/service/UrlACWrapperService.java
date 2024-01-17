@@ -29,7 +29,7 @@ public class UrlACWrapperService {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlAccessCtlDtos();
         Map<String, List<String>> urlTargetsMap = new HashMap<>();
 
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             List<String> targetIds = urlTargetsMap.get(d.getUrl());
             if (CollectionUtils.isEmpty(targetIds)) {
                 targetIds = new ArrayList<>();
@@ -41,7 +41,7 @@ public class UrlACWrapperService {
             } else {
                 log.warn("No targets url detected! {}", d.getUrl());
             }
-        });
+        }
 
         return urlTargetsMap;
     }
@@ -51,7 +51,7 @@ public class UrlACWrapperService {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlACPatternDtos();
         Map<String, List<String>> urlTargetsMap = new HashMap<>();
 
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             List<String> targetIds = urlTargetsMap.get(d.getUrl());
             if (CollectionUtils.isEmpty(targetIds)) {
                 targetIds = new ArrayList<>();
@@ -59,7 +59,7 @@ public class UrlACWrapperService {
             }
 
             urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
-        });
+        }
 
         return urlTargetsMap;
     }
@@ -70,7 +70,7 @@ public class UrlACWrapperService {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlAccessCtlDtos();
         Map<String, List<String>> urlMethodsMap = new HashMap<>();
 
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             List<String> methods = urlMethodsMap.get(d.getUrl());
             if (CollectionUtils.isEmpty(methods)) {
                 methods = new ArrayList<>();
@@ -78,7 +78,7 @@ public class UrlACWrapperService {
             }
 
             urlMethodsMap.get(d.getUrl()).addAll(d.getMethods());
-        });
+        }
 
         return urlMethodsMap;
     }
@@ -87,7 +87,7 @@ public class UrlACWrapperService {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlACPatternDtos();
         Map<String, List<String>> urlMethodsMap = new HashMap<>();
 
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             List<String> methods = urlMethodsMap.get(d.getUrl());
             if (CollectionUtils.isEmpty(methods)) {
                 methods = new ArrayList<>();
@@ -95,7 +95,7 @@ public class UrlACWrapperService {
             }
 
             urlMethodsMap.get(d.getUrl()).addAll(d.getMethods());
-        });
+        }
 
         return urlMethodsMap;
     }
