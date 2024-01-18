@@ -114,9 +114,10 @@ public class ProcessReport extends Thread {
             if (result.asResult().getData().getTotal() > 0) {
                 // 从进程不存在到打开进程 这时候需要通知一次
                 if (!this.nodeProcess.containsKey(nodeId)) {
-                    log.info("query scan process , node {} already report", node.getId());
                     this.nodeProcess.put(nodeId, nodeId);
                     startProcessNodeIds.add(nodeId);
+                } else {
+                    log.info("query scan process , node {} already report", node.getId());
                 }
             } else {
                 this.nodeProcess.remove(nodeId);
@@ -129,9 +130,9 @@ public class ProcessReport extends Thread {
             params.setSceneId(this.csceneId);
             try {
                 String res = HttpUtils.sendPost(appConfig.getBcUrl(), JsonCommon.snakeStringify(params));
-                log.info("cscene id is {} , res is {}", this.csceneId, res);
+                log.info("query scan process,cscene id is {} , res is {}", this.csceneId, res);
             } catch (Exception e) {
-                log.error("cscene id is {} , exception is {}", this.csceneId, ExceptionUtils.getMessage(e));
+                log.error("query scan process,cscene id is {} , exception is {}", this.csceneId, ExceptionUtils.getMessage(e));
             }
         }
     }
