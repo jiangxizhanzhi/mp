@@ -122,8 +122,7 @@ public class HostStateController {
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
-        new ProcessReport(listPageInfoQueryParams.getNodeIds().get(0), listPageInfoQueryParams.getNodeIds().get(1)).start();
-        return null;
+        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
 
     @ApiOperation(value = "节点网卡信息")
