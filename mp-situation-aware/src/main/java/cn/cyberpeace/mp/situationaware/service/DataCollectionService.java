@@ -609,7 +609,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_PROCESS)
     public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();

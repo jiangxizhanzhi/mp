@@ -82,6 +82,12 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable_node_limit_db_check:true}")
     private Boolean enableNodeLimitDbCheck;
 
+    @Value("${mp.cscene.bc_url:http://10.100.1.29:8999/ojj/cr/red_vs_blue/referee/submit_scan_info}")
+    private String bcUrl;
+
+    @Value("${mp.cscene.bc_sleep:5000}")
+    private Integer bcSleep;
+
     @Autowired
     private MessageSource messageSource;
 

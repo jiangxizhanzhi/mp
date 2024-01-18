@@ -1265,15 +1265,56 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        String queryKeyword = listPageInfoQueryParams.getKeyword();
+
+        List<WazuhProcessModel> resultList = totalList.stream()
+                .filter(Objects::nonNull)
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
+
+        List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
+
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
+    }
+
+
+    public ListObjServiceResult<Process> listPageProcessV2(ListPageInfoQueryParams listPageInfoQueryParams,String nodeEid) {
+
+
+        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
+        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Arrays.asList(nodeEid));
+        wazuhRequest.setPageSize(1);
+        // 默认24小时
+        LocalDateTime endTime = LocalDateTime.now().plusHours(5);
+        wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
+        wazuhRequest.setEndTime(endTime);
+
+        if (wazuhRequest.getAgentNames().contains(null)) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
+
+        List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
+
+        int skip = (page - 1) * pageSize;
+        log.info("skip:{}, limit:{}", skip, pageSize);
+        List<String> queryKeyword = listPageInfoQueryParams.getKeyword();
 
         totalList = totalList.stream()
                 .filter(m -> {
-                    if (StringUtils.isEmpty(queryKeyword)) {
+                    if (CollectionUtils.isEmpty(queryKeyword)) {
                         return true;
                     } else {
                         String cmd = m.getCommand();
-                        return StringUtils.isNotEmpty(cmd) && cmd.contains(queryKeyword);
+                        String name = m.getName();
+                        for (String k : queryKeyword) {
+                            if (StringUtils.isNotEmpty(cmd) && (cmd.contains(k) || name.contains(k))) {
+                                return true;
+                            }
+                        }
+                        return false;
                     }
                 }).collect(Collectors.toList());
 

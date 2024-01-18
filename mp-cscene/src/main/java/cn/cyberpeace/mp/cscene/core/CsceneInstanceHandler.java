@@ -93,6 +93,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
         cscene.fromModel(csceneObj);
+
+        new ProcessReport(cscene.getId(), getSceneId()).start();
     }
 
     @Override

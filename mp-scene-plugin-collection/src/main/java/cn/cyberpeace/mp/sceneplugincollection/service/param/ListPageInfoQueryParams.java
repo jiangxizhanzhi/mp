@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class ListPageInfoQueryParams extends BasePageRequest {
@@ -16,7 +17,7 @@ public class ListPageInfoQueryParams extends BasePageRequest {
     private List<String> nodeIds;
 
     @ApiModelProperty(value = "搜索关键字")
-    private String keyword;
+    private List<String> keyword;
 
     @ApiModelProperty(value = "场景关闭情况下是否仍然查询数据，默认false，表示不查询")
     private Boolean fetchIfSceneInstanceShutdown = false;

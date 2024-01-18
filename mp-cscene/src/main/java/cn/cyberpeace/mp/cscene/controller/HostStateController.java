@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.core.ProcessReport;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -121,7 +122,8 @@ public class HostStateController {
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        new ProcessReport(listPageInfoQueryParams.getNodeIds().get(0), listPageInfoQueryParams.getNodeIds().get(1)).start();
+        return null;
     }
 
     @ApiOperation(value = "节点网卡信息")
