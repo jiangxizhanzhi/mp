@@ -36,7 +36,7 @@ public class ProcessReport extends Thread {
 
     private Map<String, String> nodeProcess = new HashMap<>();
 
-    private CsceneAppConfig appConfig ;
+    private CsceneAppConfig appConfig;
 
     @Getter
     @Setter
@@ -81,11 +81,11 @@ public class ProcessReport extends Thread {
         }
 
         var service = BeanCommon.getBean(ScenePluginCollectionSceneService.class);
-
+        log.info("query scan process , cscene {}", csceneId);
         while (true) {
             CsceneInstanceModel cscene = BeanCommon.getBean(CsceneInstanceMapper.class).get(this.csceneId);
             if (cscene == null || Boolean.TRUE.equals(cscene.getDeleted())) {
-                log.info("stop query process , cscene {} deleted", csceneId);
+                log.info("query scan process , cscene deleted so stop thread, cscene {}", csceneId);
                 break;
             } else {
                 this.doQuery(service, this.nodes);
@@ -102,6 +102,7 @@ public class ProcessReport extends Thread {
         List<String> startProcessNodeIds = new ArrayList<>();
         for (SceneElementBO node : nodes) {
             String nodeId = node.getId();
+            log.info("query scan process , start query node {}", nodeId);
             ListPageInfoQueryParams params = new ListPageInfoQueryParams();
             params.setSceneIds(Arrays.asList(this.sceneId));
             params.setNodeIds(Arrays.asList(nodeId));
@@ -109,9 +110,11 @@ public class ProcessReport extends Thread {
             params.setPage(1);
             params.setPerPage(100);
             var result = service.listPageProcessV2(params, node.getEid());
+            log.info("query scan process , node {} exists {} processes", nodeId, result.asResult().getData().getTotal());
             if (result.asResult().getData().getTotal() > 0) {
                 // 从进程不存在到打开进程 这时候需要通知一次
                 if (!this.nodeProcess.containsKey(nodeId)) {
+                    log.info("query scan process , node {} already report", node.getId());
                     this.nodeProcess.put(nodeId, nodeId);
                     startProcessNodeIds.add(nodeId);
                 }
@@ -120,7 +123,7 @@ public class ProcessReport extends Thread {
             }
         }
         if (!startProcessNodeIds.isEmpty()) {
-            log.info("report process , cscene id is {} , nodeId is {}", csceneId, startProcessNodeIds);
+            log.info("query scan process , do report , cscene id is {} , nodeId is {}", csceneId, startProcessNodeIds);
             Params params = new Params();
             params.setNodeIds(startProcessNodeIds);
             params.setSceneId(this.csceneId);
@@ -128,7 +131,7 @@ public class ProcessReport extends Thread {
                 String res = HttpUtils.sendPost(appConfig.getBcUrl(), JsonCommon.snakeStringify(params));
                 log.info("cscene id is {} , res is {}", this.csceneId, res);
             } catch (Exception e) {
-                log.error("cscene id is {} , exception is ", this.csceneId, ExceptionUtils.getMessage(e));
+                log.error("cscene id is {} , exception is {}", this.csceneId, ExceptionUtils.getMessage(e));
             }
         }
     }
