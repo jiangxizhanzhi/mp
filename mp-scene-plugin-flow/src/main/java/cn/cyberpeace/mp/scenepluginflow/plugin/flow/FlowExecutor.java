@@ -180,12 +180,7 @@ public class FlowExecutor {
         }
     }
 
-    public void startFlows(BatchStartTaskBO batchStartTaskBO, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
-//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-//        request.setTaskIds(taskIds);
-//        request.setRunType(runType);
-//        request.setTaskAction(TaskActionEnum.START.toValue());
-//        request.setCallbackConsumer(callbackConsumer);
+    public void startFlows(BatchStartTaskBO batchStartTaskBO) {
         ServiceResult<Boolean> result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
