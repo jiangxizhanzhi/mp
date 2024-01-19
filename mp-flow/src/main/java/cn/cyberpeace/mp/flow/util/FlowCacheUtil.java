@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -40,6 +41,13 @@ public class FlowCacheUtil {
      * 任务consumer缓存
      */
     public static Cache<String, Consumer> taskConsumerCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .build();
+
+    /**
+     * sceneHanlder引用
+     */
+    public static Cache<String, SceneHandler> sceneHandlerCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .build();
 

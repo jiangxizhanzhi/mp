@@ -247,6 +247,12 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    private void stopCallBack(String nodeId){
+        getSceneHandler().asyncAckElementChanged(nodeId, true, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
+    }
     public boolean stopFlow(String nodeId, String flowId) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {

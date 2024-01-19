@@ -72,17 +72,6 @@ public class SceneHandlerUtils {
 
     private boolean startFlow(Flow flow, Runnable stopCallback) {
         String taskId = flow.getTaskId();
-
-        Consumer<String> formatStopCallback = new Consumer<String>() {
-            @Override
-            public void accept(String s) {
-                errorFLow(flow, s);
-                if (Objects.nonNull(stopCallback)) {
-                    stopCallback.run();
-                }
-            }
-        };
-
         try {
             log.info("start flow for taskId:[{}]", taskId);
             String sourceIp = flow.getSourceIp();
@@ -94,7 +83,7 @@ public class SceneHandlerUtils {
                 if (stopCallback != null) {
                     stopCallback.run();
                 }
-            }, formatStopCallback, sourceIp);
+            }, sourceIp);
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
             errorFLow(flow, e.getMessage());
@@ -131,22 +120,8 @@ public class SceneHandlerUtils {
         }
         try {
             log.info("start flows for taskIds:[{}]", taskIds);
-
-            Consumer<BatchActuatorCallbackResponse> callbackConsumer = new Consumer<BatchActuatorCallbackResponse>() {
-                @Override
-                public void accept(BatchActuatorCallbackResponse batchActuatorCallbackResponse) {
-                    log.info("batch tasks run callbackConsumer");
-                    batchActuatorCallbackResponse.getErrorTaskModels().forEach(flowTaskModel -> {
-                        errorFLow(flowMap.get(flowTaskModel.getFlowId()), "Flow execute error");
-                    });
-                    batchActuatorCallbackResponse.getSuccessTaskModels().forEach(flowTaskModel -> {
-                        successOffFLow(flowMap.get(flowTaskModel.getFlowId()));
-                    });
-                }
-            };
-
             String sceneId = pluginHandler.getSourceSceneId();
-            FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, callbackConsumer);
+            FlowCacheUtil.sceneHandlerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, pluginHandler.getSceneHandler());
             if (Objects.nonNull(stopCallback)) {
                 FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + sceneId, ThreadUtils.format(stopCallback));
             }
