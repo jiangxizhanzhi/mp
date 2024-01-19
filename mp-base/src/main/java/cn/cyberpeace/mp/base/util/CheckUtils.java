@@ -16,12 +16,9 @@ public class CheckUtils {
      * @param timeout 超时时间
      * @param stopCheck 停止检查方法
      * @param stopCheckIntervalCount 停止检查间隔次数：每隔一定次数进行一次停止检查
-     * @param callback 检查成功回调
-     * @param timeoutCallback 检查超时回调
      */
-    public static void loopCheck(Callable<Boolean> check, int stepTime, int timeout,
-                                 Callable<Boolean> stopCheck, int stopCheckIntervalCount,
-                                 Runnable callback, Runnable timeoutCallback, String targetName) {
+    public static boolean loopCheck(Callable<Boolean> check, int stepTime, int timeout,
+                                    Callable<Boolean> stopCheck, int stopCheckIntervalCount, String targetName) {
         stepTime = stepTime <= 0 ? 2000 : stepTime;
         timeout = timeout <= 0 ? DEFAULT_LOOP_CHECK_TIMEOUT : timeout;
         stopCheckIntervalCount = stopCheckIntervalCount <= 0 ? 1 : stopCheckIntervalCount;
@@ -41,10 +38,7 @@ public class CheckUtils {
             // 探测成功
             if (Boolean.TRUE.equals(checkFlag)) {
                 log.info("Loop check {} ok", targetName);
-                if (callback != null) {
-                    callback.run();
-                }
-                break;
+                return true;
             }
 
             // 限制探测频率
@@ -64,9 +58,6 @@ public class CheckUtils {
             // 超时不再检查
             if (allTime >= timeout) {
                 log.info("Loop check {} timout", targetName);
-                if (timeoutCallback != null) {
-                    timeoutCallback.run();
-                }
                 break;
             } else if (stopCheck != null) {
                 // 每隔一定次数进行停止检查
@@ -86,6 +77,7 @@ public class CheckUtils {
                 }
             }
         }
+        return false;
     }
 
 }
