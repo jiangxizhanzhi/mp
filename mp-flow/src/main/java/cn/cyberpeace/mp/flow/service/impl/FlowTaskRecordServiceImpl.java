@@ -14,8 +14,6 @@ import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +25,6 @@ import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Service
 @Slf4j
@@ -294,16 +291,12 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
      */
     private void taskCallback(FlowTaskTaskModel flowTaskTaskModel, String msg) {
         String taskId = flowTaskTaskModel.getId();
-        Runnable taskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
-        if (Objects.nonNull(taskRunnable)) {
-            log.info("call task runnable for: {}", taskId);
-            taskRunnable.run();
-            FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
-        }
+        log.info("call task runnable for: {}", taskId);
+        flowPostService.onFlowTaskOver(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId());
 
         if (StringUtils.isNotBlank(msg)) {
             // 有错误信息，代表执行异常
-            flowPostService.onTaskError(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId(), msg);
+            flowPostService.onFlowTaskError(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId(), msg);
         }
 
         // 批量执行校验
@@ -342,14 +335,10 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                 batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
 
                 log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
-                flowPostService.onSceneTaskError(sceneId, nodeId, batchActuatorCallbackResponse);
+                flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorCallbackResponse);
 
-                Runnable batchTaskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
-                if (Objects.nonNull(batchTaskRunnable)) {
-                    log.info("batch tasks run runnable");
-                    batchTaskRunnable.run();
-                    FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
-                }
+                log.info("batch tasks run runnable");
+                flowPostService.onStopTaskNode(sceneId, nodeId);
             }
         } else {
             log.error("no batch tasks for sceneId: {}", sceneId);

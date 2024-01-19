@@ -162,8 +162,7 @@ public class FlowExecutor {
         return addFlowTaskRequest;
     }
 
-    public void startFlow(String taskId, Runnable stopCallback, String sourceIp) {
-        FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + taskId, ThreadUtils.format(stopCallback));
+    public void startFlow(String taskId, String sourceIp) {
         ServiceResult<Boolean> result = flowService1.startTask(taskId, sourceIp);
 //        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {

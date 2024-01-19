@@ -12,42 +12,10 @@ import java.util.function.Consumer;
  * @Date：2022/11/16 11:28
  */
 public class FlowCacheUtil {
-
-    /**
-     * consummer前缀
-     */
-    public static final String CONSUMER_PREFIX = "CONSUMER";
-
-    /**
-     * runnable前缀
-     */
-    public static final String RUNNABLE_PREFIX = "RUNNABLE";
-
     /**
      * pcap包解析缓存
      */
     public static Cache<String, String> pcapAnalyseCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .build();
-
-    /**
-     * 任务runnable缓存
-     */
-    public static Cache<String, Runnable> taskRunnableCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .build();
-
-    /**
-     * 任务consumer缓存
-     */
-    public static Cache<String, Consumer> taskConsumerCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .build();
-
-    /**
-     * sceneHanlder引用
-     */
-    public static Cache<String, SceneHandler> sceneHandlerCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .build();
 

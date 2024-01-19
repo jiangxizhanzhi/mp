@@ -229,12 +229,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
-        boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, () -> {
-            asyncAckElementChanged(nodeId, true);
-            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                getSceneHandler().updateSceneElementWithPlugins(nodeId);
-            }
-        }, async, () -> {
+        boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, async, () -> {
             asyncAckElementChanged(nodeId, true);
             if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
                 getSceneHandler().updateSceneElementWithPlugins(nodeId);
@@ -324,13 +319,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        boolean flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
-                    log.info("batch tasks run stopCallback");
-                    asyncAckElementChanged(nodeId, true);
-                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                        getSceneHandler().updateSceneElementWithPlugins(nodeId);
-                    }
-                }, async, () -> {
+        boolean flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, async, () -> {
                     log.info("batch tasks run asyncCallback");
                     asyncAckElementChanged(nodeId, true);
                     if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
