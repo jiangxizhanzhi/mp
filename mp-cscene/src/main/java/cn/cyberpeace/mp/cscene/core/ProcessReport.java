@@ -81,7 +81,7 @@ public class ProcessReport extends Thread {
         }
 
         var service = BeanCommon.getBean(ScenePluginCollectionSceneService.class);
-        log.info("query scan process , cscene {}", csceneId);
+        log.info("query scan process , cscene {} , query params is {}", csceneId, JsonCommon.stringify(query));
         while (true) {
             CsceneInstanceModel cscene = BeanCommon.getBean(CsceneInstanceMapper.class).get(this.csceneId);
             if (cscene == null || Boolean.TRUE.equals(cscene.getDeleted())) {
