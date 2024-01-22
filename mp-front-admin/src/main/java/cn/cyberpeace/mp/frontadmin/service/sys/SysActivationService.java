@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
+import cn.cyberpeace.mp.frontadmin.job.SysCtlService;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
@@ -52,8 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Description: 系统激活相关service

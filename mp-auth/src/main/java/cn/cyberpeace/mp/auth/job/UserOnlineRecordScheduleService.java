@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.auth.job;
 
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
