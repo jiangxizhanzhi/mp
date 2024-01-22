@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -33,12 +32,6 @@ import java.util.Set;
 
 
 @Slf4j
-@ClassFieldClasses({
-        CloudPluginSceneConfigBO.class,
-        CloudPluginSceneConfigElementBO.class,
-        CloudPluginSceneConfigElementPortBO.class,
-        Object.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<CloudPluginSceneConfigBO,
@@ -286,5 +279,13 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     protected void validateData(BaseScenePluginDataBO validateData) {
         Set<ConstraintViolation<BaseScenePluginDataBO>> validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CloudPluginSceneConfigBO.class;
+        super.elementBOClass = CloudPluginSceneConfigElementBO.class;
+        super.elementPortBOClass = CloudPluginSceneConfigElementPortBO.class;
+        super.contextClass = Object.class;
     }
 }

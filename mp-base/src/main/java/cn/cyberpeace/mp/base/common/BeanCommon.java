@@ -1,14 +1,10 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
-import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 
 @Component
@@ -36,33 +32,5 @@ public class BeanCommon implements ApplicationContextAware {
 
     public static <T> Map<String, T> getBeanType(Class<T> clazz) {
         return context.getBeansOfType(clazz);
-    }
-
-    public static void loadBeanFields(Object obj) {
-        Class<?> clazz = obj.getClass();
-        BeanFieldNames beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
-        if (beanFieldNamesAnnotation == null) {
-            return;
-        }
-        BeanFieldClasses beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
-        if (beanFieldClassesAnnotation == null) {
-            return;
-        }
-
-        String[] fieldNames = beanFieldNamesAnnotation.value();
-        Class<?>[] fieldClasses = beanFieldClassesAnnotation.value();
-        if (fieldNames.length != fieldClasses.length) {
-            return;
-        }
-
-        for (int i = 0; i < fieldNames.length; i++) {
-            String fieldName = fieldNames[i];
-            Field field = ClassUtils.getField(clazz, fieldName, true, false);
-            if (field == null) {
-                continue;
-            }
-
-            ClassUtils.setFieldValue(field, obj, getBean(fieldClasses[i]));
-        }
     }
 }

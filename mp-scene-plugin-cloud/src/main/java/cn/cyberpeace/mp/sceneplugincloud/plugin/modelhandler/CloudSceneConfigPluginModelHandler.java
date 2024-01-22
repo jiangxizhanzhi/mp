@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler;
 
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -22,35 +21,27 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper
  * 场景实例的处理
  * 场景实例的功能由本类对外提供
  */
-@ClassFieldClasses({
-        CloudPluginSceneConfigBO.class,
-        CloudPluginSceneConfigElementBO.class,
-        CloudPluginSceneConfigElementPortBO.class,
-        CloudPluginSceneConfigModel.class,
-        CloudPluginSceneConfigElementModel.class,
-        CloudPluginSceneConfigElementPortModel.class,
-})
-@BeanFieldClasses({
-        CloudPluginSceneConfigMapper.class,
-        CloudPluginSceneConfigElementMapper.class,
-        CloudPluginSceneConfigElementPortMapper.class,
-})
-public class CloudSceneConfigPluginModelHandler extends BasePluginModelHandler<
-        SceneConfigBO,
-        SceneConfigElementBO,
-        SceneConfigElementPortBO,
-        CloudPluginSceneConfigModel,
-        CloudPluginSceneConfigElementModel,
-        CloudPluginSceneConfigElementPortModel,
-        CloudPluginSceneConfigBO,
-        CloudPluginSceneConfigElementBO,
-        CloudPluginSceneConfigElementPortBO,
-        CloudPluginSceneConfigMapper,
-        CloudPluginSceneConfigElementMapper,
-        CloudPluginSceneConfigElementPortMapper,
-        CloudSceneConfigPluginHandler> {
+public class CloudSceneConfigPluginModelHandler extends BasePluginModelHandler<SceneConfigBO, SceneConfigElementBO, SceneConfigElementPortBO, CloudPluginSceneConfigModel, CloudPluginSceneConfigElementModel, CloudPluginSceneConfigElementPortModel, CloudPluginSceneConfigBO, CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, CloudPluginSceneConfigMapper, CloudPluginSceneConfigElementMapper, CloudPluginSceneConfigElementPortMapper, CloudSceneConfigPluginHandler> {
 
     public CloudSceneConfigPluginModelHandler(CloudSceneConfigPluginHandler pluginHandler) {
         init(pluginHandler);
     }
+
+    @Override
+    protected void initClass() {
+        super.pluginSceneBOClass = CloudPluginSceneConfigBO.class;
+        super.pluginSceneElementBOClass = CloudPluginSceneConfigElementBO.class;
+        super.pluginSceneElementPortBOClass = CloudPluginSceneConfigElementPortBO.class;
+        super.pluginSceneModelClass = CloudPluginSceneConfigModel.class;
+        super.pluginSceneElementModelClass = CloudPluginSceneConfigElementModel.class;
+        super.pluginSceneElementPortModelClass = CloudPluginSceneConfigElementPortModel.class;
+    }
+
+    @Override
+    protected void initMapper() {
+        super.pluginSceneMapper = BeanCommon.getBean(CloudPluginSceneConfigMapper.class);
+        super.pluginSceneElementMapper = BeanCommon.getBean(CloudPluginSceneConfigElementMapper.class);
+        super.pluginSceneElementPortMapper = BeanCommon.getBean(CloudPluginSceneConfigElementPortMapper.class);
+    }
+
 }

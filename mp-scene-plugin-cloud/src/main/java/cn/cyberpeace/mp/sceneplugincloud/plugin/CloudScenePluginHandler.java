@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -19,7 +18,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -64,15 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-
-@ClassFieldClasses({
-        CloudPluginSceneBO.class,
-        CloudPluginSceneElementBO.class,
-        CloudPluginSceneElementPortBO.class,
-        CloudScenePluginContext.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
@@ -854,5 +844,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             }
         }
         return list;
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CloudPluginSceneBO.class;
+        super.elementBOClass = CloudPluginSceneElementBO.class;
+        super.elementPortBOClass = CloudPluginSceneElementPortBO.class;
+        super.contextClass = CloudScenePluginContext.class;
     }
 }

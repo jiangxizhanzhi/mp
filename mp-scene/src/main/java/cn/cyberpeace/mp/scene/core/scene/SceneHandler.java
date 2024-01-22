@@ -3,8 +3,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -55,6 +54,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -62,36 +62,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 场景实例的处理
  * 场景实例的功能由本类对外提供
  */
 @Slf4j
-@ClassFieldClasses({
-        SceneDataBO.class,
-        SceneTopologyBO.class,
-        SceneBO.class,
-        SceneAreaBO.class,
-        SceneElementBO.class,
-        SceneElementPortBO.class,
-        SceneElementPortConnectionBO.class,
-        ScenePieceBO.class,
-        SceneModel.class,
-        SceneAreaModel.class,
-        SceneElementModel.class,
-        SceneElementPortModel.class,
-        SceneElementPortConnectionModel.class,
-        SceneElementPluginModel.class,
-        ScenePieceModel.class,
-        ScenePluginHandler.class,
-        SceneHandler.class,
-})
 public class SceneHandler extends BaseSceneHandler<
         SceneModel,
         SceneAreaModel,
@@ -206,6 +186,29 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneElementPortConnectionMapper.class);
         super.sceneElementPluginMapper = BeanCommon.getBean(SceneElementPluginMapper.class);
         super.scenePieceMapper = BeanCommon.getBean(ScenePieceMapper.class);
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneDataBOClass = SceneDataBO.class;
+        super.sceneTopologyBOClass = SceneTopologyBO.class;
+        super.sceneBOClass = SceneBO.class;
+        super.sceneAreaBOClass = SceneAreaBO.class;
+        super.sceneElementBOClass = SceneElementBO.class;
+        super.sceneElementPortBOClass = SceneElementPortBO.class;
+        super.sceneElementPortConnectionBOClass = SceneElementPortConnectionBO.class;
+        super.scenePieceBOClass = ScenePieceBO.class;
+        super.sceneModelClass = SceneModel.class;
+        super.sceneAreaModelClass = SceneAreaModel.class;
+        super.sceneElementModelClass = SceneElementModel.class;
+        super.sceneElementPortModelClass = SceneElementPortModel.class;
+        super.sceneElementPortConnectionModelClass = SceneElementPortConnectionModel.class;
+        super.sceneElementPluginModelClass = SceneElementPluginModel.class;
+        super.scenePieceModelClass = ScenePieceModel.class;
+        super.sceneHandlerClass = SceneHandler.class;
+
+        Field field = ClassUtils.getField(this.getClass(), "scenePluginHandlerInterface", true, false);
+        ClassUtils.setFieldValue(field, this, ScenePluginHandler.class);
     }
 
     @Override

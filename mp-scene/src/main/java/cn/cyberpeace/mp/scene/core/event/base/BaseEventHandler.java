@@ -1,9 +1,8 @@
 package cn.cyberpeace.mp.scene.core.event.base;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -15,26 +14,23 @@ import java.util.Map;
 
 /**
  * 事件处理
- * @param <M> 事件目标模型类
- * @param <E> 事件模型类
+ * @param <TEventModelInterface> 事件目标模型类
+ * @param <TEventModel> 事件模型类
  *           1.不做特殊处理
  *           2.当前最新事件状态存储到缓存（TODO）
  *           3.事件每一个状态变化都持久化（暂不实现）
  */
-@ClassFieldNames({
-        "eventModelClass",
-})
 @Slf4j
 @Data
-public abstract class BaseEventHandler<M extends BaseEventModel, E extends EventModel> {
+public abstract class BaseEventHandler<TEventModelInterface extends BaseEventModel, TEventModel extends EventModel> {
 
     public static final String EVENT_NAME_PREFIX = "scene.event.";
 
     /** 事件目标 */
-    private M target;
+    private TEventModelInterface target;
 
     /** 事件模型类 */
-    private Class<E> eventModelClass;
+    protected Class<TEventModel> eventModelClass;
 
     /** 当前管理事件 */
     private Integer event;
@@ -67,14 +63,14 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 1.即时同步到事件目标上
      * 2.存储事件状态（TODO）
      */
-    private E saveEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
+    private TEventModel saveEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         target.setEvent(event);
         target.setEventStatus(eventStatus);
         target.setProcess(process);
         target.setProcessStatus(processStatus);
         target.setProcessMessage(processMessage);
 
-        E eventObj = ClassUtils.createInstance(eventModelClass);
+        TEventModel eventObj = ClassUtils.createInstance(eventModelClass);
         eventObj.setTarget(target.genTarget());
         eventObj.setEvent(event);
         eventObj.setEventStatus(eventStatus);
@@ -96,7 +92,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      */
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         if (acquireEventLock(event, eventStatus, process, processStatus)) {
-            E eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
+            TEventModel eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
             if (eventObj == null) {
                 releaseEventLock(event, eventStatus, process, processStatus);
                 log.error("{} save event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
@@ -132,8 +128,8 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * @param target 事件目标
      * @param event 当前管理事件
      */
-    public void init(M target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
-        ClassUtils.loadClassFields(this);
+    public void init(TEventModelInterface target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
+        this.initClass();
         this.target = target;
         this.event = event;
         this.eventName = eventName;
@@ -142,7 +138,9 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         checkEvent();
     }
 
-    public BaseEventHandler(M target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
+    protected abstract void initClass();
+
+    public BaseEventHandler(TEventModelInterface target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
         init(target, event, eventName, eventTransition);
     }
 

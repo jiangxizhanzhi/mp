@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
@@ -68,68 +67,48 @@ import java.util.stream.Collectors;
  *
  * TODO: 部分节点模式，只对部分节点进行有限的处理
  *
- * @param <SceneModel> 表模型类   场景模板/场景实例
- * @param <SceneAreaModel> 表模型类   区域节点
- * @param <SceneElementModel> 表模型类   网元节点
- * @param <SceneElementPortModel> 表模型类   网元端口
- * @param <SceneElementPortConnectionModel> 表模型类   网元端口连接（也代表节点之间连接）
- * @param <SceneElementPluginModel> 表模型类   网元节点插件关系
- * @param <ScenePieceModel> 表模型类   碎片节点
- * @param <SceneBO>  业务模型类  场景模板/场景实例
- * @param <SceneAreaBO>  业务模型类  区域节点
- * @param <SceneElementPortBO>  业务模型类  网元端口
- * @param <SceneElementBO>  业务模型类  网元节点
- * @param <SceneElementPortConnectionBO>  业务模型类  网元端口连接（也代表节点之间连接）
- * @param <ScenePieceBO> 业务模型类  碎片节点
- * @param <SceneTopologyBO>  业务模型类  场景拓扑数据
- * @param <SceneDataBO>  业务模型类  场景数据（包含拓扑数据、插件数据）
- * @param <SceneContextBO> 场景上下文
- * @param <ScenePluginHandler> 场景插件处理接口类
- * @param <SceneHandler> 场景处理实现类
+ * @param <TSceneModel> 表模型类   场景模板/场景实例
+ * @param <TSceneAreaModel> 表模型类   区域节点
+ * @param <TSceneElementModel> 表模型类   网元节点
+ * @param <TSceneElementPortModel> 表模型类   网元端口
+ * @param <TSceneElementPortConnectionModel> 表模型类   网元端口连接（也代表节点之间连接）
+ * @param <TSceneElementPluginModel> 表模型类   网元节点插件关系
+ * @param <TScenePieceModel> 表模型类   碎片节点
+ * @param <TSceneBO>  业务模型类  场景模板/场景实例
+ * @param <TSceneAreaBO>  业务模型类  区域节点
+ * @param <TSceneElementPortBO>  业务模型类  网元端口
+ * @param <TSceneElementBO>  业务模型类  网元节点
+ * @param <TSceneElementPortConnectionBO>  业务模型类  网元端口连接（也代表节点之间连接）
+ * @param <TScenePieceBO> 业务模型类  碎片节点
+ * @param <TSceneTopologyBO>  业务模型类  场景拓扑数据
+ * @param <TSceneDataBO>  业务模型类  场景数据（包含拓扑数据、插件数据）
+ * @param <TSceneContextBO> 场景上下文
+ * @param <TScenePluginHandler> 场景插件处理接口类
+ * @param <TSceneHandler> 场景处理实现类
  */
-@ClassFieldNames({
-        "sceneDataBOClass",
-        "sceneTopologyBOClass",
-        "sceneBOClass",
-        "sceneAreaBOClass",
-        "sceneElementBOClass",
-        "sceneElementPortBOClass",
-        "sceneElementPortConnectionBOClass",
-        "scenePieceBOClass",
-        "sceneModelClass",
-        "sceneAreaModelClass",
-        "sceneElementModelClass",
-        "sceneElementPortModelClass",
-        "sceneElementPortConnectionModelClass",
-        "sceneElementPluginModelClass",
-        "scenePieceModelClass",
-        "scenePluginHandlerInterface",
-        "sceneHandlerClass",
-})
 @Getter
 public abstract class BaseSceneHandler<
-        SceneModel extends BaseSceneModel,
-        SceneAreaModel extends BaseSceneAreaModel,
-        SceneElementModel extends BaseSceneElementModel,
-        SceneElementPortModel extends BaseSceneElementPortModel,
-        SceneElementPortConnectionModel extends BaseSceneElementPortConnectionModel,
-        SceneElementPluginModel extends BaseSceneElementPluginModel,
-        ScenePieceModel extends BaseScenePieceModel,
-        SceneBO extends BaseSceneBO<SceneModel, SceneBO>,
-        SceneAreaBO extends BaseSceneAreaBO<SceneAreaModel, SceneAreaBO>,
-        SceneElementPortBO extends BaseSceneElementPortBO<SceneElementPortModel, SceneElementPortBO, SceneElementBO>,
-        SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneElementPortBO, SceneElementBO>,
-        SceneElementPortConnectionBO extends BaseSceneElementPortConnectionBO<SceneElementPortConnectionModel, SceneElementPortConnectionBO>,
-        ScenePieceBO extends BaseScenePieceBO<ScenePieceModel, ScenePieceBO>,
-        SceneTopologyBO extends BaseSceneTopologyBO<SceneModel, SceneAreaModel, SceneElementModel, SceneElementPortModel, SceneElementPortConnectionModel, ScenePieceModel, SceneBO, SceneAreaBO, SceneElementPortBO, SceneElementBO, SceneElementPortConnectionBO, ScenePieceBO, SceneTopologyBO>,
-        SceneDataBO extends BaseSceneDataBO<SceneModel, SceneAreaModel, SceneElementModel, SceneElementPortModel, SceneElementPortConnectionModel, ScenePieceModel, SceneBO, SceneAreaBO, SceneElementPortBO, SceneElementBO, SceneElementPortConnectionBO, ScenePieceBO, SceneTopologyBO, SceneDataBO>,
-        SceneContextBO extends BaseSceneContextBO,
-        ScenePluginHandler extends BasePluginHandler<?, ?, ?, ?>,
-        SceneHandler extends BaseSceneHandler<SceneModel, SceneAreaModel, SceneElementModel, SceneElementPortModel, SceneElementPortConnectionModel, SceneElementPluginModel, ScenePieceModel,
-                SceneBO, SceneAreaBO, SceneElementPortBO, SceneElementBO, SceneElementPortConnectionBO, ScenePieceBO, SceneTopologyBO, SceneDataBO, SceneContextBO, ScenePluginHandler, SceneHandler>> {
+        TSceneModel extends BaseSceneModel,
+        TSceneAreaModel extends BaseSceneAreaModel,
+        TSceneElementModel extends BaseSceneElementModel,
+        TSceneElementPortModel extends BaseSceneElementPortModel,
+        TSceneElementPortConnectionModel extends BaseSceneElementPortConnectionModel,
+        TSceneElementPluginModel extends BaseSceneElementPluginModel,
+        TScenePieceModel extends BaseScenePieceModel,
+        TSceneBO extends BaseSceneBO<TSceneModel, TSceneBO>,
+        TSceneAreaBO extends BaseSceneAreaBO<TSceneAreaModel, TSceneAreaBO>,
+        TSceneElementPortBO extends BaseSceneElementPortBO<TSceneElementPortModel, TSceneElementPortBO, TSceneElementBO>,
+        TSceneElementBO extends BaseSceneElementBO<TSceneElementModel, TSceneElementPortBO, TSceneElementBO>,
+        TSceneElementPortConnectionBO extends BaseSceneElementPortConnectionBO<TSceneElementPortConnectionModel, TSceneElementPortConnectionBO>,
+        TScenePieceBO extends BaseScenePieceBO<TScenePieceModel, TScenePieceBO>,
+        TSceneTopologyBO extends BaseSceneTopologyBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO>,
+        TSceneDataBO extends BaseSceneDataBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO, TSceneDataBO>,
+        TSceneContextBO extends BaseSceneContextBO,
+        TScenePluginHandler extends BasePluginHandler<?, ?, ?, ?>,
+        TSceneHandler extends BaseSceneHandler<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TSceneElementPluginModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO, TSceneDataBO, TSceneContextBO, TScenePluginHandler, TSceneHandler>> {
 
     /** 上下文 */
-    private SceneContextBO context;
+    private TSceneContextBO context;
     /** 是否区域模式 */
     private boolean isAreaMode;
     /** 场景模板/场景实例id */
@@ -137,17 +116,17 @@ public abstract class BaseSceneHandler<
     /** 区域模式下，当前区域id */
     private String areaId;
     /** 场景模板/场景实例 */
-    private SceneBO scene;
+    private TSceneBO scene;
     /** 碎片节点集合 */
-    private final Map<String, ScenePieceBO> pieceMap = new ConcurrentHashMap<>();
+    private final Map<String, TScenePieceBO> pieceMap = new ConcurrentHashMap<>();
     /** 区域节点集合 */
-    private final Map<String, SceneAreaBO> areaMap = new ConcurrentHashMap<>();
+    private final Map<String, TSceneAreaBO> areaMap = new ConcurrentHashMap<>();
     /** 网元节点集合 */
-    private final Map<String, SceneElementBO> elementMap = new ConcurrentHashMap<>();
+    private final Map<String, TSceneElementBO> elementMap = new ConcurrentHashMap<>();
     /** 网元端口集合 */
-    private final Map<String, SceneElementPortBO> elementPortMap = new ConcurrentHashMap<>();
+    private final Map<String, TSceneElementPortBO> elementPortMap = new ConcurrentHashMap<>();
     /** 网元端口连接集合 */
-    private final Map<String, SceneElementPortConnectionBO> elementPortConnectionMap = new ConcurrentHashMap<>();
+    private final Map<String, TSceneElementPortConnectionBO> elementPortConnectionMap = new ConcurrentHashMap<>();
     /** 区域外连接端口id集合 */
     private final Set<String> outerConnectionPortIds = new CopyOnWriteArraySet<>();
     /** 场景插件数据，key为插件代号 */
@@ -155,42 +134,42 @@ public abstract class BaseSceneHandler<
 
     // 辅助变量
     /** 端口所属节点映射 */
-    private final Map<String, SceneElementBO> portIdElementMap = new ConcurrentHashMap<>();
+    private final Map<String, TSceneElementBO> portIdElementMap = new ConcurrentHashMap<>();
     /** 端口连接端口映射 */
     private final Map<String, String> portIdConnectedPortIdMap = new ConcurrentHashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
-    private Class<SceneDataBO> sceneDataBOClass;
-    private Class<SceneTopologyBO> sceneTopologyBOClass;
-    private Class<SceneBO> sceneBOClass;
-    private Class<SceneAreaBO> sceneAreaBOClass;
-    private Class<SceneElementBO> sceneElementBOClass;
-    private Class<SceneElementPortBO> sceneElementPortBOClass;
-    private Class<SceneElementPortConnectionBO> sceneElementPortConnectionBOClass;
-    private Class<ScenePieceBO> scenePieceBOClass;
-    private Class<SceneModel> sceneModelClass;
-    private Class<SceneAreaModel> sceneAreaModelClass;
-    private Class<SceneElementModel> sceneElementModelClass;
-    private Class<SceneElementPortModel> sceneElementPortModelClass;
-    private Class<SceneElementPortConnectionModel> sceneElementPortConnectionModelClass;
-    private Class<SceneElementPluginModel> sceneElementPluginModelClass;
-    private Class<ScenePieceModel> scenePieceModelClass;
-    private Class<ScenePluginHandler> scenePluginHandlerInterface;
-    private Class<SceneHandler> sceneHandlerClass;
+    protected Class<TSceneDataBO> sceneDataBOClass;
+    protected Class<TSceneTopologyBO> sceneTopologyBOClass;
+    protected Class<TSceneBO> sceneBOClass;
+    protected Class<TSceneAreaBO> sceneAreaBOClass;
+    protected Class<TSceneElementBO> sceneElementBOClass;
+    protected Class<TSceneElementPortBO> sceneElementPortBOClass;
+    protected Class<TSceneElementPortConnectionBO> sceneElementPortConnectionBOClass;
+    protected Class<TScenePieceBO> scenePieceBOClass;
+    protected Class<TSceneModel> sceneModelClass;
+    protected Class<TSceneAreaModel> sceneAreaModelClass;
+    protected Class<TSceneElementModel> sceneElementModelClass;
+    protected Class<TSceneElementPortModel> sceneElementPortModelClass;
+    protected Class<TSceneElementPortConnectionModel> sceneElementPortConnectionModelClass;
+    protected Class<TSceneElementPluginModel> sceneElementPluginModelClass;
+    protected Class<TScenePieceModel> scenePieceModelClass;
+    protected Class<TScenePluginHandler> scenePluginHandlerInterface;
+    protected Class<TSceneHandler> sceneHandlerClass;
 
-    protected BaseSceneMapper<SceneModel> sceneMapper;
-    protected BaseSceneAreaMapper<SceneAreaModel> sceneAreaMapper;
-    protected BaseSceneElementMapper<SceneElementModel> sceneElementMapper;
-    protected BaseSceneElementPortMapper<SceneElementPortModel> sceneElementPortMapper;
-    protected BaseSceneElementPortConnectionMapper<SceneElementPortConnectionModel> sceneElementPortConnectionMapper;
-    protected BaseSceneElementPluginMapper<SceneElementPluginModel> sceneElementPluginMapper;
-    protected BaseScenePieceMapper<ScenePieceModel> scenePieceMapper;
+    protected BaseSceneMapper<TSceneModel> sceneMapper;
+    protected BaseSceneAreaMapper<TSceneAreaModel> sceneAreaMapper;
+    protected BaseSceneElementMapper<TSceneElementModel> sceneElementMapper;
+    protected BaseSceneElementPortMapper<TSceneElementPortModel> sceneElementPortMapper;
+    protected BaseSceneElementPortConnectionMapper<TSceneElementPortConnectionModel> sceneElementPortConnectionMapper;
+    protected BaseSceneElementPluginMapper<TSceneElementPluginModel> sceneElementPluginMapper;
+    protected BaseScenePieceMapper<TScenePieceModel> scenePieceMapper;
 
     /** 插件数据处理对象集合 */
-    private final List<ScenePluginHandler> plugins = new CopyOnWriteArrayList<>();
-    private final Map<String, ScenePluginHandler> pluginMap = new ConcurrentHashMap<>();
+    private final List<TScenePluginHandler> plugins = new CopyOnWriteArrayList<>();
+    private final Map<String, TScenePluginHandler> pluginMap = new ConcurrentHashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
-    private final Map<String, List<SceneElementPluginModel>> elementIdPluginsMap = new ConcurrentHashMap<>();
+    private final Map<String, List<TSceneElementPluginModel>> elementIdPluginsMap = new ConcurrentHashMap<>();
 
     private Object getPluginContext(String pluginKey) {
         if (context == null) {
@@ -225,7 +204,7 @@ public abstract class BaseSceneHandler<
                 return;
             }
 
-            ScenePluginHandler plugin = (ScenePluginHandler) ClassUtils.createInstance(pluginClass);
+            TScenePluginHandler plugin = (TScenePluginHandler) ClassUtils.createInstance(pluginClass);
             beforeInitPlugin(plugin);
             plugin.init(sceneId, pluginData, getPluginContext(pluginKey));
             afterInitPlugin(plugin);
@@ -253,7 +232,7 @@ public abstract class BaseSceneHandler<
             String pluginKey = pluginKeyAnnotation.value();
             List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, null);
             List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, null);
-            ScenePluginHandler plugin = (ScenePluginHandler) ClassUtils.createInstance(pluginClass);
+            TScenePluginHandler plugin = (TScenePluginHandler) ClassUtils.createInstance(pluginClass);
             beforeInitPlugin(plugin);
             plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
             afterInitPlugin(plugin);
@@ -272,9 +251,9 @@ public abstract class BaseSceneHandler<
      */
     private void filterAreaData() {
         // 根节点
-        ListTreeNode<SceneAreaBO> areaNodeTree = new ListTreeNode<>();
+        ListTreeNode<TSceneAreaBO> areaNodeTree = new ListTreeNode<>();
 
-        Map<String, ListTreeNode<SceneAreaBO>> areaNodeMap = new HashMap<>();
+        Map<String, ListTreeNode<TSceneAreaBO>> areaNodeMap = new HashMap<>();
         if (StringUtils.isEmpty(areaId)) {
             areaNodeMap.put(null, areaNodeTree);
             areaNodeMap.put(StringUtils.EMPTY, areaNodeTree);
@@ -284,13 +263,13 @@ public abstract class BaseSceneHandler<
         areaMap.forEach((areaNodeId, area) -> areaNodeMap.put(areaNodeId, new ListTreeNode<>(area)));
 
         areaNodeMap.forEach((areaNodeId, areaNode) -> {
-            SceneAreaBO area = areaNode.get();
+            TSceneAreaBO area = areaNode.get();
             if (area == null) {
                 return;
             }
 
             // 去除父节点不在此区域的节点
-            ListTreeNode<SceneAreaBO> parentAreaNode = areaNodeMap.getOrDefault(area.getArea(), null);
+            ListTreeNode<TSceneAreaBO> parentAreaNode = areaNodeMap.getOrDefault(area.getArea(), null);
             if (parentAreaNode == null) {
                 return;
             }
@@ -304,8 +283,8 @@ public abstract class BaseSceneHandler<
     /**
      * 过滤关闭的区域数据
      */
-    private void filterAreaTree(ListTreeNode<SceneAreaBO> areaNode, Map<String, SceneAreaBO> targetAreaMap) {
-        SceneAreaBO area = areaNode.get();
+    private void filterAreaTree(ListTreeNode<TSceneAreaBO> areaNode, Map<String, TSceneAreaBO> targetAreaMap) {
+        TSceneAreaBO area = areaNode.get();
         if (area != null) {
             targetAreaMap.put(area.getId(), area);
             // 只保留未关闭的区域
@@ -337,7 +316,7 @@ public abstract class BaseSceneHandler<
         }
 
         // 节点所属区域也在区域内并且是展开的
-        SceneAreaBO parentArea = nodeArea != null ? areaMap.getOrDefault(nodeArea, null) : null;
+        TSceneAreaBO parentArea = nodeArea != null ? areaMap.getOrDefault(nodeArea, null) : null;
         return parentArea != null && parentArea.getOpen();
     }
 
@@ -346,7 +325,7 @@ public abstract class BaseSceneHandler<
      * @param elementPortConnection 表模型-网元端口连接
      * @return 连接的唯一标识
      */
-    private String elementPortConnectionKey(SceneElementPortConnectionModel elementPortConnection) {
+    private String elementPortConnectionKey(TSceneElementPortConnectionModel elementPortConnection) {
         return StringUtils.joinWith(":", elementPortConnection.getSourcePortId(),
                 elementPortConnection.getTargetPortId());
     }
@@ -356,7 +335,7 @@ public abstract class BaseSceneHandler<
      * @param elementPortConnection 业务模型-网元端口连接
      * @return 连接的唯一标识
      */
-    private String elementPortConnectionKey(SceneElementPortConnectionBO elementPortConnection) {
+    private String elementPortConnectionKey(TSceneElementPortConnectionBO elementPortConnection) {
         return StringUtils.joinWith(":", elementPortConnection.getSource(),
                 elementPortConnection.getTarget());
     }
@@ -376,7 +355,7 @@ public abstract class BaseSceneHandler<
      * @param elementPlugin 表模型-网元节点插件
      * @return 网元节点插件的唯一标识
      */
-    private String elementPluginKey(SceneElementPluginModel elementPlugin) {
+    private String elementPluginKey(TSceneElementPluginModel elementPlugin) {
         return elementPluginKey(elementPlugin.getSceneElement(), elementPlugin.getPluginKey());
     }
 
@@ -384,7 +363,7 @@ public abstract class BaseSceneHandler<
      * 载入场景基础数据
      * @param scene 业务模型-场景基础数据
      */
-    private void loadSceneBO(SceneBO scene) {
+    private void loadSceneBO(TSceneBO scene) {
         if (scene == null) {
             return;
         }
@@ -396,7 +375,7 @@ public abstract class BaseSceneHandler<
      * 载入区域节点数据
      * @param areas 业务模型-区域节点
      */
-    private void loadAreaBOs(List<SceneAreaBO> areas) {
+    private void loadAreaBOs(List<TSceneAreaBO> areas) {
         if (areas == null) {
             return;
         }
@@ -411,7 +390,7 @@ public abstract class BaseSceneHandler<
      * 载入碎片节点数据
      * @param pieces 业务模型-碎片节点
      */
-    private void loadPieceBOs(List<ScenePieceBO> pieces) {
+    private void loadPieceBOs(List<TScenePieceBO> pieces) {
         if (pieces == null) {
             return;
         }
@@ -429,7 +408,7 @@ public abstract class BaseSceneHandler<
      * 载入网元节点数据
      * @param elements 业务模型-网元节点
      */
-    private void loadElementBOs(List<SceneElementBO> elements) {
+    private void loadElementBOs(List<TSceneElementBO> elements) {
         if (elements == null) {
             return;
         }
@@ -441,7 +420,7 @@ public abstract class BaseSceneHandler<
 
             elementMap.put(element.getId(), element);
 
-            List<SceneElementPortBO> elementPorts = element.getPorts();
+            List<TSceneElementPortBO> elementPorts = element.getPorts();
             if (elementPorts == null) {
                 return;
             }
@@ -457,13 +436,13 @@ public abstract class BaseSceneHandler<
      * 载入网元端口连接数据
      * @param connections 业务模型-网元端口连接
      */
-    private void loadConnectionBOs(List<SceneElementPortConnectionBO> connections) {
+    private void loadConnectionBOs(List<TSceneElementPortConnectionBO> connections) {
         if (connections == null) {
             return;
         }
 
         Map<String, List<String>> outerConnectionPortIdConnectionsMap = new HashMap<>();
-        Map<String, SceneElementPortConnectionBO> validConnectionMap = new HashMap<>();
+        Map<String, TSceneElementPortConnectionBO> validConnectionMap = new HashMap<>();
         connections.forEach(connection -> {
             String sourcePortId = connection.getSource();
             String targetPortId = connection.getTarget();
@@ -525,27 +504,27 @@ public abstract class BaseSceneHandler<
      * 载入场景基础数据
      * @param scene 表模型-场景基础数据
      */
-    private void loadScene(SceneModel scene) {
+    private void loadScene(TSceneModel scene) {
         if (scene == null) {
             return;
         }
 
-        SceneBO SceneBO = ClassUtils.createInstance(sceneBOClass);
-        SceneBO.fromModel(scene);
-        this.scene = SceneBO;
+        TSceneBO TSceneBO = ClassUtils.createInstance(sceneBOClass);
+        TSceneBO.fromModel(scene);
+        this.scene = TSceneBO;
     }
 
     /**
      * 载入区域节点数据
      * @param areas 表模型-区域节点
      */
-    private void loadAreas(List<SceneAreaModel> areas) {
+    private void loadAreas(List<TSceneAreaModel> areas) {
         if (areas == null) {
             return;
         }
 
         areas.forEach(area -> {
-            SceneAreaBO areaBO = ClassUtils.createInstance(sceneAreaBOClass);
+            TSceneAreaBO areaBO = ClassUtils.createInstance(sceneAreaBOClass);
             areaBO.fromModel(area);
             areaMap.put(areaBO.getId(), areaBO);
         });
@@ -555,13 +534,13 @@ public abstract class BaseSceneHandler<
      * 载入碎片节点数据
      * @param pieces 表模型-碎片节点
      */
-    private void loadPieces(List<ScenePieceModel> pieces) {
+    private void loadPieces(List<TScenePieceModel> pieces) {
         if (pieces == null) {
             return;
         }
 
         pieces.forEach(piece -> {
-            ScenePieceBO pieceBO = ClassUtils.createInstance(scenePieceBOClass);
+            TScenePieceBO pieceBO = ClassUtils.createInstance(scenePieceBOClass);
             pieceBO.fromModel(piece);
             pieceMap.put(pieceBO.getId(), pieceBO);
         });
@@ -571,12 +550,12 @@ public abstract class BaseSceneHandler<
      * 载入网元节点数据
      * @param elements 表模型-网元节点
      */
-    private void loadElements(List<SceneElementModel> elements) {
+    private void loadElements(List<TSceneElementModel> elements) {
         if (elements == null) {
             return;
         }
         elements.forEach(element -> {
-            SceneElementBO elementBO = ClassUtils.createInstance(sceneElementBOClass);
+            TSceneElementBO elementBO = ClassUtils.createInstance(sceneElementBOClass);
             elementBO.fromModel(element);
             elementMap.put(elementBO.getId(), elementBO);
         });
@@ -586,24 +565,24 @@ public abstract class BaseSceneHandler<
      * 载入网元端口数据
      * @param elementPorts 表模型-网元端口
      */
-    private void loadElementPorts(List<SceneElementPortModel> elementPorts) {
+    private void loadElementPorts(List<TSceneElementPortModel> elementPorts) {
         if (elementPorts == null) {
             return;
         }
-        Map<String, SceneElementBO> elementIdElementBOMap = new HashMap<>();
-        for (SceneElementBO SceneElementBO : elementMap.values()) {
-            if (elementIdElementBOMap.put(SceneElementBO.getEid(), SceneElementBO) != null) {
+        Map<String, TSceneElementBO> elementIdElementBOMap = new HashMap<>();
+        for (TSceneElementBO TSceneElementBO : elementMap.values()) {
+            if (elementIdElementBOMap.put(TSceneElementBO.getEid(), TSceneElementBO) != null) {
                 throw new IllegalStateException("Duplicate key");
             }
         }
         Collections.sort(elementPorts, Comparator.comparingInt(BaseSceneElementPortModel::getOrder));
         elementPorts.forEach(elementPort -> {
-            SceneElementBO elementBO = elementIdElementBOMap.getOrDefault(elementPort.getSceneElement(), null);
+            TSceneElementBO elementBO = elementIdElementBOMap.getOrDefault(elementPort.getSceneElement(), null);
             if (elementBO == null) {
                 return;
             }
 
-            SceneElementPortBO elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
+            TSceneElementPortBO elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortBO.setElement(elementBO);
             elementPortMap.put(elementPortBO.getId(), elementPortBO);
@@ -620,7 +599,7 @@ public abstract class BaseSceneHandler<
      * 载入网元端口连接数据
      * @param connections 表模型-网元端口连接
      */
-    private void loadConnections(List<SceneElementPortConnectionModel> connections) {
+    private void loadConnections(List<TSceneElementPortConnectionModel> connections) {
         if (connections == null) {
             return;
         }
@@ -640,7 +619,7 @@ public abstract class BaseSceneHandler<
                 outerConnectionPortIds.add(targetPortId);
             }
 
-            SceneElementPortConnectionBO elementPortConnectionBO = ClassUtils.createInstance(sceneElementPortConnectionBOClass);
+            TSceneElementPortConnectionBO elementPortConnectionBO = ClassUtils.createInstance(sceneElementPortConnectionBOClass);
             elementPortConnectionBO.fromModel(connection);
             elementPortConnectionMap.put(elementPortConnectionKey(elementPortConnectionBO), elementPortConnectionBO);
             portIdConnectedPortIdMap.put(elementPortConnectionBO.getSource(), elementPortConnectionBO.getTarget());
@@ -652,10 +631,10 @@ public abstract class BaseSceneHandler<
      * 载入网元插件关系数据
      * @param elementPlugins 表模型-网元插件关系
      */
-    private void loadElementPlugins(List<SceneElementPluginModel> elementPlugins) {
+    private void loadElementPlugins(List<TSceneElementPluginModel> elementPlugins) {
         elementPlugins.forEach(elementPlugin -> {
             String elementId = elementPlugin.getSceneElement();
-            List<SceneElementPluginModel> plugins = elementIdPluginsMap.getOrDefault(elementId, new ArrayList<>());
+            List<TSceneElementPluginModel> plugins = elementIdPluginsMap.getOrDefault(elementId, new ArrayList<>());
             plugins.add(elementPlugin);
             elementIdPluginsMap.put(elementId, plugins);
         });
@@ -665,7 +644,7 @@ public abstract class BaseSceneHandler<
      * 从数据库读取场景
      * @return 表模型-场景对象
      */
-    private SceneModel readScene() {
+    private TSceneModel readScene() {
         return sceneMapper.get(sceneId);
     }
 
@@ -674,7 +653,7 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-区域节点
      */
-    private List<SceneAreaModel> readAreas(String... areaIds) {
+    private List<TSceneAreaModel> readAreas(String... areaIds) {
         HumanCondition condition = new HumanCondition().filterEqual(BaseSceneAreaModel::getScene, sceneId);
 
         String[] filterAreaIds = areaIds;
@@ -686,11 +665,11 @@ public abstract class BaseSceneHandler<
             condition.filterIn(BaseSceneAreaModel::getArea, filterAreaIds);
         }
 
-        List<SceneAreaModel> areas = sceneAreaMapper.list(condition);
+        List<TSceneAreaModel> areas = sceneAreaMapper.list(condition);
 
         if (isAreaMode) {
             List<String> list = new ArrayList<>();
-            for (SceneAreaModel area : areas) {
+            for (TSceneAreaModel area : areas) {
                 if (area.getOpen()) {
                     String nodeId = area.getNodeId();
                     list.add(nodeId);
@@ -710,8 +689,8 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-碎片节点
      */
-    private List<ScenePieceModel> readPieces(String... areaIds) {
-        List<ScenePieceModel> pieces;
+    private List<TScenePieceModel> readPieces(String... areaIds) {
+        List<TScenePieceModel> pieces;
         HumanCondition condition = new HumanCondition()
                 .filterEqual(BaseScenePieceModel::getScene, sceneId);
 
@@ -733,8 +712,8 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-网元节点
      */
-    private List<SceneElementModel> readElements(String... areaIds) {
-        List<SceneElementModel> elements;
+    private List<TSceneElementModel> readElements(String... areaIds) {
+        List<TSceneElementModel> elements;
         HumanCondition condition = new HumanCondition()
                 .filterEqual(BaseSceneElementModel::getScene, sceneId);
 
@@ -756,7 +735,7 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-网元端口
      */
-    private List<SceneElementPortModel> readElementPorts(String... areaIds) {
+    private List<TSceneElementPortModel> readElementPorts(String... areaIds) {
         HumanCondition condition = new HumanCondition();
 
         String[] filterAreaIds = areaIds;
@@ -783,7 +762,7 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-网元端口连接
      */
-    private List<SceneElementPortConnectionModel> readElementPortConnections(String... areaIds) {
+    private List<TSceneElementPortConnectionModel> readElementPortConnections(String... areaIds) {
         HumanCondition condition = new HumanCondition();
 
         String[] filterAreaIds = areaIds;
@@ -815,7 +794,7 @@ public abstract class BaseSceneHandler<
      * @param areaIds 父区域节点
      * @return 表模型-网元插件关系
      */
-    private List<SceneElementPluginModel> readElementPlugins(String... areaIds) {
+    private List<TSceneElementPluginModel> readElementPlugins(String... areaIds) {
         HumanCondition condition = new HumanCondition();
 
         String[] filterAreaIds = areaIds;
@@ -897,7 +876,7 @@ public abstract class BaseSceneHandler<
      * 保存场景属性数据
      */
     private boolean saveScene() {
-        SceneModel sceneObj = scene.toModel();
+        TSceneModel sceneObj = scene.toModel();
         boolean result = sceneMapper.save(sceneObj);
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
@@ -912,21 +891,21 @@ public abstract class BaseSceneHandler<
      * @param existAreaMap 已存在的区域节点
      * @return 更新的区域节点，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<SceneAreaModel> saveAreas(Map<String, SceneAreaModel> existAreaMap) {
-        Map<String, SceneAreaModel> savingAreaMap = areaMap.entrySet().stream()
+    private DiffTargets<TSceneAreaModel> saveAreas(Map<String, TSceneAreaModel> existAreaMap) {
+        Map<String, TSceneAreaModel> savingAreaMap = areaMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    SceneAreaModel area = entry.getValue().toModel();
+                    TSceneAreaModel area = entry.getValue().toModel();
                     area.setScene(sceneId);
                     return area;
                 }));
-        DiffTargets<SceneAreaModel> diff = diffTargets(savingAreaMap, existAreaMap);
+        DiffTargets<TSceneAreaModel> diff = diffTargets(savingAreaMap, existAreaMap);
         if (isAreaMode) {
             // 删除闭合的子区域
-            for (SceneAreaModel removingArea: diff.getRemovingTargets()) {
+            for (TSceneAreaModel removingArea: diff.getRemovingTargets()) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
-                    SceneHandler SceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    SceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
-                    SceneHandler.deleteTopology();
+                    TSceneHandler TSceneHandler = ClassUtils.createInstance(sceneHandlerClass);
+                    TSceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
+                    TSceneHandler.deleteTopology();
                 }
             }
         }
@@ -942,14 +921,14 @@ public abstract class BaseSceneHandler<
      * @param existPieceMap 已存在的碎片节点
      * @return 更新的碎片节点，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<ScenePieceModel> savePieces(Map<String, ScenePieceModel> existPieceMap) {
-        Map<String, ScenePieceModel> savingPieceMap = pieceMap.entrySet().stream()
+    private DiffTargets<TScenePieceModel> savePieces(Map<String, TScenePieceModel> existPieceMap) {
+        Map<String, TScenePieceModel> savingPieceMap = pieceMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    ScenePieceModel piece = entry.getValue().toModel();
+                    TScenePieceModel piece = entry.getValue().toModel();
                     piece.setScene(sceneId);
                     return piece;
                 }));
-        DiffTargets<ScenePieceModel> diff = diffTargets(savingPieceMap, existPieceMap);
+        DiffTargets<TScenePieceModel> diff = diffTargets(savingPieceMap, existPieceMap);
         saveDiff(scenePieceMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(piece -> pieceMap.get(piece.getNodeId()).fromModel(piece));
@@ -961,14 +940,14 @@ public abstract class BaseSceneHandler<
      * @param existElementMap 已存在的网元节点
      * @return 更新的网元节点，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<SceneElementModel> saveElements(Map<String, SceneElementModel> existElementMap) {
-        Map<String, SceneElementModel> savingElementMap = elementMap.entrySet().stream()
+    private DiffTargets<TSceneElementModel> saveElements(Map<String, TSceneElementModel> existElementMap) {
+        Map<String, TSceneElementModel> savingElementMap = elementMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    SceneElementModel element = entry.getValue().toModel();
+                    TSceneElementModel element = entry.getValue().toModel();
                     element.setScene(sceneId);
                     return element;
                 }));
-        DiffTargets<SceneElementModel> diff = diffTargets(savingElementMap, existElementMap);
+        DiffTargets<TSceneElementModel> diff = diffTargets(savingElementMap, existElementMap);
         saveDiff(sceneElementMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(element -> elementMap.get(element.getNodeId()).fromModel(element));
@@ -980,10 +959,10 @@ public abstract class BaseSceneHandler<
      * @param existElementPortMap 已存在的网元端口
      * @return 更新的网元端口，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<SceneElementPortModel> saveElementPorts(Map<String, SceneElementPortModel> existElementPortMap) {
-        Map<String, SceneElementPortModel> savingElementPortMap = new HashMap<>();
+    private DiffTargets<TSceneElementPortModel> saveElementPorts(Map<String, TSceneElementPortModel> existElementPortMap) {
+        Map<String, TSceneElementPortModel> savingElementPortMap = new HashMap<>();
         elementMap.values().forEach(element -> {
-            List<SceneElementPortBO> elementPorts = element.getPorts();
+            List<TSceneElementPortBO> elementPorts = element.getPorts();
             if (elementPorts == null) {
                 return;
             }
@@ -994,14 +973,14 @@ public abstract class BaseSceneHandler<
             }
             String elementId = element.getEid();
             elementPorts.forEach(elementPortBO -> {
-                SceneElementPortModel elementPort = elementPortBO.toModel();
+                TSceneElementPortModel elementPort = elementPortBO.toModel();
                 elementPort.setScene(sceneId);
                 elementPort.setSceneElement(elementId);
                 savingElementPortMap.put(elementPort.getPortId(), elementPort);
             });
         });
 
-        DiffTargets<SceneElementPortModel> diff = diffTargets(savingElementPortMap, existElementPortMap);
+        DiffTargets<TSceneElementPortModel> diff = diffTargets(savingElementPortMap, existElementPortMap);
         saveDiff(sceneElementPortMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(elementPort -> elementPortMap.get(elementPort.getPortId()).fromModel(elementPort));
@@ -1013,8 +992,8 @@ public abstract class BaseSceneHandler<
      * @param existElementPortConnectionMap 已存在的网元端口连接
      * @return 更新的网元端口连接，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<SceneElementPortConnectionModel> saveElementPortConnections(Map<String, SceneElementPortConnectionModel> existElementPortConnectionMap) {
-        Map<String, SceneElementPortModel> outerElementPortMap = new HashMap<>();
+    private DiffTargets<TSceneElementPortConnectionModel> saveElementPortConnections(Map<String, TSceneElementPortConnectionModel> existElementPortConnectionMap) {
+        Map<String, TSceneElementPortModel> outerElementPortMap = new HashMap<>();
         if (!outerConnectionPortIds.isEmpty()) {
             sceneElementPortMapper.list(new HumanCondition()
                     .select(BaseSceneElementPortModel::getId, BaseSceneElementPortModel::getSceneElement,
@@ -1024,33 +1003,33 @@ public abstract class BaseSceneHandler<
                     .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
         }
 
-        Map<String, SceneElementBO> portIdElementMap = getPortIdElementMap();
-        Map<String, SceneElementPortConnectionModel> savingElementPortConnectionMap = new HashMap<>();
+        Map<String, TSceneElementBO> portIdElementMap = getPortIdElementMap();
+        Map<String, TSceneElementPortConnectionModel> savingElementPortConnectionMap = new HashMap<>();
         elementPortConnectionMap.forEach((key, elementPortConnectionBO) -> {
-            SceneElementPortConnectionModel elementPortConnection = elementPortConnectionBO.toModel();
+            TSceneElementPortConnectionModel elementPortConnection = elementPortConnectionBO.toModel();
             elementPortConnection.setScene(sceneId);
-            SceneElementPortBO sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
+            TSceneElementPortBO sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
             String sourcePortId;
             String sourceElementId;
             if (sourcePortBO == null) {
-                SceneElementPortModel sourcePort = outerElementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
+                TSceneElementPortModel sourcePort = outerElementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
                 sourcePortId = sourcePort == null ? null : sourcePort.getId();
                 sourceElementId = sourcePort == null ? null : sourcePort.getSceneElement();
             } else {
                 sourcePortId = sourcePortBO.getEid();
-                SceneElementBO sourceElement = portIdElementMap.getOrDefault(sourcePortBO.getId(), null);
+                TSceneElementBO sourceElement = portIdElementMap.getOrDefault(sourcePortBO.getId(), null);
                 sourceElementId = sourceElement == null ? null : sourceElement.getEid();
             }
-            SceneElementPortBO targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
+            TSceneElementPortBO targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
             String targetPortId;
             String targetElementId;
             if (targetPortBO == null) {
-                SceneElementPortModel targetPort = outerElementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
+                TSceneElementPortModel targetPort = outerElementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
                 targetPortId = targetPort == null ? null : targetPort.getId();
                 targetElementId = targetPort == null ? null : targetPort.getSceneElement();
             } else {
                 targetPortId = targetPortBO.getEid();
-                SceneElementBO targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
+                TSceneElementBO targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
                 targetElementId = targetElement == null ? null : targetElement.getEid();
             }
             if (sourcePortId == null || targetPortId == null) {
@@ -1064,7 +1043,7 @@ public abstract class BaseSceneHandler<
             savingElementPortConnectionMap.put(key, elementPortConnection);
         });
 
-        DiffTargets<SceneElementPortConnectionModel> diff = diffTargets(savingElementPortConnectionMap, existElementPortConnectionMap);
+        DiffTargets<TSceneElementPortConnectionModel> diff = diffTargets(savingElementPortConnectionMap, existElementPortConnectionMap);
         saveDiff(sceneElementPortConnectionMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(elementPortConnection -> elementPortConnectionMap
@@ -1077,21 +1056,21 @@ public abstract class BaseSceneHandler<
      * @param existElementPluginMap 已存在的网元插件关系
      * @return 更新的网元插件关系，包含添加的、更新属性的、删除的
      */
-    private DiffTargets<SceneElementPluginModel> saveElementPlugins(Map<String, SceneElementPluginModel> existElementPluginMap) {
-        Map<String, SceneElementBO> portIdElementMap = getPortIdElementMap();
-        Map<String, SceneElementPluginModel> savingElementPluginMap = new HashMap<>();
+    private DiffTargets<TSceneElementPluginModel> saveElementPlugins(Map<String, TSceneElementPluginModel> existElementPluginMap) {
+        Map<String, TSceneElementBO> portIdElementMap = getPortIdElementMap();
+        Map<String, TSceneElementPluginModel> savingElementPluginMap = new HashMap<>();
         scenePluginData.forEach((pluginKey, pluginData) -> {
             Map<String, Map<String, Object>> pluginElements = pluginData.getElements();
             if (pluginElements != null) {
                 pluginElements.forEach((nodeId, nodePluginData) -> {
-                    SceneElementBO element = elementMap.getOrDefault(nodeId, null);
+                    TSceneElementBO element = elementMap.getOrDefault(nodeId, null);
                     if (element == null) {
                         return;
                     }
 
                     String key = elementPluginKey(element.getEid(), pluginKey);
                     if (!savingElementPluginMap.containsKey(key)) {
-                        SceneElementPluginModel elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
+                        TSceneElementPluginModel elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
                         elementPlugin.setScene(sceneId);
                         elementPlugin.setSceneElement(element.getEid());
                         elementPlugin.setPluginKey(pluginKey);
@@ -1103,14 +1082,14 @@ public abstract class BaseSceneHandler<
             Map<String, Map<String, Object>> pluginElementPorts = pluginData.getElementPorts();
             if (pluginElementPorts != null) {
                 pluginElementPorts.forEach((portId, portPluginData) -> {
-                    SceneElementBO element = portIdElementMap.getOrDefault(portId, null);
+                    TSceneElementBO element = portIdElementMap.getOrDefault(portId, null);
                     if (element == null) {
                         return;
                     }
 
                     String key = elementPluginKey(element.getEid(), pluginKey);
                     if (!savingElementPluginMap.containsKey(key)) {
-                        SceneElementPluginModel elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
+                        TSceneElementPluginModel elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
                         elementPlugin.setScene(sceneId);
                         elementPlugin.setSceneElement(element.getEid());
                         elementPlugin.setPluginKey(pluginKey);
@@ -1120,7 +1099,7 @@ public abstract class BaseSceneHandler<
             }
         });
 
-        DiffTargets<SceneElementPluginModel> diff = diffTargets(savingElementPluginMap, existElementPluginMap);
+        DiffTargets<TSceneElementPluginModel> diff = diffTargets(savingElementPluginMap, existElementPluginMap);
         saveDiff(sceneElementPluginMapper, diff);
         loadElementPlugins(ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets()));
         return diff;
@@ -1130,10 +1109,10 @@ public abstract class BaseSceneHandler<
      * 获取端口id和端口所属网元映射
      * @return 端口id和端口所属网元映射
      */
-    private Map<String, SceneElementBO> getPortIdElementMap() {
-        Map<String, SceneElementBO> portIdElementMap = new HashMap<>();
+    private Map<String, TSceneElementBO> getPortIdElementMap() {
+        Map<String, TSceneElementBO> portIdElementMap = new HashMap<>();
         elementMap.forEach((elementId, elementBO) -> {
-            List<SceneElementPortBO> elementPorts = elementBO.getPorts();
+            List<TSceneElementPortBO> elementPorts = elementBO.getPorts();
             if (elementPorts == null) {
                 return;
             }
@@ -1146,15 +1125,15 @@ public abstract class BaseSceneHandler<
 
     /**
      * 从场景业务数据载入场景元素
-     * @param SceneDataBO 场景业务数据
+     * @param TSceneDataBO 场景业务数据
      */
-    private void fromData(SceneDataBO SceneDataBO) {
+    private void fromData(TSceneDataBO TSceneDataBO) {
         // 验证数据字段
-        Set<ConstraintViolation<SceneDataBO>> validateResult = ValidationCommon.validate(SceneDataBO);
+        Set<ConstraintViolation<TSceneDataBO>> validateResult = ValidationCommon.validate(TSceneDataBO);
         ValidationCommon.handleValidateResult(validateResult);
 
-        SceneTopologyBO topology = SceneDataBO.getTopology();
-        SceneBO srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
+        TSceneTopologyBO topology = TSceneDataBO.getTopology();
+        TSceneBO srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
                 : topology.getScene();
         loadSceneBO(srcScene);
         sceneId = scene.getEid();
@@ -1168,7 +1147,7 @@ public abstract class BaseSceneHandler<
             loadConnectionBOs(topology.getConnections());
         }
 
-        loadScenePluginData(SceneDataBO.getPlugins());
+        loadScenePluginData(TSceneDataBO.getPlugins());
     }
 
     /**
@@ -1180,15 +1159,15 @@ public abstract class BaseSceneHandler<
 
     /**
      * 从场景业务数据初始化
-     * @param SceneDataBO 场景业务数据
+     * @param TSceneDataBO 场景业务数据
      * @param isAreaMode 是否区域模式
      */
-    public void init(SceneDataBO SceneDataBO, boolean isAreaMode, SceneContextBO context) {
-        ClassUtils.loadClassFields(this);
+    public void init(TSceneDataBO TSceneDataBO, boolean isAreaMode, TSceneContextBO context) {
         this.initMapper();
+        this.initClass();
         this.context = context;
         this.isAreaMode = isAreaMode;
-        fromData(SceneDataBO);
+        fromData(TSceneDataBO);
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
@@ -1200,15 +1179,17 @@ public abstract class BaseSceneHandler<
 
     protected abstract void initMapper();
 
+    protected abstract void initClass();
+
     /**
      * 从场景id初始化
      * @param sceneId 场景id
      * @param areaId 区域id
      * @param isAreaMode 是否区域模式
      */
-    public void init(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
-        ClassUtils.loadClassFields(this);
+    public void init(String sceneId, String areaId, boolean isAreaMode, TSceneContextBO context) {
         this.initMapper();
+        this.initClass();
         this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;
@@ -1223,13 +1204,13 @@ public abstract class BaseSceneHandler<
      * 验证场景
      */
     public void validate() {
-        for (ScenePluginHandler plugin : plugins) {
+        for (TScenePluginHandler plugin : plugins) {
             plugin.validate();
         }
     }
 
-    public void beforeInitPlugin(ScenePluginHandler plugin) {}
-    public void afterInitPlugin(ScenePluginHandler plugin) {}
+    public void beforeInitPlugin(TScenePluginHandler plugin) {}
+    public void afterInitPlugin(TScenePluginHandler plugin) {}
 
     /**
      * 切换区域
@@ -1247,8 +1228,8 @@ public abstract class BaseSceneHandler<
     /**
      * 输出场景业务数据
      */
-    public SceneDataBO toData() {
-        SceneTopologyBO topologyBO = ClassUtils.createInstance(sceneTopologyBOClass);
+    public TSceneDataBO toData() {
+        TSceneTopologyBO topologyBO = ClassUtils.createInstance(sceneTopologyBOClass);
         topologyBO.setScene(scene);
         topologyBO.setAreaId(areaId);
         topologyBO.setAreas(new ArrayList<>(areaMap.values()));
@@ -1256,7 +1237,7 @@ public abstract class BaseSceneHandler<
         topologyBO.setElements(new ArrayList<>(elementMap.values()));
         topologyBO.setConnections(new ArrayList<>(elementPortConnectionMap.values()));
 
-        SceneDataBO dataBO = ClassUtils.createInstance(sceneDataBOClass);
+        TSceneDataBO dataBO = ClassUtils.createInstance(sceneDataBOClass);
         dataBO.setTopology(topologyBO);
         dataBO.setPlugins(scenePluginData);
         return dataBO;
@@ -1289,9 +1270,9 @@ public abstract class BaseSceneHandler<
         if (isAreaMode) {
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             List<String> list = new ArrayList<>();
-            for (SceneAreaBO SceneAreaBO : areaMap.values()) {
-                if (SceneAreaBO.getOpen()) {
-                    String id = SceneAreaBO.getId();
+            for (TSceneAreaBO TSceneAreaBO : areaMap.values()) {
+                if (TSceneAreaBO.getOpen()) {
+                    String id = TSceneAreaBO.getId();
                     list.add(id);
                 }
             }
@@ -1304,17 +1285,17 @@ public abstract class BaseSceneHandler<
         loadElementPlugins(readElementPlugins(filterAreaIds));
         Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
         Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
-        Map<String, SceneElementBO> elementEidElementBOMap = new HashMap<>();
+        Map<String, TSceneElementBO> elementEidElementBOMap = new HashMap<>();
         elementMap.forEach((elementBOId, elementBO) -> {
             elementEidElementBOMap.put(elementBO.getEid(), elementBO);
         });
         elementIdPluginsMap.forEach((elementId, elementPlugins) -> {
-            SceneElementBO element = elementEidElementBOMap.getOrDefault(elementId, null);
+            TSceneElementBO element = elementEidElementBOMap.getOrDefault(elementId, null);
             if (element == null) {
                 return;
             }
 
-            List<SceneElementPortBO> elementPorts = element.getPorts();
+            List<TSceneElementPortBO> elementPorts = element.getPorts();
 
             elementPlugins.forEach(elementPlugin -> {
                 String pluginKey = elementPlugin.getPluginKey();
@@ -1342,12 +1323,12 @@ public abstract class BaseSceneHandler<
         boolean isCreate = StringUtils.isEmpty(sceneId);
         saveScene();
 
-        Map<String, SceneAreaModel> existAreaMap;
+        Map<String, TSceneAreaModel> existAreaMap;
         if (isCreate) {
             existAreaMap = new HashMap<>();
         } else {
-            Map<String, SceneAreaModel> map = new HashMap<>();
-            for (SceneAreaModel x : readAreas()) {
+            Map<String, TSceneAreaModel> map = new HashMap<>();
+            for (TSceneAreaModel x : readAreas()) {
                 if (map.put(x.getNodeId(), x) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
@@ -1358,69 +1339,69 @@ public abstract class BaseSceneHandler<
         if (isAreaMode) {
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             List<String> list = new ArrayList<>();
-            for (SceneAreaModel SceneAreaModel : existAreaMap.values()) {
-                if (SceneAreaModel.getOpen()) {
-                    String nodeId = SceneAreaModel.getNodeId();
+            for (TSceneAreaModel TSceneAreaModel : existAreaMap.values()) {
+                if (TSceneAreaModel.getOpen()) {
+                    String nodeId = TSceneAreaModel.getNodeId();
                     list.add(nodeId);
                 }
             }
             filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
-        Map<String, ScenePieceModel> existPieceMap;
+        Map<String, TScenePieceModel> existPieceMap;
         if (isCreate) {
             existPieceMap = new HashMap<>();
         } else {
-            Map<String, ScenePieceModel> map = new HashMap<>();
-            for (ScenePieceModel ScenePieceModel : readPieces(filterAreaIds)) {
-                if (map.put(ScenePieceModel.getNodeId(), ScenePieceModel) != null) {
+            Map<String, TScenePieceModel> map = new HashMap<>();
+            for (TScenePieceModel TScenePieceModel : readPieces(filterAreaIds)) {
+                if (map.put(TScenePieceModel.getNodeId(), TScenePieceModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
             existPieceMap = map;
         }
-        Map<String, SceneElementModel> existElementMap;
+        Map<String, TSceneElementModel> existElementMap;
         if (isCreate) {
             existElementMap = new HashMap<>();
         } else {
-            Map<String, SceneElementModel> map = new HashMap<>();
-            for (SceneElementModel SceneElementModel : readElements(filterAreaIds)) {
-                if (map.put(SceneElementModel.getNodeId(), SceneElementModel) != null) {
+            Map<String, TSceneElementModel> map = new HashMap<>();
+            for (TSceneElementModel TSceneElementModel : readElements(filterAreaIds)) {
+                if (map.put(TSceneElementModel.getNodeId(), TSceneElementModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
             existElementMap = map;
         }
-        Map<String, SceneElementPortModel> existElementPortMap;
+        Map<String, TSceneElementPortModel> existElementPortMap;
         if (isCreate) {
             existElementPortMap = new HashMap<>();
         } else {
-            Map<String, SceneElementPortModel> map = new HashMap<>();
-            for (SceneElementPortModel SceneElementPortModel : readElementPorts(filterAreaIds)) {
-                if (map.put(SceneElementPortModel.getPortId(), SceneElementPortModel) != null) {
+            Map<String, TSceneElementPortModel> map = new HashMap<>();
+            for (TSceneElementPortModel TSceneElementPortModel : readElementPorts(filterAreaIds)) {
+                if (map.put(TSceneElementPortModel.getPortId(), TSceneElementPortModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
             existElementPortMap = map;
         }
-        Map<String, SceneElementPortConnectionModel> existElementPortConnectionMap;
+        Map<String, TSceneElementPortConnectionModel> existElementPortConnectionMap;
         if (isCreate) {
             existElementPortConnectionMap = new HashMap<>();
         } else {
-            Map<String, SceneElementPortConnectionModel> map = new HashMap<>();
-            for (SceneElementPortConnectionModel SceneElementPortConnectionModel : readElementPortConnections(filterAreaIds)) {
-                if (map.put(this.elementPortConnectionKey(SceneElementPortConnectionModel), SceneElementPortConnectionModel) != null) {
+            Map<String, TSceneElementPortConnectionModel> map = new HashMap<>();
+            for (TSceneElementPortConnectionModel TSceneElementPortConnectionModel : readElementPortConnections(filterAreaIds)) {
+                if (map.put(this.elementPortConnectionKey(TSceneElementPortConnectionModel), TSceneElementPortConnectionModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
             existElementPortConnectionMap = map;
         }
-        Map<String, SceneElementPluginModel> existElementPluginMap;
+        Map<String, TSceneElementPluginModel> existElementPluginMap;
         if (isCreate) {
             existElementPluginMap = new HashMap<>();
         } else {
-            Map<String, SceneElementPluginModel> map = new HashMap<>();
-            for (SceneElementPluginModel SceneElementPluginModel : readElementPlugins(filterAreaIds)) {
-                if (map.put(this.elementPluginKey(SceneElementPluginModel), SceneElementPluginModel) != null) {
+            Map<String, TSceneElementPluginModel> map = new HashMap<>();
+            for (TSceneElementPluginModel TSceneElementPluginModel : readElementPlugins(filterAreaIds)) {
+                if (map.put(this.elementPluginKey(TSceneElementPluginModel), TSceneElementPluginModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
@@ -1428,67 +1409,67 @@ public abstract class BaseSceneHandler<
         }
 
         // 保存区域，可能会跨区域连接
-        DiffTargets<SceneAreaModel> diffAreas = saveAreas(existAreaMap);
-        DiffTargets<ScenePieceModel> diffPieces = savePieces(existPieceMap);
-        DiffTargets<SceneElementModel> diffElements = saveElements(existElementMap);
-        DiffTargets<SceneElementPortModel> diffElementPorts = saveElementPorts(existElementPortMap);
+        DiffTargets<TSceneAreaModel> diffAreas = saveAreas(existAreaMap);
+        DiffTargets<TScenePieceModel> diffPieces = savePieces(existPieceMap);
+        DiffTargets<TSceneElementModel> diffElements = saveElements(existElementMap);
+        DiffTargets<TSceneElementPortModel> diffElementPorts = saveElementPorts(existElementPortMap);
         // 此时可能存在已被删除的跨区域连接，可优化
         if (isAreaMode && !existElementPortConnectionMap.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneElementPortConnectionModel c01 : existElementPortConnectionMap.values()) {
+            for (TSceneElementPortConnectionModel c01 : existElementPortConnectionMap.values()) {
                 String id = c01.getId();
                 list.add(id);
             }
-            Map<String, SceneElementPortConnectionModel> map = new HashMap<>();
-            for (SceneElementPortConnectionModel SceneElementPortConnectionModel : sceneElementPortConnectionMapper.list(new HumanCondition()
+            Map<String, TSceneElementPortConnectionModel> map = new HashMap<>();
+            for (TSceneElementPortConnectionModel TSceneElementPortConnectionModel : sceneElementPortConnectionMapper.list(new HumanCondition()
                     .filterIn(cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel::getId, list.toArray(new String[0]))
             )) {
-                if (map.put(this.elementPortConnectionKey(SceneElementPortConnectionModel), SceneElementPortConnectionModel) != null) {
+                if (map.put(this.elementPortConnectionKey(TSceneElementPortConnectionModel), TSceneElementPortConnectionModel) != null) {
                     throw new IllegalStateException("Duplicate key");
                 }
             }
             existElementPortConnectionMap = map;
         }
-        DiffTargets<SceneElementPortConnectionModel> diffElementPortConnections = saveElementPortConnections(existElementPortConnectionMap);
+        DiffTargets<TSceneElementPortConnectionModel> diffElementPortConnections = saveElementPortConnections(existElementPortConnectionMap);
         // elementPlugin 由于通过服务端id映射，在拓扑保存后才能获取
-        DiffTargets<SceneElementPluginModel> diffElementPlugins = saveElementPlugins(existElementPluginMap);
+        DiffTargets<TSceneElementPluginModel> diffElementPlugins = saveElementPlugins(existElementPluginMap);
 
         // 保存插件数据
-        for (ScenePluginHandler plugin : plugins) {
+        for (TScenePluginHandler plugin : plugins) {
             plugin.saveScene();
             List<String> list = new ArrayList<>();
-            for (SceneElementModel SceneElementModel01 : diffElements.getAddingTargets()) {
-                String nodeId = SceneElementModel01.getNodeId();
+            for (TSceneElementModel TSceneElementModel01 : diffElements.getAddingTargets()) {
+                String nodeId = TSceneElementModel01.getNodeId();
                 list.add(nodeId);
             }
             plugin.createElements(list.toArray(new String[0]));
             List<String> result = new ArrayList<>();
-            for (SceneElementModel SceneElementModel01 : diffElements.getUpdatingTargets()) {
-                String nodeId = SceneElementModel01.getNodeId();
+            for (TSceneElementModel TSceneElementModel01 : diffElements.getUpdatingTargets()) {
+                String nodeId = TSceneElementModel01.getNodeId();
                 result.add(nodeId);
             }
             plugin.updateElements(result.toArray(new String[0]));
             List<String> list1 = new ArrayList<>();
-            for (SceneElementModel SceneElementModel : diffElements.getRemovingTargets()) {
-                String nodeId = SceneElementModel.getNodeId();
+            for (TSceneElementModel TSceneElementModel : diffElements.getRemovingTargets()) {
+                String nodeId = TSceneElementModel.getNodeId();
                 list1.add(nodeId);
             }
             plugin.deleteElements(list1.toArray(new String[0]));
             List<String> result1 = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel01 : diffElementPorts.getAddingTargets()) {
-                String portId = SceneElementPortModel01.getPortId();
+            for (TSceneElementPortModel TSceneElementPortModel01 : diffElementPorts.getAddingTargets()) {
+                String portId = TSceneElementPortModel01.getPortId();
                 result1.add(portId);
             }
             plugin.createElementPorts(result1.toArray(new String[0]));
             List<String> list2 = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel01 : diffElementPorts.getUpdatingTargets()) {
-                String portId = SceneElementPortModel01.getPortId();
+            for (TSceneElementPortModel TSceneElementPortModel01 : diffElementPorts.getUpdatingTargets()) {
+                String portId = TSceneElementPortModel01.getPortId();
                 list2.add(portId);
             }
             plugin.updateElementPorts(list2.toArray(new String[0]));
             List<String> result2 = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel : diffElementPorts.getRemovingTargets()) {
-                String portId = SceneElementPortModel.getPortId();
+            for (TSceneElementPortModel TSceneElementPortModel : diffElementPorts.getRemovingTargets()) {
+                String portId = TSceneElementPortModel.getPortId();
                 result2.add(portId);
             }
             plugin.deleteElementPorts(result2.toArray(new String[0]));
@@ -1511,78 +1492,78 @@ public abstract class BaseSceneHandler<
      * 删除拓扑数据
      */
     public void deleteTopology() {
-        List<SceneAreaModel> areas = readAreas();
+        List<TSceneAreaModel> areas = readAreas();
         String[] filterAreaIds = new String[0];
         if (isAreaMode) {
             // 递归删除闭合的子区域
-            for (SceneAreaModel removingArea: areas) {
+            for (TSceneAreaModel removingArea: areas) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
-                    SceneHandler SceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    SceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
-                    SceneHandler.deleteTopology();
+                    TSceneHandler TSceneHandler = ClassUtils.createInstance(sceneHandlerClass);
+                    TSceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
+                    TSceneHandler.deleteTopology();
                 }
             }
 
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             List<String> list = new ArrayList<>();
-            for (SceneAreaModel SceneAreaModel : areas) {
-                if (SceneAreaModel.getOpen()) {
-                    String nodeId = SceneAreaModel.getNodeId();
+            for (TSceneAreaModel TSceneAreaModel : areas) {
+                if (TSceneAreaModel.getOpen()) {
+                    String nodeId = TSceneAreaModel.getNodeId();
                     list.add(nodeId);
                 }
             }
             filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
-        List<ScenePieceModel> pieces = readPieces(filterAreaIds);
-        List<SceneElementModel> elements = readElements(filterAreaIds);
-        List<SceneElementPortModel> elementPorts = readElementPorts(filterAreaIds);
-        List<SceneElementPluginModel> elementPlugins = readElementPlugins(filterAreaIds);
+        List<TScenePieceModel> pieces = readPieces(filterAreaIds);
+        List<TSceneElementModel> elements = readElements(filterAreaIds);
+        List<TSceneElementPortModel> elementPorts = readElementPorts(filterAreaIds);
+        List<TSceneElementPluginModel> elementPlugins = readElementPlugins(filterAreaIds);
         if (!areas.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneAreaModel SceneAreaModel : areas) {
-                String id = SceneAreaModel.getId();
+            for (TSceneAreaModel TSceneAreaModel : areas) {
+                String id = TSceneAreaModel.getId();
                 list.add(id);
             }
             sceneAreaMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!pieces.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (ScenePieceModel ScenePieceModel : pieces) {
-                String id = ScenePieceModel.getId();
+            for (TScenePieceModel TScenePieceModel : pieces) {
+                String id = TScenePieceModel.getId();
                 list.add(id);
             }
             scenePieceMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elements.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneElementModel SceneElementModel : elements) {
-                String id = SceneElementModel.getId();
+            for (TSceneElementModel TSceneElementModel : elements) {
+                String id = TSceneElementModel.getId();
                 list.add(id);
             }
             sceneElementMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elementPorts.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel : elementPorts) {
-                String id = SceneElementPortModel.getId();
+            for (TSceneElementPortModel TSceneElementPortModel : elementPorts) {
+                String id = TSceneElementPortModel.getId();
                 list.add(id);
             }
             sceneElementPortMapper.bulkDelete(list.toArray(new String[0]));
         }
         if (!elementPlugins.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneElementPluginModel SceneElementPluginModel : elementPlugins) {
-                String id = SceneElementPluginModel.getId();
+            for (TSceneElementPluginModel TSceneElementPluginModel : elementPlugins) {
+                String id = TSceneElementPluginModel.getId();
                 list.add(id);
             }
             sceneElementPluginMapper.bulkDelete(list.toArray(new String[0]));
         }
 
-        List<SceneElementPortConnectionModel> elementPortConnections = readElementPortConnections(filterAreaIds);
+        List<TSceneElementPortConnectionModel> elementPortConnections = readElementPortConnections(filterAreaIds);
         if (!elementPortConnections.isEmpty()) {
             List<String> list = new ArrayList<>();
-            for (SceneElementPortConnectionModel SceneElementPortConnectionModel : elementPortConnections) {
-                String id = SceneElementPortConnectionModel.getId();
+            for (TSceneElementPortConnectionModel TSceneElementPortConnectionModel : elementPortConnections) {
+                String id = TSceneElementPortConnectionModel.getId();
                 list.add(id);
             }
             sceneElementPortConnectionMapper.bulkDelete(list.toArray(new String[0]));
@@ -1591,14 +1572,14 @@ public abstract class BaseSceneHandler<
         // 删除插件数据
         plugins.forEach(plugin -> {
             List<String> list = new ArrayList<>();
-            for (SceneElementModel SceneElementModel : elements) {
-                String nodeId = SceneElementModel.getNodeId();
+            for (TSceneElementModel TSceneElementModel : elements) {
+                String nodeId = TSceneElementModel.getNodeId();
                 list.add(nodeId);
             }
             plugin.deleteElements(list.toArray(new String[0]));
             List<String> result = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel : elementPorts) {
-                String portId = SceneElementPortModel.getPortId();
+            for (TSceneElementPortModel TSceneElementPortModel : elementPorts) {
+                String portId = TSceneElementPortModel.getPortId();
                 result.add(portId);
             }
             plugin.deleteElementPorts(result.toArray(new String[0]));
@@ -1634,17 +1615,17 @@ public abstract class BaseSceneHandler<
      * 单独保存基础场景节点数据
      */
     public List<String> updateSceneElement(String nodeId) {
-        SceneElementBO elementBO = getElement(nodeId);
-        SceneElementModel element = elementBO.toModel();
+        TSceneElementBO elementBO = getElement(nodeId);
+        TSceneElementModel element = elementBO.toModel();
         element.setScene(sceneId);
         sceneElementMapper.update(element);
 
-        List<SceneElementPortBO> elementPortBOS = elementBO.getPorts();
+        List<TSceneElementPortBO> elementPortBOS = elementBO.getPorts();
         if (elementPortBOS != null && !elementPortBOS.isEmpty()) {
-            List<SceneElementPortModel> addPorts = new ArrayList<>();
-            List<SceneElementPortModel> updatePorts = new ArrayList<>();
-            for (SceneElementPortBO elementPortBO : elementPortBOS) {
-                SceneElementPortModel port = elementPortBO.toModel();
+            List<TSceneElementPortModel> addPorts = new ArrayList<>();
+            List<TSceneElementPortModel> updatePorts = new ArrayList<>();
+            for (TSceneElementPortBO elementPortBO : elementPortBOS) {
+                TSceneElementPortModel port = elementPortBO.toModel();
                 port.setScene(sceneId);
                 port.setSceneElement(element.getId());
                 if (port.getId() == null) {
@@ -1662,7 +1643,7 @@ public abstract class BaseSceneHandler<
             return new ArrayList<>();
         } else {
             // 此时说明把端口都删除了
-            List<SceneElementPortModel> list = sceneElementPortMapper
+            List<TSceneElementPortModel> list = sceneElementPortMapper
                     .list(new HumanCondition().filterEqual(cn.cyberpeace.mp.scene.model.SceneElementPortModel::getScene, sceneId)
                     .filterEqual(cn.cyberpeace.mp.scene.model.SceneElementPortModel::getSceneElement, element.getId()));
             // 连线也删除一下
@@ -1677,12 +1658,12 @@ public abstract class BaseSceneHandler<
                 return new ArrayList<>();
             }
             List<String> result = new ArrayList<>();
-            for (SceneElementPortModel SceneElementPortModel : list) {
-                String portId = SceneElementPortModel.getPortId();
+            for (TSceneElementPortModel TSceneElementPortModel : list) {
+                String portId = TSceneElementPortModel.getPortId();
                 result.add(portId);
             }
             List<String> deleteIds = new ArrayList<>();
-            for (SceneElementPortModel p : list) {
+            for (TSceneElementPortModel p : list) {
                 String id = p.getId();
                 deleteIds.add(id);
             }
@@ -1697,13 +1678,13 @@ public abstract class BaseSceneHandler<
     public void updateSceneElementWithPlugins(String nodeId) {
         List<String> list = updateSceneElement(nodeId);
 
-        List<SceneElementPortBO> elementPortBOS = getElement(nodeId).getPorts();
-        for (ScenePluginHandler plugin : plugins) {
+        List<TSceneElementPortBO> elementPortBOS = getElement(nodeId).getPorts();
+        for (TScenePluginHandler plugin : plugins) {
             plugin.updateElements(nodeId);
             if (elementPortBOS != null && !elementPortBOS.isEmpty()) {
                 List<String> result = new ArrayList<>();
-                for (SceneElementPortBO SceneElementPortBO : elementPortBOS) {
-                    String id = SceneElementPortBO.getId();
+                for (TSceneElementPortBO TSceneElementPortBO : elementPortBOS) {
+                    String id = TSceneElementPortBO.getId();
                     result.add(id);
                 }
                 plugin.updateElementPorts(result.toArray(new String[0]));
@@ -1718,7 +1699,7 @@ public abstract class BaseSceneHandler<
      * @param pluginKey 插件代号
      */
     public <H9> H9 getPluginHandler(String pluginKey) {
-        ScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
+        TScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         return plugin == null ? null : (H9) plugin;
     }
 
@@ -1727,7 +1708,7 @@ public abstract class BaseSceneHandler<
      * @param pluginKey 插件代号
      */
     public <S9> S9 getPluginScene(String pluginKey) {
-        ScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
+        TScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1746,7 +1727,7 @@ public abstract class BaseSceneHandler<
      * @param nodeId 网元节点id
      */
     public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
-        ScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
+        TScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1765,7 +1746,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public <P9> P9 getPluginPort(String pluginKey, String portId) {
-        ScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
+        TScenePluginHandler plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1783,7 +1764,7 @@ public abstract class BaseSceneHandler<
      * 获取网元数据
      * @param nodeId 网元节点id
      */
-    public SceneElementBO getElement(String nodeId) {
+    public TSceneElementBO getElement(String nodeId) {
         return nodeId != null ? elementMap.getOrDefault(nodeId, null) : null;
     }
 
@@ -1791,11 +1772,11 @@ public abstract class BaseSceneHandler<
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<SceneElementBO> getElementConnectedElements(String nodeId) {
-        List<SceneElementPortBO> connectedPorts = getElementConnectedPorts(nodeId);
-        Map<String, SceneElementBO> connectedElementMap = new HashMap<>();
+    public List<TSceneElementBO> getElementConnectedElements(String nodeId) {
+        List<TSceneElementPortBO> connectedPorts = getElementConnectedPorts(nodeId);
+        Map<String, TSceneElementBO> connectedElementMap = new HashMap<>();
         connectedPorts.forEach(port -> {
-            SceneElementBO element = getPortElement(port.getId());
+            TSceneElementBO element = getPortElement(port.getId());
             if (element == null) {
                 return;
             }
@@ -1808,15 +1789,15 @@ public abstract class BaseSceneHandler<
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<SceneElementPortBO> getElementConnectedPorts(String nodeId) {
-        SceneElementBO ele = getElement(nodeId);
-        List<SceneElementPortBO> ports = ele.getPorts();
+    public List<TSceneElementPortBO> getElementConnectedPorts(String nodeId) {
+        TSceneElementBO ele = getElement(nodeId);
+        List<TSceneElementPortBO> ports = ele.getPorts();
         if (ports == null) {
             return new ArrayList<>();
         }
-        List<SceneElementPortBO> connectedPorts = new ArrayList<>();
+        List<TSceneElementPortBO> connectedPorts = new ArrayList<>();
         ports.forEach(port -> {
-            SceneElementPortBO connectedPort = getPortConnectedPort(port.getId());
+            TSceneElementPortBO connectedPort = getPortConnectedPort(port.getId());
             if (connectedPort == null) {
                 return;
             }
@@ -1830,12 +1811,12 @@ public abstract class BaseSceneHandler<
      * @param nodeId 网元节点id
      */
     public boolean elementHasConnectedPort(String nodeId) {
-        SceneElementBO ele = getElement(nodeId);
-        List<SceneElementPortBO> ports = ele.getPorts();
+        TSceneElementBO ele = getElement(nodeId);
+        List<TSceneElementPortBO> ports = ele.getPorts();
         if (ports == null) {
             return false;
         }
-        for (SceneElementPortBO port: ports) {
+        for (TSceneElementPortBO port: ports) {
             String connectedPortId = portIdConnectedPortIdMap.getOrDefault(port.getId(), null);
             if (connectedPortId != null) {
                 return true;
@@ -1848,7 +1829,7 @@ public abstract class BaseSceneHandler<
      * 获取端口数据
      * @param portId 端口id
      */
-    public SceneElementPortBO getPort(String portId) {
+    public TSceneElementPortBO getPort(String portId) {
         return portId != null ? elementPortMap.getOrDefault(portId, null) : null;
     }
 
@@ -1856,7 +1837,7 @@ public abstract class BaseSceneHandler<
      * 获取端口所属网元数据
      * @param portId 端口id
      */
-    public SceneElementBO getPortElement(String portId) {
+    public TSceneElementBO getPortElement(String portId) {
         return portId != null ? portIdElementMap.getOrDefault(portId, null) : null;
     }
 
@@ -1864,7 +1845,7 @@ public abstract class BaseSceneHandler<
      * 获取端口连接的端口
      * @param portId 端口id
      */
-    public SceneElementPortBO getPortConnectedPort(String portId) {
+    public TSceneElementPortBO getPortConnectedPort(String portId) {
         String connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPort(connectedPortId);
     }
@@ -1873,7 +1854,7 @@ public abstract class BaseSceneHandler<
      * 获取端口连接的节点
      * @param portId 端口id
      */
-    public SceneElementBO getPortConnectedElement(String portId) {
+    public TSceneElementBO getPortConnectedElement(String portId) {
         String connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPortElement(connectedPortId);
     }
@@ -1882,7 +1863,7 @@ public abstract class BaseSceneHandler<
      * 获取源端口所属的连线
      * @param portId 端口id
      */
-    public SceneElementPortConnectionBO getPortBelongConnection(String portId) {
+    public TSceneElementPortConnectionBO getPortBelongConnection(String portId) {
         SceneConfigElementPortConnectionModel connectionModel = portId != null
                 ? (SceneConfigElementPortConnectionModel) sceneElementPortConnectionMapper.first(new HumanCondition()
                 .filterEqual(cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel::getScene, sceneId)
@@ -1897,7 +1878,7 @@ public abstract class BaseSceneHandler<
         } else {
             baseSceneElementPortConnectionBO = null;
         }
-        return (SceneElementPortConnectionBO) baseSceneElementPortConnectionBO;
+        return (TSceneElementPortConnectionBO) baseSceneElementPortConnectionBO;
     }
 
     public void addElementPlugin(String pluginKey, String nodeId, Map<String, Object> pluginElement) {
@@ -1922,7 +1903,7 @@ public abstract class BaseSceneHandler<
         scenePluginDataBO.getElementPorts().put(portId, pluginPort);
     }
 
-    public void addPort(String portId, SceneElementBO element) {
+    public void addPort(String portId, TSceneElementBO element) {
         this.portIdElementMap.put(portId, element);
     }
 }

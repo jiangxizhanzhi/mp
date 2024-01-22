@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.base.util.basic;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,11 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -257,34 +259,6 @@ public class ClassUtils {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
-        }
-    }
-
-    public static void loadClassFields(Object obj) {
-        Class<?> clazz = obj.getClass();
-        ClassFieldNames classFieldNamesAnnotation = clazz.getAnnotation(ClassFieldNames.class);
-        if (classFieldNamesAnnotation == null) {
-            return;
-        }
-        ClassFieldClasses classFieldClassesAnnotation = clazz.getAnnotation(ClassFieldClasses.class);
-        if (classFieldClassesAnnotation == null) {
-            return;
-        }
-
-        String[] fieldNames = classFieldNamesAnnotation.value();
-        Class<?>[] fieldClasses = classFieldClassesAnnotation.value();
-        if (fieldNames.length != fieldClasses.length) {
-            return;
-        }
-
-        for (int i = 0; i < fieldNames.length; i++) {
-            String fieldName = fieldNames[i];
-            Field field = ClassUtils.getField(clazz, fieldName, true, false);
-            if (field == null) {
-                continue;
-            }
-
-            ClassUtils.setFieldValue(field, obj, fieldClasses[i]);
         }
     }
 
