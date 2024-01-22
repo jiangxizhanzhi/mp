@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
+import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
 import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -52,7 +52,7 @@ public class FlowTaskPostService implements FlowPostService {
      * @param nodeId 节点
      * @param response 执行信息
      */
-    public void onNodeFlowTaskError(String sceneId, String nodeId, BatchActuatorCallbackResponse response){
+    public void onNodeFlowTaskError(String sceneId, String nodeId, BatchActuatorResponse response){
         List<Flow> flows = SceneFlowCacheUtil.get(sceneId, nodeId);
         Map<String, Flow> flowMap = flows.stream()
                 .collect(Collectors.toMap(Flow::getId, Function.identity()));

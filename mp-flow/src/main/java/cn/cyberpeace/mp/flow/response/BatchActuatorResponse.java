@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "流量批量执行回调方法返回信息")
-public class BatchActuatorCallbackResponse {
+public class BatchActuatorResponse {
 
     /**
      * 执行成功任务列表
