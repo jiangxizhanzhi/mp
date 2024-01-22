@@ -33,8 +33,7 @@ public abstract class BasePluginCommonHandler<
         H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
                 S9, ?, P9, E9, ?, ?, ?, ?, ?,
                 ?, H>>
-        extends BasePluginHandler<S, E, P, C>
-        implements PluginSceneHandlerCommon<S9, E9, P9, H> {
+        extends BasePluginHandler<S, E, P, C> {
 
     public void syncSrcData() {
         S scene = getScene();
@@ -100,4 +99,107 @@ public abstract class BasePluginCommonHandler<
     }
 
     public abstract void reloadData();
+
+    public abstract H getSceneHandler();
+
+
+    /**
+     * 获取其它插件全局数据
+     *
+     * @param pluginKey 插件代号
+     */
+    public <S9> S9 getPluginScene(String pluginKey) {
+        return getSceneHandler().getPluginScene(pluginKey);
+    }
+
+    /**
+     * 获取网元其它插件数据
+     *
+     * @param pluginKey 插件代号
+     * @param nodeId    网元节点id
+     */
+    public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
+        return getSceneHandler().getPluginElement(pluginKey, nodeId);
+    }
+
+    /**
+     * 获取端口其它插件数据
+     *
+     * @param pluginKey 插件代号
+     * @param portId    端口id
+     */
+    public <P9> P9 getPluginPort(String pluginKey, String portId) {
+        return getSceneHandler().getPluginPort(pluginKey, portId);
+    }
+
+    /**
+     * 获取网元数据
+     *
+     * @param nodeId 网元节点id
+     */
+    public E9 getSrcElement(String nodeId) {
+        return getSceneHandler().getElement(nodeId);
+    }
+
+    /**
+     * 获取网元连接的网元
+     *
+     * @param nodeId 网元节点id
+     */
+    public List<E9> getElementConnectedSrcElements(String nodeId) {
+        return getSceneHandler().getElementConnectedElements(nodeId);
+    }
+
+    /**
+     * 获取网元连接的网元
+     *
+     * @param nodeId 网元节点id
+     */
+    public List<P9> getElementConnectedSrcPorts(String nodeId) {
+        return getSceneHandler().getElementConnectedPorts(nodeId);
+    }
+
+    /**
+     * 获取场景基础数据
+     */
+    public  S9 getSrcScene() {
+        return getSceneHandler().getScene();
+    }
+
+    /**
+     * 获取端口数据
+     *
+     * @param portId 端口id
+     */
+    public P9 getSrcPort(String portId) {
+        return getSceneHandler().getPort(portId);
+    }
+
+    /**
+     * 获取端口所属网元数据
+     *
+     * @param portId 端口id
+     */
+    public E9 getPortSrcElement(String portId) {
+        return getSceneHandler().getPortElement(portId);
+    }
+
+    /**
+     * 获取端口连接的端口
+     *
+     * @param portId 端口id
+     */
+    public P9 getPortConnectedSrcPort(String portId) {
+        return getSceneHandler().getPortConnectedPort(portId);
+    }
+
+    /**
+     * 获取端口连接的节点
+     *
+     * @param portId 端口id
+     */
+    public E9 getPortConnectedSrcElement(String portId) {
+        return getSceneHandler().getPortConnectedElement(portId);
+    }
+
 }

@@ -59,7 +59,7 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart) {
         SceneHandler sceneHandler;
         try {
             // 使用代理 提供事件流转
@@ -89,9 +89,6 @@ public class SceneService {
             long consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler.updateScene();
-            if (callback != null) {
-                callback.run();
-            }
             SceneStageRecorder.removeRecorder(sceneHandler.getSceneId());
         });
 
@@ -100,7 +97,7 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
                                                             SceneContextBO context) {
-        return create(sceneConfigDataBO.exportToScene(), context, false, null);
+        return create(sceneConfigDataBO.exportToScene(), context, false);
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {

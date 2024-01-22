@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 
-@ClassFieldClasses({CollectionPluginSceneConfigBO.class, CollectionPluginSceneConfigElementBO.class, CollectionPluginSceneConfigElementPortBO.class, Object.class,})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler<CollectionPluginSceneConfigBO, CollectionPluginSceneConfigElementBO, CollectionPluginSceneConfigElementPortBO, Object> {
@@ -173,4 +171,11 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CollectionPluginSceneConfigBO.class;
+        super.elementBOClass = CollectionPluginSceneConfigElementBO.class;
+        super.elementPortBOClass = CollectionPluginSceneConfigElementPortBO.class;
+        super.contextClass = Object.class;
+    }
 }

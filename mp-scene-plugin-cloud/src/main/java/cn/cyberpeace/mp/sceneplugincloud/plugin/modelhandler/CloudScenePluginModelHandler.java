@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler;
 
 import cn.cyberpeace.mp.base.bo.DiffTargets;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -28,22 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-
-@ClassFieldClasses({
-        CloudPluginSceneBO.class,
-        CloudPluginSceneElementBO.class,
-        CloudPluginSceneElementPortBO.class,
-        CloudPluginSceneModel.class,
-        CloudPluginSceneElementModel.class,
-        CloudPluginSceneElementPortModel.class,
-})
-@BeanFieldClasses({
-        CloudPluginSceneMapper.class,
-        CloudPluginSceneElementMapper.class,
-        CloudPluginSceneElementPortMapper.class,
-})
 public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         SceneBO,
         SceneElementBO,
@@ -155,5 +138,22 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         });
         existTargetMap.forEach((key, node) -> diff.getRemovingTargets().add(node));
         return diff;
+    }
+
+    @Override
+    protected void initClass() {
+        super.pluginSceneBOClass = CloudPluginSceneBO.class;
+        super.pluginSceneElementBOClass = CloudPluginSceneElementBO.class;
+        super.pluginSceneElementPortBOClass = CloudPluginSceneElementPortBO.class;
+        super.pluginSceneModelClass = CloudPluginSceneModel.class;
+        super.pluginSceneElementModelClass = CloudPluginSceneElementModel.class;
+        super.pluginSceneElementPortModelClass = CloudPluginSceneElementPortModel.class;
+    }
+
+    @Override
+    protected void initMapper() {
+        super.pluginSceneMapper = BeanCommon.getBean(CloudPluginSceneMapper.class);
+        super.pluginSceneElementMapper = BeanCommon.getBean(CloudPluginSceneElementMapper.class);
+        super.pluginSceneElementPortMapper = BeanCommon.getBean(CloudPluginSceneElementPortMapper.class);
     }
 }

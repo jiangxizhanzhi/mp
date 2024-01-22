@@ -2,10 +2,8 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
@@ -19,7 +17,6 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -33,16 +30,6 @@ import java.util.Objects;
 /**
  * 综合场景实例处理
  */
-@ClassFieldClasses({
-        CsceneInstanceModel.class,
-        CsceneInstanceRoleModel.class,
-        CsceneInstanceBO.class,
-        CsceneInstaneRoleBO.class,
-})
-@BeanFieldClasses({
-        CsceneInstanceMapper.class,
-        CsceneInstanceRoleMapper.class,
-})
 @Slf4j
 public class CsceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
@@ -102,9 +89,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
-            LogFileUtil.getLogFile(cscene.getId());
-        }).getSource());
+        var result = sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource();
+        cscene.setScene(result);
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
@@ -144,6 +130,20 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId != null) {
             sceneService.delete(sceneId, logic, generateSceneContext());
         }
+    }
+
+    @Override
+    protected void initMapper() {
+        super.csceneMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        super.csceneRoleMapper = BeanCommon.getBean(CsceneInstanceRoleMapper.class);
+    }
+
+    @Override
+    protected void initClass() {
+        super.csceneModelClass = CsceneInstanceModel.class;
+        super.csceneRoleModelClass = CsceneInstanceRoleModel.class;
+        super.csceneBOClass = CsceneInstanceBO.class;
+        super.csceneRoleBOClass = CsceneInstaneRoleBO.class;
     }
 
     public void update() {

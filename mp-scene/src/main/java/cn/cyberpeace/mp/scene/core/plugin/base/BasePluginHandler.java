@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
-import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -11,8 +9,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,38 +20,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 基础的场景插件处理类
  * 场景插件处理目前只对网元节点和网元端口做插件配置处理
  *
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
+ * @param <TSceneBO> 插件对应配置类
+ * @param <TPluginSceneElementBO> 网元节点的插件对应配置类
+ * @param <TPluginSceneElementPortBO> 网元端口的插件对应配置类
  */
 @Slf4j
-@ClassFieldNames({
-        "sceneBOClass",
-        "elementBOClass",
-        "elementPortBOClass",
-        "contextClass",
-})
 @Data
-public abstract class BasePluginHandler<S, E, P, C> {
+public abstract class BasePluginHandler<TSceneBO, TPluginSceneElementBO, TPluginSceneElementPortBO, TContext> {
     private String key;
     private float priority;
 
-    private C context;
+    private TContext context;
 
     // 源场景索引数据
     private String sourceSceneId;
     private final List<String> elementIds = new CopyOnWriteArrayList<>();
     private final List<String> elementPortIds = new CopyOnWriteArrayList<>();
 
-    private S scene;
-    private final Map<String, E> elementMap = new ConcurrentHashMap<>();
-    private final Map<String, P> elementPortMap = new ConcurrentHashMap<>();
+    private TSceneBO scene;
+    private final Map<String, TPluginSceneElementBO> elementMap = new ConcurrentHashMap<>();
+    private final Map<String, TPluginSceneElementPortBO> elementPortMap = new ConcurrentHashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
-    private Class<S> sceneBOClass;
-    private Class<E> elementBOClass;
-    private Class<P> elementPortBOClass;
-    private Class<C> contextClass;
+    protected Class<TSceneBO> sceneBOClass;
+    protected Class<TPluginSceneElementBO> elementBOClass;
+    protected Class<TPluginSceneElementPortBO> elementPortBOClass;
+    protected Class<TContext> contextClass;
 
     private void loadContext(Object context) {
         if (context == null) {
@@ -64,12 +54,12 @@ public abstract class BasePluginHandler<S, E, P, C> {
 
         try {
             if (contextClass.equals(context.getClass())) {
-                this.context = (C) context;
+                this.context = (TContext) context;
             } else if (context instanceof Map) {
                 // TODO: 去除snake依赖
                 this.context = JsonCommon.snakeMapToBean((Map<String, Object>) context, contextClass);
             } else {
-                this.context = (C) context;
+                this.context = (TContext) context;
             }
         } catch (Exception e) {
             log.error("load plugin({}) context({}) error: {}", key, context, e);
@@ -101,7 +91,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
         }
 
         // 验证数据字段
-        BaseScenePluginDataBO<S, E, P> validateData = new BaseScenePluginDataBO<S, E, P>();
+        BaseScenePluginDataBO<TSceneBO, TPluginSceneElementBO, TPluginSceneElementPortBO> validateData = new BaseScenePluginDataBO<TSceneBO, TPluginSceneElementBO, TPluginSceneElementPortBO>();
         validateData.setScene(scene);
         validateData.setElements(elementMap);
         validateData.setElementPorts(elementPortMap);
@@ -151,11 +141,13 @@ public abstract class BasePluginHandler<S, E, P, C> {
     }
 
     public void initBase() {
-        ClassUtils.loadClassFields(this);
+        this.initClass();
         PluginKey pluginKeyAnnotation = getClass().getAnnotation(PluginKey.class);
         key = pluginKeyAnnotation.value();
         priority = pluginKeyAnnotation.priority();
     }
+
+    protected abstract void initClass();
 
     /**
      * 从场景插件业务数据初始化
@@ -190,11 +182,11 @@ public abstract class BasePluginHandler<S, E, P, C> {
         reload();
     }
 
-    public E getElement(String nodeId) {
+    public TPluginSceneElementBO getElement(String nodeId) {
         return nodeId != null ? elementMap.getOrDefault(nodeId, null) : null;
     }
 
-    public P getPort(String portId) {
+    public TPluginSceneElementPortBO getPort(String portId) {
         return portId != null ? elementPortMap.getOrDefault(portId, null) : null;
     }
 

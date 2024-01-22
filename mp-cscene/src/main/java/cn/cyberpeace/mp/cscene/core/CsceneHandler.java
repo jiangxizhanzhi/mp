@@ -2,13 +2,15 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -36,22 +38,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 /**
  * 综合场景处理
  */
-@ClassFieldClasses({
-        CsceneModel.class,
-        CsceneRoleModel.class,
-        CsceneBO.class,
-        CsceneRoleBO.class,
-})
-@BeanFieldClasses({
-        CsceneMapper.class,
-        CsceneRoleMapper.class,
-})
 @Slf4j
 public class CsceneHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
@@ -326,6 +317,20 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (sceneId != null) {
             sceneConfigService.delete(sceneId, logic, null);
         }
+    }
+
+    @Override
+    protected void initMapper() {
+        super.csceneMapper = BeanCommon.getBean(CsceneMapper.class);
+        super.csceneRoleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
+    }
+
+    @Override
+    protected void initClass() {
+        super.csceneModelClass = CsceneModel.class;
+        super.csceneRoleModelClass = CsceneRoleModel.class;
+        super.csceneBOClass = CsceneBO.class;
+        super.csceneRoleBOClass = CsceneRoleBO.class;
     }
 
     private void checkVlanIds(CsceneBO csceneBO) {

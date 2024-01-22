@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
@@ -36,15 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-
-@ClassFieldClasses({
-        FlowPluginSceneBO.class,
-        FlowPluginSceneElementBO.class,
-        FlowPluginSceneElementPortBO.class,
-        Object.class,
-})
 @Component
 @Slf4j
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
@@ -398,4 +389,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
         return flow;
     }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = FlowPluginSceneBO.class;
+        super.elementBOClass = FlowPluginSceneElementBO.class;
+        super.elementPortBOClass = FlowPluginSceneElementPortBO.class;
+        super.contextClass = Object.class;
+    }
+
 }
