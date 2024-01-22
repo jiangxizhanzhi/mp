@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -494,26 +493,29 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             }
         }
 
-        List<String> roleBoIds =
-                rolebos.stream().map(r -> {
-                    if (CollectionUtils.isEmpty(r.getTargets())) {
-                        return r.getId();
-                    }
-                    return null;
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> roleBoIds = new ArrayList<>();
+        for (RoleBo role : rolebos) {
+            if (!CollectionUtils.isEmpty(role.getTargets())) {
+                continue;
+            }
+            String id = role.getId();
+            if (id != null) {
+                roleBoIds.add(id);
+            }
+        }
 
         if (CollectionUtils.isNotEmpty(roleBoIds)) {
             List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleBoIds);
             if (CollectionUtils.isNotEmpty(targetRoleBos)) {
                 for (RoleBo r : rolebos) {
-                    List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
+                    List<TargetModel> targetModels = new ArrayList<>();
+                    for (TargetRoleBo tr : targetRoleBos) {
                         if (Objects.equals(tr.getRoleId(), r.getId())) {
                             TargetModel targetModel = new TargetModel();
                             BeanUtils.copyProperties(tr, targetModel);
-                            return targetModel;
+                            targetModels.add(targetModel);
                         }
-                        return null;
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
+                    }
                     r.setTargets(targetModels);
                 }
             }

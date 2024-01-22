@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
@@ -118,10 +117,19 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             };
 
             if (port == null || port.compareTo(0) <= 0) {
-                TaskCommon.executeTask(() -> NetworkUtils.probeHost(ip, checkSuccessCallback, checkSuccessCallback));
+                TaskCommon.executeTask(() -> {
+                    NetworkUtils.probeHost(ip);
+                    this.checkSuccessCallback(ipAccessModesMap, nodeId);
+                });
             } else {
-                TaskCommon.executeTask(
-                        () -> NetworkUtils.probePort(protocol, ip, port, checkSuccessCallback, checkTimeoutCallback));
+                TaskCommon.executeTask(() -> {
+                    boolean flag = NetworkUtils.probePort(protocol, ip, port);
+                    if (flag) {
+                        this.checkSuccessCallback(ipAccessModesMap, nodeId);
+                    } else {
+                        this.checkTimeoutCallback(ipAccessModesMap, nodeId);
+                    }
+                });
             }
         });
     }
@@ -199,5 +207,33 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 //        } else {
 //            return null;
 //        }
+    }
+
+    private void checkSuccessCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
+        ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
+            accessModes.forEach(accessMode -> accessMode.setAvailable(true));
+            getPluginHandler().asyncAckElementChanged(nodeId, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+            }
+        });
+    }
+
+    private void checkTimeoutCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
+        ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
+            accessModes.forEach(accessMode -> accessMode.setAvailable(true));
+            String sceneId = getPluginHandler().getSceneHandler().getSceneId();
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+            SceneElementBO dbElement = sceneHandler.getElement(nodeId);
+            if (dbElement != null && dbElement.getEvent().equals(getPluginHandler().getSrcElement(nodeId).getEvent())) {
+                log.info("check access mode timeout , update access info , sceneId {},nodeId {}", sceneId, nodeId);
+                getPluginHandler().asyncAckElementChanged(nodeId, true);
+                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                }
+            } else {
+                log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
+            }
+        });
     }
 }

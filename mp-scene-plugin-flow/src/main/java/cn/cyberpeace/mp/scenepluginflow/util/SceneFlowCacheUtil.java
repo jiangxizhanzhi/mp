@@ -20,6 +20,16 @@ import java.util.concurrent.TimeUnit;
  * @Date 2022/3/1
  */
 public class SceneFlowCacheUtil {
+    private static LoadingCache<String, SceneHandler> sceneCache = CacheBuilder.newBuilder()
+            .maximumSize(300)
+            .expireAfterAccess(24, TimeUnit.HOURS)
+            .build(new CacheLoader<String, SceneHandler>() {
+                @Override
+                public SceneHandler load(String sceneId) {
+                    return new SceneHandler(sceneId, null, false, null);
+                }
+            });
+
     private static LoadingCache<String, List<Flow>> cache = CacheBuilder.newBuilder()
             .maximumSize(300)
             .expireAfterAccess(24, TimeUnit.HOURS)
@@ -29,7 +39,7 @@ public class SceneFlowCacheUtil {
                     String[] info = parseKey(key);
                     String sceneId = info[0];
                     String nodeId = info[1];
-                    SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+                    SceneHandler sceneHandler = sceneCache.getUnchecked(sceneId);
                     if (sceneHandler != null) {
                         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                         if (pluginHandler != null) {
@@ -50,6 +60,10 @@ public class SceneFlowCacheUtil {
         return cache.getUnchecked(getKey(sceneId, nodeId));
     }
 
+    public static SceneHandler getSceneHandler(String sceneId) {
+        return sceneCache.getUnchecked(sceneId);
+    }
+    
     private static String getKey(String sceneId, String nodeId) {
         return sceneId + "_" + nodeId;
     }

@@ -162,9 +162,7 @@ public class FlowExecutor {
         return addFlowTaskRequest;
     }
 
-    public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback, String sourceIp) {
-        FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + taskId, ThreadUtils.format(stopCallback));
-        FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + taskId, errorCallback);
+    public void startFlow(String taskId, String sourceIp) {
         ServiceResult<Boolean> result = flowService1.startTask(taskId, sourceIp);
 //        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {
@@ -180,12 +178,7 @@ public class FlowExecutor {
         }
     }
 
-    public void startFlows(BatchStartTaskBO batchStartTaskBO, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
-//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-//        request.setTaskIds(taskIds);
-//        request.setRunType(runType);
-//        request.setTaskAction(TaskActionEnum.START.toValue());
-//        request.setCallbackConsumer(callbackConsumer);
+    public void startFlows(BatchStartTaskBO batchStartTaskBO) {
         ServiceResult<Boolean> result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
