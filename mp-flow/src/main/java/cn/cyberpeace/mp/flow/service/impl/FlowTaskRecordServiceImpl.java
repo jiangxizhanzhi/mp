@@ -291,7 +291,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
      */
     private void flowRecordPostProcess(FlowTaskTaskModel flowTaskTaskModel, String msg) {
         String taskId = flowTaskTaskModel.getId();
-        log.info("call task runnable for: {}", taskId);
+        log.info("call task post process for: {}", taskId);
         flowPostService.onFlowTaskOver(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId());
 
         if (StringUtils.isNotBlank(msg)) {
@@ -337,7 +337,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                 log.info("batch tasks accept response: {}", batchActuatorResponse);
                 flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorResponse);
 
-                log.info("batch tasks run runnable");
+                log.info("batch tasks run onStop");
                 flowPostService.onStopTaskNode(sceneId, nodeId);
             }
         } else {
