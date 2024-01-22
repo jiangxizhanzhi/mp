@@ -102,9 +102,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
-            LogFileUtil.getLogFile(cscene.getId());
-        }).getSource());
+        var result = sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource();
+        cscene.setScene(result);
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
