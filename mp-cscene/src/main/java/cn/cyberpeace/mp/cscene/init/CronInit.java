@@ -41,7 +41,7 @@ public class CronInit {
         jobs.add(cloudMessageConvertInitJob);
         jobs.add(cloudLocalFileMappingInitJob);
         jobs.add(sceneNodeNumInitJob);
-        for (var job : jobs) {
+        for (AbstractInitJob job : jobs) {
             try {
                 job.executed();
             } catch (Exception e) {

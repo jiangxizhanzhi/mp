@@ -67,7 +67,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serviceAlarmStatistics(int days) {
-        var list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
 
         return processTrend(list, days);
     }
@@ -78,7 +78,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serverAlarmStatistics(int days) {
-        var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
         return processTrend(list, days);
     }
 
@@ -262,7 +262,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         }
 
         public static DateFormatAggr f(String fieldName, String dateFormatter) {
-            var aggregation = new DateFormatAggr();
+            DateFormatAggr aggregation = new DateFormatAggr();
             aggregation.setFieldName(fieldName);
             aggregation.addCalc(genCalcDateFormatter(dateFormatter));
             return aggregation;

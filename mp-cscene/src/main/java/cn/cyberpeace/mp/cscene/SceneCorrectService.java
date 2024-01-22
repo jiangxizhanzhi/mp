@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Description
@@ -53,13 +54,13 @@ public class SceneCorrectService {
                 })
                 .orAndEnd()
                 .filterOrEnd();
-        var creatingScenes = sceneMapper.list(humanCondition);
+        List<SceneModel> creatingScenes = sceneMapper.list(humanCondition);
         if (CollectionUtils.isNotEmpty(creatingScenes)) {
             LocalDateTime now = LocalDateTime.now();
             log.info("current local date time is {}", now);
-            for (var creatingScene : creatingScenes) {
+            for (SceneModel creatingScene : creatingScenes) {
                 try {
-                    var createTime = creatingScene.getCreateTime();
+                    LocalDateTime createTime = creatingScene.getCreateTime();
                     if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
                         // 超过预留时间未启动完成
                         int counts = sceneElementMapper.total(new HumanCondition()
@@ -88,13 +89,13 @@ public class SceneCorrectService {
                 .filterIn(SceneModel::getEventStatus, new Integer[]{
                         EventStatus.INITIAL, EventStatus.START, EventStatus.IN_PROGRESS, EventStatus.PAUSE
                 });
-        var creatingScenes = sceneMapper.list(humanCondition);
+        List<SceneModel> creatingScenes = sceneMapper.list(humanCondition);
         if (CollectionUtils.isNotEmpty(creatingScenes)) {
             LocalDateTime now = LocalDateTime.now();
             log.info("current local date time is {}", now);
-            for (var creatingScene : creatingScenes) {
+            for (SceneModel creatingScene : creatingScenes) {
                 try {
-                    var createTime = creatingScene.getUpdateTime();
+                    LocalDateTime createTime = creatingScene.getUpdateTime();
                     if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
                         // 超过预留时间未删除完成
                         int counts = sceneElementMapper.total(new HumanCondition()

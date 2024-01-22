@@ -43,10 +43,12 @@ import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -118,7 +120,7 @@ public class CsceneFlowService {
      */
     public void addTask(AddFlowTaskTaskRequest request) {
         log.info("CsceneFlowService.addTask begin. request:{}", request);
-        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
@@ -181,7 +183,7 @@ public class CsceneFlowService {
             for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
                 scenePluginDataBO.getElements().put(detail.getNodeId(), JsonCommon.beanToSnakeMap(elementBO));
             }
-            var scene = sceneHandler.toData();
+            SceneDataBO scene = sceneHandler.toData();
             scene.getPlugins().put(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, scenePluginDataBO);
             SceneHandler sceneHandler2 = new SceneHandler(scene, null);
             sceneHandler2.save();
@@ -208,7 +210,7 @@ public class CsceneFlowService {
             String networkId = "";
             if (CollectionUtils.isNotEmpty(sceneHandler.getElement(detail.getNodeId()).getPorts())) {
                 CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-                for (var p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
+                for (SceneElementPortBO p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
                     nodeIp = p.getIp();
                     if (StringUtils.isNotEmpty(nodeIp)) {
                         CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
@@ -545,7 +547,7 @@ public class CsceneFlowService {
      */
     public List<FlowTaskNode> nodeOption(String id) {
         log.info("CsceneFlowService.nodeOption begin. id:{}", id);
-        var sceneId = csceneInstanceService.getSceneId(id);
+        String sceneId = csceneInstanceService.getSceneId(id);
         List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
 
         if (CollectionUtils.isNotEmpty(nodeList)) {
@@ -593,7 +595,7 @@ public class CsceneFlowService {
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
         log.info("CsceneFlowService.totalRate begin. id:{}", id);
-        var sceneId = csceneInstanceService.getSceneId(id);
+        String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
@@ -669,9 +671,9 @@ public class CsceneFlowService {
 
     private String getUsableIp(String networkId, SceneHandler sceneHandler) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var elements = new ArrayList<>(pluginHandler.getElementMap().values());
+        ArrayList<CloudPluginSceneElementBO> elements = new ArrayList<>(pluginHandler.getElementMap().values());
         ConnectedNetworkBO findNet = null;
-        for (var e : elements) {
+        for (CloudPluginSceneElementBO e : elements) {
             List<ConnectedNetworkBO> nets = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(e.getDeriveNetworks())) {
                 nets.addAll(e.getDeriveNetworks());
@@ -680,7 +682,7 @@ public class CsceneFlowService {
                 nets.addAll(e.getAccessNetworks());
             }
             boolean finded = false;
-            for (var n : nets) {
+            for (ConnectedNetworkBO n : nets) {
                 if (networkId.equals(n.getNetwork().getResourceId())) {
                     finded = true;
                     findNet = n;
@@ -707,7 +709,7 @@ public class CsceneFlowService {
                     ips.add(ip);
                 }
             }
-            var allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
+            List<String> allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
             if (CollectionUtils.isNotEmpty(allocateIp)) {
                 return allocateIp.get(0);
             } else {

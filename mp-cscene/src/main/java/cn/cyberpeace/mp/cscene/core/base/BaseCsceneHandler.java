@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.core.base;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
@@ -76,7 +77,7 @@ public abstract class BaseCsceneHandler<
      * @return 业务模型数据
      */
     private TCsceneBO convertToCsceneBO(TCsceneModel csceneObj) {
-        var csceneBO = ClassUtils.createInstance(csceneBOClass);
+        TCsceneBO csceneBO = ClassUtils.createInstance(csceneBOClass);
         csceneBO.fromModel(csceneObj);
         String sceneId = getSceneId(csceneObj);
         if (!StringUtils.isEmpty(sceneId)) {
@@ -99,7 +100,7 @@ public abstract class BaseCsceneHandler<
         Map<String, TCsceneRoleBO> roleBOMap = new HashMap<>();
         Map<String, String> roleParentMap = new HashMap<>();
         for (TCsceneRoleModel roleObj : roleObjs) {
-            var roleBO = ClassUtils.createInstance(roleBOClass);
+            TCsceneRoleBO roleBO = ClassUtils.createInstance(roleBOClass);
             roleBO.fromModel(roleObj);
             roleBOMap.put(roleObj.getId(), roleBO);
             roleParentMap.put(roleObj.getId(), roleObj.getParent());
@@ -110,8 +111,8 @@ public abstract class BaseCsceneHandler<
         for (Map.Entry<String, TCsceneRoleBO> entry : roleBOMap.entrySet()) {
             String roleId = entry.getKey();
             TCsceneRoleBO roleBO = entry.getValue();
-            var parentId = roleParentMap.getOrDefault(roleId, null);
-            var parentRoleBO = roleBOMap.getOrDefault(parentId, null);
+            String parentId = roleParentMap.getOrDefault(roleId, null);
+            TCsceneRoleBO parentRoleBO = roleBOMap.getOrDefault(parentId, null);
             if (parentRoleBO == null) {
                 continue;
             }
@@ -138,12 +139,12 @@ public abstract class BaseCsceneHandler<
         }
 
         for (TCsceneRoleBO roleBO : roleBOS) {
-            var roleObj = roleBO.toModel();
+            TCsceneRoleModel roleObj = roleBO.toModel();
             roleObj.setParent(parentId);
             roleObj.initDefault(BaseModel::getId);
             roleObjs.add(roleObj);
 
-            var children = roleBO.getChildren();
+            List<TCsceneRoleBO> children = roleBO.getChildren();
             if (children != null) {
                 roleObjs.addAll(convertToRoleObjs(children, roleObj.getId()));
             }
@@ -157,7 +158,7 @@ public abstract class BaseCsceneHandler<
      */
     private boolean reloadCscene() {
         cscene = null;
-        var csceneObj = readCscene();
+        TCsceneModel csceneObj = readCscene();
         if (csceneObj == null) {
             return false;
         }
@@ -182,16 +183,16 @@ public abstract class BaseCsceneHandler<
      * @return 保存是否成功
      */
     private boolean saveCscene() {
-        var sceneId = getSceneId(cscene.toModel());
+        String sceneId = getSceneId(cscene.toModel());
         if (!StringUtils.isEmpty(csceneId)) {
-            var originCsceneObj = readCscene();
-            var originSceneId = originCsceneObj == null ? null : getSceneId(originCsceneObj);
+            TCsceneModel originCsceneObj = readCscene();
+            String originSceneId = originCsceneObj == null ? null : getSceneId(originCsceneObj);
             // 场景id变化了删除原来的
             if (!StringUtils.isEmpty(originSceneId) && !originSceneId.equals(sceneId)) {
                 deleteScene(originSceneId, true);
             }
         } else {
-            var user = UserCommon.getUserWithContext(context);
+            UserModel user = UserCommon.getUserWithContext(context);
             if (user != null) {
                 cscene.setCreateUser(user.getId());
                 cscene.setCreateUsername(user.getUsername());
@@ -200,7 +201,7 @@ public abstract class BaseCsceneHandler<
         saveScene(cscene);
 
         TCsceneModel csceneObj = cscene.toModel();
-        var result = csceneMapper.save(csceneObj);
+        boolean result = csceneMapper.save(csceneObj);
         setCsceneId(csceneObj.getId());
         cscene.fromModel(csceneObj);
         return result;
@@ -232,17 +233,17 @@ public abstract class BaseCsceneHandler<
         }
         String[] removingTargetIds = existRoleObjMap.keySet().toArray(new String[0]);
 
-        var deleteResult = csceneRoleMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();
+        int deleteResult = csceneRoleMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();
         if (deleteResult < removingTargetIds.length) {
             throw new SceneUpdateException("Cscene role diff delete failed");
         }
 
-        var createResult = csceneRoleMapper.bulkCreate(addingTargets).getSuccessCount();
+        int createResult = csceneRoleMapper.bulkCreate(addingTargets).getSuccessCount();
         if (createResult < addingTargets.size()) {
             throw new SceneUpdateException("Cscene role diff create failed");
         }
 
-        var updateResult = csceneRoleMapper.bulkUpdate(updatingTargets).getSuccessCount();
+        int updateResult = csceneRoleMapper.bulkUpdate(updatingTargets).getSuccessCount();
         if (updateResult < updatingTargets.size()) {
             throw new SceneUpdateException("Cscene role diff update failed");
         }
@@ -308,7 +309,7 @@ public abstract class BaseCsceneHandler<
     public void init(TCsceneModel csceneObj, List<TCsceneRoleModel> roleObjs, CsceneContextBO context) {
         initBase();
         initContext(context);
-        var csceneBO = convertToCsceneBO(csceneObj);
+        TCsceneBO csceneBO = convertToCsceneBO(csceneObj);
         csceneBO.setRoles(convertToRoleBOs(roleObjs, csceneRoleBOClass));
         fromData(csceneBO);
     }

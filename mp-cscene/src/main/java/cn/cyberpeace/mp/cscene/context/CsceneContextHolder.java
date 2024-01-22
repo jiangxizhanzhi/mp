@@ -14,7 +14,7 @@ public class CsceneContextHolder {
     }
 
     public static CsceneContext getContext() {
-        var context = contextHolder.get();
+        CsceneContext context = contextHolder.get();
         if (context == null) {
             context = new CsceneContext();
             contextHolder.set(context);

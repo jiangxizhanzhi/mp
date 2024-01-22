@@ -163,7 +163,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         this.validUsbCanDelete(request.getUuids());
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", request.getUuids());
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + ". response: {}", result);

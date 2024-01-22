@@ -59,7 +59,7 @@ public class TargetController {
     @GetMapping("/current_user/tree")
     public ServiceResult getTree() {
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
-        var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
+        List<TargetBo> result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
         return ServiceResult.builder().source(result).build().asResult();
     }
 }

@@ -82,7 +82,7 @@ public class InstallerService extends BaseCpService {
      * @param ids
      */
     public BaseCloudPlatformResult deleteByIds(List<String> ids) {
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
         BaseCloudPlatformResult result = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INSTALLER + LISTS,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         super.checkResult(result);

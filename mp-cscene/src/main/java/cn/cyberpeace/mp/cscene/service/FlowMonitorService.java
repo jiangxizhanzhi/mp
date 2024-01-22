@@ -41,6 +41,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
@@ -53,6 +54,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -376,7 +378,7 @@ public class FlowMonitorService {
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
-        var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTime> result = new ArrayList<>();
         if (map != null && !map.isEmpty()) {
@@ -408,7 +410,7 @@ public class FlowMonitorService {
         params.setEndTime(baseRequest.getEndTime());
         params.setTopSize(baseRequest.getTopSize());
         params.setSourceIps(baseRequest.getSourceIps());
-        var result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
+        List<FlowAttackCountBO> result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
         List<FlowAttackTime> list = new ArrayList<>();
         for (FlowAttackCountBO bo : result) {
             FlowAttackTime build = FlowAttackTime.builder()
@@ -427,7 +429,7 @@ public class FlowMonitorService {
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
-        var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
+        TeamAttackBO countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
         TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
         totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
         totalFlowAttackRatio.setTotalTrafficSize(countResult.getTrafficSize());
@@ -668,7 +670,7 @@ public class FlowMonitorService {
             CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
             if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                    var u = URLUtil.url(url);
+                    URL u = URLUtil.url(url);
                     url = StringUtils.replaceOnce(url, u.getHost(), config.getPublicNetProxyIp());
                 }
             }

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListResult;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,7 @@ public class DynamipsConverter implements BaseConverter {
         param.setOffset(request.getOffset());
         param.setSortKey(request.getOrder());
         param.setSortDir(request.getSort());
-        var result = virtualDynamips.list(param);
+        VirtualDynamipsListResult result = virtualDynamips.list(param);
         if (result == null || CollectionUtils.isEmpty(result.getItems())) {
             BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
             convertModel.setList(new ArrayList<>());
@@ -65,9 +66,9 @@ public class DynamipsConverter implements BaseConverter {
         instanceBO.setId(v.getInstanceId() == null ? StringUtils.EMPTY : v.getInstanceId());
         instanceBO.setName(v.getName());
         instanceBO.setCreateTime(v.getCreatedAt());
-        var createTime = TimeUtils.stringToLocalDateTime(v.getCreatedAt(), TimeUtils.tzDateTimeFormatter);
-        var utcCurrentTimeStr = TimeUtils.localDateTimeToUtcString(LocalDateTime.now());
-        var utcCurrentTime = TimeUtils.stringToLocalDateTime(utcCurrentTimeStr, TimeUtils.tzDateTimeFormatter);
+        LocalDateTime createTime = TimeUtils.stringToLocalDateTime(v.getCreatedAt(), TimeUtils.tzDateTimeFormatter);
+        String utcCurrentTimeStr = TimeUtils.localDateTimeToUtcString(LocalDateTime.now());
+        LocalDateTime utcCurrentTime = TimeUtils.stringToLocalDateTime(utcCurrentTimeStr, TimeUtils.tzDateTimeFormatter);
         instanceBO.setRunningTime(utcCurrentTime.toEpochSecond(ZoneOffset.UTC) - createTime.toEpochSecond(ZoneOffset.UTC));
         instanceBO.setStatus(v.getStatus());
         instanceBO.setNode(v.getHost());

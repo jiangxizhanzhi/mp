@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -161,9 +162,9 @@ public class CloudPlatformMonitorController {
         // dynamips个数
         HypervisorStatisticsVO finalResponse7 = response;
         CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
-            var result = new VirtualDynamips().statistics();
+            VirtualDynamipsStatisticsResult result = new VirtualDynamips().statistics();
             int totalDynamips = 0;
-            for (var v : result.getStatics().values()) {
+            for (Integer v : result.getStatics().values()) {
                 totalDynamips += v;
             }
             finalResponse7.setTotalDynamips(totalDynamips);
@@ -234,7 +235,7 @@ public class CloudPlatformMonitorController {
 
         // 获取 dynamips 数量
         VirtualDynamips virtualDynamips = new VirtualDynamips();
-        var result = virtualDynamips.statistics();
+        VirtualDynamipsStatisticsResult result = virtualDynamips.statistics();
         for (HypervisorPageVO v : hypervisorPageRespons) {
             v.setTotalDynamips(result.getStatics().get(v.getName()));
         }

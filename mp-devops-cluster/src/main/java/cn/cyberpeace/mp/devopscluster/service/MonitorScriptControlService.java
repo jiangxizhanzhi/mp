@@ -119,7 +119,7 @@ public class MonitorScriptControlService {
         for (String launchId : launchIds) {
             String cmd = String.format(MonitorConstant.MONITOR_CMD, launchId, MonitorConstant.OP_RESTART, servers);
             log.info("restart hostname:{}, cmd:{}", hostname, cmd);
-            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
             runCommandItem.setCommand(cmd);
@@ -157,7 +157,7 @@ public class MonitorScriptControlService {
             String servers = StringUtils.join(monitor.getServiceList(), ",");
             String cmd = String.format(MonitorConstant.MONITOR_CMD, monitor.getLaunchId(), MonitorConstant.OP_STATUS, servers);
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
-            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setRunId(monitor.getLaunchId());
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
@@ -209,7 +209,7 @@ public class MonitorScriptControlService {
             log.info("newAddedNodes:{}", newAddedNodes);
             toInstallList.addAll(newAddedNodes);
 
-            var tryInstallAgain = this.getTryInstallAgainNodes(configedNodeList, new HashSet<>(toInstallList));
+            List<String> tryInstallAgain = this.getTryInstallAgainNodes(configedNodeList, new HashSet<>(toInstallList));
             toInstallList.addAll(tryInstallAgain);
 
             // 上次脚本安装失败，或者配置有变更的节点
@@ -260,7 +260,7 @@ public class MonitorScriptControlService {
             }
         }
         List<String> result = new ArrayList<>();
-        for (var s : tryInstallAgainNodes) {
+        for (String s : tryInstallAgainNodes) {
             if (!toInstallListMap.contains(s)) {
                 result.add(s);
             }

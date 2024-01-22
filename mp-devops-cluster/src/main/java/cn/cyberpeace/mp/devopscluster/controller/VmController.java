@@ -154,7 +154,7 @@ public class VmController {
         List<UserBo> userBoList = new ArrayList<>();
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
-        var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
+        List<DeviceTargetPO> devopsResult = deviceTargetMapper.findByUuids(instanceNames);
         POLogoUtils.changeLogoPathToUrl(devopsResult);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         if (Objects.nonNull(source)) {
@@ -166,7 +166,7 @@ public class VmController {
                     userIdList.add(userId);
                 }
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    var list = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    List<UserBo> list = userService.listByUserIds(userIdList.toArray(new String[]{}));
                     if (CollectionUtils.isNotEmpty(list)) {
                         userBoList = list;
                     }

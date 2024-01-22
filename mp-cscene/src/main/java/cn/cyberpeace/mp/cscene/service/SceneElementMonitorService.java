@@ -30,6 +30,8 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
@@ -131,8 +133,8 @@ public class SceneElementMonitorService {
         String sceneId = baseRequest.getSceneId();
         String elementId = baseRequest.getElementIds().get(0);
 
-        var result = csceneInstanceService.getById(sceneId, null);
-        var csceneInstanceBO = result.getSource();
+        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
+        CsceneInstanceBO csceneInstanceBO = result.getSource();
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
@@ -242,8 +244,8 @@ public class SceneElementMonitorService {
             return;
         }
 
-        var topology = csceneInstanceBO.getScene().getTopology();
-        var topologyElements = topology.getElements();
+        SceneTopologyBO topology = csceneInstanceBO.getScene().getTopology();
+        List<SceneElementBO> topologyElements = topology.getElements();
         Optional<SceneElementBO> tpoEleOptional = Optional.empty();
         for (SceneElementBO e : topologyElements) {
             if (Objects.equals(elementId, e.getId())) {
@@ -266,9 +268,9 @@ public class SceneElementMonitorService {
             return;
         }
 
-        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
-        var pluginElements = scenePluginDataBO.getElements();
-        var pluginEleOptional = Optional.<Map<String, Object>>empty();
+        ScenePluginDataBO scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        Map<String, Map<String, Object>> pluginElements = scenePluginDataBO.getElements();
+        Optional<Map<String, Object>> pluginEleOptional = Optional.<Map<String, Object>>empty();
         for (Map.Entry<String, Map<String, Object>> entry : pluginElements.entrySet()) {
             if (Objects.equals(entry.getKey(), elementId)) {
                 Map<String, Object> value = entry.getValue();
@@ -347,12 +349,12 @@ public class SceneElementMonitorService {
         // 参考SystemTypeUtils
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
             basicInfo.setSystemType(sceneElementBO.getSystemType());
-            var item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
+            SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
             basicInfo.setSystemTypeName(item.getName());
         }
 
         // ip, 用户名，登录方式
-        var ports = sceneElementBO.getPorts();
+        List<SceneElementPortBO> ports = sceneElementBO.getPorts();
         List<ElementPort> ePorts = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(ports)) {
             List<ElementPort> list = new ArrayList<>();
@@ -434,8 +436,8 @@ public class SceneElementMonitorService {
     public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
                                                                      String path) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 不传节点id默认查询全部节点
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
             List<String> list = new ArrayList<>();
@@ -506,7 +508,7 @@ public class SceneElementMonitorService {
         if (CollectionUtils.isNotEmpty(fileEventModels.getObjs())) {
             List<FileEventModel> list = new ArrayList<>();
             Set<String> exist = new HashSet<>();
-            for (var x : fileEventModels.getObjs()) {
+            for (FileEventModel x : fileEventModels.getObjs()) {
                 if (!exist.contains(x.getAgentId() + x.getFilePath())) {
                     if (StringUtils.isBlank(hostEventQueryParams.getPath())) {
                         list.add(x);
@@ -588,13 +590,13 @@ public class SceneElementMonitorService {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
         if (CollectionUtil.isEmpty(agentNames)) {
             return Collections.emptyList();
         }
 
         List<ElementHistogramInfo> infos = new ArrayList<>();
-        var wazuhEventRequest = buildWazuhRequest(pageRequest);
+        WazuhEventRequest wazuhEventRequest = buildWazuhRequest(pageRequest);
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setRuleGroups(ruleGroups);
         wazuhEventRequest.setLevels(pageRequest.getLevels());
@@ -603,7 +605,7 @@ public class SceneElementMonitorService {
         String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize)));
         String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes(1));
 
-        var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
+        Map<String, Long> resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
 
         if (CollectionUtil.isNotEmpty(resultMap)) {
             for (Map.Entry<String, Long> entry : resultMap.entrySet()) {
@@ -633,8 +635,8 @@ public class SceneElementMonitorService {
     @Deprecated
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         LocalDateTime startTime;
         LocalDateTime endTime;
         processRequest(pageRequest, sceneHandler);
@@ -642,7 +644,7 @@ public class SceneElementMonitorService {
         endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
         // 根据配置设置查询的最大条数
         pageRequest.setPageSize(10000);
-        var result = getModifyData(pageRequest, ruleGroups, null);
+        ListObjServiceResult<CollectionHostEventBO> result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
@@ -662,8 +664,8 @@ public class SceneElementMonitorService {
         result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
         int currentHistogramInfo = 0;
         for (int i = 0; i < result.getSource().getObjs().size(); ) {
-            var collectionData = result.getSource().getObjs().get(i);
-            var histogramInfo = histogramInfos.get(currentHistogramInfo);
+            CollectionHostEventBO collectionData = result.getSource().getObjs().get(i);
+            ElementHistogramInfo histogramInfo = histogramInfos.get(currentHistogramInfo);
             // 超出时间区间的事件放到最后一个区间
             if ((currentHistogramInfo == histogramInfos.size() - 1) || collectionData.getTime().isBefore(histogramInfo.getLocalDateTime())) {
                 histogramInfo.setCount(histogramInfo.getCount() + 1);
@@ -680,11 +682,11 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ListObjResult<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
@@ -707,7 +709,7 @@ public class SceneElementMonitorService {
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityInfo(request, true);
+        ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         for (WazuhVulnerabilityInfoModel r : result.getObjs()) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
@@ -738,15 +740,15 @@ public class SceneElementMonitorService {
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         int halfScanTime = getWazuhVulnerabilityScanInterval() / 2;
-        var first = dataCollectionService.queryVulnerabilityInfo(request, false);
-        var last = dataCollectionService.queryVulnerabilityInfo(request, true);
+        ListObjResult<WazuhVulnerabilityInfoModel> first = dataCollectionService.queryVulnerabilityInfo(request, false);
+        ListObjResult<WazuhVulnerabilityInfoModel> last = dataCollectionService.queryVulnerabilityInfo(request, true);
         if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
             // 两次上报漏洞信息的间隔超过扫描间隔且查不到数据时，将开始时间往前推扫描间隔的一半进行查询
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-halfScanTime)));
             return;
         }
-        var firstTime = first.getObjs().get(0).getTime();
-        var lastTime = last.getObjs().get(0).getTime();
+        LocalDateTime firstTime = first.getObjs().get(0).getTime();
+        LocalDateTime lastTime = last.getObjs().get(0).getTime();
         if (firstTime.plusHours(halfScanTime).isBefore(lastTime)) {
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(lastTime.plusHours(-halfScanTime)));
         } else if (firstTime.plusHours(halfScanTime).isAfter(lastTime)) {
@@ -759,11 +761,11 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
@@ -778,7 +780,7 @@ public class SceneElementMonitorService {
         request.setEndTime(endTime);
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+        List<WazuhVulnerabilityInfoCountModel> result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 false, "data.vulnerability.severity", "severity");
         if (CollUtil.isEmpty(result)) {
             return new ArrayList<>();
@@ -823,11 +825,11 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
@@ -842,7 +844,7 @@ public class SceneElementMonitorService {
         request.setEndTime(endTime);
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+        List<WazuhVulnerabilityInfoCountModel> result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 true, "data.vulnerability.package.name", "package_name");
         List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();
         for (WazuhVulnerabilityInfoCountModel r : result) {
@@ -1029,7 +1031,7 @@ public class SceneElementMonitorService {
 
     private List<ElementHistogramInfo> processHistogramList(LocalDateTime endTime, int bucketSize, int invervalMinutes, Map<String, Long> resultMap) {
         List<ElementHistogramInfo> infos = new ArrayList<>();
-        var calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
+        LocalDateTime calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
 
         //int minutes = LocalDateTime.now().getMinute() / invervalMinutes * invervalMinutes;
         //int hour = Long.valueOf(Duration.between(LocalDate.now().atTime(LocalTime.MIN), LocalDateTime.now()).getSeconds() / 3600).intValue();
@@ -1038,7 +1040,7 @@ public class SceneElementMonitorService {
 
         for (int i = 0; i < bucketSize; i++) {
             String timeStr = TimeUtils.localTime2yyyyMMddHHmm(calculatedTime);
-            var info = new ElementHistogramInfo();
+            ElementHistogramInfo info = new ElementHistogramInfo();
             if (Objects.nonNull(resultMap) && Objects.nonNull(resultMap.get(timeStr))) {
                 info.setTime(timeStr);
                 info.setCount(resultMap.get(timeStr).intValue());

@@ -61,7 +61,7 @@ public class InitRegisterService extends BaseCpService {
      * @return
      */
     public Integer initTarget() {
-        var result = new CloudPlatformItemsPageResult();
+        CloudPlatformItemsPageResult result = new CloudPlatformItemsPageResult();
         try {
             result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION +
                     "/device/lists?limit=9999&is_internal=false", CloudPlatformItemsPageResult.class);

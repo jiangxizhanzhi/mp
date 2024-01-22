@@ -64,7 +64,7 @@ public class RouterController {
         }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             for (RouterPageVO rout : routerList) {
-                var csceneNodeInfoBO = map.get(rout.getName());
+                CsceneNodeInfoBO csceneNodeInfoBO = map.get(rout.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     rout.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     rout.setReferenceType(csceneNodeInfoBO.getReferenceType());

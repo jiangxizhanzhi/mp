@@ -72,7 +72,7 @@ public class NetworkController {
         }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             for (NetworkPageVO net : networkList) {
-                var csceneNodeInfoBO = map.get(net.getName());
+                CsceneNodeInfoBO csceneNodeInfoBO = map.get(net.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     net.setReferenceType(csceneNodeInfoBO.getReferenceType());

@@ -53,7 +53,7 @@ public class InjectFileService extends BaseCpService {
      * 删除
      */
     public BaseCloudPlatformResult delete(List<String> uuids) {
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("inject_uuids", uuids);
         return super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INJECT_FILE,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
     }

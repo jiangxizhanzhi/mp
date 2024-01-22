@@ -162,7 +162,7 @@ public class ContainerController {
                     userIdList.add(userId);
                 }
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    var list = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    List<UserBo> list = userService.listByUserIds(userIdList.toArray(new String[]{}));
                     if (CollectionUtils.isNotEmpty(list)) {
                         userBoList = list;
                     }

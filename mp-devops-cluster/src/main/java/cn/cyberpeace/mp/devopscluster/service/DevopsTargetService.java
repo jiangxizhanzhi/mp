@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
+import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
@@ -90,7 +92,7 @@ public class DevopsTargetService {
         if (CollectionUtils.isEmpty(deviceList)) {
             return 0;
         }
-        for (var d : deviceList) {
+        for (Device d : deviceList) {
             d.setSupportExport(this.getSupportExport(d));
         }
         List<DeviceTargetPO> deviceTargetPOS = new ArrayList<>();
@@ -98,7 +100,7 @@ public class DevopsTargetService {
             DeviceTargetPO deviceTargetPO = convertToTargetModel(device);
             deviceTargetPOS.add(deviceTargetPO);
         }
-        var user = UserCommon.getCurrentUser();
+        UserModel user = UserCommon.getCurrentUser();
         for (DeviceTargetPO d : deviceTargetPOS) {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
@@ -111,7 +113,7 @@ public class DevopsTargetService {
             return;
         }
         List<DeviceTargetPO> update = new ArrayList<>();
-        for (var l : deviceList) {
+        for (Device l : deviceList) {
             if (l.getExtEntity() != null) {
                 DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
                 deviceTargetPO.setUuid(l.getUuid());
@@ -250,8 +252,8 @@ public class DevopsTargetService {
             ImagePageDTO pageDTO = new ImagePageDTO();
             pageDTO.setName(device.getExtImageInfo().getBaseImageName());
             pageDTO.setLikeName(false);
-            var result = this.supportExportConvert.page(pageDTO);
-            var list = result.getList();
+            BasePageBO<ImageConvertModel> result = this.supportExportConvert.page(pageDTO);
+            List<ImageConvertModel> list = result.getList();
             if (CollectionUtils.isNotEmpty(list)) {
                 ImageConvertModel baseImage = list.get(0);
                 if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {

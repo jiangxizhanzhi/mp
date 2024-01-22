@@ -83,7 +83,7 @@ public class CollectionTypeService {
             wazuhEventRequest.setStartTime(appRequest.getStartTime());
         } else {
             String translateSceneId = csceneCommonService.translateSceneId(appRequest.getSceneId());
-            var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
+            SceneHandler sceneHandler = new SceneHandler(translateSceneId, null, false, null);
             wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
         }
         wazuhEventRequest.setEndTime(Optional.ofNullable(appRequest.getEndTime()).orElse(LocalDateTime.now()));

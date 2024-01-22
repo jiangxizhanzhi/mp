@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
@@ -138,12 +139,12 @@ public class LogFileService {
     }
 
     public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
-        var cscene = csceneInstanceMapper.get(csceneId);
+        CsceneInstanceModel cscene = csceneInstanceMapper.get(csceneId);
         if(cscene == null){
             return new ConcurrentHashMap<>();
         }
         String sceneId = cscene.getScene();
-        var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        CollectionPluginSceneModel model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model == null || StringUtils.isEmpty(model.getProbeCollector())) {
             return new ConcurrentHashMap<>();
         }
@@ -172,7 +173,7 @@ public class LogFileService {
             if (Objects.nonNull(ebasicInfo)) {
                 String systemType = ebasicInfo.getSystemType();
                 CompletableFuture<List<LogFileVO>> cf = CompletableFuture.supplyAsync(() -> {
-                    var files = queryLogCollectFiles(agentName, elementId, systemType);
+                    List<LogFileVO> files = queryLogCollectFiles(agentName, elementId, systemType);
                     result.put(elementId, files);
                     return files;
                 });

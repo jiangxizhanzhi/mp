@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
@@ -83,13 +84,13 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (StringUtils.isEmpty(getCsceneId())) {
             return false;
         }
-        var csceneInstanceObjMap = new HashMap<String,CsceneInstanceModel>();
+        HashMap<String, CsceneInstanceModel> csceneInstanceObjMap = new HashMap<String,CsceneInstanceModel>();
         for (CsceneInstanceModel x : readCsceneInstances()) {
             if (csceneInstanceObjMap.put(x.getId(), x) != null) {
                 throw new IllegalStateException("Duplicate key");
             }
         }
-        var instanceRoleObjsMap = new HashMap<String, List<CsceneInstanceRoleModel>>();
+        HashMap<String, List<CsceneInstanceRoleModel>> instanceRoleObjsMap = new HashMap<String, List<CsceneInstanceRoleModel>>();
         for (CsceneInstanceRoleModel csceneInstanceRoleModel : readCsceneInstanceRoles(csceneInstanceObjMap.keySet()
                 .toArray(new String[0]))) {
             instanceRoleObjsMap.computeIfAbsent(csceneInstanceRoleModel.getCscene(), k -> new ArrayList<>()).add(csceneInstanceRoleModel);
@@ -100,9 +101,9 @@ public class CsceneHandler extends BaseCsceneHandler<
         for (Map.Entry<String,CsceneInstanceModel> entry : csceneInstanceObjMap.entrySet()) {
             String instanceId = entry.getKey();
             CsceneInstanceModel csceneInstanceObj = entry.getValue();
-            var roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
+            List<CsceneInstanceRoleModel> roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
             CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
-            var type = csceneInstanceObj.getType();
+            Integer type = csceneInstanceObj.getType();
             if (type != null && type.equals(CsceneInstanceModel.Type.TEST)) {
                 testScenes.add(csceneInstanceHandler.toData());
             } else if (type != null && type.equals(CsceneInstanceModel.Type.APP)) {
@@ -122,7 +123,7 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (cscene == null) {
             return null;
         }
-        var csceneInstance = cscene.exportToCsceneInstance();
+        CsceneInstanceBO csceneInstance = cscene.exportToCsceneInstance();
         return createInstance(type, csceneInstance);
     }
 
@@ -140,7 +141,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         this.checkVlanIds(getCscene());
-        var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
         if (!updateResult.isSuccess()) {
@@ -148,7 +149,7 @@ public class CsceneHandler extends BaseCsceneHandler<
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
         instanceHandler.create();
-        var result = instanceHandler.toData();
+        CsceneInstanceBO result = instanceHandler.toData();
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {
             result.getScene().getTopology().getScene().setProgressPercentage(5);
         }
@@ -211,7 +212,7 @@ public class CsceneHandler extends BaseCsceneHandler<
 
         if (unique) {
             reloadCsceneInstances();
-            var testScenes = getCscene().getTestScenes();
+            List<CsceneInstanceBO> testScenes = getCscene().getTestScenes();
             if (testScenes != null && !testScenes.isEmpty()) {
                 return null;
             }
@@ -226,7 +227,7 @@ public class CsceneHandler extends BaseCsceneHandler<
 
         if (unique) {
             reloadCsceneInstances();
-            var testScenes = getCscene().getTestScenes();
+            List<CsceneInstanceBO> testScenes = getCscene().getTestScenes();
             if (testScenes != null && !testScenes.isEmpty()) {
                 return null;
             }
@@ -245,7 +246,7 @@ public class CsceneHandler extends BaseCsceneHandler<
 
         if (unique) {
             reloadCsceneInstances();
-            var appScenes = getCscene().getAppScenes();
+            List<CsceneInstanceBO> appScenes = getCscene().getAppScenes();
             if (appScenes != null && !appScenes.isEmpty()) {
                 return null;
             }
@@ -261,7 +262,7 @@ public class CsceneHandler extends BaseCsceneHandler<
 
         if (unique) {
             reloadCsceneInstances();
-            var appScenes = getCscene().getAppScenes();
+            List<CsceneInstanceBO> appScenes = getCscene().getAppScenes();
             if (appScenes != null && !appScenes.isEmpty()) {
                 return null;
             }
@@ -278,8 +279,8 @@ public class CsceneHandler extends BaseCsceneHandler<
     public boolean delete(boolean logic, boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();
-            for (var csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
-                var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+            for (CsceneInstanceBO csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+                CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
                 instanceHandler.delete(logic);
             }
         }
@@ -304,7 +305,7 @@ public class CsceneHandler extends BaseCsceneHandler<
 
     @Override
     public void deleteScene(CsceneBO csceneBO, boolean logic) {
-        var sceneData = csceneBO.getSceneConfig();
+        SceneConfigDataBO sceneData = csceneBO.getSceneConfig();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
@@ -338,13 +339,13 @@ public class CsceneHandler extends BaseCsceneHandler<
             return;
         }
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
-            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
             if (elements != null && !elements.isEmpty()) {
                 CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
                 for (Map<String, Object> e : elements.values()) {
                     if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                         String image = e.get("image").toString();
-                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image});
+                        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image});
                         if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
                             Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = serviceResult.getSource();
                             List<String> sceneNames = new ArrayList<>();
@@ -371,7 +372,7 @@ public class CsceneHandler extends BaseCsceneHandler<
                         }
                     }
                     if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0) {
-                        var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
+                        List<CsceneInstanceModel> result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
                         if (CollectionUtils.isNotEmpty(result)) {
                             throw new MpRuntimeException(CsceneErrorCode.VLANID_HAS_BEEN_USED.format(String.valueOf(e.get("vlan_id")), JsonCommon.stringify(result.get(0).getName())));
                         }

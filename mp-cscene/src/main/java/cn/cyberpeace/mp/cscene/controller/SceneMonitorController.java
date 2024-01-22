@@ -73,7 +73,7 @@ public class SceneMonitorController {
         }
         List<ElementMonitorBasicInfo> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(basicInfoList)) {
-            for (var e : basicInfoList) {
+            for (ElementMonitorBasicInfo e : basicInfoList) {
                 if (e.getEvent() != null) {
                     if (e.getEvent() != SceneElementModel.Event.DELETE) {
                         result.add(e);

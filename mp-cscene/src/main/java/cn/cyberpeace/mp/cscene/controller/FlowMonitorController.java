@@ -213,7 +213,7 @@ public class FlowMonitorController {
                         other += attackTypeCounts.get(i).getTimes();
                     }
                 }
-                var otherCount = new FlowAttackTypeCount();
+                FlowAttackTypeCount otherCount = new FlowAttackTypeCount();
                 otherCount.setAttackType(MessageCommon.get("cscene.flowtype.other"));
                 otherCount.setTimes(other);
                 result.add(otherCount);
@@ -265,7 +265,7 @@ public class FlowMonitorController {
                         other += resultCounts.get(i).getTimes();
                     }
                 }
-                var otherCount = new FlowAttackTypeCount();
+                FlowAttackTypeCount otherCount = new FlowAttackTypeCount();
                 otherCount.setAttackType(MessageCommon.get("cscene.flowtype.other"));
                 otherCount.setTimes(other);
                 result.add(otherCount);
@@ -302,7 +302,7 @@ public class FlowMonitorController {
     @ApiOperation(value = "查询流量攻击类型列表")
     @GetMapping("/attack_types")
     public ServiceResult<FlowAttackConfigInfo> getFlowAttackType() {
-        var result = flowClassificationsService.findAll();
+        List<FlowClassificationModel> result = flowClassificationsService.findAll();
         List<FlowAttackConfigInfo.FlowAttackType> list = new ArrayList<>();
         for (FlowClassificationModel r : result) {
             FlowAttackConfigInfo.FlowAttackType flowAttackType = getFlowAttackType(r);
