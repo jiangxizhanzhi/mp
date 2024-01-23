@@ -1,29 +1,45 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -124,18 +141,14 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取指定id场景模板")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),})
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id) {
         return modelService.getById(id, false, null).asResult();
     }
 
     @ApiOperation("导出指定id场景模板")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),})
     @GetMapping(value = "/export", params = "id")
     public ServiceResult<CsceneBO> export(@RequestParam String id) {
         return modelService.export(id, null).asResult();
@@ -174,13 +187,9 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("克隆指定id场景模板")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class), @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)})
     @PostMapping(value = "/clone")
-    public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
-                                         @RequestBody(required = false) CsceneActionRequest request) {
+    public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id, @RequestBody(required = false) CsceneActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.clone(request.getId(), null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, request.getContext());
@@ -188,13 +197,9 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("删除场景模板")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class), @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)})
     @DeleteMapping
-    public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
-                                         @RequestBody(required = false) CsceneActionRequest request) {
+    public ServiceResult<Boolean> delete(@RequestParam(required = false) String id, @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
         var result = modelService.deleteById(request.getId(), true, false, null).asResult();
@@ -213,13 +218,9 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("创建场景模板测试实例")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class), @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)})
     @PostMapping(value = "/test_instance")
-    public ServiceResult<CsceneInstanceBO> createTestInstance(
-            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+    public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
@@ -229,13 +230,9 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("创建场景模板应用实例")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class), @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)})
     @PostMapping(value = "/app_instance")
-    public ServiceResult<CsceneInstanceBO> createAppInstance(
-            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+    public ServiceResult<CsceneInstanceBO> createAppInstance(@RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
@@ -252,12 +249,64 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景模板")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String[].class, allowMultiple = true),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String[].class, allowMultiple = true),})
     @GetMapping("/stat_device_refer_cscenes")
-    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
-            @RequestParam String[] images) {
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(@RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @GetMapping("/record_process")
+    public ServiceResult test(String ip) {
+        log.info("record_process , ip is {}", ip);
+        SceneMapper sceneMapper = BeanCommon.getBean(SceneMapper.class);
+        var scenes = sceneMapper.list(new HumanCondition().filterEqual(SceneModel::getEvent, 2));
+        if (CollectionUtils.isEmpty(scenes)) {
+            log.info("record_process : no active scene");
+            return new ServiceResult();
+        }
+        List<String> ids = new ArrayList<>();
+        scenes.forEach(s -> ids.add(s.getId()));
+
+        SceneElementPortMapper portMapper = BeanCommon.getBean(SceneElementPortMapper.class);
+        var ports = portMapper.list(new HumanCondition().filterIn(SceneElementPortModel::getScene, ids.toArray(new String[]{})).filterEqual(SceneElementPortModel::getIp, ip));
+        if (CollectionUtils.isEmpty(ports)) {
+            log.info("record_process : no active ports");
+            return new ServiceResult();
+        }
+        SceneElementMapper elementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        var e = elementMapper.get(ports.get(0).getSceneElement());
+        if (e == null) {
+            log.info("record_process : no active element");
+            return new ServiceResult();
+        }
+
+        CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        var instance = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getScene, e.getScene()));
+        if (CollectionUtils.isEmpty(instance)) {
+            log.info("record_process : no active cscene");
+            return new ServiceResult();
+        }
+
+        try {
+            Params params = new Params();
+            params.setNodeIds(Arrays.asList(e.getNodeId()));
+            params.setSceneId(instance.get(0).getId());
+            CsceneAppConfig appConfig = BeanCommon.getBean(CsceneAppConfig.class);
+            String p = JsonCommon.snakeStringify(params);
+            log.info("record_process,params is {}", p);
+            String res = HttpUtils.sendPost(appConfig.getBcUrl(), p);
+            log.info("record_process, res is {}", res);
+        } catch (Exception exception) {
+            log.error("record_process, exception is {}", ExceptionUtils.getMessage(exception));
+        }
+
+        return new ServiceResult();
+    }
+
+    @Getter
+    @Setter
+    private static class Params {
+        private List<String> nodeIds;
+        private String sceneId;
     }
 }
