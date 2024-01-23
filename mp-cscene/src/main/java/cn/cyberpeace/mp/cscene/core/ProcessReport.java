@@ -72,30 +72,30 @@ public class ProcessReport extends Thread {
 
     @Override
     public void run() {
-        if (this.query == null) {
-            return;
-        }
-        this.initNodes();
-        if (this.nodes.isEmpty()) {
-            return;
-        }
-
-        var service = BeanCommon.getBean(ScenePluginCollectionSceneService.class);
-        log.info("query scan process , cscene {} , query params is {}", csceneId, JsonCommon.stringify(query));
-        while (true) {
-            CsceneInstanceModel cscene = BeanCommon.getBean(CsceneInstanceMapper.class).get(this.csceneId);
-            if (cscene == null || Boolean.TRUE.equals(cscene.getDeleted())) {
-                log.info("query scan process , cscene deleted so stop thread, cscene {}", csceneId);
-                break;
-            } else {
-                this.doQuery(service, this.nodes);
-            }
-            try {
-                Thread.sleep(appConfig.getBcSleep());
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-        }
+//        if (this.query == null) {
+//            return;
+//        }
+//        this.initNodes();
+//        if (this.nodes.isEmpty()) {
+//            return;
+//        }
+//
+//        var service = BeanCommon.getBean(ScenePluginCollectionSceneService.class);
+//        log.info("query scan process , cscene {} , query params is {}", csceneId, JsonCommon.stringify(query));
+//        while (true) {
+//            CsceneInstanceModel cscene = BeanCommon.getBean(CsceneInstanceMapper.class).get(this.csceneId);
+//            if (cscene == null || Boolean.TRUE.equals(cscene.getDeleted())) {
+//                log.info("query scan process , cscene deleted so stop thread, cscene {}", csceneId);
+//                break;
+//            } else {
+//                this.doQuery(service, this.nodes);
+//            }
+//            try {
+//                Thread.sleep(appConfig.getBcSleep());
+//            } catch (Exception e) {
+//                log.error(e.getMessage());
+//            }
+//        }
     }
 
     private void doQuery(ScenePluginCollectionSceneService service, List<SceneElementBO> nodes) {
