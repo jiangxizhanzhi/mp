@@ -20,12 +20,10 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
-import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SceneEventUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,9 +43,6 @@ public class SceneService {
 
     @Resource
     private SceneConfigService sceneConfigService;
-
-    @Autowired
-    private ResourceClearHandler resourceClearHandler;
 
     public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId, SceneContextBO context) {
         SceneHandler sceneHandler;
@@ -121,11 +116,7 @@ public class SceneService {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
                 SceneTaskPool.getInstance().executeTask(() -> {
-                    try {
-                        sceneHandler.delete();
-                    } finally {
-                        resourceClearHandler.doCallback(id);
-                    }
+                    sceneHandler.delete();
                 });
             }
         } catch (SceneNotExistException e) {

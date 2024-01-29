@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -22,7 +21,14 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
@@ -39,7 +45,6 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
-import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -70,8 +75,13 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
-import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -94,7 +104,11 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
@@ -120,11 +134,18 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -175,9 +196,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LogFileService logFileService;
-
-    @Autowired
-    private ResourceClearHandler resourceClearHandler;
 
     @Resource
     private CsceneService csceneService;
@@ -667,7 +685,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 boolean flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
-                    resourceClearHandler.doCallback(id);
                 }
                 if (!logic) {
                     screenshotService.batchDeleteBySceneId(id);
