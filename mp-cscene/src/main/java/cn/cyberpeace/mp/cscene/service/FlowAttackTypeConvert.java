@@ -83,7 +83,7 @@ public class FlowAttackTypeConvert {
         formatTypes.put("command and control", "Command And Control");
         formatTypes.put("impact", "Impact");
 
-        for (var attck : attackType2AttCks.entrySet()) {
+        for (Map.Entry<String, String> attck : attackType2AttCks.entrySet()) {
             if (!attCk2AttackTypes.containsKey(attck.getValue())) {
                 attCk2AttackTypes.put(attck.getValue(), new ArrayList<>());
             }

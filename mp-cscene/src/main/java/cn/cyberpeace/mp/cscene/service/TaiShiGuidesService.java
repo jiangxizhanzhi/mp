@@ -37,12 +37,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -112,11 +114,11 @@ public class TaiShiGuidesService {
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(TaiShiRequest request) {
         List<String> sceneIds = new ArrayList<>();
         if (StringUtils.isNotEmpty(request.getSceneId()) && request.getSceneId().contains(",")) {
-            var ids = request.getSceneId().split(",");
-            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(ids));
+            String[] ids = request.getSceneId().split(",");
+            List<String> sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(ids));
             sceneIds.addAll(sceneIdsTmp);
         } else {
-            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+            List<String> sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
             sceneIds.addAll(sceneIdsTmp);
         }
         if (CollectionUtils.isEmpty(sceneIds)) {
@@ -133,9 +135,9 @@ public class TaiShiGuidesService {
         }
 
         Set<String> indexes = new HashSet<>();
-        var mergeQuery = QueryBuilders.boolQuery();
+        BoolQueryBuilder mergeQuery = QueryBuilders.boolQuery();
 
-        var formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
+        TaiShiRequest.EventRequest formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
         if (CollectionUtils.isNotEmpty(formatDefenseReq.getDefenseTypes())) {
             List<String> formatDefenseTypes = new ArrayList<>();
             for (String d : formatDefenseReq.getDefenseTypes()) {
@@ -147,7 +149,7 @@ public class TaiShiGuidesService {
             formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
         }
 
-        var formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
+        TaiShiRequest.EventRequest formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
         if (CollectionUtils.isNotEmpty(formatAttCkReq.getDefenseTypes())) {
             List<String> formatDefenseTypes = new ArrayList<>();
             for (String d : formatAttCkReq.getDefenseTypes()) {
@@ -189,7 +191,7 @@ public class TaiShiGuidesService {
     }
 
     public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
@@ -200,7 +202,7 @@ public class TaiShiGuidesService {
         }
 
         Set<String> indexes = new HashSet<>();
-        var mergeQuery = QueryBuilders.boolQuery();
+        BoolQueryBuilder mergeQuery = QueryBuilders.boolQuery();
 
         TaiShiRequest.EventRequest r = new TaiShiRequest.EventRequest();
         r.setStartTime(request.getStartTime());
@@ -214,7 +216,7 @@ public class TaiShiGuidesService {
 
     private ServiceResult<List<FlowTrend>> getResultHistogram(BatchSceneHandler sceneHandler, Set<String> indexes, BoolQueryBuilder mergeQuery) {
         long interval = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(sceneHandler.getEarliestStartTime(), sceneHandler.getLatestSceneRunningTime(), 50);
-        var searchBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
         AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("histogram").field("@timestamp")
                 .fixedInterval(DateHistogramInterval.seconds((int) interval))
@@ -227,7 +229,7 @@ public class TaiShiGuidesService {
         searchRequest.source(searchBuilder);
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         try {
-            var searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             Aggregations aggregations = searchResponse.getAggregations();
             ParsedDateHistogram parsedTerms = aggregations.get("histogram");
             List<? extends Histogram.Bucket>  buckets = parsedTerms.getBuckets();
@@ -253,7 +255,7 @@ public class TaiShiGuidesService {
     }
 
     private ServiceResult<List<FlowTrend>> getResultHistogram(Set<String> indexes, BoolQueryBuilder mergeQuery) {
-        var searchBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
         AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("histogram").field("@timestamp")
                 .fixedInterval(DateHistogramInterval.seconds(3600))
@@ -267,7 +269,7 @@ public class TaiShiGuidesService {
         searchRequest.source(searchBuilder);
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         try {
-            var searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             Aggregations aggregations = searchResponse.getAggregations();
             ParsedDateHistogram parsedTerms = aggregations.get("histogram");
             List<? extends Histogram.Bucket> buckets = parsedTerms.getBuckets();
@@ -283,7 +285,7 @@ public class TaiShiGuidesService {
     }
 
     private ListObjServiceResult<TaiShiEventInfo> getResult(int page, int pageSize, BatchSceneHandler sceneHandler, Set<String> indexes, BoolQueryBuilder mergeQuery) {
-        var searchBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
 
         // 分页
@@ -300,19 +302,19 @@ public class TaiShiGuidesService {
         List<TaiShiEventInfo> result = new ArrayList<>();
         int total = 0;
         try {
-            var response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             total = (int) response.getHits().getTotalHits().value;
-            var mac2Elements = sceneHandler.getAllMac2ElementMapForScene();
-            var eid2Elements = sceneHandler.getAllEid2ElementMap();
-            for (var hit : response.getHits().getHits()) {
+            Map<String, SceneElementBO> mac2Elements = sceneHandler.getAllMac2ElementMapForScene();
+            Map<String, SceneElementBO> eid2Elements = sceneHandler.getAllEid2ElementMap();
+            for (SearchHit hit : response.getHits().getHits()) {
                 if (hit.getSourceAsMap().containsKey("agent")) {
-                    var eventData = JsonCommon.snakeMapToBean(hit.getSourceAsMap(), WazuhEventData.class);
-                    var taishi = this.getEventInfoFrom(eventData, eid2Elements);
+                    WazuhEventData eventData = JsonCommon.snakeMapToBean(hit.getSourceAsMap(), WazuhEventData.class);
+                    TaiShiEventInfo taishi = this.getEventInfoFrom(eventData, eid2Elements);
                     result.add(taishi);
                 } else {
-                    var eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
+                    FlowEventData eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
                     eventData.setTimestamp(hit.getSourceAsMap().get("@timestamp").toString());
-                    var taishi = this.getEventInfoFrom(eventData, mac2Elements);
+                    TaiShiEventInfo taishi = this.getEventInfoFrom(eventData, mac2Elements);
                     result.add(taishi);
                 }
             }
@@ -327,11 +329,11 @@ public class TaiShiGuidesService {
         LocalDateTime end = request.getEndTime() == null ? sceneHandler.getLatestSceneRunningTime() : request.getEndTime();
 
         // 取探针数据索引
-        var indices = dataCollectionService.indexListBuilder(start, end);
+        List<String> indices = dataCollectionService.indexListBuilder(start, end);
 
         // 探针数据查询条件
         List<String> targetNodeEids = this.getEidsByNodeIds(sceneHandler, request.getTargetNodeIds());
-        var agentQuery = QueryBuilders.boolQuery()
+        BoolQueryBuilder agentQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.termsQuery("agent.name", targetNodeEids))
                 .must(QueryBuilders.existsQuery("rule.mitre.tactic"));
 
@@ -375,7 +377,7 @@ public class TaiShiGuidesService {
         flowIndex = flowIndex + "_session*";
 
         // 流量查询条件
-        var flowQuery = QueryBuilders.boolQuery()
+        BoolQueryBuilder flowQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.existsQuery("suricata"));
         // 流量数据既有源也有目的 可以使用ip来查下
         List<String> sourceIps = this.getIpsByNodeIds(sceneHandler, request.getSourceNodeIds());
@@ -384,7 +386,7 @@ public class TaiShiGuidesService {
         flowQuery.must(QueryBuilders.termsQuery("destination.ip", targetIps));
         if (CollectionUtils.isNotEmpty(request.getDefenseTypes())) {
             List<String> attackTypes = new ArrayList<>();
-            for (var defenseType : request.getDefenseTypes()) {
+            for (String defenseType : request.getDefenseTypes()) {
                 attackTypes.addAll(FlowAttackTypeConvert.getAttackTypes(FlowAttackTypeConvert.getFormatType(defenseType)));
             }
             flowQuery.must(QueryBuilders.termsQuery("suricata.category", attackTypes));
@@ -410,11 +412,11 @@ public class TaiShiGuidesService {
     public ServiceResult<List<FlowTrend>> getEventTiming(TaiShiRequest request) {
         List<String> sceneIds = new ArrayList<>();
         if (StringUtils.isNotEmpty(request.getSceneId()) && request.getSceneId().contains(",")) {
-            var ids = request.getSceneId().split(",");
-            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(ids));
+            String[] ids = request.getSceneId().split(",");
+            List<String> sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(ids));
             sceneIds.addAll(sceneIdsTmp);
         } else {
-            var sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+            List<String> sceneIdsTmp = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
             sceneIds.addAll(sceneIdsTmp);
         }
         if (CollectionUtils.isEmpty(sceneIds)) {
@@ -431,9 +433,9 @@ public class TaiShiGuidesService {
         }
 
         Set<String> indexes = new HashSet<>();
-        var mergeQuery = QueryBuilders.boolQuery();
+        BoolQueryBuilder mergeQuery = QueryBuilders.boolQuery();
 
-        var formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
+        TaiShiRequest.EventRequest formatDefenseReq = request.getDefense() == null ? new TaiShiRequest.EventRequest() : request.getDefense();
         if (CollectionUtils.isNotEmpty(formatDefenseReq.getDefenseTypes())) {
             List<String> formatDefenseTypes = new ArrayList<>();
             for (String d : formatDefenseReq.getDefenseTypes()) {
@@ -445,7 +447,7 @@ public class TaiShiGuidesService {
             formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
         }
 
-        var formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
+        TaiShiRequest.EventRequest formatAttCkReq = request.getAttack() == null ? new TaiShiRequest.EventRequest() : request.getAttack();
         if (CollectionUtils.isNotEmpty(formatAttCkReq.getDefenseTypes())) {
             List<String> formatDefenseTypes = new ArrayList<>();
             for (String d : formatAttCkReq.getDefenseTypes()) {
@@ -488,22 +490,22 @@ public class TaiShiGuidesService {
     public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
         List<String> sceneIdList = csceneCommonService.translateSceneIds(Arrays.asList(sceneId));
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIdList, new ArrayList<>());
-        var sceneEndTime = sceneHandler.getLatestSceneRunningTime().plusHours(1);
-        var hour = sceneEndTime.toLocalTime().getHour();
-        var endTime = LocalDateTime.of(sceneEndTime.toLocalDate(), LocalTime.of(hour, 0, 0));
-        var startTime = endTime.minusDays(1);
+        LocalDateTime sceneEndTime = sceneHandler.getLatestSceneRunningTime().plusHours(1);
+        int hour = sceneEndTime.toLocalTime().getHour();
+        LocalDateTime endTime = LocalDateTime.of(sceneEndTime.toLocalDate(), LocalTime.of(hour, 0, 0));
+        LocalDateTime startTime = endTime.minusDays(1);
 
-        var formatDefenseReq = new TaiShiRequest.EventRequest();
+        TaiShiRequest.EventRequest formatDefenseReq = new TaiShiRequest.EventRequest();
         formatDefenseReq.setDefenseTypes(ClassificationConvert.getAllEngageKeys());
         formatDefenseReq.setStartTime(startTime);
         formatDefenseReq.setEndTime(endTime);
-        var formatAttCkReq = new TaiShiRequest.EventRequest();
+        TaiShiRequest.EventRequest formatAttCkReq = new TaiShiRequest.EventRequest();
         formatAttCkReq.setDefenseTypes(ClassificationConvert.getAllAttCkKeys());
         formatAttCkReq.setStartTime(startTime);
         formatAttCkReq.setEndTime(endTime);
 
         Set<String> indexes = new HashSet<>();
-        var mergeQuery = QueryBuilders.boolQuery();
+        BoolQueryBuilder mergeQuery = QueryBuilders.boolQuery();
 
         EsEventRequestParsedResult hostDefenseResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatDefenseReq);
         EsEventRequestParsedResult hostAttackResult = this.getHostEsEventRequestParsedResult(sceneHandler, formatAttCkReq);
@@ -527,15 +529,15 @@ public class TaiShiGuidesService {
             mergeQuery.should(flowAttackResult.getQuery());
         }
 
-        var result = this.getResultHistogram(indexes, mergeQuery).getSource();
+        List<FlowTrend> result = this.getResultHistogram(indexes, mergeQuery).getSource();
         Map<String, FlowTrend> resultMap = new HashMap<>();
-        for (var r : result) {
+        for (FlowTrend r : result) {
             resultMap.put(TimeUtils.localDateTimeToUtcString(r.getTime()), r);
         }
 
         List<FlowTrend> trends = new ArrayList<>();
         for (int i = 0; i < 24; i++) {
-            var time = startTime.plusHours(i);
+            LocalDateTime time = startTime.plusHours(i);
             FlowTrend flowTrend = resultMap.get(TimeUtils.localDateTimeToUtcString(time));
             if (flowTrend == null) {
                 flowTrend = new FlowTrend();
@@ -554,7 +556,7 @@ public class TaiShiGuidesService {
         request.setType(NumberUtils.INTEGER_ONE);
         request.setEndTime(endTime);
         request.setStartTime(startTime);
-        var flows = flowMonitorService.getSceneFlowTrend(request);
+        List<FlowTrend> flows = flowMonitorService.getSceneFlowTrend(request);
         return flows;
     }
 
@@ -572,7 +574,7 @@ public class TaiShiGuidesService {
 
         BaseSceneElementRequest elementRequest = new BaseSceneElementRequest();
         elementRequest.setSceneId(sceneId);
-        var hosts = hostStateService.getSceneAttCkTypeCountTrend(elementRequest, startTime, endTime).getSource();
+        List<IntervalSizeBO<LocalDateTime, Long>> hosts = hostStateService.getSceneAttCkTypeCountTrend(elementRequest, startTime, endTime).getSource();
         for (IntervalSizeBO<LocalDateTime, Long> bo : hosts) {
             if (Objects.nonNull(bo.getStart())) {
                 FlowTrend flowTrend = getClosest(bo.getStart(), flowTrendMap);
@@ -605,7 +607,7 @@ public class TaiShiGuidesService {
         attackTypeTopRequest.setAttackTypeI18(false);
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(attackTypeTopRequest);
         if (CollectionUtils.isNotEmpty(attackTypeCounts)) {
-            for (var f : attackTypeCounts) {
+            for (FlowAttackTypeCount f : attackTypeCounts) {
                 String newType = FlowAttackTypeConvert.getAttCk(f.getAttackType());
                 String key = newType.toLowerCase();
                 FlowAttackTypeCount count = new FlowAttackTypeCount();
@@ -619,7 +621,7 @@ public class TaiShiGuidesService {
         elementRequest.setSceneId(sceneId);
         List<AttCkTypeCount> list = hostStateService.getSceneAttCkTypeCountInfo(elementRequest).getSource().getList();
         if (CollectionUtils.isNotEmpty(list)) {
-            for (var a : list) {
+            for (AttCkTypeCount a : list) {
                 String key = a.getType().toLowerCase();
                 if (!result.containsKey(key)) {
                     FlowAttackTypeCount count = new FlowAttackTypeCount();
@@ -627,14 +629,14 @@ public class TaiShiGuidesService {
                     count.setAttackType(key);
                     result.put(count.getAttackType(), count);
                 } else {
-                    var count = result.get(key);
+                    FlowAttackTypeCount count = result.get(key);
                     count.setTimes(count.getTimes() + a.getTimes().intValue());
                 }
             }
         }
         List<FlowAttackTypeCount> sortedResult = new ArrayList<>(result.values());
         Collections.sort(sortedResult, (a1, a2) -> a2.getTimes() - a1.getTimes());
-        for (var s : sortedResult) {
+        for (FlowAttackTypeCount s : sortedResult) {
             String key2 = s.getAttackType().replaceAll(" ", "_");
             String attackTypeName = MessageCommon.get("cscene.attck." + key2);
             s.setAttackType(attackTypeName);
@@ -675,7 +677,7 @@ public class TaiShiGuidesService {
         taiShi.setHostEventDesc(StringUtils.join(eventData.getRule().getMitre().getTechnique(), ","));
         taiShi.setTime(TimeUtils.dateToLocalDateTime(eventData.getTimestamp()));
         if (eventData.getAgent() != null && eid2Elements.containsKey(eventData.getAgent().getName())) {
-            var element = eid2Elements.get(eventData.getAgent().getName());
+            SceneElementBO element = eid2Elements.get(eventData.getAgent().getName());
             taiShi.setTargetNodeName(element.getName());
             taiShi.setTargetNodeIp(eventData.getAgent().getIp());
             taiShi.setTargetNodeId(element.getId());
@@ -689,7 +691,7 @@ public class TaiShiGuidesService {
         taiShi.setTriggerType("flow");
         taiShi.setTime(TimeUtils.timestampToLocalDateTime(Long.parseLong(eventData.getTimestamp())));
         if (eventData.getSource() != null) {
-            var element = this.getElementBy(eventData.getSource().getIp(), ip2ElementMap);
+            SceneElementBO element = this.getElementBy(eventData.getSource().getIp(), ip2ElementMap);
             if (element != null) {
                 taiShi.setSourceNodeId(element.getId());
                 taiShi.setSourceNodeIp(eventData.getSource().getIp());
@@ -698,7 +700,7 @@ public class TaiShiGuidesService {
             }
         }
         if (eventData.getDestination() != null) {
-            var element = this.getElementBy(eventData.getDestination().getIp(), ip2ElementMap);
+            SceneElementBO element = this.getElementBy(eventData.getDestination().getIp(), ip2ElementMap);
             if (element != null) {
                 taiShi.setTargetNodeId(element.getId());
                 taiShi.setTargetNodeIp(eventData.getDestination().getIp());
@@ -737,8 +739,8 @@ public class TaiShiGuidesService {
 
     public List<String> getAttCksByFlowAttackTypes(List<String> flowAttackTypes) {
         List<String> result = new ArrayList<>();
-        for (var a : flowAttackTypes) {
-            var attCk = this.getAttCkByFlowAttackType(a);
+        for (String a : flowAttackTypes) {
+            String attCk = this.getAttCkByFlowAttackType(a);
             if (attCk != null) {
                 result.add(attCk);
             }
@@ -758,8 +760,8 @@ public class TaiShiGuidesService {
             if (CollectionUtils.isEmpty(nodeIds)) {
                 result.addAll(sceneHandler.getAllIps());
             } else {
-                for (var nodeId : nodeIds) {
-                    var ips = sceneHandler.getIpsByNodeId(nodeId);
+                for (String nodeId : nodeIds) {
+                    List<String> ips = sceneHandler.getIpsByNodeId(nodeId);
                     if (CollectionUtils.isNotEmpty(ips)) {
                         result.addAll(ips);
                     }
@@ -777,8 +779,8 @@ public class TaiShiGuidesService {
             targetNodeEids.addAll(sceneHandler.getAllEid2ElementMap().keySet());
         } else {
             // 参数指定 则转换一下eid
-            for (var nodeId : nodeIds) {
-                var node = sceneHandler.getNodeByNodeId(nodeId);
+            for (String nodeId : nodeIds) {
+                SceneElementBO node = sceneHandler.getNodeByNodeId(nodeId);
                 if (node != null) {
                     targetNodeEids.add(node.getEid());
                 }

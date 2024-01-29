@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     private CsceneInstanceUserCountService csceneInstanceUserCountService;
 
     private SceneContextBO generateSceneContext() {
-        var context = getContext();
+        CsceneContextBO context = getContext();
         if (context == null) {
             return null;
         }
@@ -86,13 +87,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (Objects.nonNull(getContext())) {
             csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
         }
-        var cscene = getCscene();
+        CsceneInstanceBO cscene = getCscene();
         // 先保存设置id
         save();
-        var result = sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource();
+        SceneDataBO result = sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource();
         cscene.setScene(result);
 
-        var csceneObj = cscene.toModel();
+        CsceneInstanceModel csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
         cscene.fromModel(csceneObj);
     }
@@ -117,7 +118,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (Objects.nonNull(getContext())) {
             csceneInstanceUserCountService.decreaseCount(getContext().getAccessUserId());
         }
-        var sceneData = csceneBO.getScene();
+        SceneDataBO sceneData = csceneBO.getScene();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
@@ -147,10 +148,10 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     public void update() {
-        var cscene = getCscene();
+        CsceneInstanceBO cscene = getCscene();
         String sceneId = getSceneId();
         if (StringUtils.isEmpty(sceneId)) {
-            var csceneInstanceModel = getCsceneMapper().first(new HumanCondition().filterEqual(CsceneInstanceModel::getId, cscene.getId()));
+            CsceneInstanceModel csceneInstanceModel = getCsceneMapper().first(new HumanCondition().filterEqual(CsceneInstanceModel::getId, cscene.getId()));
             if (csceneInstanceModel != null) {
                 sceneId = csceneInstanceModel.getScene();
             }
@@ -161,7 +162,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             SceneInstanceLinkCacheUtil.refresh(sid);
         }).getSource());
 
-        var csceneObj = cscene.toModel();
+        CsceneInstanceModel csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
         csceneObj.setId(cscene.getId());
         cscene.fromModel(csceneObj);

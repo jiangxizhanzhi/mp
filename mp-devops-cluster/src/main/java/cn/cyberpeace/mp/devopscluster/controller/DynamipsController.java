@@ -62,8 +62,8 @@ public class DynamipsController {
     @ApiOperation("分页查询dynamips信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(DynamipsInstancePageRequest request) {
-        var result = dynamipsConverter.page(request);
-        var pageVos = convertBOToPageVO(result);
+        BasePageBO<InstanceBO> result = dynamipsConverter.page(request);
+        List<InstancePageVO> pageVos = convertBOToPageVO(result);
         return new PageResult<>(pageVos, result.getTotal());
     }
 
@@ -83,7 +83,7 @@ public class DynamipsController {
         List<UserBo> userBoList = new ArrayList<>();
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
-        var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
+        List<DeviceTargetPO> devopsResult = deviceTargetMapper.findByUuids(instanceNames);
         POLogoUtils.changeLogoPathToUrl(devopsResult);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         if (Objects.nonNull(source)) {

@@ -149,7 +149,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
             condition.pagination(queryParams.getPage(), queryParams.getPageSize());
         }
 
-        var list = getModelMapper().list(condition);
+        List<SystemAlarmModel> list = getModelMapper().list(condition);
         int total = getModelMapper().total(condition);
         return new ListObjServiceResult<>(new ListObjResult<>(list, total));
 

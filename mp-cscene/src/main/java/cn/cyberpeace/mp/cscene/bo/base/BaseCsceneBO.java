@@ -50,7 +50,7 @@ public abstract class BaseCsceneBO<
     @SafeVarargs
     public final <R9 extends BaseCsceneRoleBO<?, R9>, P extends BaseCsceneBO<?, ?, R9, P>> P export(
             Class<P> pClass, Class<R9> roleClass, SerializableFunction<T>... ignoreFieldGetters) {
-        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        P pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (roles != null) {
             List<R9> list = new ArrayList<>();
             for (R role : roles) {

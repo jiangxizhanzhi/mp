@@ -33,7 +33,7 @@ public class CsceneCreateInstanceRequest extends CsceneActionRequest {
     private CsceneContextBO context;
 
     public CsceneInstanceCreateContextBO toCsceneInstanceCreateContextBO() {
-        var csceneInstanceCreateContextBO = new CsceneInstanceCreateContextBO();
+        CsceneInstanceCreateContextBO csceneInstanceCreateContextBO = new CsceneInstanceCreateContextBO();
         csceneInstanceCreateContextBO.setSceneTtl(sceneTtl);
         csceneInstanceCreateContextBO.setSceneAttr(sceneAttr);
         csceneInstanceCreateContextBO.setReferenceMetaData(referenceMetaData);

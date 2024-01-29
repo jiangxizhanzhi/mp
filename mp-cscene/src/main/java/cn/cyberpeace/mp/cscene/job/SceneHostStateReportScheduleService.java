@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
@@ -67,7 +68,7 @@ public class SceneHostStateReportScheduleService {
     }
 
     private void reportCsceneElement(String csceneInstanceId) {
-        var csceneInstanceModel = csceneInstanceService.get(csceneInstanceId).getSource().getObj();
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceService.get(csceneInstanceId).getSource().getObj();
         if (StringUtils.isNotEmpty(csceneInstanceModel.getPassThrough())) {
             SysContextHolder.setPassThroughMap(JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
             }));
@@ -84,7 +85,7 @@ public class SceneHostStateReportScheduleService {
                 throw new IllegalStateException("Duplicate key");
             }
         }
-        var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(csceneInstanceId, null);
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(csceneInstanceId, null);
         if (CollectionUtils.isNotEmpty(agentNames)) {
             AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
             agentNameBasedRequest.setAgentNames(agentNames);
@@ -94,7 +95,7 @@ public class SceneHostStateReportScheduleService {
             for (Map.Entry<String, List<HostState>> entry : map.entrySet()) {
                 String k = entry.getKey();
                 List<HostState> v = entry.getValue();
-                var hostState = v.get(0);
+                HostState hostState = v.get(0);
                 hostState.setElementId(elementEid2Id.get(k));
                 hostState.setSceneId(sceneId);
                 hostStates.add(hostState);

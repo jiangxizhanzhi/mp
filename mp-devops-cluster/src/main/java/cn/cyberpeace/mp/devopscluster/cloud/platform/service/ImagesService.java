@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
@@ -133,7 +134,7 @@ public class ImagesService extends BaseCpService {
                 }
                 //采用http、https协议访问节点部署的web服务时，前端是直接用ip+端口号访问，这里url为空
                 if (StringUtils.isNotEmpty(l.getUrl())) {
-                    var u = URLUtils.url(l.getUrl());
+                    URL u = URLUtils.url(l.getUrl());
                     l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
                 }
                 if (config.getPublicNetProxyExcludeProtocols().contains(l.getProtocol())) {

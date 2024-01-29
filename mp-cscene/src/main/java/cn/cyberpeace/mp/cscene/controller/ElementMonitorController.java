@@ -166,7 +166,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();
 
-        var result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
+        List<ElementVulnerabilityCountInfo> result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
@@ -175,7 +175,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();
 
-        var result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
+        List<ElementVulnerabilityPieChartInfo> result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
@@ -184,7 +184,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();
 
-        var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
+        ListObjResult<ElementVulnerabilityInfo> result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
         return new ListObjServiceResult<>(result).asResult();
     }
 

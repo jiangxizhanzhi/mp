@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
@@ -65,11 +67,11 @@ public class CsceneCommonService {
 
     @Cacheable(value = "translate_scene_config_id")
     public String translateSceneConfigId(String csceneId) {
-        var csceneResult = csceneService.get(csceneId).getSource();
+        ObjResult<CsceneModel> csceneResult = csceneService.get(csceneId).getSource();
         if (csceneResult == null) {
             return null;
         }
-        var cscene = csceneResult.getObj();
+        CsceneModel cscene = csceneResult.getObj();
         return cscene.getSceneConfig();
     }
 
@@ -112,7 +114,7 @@ public class CsceneCommonService {
 
     @Cacheable(value = "query_scene_create_time")
     public LocalDateTime getSceneCreateTime(String sceneId) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         if (Objects.nonNull(sceneHandler.getScene())) {
             return sceneHandler.getScene().getCreateTime();
         }

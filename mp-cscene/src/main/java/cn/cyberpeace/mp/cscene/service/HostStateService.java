@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -138,7 +139,7 @@ public class HostStateService {
 
     private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         // 构建查询参数
-        var request = new WazuhMonitorEventsRequest();
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setPageNum(1);
         // todo 设置最多读取最大条数
         request.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
@@ -242,7 +243,7 @@ public class HostStateService {
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
             if (CollectionUtils.isNotEmpty(sceneIds)) {
-                var result = csceneSpecialService.getSceneStateInfo(sceneIds.get(0));
+                ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(sceneIds.get(0));
                 if (!result.getSource().isRunning() && result.getSource().getSceneModel() != null) {
                     endTime = result.getSource().getSceneModel().getUpdateTime();
                 }
@@ -481,8 +482,8 @@ public class HostStateService {
             } else {
                 endTime = LocalDateTime.now();
             }
-            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
-            var ports = new ArrayList<>();
+            List<CollectionPluginSceneDataModel> dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
+            ArrayList<Object> ports = new ArrayList<>();
             for (CollectionPluginSceneDataModel d : dataModels) {
                 Port parse = JsonCommon.parse(d.getData(), Port.class);
                 ports.add(parse);
@@ -567,8 +568,8 @@ public class HostStateService {
             } else {
                 endTime = LocalDateTime.now();
             }
-            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
-            var netifaces = new ArrayList<>();
+            List<CollectionPluginSceneDataModel> dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
+            ArrayList<Object> netifaces = new ArrayList<>();
             for (CollectionPluginSceneDataModel d : dataModels) {
                 Netiface parse = JsonCommon.parse(d.getData(), Netiface.class);
                 netifaces.add(parse);
@@ -582,15 +583,15 @@ public class HostStateService {
 
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request,LocalDateTime startTime,LocalDateTime endTime) {
         List<IntervalSizeBO<LocalDateTime, Long>> result = new ArrayList<>();
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(result);
         }
 
-        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountTrend(sceneIds.get(0), startTime, endTime);
-        var list = listServiceResult.getSource();
+        ServiceResult<List<AttCkTypeCount>> listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountTrend(sceneIds.get(0), startTime, endTime);
+        List<AttCkTypeCount> list = listServiceResult.getSource();
         if (CollectionUtils.isNotEmpty(list)) {
-            for (var count : list) {
+            for (AttCkTypeCount count : list) {
                 LocalDateTime time = TimeUtils.stringToLocalDateTime(count.getType(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
                 IntervalSizeBO<LocalDateTime, Long> v = new IntervalSizeBO<>(time, time, count.getTimes());
                 result.add(v);
@@ -600,17 +601,17 @@ public class HostStateService {
     }
 
     public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(new SceneAttCkTypeCountInfo()).asResult();
         }
-        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountInfo(sceneIds.get(0));
-        var list = listServiceResult.getSource();
+        ServiceResult<List<AttCkTypeCount>> listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountInfo(sceneIds.get(0));
+        List<AttCkTypeCount> list = listServiceResult.getSource();
         SceneAttCkTypeCountInfo attCkTypeCountInfo = new SceneAttCkTypeCountInfo();
         attCkTypeCountInfo.setTotalTimes(0L);
         attCkTypeCountInfo.setList(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(list)) {
-            for (var count : list) {
+            for (AttCkTypeCount count : list) {
                 attCkTypeCountInfo.setTotalTimes(attCkTypeCountInfo.getTotalTimes() + count.getTimes());
                 AttCkTypeCount attCkTypeCount = new AttCkTypeCount();
                 attCkTypeCount.setTimes(count.getTimes());

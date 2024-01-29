@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -49,7 +50,7 @@ public class ScreenrecordController {
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         String sceneId = null;
         if (StringUtils.isNotEmpty(queryParams.getCsceneId())) {
-            var csceneModel = csceneInstanceMapper.get(queryParams.getCsceneId());
+            CsceneInstanceModel csceneModel = csceneInstanceMapper.get(queryParams.getCsceneId());
             sceneId = csceneModel == null ? null : csceneModel.getScene();
         }
         return screenrecordService.pageScreenrecord(queryParams, sceneId);
@@ -98,7 +99,7 @@ public class ScreenrecordController {
     @PostMapping("/update_restore_limit_config")
     public ServiceResult<ScreenRecordRestoreConfigVO> updateRestoreLimitConfig(@RequestBody ScreenrecordConfigRequest request) {
         screenrecordService.updateRestoreLimitConfig(request);
-        var result = new ScreenRecordRestoreConfigVO();
+        ScreenRecordRestoreConfigVO result = new ScreenRecordRestoreConfigVO();
         result.setFileLimitSpace(request.getFileLimitSpace());
         result.setFileLimitTime(request.getFileLimitTime());
         return new ServiceResult<>(result).asResult();

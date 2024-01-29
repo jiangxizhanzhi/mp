@@ -123,7 +123,7 @@ public class ScreenrecordService extends BaseCpService {
         log.info("page screenrecord response: {}", pageResponse);
 
         // 获取该场景的所有节点id，因为可能已经删除了一部分节点
-        var ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
+        List<String> ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
 
         List<ScreenrecordVO> responseList = new ArrayList<>();
         Integer count = 0;
@@ -149,7 +149,7 @@ public class ScreenrecordService extends BaseCpService {
                     }
                     for (ScreenrecordVO res : responseList) {
                         if (userId2Bo.containsKey(res.getUserId())) {
-                            var userBo = userId2Bo.get(res.getUserId());
+                            UserBo userBo = userId2Bo.get(res.getUserId());
                             res.setUserAvatar(userBo.getAvatar());
                         }
                     }
@@ -347,7 +347,7 @@ public class ScreenrecordService extends BaseCpService {
 
     public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
         RecordRestoreLimitConfigResult result = new Remote().getRecordRestoreLimitConfig();
-        var config = new ScreenRecordRestoreConfigVO();
+        ScreenRecordRestoreConfigVO config = new ScreenRecordRestoreConfigVO();
         config.setFileLimitSpace(result.getCleanRecordFileLimitSpace());
         config.setFileLimitTime(result.getCleanRecordFileLimitTime());
         return new ServiceResult<>(config);

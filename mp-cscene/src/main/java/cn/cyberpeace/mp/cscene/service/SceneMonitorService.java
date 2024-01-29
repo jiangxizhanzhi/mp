@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
@@ -16,14 +17,19 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.job.SceneHostStateReportScheduleService;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -56,6 +62,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Description: 场景监控Service
@@ -173,7 +180,7 @@ public class SceneMonitorService {
             Set<String> networkIds = new HashSet<>();
             if (CollectionUtil.isNotEmpty(scenePluginDataBO.getElementPorts())) {
                 for (Map<String, Object> p : scenePluginDataBO.getElementPorts().values()) {
-                    var port = JsonCommon.snakeMapToBean(p, CloudPluginSceneElementPortBO.class);
+                    CloudPluginSceneElementPortBO port = JsonCommon.snakeMapToBean(p, CloudPluginSceneElementPortBO.class);
                     if (StringUtils.isNotEmpty(port.getAuxiliaryNetworkId())) {
                         networkIds.add(port.getAuxiliaryNetworkId());
                     }
@@ -187,11 +194,11 @@ public class SceneMonitorService {
     }
 
     public List<ElementMonitorBasicInfo> getSceneElements(String sceneId, Boolean supportProbe, Boolean supportFlow) {
-        var result = csceneInstanceService.getById(sceneId, null);
-        var csceneInstanceBO = result.getSource();
+        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
+        CsceneInstanceBO csceneInstanceBO = result.getSource();
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
-        for (var element : csceneInstanceBO.getScene().getTopology().getElements()) {
+        for (SceneElementBO element : csceneInstanceBO.getScene().getTopology().getElements()) {
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
             elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, element.getId());
             basicInfos.add(basicInfo);
@@ -252,9 +259,9 @@ public class SceneMonitorService {
             fetchRealTimeHostState = true;
         }
         boolean isAll = Objects.nonNull(request) && Objects.nonNull(request.getIsAll()) ? request.getIsAll() : Boolean.FALSE;
-        var result = csceneInstanceService.getById(sceneId, null);
-        var csceneInstanceBO = result.getSource();
-        var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
+        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
+        CsceneInstanceBO csceneInstanceBO = result.getSource();
+        String sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
 
         if (StringUtils.isEmpty(sceneInstanceId)) {
             return Collections.emptyList();
@@ -264,7 +271,7 @@ public class SceneMonitorService {
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 
         // 根据名称模糊筛选
-        var stream = sceneHandler.getElementMap().values().stream();
+        Stream<SceneElementBO> stream = sceneHandler.getElementMap().values().stream();
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
@@ -281,12 +288,12 @@ public class SceneMonitorService {
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
             // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
-            var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
+            CompletableFuture<ElementMonitorBasicInfo> cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
             cfList.add(cf);
         }
 
         if (CollectionUtil.isNotEmpty(cfList)) {
-            var cfArray = cfList.toArray(new CompletableFuture[0]);
+            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
             CompletableFuture<List<ElementMonitorBasicInfo>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> {
                 List<ElementMonitorBasicInfo> list = new ArrayList<>();
                 for (CompletableFuture<ElementMonitorBasicInfo> elementMonitorBasicInfoCompletableFuture : cfList) {
@@ -357,12 +364,12 @@ public class SceneMonitorService {
 
         // 添加云插件端口接入方式
         if (CollectionUtils.isNotEmpty(basicInfos)) {
-            for (var basicInfo : basicInfos) {
+            for (ElementMonitorBasicInfo basicInfo : basicInfos) {
                 if (CollectionUtils.isEmpty(basicInfo.getPorts())) {
                     continue;
                 }
-                for (var p : basicInfo.getPorts()) {
-                    var cloudPort = cloudPlugin.getPort(p.getId());
+                for (ElementPort p : basicInfo.getPorts()) {
+                    CloudPluginSceneElementPortBO cloudPort = cloudPlugin.getPort(p.getId());
                     p.setCloudAccessModes(cloudPort.getAccessModes());
                 }
             }
@@ -370,7 +377,7 @@ public class SceneMonitorService {
 
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
             // 查询实时主机状态
-            var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
+            List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
             if (CollectionUtil.isNotEmpty(agentNames)) {
                 AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
                 agentNameBasedRequest.setAgentNames(agentNames);
@@ -378,7 +385,7 @@ public class SceneMonitorService {
 
                 Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
                 for (ElementMonitorBasicInfo basicInfo : basicInfos) {
-                    var hostStates = map.get(basicInfo.getEid());
+                    List<HostState> hostStates = map.get(basicInfo.getEid());
                     //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
                     if (CollectionUtils.isNotEmpty(hostStates)) {
                         if (!BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())) {
@@ -392,7 +399,7 @@ public class SceneMonitorService {
             }
 
             // 查询用户连接信息
-            var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
+            List<CloudPluginSceneConnectionModel> connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
                     .select(CloudPluginSceneConnectionModel::getSceneElement)
                     .select(CloudPluginSceneConnectionModel::getAccessUser)
                     .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
@@ -405,7 +412,7 @@ public class SceneMonitorService {
                     String user = connection.getAccessUser();
                     userIds.add(user);
                 }
-                var userModels = UserCommon.getUsers(new ArrayList<>(userIds));
+                List<UserModel> userModels = UserCommon.getUsers(new ArrayList<>(userIds));
                 Map<String, UserModel> userId2User = new HashMap<>();
                 for (UserModel userModel1 : userModels) {
                     if (userId2User.put(userModel1.getId(), userModel1) != null) {
@@ -413,9 +420,9 @@ public class SceneMonitorService {
                     }
                 }
                 for (CloudPluginSceneConnectionModel model : connections) {
-                    var users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
+                    List<AccessUserBO> users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
                     nodeId2Users.put(model.getSceneElement(), users);
-                    var userModel = userId2User.get(model.getAccessUser());
+                    UserModel userModel = userId2User.get(model.getAccessUser());
                     if (userModel != null) {
                         AccessUserBO accessUser = new AccessUserBO();
                         accessUser.setId(userModel.getId());
@@ -460,13 +467,13 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> res = new ArrayList<>();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, null, null);
         CloudSceneConfigPluginHandler cloudConfigPlugin = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var stream = sceneConfigHandler.getElementMap().values().stream();
+        Stream<SceneConfigElementBO> stream = sceneConfigHandler.getElementMap().values().stream();
         // 根据名称模糊筛选
         if (StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
         stream.forEach(e -> {
-            var cloudElement = cloudConfigPlugin.getElement(e.getId());
+            CloudPluginSceneConfigElementBO cloudElement = cloudConfigPlugin.getElement(e.getId());
             if (!isSupportedVirtualType(cloudElement.getVirtualType()) && !Boolean.TRUE.equals(request.getIsAll())) {
                 return;
             }

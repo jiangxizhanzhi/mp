@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Description 清理mp服务启动之前正在创建中的场景,仅修改状态
@@ -29,7 +30,7 @@ public class SceneUpdateStatusJob extends AbstractInitJob {
     @Override
     protected boolean doExecute() {
         //忽略服务启动之前一定时间内的启动的场景
-        var startServiceTime = LocalDateTime.now().minusSeconds(csceneAppConfig.getIgnoreSceneCreatingSeconds());
+        LocalDateTime startServiceTime = LocalDateTime.now().minusSeconds(csceneAppConfig.getIgnoreSceneCreatingSeconds());
         HumanCondition humanCondition = new HumanCondition()
                 .filterOrStart()
                 .orAndStart()
@@ -38,11 +39,11 @@ public class SceneUpdateStatusJob extends AbstractInitJob {
                 .andLessThanOrEqual(SceneModel::getCreateTime, startServiceTime)
                 .orAndEnd()
                 .filterOrEnd();
-        var creatingScenes = sceneMapper.list(humanCondition);
+        List<SceneModel> creatingScenes = sceneMapper.list(humanCondition);
         if (CollectionUtils.isNotEmpty(creatingScenes)) {
             LocalDateTime now = LocalDateTime.now();
             log.info("current local date time is {}", now);
-            for (var creatingScene : creatingScenes) {
+            for (SceneModel creatingScene : creatingScenes) {
                 try {
                     log.info("scene {} is created before mp service is started, and will be set error status", creatingScene.getId());
                     creatingScene.setEventStatus(EventStatus.ABNORMAL);

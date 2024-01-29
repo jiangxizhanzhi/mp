@@ -44,14 +44,14 @@ public class ISOService extends BaseCpService {
     }
 
     public BaseCloudPlatformResult download(String tmpdirUuid, String fileName) {
-        var result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE +
+        BaseCloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE +
                 BaseCloudPlatformConstant.URL_VERSION + "/iso/" + tmpdirUuid + "/" + fileName, BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }
 
     public void delete(String tmpdirUuid, String fileName) {
-        var result = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/iso/" +
+        BaseCloudPlatformResult result = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/iso/" +
                 tmpdirUuid + "/" + fileName, null, BaseCloudPlatformResult.class);
         super.checkResult(result);
     }

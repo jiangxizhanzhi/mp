@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.job.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -60,7 +61,7 @@ public class LogFileController {
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
         log.info("page query log files, pageRequest = {}, sceneId = {}", pageRequest, pageRequest.getSceneId());
         if (StringUtils.isNotEmpty(pageRequest.getStartTime()) || StringUtils.isNotEmpty(pageRequest.getEndTime())) {
-            var instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
+            CsceneInstanceModel instance = instanceService.get(pageRequest.getSceneId()).getSource().getObj();
             LocalDateTime startTime = null;
             if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
                 startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
@@ -76,7 +77,7 @@ public class LogFileController {
             TimeListPageInfoQueryParams params = new TimeListPageInfoQueryParams();
             params.setSceneIds(List.of(instance.getScene()));
             params.setNodeIds(pageRequest.getElementIds());
-            var dataModels = dataRecordService.getData(params, CollectionPluginSceneDataModel.Type.LOGFile, startTime,
+            List<CollectionPluginSceneDataModel> dataModels = dataRecordService.getData(params, CollectionPluginSceneDataModel.Type.LOGFile, startTime,
                     endTime);
             List<LogFileVO> logs = new ArrayList<>();
             for (CollectionPluginSceneDataModel d : dataModels) {
@@ -85,7 +86,7 @@ public class LogFileController {
             }
             Set<String> exists = new HashSet<>();
             List<LogFileVO> finalResult = new ArrayList<>();
-            for (var log : logs) {
+            for (LogFileVO log : logs) {
                 if (!exists.contains(log.getPath())) {
                     exists.add(log.getPath());
                     finalResult.add(log);

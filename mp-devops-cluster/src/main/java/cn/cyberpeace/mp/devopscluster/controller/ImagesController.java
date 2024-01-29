@@ -10,9 +10,11 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.util.FileClient;
+import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -57,6 +59,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -192,7 +195,7 @@ public class ImagesController {
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
         if (Objects.nonNull(extVm) && StringUtils.isNotEmpty(extVm.getIsoTmpdirUuid())) {
-            var res = csceneSpecialService.statISOReferCscenes(extVm.getIsoTmpdirUuid()).getSource();
+            List<String> res = csceneSpecialService.statISOReferCscenes(extVm.getIsoTmpdirUuid()).getSource();
             imagesByIdVO.setAllowChangeIso(CollectionUtils.isEmpty(res));
         } else {
             imagesByIdVO.setAllowChangeIso(true);
@@ -284,7 +287,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid, @RequestParam("image_name") String imageName) {
         if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
-            var image = imagesConverter.findByUuid(uuid);
+            ImageConvertModel image = imagesConverter.findByUuid(uuid);
             if (Boolean.TRUE.equals(image.getIsImport()) || Boolean.TRUE.equals(image.getIsInit()) ||
                     Boolean.TRUE.equals(image.getIsInternal())) {
                 throw new MpRuntimeException(DevopsClusterErrorCode.BUILD_IN_TARGET_NOT_ALLOWED_EXPORT);
@@ -294,7 +297,7 @@ public class ImagesController {
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                var u = URLUtils.url(downloadUrl);
+                URL u = URLUtils.url(downloadUrl);
                 downloadUrl = StringUtils.replaceOnce(downloadUrl, u.getHost(), config.getPublicNetProxyIp());
             }
         }
@@ -344,7 +347,7 @@ public class ImagesController {
     @GetMapping("/{id}/snapshot/list")
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
-        var list = convertModel.getList();
+        List<SnapshotConvertModel> list = convertModel.getList();
         if (CollectionUtils.isNotEmpty(list)) {
             List<String> sceneIds = new ArrayList<>();
             for (SnapshotConvertModel snapshotConvertModel : list) {
@@ -353,10 +356,10 @@ public class ImagesController {
                     sceneIds.add(sceneId);
                 }
             }
-            var nameMap = csceneSpecialService.getCsceneNameBySceneIds(sceneIds).getSource();
+            Map<String, CsceneInstanceInfo> nameMap = csceneSpecialService.getCsceneNameBySceneIds(sceneIds).getSource();
             List<String> uuids = new ArrayList<>();
-            for (var m : list) {
-                var sceneInfo = nameMap.get(m.getSceneId());
+            for (SnapshotConvertModel m : list) {
+                CsceneInstanceInfo sceneInfo = nameMap.get(m.getSceneId());
                 if(StringUtils.isNotEmpty(m.getUuid())){
                     uuids.add(m.getUuid());
                 }
@@ -402,7 +405,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
 //        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
-        var res = snapshotConverter.list(request.getUuid());
+        BasePageBO<SnapshotConvertModel> res = snapshotConverter.list(request.getUuid());
         snapshotConverter.merge(request);
         if (res != null && CollectionUtils.isNotEmpty(res.getList())) {
             for (SnapshotConvertModel l : res.getList()) {
@@ -503,14 +506,14 @@ public class ImagesController {
     @ApiOperation("查询dynamips 相关的信息")
     @GetMapping("/dynamic_image_info")
     public Result<DynamicImageInfo> getDynamicImageInfo(@RequestParam(required = false) String platform) {
-        var info = dynamipsService.getInfo(platform);
+        DynamicImageInfo info = dynamipsService.getInfo(platform);
         return new Result<>(info);
     }
 
     @ApiOperation("查询dynamips flavor 相关的信息")
     @GetMapping("/dynamic_type_info")
     public Result<Map<String, Object>> getDynamicTypeInfo() {
-        var info = dynamipsService.getTypeInfo();
+        Map<String, Object> info = dynamipsService.getTypeInfo();
         return new Result<>(info);
     }
 
@@ -605,7 +608,7 @@ public class ImagesController {
     @ApiOperation("下载iso文件")
     @GetMapping(value = "/file/download/iso")
     public ServiceResult<String> downloadISOFile(ISOFileRequest request) {
-        var result = isoService.download(request.getTmpdirUuid(), request.getFileName());
+        BaseCloudPlatformResult result = isoService.download(request.getTmpdirUuid(), request.getFileName());
         return new ServiceResult<>(result.getNginxFileUrl()).asResult();
     }
 
@@ -648,7 +651,7 @@ public class ImagesController {
         ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
         ExtVm extVm = v.getExtVm();
         ExtImageInfo extImageInfo = v.getExtImageInfo();
-        var vo = ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
+        ImagesPageVO vo = ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
                 .logo(v.getLogo())
                 .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                 .imageType(v.getImageType())
@@ -663,7 +666,7 @@ public class ImagesController {
         if (vo.getExtDocker() != null && vo.getExtDocker().getExtInfo() != null && vo.getExtDocker().getExtInfo() instanceof Map) {
             Map map = (Map) vo.getExtDocker().getExtInfo();
             if (map.containsKey("message")) {
-                var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                String result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
                 if (result != null) {
                     map.put("message", result);
                 }
@@ -672,7 +675,7 @@ public class ImagesController {
         if (vo.getExtVm() != null && vo.getExtVm().getExtInfo() != null && vo.getExtVm().getExtInfo() instanceof Map) {
             Map map = (Map) vo.getExtVm().getExtInfo();
             if (map.containsKey("message")) {
-                var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                String result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
                 if (result != null) {
                     map.put("message", result);
                 }
@@ -688,8 +691,8 @@ public class ImagesController {
                 ImagePageDTO pageDTO = new ImagePageDTO();
                 pageDTO.setName(v.getExtImageInfo().getBaseImageName());
                 pageDTO.setLikeName(false);
-                var result = this.imagesConverter.page(pageDTO);
-                var list = result.getList();
+                BasePageBO<ImageConvertModel> result = this.imagesConverter.page(pageDTO);
+                List<ImageConvertModel> list = result.getList();
                 if (CollectionUtils.isNotEmpty(list)) {
                     ImageConvertModel baseImage = list.get(0);
                     if (Boolean.TRUE.equals(baseImage.getIsImport() || Boolean.TRUE.equals(baseImage.getIsInit()) || Boolean.TRUE.equals(baseImage.getIsInternal()))) {
@@ -707,7 +710,7 @@ public class ImagesController {
     }
 
     private void checkISOReference(String isoTmpdirUuid) {
-        var result = csceneSpecialService.statISOReferCscenes(isoTmpdirUuid).getSource();
+        List<String> result = csceneSpecialService.statISOReferCscenes(isoTmpdirUuid).getSource();
         if (CollectionUtils.isNotEmpty(result)) {
             throw new MpRuntimeException(DevopsClusterErrorCode.ISO_REFERENCE_SCENE_WITH_NAME
                     .format(StringUtils.joinWith(",", result.toArray())));

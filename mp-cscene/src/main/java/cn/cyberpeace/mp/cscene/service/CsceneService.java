@@ -13,6 +13,8 @@ import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
@@ -47,6 +49,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import com.github.pagehelper.PageInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -101,11 +104,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private String getSceneConfigId(String csceneId) {
-        var csceneResult = get(csceneId).getSource();
+        ObjResult<CsceneModel> csceneResult = get(csceneId).getSource();
         if (csceneResult == null) {
             return null;
         }
-        var cscene = csceneResult.getObj();
+        CsceneModel cscene = csceneResult.getObj();
         return cscene.getSceneConfig();
     }
 
@@ -114,7 +117,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(sceneIds)) {
             return 0;
         }
-        var groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
+        String groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
         Map<Object, Long> elementCountMap = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(groupFieldName))
                 .getSource().get(groupFieldName);
@@ -128,7 +131,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
-        var groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
+        String groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
         Map<Object, Long> elementCountMap = scenePluginCloudSceneConfigService
                 .groupCountElement(List.of(sceneConfigId), null, List.of(groupFieldName))
                 .getSource().get(groupFieldName);
@@ -144,7 +147,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneEditNodeLimit(int count) {
-        var sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
+        int sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
         if (count > sceneEditNodeLimit) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_EDIT_NODE_LIMIT.format(String.valueOf(sceneEditNodeLimit),
                     String.valueOf(count)));
@@ -152,7 +155,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneEditNodeLimit(CsceneBO csceneBO) {
-        var elementCount = 0;
+        int elementCount = 0;
         try {
             elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
         } catch (NullPointerException e) {
@@ -164,8 +167,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneUsingNodeLimit(int count) {
-        var activeVirtualDeviceCount = getActiveVirtualDeviceCount();
-        var sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
+        int activeVirtualDeviceCount = getActiveVirtualDeviceCount();
+        int sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
         if (activeVirtualDeviceCount + count > sceneUsingNodeLimit) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(sceneUsingNodeLimit),
                     String.valueOf(activeVirtualDeviceCount), String.valueOf(count)));
@@ -176,17 +179,17 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableNodeLimitDbCheck())) {
             return;
         }
-        var elementCount = 0;
+        int elementCount = 0;
         if (cscene == null) {
-            var sceneConfigId = getSceneConfigId(csceneId);
+            String sceneConfigId = getSceneConfigId(csceneId);
             elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
         } else {
             // TODO 获取需要虚拟化的节点数量
             try {
-                var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+                Map<String, Map<String, Object>> pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
                 if (pluginElements != null) {
-                    for (var e : pluginElements.values()) {
-                        var virtualType = e.get("virtual_type");
+                    for (Map<String, Object> e : pluginElements.values()) {
+                        Object virtualType = e.get("virtual_type");
                         if (virtualType != null) {
                             if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
                                     Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
@@ -253,7 +256,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CsceneAuthModel::getTarget, csceneId);
-        var csceneAuthModels = csceneAuthMapper.list(humanCondition);
+        List<CsceneAuthModel> csceneAuthModels = csceneAuthMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(csceneAuthModels)) {
             return new ServiceResult<>(csceneAuthorizeBO);
         }
@@ -266,7 +269,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         request.setIds(userIds.toArray(new String[0]));
         request.setPage(1);
         request.setPageSize(userIds.size());
-        var users = tenantUserService.pageUsersByOrg(request);
+        PageInfo<UserBo> users = tenantUserService.pageUsersByOrg(request);
         Map<String, UserBo> userId2User = new HashMap<>();
         for (UserBo userDto : users.getList()) {
             if (userId2User.put(userDto.getId(), userDto) != null) {
@@ -275,7 +278,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         for (String userId : userIds) {
             CsceneAuthorizeBO.SharedUser sharedUser = new CsceneAuthorizeBO.SharedUser();
-            var user = userId2User.get(userId);
+            UserBo user = userId2User.get(userId);
             sharedUser.setId(userId);
             sharedUser.setName(user.getName());
             // 目前用户只会有一个组织
@@ -385,8 +388,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         for (Map.Entry<String, CsceneModel> entry : csceneObjMap.entrySet()) {
             String csceneId = entry.getKey();
             CsceneModel csceneObj = entry.getValue();
-            var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
-            var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
+            List<CsceneRoleModel> roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
+            CsceneHandler csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
             csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
         }
         // 转为Map后顺序被打乱，此时再次排序
@@ -419,9 +422,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
             HumanCondition humanCondition = new HumanCondition()
                     .filterIn(CsceneAuthModel::getTarget, list.toArray());
-            var csceneAuthModels = csceneAuthMapper.list(humanCondition);
+            List<CsceneAuthModel> csceneAuthModels = csceneAuthMapper.list(humanCondition);
             Map<String, List<String>> csceneId2UserIds = new HashMap<>();
-            for (var csceneAuthModel : csceneAuthModels) {
+            for (CsceneAuthModel csceneAuthModel : csceneAuthModels) {
                 if (!csceneId2UserIds.containsKey(csceneAuthModel.getTarget())) {
                     csceneId2UserIds.put(csceneAuthModel.getTarget(), new ArrayList<>());
                 }
@@ -434,20 +437,20 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
-        var cscene = csceneHandler.toData(withInstance);
+        CsceneHandler csceneHandler = new CsceneHandler(id, context);
+        CsceneBO cscene = csceneHandler.toData(withInstance);
         cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
         return new ServiceResult<>(cscene);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
+        CsceneHandler csceneHandler = new CsceneHandler(id, context);
         return new ServiceResult<>(csceneHandler.toData(false).export());
     }
 
     @Transactional
     public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
+        CsceneHandler csceneHandler = new CsceneHandler(id, context);
         return sync(csceneHandler.toDataWithoutCorrectCsceneData(false).export(), context, false);
     }
 
@@ -458,7 +461,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
             // 更新name
-            var serviceResult = update(csceneBO.toModel());
+            ObjServiceResult<CsceneModel> serviceResult = update(csceneBO.toModel());
             // 更新录屏开关
             if (csceneBO.getEnableRecording() != null) {
                 String sceneConfigId = getSceneConfigId(csceneBO.getId());
@@ -476,7 +479,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         } else {
             handlerEnableRate(csceneBO);
-            var csceneHandler = new CsceneHandler(csceneBO, context);
+            CsceneHandler csceneHandler = new CsceneHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
@@ -492,7 +495,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (StringUtils.isEmpty(csceneBO.getId())) {
             return;
         }
-        var sceneConfigId = getSceneConfigId(csceneBO.getId());
+        String sceneConfigId = getSceneConfigId(csceneBO.getId());
         if (StringUtils.isEmpty(sceneConfigId)) {
             return;
         }
@@ -503,7 +506,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 return;
             }
             ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
-            var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
+            Map<String, Object> cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
                     .orElse(new HashMap<>());
             cpcloudPluginScene.put("enable_rate", cloudSceneConfigPluginHandler.getScene().getEnableRate());
             scenePluginDataBO.setScene(cpcloudPluginScene);
@@ -519,14 +522,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> syncWithoutCheckLimit(CsceneBO csceneBO, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(csceneBO, context);
+        CsceneHandler csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
-        var csceneHandler = new CsceneHandler(id, context);
-        var flag = csceneHandler.delete(logic, withInstance);
+        CsceneHandler csceneHandler = new CsceneHandler(id, context);
+        boolean flag = csceneHandler.delete(logic, withInstance);
         if (flag) {
             // 尝试该场景模板建立的快照
             CsceneSnapshotDeleteTaskPool.getInstance().executeTask(() -> {
@@ -538,7 +541,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, boolean withInstance,
                                                   CsceneContextBO context) {
-        var result = 0;
+        int result = 0;
         for (String id : ids) {
             if (Boolean.TRUE.equals(deleteById(id, logic, withInstance, context).getSource())) {
                 result += 1;
@@ -557,7 +560,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                                                               CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, null);
 
-        var csceneHandler = new CsceneHandler(csceneId, context);
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
@@ -565,7 +568,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                                                               CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, cscene);
 
-        var csceneHandler = new CsceneHandler(csceneId, context);
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
 
@@ -576,8 +579,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
-        var cscene = createContext.getCscene();
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
+        CsceneBO cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
             csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
@@ -609,7 +612,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, null);
 
-        var csceneHandler = new CsceneHandler(csceneId, context);
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createAppInstance(unique));
     }
 
@@ -617,7 +620,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                                                              CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, cscene);
 
-        var csceneHandler = new CsceneHandler(csceneId, context);
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, cscene));
     }
 
@@ -628,8 +631,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
-        var cscene = createContext.getCscene();
+        CsceneHandler csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
+        CsceneBO cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
             csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
@@ -712,7 +715,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (csceneInstance.getScene() != null && csceneInstance.getScene().getPlugins() != null) {
             ScenePluginDataBO scenePluginDataBO = csceneInstance.getScene().getPlugins().get("cpcloud");
             if (scenePluginDataBO != null) {
-                var cpcloudPluginScene = Optional
+                Map<String, Object> cpcloudPluginScene = Optional
                         .ofNullable(scenePluginDataBO.getScene())
                         .orElse(new HashMap<>());
                 cpcloudPluginScene.put("enable_recording", csceneAppConfig.getSceneEnableRecording());
@@ -722,7 +725,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private List<String> getCsceneIds() {
-        var currentUser = UserCommon.getCurrentUser();
+        UserModel currentUser = UserCommon.getCurrentUser();
         String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CsceneAuthModel::getOwner, currentUserId);
@@ -761,7 +764,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public List<String> getOneSceneInstanceAllElementIds(String sceneId) {
         List<String> ids = new ArrayList<>();
-        var sceneElementModels = BeanCommon.getBean(SceneElementMapper.class).list(new HumanCondition()
+        List<SceneElementModel> sceneElementModels = BeanCommon.getBean(SceneElementMapper.class).list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, sceneId));
         if (CollectionUtils.isNotEmpty(sceneElementModels)) {
             List<String> list = new ArrayList<>();

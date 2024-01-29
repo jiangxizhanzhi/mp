@@ -98,7 +98,7 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        for (var d : model.getList()) {
+        for (Device d : model.getList()) {
             if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
                 if (d.getExtDocker() != null) {
                     d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());

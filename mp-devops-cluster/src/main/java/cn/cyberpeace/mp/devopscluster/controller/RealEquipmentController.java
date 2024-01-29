@@ -90,7 +90,7 @@ public class RealEquipmentController {
             list.add(realEquipmentPageVO);
         }
 
-        for (var l : list) {
+        for (RealEquipmentPageVO l : list) {
             if (l.getExtSystemInfo() != null && "USB".equals(l.getExtSystemInfo().getSystemTypeName())) {
                 l.getExtSystemInfo().setSystemArchitecture(null);
                 l.getExtSystemInfo().setSystemArchitectureName(null);
@@ -103,7 +103,7 @@ public class RealEquipmentController {
 
     private RealEquipmentPageVO getRealEquipmentPageVO(TypeAllConvertModel l1AndL2AndL3Type, TypeAllConvertModel language, TypeAllConvertModel systemArchitecure, TypeAllConvertModel accessType, RealEquipmentBO v) {
         ExtEntity extEntity = v.getExtEntity();
-        var connection = realEquipmentService.connection(v.getUuid());
+        CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(v.getUuid());
         Boolean loginEnable = false;
         if (connection != null && CollectionUtils.isNotEmpty(connection.getList())) {
             loginEnable = true;
@@ -390,7 +390,7 @@ public class RealEquipmentController {
                     response.setRamPercent(mem.getResult().get(extEntity.getSnmpMemOid()));
                 }
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
-                var disk = realEquipmentService.snmpForDisk(snmpParams);
+                SnmpCloudPlatform disk = realEquipmentService.snmpForDisk(snmpParams);
                 if (Objects.nonNull(disk) &&  Objects.nonNull(disk.getStatus()) && disk.getStatus()){
                     response.setDiskPercent(disk.getResult().get(extEntity.getSnmpDiskOid()));
                 }

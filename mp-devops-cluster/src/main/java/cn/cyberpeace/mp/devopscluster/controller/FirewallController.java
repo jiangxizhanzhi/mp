@@ -74,7 +74,7 @@ public class FirewallController {
         }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             for (FirewallPageVO firewall : firewallList) {
-                var csceneNodeInfoBO = map.get(firewall.getName());
+                CsceneNodeInfoBO csceneNodeInfoBO = map.get(firewall.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     firewall.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     firewall.setReferenceType(csceneNodeInfoBO.getReferenceType());

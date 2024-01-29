@@ -51,7 +51,7 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getAssetNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
@@ -89,7 +89,7 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     @SafeVarargs
     public final <P extends BaseCsceneRoleBO<?, P>> P exportIgnore2(Class<P> pClass,
                                                                     SerializableFunction<T>... ignoreFieldGetters) {
-        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        P pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (children != null) {
             List<P> list = new ArrayList<>();
             for (T child : children) {

@@ -98,8 +98,8 @@ public class RealEquipmentConverter implements BaseConverter{
             list.add(deviceTargetPO1Name);
         }
         String[] imageNames = list.toArray(new String[0]);
-        var referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
-        var useStateMap = csceneSpecialService.statDeviceReferCsceneInstances(imageNames).getSource();
+        Map<String, List<DeviceReferCsceneStat>> referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
+        Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = csceneSpecialService.statDeviceReferCsceneInstances(imageNames).getSource();
 
         List<Integer> ids = new ArrayList<>();
         for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {

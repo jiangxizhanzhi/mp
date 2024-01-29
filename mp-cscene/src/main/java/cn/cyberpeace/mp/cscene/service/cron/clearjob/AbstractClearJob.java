@@ -80,7 +80,7 @@ public abstract class AbstractClearJob<Q> {
         if (StringUtils.isEmpty(id)) {
             return false;
         }
-        var condition = new HumanCondition().filterEqual(SceneElementModel::getId, id);
+        HumanCondition condition = new HumanCondition().filterEqual(SceneElementModel::getId, id);
         List<SceneElementModel> elements = sceneElementMapper.list(condition);
         if (CollectionUtils.isEmpty(elements)) {
             return false;
@@ -93,7 +93,7 @@ public abstract class AbstractClearJob<Q> {
             return true;
         } else {
             SceneMapper sceneMapper = BeanCommon.getBean(SceneMapper.class);
-            var scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
+            SceneModel scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
             if (scene != null && scene.getEventStatus() == EventStatus.OVER && scene.getEvent() == SceneElementModel.Event.DELETE) {
                 return true;
             } else if (scene != null && scene.getEventStatus() == EventStatus.ABNORMAL && scene.getEvent() == SceneElementModel.Event.DELETE) {

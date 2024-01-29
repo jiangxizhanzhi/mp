@@ -401,7 +401,7 @@ public class ImagesConverter implements BaseConverter{
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
         scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
-        var updateTargetModel = new DeviceTargetPO();
+        DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
         deviceTargetMapper.updateById(updateTargetModel);
@@ -416,7 +416,7 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
-        var updateTargetModel = new DeviceTargetPO();
+        DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(request.getUuid());
         updateTargetModel.setInstanceCreateUser(StringUtils.EMPTY);
         deviceTargetMapper.updateById(updateTargetModel);

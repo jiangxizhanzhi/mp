@@ -54,7 +54,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
 
     @Override
     public CsceneModel toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        CsceneModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
         if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
@@ -64,7 +64,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
 
     @Override
     public CsceneBO export() {
-        var csceneBO = super.export();
+        CsceneBO csceneBO = super.export();
         csceneBO.setTestScenes(null);
         csceneBO.setAppScenes(null);
         if (sceneConfig != null) {
@@ -74,7 +74,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {
-        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
+        CsceneInstanceBO csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
                 CsceneBO::getType, CsceneBO::getSceneConfig, CsceneBO::getTestScenes, CsceneBO::getAppScenes);
         if (sceneConfig != null) {
             csceneInstance.setScene(sceneConfig.exportToScene());

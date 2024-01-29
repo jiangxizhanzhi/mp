@@ -148,11 +148,11 @@ public class ProtocolCollectionService {
     public ServiceResult queryMibOidInfo(MibInfoQueryRequest mibInfoQueryRequest){
         EntityNode entityNode = new EntityNode();
         //请求参数构建（oid必传）
-        var paramBuilder = MibNodeQueryParam.builder().oid(mibInfoQueryRequest.getOid());
+        MibNodeQueryParam.MibNodeQueryParamBuilder paramBuilder = MibNodeQueryParam.builder().oid(mibInfoQueryRequest.getOid());
         //综合场景id获取场景id
         String sceneId = csceneInstanceService.getSceneId(mibInfoQueryRequest.getSceneId());
         //获取场景处理类
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         //获取云平台场景处理类
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         //获取节点和云平台插件场景节点信息的关系

@@ -51,8 +51,8 @@ public class CscenePluginDataRecordService {
 
     @Scheduled(initialDelay = 120, fixedRate = 120, timeUnit = TimeUnit.SECONDS)
     public void action() {
-        var instances = csceneService.getRunningCscenes();
-        for (var instance : instances) {
+        List<CsceneInstanceModel> instances = csceneService.getRunningCscenes();
+        for (CsceneInstanceModel instance : instances) {
             if (instance.getReferenceType() == null || (BaseCsceneModel.ReferenceType.READ_VS_BLUE != instance.getReferenceType() && BaseCsceneModel.ReferenceType.TEAM_TRAINING != instance.getReferenceType())) {
                 continue;
             }
@@ -63,8 +63,8 @@ public class CscenePluginDataRecordService {
                     continue;
                 }
                 List<CollectionPluginSceneDataModel> result = new ArrayList<>();
-                for (var element : collectPlugin.getElementMap().values()) {
-                    var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
+                for (CollectionPluginSceneElementBO element : collectPlugin.getElementMap().values()) {
+                    List<Port> ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(ports)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (Port p : ports) {
@@ -73,7 +73,7 @@ public class CscenePluginDataRecordService {
                         }
                         result.addAll(models);
                     }
-                    var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
+                    List<Netiface> netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (Netiface n : netifaces) {
@@ -87,7 +87,7 @@ public class CscenePluginDataRecordService {
                     request.setElementIds(List.of(element.getSrcElement().getId()));
                     request.setPage(1);
                     request.setPageSize(10);
-                    var logfiles = logFileService.pageByElementId(request).getSource().getObjs();
+                    List<LogFileVO> logfiles = logFileService.pageByElementId(request).getSource().getObjs();
                     if (CollectionUtils.isNotEmpty(logfiles)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (LogFileVO n : logfiles) {

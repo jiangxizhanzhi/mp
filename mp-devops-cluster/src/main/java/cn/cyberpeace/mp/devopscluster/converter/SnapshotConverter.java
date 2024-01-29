@@ -67,7 +67,7 @@ public class SnapshotConverter {
     }
 
     private static SnapshotConvertModel getSnapshotConvertModel(Snapshot item) {
-        var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
+        SnapshotConvertModel result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                 item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
         result.setImageName(item.getImageName());
         if (item.getExtInfo() != null) {

@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -74,7 +77,7 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<Boolean> checkSnapshotName(String csceneId, String csceneInstanceId, String nodeId, String name) {
-        var sameNameModel = csceneSnapshotMapper.first(new HumanCondition()
+        CsceneSnapshotModel sameNameModel = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getName, name)
@@ -107,7 +110,7 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<CsceneSnapshotModel> getCsceneSnapshotId(String snapshotId) {
-        var result = csceneSnapshotMapper.first(
+        CsceneSnapshotModel result = csceneSnapshotMapper.first(
                 new HumanCondition()
                         .filterEqual(CsceneSnapshotModel::getSnapshotId, snapshotId)
                         .filterEqual(CsceneSnapshotModel::getDeleted, false)
@@ -116,7 +119,7 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<CsceneSnapshotModel> getCsceneSnapshot(String csceneId, String nodeId, String snapshotResourceId) {
-        var result = csceneSnapshotMapper.first(new HumanCondition()
+        CsceneSnapshotModel result = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceId)
@@ -126,7 +129,7 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<List<CsceneSnapshotModel>> getCsceneSnapshot(String csceneId) {
-        var result = csceneSnapshotMapper.list(new HumanCondition()
+        List<CsceneSnapshotModel> result = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getDeleted, false)
         );
@@ -146,7 +149,7 @@ public class CsceneSnapshotService {
 
     @Transactional
     public ServiceResult<Boolean> deleteCsceneSnapshotRelativeInfo(String csceneId, String nodeId, String snapshotResourceId) {
-        var csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition().filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
+        CsceneSnapshotModel csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition().filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceId));
         if (csceneSnapshot != null) {
@@ -158,7 +161,7 @@ public class CsceneSnapshotService {
 
     @Transactional
     public ServiceResult<Boolean> deleteSnapshotRelativeInfoByResource(String snapshotResourceId) {
-        var csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition()
+        CsceneSnapshotModel csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceId));
         if (csceneSnapshot != null) {
             csceneSnapshotMapper.delete(csceneSnapshot.getId());
@@ -169,7 +172,7 @@ public class CsceneSnapshotService {
 
     public ServiceResult<Boolean> correctSnapshotRelativeInfo() {
         // 异常数据: cscene_snapshot 存在, 无resourceId
-        var noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
+        List<CsceneSnapshotModel> noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY)
                 .filterEqual(CsceneSnapshotModel::getDeleted, false));
         if (CollectionUtils.isNotEmpty(noResourceIds)) {
@@ -187,7 +190,7 @@ public class CsceneSnapshotService {
         }
 
         // 异常数据: cscene_snapshot 为删除状态
-        var deletedSnapshots = csceneSnapshotMapper.list(new HumanCondition()
+        List<CsceneSnapshotModel> deletedSnapshots = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getDeleted, true));
         if (CollectionUtils.isNotEmpty(deletedSnapshots)) {
             LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-5);
@@ -197,7 +200,7 @@ public class CsceneSnapshotService {
                 }
                 if (StringUtils.isNotEmpty(csceneSnapshot.getSnapshotId())) {
                     try {
-                        var sceneSnapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
+                        SceneElementSnapshotModel sceneSnapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
                         if (sceneSnapshot != null) {
                             this.deleteOneSnapshot(csceneSnapshot.getCsceneId(), sceneSnapshot, true);
                         }
@@ -212,7 +215,7 @@ public class CsceneSnapshotService {
 
 
     private boolean correctCsceneSnapshotResourceId(CsceneSnapshotModel csceneSnapshot) {
-        var result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
+        SceneElementSnapshotModel result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
         if (result != null) {
             // 如果scene_snapshot存在, name补充resourceId字段
             String resourceId = SnapshotAddressUtils.parseAddress(result.getAddress()).getSnapshotUuid();
@@ -225,15 +228,15 @@ public class CsceneSnapshotService {
                 SceneHandler sceneHandler = new SceneHandler(sceneInfo.getSceneId(), null, false, null);
                 CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 if (cloudPlugin != null) {
-                    var node = cloudPlugin.getElement(csceneSnapshot.getNodeId());
+                    CloudPluginSceneElementBO node = cloudPlugin.getElement(csceneSnapshot.getNodeId());
                     if (node != null && StringUtils.isNotEmpty(node.getImageUuid())) {
                         // 查询云平台的快照列表
                         DeviceSnapshotParam param = new DeviceSnapshotParam();
                         param.setDeviceUuid(node.getImageUuid());
-                        var snapShotResult = new Remote().getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
+                        DeviceSnapshotResultData snapShotResult = new Remote().getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
                         DeviceSnapshotResultData.Snapshot cloudSnapshot = null;
                         if (snapShotResult != null && CollectionUtils.isNotEmpty(snapShotResult.getItems())) {
-                            for (var m : snapShotResult.getItems()) {
+                            for (DeviceSnapshotResultData.Snapshot m : snapShotResult.getItems()) {
                                 if (csceneSnapshot.getName().equals(m.getName()) && !Boolean.TRUE.equals(m.getDeleted())) {
                                     cloudSnapshot = m;
                                 }
@@ -262,7 +265,7 @@ public class CsceneSnapshotService {
     }
 
     public void deleteSceneSnapshots(String csceneId) {
-        var csceneSnapshots = this.getCsceneSnapshot(csceneId).getSource();
+        List<CsceneSnapshotModel> csceneSnapshots = this.getCsceneSnapshot(csceneId).getSource();
         if (CollectionUtils.isEmpty(csceneSnapshots)) {
             return;
         }
@@ -271,7 +274,7 @@ public class CsceneSnapshotService {
             String snapshotId = csceneSnapshot.getSnapshotId();
             snapshotIds.add(snapshotId);
         }
-        var snapshots = sceneSnapshotService.getElementSnapshots(snapshotIds).getSource();
+        List<SceneElementSnapshotModel> snapshots = sceneSnapshotService.getElementSnapshots(snapshotIds).getSource();
         if (CollectionUtils.isNotEmpty(snapshots)) {
             Set<String> names = new HashSet<>();
             Set<String> sourceNames = new HashSet<>();
@@ -295,7 +298,7 @@ public class CsceneSnapshotService {
                     break;
                 } else {
                     times++;
-                    var snapshot = queue.poll();
+                    SceneElementSnapshotModel snapshot = queue.poll();
                     boolean deleteResult = false;
                     try {
                         deleteResult = this.deleteOneSnapshot(csceneId, snapshot, false);
@@ -303,7 +306,7 @@ public class CsceneSnapshotService {
                         log.error("faild to delete snapshot , id is {}", snapshot.getId(), e);
                     }
                     if (deleteResult) {
-                        var model = name2Model.get(snapshot.getSourceName());
+                        SceneElementSnapshotModel model = name2Model.get(snapshot.getSourceName());
                         if (model != null && !queueAdded.contains(model.getId())) {
                             queue.add(model);
                             queueAdded.add(model.getId());
@@ -316,17 +319,17 @@ public class CsceneSnapshotService {
 
     private boolean deleteOneSnapshot(String csceneId, SceneElementSnapshotModel snapshot, boolean correctMode) {
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
-        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
-        var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
-        var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
+        Map<String, List<DeviceReferCsceneStat>> configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
+        List<String> configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
+        SnapshotAddressUtils.SnapshotAddressInfo info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
         if (CollectionUtils.isNotEmpty(configNames)) {
             if (correctMode) {
                 this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             }
             return false;
         }
-        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image}).getSource();
-        var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
+        Map<String, List<DeviceReferCsceneInstanceStat>> instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image}).getSource();
+        List<String> instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
         if (CollectionUtils.isNotEmpty(instanceNames)) {
             if (correctMode) {
                 this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
@@ -343,7 +346,7 @@ public class CsceneSnapshotService {
         this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         boolean isDeleted = false;
         for (int i = 0; i < 3; i++) {
-            var elementModel = sceneElementMapper.list(new HumanCondition()
+            List<SceneElementModel> elementModel = sceneElementMapper.list(new HumanCondition()
                     .filterEqual(SceneElementModel::getScene, snapshot.getScene())
                     .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
             // 节点实例未删除完毕直接返回
@@ -387,7 +390,7 @@ public class CsceneSnapshotService {
             return null;
         }
         Set<String> names = new HashSet<>();
-        for (var used : usingList) {
+        for (T used : usingList) {
             if (names.size() < nameSize) {
                 names.add(getName.apply(used));
             }
@@ -396,14 +399,14 @@ public class CsceneSnapshotService {
     }
 
     private SceneInfo getSceneInfo(String csceneInstanceId) {
-        var condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
+        HumanCondition condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene, CsceneModel.class, CsceneModel::getId)
                 .currentLink(CsceneInstanceModel.class)
                 .filterEqual(CsceneInstanceModel::getId, csceneInstanceId)
                 .selectAs(CsceneInstanceModel::getScene, SceneInfo::getSceneId)
                 .currentLink(CsceneModel.class)
                 .selectAs(CsceneModel::getSceneConfig, SceneInfo::getSceneConfigId);
-        var list = csceneInstanceMapper.list(condition, SceneInfo.class);
+        List<SceneInfo> list = csceneInstanceMapper.list(condition, SceneInfo.class);
         if (CollectionUtils.isNotEmpty(list)) {
             return list.get(0);
         } else {
