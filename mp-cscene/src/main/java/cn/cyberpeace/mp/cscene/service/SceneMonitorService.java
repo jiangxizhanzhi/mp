@@ -103,8 +103,8 @@ public class SceneMonitorService {
      */
     public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
         log.info("query scene monitor info, sceneId:{}", sceneId);
-        var result = csceneInstanceService.getById(sceneId, null);
-        var csceneInstanceBO = result.getSource();
+        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
+        CsceneInstanceBO csceneInstanceBO = result.getSource();
 
         SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
         sceneMonitorInfo.setSceneAttr(csceneInstanceBO.getSceneAttr());
@@ -117,7 +117,7 @@ public class SceneMonitorService {
         LocalDateTime createTime = csceneInstanceBO.getCreateTime();
         if (Objects.nonNull(createTime)) {
             sceneMonitorInfo.setCreateTime(createTime);
-            var instanceModel = csceneInstanceService.get(sceneId).getSource().getObj();
+            CsceneInstanceModel instanceModel = csceneInstanceService.get(sceneId).getSource().getObj();
             if (Boolean.TRUE.equals(instanceModel.getDeleted())) {
                 Duration duration = Duration.between(createTime, instanceModel.getUpdateTime());
                 Long minutes = duration.toMinutes();
@@ -135,12 +135,12 @@ public class SceneMonitorService {
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
             return sceneMonitorInfo;
         }
-        var scene = csceneInstanceBO.getScene();
+        SceneDataBO scene = csceneInstanceBO.getScene();
 
 
-        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        ScenePluginDataBO scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 
-        var pluginElements = scenePluginDataBO.getElements();
+        Map<String, Map<String, Object>> pluginElements = scenePluginDataBO.getElements();
         if (CollectionUtil.isNotEmpty(pluginElements)) {
             for (Map.Entry<String, Map<String, Object>> entry : pluginElements.entrySet()) {
                 String k = entry.getKey();
