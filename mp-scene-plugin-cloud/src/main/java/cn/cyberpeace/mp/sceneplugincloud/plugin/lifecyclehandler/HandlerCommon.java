@@ -92,29 +92,6 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             String ip = accessModes.get(0).getAccessIp();
             Integer port = accessModes.get(0).getAccessPort();
             String protocol = accessModes.get(0).getProtocol();
-            Runnable checkSuccessCallback = () -> {
-                accessModes.forEach(accessMode -> accessMode.setAvailable(true));
-                getPluginHandler().asyncAckElementChanged(nodeId, true);
-                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
-                }
-            };
-
-            Runnable checkTimeoutCallback = () -> {
-                accessModes.forEach(accessMode -> accessMode.setAvailable(true));
-                String sceneId = getPluginHandler().getSceneHandler().getSceneId();
-                SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-                SceneElementBO dbElement = sceneHandler.getElement(nodeId);
-                if (dbElement != null && dbElement.getEvent() == getPluginHandler().getSrcElement(nodeId).getEvent()) {
-                    log.info("check access mode timeout , update access info , sceneId {},nodeId {}", sceneId, nodeId);
-                    getPluginHandler().asyncAckElementChanged(nodeId, true);
-                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                        getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
-                    }
-                } else {
-                    log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
-                }
-            };
 
             if (port == null || port.compareTo(0) <= 0) {
                 TaskCommon.executeTask(() -> {
