@@ -6,71 +6,28 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
-import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
-import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskFlowConf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskIpv4Conf;
-import cn.cyberpeace.mp.flow.bo.FlowTaskStart;
-import cn.cyberpeace.mp.flow.bo.TaskSipBO;
+import cn.cyberpeace.mp.flow.bo.*;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
-import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
-import cn.cyberpeace.mp.flow.enums.PortTypeEnum;
-import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
-import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
-import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
-import cn.cyberpeace.mp.flow.model.FlowPortModel;
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.enums.*;
+import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
-import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
-import cn.cyberpeace.mp.flow.request.AddPcapRequest;
-import cn.cyberpeace.mp.flow.request.AddScriptsRequest;
-import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
-import cn.cyberpeace.mp.flow.request.AddVmRequest;
-import cn.cyberpeace.mp.flow.request.BatchStartFlowTaskRequest;
-import cn.cyberpeace.mp.flow.request.BatchStopFlowTaskRequest;
-import cn.cyberpeace.mp.flow.request.StartFlowTaskRequest;
-import cn.cyberpeace.mp.flow.request.StopFlowTaskRequest;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
-import cn.cyberpeace.mp.flow.service.FlowPortService;
-import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
-import cn.cyberpeace.mp.flow.service.FlowTaskConfService;
-import cn.cyberpeace.mp.flow.service.FlowTaskPortService;
-import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
-import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
-import cn.cyberpeace.mp.flow.util.CommonUtil;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
-import cn.cyberpeace.mp.flow.util.FlowWebSocketClientUtil;
-import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
-import cn.cyberpeace.mp.flow.util.ResponseUtils;
-import cn.cyberpeace.mp.flow.util.SshUtil;
-import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
+import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.service.*;
+import cn.cyberpeace.mp.flow.util.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
-import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -81,12 +38,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.*;
 
 /**
  * @Description: 流量任务异步执行服务类
@@ -1264,317 +1216,6 @@ public class AsyncPlatFlowTaskService {
             log.error("delete flow file error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
-
-    /**
-     * 2秒一次轮询任务状态，当任务结束时执行回调方法
-     * @param taskId
-     * @param flowActuatorModel
-     * @param callback
-     * @param errorCallback
-     * @throws InterruptedException
-     */
-    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Consumer<String> errorCallback) {
-        String host = flowActuatorModel.getIp();
-        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(flowTaskModel)) {
-            log.error("flowTaskModel is empty for [{}]", taskId);
-            return;
-        }
-
-        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询24小时
-        boolean flag = CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000,
-                1000 * 60 * 60 * 24, () -> refreshTaskStatusStopCheck(flowTaskModel.getId()),
-                1, "CheckTaskJobStopped");
-        if (flag) {
-            taskJobStoppedCallback(flowTaskModel.getId(), callback);
-        } else {
-            log.error("task job running status get failed：[{}]", taskId);
-        }
-    }
-
-
-    /**
-     * 2秒一次批量轮询任务状态，当所有任务结束时执行回调方法
-     * @param flowTaskModels
-     * @param flowActuatorModel
-     * @param consumer
-     */
-    public void batchRefreshTaskStatus(List<FlowTaskModel> flowTaskModels, FlowActuatorModel flowActuatorModel, Consumer<BatchActuatorCallbackResponse> consumer) {
-        String host = flowActuatorModel.getIp();
-        // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询60分钟
-        boolean flag = CheckUtils.loopCheck(() -> batchCheckTaskJobStopped(flowTaskModels, host, consumer), 2000,
-                1000 * 60 * 60, null, 1, "BatchCheckTaskJobStopped");
-        if (!flag) {
-            log.error("batch get task job running status failed");
-        }
-    }
-
-    /**
-     * 刷新任务状态停止校验方法
-     * @param taskId
-     * @return
-     */
-    private Boolean refreshTaskStatusStopCheck(String taskId) {
-        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(flowTaskModel)) {
-            log.error("flowTaskModel is empty for [{}]", taskId);
-            return false;
-        }
-
-        return TaskStatusEnum.STOPED.toValue() == flowTaskModel.getTaskStatus();
-    }
-
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
-    private void taskJobStoppedCallback(String taskId, Runnable call) {
-        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(oldFlowTaskModel)) {
-            log.info("flowTaskModel is empty for taskId:{}", taskId);
-            return;
-        }
-
-        FlowTaskModel flowTaskModel = new FlowTaskModel();
-        flowTaskModel.setId(taskId);
-        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
-        flowTaskModel.setUpdateTime(LocalDateTime.now());
-
-        // 更新本地任务状态
-        flowTaskMapper.updateTaskInfo(flowTaskModel);
-
-        // 执行回调通知方法
-        if (Objects.nonNull(call)) {
-            log.info("start to run callback function");
-            call.run();
-        }
-
-        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
-            String actuatorId = oldFlowTaskModel.getActuatorId();
-            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
-            if (Objects.isNull(flowActuatorModel)) {
-                log.error("del ports failed for actuator is empty");
-                return;
-            }
-
-            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
-            this.delPorts(flowActuatorModel, flowPortIds);
-
-            flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
-            flowTaskMapper.updateTaskInfo(flowTaskModel);
-        }
-
-    }
-
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
-    private void jobStoppedCallback(String taskId, Consumer<String> call, String errMsg) {
-        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(oldFlowTaskModel)) {
-            log.info("flowTaskModel is empty for taskId:{}", taskId);
-            return;
-        }
-
-        FlowTaskModel flowTaskModel = new FlowTaskModel();
-        flowTaskModel.setId(taskId);
-        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
-        flowTaskModel.setUpdateTime(LocalDateTime.now());
-
-        // 更新本地任务状态
-        flowTaskMapper.updateTaskInfo(flowTaskModel);
-
-        // 执行回调通知方法
-        if (Objects.nonNull(call)) {
-            log.info("start to run callback function");
-            call.accept(errMsg);
-        }
-
-        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
-            String actuatorId = oldFlowTaskModel.getActuatorId();
-            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
-            if (Objects.isNull(flowActuatorModel)) {
-                log.error("del ports failed for actuator is empty");
-                return;
-            }
-
-            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
-            this.delPorts(flowActuatorModel, flowPortIds);
-
-            flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
-            flowTaskMapper.updateTaskInfo(flowTaskModel);
-        }
-
-    }
-
-    /**
-     * 校验任务状态是否已停止
-     * @param flowTaskModel
-     * @param hostUrl
-     * @param errorCallback
-     * @return
-     */
-    private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Consumer<String> errorCallback) {
-        Boolean result = false;
-        if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
-            log.warn("no thirdTaskIds to query");
-            return result;
-        }
-
-        if (StringUtils.isBlank(hostUrl)) {
-            log.error("hostUrl is empty");
-            return result;
-        }
-
-        try {
-            JSONObject statusObj = new JSONObject();
-            JSONArray statusArray = new JSONArray();
-            statusArray.addAll(Collections.singletonList(flowTaskModel.getThirdTaskId()));
-            statusObj.put("uuids", statusArray);
-
-            String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
-                    statusObj.toJSONString());
-            JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
-            log.info("query task status response:{}", statusRspObj.toJSONString());
-            if (ResponseUtils.checkResponse(statusRspObj)) {
-                JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    Integer taskStatus = rows.getJSONObject(0).getInteger("status");
-                    // 任务状态为已停止或者停止中，表示任务运行结束
-                    if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        // 判断任务是否运行成功
-                        Integer isSuccess = rows.getJSONObject(0).getInteger("result");
-                        if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
-                            log.info("flow execute success:[{}]", flowTaskModel.getId());
-                            result = true;
-                        } else {
-                            FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
-                            String errMsg = rows.getJSONObject(0).getString("result_detail");
-                            if (Objects.nonNull(flowInfoModel) && flowInfoModel.getResourceType() == ResourceTypeEnum.SCRIPT.toValue()) {
-                                // 脚本执行报错，添加前缀
-                                errMsg = MessageCommonUtil.convertMessage("scriptFlowError").concat(errMsg).replace("\\n\'", "");
-                            }
-                            log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
-                            jobStoppedCallback(flowTaskModel.getId(), errorCallback, errMsg);
-                        }
-
-                    }
-                }
-            } else {
-                log.error("query task status failed");
-            }
-        } catch (Exception e) {
-            log.error("query task status error", e);
-        }
-
-        return result;
-    }
-
-    /**
-     * 批量校验任务状态是否已停止
-     * @param flowTaskModels
-     * @param hostUrl
-     * @param consumer
-     * @return
-     */
-    private Boolean batchCheckTaskJobStopped(List<FlowTaskModel> flowTaskModels, String hostUrl, Consumer<BatchActuatorCallbackResponse> consumer) {
-        if (StringUtils.isBlank(hostUrl)) {
-            log.error("hostUrl is empty");
-            return false;
-        }
-
-        List<String> taskIds = new ArrayList<>();
-        for (FlowTaskModel model : flowTaskModels) {
-            String id = model.getId();
-            taskIds.add(id);
-        }
-        List<String> thirdTaskIds = new ArrayList<>();
-        for (FlowTaskModel flowTaskModel : flowTaskModels) {
-            String taskId = flowTaskModel.getThirdTaskId();
-            thirdTaskIds.add(taskId);
-        }
-        try {
-            JSONObject statusObj = new JSONObject();
-            JSONArray statusArray = new JSONArray();
-            statusArray.addAll(thirdTaskIds);
-            statusObj.put("uuids", statusArray);
-
-            String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
-                    statusObj.toJSONString());
-            JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
-            log.info("batch query task status response:{}", statusRspObj.toJSONString());
-            if (ResponseUtils.checkResponse(statusRspObj)) {
-                JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    // 校验是否有运行中的任务
-                    long count = 0L;
-                    for (Object o : rows) {
-                        if (TaskStatusEnum.INIT.toValue() == ((JSONObject) o).getInteger("status")
-                                || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) o).getInteger("status")) {
-                            count++;
-                        }
-                    }
-                    if (count > 0) {
-                        log.info("batch actuator task is still running for hostUrl: {}", hostUrl);
-                        return false;
-                    }
-
-                    List<FlowTaskModel> successTaskModels = new ArrayList<>();
-                    List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                    for (Object row : rows) {
-                        JSONObject resultObj = (JSONObject) row;
-                        String thirdTaskId = resultObj.getString("uuid");
-                        Optional<FlowTaskModel> found = Optional.empty();
-                        for (FlowTaskModel task : flowTaskModels) {
-                            if (Objects.equals(task.getThirdTaskId(), thirdTaskId)) {
-                                found = Optional.of(task);
-                                break;
-                            }
-                        }
-                        FlowTaskModel taskModel = found.get();
-
-                        // 判断任务是否运行成功
-                        Integer isSuccess = resultObj.getInteger("result");
-                        if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
-                            log.info("flow execute success:[{}]", taskModel.getId());
-                            successTaskModels.add(taskModel);
-                        } else {
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
-                            log.info("flow execute error:[{}]", taskModel.getId());
-                            errorTaskModels.add(taskModel);
-                        }
-                    }
-
-                    // 批量更新流量任务状态为停止
-                    flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);
-
-                    if (Objects.nonNull(consumer)) {
-                        BatchActuatorCallbackResponse callbackResponse = new BatchActuatorCallbackResponse();
-                        callbackResponse.setSuccessTaskModels(successTaskModels);
-                        callbackResponse.setErrorTaskModels(errorTaskModels);
-                        consumer.accept(callbackResponse);
-                    }
-
-                    return true;
-                }
-            } else {
-                log.error("batch query task status failed");
-            }
-        } catch (Exception e) {
-            log.error("batch query task status error", e);
-        }
-
-        return false;
-    }
-
 
     /**
      * 上传流量文件

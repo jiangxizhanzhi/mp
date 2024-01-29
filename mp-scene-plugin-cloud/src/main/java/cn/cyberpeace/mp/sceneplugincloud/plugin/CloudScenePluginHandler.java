@@ -46,6 +46,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -341,6 +342,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             element.setImage(image);
         }
         new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
+
+        // 后处理，刷新场景缓存
+        String sceneId = getSceneHandler().getSceneId();
+        SceneInstanceLinkCacheUtil.refresh(sceneId);
     }
 
     @Override

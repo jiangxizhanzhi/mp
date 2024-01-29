@@ -264,9 +264,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.recreateElement(sceneId, nodeId, image, generateSceneContext(), () -> {
-            SceneInstanceLinkCacheUtil.refresh(sceneId);
-        }).getSource();
+        return this.sceneService.recreateElement(sceneId, nodeId, image, generateSceneContext()).getSource();
     }
 
     public boolean modifyElement(ElementModifyBO element) {

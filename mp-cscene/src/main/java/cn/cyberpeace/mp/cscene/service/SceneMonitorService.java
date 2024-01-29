@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.job.SceneHostStateReportScheduleService;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -102,8 +103,8 @@ public class SceneMonitorService {
      */
     public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
         log.info("query scene monitor info, sceneId:{}", sceneId);
-        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
-        CsceneInstanceBO csceneInstanceBO = result.getSource();
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
 
         SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
         sceneMonitorInfo.setSceneAttr(csceneInstanceBO.getSceneAttr());
@@ -116,7 +117,7 @@ public class SceneMonitorService {
         LocalDateTime createTime = csceneInstanceBO.getCreateTime();
         if (Objects.nonNull(createTime)) {
             sceneMonitorInfo.setCreateTime(createTime);
-            CsceneInstanceModel instanceModel = csceneInstanceService.get(sceneId).getSource().getObj();
+            var instanceModel = csceneInstanceService.get(sceneId).getSource().getObj();
             if (Boolean.TRUE.equals(instanceModel.getDeleted())) {
                 Duration duration = Duration.between(createTime, instanceModel.getUpdateTime());
                 Long minutes = duration.toMinutes();
@@ -134,12 +135,12 @@ public class SceneMonitorService {
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
             return sceneMonitorInfo;
         }
-        SceneDataBO scene = csceneInstanceBO.getScene();
+        var scene = csceneInstanceBO.getScene();
 
 
-        ScenePluginDataBO scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 
-        Map<String, Map<String, Object>> pluginElements = scenePluginDataBO.getElements();
+        var pluginElements = scenePluginDataBO.getElements();
         if (CollectionUtil.isNotEmpty(pluginElements)) {
             for (Map.Entry<String, Map<String, Object>> entry : pluginElements.entrySet()) {
                 String k = entry.getKey();

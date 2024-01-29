@@ -3,17 +3,16 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
@@ -33,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -166,7 +163,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp,
-                             boolean async, Runnable asyncCallback) {
+                             boolean async) {
         String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             return startFlow(flow);
@@ -233,7 +230,13 @@ public class SceneHandlerUtils {
                 flowTaskId = flowTaskTaskModels.get(0).getId();
             }
             flow.setTaskId(flowTaskId);
-            return startFlow(flow);
+            boolean res = startFlow(flow);
+            SceneHandler handler = pluginHandler.getSceneHandler();
+            handler.asyncAckElementChanged(flowElement.getSrcElement().getId(), true, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                handler.updateSceneElementWithPlugins(flowElement.getSrcElement().getId());
+            }
+            return res;
         };
         if (async) {
             TaskCommon.executeTask(() -> {
@@ -241,9 +244,6 @@ public class SceneHandlerUtils {
                     start.call();
                 } catch (Exception e) {
                     log.info("Start flow error: ", e);
-                }
-                if (asyncCallback != null) {
-                    asyncCallback.run();
                 }
             });
             return true;

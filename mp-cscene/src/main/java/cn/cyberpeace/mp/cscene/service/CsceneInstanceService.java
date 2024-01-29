@@ -40,6 +40,7 @@ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.job.SceneHostStateReportScheduleService;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;

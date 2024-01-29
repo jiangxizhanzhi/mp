@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.flow.util;
 
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
-import java.util.function.Consumer;
 
 /**
  * @Description: 流量缓存工具类

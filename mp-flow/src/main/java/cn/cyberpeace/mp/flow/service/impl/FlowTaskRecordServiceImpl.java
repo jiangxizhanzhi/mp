@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
+import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
 import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
@@ -280,7 +280,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         }
 
         // 任务回调处理
-        this.taskCallback(flowTaskTaskModel, msg);
+        this.flowRecordPostProcess(flowTaskTaskModel, msg);
         log.info("FlowTaskRecordServiceImpl.syncRecord end.");
     }
 
@@ -289,9 +289,9 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
      * @param flowTaskTaskModel
      * @param msg
      */
-    private void taskCallback(FlowTaskTaskModel flowTaskTaskModel, String msg) {
+    private void flowRecordPostProcess(FlowTaskTaskModel flowTaskTaskModel, String msg) {
         String taskId = flowTaskTaskModel.getId();
-        log.info("call task runnable for: {}", taskId);
+        log.info("call task post process for: {}", taskId);
         flowPostService.onFlowTaskOver(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId());
 
         if (StringUtils.isNotBlank(msg)) {
@@ -318,7 +318,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             int runningCount = (int) count;
             if (runningCount == 0) {
                 // 回调参数封装
-                BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
+                BatchActuatorResponse batchActuatorResponse = new BatchActuatorResponse();
                 List<FlowTaskModel> successTaskModels = new ArrayList<>();
                 List<FlowTaskModel> errorTaskModels = new ArrayList<>();
                 for (FlowTaskTaskModel taskTaskModel : taskTaskModels) {
@@ -331,13 +331,13 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
                         errorTaskModels.add(flowTaskModel);
                     }
                 }
-                batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
-                batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
+                batchActuatorResponse.setSuccessTaskModels(successTaskModels);
+                batchActuatorResponse.setErrorTaskModels(errorTaskModels);
 
-                log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
-                flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorCallbackResponse);
+                log.info("batch tasks accept response: {}", batchActuatorResponse);
+                flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorResponse);
 
-                log.info("batch tasks run runnable");
+                log.info("batch tasks run onStop");
                 flowPostService.onStopTaskNode(sceneId, nodeId);
             }
         } else {

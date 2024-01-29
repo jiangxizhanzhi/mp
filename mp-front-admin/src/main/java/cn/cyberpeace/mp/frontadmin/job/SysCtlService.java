@@ -1,8 +1,9 @@
-package cn.cyberpeace.mp.frontadmin.service.sys;
+package cn.cyberpeace.mp.frontadmin.job;
 
 import cn.cyberpeace.mp.auth.util.EncryptUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysActivCtlService;
 import cn.cyberpeace.mp.frontadmin.util.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

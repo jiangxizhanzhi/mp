@@ -339,13 +339,11 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, SceneContextBO context,
-                                                  Runnable callback) {
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
         ElementTaskPool.getInstance().executeTask(() -> {
             sceneHandler.recreateElement(nodeId,image);
-            callback.run();
         });
         return new ServiceResult<>(true);
     }

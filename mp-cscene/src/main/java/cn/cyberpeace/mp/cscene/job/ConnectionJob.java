@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.service.cron;
+package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;

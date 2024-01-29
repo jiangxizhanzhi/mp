@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.frontadmin.service.cron;
+package cn.cyberpeace.mp.frontadmin.job;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;

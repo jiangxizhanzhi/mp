@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.flow.service.job;
+package cn.cyberpeace.mp.flow.job;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;

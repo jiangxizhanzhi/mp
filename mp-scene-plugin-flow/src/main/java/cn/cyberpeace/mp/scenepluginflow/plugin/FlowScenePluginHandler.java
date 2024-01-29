@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
+import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
@@ -29,6 +30,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
     private PrepareHandler prepareHandler ;
+
+    @Resource
+    private FlowPostService postService;
 
     @Override
     public void correctData() {
@@ -220,25 +225,11 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
-        boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, async, () -> {
-            asyncAckElementChanged(nodeId, true);
-            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                getSceneHandler().updateSceneElementWithPlugins(nodeId);
-            }
-        });
-        asyncAckElementChanged(nodeId, true);
-        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-            getSceneHandler().updateSceneElementWithPlugins(nodeId);
-        }
+        boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, async);
+        postService.onStopTaskNode(getSourceSceneId(), nodeId);
         return flag;
     }
 
-    private void stopCallBack(String nodeId){
-        getSceneHandler().asyncAckElementChanged(nodeId, true, true);
-        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-            getSceneHandler().updateSceneElementWithPlugins(nodeId);
-        }
-    }
     public boolean stopFlow(String nodeId, String flowId) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {

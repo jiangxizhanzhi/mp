@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.common.TimeCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -10,15 +9,18 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.*;
+import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
+import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.BatchDeleteFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
@@ -27,7 +29,6 @@ import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
-import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSON;
@@ -41,11 +42,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 流量任务service
@@ -482,202 +482,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         return false;
     }
 
-
-    /**
-     * 执行流量任务
-     *
-     * @param flowTaskId
-     * @param taskAction 1 start， 2 stop, 3 reset
-     * @param callback 回调方法
-     * @param errorCallback 执行错误时回调方法
-     * @return
-     */
-    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Consumer<String> errorCallback) {
-        // 流量任务存在校验
-        ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
-        if (Objects.isNull(flowTaskResult)) {
-            log.error("flow task not exist:{}", flowTaskId);
-            return ResultCommon.fail(FlowErrorCode.TASK_NOT_EXIST);
-        }
-        FlowTaskModel flowTaskModel = flowTaskResult.getObj();
-
-        // 判断调用哪个流量执行器
-        if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-            log.info("=========== Actuator trex flow end ===============");
-            return this.actuatorTrex(flowTaskModel, taskAction, callback, errorCallback);
-        } else {
-            log.info("=========== Actuator other flow end ===============");
-            return ResultCommon.fail(FlowErrorCode.NO_ACTUATOR_TO_USE);
-        }
-    }
-
-    /**
-     * 调用Trex流量执行器
-     * @param flowTaskModel
-     * @param taskAction    1 start， 2 stop, 3 reset
-     * @param callback  流量停止回调方法
-     * @param errorCallback 流量执行异常回调方法
-     * @return
-     */
-    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Consumer<String> errorCallback) {
-        FlowInfoModel flowInfoModel = new FlowInfoModel();
-        // 是否自定义流量
-        boolean isCustom = false;
-        if (Objects.equals(CustomFlagEnum.NO.toValue(), flowTaskModel.getCustomFlag())) {
-            // 流量信息存在校验
-            ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
-            if (Objects.isNull(flowInfoResult)) {
-                log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-                return ResultCommon.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
-            }
-            flowInfoModel = flowInfoResult.getObj();
-        } else {
-            isCustom = true;
-            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
-        }
-
-        // 流量执行器信息查询
-        String actuatorId = flowTaskModel.getActuatorId();
-        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
-        if (Objects.isNull(flowActuatorModel)) {
-            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-        }
-
-        ObjResult<FlowPortModel> portObjResult = flowPortService.get(flowTaskModel.getFlowPortId()).getSource();
-        if (Objects.isNull(portObjResult)) {
-            if (Objects.equals(CustomFlagEnum.YES.toValue(), flowTaskModel.getCustomFlag())) {
-                log.error("custom flow can only run once");
-                return ResultCommon.fail(FlowErrorCode.RECREATE_CUSTOM_FLOW_ERROR);
-            } else {
-                log.error("flow port info is empty");
-                return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-            }
-        }
-        FlowPortModel flowPortModel = portObjResult.asResult();
-
-        String thirdTaskId = flowTaskModel.getThirdTaskId();
-        if (StringUtils.isNotBlank(thirdTaskId)) {
-            // 流量发生平台已经创建过任务，并且是启动任务，需要判断当前任务状态
-            if (TaskActionEnum.START.toValue() == taskAction) {
-                JSONArray rows = this.queryTaskStatus(Collections.singletonList(thirdTaskId), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
-                if (Objects.nonNull(rows)) {
-                    int taskStatus = rows.getJSONObject(0).getInteger("status");
-                    if (TaskStatusEnum.RUNNING.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        return ResultCommon.fail(FlowErrorCode.TASK_IS_RUNNING);
-                    }
-                } else {
-                    log.error("query task status failed");
-                    return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-                }
-            }
-        } else {
-            // 流量平台未创建过任务，并且是停止任务，提示错误
-            if (TaskActionEnum.STOP.toValue() == taskAction) {
-                log.error("third task not exist");
-                return ResultCommon.fail(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
-            }
-        }
-
-        // 执行任务地址
-        String urlPath = "";
-        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-            if (isCustom) {
-                // 自定义流量
-                urlPath = "/tasks/custom/action";
-            } else {
-                // 背景流量
-                urlPath = "/tasks/action";
-            }
-
-            // 判断是否关联流量平台任务，没有则新增
-            if (StringUtils.isBlank(thirdTaskId)) {
-                // 构建新增app任务请求
-                AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
-                try {
-                    String addAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
-                            JsonUtils.snakeStringify(appTaskRequest));
-                    JSONObject addAppTaskObj = JSONObject.parseObject(addAppTaskRsp);
-                    log.info("add app task response:{}", addAppTaskObj.toJSONString());
-                    if (ResponseUtils.checkResponse(addAppTaskObj)) {
-                        // 第三方任务id
-                        thirdTaskId = addAppTaskObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
-
-                    } else {
-                        log.error("add app task failed");
-                        return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-                    }
-                } catch (Exception e) {
-                    log.error("add app task error, {}", ExceptionUtils.getStackTrace(e));
-                    return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-                }
-            }
-        } else {
-            urlPath = "/tasks/standards/action";
-
-            // 判断是否关联流量平台任务，没有则新增
-            if (StringUtils.isBlank(thirdTaskId)) {
-                // 封装请求参数
-                AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
-                standTaskRequest.setPort(flowPortModel.getServerMac());
-
-                try {
-                    String addStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
-                            JsonUtils.snakeStringify(standTaskRequest));
-                    JSONObject addStandTaskObj = JSONObject.parseObject(addStandTaskRsp);
-                    log.info("add standard task response:{}", addStandTaskObj.toJSONString());
-                    if (ResponseUtils.checkResponse(addStandTaskObj)) {
-                        // 第三方任务id
-                        thirdTaskId = addStandTaskObj.getString(BaseConstants.STR_DATA);
-                    } else {
-                        log.error("add standard task failed");
-                        return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-                    }
-                } catch (Exception e) {
-                    log.error("add standard task error, {}", ExceptionUtils.getStackTrace(e));
-                    return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-                }
-            }
-        }
-
-        int taskStatus = TaskStatusEnum.RUNNING.toValue();
-        // 构建执行任务请求
-        FlowExecuteRequest executeRequest = new FlowExecuteRequest(flowTaskModel);
-        executeRequest.setTaskId(flowTaskModel.getId());
-        executeRequest.setAction(taskAction);
-        executeRequest.setUuid(thirdTaskId);
-        executeRequest.setUrlPath(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath);
-        if (TaskActionEnum.STOP.toValue() == taskAction) {
-            // 停止任务时，执行次数设为1
-            executeRequest.setCount(1);
-            taskStatus = TaskStatusEnum.STOPING.toValue();
-        }
-
-        // 调用定时任务处理
-        FlowExecuteScheduleUtil util = FlowExecuteScheduleUtil.builder().build();
-        util.setFlowBaseModel(executeRequest);
-        util.setMethod(flowExecuteScheduleMethod);
-        util.schedule();
-
-        // 更新第三方任务id和任务状态
-        FlowTaskModel updateTaskModel = new FlowTaskModel();
-        updateTaskModel.setId(flowTaskModel.getId());
-        updateTaskModel.setThirdTaskId(thirdTaskId);
-        updateTaskModel.setTaskStatus(taskStatus);
-        updateTaskModel.setUpdateTime(LocalDateTime.now());
-        this.updateFlowTaskDetail(updateTaskModel);
-
-        TaskCommon.executeTask(() -> {
-            try {
-                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, callback, errorCallback);
-            } catch (Exception e) {
-                log.info("refresh task status error: ", e);
-            }
-        });
-
-
-        return ResultCommon.success(true);
-    }
-
     /**
      * 查询流量执行记录
      * @param taskId
@@ -914,108 +718,4 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     public List<FlowTaskModel> batchSavePlatFlowTask(List<AddFlowTaskRequest> addTaskRequestList) {
         return asyncPlatFlowTaskService.batchSavePlatFlowTask(addTaskRequestList);
     }
-
-    /**
-     * 批量执行流量任务
-     * @param request
-     * @return
-     */
-    public ServiceResult<Boolean> batchActuator(BatchActuatorTaskRequest request) {
-        // 流量任务存在校验
-        QueryParams queryParams = new QueryParams();
-        queryParams.setIds(request.getTaskIds().toArray(new String[0]));
-        ListObjServiceResult<FlowTaskModel> objServiceResult = list(queryParams);
-        if (Objects.isNull(objServiceResult) || !Objects.equals(request.getTaskIds().size(), objServiceResult.getSource().getTotal())) {
-            log.error("not all flow task exist");
-            return ResultCommon.fail(FlowErrorCode.TASK_NOT_EXIST);
-        }
-
-        List<FlowTaskModel> flowTaskModels = objServiceResult.getSource().getObjs();
-        if (TaskActionEnum.STOP.toValue() != request.getTaskAction()) {
-            // 流量任务状态校验
-            List<String> runningTaskIds = new ArrayList<>();
-            for (FlowTaskModel flowTaskModel : flowTaskModels) {
-                if (flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()) {
-                    String id = flowTaskModel.getId();
-                    runningTaskIds.add(id);
-                }
-            }
-            if (CollectionUtils.isNotEmpty(runningTaskIds)) {
-                log.error("tasks [{}] are running, can not batch actuator tasks", runningTaskIds);
-                return ResultCommon.fail(FlowErrorCode.TASK_IS_RUNNING);
-            }
-        }
-
-        // 流量执行器信息查询
-        String actuatorId = flowTaskModels.get(0).getActuatorId();
-        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
-        if (Objects.isNull(flowActuatorModel)) {
-            return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-        }
-
-        // 按顺序封装第三方任务id集合
-        List<String> thirdTaskIds = new ArrayList<>();
-        for (String taskId : request.getTaskIds()) {
-            Optional<FlowTaskModel> optionalFlowTaskModel =
-                    Optional.empty();
-            for (FlowTaskModel taskModel : flowTaskModels) {
-                if (taskId.equals(taskModel.getId())) {
-                    optionalFlowTaskModel = Optional.of(taskModel);
-                    break;
-                }
-            }
-            if (optionalFlowTaskModel.isPresent()) {
-                FlowTaskModel sortTaskModel = optionalFlowTaskModel.get();
-                thirdTaskIds.add(sortTaskModel.getThirdTaskId());
-            }
-        }
-        log.info("Batch actuator flow thirdTaskIds: {}", thirdTaskIds);
-        // 任务id集合
-        List<String> taskIds = new ArrayList<>();
-        Set<String> uniqueValues = new HashSet<>();
-        for (FlowTaskModel flowTaskModel : flowTaskModels) {
-            String id = flowTaskModel.getId();
-            if (uniqueValues.add(id)) {
-                taskIds.add(id);
-            }
-        }
-
-        // 执行任务参数
-        JSONObject object = new JSONObject();
-        object.put("uuids", thirdTaskIds);
-        object.put("action", request.getTaskAction());
-        object.put("run_type", request.getRunType());
-        object.put("node_id", flowTaskModels.get(0).getNodeId());
-        object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
-
-        try {
-            // 执行任务地址
-            String urlPath = CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/batch/action";
-            String batchActuatorRsp = HttpUtils.sendPost(urlPath, JSONObject.toJSONString(object));
-            JSONObject batchActuatorObj = JSONObject.parseObject(batchActuatorRsp);
-            log.info("batch actuator tasks response:{}", batchActuatorObj.toJSONString());
-            if (ResponseUtils.checkResponse(batchActuatorObj)) {
-                log.info("batch actuator tasks success");
-                // 流量任务状态和执行次数更新
-                this.batchUpdateTaskStatus(TaskStatusEnum.RUNNING.toValue(), true, taskIds);
-            } else {
-                log.error("batch actuator tasks failed");
-                return ResultCommon.success(false);
-            }
-        } catch (IOException e) {
-            log.error("batch actuator tasks error, {}", ExceptionUtils.getStackTrace(e));
-            return ResultCommon.success(false);
-        }
-
-        TaskCommon.executeTask(() -> {
-            try {
-                // 批量轮询任务状态
-                asyncPlatFlowTaskService.batchRefreshTaskStatus(flowTaskModels, flowActuatorModel, request.getCallbackConsumer());
-            } catch (Exception e) {
-                log.info("refresh task status error: ", e);
-            }
-        });
-        return ResultCommon.success(true);
-    }
-
 }

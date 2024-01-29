@@ -74,13 +74,6 @@ public class NetworkUtils {
         }
     }
 
-    public static boolean probePort(String host, int port, Runnable callback, Runnable timeoutCallback) {
-        return probePort(host, port, 0);
-    }
-
-    public static boolean probePort(String host, int port, int timeout) {
-        return probePort(host, port, 0, 0, timeout, null, 0);
-    }
 
     public static boolean probePort(String protocol, String host, int port) {
         return probePort(protocol, host, port, 0, 0, 0, null, 0);

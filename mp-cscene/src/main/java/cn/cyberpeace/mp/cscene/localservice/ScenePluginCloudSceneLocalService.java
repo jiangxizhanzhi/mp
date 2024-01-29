@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.cscene.localservice;
 import cn.cyberpeace.mp.base.annotation.LocalCallFunc;
 import cn.cyberpeace.mp.base.annotation.LocalCallServer;
 import cn.cyberpeace.mp.cscene.service.ScenePluginCloudSceneCronService;
-import cn.cyberpeace.mp.cscene.service.cron.CsceneCronJob;
+import cn.cyberpeace.mp.cscene.job.CsceneCronJob;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
