@@ -37,7 +37,7 @@ public class SceneImportController {
     @Resource
     private ResourceCenterService resourceCenterService;
 
-    @ApiOperation("导入资源")
+    @ApiOperation("场景导入")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_resource_center")
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {

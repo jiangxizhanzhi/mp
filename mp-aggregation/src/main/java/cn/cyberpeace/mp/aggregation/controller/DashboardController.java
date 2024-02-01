@@ -54,7 +54,7 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @ApiOperation("用户日活跃情况")
+    @ApiOperation("用户日活统计")
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
         DailyUserActivityResponse response = dashboardService.dailyUserActivity();
@@ -68,7 +68,11 @@ public class DashboardController {
         return ResultCommon.success(response);
     }
 
-
+    /**
+     * (mock接口,不要使用)
+     * @return
+     */
+    @Deprecated
     @ApiOperation("资源使用情况")
     @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
