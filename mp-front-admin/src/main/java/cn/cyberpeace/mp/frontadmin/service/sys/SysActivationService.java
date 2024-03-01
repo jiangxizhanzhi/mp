@@ -43,8 +43,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +52,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+
 
 /**
  * @Description: 系统激活相关service
@@ -645,7 +645,7 @@ public class SysActivationService {
         updateSysActivCtlModel.setSuffix(newSuffix);
 
 
-        long delayLifeTime = Duration.of(activationRequest.getDeadline(), ChronoUnit.MONTHS).toSeconds();
+        long delayLifeTime = (31556952L / 12) * activationRequest.getDeadline();
         long oldLifeTime = Long.parseLong(Optional.ofNullable(EncryptUtils.desDecrypt(oldSysActivCtlModel.getSysLifetime())).orElse("0"));
         long updateLifeTime = delayLifeTime + oldLifeTime;
         updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(updateLifeTime)));
