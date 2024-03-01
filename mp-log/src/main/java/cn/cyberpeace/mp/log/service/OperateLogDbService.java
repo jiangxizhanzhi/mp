@@ -28,4 +28,5 @@ public interface OperateLogDbService {
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale);
 
     List<OperateLogSqlModel> getLogs(String[] ids, Integer module, Integer type);
+
 }

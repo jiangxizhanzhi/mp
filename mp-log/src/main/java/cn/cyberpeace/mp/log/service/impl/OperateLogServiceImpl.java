@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.log.bo.ExportLogEnBo;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
 import cn.cyberpeace.mp.log.request.LogExportRequest;
+import cn.cyberpeace.mp.log.request.LogsExportrequest;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
@@ -95,7 +96,7 @@ public class OperateLogServiceImpl implements OperateLogService {
     }
 
     @Override
-    public void exportExcel(HttpServletResponse response, LogExportRequest request) throws IOException {
+    public void exportExcel(HttpServletResponse response, LogsExportrequest request) throws IOException {
 
         List<OperateLogSqlModel> list = operateLogDbService.getLogs(request.getIds(),request.getModule(),request.getType());
         Locale locale = LocaleContextHolder.getLocale();

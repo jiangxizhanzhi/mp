@@ -10,7 +10,9 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.exportHandle.ExportHandle;
 import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
+import cn.cyberpeace.mp.log.request.LogsExportrequest;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
@@ -50,6 +52,9 @@ public class OperateLogController {
 
     private OperateLogService operateLogService;
 
+    @Autowired
+    private ExportHandle exportHandle;
+
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
@@ -79,7 +84,6 @@ public class OperateLogController {
     @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-
         return operateLogService.bulkDeleteByIds(ids).asResult();
     }
 
@@ -96,12 +100,12 @@ public class OperateLogController {
     }
 
     @ApiOperation(value = "导出日志excel", notes = "")
-    @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = LogExportRequest.class)
+    @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = LogsExportrequest.class)
     @PostMapping("/excel/export")
     //@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public void exportLogExcel(HttpServletResponse response, @RequestBody LogExportRequest exportRequest) throws IOException {
-
-        operateLogService.exportExcel(response, exportRequest);
+    public void exportLogExcel(HttpServletResponse response, @RequestBody LogsExportrequest exportRequest) throws IOException {
+//        operateLogService.exportExcel(response, exportRequest);
+        exportHandle.exportExcel(response, exportRequest);
     }
 
 }

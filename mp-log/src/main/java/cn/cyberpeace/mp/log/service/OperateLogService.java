@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
 import cn.cyberpeace.mp.log.request.LogExportRequest;
+import cn.cyberpeace.mp.log.request.LogsExportrequest;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
@@ -29,6 +30,6 @@ public interface OperateLogService {
 
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request);
 
-    void  exportExcel(HttpServletResponse response, LogExportRequest request) throws IOException;
+    void  exportExcel(HttpServletResponse response, LogsExportrequest request) throws IOException;
 
 }
