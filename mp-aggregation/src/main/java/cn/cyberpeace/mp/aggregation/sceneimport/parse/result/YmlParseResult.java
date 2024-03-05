@@ -16,4 +16,5 @@ public class YmlParseResult {
     private SceneElementParseResult scene;
     private List<NetworkElementParseResult> networks;
     private List<NodeElementParseResult> nodes;
+    private List<SceneElementShape> shape;
 }

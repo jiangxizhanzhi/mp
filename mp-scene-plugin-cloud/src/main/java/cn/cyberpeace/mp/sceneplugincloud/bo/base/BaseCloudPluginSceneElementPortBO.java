@@ -41,6 +41,8 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private Integer gatewayPortType;
     @ApiModelProperty(value = "网关设备端口地址段")
     private String gatewayPortIps;
+    @ApiModelProperty(value = "连接模式: dot1q-tunnel(单臂路由)")
+    private String connectMode;
 
     @ApiModelProperty(value = "辅助网络id")
     private String auxiliaryNetworkId;
@@ -72,6 +74,12 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String bgpPeer;
     @ApiModelProperty(value = "bgp组网下的对端端口所属AS")
     private String bgpPeerAs;
+
+    // rip 组网
+    @ApiModelProperty(value = "rip组网下的IP")
+    private String ripIp;
+    @ApiModelProperty(value = "ip下的邻居")
+    private String ripPear;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

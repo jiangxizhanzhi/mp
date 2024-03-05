@@ -11,4 +11,5 @@ import lombok.Data;
 public class StaticRoutesResult {
     private String destination;
     private String gateway;
+    private String nexthopNode;
 }

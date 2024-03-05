@@ -7,6 +7,8 @@ package cn.cyberpeace.mp.auth.constant;
  */
 public class AuthConstant {
 
+    public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
+
     public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     public static final String ROOT_ORG_ID = "a13262d600fe40c799d63dce5c1485af";

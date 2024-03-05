@@ -1,14 +1,14 @@
 ip:
   self: mp                     # mp自身地址
-  mariadb: 10.100.0.101        # MP新中台mariadb数据库地址
-  fdfs: 10.100.1.26             # FastDFS地址
-  cp: 10.100.7.1                # 云平台适配层接口地址
-  moloch: 10.100.0.101          # moloch的IP地址
-  wazuh: 10.100.7.1           # wazuh的IP地址
-  es: 10.100.0.101                 # MP新中台ES地址
-  rabbitmq: 10.100.0.101        # rabbitmq地址
-  mp: 10.100.1.12:8001                       # MP中台地址
-  redis: 10.100.7.1
+  mariadb: 10.2.58.50        # MP新中台mariadb数据库地址
+  fdfs: 10.2.58.50             # FastDFS地址
+  cp: 10.2.58.50                # 云平台适配层接口地址
+  moloch: 10.2.58.50          # moloch的IP地址
+  wazuh: 10.2.58.50           # wazuh的IP地址
+  es: 10.2.58.50                 # MP新中台ES地址
+  rabbitmq: 10.2.58.50        # rabbitmq地址
+  mp: 10.2.58.50:8001                       # MP中台地址
+  redis: 10.2.58.50
 port:
   self-callback: 8080
 server:
@@ -18,9 +18,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${ip.mariadb}:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: root
-    password: root
+    url: jdbc:mysql://${ip.mariadb}:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: mp
+    password: bymsoSAGToyAcs9H
     driver-class-name: org.mariadb.jdbc.Driver
   redis:
     host: ${ip.redis}

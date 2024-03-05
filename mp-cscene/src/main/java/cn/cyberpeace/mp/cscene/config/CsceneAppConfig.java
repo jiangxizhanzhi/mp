@@ -66,6 +66,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable-scene-cron-job:true}")
     private Boolean enableSceneCronJob;
 
+    @Value("${mp.cscene.enable-command-change:false}")
+    private Boolean enableCommandChange;
+
     @Autowired
     private MessageSource messageSource;
 

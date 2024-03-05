@@ -83,6 +83,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "ospf网络下的routerID")
     private String ospfRouterId;
 
+    @ApiModelProperty(value = "rip网络下的lookback")
+    private String ripLoopback;
+
     // 虚拟防火墙属性
     @ApiModelProperty(value = "虚拟防火墙规则")
     @Valid
@@ -91,6 +94,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
+    @ApiModelProperty(value = "虚拟机/容器镜像id")
+    private String imageUuid;
     @ApiModelProperty(value = "终端初始包含工具")
     @Valid
     private List<InitialTool> initialTools;

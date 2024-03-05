@@ -1,14 +1,19 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.aggregation.dto.SceneExportRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.MoundRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +45,17 @@ public class SceneImportController {
         }
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ServiceResult.success(serviceResult.getSource().getId());
+    }
+
+    @ApiOperation("场景导出")
+    @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
+    @PostMapping("/export_scene")
+    public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
+        String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
+        boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
+        return ResultCommon.success(resourceCenterService.exportScene(
+                request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath(), sceneNumber, disableImageExport
+        ).getSource());
     }
 
     @PostMapping("/mount")

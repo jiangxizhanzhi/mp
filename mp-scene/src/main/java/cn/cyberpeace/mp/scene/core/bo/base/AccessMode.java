@@ -41,6 +41,9 @@ public class AccessMode {
     @ApiModelProperty(value = "开启代理")
     private Boolean proxy;
 
+    @ApiModelProperty(value = "是否是管理接入")
+    private Boolean manageMode;
+
     public static class Protocol {
         public static final String PING = "ping";
         public static final String CONSOLE = "console";
