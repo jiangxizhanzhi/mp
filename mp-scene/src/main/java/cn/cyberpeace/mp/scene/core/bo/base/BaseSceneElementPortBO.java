@@ -48,6 +48,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer order;
     @ApiModelProperty(value = "是否辅助端口")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "路由端口连接的网络设置的cidr")
+    private String portConnectNetCidr;
 
     @JsonIgnore
     private E element;

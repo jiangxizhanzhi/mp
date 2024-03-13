@@ -77,6 +77,7 @@ public class SceneService {
         sceneHandler.save();
 
         SceneStageRecorder.registerRecoder(sceneHandler.getSceneId(), sceneHandler.getSceneStageRecorder());
+
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
             if (!sceneHandler.initiate(false)) {

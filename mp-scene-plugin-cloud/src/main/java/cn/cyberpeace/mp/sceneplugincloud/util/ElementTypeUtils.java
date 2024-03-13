@@ -71,8 +71,10 @@ public class ElementTypeUtils {
         if (element.getVirtualType() != null) {
             virtualType = element.getVirtualType();
         }
-        boolean isVirtualGateWayNode = virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
-                || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
+
+        // 判断网关节点，如果当前节点是路由、核心路由、防火墙，就说明是网关节点
+        boolean isVirtualGateWayNode = virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
+                || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL
                 || type == BaseSceneElementModel.Type.ROUTER;
         return isVirtualGateWayNode;
     }

@@ -186,7 +186,7 @@ public class Ipv4Util {
         return longToIpv4(getBeginIpLong(ip, maskBit));
     }
 
-    private static Long getBeginIpLong(String ip, int maskBit) {
+    public static Long getBeginIpLong(String ip, int maskBit) {
         return ipv4ToLong(ip) & ipv4ToLong(getMaskByMaskBit(maskBit));
     }
 

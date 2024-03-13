@@ -150,7 +150,7 @@ public class InitiateHandler extends HandlerCommon {
                     }
                     for (var network : cloudElement.getDeriveNetworks()) {
                         var networkInfo = network.getNetwork();
-                        List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), Boolean.TRUE.equals(networkInfo.getDhcp()));
+                        List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), false);
                         if (CollectionUtils.isEmpty(ips)) {
                             log.info("ip pool is empty when initate collection,node {}", cloudElement.getSrcElement().getName());
                             return;
