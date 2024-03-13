@@ -446,14 +446,6 @@ public class ElementInitiateHandler extends HandlerCommon {
             String firstIp = IpUtils.beginIp(cidr);
             possibleDhcpIps.add(IpUtils.nextIp(firstIp));
         }
-        if (gateway.endsWith(".254")) {
-            int index = StringUtils.lastIndexOf(gateway, ".");
-            String prefix = StringUtils.substring(gateway, 0, index);
-            String ip = StringUtils.joinWith(".", prefix, "1");
-            if (StringUtils.isNotEmpty(cidr) && IpUtils.newIsInCidr(ip, cidr)) {
-                possibleDhcpIps.add(ip);
-            }
-        }
         possibleDhcpIps.add(IpUtils.nextIp(gateway));
         return new ArrayList<>(possibleDhcpIps);
     }

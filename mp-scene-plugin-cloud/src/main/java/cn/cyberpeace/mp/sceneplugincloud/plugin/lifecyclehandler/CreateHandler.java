@@ -190,9 +190,9 @@ public class CreateHandler extends HandlerCommon {
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             // 默认开启dhcp
-            var dhcp = connectedNetwork.network.getDhcp();
+            var dhcp =  Objects.nonNull(subnet.getDhcpPortIp()) || Boolean.TRUE.equals(connectedNetwork.network.getDhcp());
             if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
-                subnet.setEnableDhcp(dhcp == null || dhcp);
+                subnet.setEnableDhcp(dhcp);
             } else {
                 subnet.setEnableDhcp(true);
             }
@@ -1438,7 +1438,7 @@ public class CreateHandler extends HandlerCommon {
         openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts().size()));
         boolean openDhcpResult = false;
         boolean buildNetworkResult = false;
-        int tryTimes = 5;
+        int tryTimes = 10;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 先等2s,等待串口可用

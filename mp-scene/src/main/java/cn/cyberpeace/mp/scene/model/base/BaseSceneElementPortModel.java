@@ -45,6 +45,8 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer order;
     @DefaultBool
     private Boolean isAuxiliary;
+    @DefaultStr
+    private String portConnectNetCidr;
 
     public static class Type {
         public static final int IP_PORT = 1;

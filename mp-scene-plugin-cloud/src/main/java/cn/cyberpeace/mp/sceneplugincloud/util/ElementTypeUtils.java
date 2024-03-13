@@ -35,6 +35,10 @@ public class ElementTypeUtils {
         return Boolean.TRUE.equals(element.getExternal());
     }
 
+    public static boolean isVirtualRouter(CloudPluginSceneElementBO element) {
+        return BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER == element.getRole() && BaseCloudPluginSceneElementModel.ImageType.VM.equals(element.getImageType());
+    }
+
     public static boolean isExternalTerminal(CloudPluginSceneElementBO cloudElement) {
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
             return false;
