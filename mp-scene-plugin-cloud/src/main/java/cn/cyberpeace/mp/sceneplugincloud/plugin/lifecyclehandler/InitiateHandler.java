@@ -453,16 +453,11 @@ public class InitiateHandler extends HandlerCommon {
                     continue;
                 }
             }
-            // 需要自己处理网络的端口
-            String cidrDivideIp = null;
-            if (StringUtils.isNotEmpty(port.getIp())) {
-                // 自己的端口设置了ip,用自己的端口分网络
-                cidrDivideIp = port.getIp();
-            } else if (connectPort != null && StringUtils.isNotEmpty(connectPort.getIp())) {
-                // 自己的端口无ip,但是连线另一端的端口设置了ip,用对端端口ip分网络
-                cidrDivideIp = connectPort.getIp();
-            }
-            if (StringUtils.isEmpty(cidrDivideIp)) {
+            // 根据用户手动配置的网络参数，初始化网络和网络设置
+            String cidrDivideIp = getConnectCidrDivideIp(port, connectPort);
+            String connectCidrByManualSettingInPort = getConnectCidrByManualSettingInPort(port, connectPort);
+            boolean connectCidrNotManualSetFlag = StringUtils.isBlank(cidrDivideIp) && StringUtils.isBlank(connectCidrByManualSettingInPort);
+            if (connectCidrNotManualSetFlag) {
                 // 未设置ip值,使用默认网段的网络
                 boolean isCoreRouter = this.isCoreRouter(cloudElement);
                 boolean isDynamips = this.isDynamips(cloudElement);
@@ -483,8 +478,12 @@ public class InitiateHandler extends HandlerCommon {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
                 }
             } else {
-                // 设置了ip值,根据ip值计算网段
-                String cidr = this.ip2Cidr24(cidrDivideIp);
+                String cidr;
+                if (StringUtils.isEmpty(connectCidrByManualSettingInPort)) {
+                    cidr = this.ip2Cidr24(cidrDivideIp);
+                } else {
+                    cidr = connectCidrByManualSettingInPort;
+                }
                 if (cidr.equals(defaultConnectedNetwork.getNetwork().getCidr())) {
                     // 和默认网段相同,则也加入默认网络
                     defaultConnectedNetwork.addPort(port, connectPort, true);
@@ -690,70 +689,23 @@ public class InitiateHandler extends HandlerCommon {
     private void initIpPool(CloudPluginSceneElementBO element) {
         element.getDeriveNetworks().forEach(connectedNetwork -> {
             CloudPluginSceneElementNetworkBO network = connectedNetwork.network;
-            String cidr = network.getCidr();
-            if (StringUtils.isEmpty(cidr)) {
+            if (!network.cidrValidFlag()) {
                 return;
             }
-            Set<String> existIps = new HashSet<>();
-            connectedNetwork.getFromPorts().forEach(port -> {
-                if (StringUtils.isNotEmpty(port.getIp())) {
-                    existIps.add(port.getIp());
-                }
-            });
-            connectedNetwork.getToPorts().forEach(port -> {
-                if (StringUtils.isNotEmpty(port.getIp())) {
-                    existIps.add(port.getIp());
-                }
-            });
 
-            // 处理网关
-            if (StringUtils.isEmpty(network.getGateway())) {
-                String gatewayIp = null;
-                if (ElementTypeUtils.isVirtualGateway(element)
-                        || ElementTypeUtils.isCoreRouter(element) || ElementTypeUtils.isEntityGateway(element)) {
-                    for (SceneElementPortBO p : connectedNetwork.getFromPorts()) {
-                        if (StringUtils.isNotEmpty(p.getIp())) {
-                            gatewayIp = p.getIp();
-                            break;
-                        }
-                    }
-                }
-                if (gatewayIp == null) {
-                    String gateway = null;
-                    List<String> excludeIps = new ArrayList<>(existIps);
-                    for (int i = 0; i < 5; i++) {
-                        gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, element.getAllocationPools()).get(0);
-                        excludeIps.add(gateway);
-                        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, network.getCidr());
-                        if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
-                            possibleDhcpIps = new ArrayList<>();
-                        }
-                        boolean conflict = false;
-                        for (String possibleDhcpIp : possibleDhcpIps) {
-                            if (existIps.contains(possibleDhcpIp)) {
-                                conflict = true;
-                                break;
-                            }
-                        }
-                        if (!conflict) {
-                            break;
-                        }
-                    }
-                    network.setGateway(gateway);
-                } else {
-                    network.setGateway(gatewayIp);
-                }
-            }
+            Set<String> existIps = getNetworkExistIp(connectedNetwork);
+
+            // 设置网关
+            setNetworkGateway(connectedNetwork, element, existIps);
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && !Boolean.FALSE.equals(element.getDhcp())) {
-                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway(), network.getCidr());
-                for (String possibleDhcpIp : possibleDhcpIps) {
-                    if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
-                        network.setDhcpIp(possibleDhcpIp);
-                        existIps.add(possibleDhcpIp);
-                        break;
-                    }
-                }
+
+            // dhcp的作用是为了起dhcp服务，如果是核心路由器，ip在创建虚机后通过命令设置，可以不需要dhcp服务
+            boolean dhcpOpenAndNeedMpAllocateDhcpFlag = Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())
+                    && !Boolean.FALSE.equals(element.getDhcp());
+
+            boolean onlyVirtualRouterConnectFlag = onlyVirtualRouterConnectFlag(connectedNetwork);
+
+            if (dhcpOpenAndNeedMpAllocateDhcpFlag && !onlyVirtualRouterConnectFlag) {
                 if (StringUtils.isEmpty(network.getDhcpIp())) {
                     List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(element.getDhcp()));
                     if (CollectionUtils.isNotEmpty(ipPool)) {
@@ -761,30 +713,33 @@ public class InitiateHandler extends HandlerCommon {
                         existIps.add(ipPool.get(0));
                     }
                 }
-            } else {
-                existIps.add(IpUtils.nextIp(network.getGateway()));
             }
 
             Set<String> portIps = new HashSet<>();
             int requireCount = 0;
             int gatewayCount = 0;
-            boolean fromPortsAdd = false;
-            // 网络的from端口最多分一个
-            for (SceneElementPortBO port : connectedNetwork.getFromPorts()) {
-                if (StringUtils.isEmpty(port.getIp())) {
-                    if (!fromPortsAdd) {
-                        if (ElementTypeUtils.isVirtualGateway(element)) {
-                            gatewayCount++;
-                        } else {
-                            requireCount++;
-                        }
-                    }
-                    fromPortsAdd = true;
-                } else {
-                    portIps.add(port.getIp());
+            // 查看网络的from端口是否配置了ip值
+            String fromPortIp = null;
+            for (var port : connectedNetwork.getFromPorts()) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    fromPortIp = port.getIp();
+                    break;
                 }
             }
-            for (SceneElementPortBO port : connectedNetwork.getToPorts()) {
+            if (StringUtils.isNotEmpty(fromPortIp)) {
+                // 如果有一个from端口配置了ip , 则所有的from 端口都设置为该ip
+                for (var port : connectedNetwork.getFromPorts()) {
+                    port.setIp(fromPortIp);
+                }
+            } else {
+                // 如果from端口都没有配置ip 则只需要共同分一个ip值即可
+                if (ElementTypeUtils.isVirtualGateway(element)) {
+                    gatewayCount++;
+                } else {
+                    requireCount++;
+                }
+            }
+            for (var port : connectedNetwork.getToPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
                     if (ElementTypeUtils.isVirtualGateway(getPluginHandler().getElement(port.getElement().getId()))) {
                         gatewayCount++;
@@ -798,20 +753,27 @@ public class InitiateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 gatewayCount++;
             }
+
+            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), element.getAllocationPools(), false);
+            boolean gatewayIpNotAllocatedFlag = false;
+            if (!portIps.contains(network.getGateway())) {
+                // 网关未分配 则放入地址池的最后等待分配
+                if (!Boolean.TRUE.equals(network.getGatewayOff())) {
+                    gatewayCount--;
+                    gatewayIpNotAllocatedFlag = true;
+                }
+            }
             List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), element.getAllocationPools());
+
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
             if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
                 existIps.addAll(gatewayIpPool);
             }
-            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), element.getAllocationPools(), BoolUtils.bool(element.getDhcp()));
             ipPool.addAll(gatewayIpPool);
-            if (!portIps.contains(network.getGateway())) {
-                // 网关未分配 则放入地址池的最后等待分配
-                if (!Boolean.TRUE.equals(network.getGatewayOff())) {
-                    ipPool.add(network.getGateway());
-                }
+            if (gatewayIpNotAllocatedFlag) {
+                ipPool.add(network.getGateway());
             }
             network.getExcloudIps().addAll(existIps);
             network.getExcloudIps().addAll(ipPool);
@@ -821,6 +783,88 @@ public class InitiateHandler extends HandlerCommon {
             }
         });
     }
+
+    private Set<String> getNetworkExistIp(ConnectedNetworkBO connectedNetworkBO) {
+        Set<String> existIps = new HashSet<>();
+        connectedNetworkBO.getFromPorts().forEach(port -> {
+            if (StringUtils.isNotEmpty(port.getIp())) {
+                existIps.add(port.getIp());
+            }
+        });
+        connectedNetworkBO.getToPorts().forEach(port -> {
+            if (StringUtils.isNotEmpty(port.getIp())) {
+                existIps.add(port.getIp());
+            }
+        });
+        return existIps;
+    }
+
+    private boolean onlyVirtualRouterConnectFlag(ConnectedNetworkBO connectedNetworkBO) {
+        List<SceneElementPortBO> fromPorts = connectedNetworkBO.getFromPorts();
+        List<SceneElementPortBO> toPorts = connectedNetworkBO.getToPorts();
+
+        if (CollectionUtils.isNotEmpty(fromPorts) && CollectionUtils.isNotEmpty(toPorts)) {
+            if (fromPorts.size() == toPorts.size() && fromPorts.size() == 1) {
+                if (ElementTypeUtils.isVirtualRouter(
+                        getPluginHandler().getElement(fromPorts.get(0).getElement().getId())) &&
+                        ElementTypeUtils.isVirtualRouter(
+                                getPluginHandler().getElement(toPorts.get(0).getElement().getId())
+                        )) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void setNetworkGateway(ConnectedNetworkBO connectedNetworkBO, CloudPluginSceneElementBO element, Set<String> existIps) {
+
+        CloudPluginSceneElementNetworkBO network = connectedNetworkBO.network;
+        if (StringUtils.isEmpty(network.getGateway())) {
+            String gatewayIp = null;
+
+            // gateway ip from manual allocate ip
+            if (elementIsGatewayTypeFlag(element)) {
+                for (var p : connectedNetworkBO.getFromPorts()) {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        gatewayIp = p.getIp();
+                        break;
+                    }
+                }
+            }
+
+            if (StringUtils.isEmpty(gatewayIp)) {
+                for (SceneElementPortBO toPort : connectedNetworkBO.getToPorts()) {
+                    if (StringUtils.isNotEmpty(toPort.getIp())) {
+                        CloudPluginSceneElementBO cloudPluginSceneElementBO =
+                                getPluginHandler().getElement(toPort.getElement().getId());
+                        if (elementIsGatewayTypeFlag(cloudPluginSceneElementBO)) {
+                            gatewayIp = toPort.getIp();
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+            // gateway ip from auto allocate ip
+            if (StringUtils.isEmpty(gatewayIp)) {
+                List<String> excludeIps = new ArrayList<>(existIps);
+
+                gatewayIp = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1,
+                                                                excludeIps, element.getAllocationPools()).get(0);
+
+            }
+
+            connectedNetworkBO.network.setGateway(gatewayIp);
+        }
+    }
+
+    private boolean elementIsGatewayTypeFlag(CloudPluginSceneElementBO elementBO) {
+        return ElementTypeUtils.isVirtualGateway(elementBO)
+                || ElementTypeUtils.isCoreRouter(elementBO) || ElementTypeUtils.isEntityGateway(elementBO);
+    }
+
 
     /**
      * 初始化虚拟网络端口
@@ -1139,17 +1183,9 @@ public class InitiateHandler extends HandlerCommon {
     private List<String> getPossibleDhcpIps(String gateway, String cidr) {
         Set<String> possibleDhcpIps = new HashSet<>();
         if (StringUtils.isNotEmpty(cidr)) {
-            String firstIp = IpUtils.beginIp(cidr);
-            possibleDhcpIps.add(IpUtils.nextIp(firstIp));
+            possibleDhcpIps.add(IpUtils.cidrFirstCanUseIp(cidr));
         }
-        if (gateway.endsWith(".254")) {
-            int index = StringUtils.lastIndexOf(gateway, ".");
-            String prefix = StringUtils.substring(gateway, 0, index);
-            String ip = StringUtils.joinWith(".", prefix, "1");
-            if (StringUtils.isNotEmpty(cidr) && IpUtils.newIsInCidr(ip, cidr)) {
-                possibleDhcpIps.add(ip);
-            }
-        }
+
         possibleDhcpIps.add(IpUtils.nextIp(gateway));
         return new ArrayList<>(possibleDhcpIps);
     }
@@ -1180,29 +1216,41 @@ public class InitiateHandler extends HandlerCommon {
                     if (Boolean.TRUE.equals(net.getNetwork().getExternal()) || StringUtils.isEmpty(net.getNetwork().getCidr())) {
                         continue;
                     }
-                    List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true);
-                    if (CollectionUtils.isNotEmpty(randomIps)) {
-                        // 如果ip不够分了 只能走云平台默认逻辑
-                        String distributedPortMappingIp = randomIps.get(0);
-                        if (CollectionUtils.isNotEmpty(net.getFromPorts())) {
-                            SceneElementPortBO srcPort = net.getFromPorts().get(0);
-                            CloudPluginSceneElementPortBO cloudPort = getPluginHandler().getPort(srcPort.getId());
-                            if (cloudPort != null) {
-                                if (CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
-                                    for (CloudAccessMode accessMode : cloudPort.getAccessModes()) {
-                                        // 除console协议的其他接入协议中,有需要端口映射的,那么需要分配一个分布式的端口映射ip
-                                        if (!AccessMode.Protocol.CONSOLE.equals(accessMode.getProtocol()) && Boolean.TRUE.equals(accessMode.getProxy())) {
-                                            cloudPort.setDistributedPortMappingIp(distributedPortMappingIp);
-                                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), distributedPortMappingIp);
-                                            net.getNetwork().getExcloudIps().add(distributedPortMappingIp);
+                    // 如果ip不够分了 只能走云平台默认逻辑
+                    if (CollectionUtils.isNotEmpty(net.getFromPorts())) {
+                        var srcPort = net.getFromPorts().get(0);
+                        var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                        if (cloudPort != null) {
+                            if (CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
+                                List<String> randomIps = new ArrayList<>();
+
+                                for (var accessMode : cloudPort.getAccessModes()) {
+                                    // 除console协议的其他接入协议中,有需要端口映射的,那么需要分配一个分布式的端口映射ip
+                                    if (!AccessMode.Protocol.CONSOLE.equals(accessMode.getProtocol()) && Boolean.TRUE.equals(accessMode.getProxy())) {
+                                        if (CollectionUtils.isEmpty(randomIps)) {
+                                            try {
+                                                randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), false);
+                                            } catch (MpRuntimeException e) {
+                                                log.info("failed to allocate ip for fwdnsInterfaceIp , element is {}",srcPort.getElement().getId());
+                                            }
+                                        }
+
+                                        if (CollectionUtils.isNotEmpty(randomIps)) {
+                                            cloudPort.setDistributedPortMappingIp(randomIps.get(0));
+                                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), randomIps.get(0));
+                                            net.getNetwork().getExcloudIps().add(randomIps.get(0));
                                             break;
                                         }
                                     }
                                 }
                             }
-                        } else {
-                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), distributedPortMappingIp);
-                            net.getNetwork().getExcloudIps().add(distributedPortMappingIp);
+                        }
+                    } else {
+                        List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), false);
+
+                        if (CollectionUtils.isNotEmpty(randomIps)) {
+                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), randomIps.get(0));
+                            net.getNetwork().getExcloudIps().add(randomIps.get(0));
                         }
                     }
                 }
@@ -1265,5 +1313,35 @@ public class InitiateHandler extends HandlerCommon {
                 }
             });
         }
+    }
+
+    private String getConnectCidrByManualSettingInPort(SceneElementPortBO fromPort, SceneElementPortBO toPort) {
+        String fromPortCidr = fromPort.getPortConnectNetCidr();
+        if (Objects.isNull(toPort)) {
+            return fromPortCidr;
+        }
+        String toPortCidr = toPort.getPortConnectNetCidr();
+        if (StringUtils.isNoneBlank(fromPortCidr)) {
+            if (fromPortCidr.equals(toPortCidr)) {
+                return fromPortCidr;
+            } else if (StringUtils.isNoneBlank(toPortCidr)) {
+                throw new MpRuntimeException(String.format("节点%s端口%s配置的网段和其对端端口冲突", fromPort.getElement().getName(), fromPort.getName()));
+            } else {
+                return fromPortCidr;
+            }
+        } else {
+            return toPortCidr;
+        }
+    }
+
+    private String getConnectCidrDivideIp(SceneElementPortBO fromPort, SceneElementPortBO toPort) {
+        if (StringUtils.isNotEmpty(fromPort.getIp())) {
+            // 自己的端口设置了ip,用自己的端口分网络
+            return fromPort.getIp();
+        } else if (toPort != null && StringUtils.isNotEmpty(toPort.getIp())) {
+            // 自己的端口无ip,但是连线另一端的端口设置了ip,用对端端口ip分网络
+            return toPort.getIp();
+        }
+        return null;
     }
 }

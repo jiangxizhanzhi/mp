@@ -116,4 +116,8 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
         }
         return obj;
     }
+
+    public boolean cidrValidFlag() {
+        return StringUtils.isNotBlank(this.getCidr());
+    }
 }
