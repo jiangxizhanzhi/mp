@@ -17,6 +17,12 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -268,5 +274,40 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @ApiOperation("拓扑回显")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @PostMapping("/completion_topo")
+    public ServiceResult<CsceneBO> completionTopo(@RequestBody CsceneBO csceneBO) {
+        correctRequestCsceneParamsForSync(csceneBO);
+        // 场景模板对象 转成 场景实例对象
+        String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
+        SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
+        sceneDataBO.getTopology().setScene(new SceneBO());
+
+        // 对场景实例对象先保存再进行初始化
+        // 必须先保存 否则无法进行初始化
+        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
+        instanceHandler.save();
+        instanceHandler.initiate();
+        instanceHandler.completionTopo();
+        instanceHandler.save();
+
+        // 把实例转回成模板
+        String instanceContent = JsonCommon.snakeStringify(instanceHandler.toData());
+        SceneConfigDataBO sceneConfigDataBO = JsonCommon.snakeParse(instanceContent, SceneConfigDataBO.class);
+
+        CsceneBO tmp = new CsceneBO();
+        sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
+        tmp.setSceneConfig(sceneConfigDataBO);
+        correctRequestCsceneParamsForSync(tmp);
+        SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
+        newConfigHandler.save();
+
+        SceneConfigDataBO returnData = newConfigHandler.toData();
+        returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
+        csceneBO.setSceneConfig(newConfigHandler.toData());
+        return new ServiceResult<>(csceneBO).asResult();
     }
 }

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -114,13 +115,35 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setDhcp(true);
         cloudPluginSceneElementBO.setSrcElement(sceneElementBO);
         cloudPluginSceneElementBO.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+
+        sceneElementBO.setType(BaseSceneElementModel.Type.SWITCH);
+        // azure todo 把两个字段补充
+//        sceneElementBO.setName();
+//        sceneElementBO.setIcon2();
+        cloudPluginSceneElementBO.setImageType("simple");
+        cloudPluginSceneElementBO.setElectricPortNumber(1);
+        cloudPluginSceneElementBO.setLanPortNumber(1);
+        cloudPluginSceneElementBO.setWanPortNumber(1);
+        cloudPluginSceneElementBO.setOpticalPortNumber(1);
+
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }
 
     private static PortWrapper createAuxiliaryPort(SceneElementBO element) {
         SceneElementPortBO port = new SceneElementPortBO();
         port.setElement(element);
-        port.setId(TextUtils.uuid());
+
+        int existPortNum = element.getPorts().size();
+        Integer type = element.getType();
+        String nodeId = element.getId();
+        String portId = "";
+        if (type != null && type == BaseSceneElementModel.Type.TERMINAL) {
+            portId = "port_" + nodeId + "_" + (existPortNum + 1);
+        } else {
+            portId = "port_" + nodeId + "_electrical_" + (existPortNum + 1);
+        }
+        port.setId(portId);
+
         // todo
         port.setOrder(0);
         port.setIsAuxiliary(true);

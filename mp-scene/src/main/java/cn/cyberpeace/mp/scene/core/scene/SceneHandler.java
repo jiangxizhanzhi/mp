@@ -415,6 +415,12 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
+    public void completionTopo() {
+        for (var plugin : getPlugins()) {
+            plugin.completionTopo();
+        }
+    }
+
     public boolean initiate() {
         return initiate(true);
     }

@@ -544,6 +544,26 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    @Override
+    public void completionTopo() {
+        TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+        // 如果节点没有连线的 把交换机补充上
+        for (CloudPluginSceneElementBO element : getElementMap().values()) {
+            List<SceneElementBO> connectedElements = getElementConnectedSrcElements(element.getSrcElement().getId());
+            if (CollectionUtils.isEmpty(connectedElements)) {
+                if (!element.getDeriveNetworks().isEmpty()) {
+                    TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
+                    nodeWrapper.getSceneElement().setIsAuxiliary(false);
+                    TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
+                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
+                    port1Wrapper.getScenePort().setIsAuxiliary(false);
+                    port2Wrapper.getScenePort().setIsAuxiliary(false);
+                    topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
+                }
+            }
+        }
+    }
+
     /**
      * 向插件和topo中新增一个节点
      * @param nodeId
