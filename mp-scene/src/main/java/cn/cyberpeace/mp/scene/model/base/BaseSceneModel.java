@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.model.base;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
@@ -19,6 +20,18 @@ public class BaseSceneModel extends BaseModel {
     private String displayContext;
     @DefaultBool
     private Boolean deleted;
+    @DefaultInt
+    private Integer cloudType ;
+
+    public static class CloudType {
+        public static final int DEFAULT = 0;
+        public static final int PUBLIC = 1;
+        public static final int PRIVATE = 2;
+        public static final int MIX = 3;
+
+        private CloudType() {
+        }
+    }
 
     @Override
     public boolean hasDeleted() {

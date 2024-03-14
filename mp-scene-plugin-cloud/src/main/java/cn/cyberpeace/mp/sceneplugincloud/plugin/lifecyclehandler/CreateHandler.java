@@ -355,7 +355,7 @@ public class CreateHandler extends HandlerCommon {
      * @return List<VirtualNic>
      * @description: 生成虚拟网卡
      */
-    private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
+    protected List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
         // 添加管理网卡
         if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
@@ -1268,6 +1268,15 @@ public class CreateHandler extends HandlerCommon {
 
         // 先创建辅助网络(包含虚拟交换机)
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
+
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            e.getDeriveNetworks();
+        });
+
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            e.getAccessNetworks();
+        });
+
         var createAuxiliaryNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());

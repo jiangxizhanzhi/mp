@@ -20,4 +20,6 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private LocalDateTime createTime;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime updateTime;
+    @ApiModelProperty(value = "云类型")
+    private Integer cloudType ;
 }

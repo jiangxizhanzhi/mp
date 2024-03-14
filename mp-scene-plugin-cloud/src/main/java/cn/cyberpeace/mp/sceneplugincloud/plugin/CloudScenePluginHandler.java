@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
@@ -24,6 +25,8 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureDeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
@@ -133,9 +136,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         handlerUtils = new HandlerUtils(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
-        createHandler = new CreateHandler(this);
-        deleteHandler = new DeleteHandler(this);
         prepareHandler = new PrepareHandler(this);
+
+        Integer cloudType = getSceneHandler().getScene().getCloudType();
+        if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
+            createHandler = new CreateHandler(this);
+            deleteHandler = new DeleteHandler(this);
+        } else {
+            createHandler = new AzureCreateHandler(cloudType, this);
+            deleteHandler = new AzureDeleteHandler(cloudType, this);
+        }
     }
 
     @Override
