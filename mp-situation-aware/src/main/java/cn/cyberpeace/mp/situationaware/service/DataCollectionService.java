@@ -1532,9 +1532,18 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public static String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
-        var indexArray = new String[indexList.size()];
-        indexList.toArray(indexArray);
-        return indexArray;
+        if (indexList.size() > 10) {
+            Collections.reverse(indexList);
+            String[] indexArray = new String[10];
+            for (int i = 0; i < 10; i++) {
+                indexArray[i] = indexList.get(i);
+            }
+            return indexArray;
+        } else {
+            var indexArray = new String[indexList.size()];
+            indexList.toArray(indexArray);
+            return indexArray;
+        }
     }
 
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
