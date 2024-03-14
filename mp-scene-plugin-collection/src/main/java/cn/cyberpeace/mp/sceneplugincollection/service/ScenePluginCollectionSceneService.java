@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -17,6 +18,8 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -457,7 +460,7 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> ruleId2Files = new HashMap<>(ruleId2File);
         ruleId2Files.putAll(ruleId2AppNames);
 
-        WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>(agentNameElementMap.keySet()));
+        WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler, new ArrayList<>(agentNameElementMap.keySet()));
         if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
             // 取交集
             List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
@@ -524,23 +527,38 @@ public class ScenePluginCollectionSceneService {
      * @param agentNames
      * @return
      */
-    public WazuhEventRequest genWazuhEventRequest(HostEventQueryParams queryParams, LocalDateTime sceneCreateTime, List<String> agentNames) {
+    public WazuhEventRequest genWazuhEventRequest(HostEventQueryParams queryParams, SceneHandler sceneHandler, List<String> agentNames) {
         WazuhEventRequest request = new WazuhEventRequest();
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
 
-        // 查询时间段 默认使用场景创建到当前时间
-        if (StringUtils.isBlank(queryParams.getStartTime())) {
-            request.setStartTime(sceneCreateTime);
-        } else {
+        // 优先根据请求参数设置查询时间段
+        if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
             request.setStartTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
         }
-        if (StringUtils.isBlank(queryParams.getEndTime())) {
-            request.setEndTime(LocalDateTime.now());
-        } else {
+        if(StringUtils.isNotEmpty(queryParams.getEndTime())){
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
+
+        // 再根据场景的启停时间设置查询时间段
+        if (request.getStartTime() == null) {
+            request.setStartTime(sceneHandler.getScene().getCreateTime());
+        }
+        if (request.getEndTime() == null) {
+            if (sceneHandler.getScene().getEvent() == SceneModel.Event.DELETE) {
+                // todo 可以在SceneHandler里面加字段
+                request.setEndTime(BeanCommon.getBean(SceneMapper.class).get(sceneHandler.getSceneId()).getUpdateTime());
+            } else {
+                request.setEndTime(LocalDateTime.now());
+            }
+        }
+        LocalDateTime tenDaysBeforeEnd = request.getEndTime().minusDays(10);
+        if (request.getStartTime().isBefore(tenDaysBeforeEnd)) {
+            // 开始结束时间跨度不能超过10天
+            request.setStartTime(tenDaysBeforeEnd);
+        }
+
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
             request.setLevels(queryParams.getLevels());
         }

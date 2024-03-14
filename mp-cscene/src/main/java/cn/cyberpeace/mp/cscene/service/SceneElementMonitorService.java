@@ -426,7 +426,7 @@ public class SceneElementMonitorService {
         }
 
         WazuhEventRequest request = scenePluginCollectionSceneService.genWazuhEventRequest(hostEventQueryParams,
-                sceneHandler.getScene().getCreateTime(), getAgentNames(pageRequest, sceneHandler));
+                sceneHandler, getAgentNames(pageRequest, sceneHandler));
         request.setSicLaunchId(sicLaunchId);
         request.setRuleGroups(null);
 
