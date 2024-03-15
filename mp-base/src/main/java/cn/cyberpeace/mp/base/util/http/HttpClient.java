@@ -34,7 +34,7 @@ import java.util.Map;
 @Data
 public class HttpClient {
 
-    public static final int DEFAULT_TIMEOUT = 30000;
+    public static final int DEFAULT_TIMEOUT = 3000000;
 
     public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
