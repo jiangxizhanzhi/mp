@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.model.base;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
@@ -19,6 +20,8 @@ public class BaseSceneModel extends BaseModel {
     private String displayContext;
     @DefaultBool
     private Boolean deleted;
+    @DefaultInt(MultiSceneType.COMMON_SCENE)
+    private Integer multiSceneType;
 
     @Override
     public boolean hasDeleted() {
@@ -29,5 +32,11 @@ public class BaseSceneModel extends BaseModel {
     public boolean prepareDeleteFlag() {
         setDeleted(true);
         return true;
+    }
+
+    public static class MultiSceneType {
+        public static final Integer COMMON_SCENE = 0;
+        public static final Integer SUB_CYBER_SCENE = 1;
+        public static final Integer MANAGER_CENTER_SCENE = 2;
     }
 }

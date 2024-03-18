@@ -91,6 +91,16 @@ management:
 
 # 中台各模块相关配置
 mp:
+  multi-scene:
+    manager-center-flag: ${mp.multi-scene.ext-var.manager-center-flag}
+    manager-center-ip: ${mp.multi-scene.ext-var.manager-center-ip}
+    manager-center-port: ${mp.multi-scene.ext-var.manager-center-port}
+    heartbeat-interval: ${mp.multi-scene.ext-var.heartbeat-interval}
+    scan-interval: ${mp.multi-scene.ext-var.scan-interval}
+    sub-cyber-range-flag: ${mp.multi-scene.ext-var.sub-cyber-range-flag}
+    cyber-range-tag: ${mp.multi-scene.ext-var.cyber-range-tag}
+    cyber-range-ip: ${mp.multi-scene.ext-var.cyber-range-ip}
+    cyber-range-port: ${mp.multi-scene.ext-var.cyber-range-port}
   common: #公用配置
   #    ext-var:
   #      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址

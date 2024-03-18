@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetSceneRequest extends BasePageRequest implements Serializable {
+public class TargetSceneRequest extends BasePageRequest implements Serializable, SnakeHttpParam {
 
     /**
      * 系统主类型
@@ -134,5 +135,12 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
      */
     @ApiModelProperty(value = "操作系统类型：1 WINDOWS, 2 LINUX, 3 UNIX, 4 BSD, 5 OTHER")
     private Integer parentSystemType;
+
+    @ApiModelProperty("多靶场类型")
+    private Integer multiSceneType;
+
+
+    @ApiModelProperty("靶场标识")
+    private String rangeTag;
 
 }

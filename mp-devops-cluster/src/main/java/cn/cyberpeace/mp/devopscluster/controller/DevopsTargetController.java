@@ -16,11 +16,13 @@ import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.request.CommonTargetsRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.upload.TargetIconUploadService;
 import cn.cyberpeace.mp.devopscluster.thread.ITask;
+import cn.cyberpeace.mp.devopscluster.utils.MultiSceneTargetClient;
 import cn.cyberpeace.mp.devopscluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetByTypeVO;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceTargetVO;
@@ -30,6 +32,10 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
+import cn.cyberpeace.mp.scene.core.bo.MultiSceneRegisterBo;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.service.ManageCenterService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -71,6 +77,11 @@ public class DevopsTargetController {
     private final TargetIconUploadService targetIconUploadService;
 
     private final DevopsTargetService devopsTargetService;
+
+    private final MultiSceneConfig multiSceneConfig;
+
+    private final ManageCenterService manageCenterService;
+    private final MultiSceneTargetClient multiSceneTargetClient = new MultiSceneTargetClient();
 
     /**
      * 查询FTP信息
@@ -151,40 +162,54 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
-    public ServiceResult<Device> listAll(TargetSceneRequest request){
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
-        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
-
-        Integer category = request.getCategory();
-        if (Objects.nonNull(category)) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
-        }
-
-        if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
-            secondTypeList = secondTypeList.stream().filter(v -> request.getSecondCategoryList().contains(v.getId())).collect(Collectors.toList());
-        }
-
+    public ServiceResult<ListResult<Device>> listAll(TargetSceneRequest request){
+        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
+                .equals(request.getMultiSceneType()));
         List<Device> deviceList = new ArrayList<>();
-        for (TypeConvertModel first : firstTypeList){
-            Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            List<Integer> secondCategories = typeConvertModels.stream()
-                    .map(model -> model.getId())
-                    .collect(Collectors.toList());
-            request.setCategory(firstId);
-            request.setSecondCategories(secondCategories);
-            request.setPage(null);
-            request.setPerPage(null);
-            BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
-            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
-                continue;
+
+        if (managerCenterOpenFlag) {
+            if (StringUtils.isEmpty(request.getRangeTag())) {
+                request.setRangeTag(multiSceneConfig.getCyberRangeTag());
             }
-            List<Device> secondDeviceList = targetSceneConvertModel.getList();
-            deviceList.addAll(secondDeviceList);
+            MultiSceneRegisterBo targetRange = manageCenterService.getTargetCyberRangeBo(request.getRangeTag());
+            String server = String.format("%s:%s", targetRange.getRangeIp(), targetRange.getRangePort());
+            deviceList = multiSceneTargetClient.listNotCommonTargets(server, request);
+
+        } else {
+
+            TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+            List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
+            List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+
+            Integer category = request.getCategory();
+            if (Objects.nonNull(category)) {
+                firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+            }
+
+            if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
+                secondTypeList = secondTypeList.stream().filter(v -> request.getSecondCategoryList().contains(v.getId())).collect(Collectors.toList());
+            }
+
+            for (TypeConvertModel first : firstTypeList){
+                Integer firstId = first.getId();
+                List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
+                        .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+                List<Integer> secondCategories = typeConvertModels.stream()
+                        .map(model -> model.getId())
+                        .collect(Collectors.toList());
+                request.setCategory(firstId);
+                request.setSecondCategories(secondCategories);
+                request.setPage(null);
+                request.setPerPage(null);
+                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
+                    continue;
+                }
+                List<Device> secondDeviceList = targetSceneConvertModel.getList();
+                deviceList.addAll(secondDeviceList);
+            }
         }
-        return new Result(new ListResult<>(deviceList));
+        return new ServiceResult<>(new ListResult<>(deviceList)).asResult();
     }
 
 
@@ -281,28 +306,45 @@ public class DevopsTargetController {
 
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
-    public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request){
-        List<Device> deviceList = targetConverter.getCommonTargets("");
-        List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
+    public ServiceResult<ListResult<DeviceVO>> getCommonTargets(CommonTargetsRequest request){
+        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
+                .equals(request.getMultiSceneType()));
 
-        Locale locale = LocaleContextHolder.getLocale();
-        if (Objects.equals(locale, Locale.CHINA)) {
-            // 常用靶标名称国际化处理
-            deviceVOList.forEach(device -> {
-                device.setImage(device.getName());
-                device.setName(
-                        Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
-                                CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
-            });
-        }
+        List<DeviceVO> deviceVOList;
 
-        if (Objects.nonNull(request.getImageType())) {
-            deviceVOList = deviceVOList.stream().filter(v -> v.getImageType().equals(request.getImageType().toValue())).collect(Collectors.toList());
+        if (managerCenterOpenFlag) {
+            if (StringUtils.isEmpty(request.getRangeTag())) {
+                request.setRangeTag(multiSceneConfig.getCyberRangeTag());
+            }
+            MultiSceneRegisterBo targetRange = manageCenterService.getTargetCyberRangeBo(request.getRangeTag());
+            String server = String.format("%s:%s", targetRange.getRangeIp(), targetRange.getRangePort());
+            deviceVOList = multiSceneTargetClient.listCommonTargets(server, request.multiSceneCommonTargetsQueryParams());
+
+        } else {
+
+            List<Device> deviceList = targetConverter.getCommonTargets("");
+            deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
+
+            Locale locale = LocaleContextHolder.getLocale();
+            if (Objects.equals(locale, Locale.CHINA)) {
+                // 常用靶标名称国际化处理
+                deviceVOList.forEach(device -> {
+                    device.setImage(device.getName());
+                    device.setName(
+                            Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
+                                    CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
+                });
+            }
+
+            if (Objects.nonNull(request.getImageType())) {
+                deviceVOList = deviceVOList.stream().filter(v -> v.getImageType().equals(request.getImageType().toValue())).collect(Collectors.toList());
+            }
+            if (Objects.nonNull(request.getRole())) {
+                deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
+            }
         }
-        if (Objects.nonNull(request.getRole())) {
-            deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
-        }
-        return new Result(new ListResult(deviceVOList));
+        return new ServiceResult<>(new ListResult<>(deviceVOList)).asResult();
+
     }
 
     @ApiOperation("批量同步靶标数据")

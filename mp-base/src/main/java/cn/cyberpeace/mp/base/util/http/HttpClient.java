@@ -17,7 +17,6 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -53,7 +52,11 @@ public class HttpClient {
     private String contentType = DEFAULT_CONTENT_TYPE;
 
     private String formatUrl(String url, HttpParam param) {
-        var serverUrl = StringUtils.join(server, url);
+        //可以直接从url指定server，防止从属性中取server，多线程请求不同server异常
+        String serverUrl = url;
+        if (url.startsWith("/")) {
+            serverUrl = StringUtils.join(server, url);
+        }
         if (param == null) {
             return serverUrl;
         }

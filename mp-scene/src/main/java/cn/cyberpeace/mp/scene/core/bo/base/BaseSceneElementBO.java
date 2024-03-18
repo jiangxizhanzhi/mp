@@ -45,6 +45,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "归属靶场的标识")
+    private String rangeTag;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
