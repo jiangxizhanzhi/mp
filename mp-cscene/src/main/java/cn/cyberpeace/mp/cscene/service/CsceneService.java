@@ -126,7 +126,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 elementCountMap.getOrDefault(
                         BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L);
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L)+
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L);
         return (int) activeVirtualDeviceCount;
     }
 
