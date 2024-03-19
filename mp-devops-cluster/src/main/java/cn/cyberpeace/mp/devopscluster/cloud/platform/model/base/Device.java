@@ -194,4 +194,7 @@ public class Device extends BaseCloudPlatformResult {
     }
 
     private Boolean supportExport;
+
+    @ApiModelProperty("靶场标识")
+    private String rangeTag;
 }

@@ -33,6 +33,8 @@ public abstract class BaseCsceneBO<
     private Boolean enableRecording;
     @ApiModelProperty(value = "是否只是部分启动")
     private Boolean supportPartialStart;
+    @ApiModelProperty(value = "联管中心中该拓扑的对应拓扑id")
+    private String manageCenterCsceneId;
     @Override
     public T export() {
         setId(null);

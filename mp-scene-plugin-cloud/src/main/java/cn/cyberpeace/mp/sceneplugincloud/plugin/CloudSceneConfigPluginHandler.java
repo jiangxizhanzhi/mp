@@ -3,8 +3,11 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
@@ -13,18 +16,24 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.validation.CloudScenePluginValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -281,5 +290,267 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     protected void validateData(BaseScenePluginDataBO validateData) {
         var validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
+    }
+
+    /**
+     * 多靶场需要预先初始化靶场直接连线。cidr, ip, gateway
+     */
+    @Override
+    public void initiate() {
+        Set<String> existCidrList = new HashSet<>();
+        existCidrList.addAll(
+                this.getElementMap().values().stream().map(BaseCloudPluginSceneElementBO::getCidr)
+                        .filter(StringUtils::isNoneBlank).collect(Collectors.toSet()));
+
+        Set<String> manualSetIps = this.getSceneHandler().getElementPortMap().values().stream()
+                .map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).collect(Collectors.toSet());
+        existCidrList.addAll(manualSetIps.stream().map(IpUtils::getIpDefault24Cidr).collect(Collectors.toSet()));
+
+
+        this.getElementMap().forEach((nodeId, pluginElement) -> {
+            boolean switchFlag = pluginElement.getSrcElement().getType() == BaseSceneElementModel.Type.SWITCH;
+            if (switchFlag) {
+                String cidr = pluginElement.getCidr();
+                if (StringUtils.isNotEmpty(cidr)) {
+                    //根据cidr，给连接的端口设置ip
+                    processSwitchConnectPortIpAndGateWay(nodeId, cidr, pluginElement);
+                } else {
+                    //1. 分配一个cidr
+                    cidr = getCidrFromElementAndConnectPorts(nodeId, existCidrList);
+                    existCidrList.add(cidr);
+                    processSwitchConnectPortIpAndGateWay(nodeId, cidr, pluginElement);
+                }
+            }
+        });
+
+        this.getElementMap().forEach((nodeId, pluginElement) -> {
+            boolean gatewayTypeFlag = gatewayTypeFlag(nodeId);
+
+            if (gatewayTypeFlag) {
+                //对于路由器（非核心）和防火墙来说，在同一默认网络的都是同一个cidr，其他用户设置了ip的，都是由ip计算cidr
+                String defaultRandomCidr = getRandomCidrs(1, new ArrayList<>(existCidrList)).get(0);
+                List<String> defaultRandomCidrExcludeIps = new ArrayList<>();
+                String defaultFromIp = "";
+
+                for (SceneConfigElementPortBO port : pluginElement.getSrcElement().getPorts()) {
+                    if (StringUtils.isNotEmpty(port.getGateway())) {
+                        continue;
+                    } else {
+                        SceneConfigElementPortBO connectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+
+                        String fromPortIp = port.getIp();
+                        String toPortIp = connectedPort.getIp();
+
+                        //完全随机生成cidr
+                        if (StringUtils.isEmpty(fromPortIp) && StringUtils.isEmpty(toPortIp)) {
+                            if (!ElementTypeUtils.isCoreRouter(pluginElement.getImage())) {
+
+                                if (StringUtils.isEmpty(defaultFromIp)) {
+                                    existCidrList.add(defaultRandomCidr);
+                                    List<String> computedIpPool = IpUtils.newRandomIps(defaultRandomCidr, 2, defaultRandomCidrExcludeIps, null, false);
+                                    defaultFromIp = computedIpPool.remove(0);
+                                    port.setIp(defaultFromIp);
+                                    connectedPort.setIp(computedIpPool.remove(0));
+
+                                    defaultRandomCidrExcludeIps.add(port.getIp());
+                                    defaultRandomCidrExcludeIps.add(connectedPort.getIp());
+
+                                } else {
+                                    List<String> computedIpPool = IpUtils.newRandomIps(defaultRandomCidr, 1, defaultRandomCidrExcludeIps, null, false);
+                                    connectedPort.setIp(computedIpPool.remove(0));
+                                    port.setIp(defaultFromIp);
+
+                                    defaultRandomCidrExcludeIps.add(connectedPort.getIp());
+                                }
+
+                            } else {
+                                String randomCidr = getRandomCidrs(1, new ArrayList<>(existCidrList)).get(0);
+                                existCidrList.add(randomCidr);
+                                List<String> computedIpPool = IpUtils.newRandomIps(defaultRandomCidr, 2, defaultRandomCidrExcludeIps, null, false);
+                                port.setIp(computedIpPool.remove(0));
+                                connectedPort.setIp(computedIpPool.remove(0));
+                            }
+
+                        } else if (StringUtils.isEmpty(fromPortIp)) {
+                            String cidrFromIp = IpUtils.getIpDefault24Cidr(toPortIp);
+                            String randomFromPortIp = IpUtils.newRandomIps(cidrFromIp, 1, Collections.singletonList(toPortIp), null, false).get(0);
+                            port.setIp(randomFromPortIp);
+
+
+                        } else if (StringUtils.isEmpty(toPortIp)) {
+                            String cidrFromIp = IpUtils.getIpDefault24Cidr(fromPortIp);
+                            String randomToPortIp = IpUtils.newRandomIps(cidrFromIp, 1, Collections.singletonList(toPortIp), null, false).get(0);
+                            connectedPort.setIp(randomToPortIp);
+                        }
+
+                        port.setGateway(fromPortIp);
+                        connectedPort.setGateway(fromPortIp);
+                    }
+
+
+
+
+                }
+            }
+        });
+    }
+
+    private String getCidrFromElementAndConnectPorts(String nodeId, Set<String> existCidrList) {
+        List<SceneConfigElementPortBO> currentNodePorts = getElement(nodeId).getSrcElement().getPorts();
+        List<String> cidrSetFromCurrentNodeIp = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(currentNodePorts)) {
+            cidrSetFromCurrentNodeIp = currentNodePorts.stream().map(SceneConfigElementPortBO::getIp).filter(StringUtils::isNoneBlank)
+                    .map(IpUtils::getIpDefault24Cidr).collect(Collectors.toList());
+
+        }
+
+        List<String> cidrSetFromConnectIp = getElementConnectedSrcPorts(nodeId).stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank)
+                .map(IpUtils::getIpDefault24Cidr).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(cidrSetFromConnectIp)) {
+            return cidrSetFromConnectIp.get(0);
+        } else if (CollectionUtils.isNotEmpty(cidrSetFromCurrentNodeIp)) {
+            return cidrSetFromCurrentNodeIp.get(0);
+        } else {
+            return getRandomCidrs(1, new ArrayList<>(existCidrList)).get(0);
+        }
+    }
+
+    private void processSwitchConnectPortIpAndGateWay(String nodeId, String cidr, CloudPluginSceneConfigElementBO pluginElement) {
+        checkSwitchConnectPortInCidr(nodeId, cidr, pluginElement.getSrcElement());
+        List<String> ipPool = getSwitchTypeConnectPortIpPool(nodeId, cidr);
+        setSwitchIpAndGateway(nodeId, ipPool);
+    }
+
+    private void checkSwitchConnectPortInCidr(String nodeId, String cidr, SceneConfigElementBO sceneConfigElementBO) {
+        List<SceneConfigElementPortBO> ports = this.getElementConnectedSrcPorts(nodeId);
+        String maskBit = cidr.split("/")[1];
+        if (CollectionUtils.isNotEmpty(ports)) {
+            boolean manualIpNotInSwitchCidr = ports.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).map(ip -> IpUtils.getIpCidrByMaskBit(ip, maskBit))
+                    .anyMatch(computedCidr -> !computedCidr.equals(cidr));
+            if (manualIpNotInSwitchCidr) {
+                throw new MpRuntimeException(String.format("节点%s连接的端口ip配置和该节点cidr配置冲突", sceneConfigElementBO.getName()));
+            }
+        }
+
+    }
+
+    private List<String> getRandomCidrs(int count, List<String> existCidrs) {
+        List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
+        return IpUtils.randomCidrs(cidrPool, count, existCidrs);
+    }
+
+    private List<String> getSwitchTypeConnectPortIpPool(String nodeId, String cidr) {
+        List<SceneConfigElementPortBO> elementPortList = this.getElementConnectedSrcPorts(nodeId);
+
+        List<String> excludeIps = new ArrayList<>();
+        List<String> manualSetIps = elementPortList.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).collect(Collectors.toList());
+        excludeIps.addAll(manualSetIps);
+
+        String gateway = this.getElement(nodeId).getGateway();
+
+        long notSetIpCount = elementPortList.stream().filter(port -> StringUtils.isEmpty(port.getIp())).count() + 1;
+
+        List<String> ipPool = new ArrayList<>();
+
+        if (StringUtils.isNotEmpty(gateway)) {
+            if (!manualSetIps.contains(gateway)) {
+                notSetIpCount = notSetIpCount - 1;
+                ipPool.add(gateway);
+            }
+            excludeIps.add(gateway);
+        }
+
+
+        List<String> computedIpPool = IpUtils.newRandomIps(cidr, (int) notSetIpCount, excludeIps, null, false);
+        ipPool.addAll(computedIpPool);
+        return ipPool;
+    }
+
+    private void setSwitchIpAndGateway(String nodeId, List<String> ipPool) {
+        if (CollectionUtils.isNotEmpty(ipPool)) {
+            ipPool.sort((o1, o2) -> (int) (Ipv4Util.ipv4ToLong(o1) - Ipv4Util.ipv4ToLong(o2)));
+        }
+
+        List<SceneConfigElementPortBO> elementPortList = this.getElementConnectedSrcPorts(nodeId);
+        String gatewayIp = null;
+
+        for (SceneConfigElementPortBO connectPort : elementPortList) {
+            if (StringUtils.isNotEmpty(connectPort.getIp())) {
+                return;
+            } else {
+                if (gatewayTypeFlag(connectPort.getElement().getId())) {
+                    connectPort.setIp(ipPool.remove(ipPool.size() - 1));
+                    if (StringUtils.isEmpty(gatewayIp)) {
+                        gatewayIp = connectPort.getIp();
+                    }
+                } else {
+                    connectPort.setIp(ipPool.remove(0));
+                }
+            }
+        }
+
+        List<SceneConfigElementPortBO> ports = getElement(nodeId).getSrcElement().getPorts();
+
+        if (CollectionUtils.isNotEmpty(ports)) {
+            ports.forEach(port -> port.setIp(ipPool.get(0)));
+            if (StringUtils.isEmpty(gatewayIp)) {
+                gatewayIp = ipPool.get(0);
+            }
+        }
+
+        gatewayIp = StringUtils.isEmpty(getElement(nodeId).getGateway()) ? gatewayIp : getElement(nodeId).getGateway();
+
+        for (SceneConfigElementPortBO connectPort : elementPortList) {
+            connectPort.setGateway(gatewayIp);
+        }
+        for (SceneConfigElementPortBO port : ports) {
+            port.setGateway(gatewayIp);
+        }
+    }
+
+    public boolean gatewayTypeFlag(String nodeId) {
+        return getElement(nodeId).getSrcElement().getType() == BaseSceneElementModel.Type.FIREWALL || BaseSceneElementModel.Type.ROUTER == getElement(nodeId).getSrcElement().getType();
+    }
+
+
+    public void initCoreType(CloudPluginSceneConfigElementBO element) {
+        Integer role = element.getRole();
+        CoreType coreType = CoreType.NETWORK;
+        if (role != null) {
+            if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
+                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
+            ) {
+                coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK_0;
+                } else {
+                    coreType = CoreType.FIREWALL;
+                }
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            }
+        }
+        element.setCoreType(coreType);
     }
 }

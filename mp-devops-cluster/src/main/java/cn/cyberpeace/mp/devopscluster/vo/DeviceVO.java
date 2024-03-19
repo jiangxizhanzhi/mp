@@ -185,6 +185,9 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("默认可运行的镜像名称")
     private String defaultLaunchImageName;
 
+    @ApiModelProperty("靶场标识")
+    private String rangeTag;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

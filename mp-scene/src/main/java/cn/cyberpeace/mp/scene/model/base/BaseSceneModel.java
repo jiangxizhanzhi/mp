@@ -22,6 +22,9 @@ public class BaseSceneModel extends BaseModel {
     private Boolean deleted;
     @DefaultInt(MultiSceneType.COMMON_SCENE)
     private Integer multiSceneType;
+    @DefaultStr
+    private String manageCenterSceneId;
+
 
     @Override
     public boolean hasDeleted() {

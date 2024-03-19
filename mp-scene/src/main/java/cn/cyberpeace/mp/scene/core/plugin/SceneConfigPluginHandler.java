@@ -26,4 +26,7 @@ public abstract class SceneConfigPluginHandler<S extends BasePluginSceneBO<?, S,
 
     private SceneConfigHandler sceneHandler;
 
+    public void initiate() throws Exception {
+    }
+
 }

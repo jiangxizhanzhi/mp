@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.bo;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @ApiModel(description = "场景模板数据")
 @Data
-public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
+public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> implements SnakeHttpData {
     @ApiModelProperty(value = "场景模板类型")
     private Integer type;
     @ApiModelProperty(value = "场景模板授权类型 0:私有 1:授权所有 2:共享")

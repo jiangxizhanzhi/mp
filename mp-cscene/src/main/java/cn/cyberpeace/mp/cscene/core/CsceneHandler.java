@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -22,7 +23,10 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -35,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -382,5 +387,48 @@ public class CsceneHandler extends BaseCsceneHandler<
                 });
             }
         }
+    }
+
+    public void updateSubRangeTopo(CsceneBO csceneBO) {
+
+        SceneConfigHandler originSceneConfigHandler = new SceneConfigHandler(this.getCscene().getSceneConfig(), null);
+        SceneConfigHandler updateSceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), null);
+
+
+        originSceneConfigHandler.getElementMap().forEach((nodeId, originElement) -> {
+            SceneConfigElementBO updateElement = updateSceneConfigHandler.getElementMap().get(nodeId);
+            BeanUtils.copyProperties(updateElement, originElement, "ports", "eid");
+        });
+
+        originSceneConfigHandler.getElementPortMap().forEach((portId, originElementPort) -> {
+            SceneConfigElementPortBO updateElementPort = updateSceneConfigHandler.getElementPortMap().get(portId);
+            BeanUtils.copyProperties(updateElementPort, originElementPort, "element", "eid");
+        });
+
+        originSceneConfigHandler.getPlugins().forEach(originPlugin -> {
+
+
+            var updatePlugin = updateSceneConfigHandler.getPluginMap().get(originPlugin.getKey());
+            var originPluginElementMap = originPlugin.getElementMap();
+            originPluginElementMap.forEach((nodeId, originPluginElement) -> {
+
+                var updatePluginElement = updateSceneConfigHandler.getPluginElement(originPlugin.getKey(), nodeId);
+                if (Objects.nonNull(updatePluginElement)) {
+                    BeanUtils.copyProperties(updatePluginElement, originPluginElement, "srcElement", "eid");
+                }
+            });
+
+            var originPluginElementPortMap = originPlugin.getElementPortMap();
+            originPluginElementPortMap.forEach((portId, originPluginElementPort) -> {
+
+                var updatePluginElementPort
+                        = updatePlugin.getElementPortMap().get(portId);
+                if (Objects.nonNull(updatePluginElementPort)) {
+                    BeanUtils.copyProperties(updatePluginElementPort, originPluginElementPort, "srcPort", "eid");
+                }
+            });
+        });
+
+
     }
 }

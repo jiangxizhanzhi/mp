@@ -1,17 +1,20 @@
 package cn.cyberpeace.mp.scene.core.sceneconfig;
 
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 场景模板的处理
  * 场景模板的功能由本类对外提供
  */
+@Slf4j
 @ClassFieldClasses({
         SceneConfigDataBO.class,
         SceneConfigTopologyBO.class,
@@ -88,6 +91,17 @@ public class SceneConfigHandler extends BaseSceneHandler<
     @Override
     public void beforeInitPlugin(SceneConfigPluginHandler<?, ?, ?, ?> plugin) {
         plugin.setSceneHandler(this);
+    }
+
+    public void initiate() {
+        try {
+            for (SceneConfigPluginHandler<?, ?, ?, ?> plugin : getPlugins()) {
+                plugin.initiate();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new MpRuntimeException("联管中心预初始化失败");
+        }
     }
 
 }

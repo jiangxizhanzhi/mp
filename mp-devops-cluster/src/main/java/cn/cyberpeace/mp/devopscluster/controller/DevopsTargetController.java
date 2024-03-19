@@ -209,6 +209,10 @@ public class DevopsTargetController {
                 deviceList.addAll(secondDeviceList);
             }
         }
+
+        if (StringUtils.isNotEmpty(request.getRangeTag()) && CollectionUtils.isNotEmpty(deviceList)) {
+            deviceList.forEach(device -> device.setRangeTag(request.getRangeTag()));
+        }
         return new ServiceResult<>(new ListResult<>(deviceList)).asResult();
     }
 
@@ -343,6 +347,11 @@ public class DevopsTargetController {
                 deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
             }
         }
+
+        if (StringUtils.isNotEmpty(request.getRangeTag()) && CollectionUtils.isNotEmpty(deviceVOList)) {
+            deviceVOList.forEach(deviceVO -> deviceVO.setRangeTag(request.getRangeTag()));
+        }
+
         return new ServiceResult<>(new ListResult<>(deviceVOList)).asResult();
 
     }

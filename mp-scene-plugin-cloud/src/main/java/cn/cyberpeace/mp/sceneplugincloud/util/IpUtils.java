@@ -563,4 +563,12 @@ public class IpUtils {
             return netIp + "/" + maskBit;
         }
     }
+
+    public static String getIpDefault24Cidr(String ip) {
+        return getFormatCidrIp(ip+"/24");
+    }
+
+    public static String getIpCidrByMaskBit(String ip, String maskBit) {
+        return getFormatCidrIp(ip + maskBit);
+    }
 }

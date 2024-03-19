@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.dto.scene.MultiSceneRegisterDto;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -17,6 +19,8 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
+import cn.cyberpeace.mp.scene.service.ManageCenterService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -24,18 +28,14 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -49,6 +49,9 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+    private MultiSceneConfig multiSceneConfig;
+    private ManageCenterService manageCenterService;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -268,5 +271,26 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    @ApiOperation("当前接口是否为联管中心")
+    @GetMapping("/multi_scene/check_node_type")
+    public ServiceResult<Boolean> checkNodeType() {
+        return new ServiceResult<>(multiSceneConfig.isManagerCenterFlag()).asResult();
+    }
+
+    @ApiOperation("获取当前联管中心注册的接口")
+    @GetMapping("/multi_scene/list_sub_node")
+    public ServiceResult<List<MultiSceneRegisterDto>> listMultiSceneSubNode() {
+        if (multiSceneConfig.isManagerCenterFlag()) {
+            List<MultiSceneRegisterDto> rangeDtoList = manageCenterService.getAllOnlineCyberRange().stream().map(rangeBo -> {
+                MultiSceneRegisterDto multiSceneRegisterDto = new MultiSceneRegisterDto();
+                BeanUtils.copyProperties(rangeBo, multiSceneRegisterDto);
+                return multiSceneRegisterDto;
+            }).collect(Collectors.toList());
+            return new ServiceResult<>(rangeDtoList).asResult();
+        } else {
+            throw new MpRuntimeException("非联管节点, 无注册子靶场");
+        }
     }
 }

@@ -20,7 +20,9 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -102,10 +104,20 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
-            LogFileUtil.getLogFile(cscene.getId());
-        }).getSource());
 
+        MultiSceneConfig multiSceneConfig = BeanCommon.getBean(MultiSceneConfig.class);
+        boolean manageCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
+                        .equals(cscene.getScene().getTopology().getScene().getMultiSceneType());
+        if (manageCenterOpenFlag) {
+            //推送启动消息
+        } else if (BaseSceneModel.MultiSceneType.SUB_CYBER_SCENE.equals(cscene.getScene().getTopology().getScene().getMultiSceneType())) {
+            //分靶场启动
+
+        } else {
+            cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
+                LogFileUtil.getLogFile(cscene.getId());
+            }).getSource());
+        }
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
         cscene.fromModel(csceneObj);
