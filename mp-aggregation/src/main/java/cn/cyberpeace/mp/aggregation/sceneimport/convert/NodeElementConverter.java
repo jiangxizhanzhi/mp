@@ -123,6 +123,7 @@ class NodeElementConverter implements IConverter {
                 pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.NPC);
                 pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
                 pluginElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+                sceneConfigElementBO.setIcon2(DefaultImgUtil.pathToFdfsUrl(CommonConstant.DefaultImageUrl.NPC));
             } else {
                 pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
             }
