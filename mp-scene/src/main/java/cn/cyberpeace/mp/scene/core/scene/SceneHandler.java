@@ -425,17 +425,17 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
+        // key未关联forceSave和withPlugins，会丢弃部分入库任务，最终入库
         delayTaskPool.execute(
                 getSceneId(),
-                StringUtils.joinWith(":", forceSave, withPlugins),
                 () -> ackSceneChanged(forceSave, withPlugins)
         );
     }
 
     public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
+        // key未关联forceSave和withPlugins，会丢弃部分入库任务，最终入库
         delayTaskPool.execute(
                 StringUtils.joinWith(":", getSceneId(), nodeId),
-                StringUtils.joinWith(":", forceSave, withPlugins),
                 () -> ackElementChanged(nodeId, forceSave, withPlugins)
         );
     }

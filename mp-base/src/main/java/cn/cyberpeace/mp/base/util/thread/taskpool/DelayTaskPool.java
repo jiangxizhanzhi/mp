@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.base.util.thread.taskpool;
 
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,17 +18,14 @@ public class DelayTaskPool {
 
     public static final Integer DEFAULT_POOL_SIZE = 10;
 
-    public static final String DEFAULT_TASK_SUB_KEY = "_";
-
     private final TaskPool taskPool;
 
     private final TaskPool runPool;
 
     /**
-     * 任务集合<任务key, 有序任务集合>
-     * 一个任务key下，可以有多个有序任务
+     * 任务集合<任务key, 任务>，相同任务key会覆盖
      */
-    private final Map<String, LinkedHashMap<String, Runnable>> taskMap = new ConcurrentHashMap<>();
+    private final Map<String, Runnable> taskMap = new ConcurrentHashMap<>();
 
     private Integer runDelay;
 
@@ -57,39 +54,13 @@ public class DelayTaskPool {
     /**
      * 添加任务
      * @param key 任务key
-     * @param subKey 任务子key
-     * @param task 任务
-     */
-    public void add(String key, String subKey, Runnable task) {
-        synchronized (taskMap) {
-            var orderedTasks = taskMap.getOrDefault(key, null);
-            if (orderedTasks == null) {
-                orderedTasks = new LinkedHashMap<>();
-            }
-            orderedTasks.remove(subKey);
-            orderedTasks.put(subKey, task);
-            taskMap.put(key, orderedTasks);
-        }
-    }
-
-    /**
-     * 添加任务
-     * @param key 任务key
      * @param task 任务
      */
     public void add(String key, Runnable task) {
-        add(key, DEFAULT_TASK_SUB_KEY, task);
-    }
-
-    /**
-     * 添加并执行任务
-     * @param key 任务key
-     * @param subKey 任务子key
-     * @param task 任务
-     */
-    public void execute(String key, String subKey, Runnable task) {
-        add(key, subKey, task);
-        runPool.executeTask(this::run);
+        Runnable formatTask = ThreadUtils.format(task);
+        synchronized (taskMap) {
+            taskMap.put(key, formatTask);
+        }
     }
 
     /**
@@ -121,7 +92,7 @@ public class DelayTaskPool {
         } catch (InterruptedException e) {
             log.error("Delay task pool run delay is interrupted: ", e);
         }
-        Map<String, LinkedHashMap<String, Runnable>> runTaskMap = null;
+        Map<String, Runnable> runTaskMap = null;
         synchronized (taskMap) {
             if (!taskMap.isEmpty()) {
                 runTaskMap = new HashMap<>(taskMap);
@@ -129,12 +100,7 @@ public class DelayTaskPool {
             }
         }
         if (runTaskMap != null) {
-            runTaskMap.forEach((key, orderedTasks) -> {
-                Runnable orderedTasksFunc = () -> {
-                    orderedTasks.forEach((subKey, task) -> task.run());
-                };
-                taskPool.executeTask(orderedTasksFunc, true);
-            });
+            runTaskMap.forEach((key, task) -> taskPool.executeTask(task, false));
         }
 
         var runNext = false;
