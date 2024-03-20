@@ -425,15 +425,19 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
-        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), forceSave, withPlugins), () -> {
-            ackSceneChanged(forceSave, withPlugins);
-        });
+        delayTaskPool.execute(
+                getSceneId(),
+                StringUtils.joinWith(":", forceSave, withPlugins),
+                () -> ackSceneChanged(forceSave, withPlugins)
+        );
     }
 
     public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
-        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), nodeId, forceSave, withPlugins), () -> {
-            ackElementChanged(nodeId, forceSave, withPlugins);
-        });
+        delayTaskPool.execute(
+                StringUtils.joinWith(":", getSceneId(), nodeId),
+                StringUtils.joinWith(":", forceSave, withPlugins),
+                () -> ackElementChanged(nodeId, forceSave, withPlugins)
+        );
     }
 
     public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
