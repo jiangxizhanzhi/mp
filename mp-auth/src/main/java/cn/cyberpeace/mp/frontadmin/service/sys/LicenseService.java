@@ -8,14 +8,12 @@ import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 

@@ -13,7 +13,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 

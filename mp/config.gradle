@@ -13,7 +13,6 @@ gradle.ext {
         'mp-situation-aware',
         'mp-log',
         'mp-flow',
-        'mp-front-admin',
         'mp-front-admin-business',
         'mp-front-business'
     ]

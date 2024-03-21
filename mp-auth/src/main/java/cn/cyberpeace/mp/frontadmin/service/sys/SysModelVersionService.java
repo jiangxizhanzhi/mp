@@ -5,8 +5,6 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
 import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
 
-import java.util.List;
-
 /**
  * @Description:
  * @Author: guquan
