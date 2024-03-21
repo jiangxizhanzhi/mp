@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.StaticRoutesResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
@@ -13,6 +15,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -55,20 +58,20 @@ public class SceneExporter {
         // 生成topo.yml
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
-            resultV1.getYmlResult().getNodes().forEach(n -> {
+            for (NodeElementParseResult n : resultV1.getYmlResult().getNodes()) {
                 if (StringUtils.isNotEmpty(n.getImage())) {
                     n.setImage(sceneNumber + n.getImage());
                 }
                 if (StringUtils.isNotEmpty(n.getImages())) {
                     n.setImages(sceneNumber + n.getImages());
                 }
-            });
+            }
         }
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
         SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(parseResult.getYmlResult().getNodes())) {
-            parseResult.getYmlResult().getNodes().forEach(n -> {
+            for (NodeElementParseResult n : parseResult.getYmlResult().getNodes()) {
                 if (StringUtils.isNotEmpty(n.getImage())) {
                     n.setImage(sceneNumber + n.getImage());
                 }
@@ -76,14 +79,14 @@ public class SceneExporter {
                     n.setImages(sceneNumber + n.getImages());
                 }
                 if (CollectionUtils.isNotEmpty(n.getStaticRouters())) {
-                    for (var sr : n.getStaticRouters()) {
+                    for (StaticRoutesResult sr : n.getStaticRouters()) {
                         if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
                             sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
                         }
                     }
                 }
                 if (CollectionUtils.isNotEmpty(n.getStaticRoutes())) {
-                    for (var sr : n.getStaticRoutes()) {
+                    for (StaticRoutesResult sr : n.getStaticRoutes()) {
                         if (StringUtils.isNotEmpty(sr.getNexthopNode())) {
                             sr.setNexthopNode(parseResult.getIdConvert().get(sr.getNexthopNode()));
                         }
@@ -92,12 +95,12 @@ public class SceneExporter {
                 if (n.getExtInfo() != null) {
                     ExtNodeInfo extNodeInfo = n.getExtInfo();
                     if (CollectionUtils.isNotEmpty(extNodeInfo.getPortProtocols())) {
-                        for (var p : extNodeInfo.getPortProtocols()) {
+                        for (ExtNodeInfo.PortProtocolExportInfo p : extNodeInfo.getPortProtocols()) {
                             p.setConnectNode(parseResult.getIdConvert().get(p.getConnectNode()));
                         }
                     }
                 }
-            });
+            }
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
@@ -109,19 +112,21 @@ public class SceneExporter {
         }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
-        parseResult.getIdConvert().forEach((k, v) -> {
+        for (Map.Entry<String, String> entry : parseResult.getIdConvert().entrySet()) {
+            String k = entry.getKey();
+            String v = entry.getValue();
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
             convertInfo.setId(v);
             convertInfo.setOriginId(k);
             convertInfos.add(convertInfo);
-        });
+        }
         exportResult.setConvertInfos(convertInfos);
         return exportResult;
     }
 
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
-            for (var device : devices) {
+            for (SceneParseResourceCenterV2.Device device : devices) {
                 String currentImageDir = null;
                 if (StringUtils.isNotEmpty(singleImagePath)) {
                     currentImageDir = singleImagePath;
@@ -136,13 +141,13 @@ public class SceneExporter {
                 ExportDeviceYmlParams params = new ExportDeviceYmlParams();
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
-                var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
+                CloudResponse<Map> result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
                 }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
-                var imageMap = result.getData();
+                Map imageMap = result.getData();
                 if (imageMap.containsKey("Cloud-init")) {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
                 }
-                var image = JsonCommon.mapToBean(imageMap, Image.class);
+                Image image = JsonCommon.mapToBean(imageMap, Image.class);
                 if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
                     String flavor = String.format("%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
                     image.set实例大小(formatFlavor(flavor));
@@ -193,7 +198,7 @@ public class SceneExporter {
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
                     List<AccessModeExportResult> normal = new ArrayList<>();
                     List<AccessModeExportResult> manage = new ArrayList<>();
-                    for (var m : device.getAccessModes()) {
+                    for (AccessMode m : device.getAccessModes()) {
                         AccessModeExportResult accessModeParseResult = new AccessModeExportResult();
                         accessModeParseResult.setDesc(m.getDesc());
                         if (StringUtils.isNotEmpty(m.getPath())) {
@@ -301,7 +306,7 @@ public class SceneExporter {
     }
 
     private void downloadNodeFile(String envPath, Map<String, String> file2Download) {
-        for (var entry : file2Download.entrySet()) {
+        for (Map.Entry<String, String> entry : file2Download.entrySet()) {
             // 下载附件
             String fdfsFilePath = entry.getValue();
             if (StringUtils.contains(entry.getValue(), "?")) {

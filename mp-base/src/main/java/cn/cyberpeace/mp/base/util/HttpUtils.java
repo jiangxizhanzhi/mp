@@ -433,7 +433,7 @@ public class HttpUtils {
     public static String sendDelete(String url) throws IOException {
         log.info("请求地址================>{}", url);
         HttpClient client = HttpClientBuilder.create().build();
-        var httpDelete = new HttpDelete(url);
+        HttpDelete httpDelete = new HttpDelete(url);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
@@ -471,12 +471,12 @@ public class HttpUtils {
      */
     public static HttpResponse sendGetDownLoadWithDigestAuth(String url, String userName,
                                                              String password) throws IOException {
-        var credentialsProvider = new BasicCredentialsProvider();
-        var usernamePasswordCredentials = new UsernamePasswordCredentials(userName, password);
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(userName, password);
         credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
         CloseableHttpClient client =
                 HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
-        var httpGet = new HttpGet(url);
+        HttpGet httpGet = new HttpGet(url);
 
         httpGet.setHeader("Accept-Encoding", "gzip, deflate");
         httpGet.setHeader("Accept", "*/*");
@@ -484,8 +484,8 @@ public class HttpUtils {
     }
 
     private static CloseableHttpClient withDigestAuth(String userName, String password) {
-        var credentialsProvider = new BasicCredentialsProvider();
-        var usernamePasswordCredentials = new UsernamePasswordCredentials(userName, password);
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(userName, password);
         credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
         CloseableHttpClient client =
                 HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();

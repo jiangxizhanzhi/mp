@@ -41,14 +41,14 @@ public class NpcClearJob extends AbstractClearJob<NpcGetData> {
     @Override
     protected Map<String, NpcGetData> getEid2Node(List<NpcGetData> npcs) {
         Map<String, NpcGetData> result = new HashMap<>();
-        npcs.forEach(npc -> {
-            if (npc.getNodeName() != null) {
-                String eid = super.getEid(npc.getNodeName());
+        for (NpcGetData npcGetData : npcs) {
+            if (npcGetData.getNodeName() != null) {
+                String eid = super.getEid(npcGetData.getNodeName());
                 if (StringUtils.isNotEmpty(eid)) {
-                    result.put(eid, npc);
+                    result.put(eid, npcGetData);
                 }
             }
-        });
+        }
         return result;
     }
 

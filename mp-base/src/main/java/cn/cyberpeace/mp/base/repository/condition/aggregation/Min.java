@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 public class Min extends Aggregation<Min> {
 
     public static Min f(String fieldName) {
-        var aggregation = new Min();
+        Min aggregation = new Min();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +53,16 @@ public class SupportExportConvert {
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
         Map<String, DeviceTargetPO> supportExports = new HashMap<>();
-        deviceTargetPOS.stream().forEach(d -> {
+        for (DeviceTargetPO d : deviceTargetPOS) {
             supportExports.put(d.getUuid(), d);
-        });
+        }
 
-        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = new ArrayList<>();
+        for (DeviceTargetPO po : deviceTargetPOS) {
+            String id = po.getId();
+            Integer parseInt = Integer.parseInt(id);
+            ids.add(parseInt);
+        }
         if (CollectionUtils.isEmpty(ids)) {
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
@@ -69,15 +75,33 @@ public class SupportExportConvert {
             return imageConvertPageModel;
         }
 
-        List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
+        List<String> targetUuids = new ArrayList<>();
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            String uuid = targetPO.getUuid();
+            targetUuids.add(uuid);
+        }
 
         List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
 
-        Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
+        Map<String, Integer> imageAuthTotalCountsMap = new HashMap<>();
+        for (ImageAuthTotalCount imageAuthTotalCount : imageAuthTotalCounts) {
+            if (imageAuthTotalCountsMap.put(imageAuthTotalCount.getTarget(), imageAuthTotalCount.getTotal()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
-        Map<String, PublicEnum> targetMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getIsPublic));
+        Map<String, PublicEnum> targetMap = new HashMap<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            if (targetMap.put(deviceTargetPO.getUuid(), deviceTargetPO.getIsPublic()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
-        List<ImageConvertModel> modelList = deviceList.stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
+        List<ImageConvertModel> modelList = new ArrayList<>();
+        for (Device device : deviceList) {
+            ImageConvertModel convertModel = wrapperImageConvertModel(device);
+            modelList.add(convertModel);
+        }
 
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (ImageConvertModel imageConvertModel : modelList) {

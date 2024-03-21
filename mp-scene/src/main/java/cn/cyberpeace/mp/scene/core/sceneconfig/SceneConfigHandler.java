@@ -1,45 +1,39 @@
 package cn.cyberpeace.mp.scene.core.sceneconfig;
 
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigTopologyBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
-import cn.cyberpeace.mp.scene.model.*;
-import cn.cyberpeace.mp.scene.repository.*;
+import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementPluginModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigPieceModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementPluginMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementPortConnectionMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigPieceMapper;
+
+import java.lang.reflect.Field;
 
 /**
  * 场景模板的处理
  * 场景模板的功能由本类对外提供
  */
-@ClassFieldClasses({
-        SceneConfigDataBO.class,
-        SceneConfigTopologyBO.class,
-        SceneConfigBO.class,
-        SceneConfigAreaBO.class,
-        SceneConfigElementBO.class,
-        SceneConfigElementPortBO.class,
-        SceneConfigElementPortConnectionBO.class,
-        SceneConfigPieceBO.class,
-        SceneConfigModel.class,
-        SceneConfigAreaModel.class,
-        SceneConfigElementModel.class,
-        SceneConfigElementPortModel.class,
-        SceneConfigElementPortConnectionModel.class,
-        SceneConfigElementPluginModel.class,
-        SceneConfigPieceModel.class,
-        SceneConfigPluginHandler.class,
-        SceneConfigHandler.class,
-})
-@BeanFieldClasses({
-        SceneConfigMapper.class,
-        SceneConfigAreaMapper.class,
-        SceneConfigElementMapper.class,
-        SceneConfigElementPortMapper.class,
-        SceneConfigElementPortConnectionMapper.class,
-        SceneConfigElementPluginMapper.class,
-        SceneConfigPieceMapper.class,
-})
 public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigModel,
         SceneConfigAreaModel,
@@ -56,13 +50,6 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigPieceBO,
         SceneConfigTopologyBO,
         SceneConfigDataBO,
-        SceneConfigMapper,
-        SceneConfigAreaMapper,
-        SceneConfigElementMapper,
-        SceneConfigElementPortMapper,
-        SceneConfigElementPortConnectionMapper,
-        SceneConfigElementPluginMapper,
-        SceneConfigPieceMapper,
         SceneConfigContextBO,
         SceneConfigPluginHandler<?, ?, ?, ?>,
         SceneConfigHandler> {
@@ -83,6 +70,40 @@ public class SceneConfigHandler extends BaseSceneHandler<
 
     public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode, SceneConfigContextBO context) {
         init(sceneId, areaId, isAreaMode, context);
+    }
+
+    @Override
+    protected void initMapper() {
+        super.sceneMapper = BeanCommon.getBean(SceneConfigMapper.class);
+        super.sceneAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
+        super.sceneElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
+        super.sceneElementPortMapper = BeanCommon.getBean(SceneConfigElementPortMapper.class);
+        super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneConfigElementPortConnectionMapper.class);
+        super.sceneElementPluginMapper = BeanCommon.getBean(SceneConfigElementPluginMapper.class);
+        super.scenePieceMapper = BeanCommon.getBean(SceneConfigPieceMapper.class);
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneDataBOClass = SceneConfigDataBO.class;
+        super.sceneTopologyBOClass = SceneConfigTopologyBO.class;
+        super.sceneBOClass = SceneConfigBO.class;
+        super.sceneAreaBOClass = SceneConfigAreaBO.class;
+        super.sceneElementBOClass = SceneConfigElementBO.class;
+        super.sceneElementPortBOClass = SceneConfigElementPortBO.class;
+        super.sceneElementPortConnectionBOClass = SceneConfigElementPortConnectionBO.class;
+        super.scenePieceBOClass = SceneConfigPieceBO.class;
+        super.sceneModelClass = SceneConfigModel.class;
+        super.sceneAreaModelClass = SceneConfigAreaModel.class;
+        super.sceneElementModelClass = SceneConfigElementModel.class;
+        super.sceneElementPortModelClass = SceneConfigElementPortModel.class;
+        super.sceneElementPortConnectionModelClass = SceneConfigElementPortConnectionModel.class;
+        super.sceneElementPluginModelClass = SceneConfigElementPluginModel.class;
+        super.scenePieceModelClass = SceneConfigPieceModel.class;
+        super.sceneHandlerClass = SceneConfigHandler.class;
+
+        Field field = ClassUtils.getField(this.getClass(), "scenePluginHandlerInterface", true, false);
+        ClassUtils.setFieldValue(field, this, SceneConfigPluginHandler.class);
     }
 
     @Override

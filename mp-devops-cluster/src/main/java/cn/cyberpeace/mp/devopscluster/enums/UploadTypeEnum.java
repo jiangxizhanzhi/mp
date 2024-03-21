@@ -26,9 +26,9 @@ public enum UploadTypeEnum {
     private static Map<String, UploadTypeEnum> map = new ConcurrentHashMap<>();
 
     static {
-        Arrays.stream(UploadTypeEnum.values()).forEach(
-                t -> map.put(t.getDesc(), t)
-        );
+        for (UploadTypeEnum t : UploadTypeEnum.values()) {
+            map.put(t.getDesc(), t);
+        }
     }
 
     @JsonCreator

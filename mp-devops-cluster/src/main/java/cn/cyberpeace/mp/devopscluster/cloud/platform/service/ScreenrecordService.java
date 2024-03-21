@@ -123,14 +123,14 @@ public class ScreenrecordService extends BaseCpService {
         log.info("page screenrecord response: {}", pageResponse);
 
         // 获取该场景的所有节点id，因为可能已经删除了一部分节点
-        var ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
+        List<String> ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
 
         List<ScreenrecordVO> responseList = new ArrayList<>();
         Integer count = 0;
         if (Objects.nonNull(pageResponse) && CollectionUtils.isNotEmpty(pageResponse.getRecord())) {
             count = pageResponse.getTotalnum();
             Set<String> existUserIds = new HashSet<>();
-            pageResponse.getRecord().forEach(record -> {
+            for (ScreenrecordPageVO.Record record : pageResponse.getRecord()) {
                 if (ids.size() == 0 || ids.contains(record.getHostId())) {
                     // 结果转换
                     ScreenrecordVO response = new ScreenrecordVO();
@@ -138,19 +138,21 @@ public class ScreenrecordService extends BaseCpService {
                     responseList.add(response);
                     existUserIds.add(response.getUserId());
                 }
-            });
+            }
             // 处理头像
             if (!existUserIds.isEmpty()) {
                 List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
                 if (CollectionUtils.isNotEmpty(users)) {
                     Map<String, UserBo> userId2Bo = new HashMap<>();
-                    users.forEach(u -> userId2Bo.put(u.getId(), u));
-                    responseList.forEach(res -> {
+                    for (UserBo u : users) {
+                        userId2Bo.put(u.getId(), u);
+                    }
+                    for (ScreenrecordVO res : responseList) {
                         if (userId2Bo.containsKey(res.getUserId())) {
-                            var userBo = userId2Bo.get(res.getUserId());
+                            UserBo userBo = userId2Bo.get(res.getUserId());
                             res.setUserAvatar(userBo.getAvatar());
                         }
-                    });
+                    }
                 }
             }
         }
@@ -280,7 +282,9 @@ public class ScreenrecordService extends BaseCpService {
     public ServiceResult<Boolean> batchDeleteScreenRecord(ScreenrecordBatchDeleteRequest request) {
         JSONObject delObj = new JSONObject();
         JSONArray delArray = new JSONArray();
-        request.getRecordNames().forEach(name -> delArray.add(name));
+        for (String name : request.getRecordNames()) {
+            delArray.add(name);
+        }
         delObj.put("recording_file", delArray);
 
         ScreenrecordDelVO delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
@@ -343,7 +347,7 @@ public class ScreenrecordService extends BaseCpService {
 
     public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
         RecordRestoreLimitConfigResult result = new Remote().getRecordRestoreLimitConfig();
-        var config = new ScreenRecordRestoreConfigVO();
+        ScreenRecordRestoreConfigVO config = new ScreenRecordRestoreConfigVO();
         config.setFileLimitSpace(result.getCleanRecordFileLimitSpace());
         config.setFileLimitTime(result.getCleanRecordFileLimitTime());
         return new ServiceResult<>(config);

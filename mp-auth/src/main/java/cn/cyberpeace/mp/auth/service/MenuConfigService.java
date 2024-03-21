@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.MenuTemplateModel;
 import cn.cyberpeace.mp.auth.model.MenuTemplateRoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateMapper;
 import cn.cyberpeace.mp.auth.repository.MenuTemplateRoleMapper;
@@ -44,17 +45,23 @@ public class MenuConfigService {
 
     public List<TargetBo> getUserTreeMenuBy(String userId, List<String> authorityMenuIds) {
         String userMenuTemplateId = "1";
-        var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
+        List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         if (CollectionUtils.isNotEmpty(roles)) {
             String roleId = roles.get(0).getRole();
-            var roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
+            MenuTemplateRoleModel roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
             if (roleMenuTemplate != null) {
                 userMenuTemplateId = roleMenuTemplate.getTemplateId();
             }
         }
         List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
         Set<String> authorityMenuIdsSet = new HashSet<>(authorityMenuIds);
-        targets = targets.stream().filter(t -> authorityMenuIdsSet.contains(t.getIdentifier())).collect(Collectors.toList());
+        List<MenuTemplateModel> list = new ArrayList<>();
+        for (MenuTemplateModel t : targets) {
+            if (authorityMenuIdsSet.contains(t.getIdentifier())) {
+                list.add(t);
+            }
+        }
+        targets = list;
         if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
@@ -78,8 +85,8 @@ public class MenuConfigService {
     }
 
     public List<TargetBo> getTree() {
-        var user = UserUtils.getLoginUser();
-        var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, user.getId()).orderBy(UserRoleModel::getPk));
+        UserModel user = UserUtils.getLoginUser();
+        List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, user.getId()).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
         if (CollectionUtils.isEmpty(roles)) {
             targets = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
@@ -143,11 +150,11 @@ public class MenuConfigService {
     }
 
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
 }

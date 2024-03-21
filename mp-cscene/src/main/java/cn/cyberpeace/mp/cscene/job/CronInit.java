@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.init;
+package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.cscene.init.jobs.SceneNodeNumInitJob;
 import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
@@ -41,7 +41,7 @@ public class CronInit {
         jobs.add(cloudMessageConvertInitJob);
         jobs.add(cloudLocalFileMappingInitJob);
         jobs.add(sceneNodeNumInitJob);
-        for (var job : jobs) {
+        for (AbstractInitJob job : jobs) {
             try {
                 job.executed();
             } catch (Exception e) {

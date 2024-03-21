@@ -9,6 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,15 +37,15 @@ public class Application {
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-            var localHost = "localhost";
-            var serverProperties = BaseSingleton.baseAppConfig.getServerProperties();
-            var protocol = (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) ? "https" : "http";
-            var hostAddress = serverProperties.getAddress() == null ? InetAddress.getLocalHost().getHostAddress() : serverProperties.getAddress().getHostAddress();
-            var port= serverProperties.getPort();
-            var contextPath = serverProperties.getServlet().getContextPath();
+            String localHost = "localhost";
+            ServerProperties serverProperties = BaseSingleton.baseAppConfig.getServerProperties();
+            String protocol = (serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled()) ? "https" : "http";
+            String hostAddress = serverProperties.getAddress() == null ? InetAddress.getLocalHost().getHostAddress() : serverProperties.getAddress().getHostAddress();
+            Integer port= serverProperties.getPort();
+            String contextPath = serverProperties.getServlet().getContextPath();
             contextPath = StringUtils.isEmpty(contextPath) ? StringUtils.EMPTY : contextPath;
-            var localServer = String.format("%s://%s:%d%s", protocol, localHost, port, contextPath);
-            var server = String.format("%s://%s:%d%s", protocol, hostAddress, port, contextPath);
+            String localServer = String.format("%s://%s:%d%s", protocol, localHost, port, contextPath);
+            String server = String.format("%s://%s:%d%s", protocol, hostAddress, port, contextPath);
             List<String> serverLines = new ArrayList<>() {{
                 add(StringUtils.EMPTY);
                 add("----------------------------------------------------------");

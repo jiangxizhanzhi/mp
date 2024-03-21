@@ -109,7 +109,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
 
         if (CollectionUtils.isNotEmpty(scriptParamModels)) {
             JSONObject paramObj = new JSONObject();
-            scriptParamModels.forEach(param -> {
+            for (FlowScriptParamModel param : scriptParamModels) {
                 JSONArray paramArray = new JSONArray();
                 String type;
                 if (param.getParamType() == ParamTypeEnum.STRING.toValue()) {
@@ -128,7 +128,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
                 // 参数说明
                 paramArray.add(param.getParamDesc());
                 paramObj.put(param.getParamKey(), paramArray);
-            });
+            }
             setParameter(paramObj.toJSONString());
         }
         setFileName(flowInfoModel.getFileName());

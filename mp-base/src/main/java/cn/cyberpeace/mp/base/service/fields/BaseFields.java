@@ -118,11 +118,13 @@ public abstract class BaseFields {
             DynamicFields validOrderFields = getValidOrderFields(uncertainOrderFields);
             if (validOrderFields != null) {
                 List<String> validOrderList = new ArrayList<>();
-                fieldNameOrderMap.forEach((fieldName, order) -> {
+                for (Map.Entry<String, String> entry : fieldNameOrderMap.entrySet()) {
+                    String fieldName = entry.getKey();
+                    String order = entry.getValue();
                     if (validOrderFields.hasField(fieldName)) {
                         validOrderList.add(order);
                     }
-                });
+                }
                 validOrders = validOrderList.toArray(new String[0]);
             }
 

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devopscluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
 import cn.cyberpeace.mp.devopscluster.vo.SerialPortVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -102,7 +104,7 @@ public class TypeController {
         TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
         TypeAllVO allResponse = new TypeAllVO();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
-        var firstTypeList = Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null;
+        List<TypeConvertModel> firstTypeList = Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null;
         if (CollectionUtils.isNotEmpty(firstTypeList)) {
             for (int i = 0; i < firstTypeList.size(); i++) {
                 if (firstTypeList.get(i).getId() == 5) {
@@ -152,7 +154,13 @@ public class TypeController {
         }
         if (Objects.nonNull(firstTypeId)) {
             List<TargetType> l2AndL3TypeList = l1AndL2AndL3Type.getList();
-            l2AndL3TypeList = l2AndL3TypeList.stream().filter(type -> Objects.equals(firstTypeId, type.getId())).collect(Collectors.toList());
+            List<TargetType> list = new ArrayList<>();
+            for (TargetType type : l2AndL3TypeList) {
+                if (Objects.equals(firstTypeId, type.getId())) {
+                    list.add(type);
+                }
+            }
+            l2AndL3TypeList = list;
             l1AndL2AndL3Type.setList(l2AndL3TypeList);
         }
         return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));

@@ -65,12 +65,12 @@ public class TimeUtils {
     }
 
     public static LocalDateTime utcStringToLocalDateTime(String utcDateTimeStr) {
-        var zonedDatetime = ZonedDateTime.parse(utcDateTimeStr, utcDateTimeFormatter);
+        ZonedDateTime zonedDatetime = ZonedDateTime.parse(utcDateTimeStr, utcDateTimeFormatter);
         return zonedDatetime.withZoneSameInstant(TimeZone.getDefault().toZoneId()).toLocalDateTime();
     }
 
     public static String localDateTimeToUtcString(LocalDateTime localDateTime) {
-        var zonedDatetime = localDateTime.atZone(TimeZone.getDefault().toZoneId());
+        ZonedDateTime zonedDatetime = localDateTime.atZone(TimeZone.getDefault().toZoneId());
         return zonedDatetime.format(utcDateTimeFormatter);
     }
 

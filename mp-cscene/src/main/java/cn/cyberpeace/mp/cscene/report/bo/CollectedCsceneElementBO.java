@@ -18,7 +18,7 @@ public class CollectedCsceneElementBO extends CollectedSceneElementBO {
     private String callAction;
 
     public static CollectedCsceneElementBO fromCollectedSceneElementBO(CollectedSceneElementBO collectedSceneElementBO) {
-        var collectedCsceneElementBO = new CollectedCsceneElementBO();
+        CollectedCsceneElementBO collectedCsceneElementBO = new CollectedCsceneElementBO();
         collectedCsceneElementBO.setSceneId(collectedSceneElementBO.getSceneId());
         collectedCsceneElementBO.setSceneElement(collectedSceneElementBO.getSceneElement());
         collectedCsceneElementBO.setSceneElementPluginData(collectedSceneElementBO.getSceneElementPluginData());

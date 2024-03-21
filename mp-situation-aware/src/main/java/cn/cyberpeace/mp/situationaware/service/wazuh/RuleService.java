@@ -37,13 +37,13 @@ public class RuleService extends RequestProcessor {
      * @return 规则
      */
     public ListObjServiceResult<Rule> pageRules(BasePageRequest pageRequest) {
-        var uri = "/rules";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/rules";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(pageRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Rule> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         List<Rule> rules = result.getData().getAffectedItems();

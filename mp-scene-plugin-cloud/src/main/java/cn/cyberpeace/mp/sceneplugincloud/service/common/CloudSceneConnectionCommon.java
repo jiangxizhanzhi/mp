@@ -12,6 +12,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.Data;
@@ -64,20 +66,20 @@ public class CloudSceneConnectionCommon {
     }
 
     public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
-        var sceneId = param.getSceneId();
-        var sceneElementId = param.getSceneElementId();
-        var sceneElementPortId = param.getSceneElementPortId();
-        var cloudAccessMode = param.getCloudAccessMode();
-        var userId = param.getUserId();
-        var accessModeId = cloudAccessMode.getId();
+        String sceneId = param.getSceneId();
+        String sceneElementId = param.getSceneElementId();
+        String sceneElementPortId = param.getSceneElementPortId();
+        CloudAccessMode cloudAccessMode = param.getCloudAccessMode();
+        String userId = param.getUserId();
+        String accessModeId = cloudAccessMode.getId();
         if (StringUtils.isEmpty(accessModeId)) {
             log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access mode id",
                     sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
             return null;
         }
 
-        var isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
-        var isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
+        boolean isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
+        boolean isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
         if ((!isConsole && !isCom) && StringUtils.isEmpty(cloudAccessMode.getAccessIp())) {
             log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access ip",
                     sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
@@ -97,12 +99,12 @@ public class CloudSceneConnectionCommon {
         }
 
         // console信息可能会变，获取最新的console信息
-        var resourceId = param.getResourceId();
-        var resourceHost = param.getResourceHost();
-        var accessIp = sceneConnection == null ? cloudAccessMode.getAccessIp() : sceneConnection.getAccessIp();
-        var accessPort = sceneConnection == null ? cloudAccessMode.getAccessPort() : sceneConnection.getAccessPort();
+        String resourceId = param.getResourceId();
+        String resourceHost = param.getResourceHost();
+        String accessIp = sceneConnection == null ? cloudAccessMode.getAccessIp() : sceneConnection.getAccessIp();
+        Integer accessPort = sceneConnection == null ? cloudAccessMode.getAccessPort() : sceneConnection.getAccessPort();
         if (isConsole && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            var vmClient = new VirtualMachine();
+            VirtualMachine vmClient = new VirtualMachine();
             ConsoleInfoGetResult consoleInfo = null;
             try {
                 consoleInfo = vmClient.getConsoleInfo(resourceId, resourceHost);
@@ -111,8 +113,8 @@ public class CloudSceneConnectionCommon {
             }
             // console信息不同，需要创建新的连接
             if (consoleInfo != null) {
-                var latestConsoleIp = consoleInfo.getIpAddress();
-                var latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
+                String latestConsoleIp = consoleInfo.getIpAddress();
+                Integer latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
                 if (latestConsoleIp != null) {
                     sceneConnection = null;
                     accessIp = latestConsoleIp;
@@ -122,7 +124,7 @@ public class CloudSceneConnectionCommon {
                 log.error("Get instance({}, {}) console empty info", resourceHost, resourceId);
             }
         } else if (isCom && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            var vmClient = new VirtualMachine();
+            VirtualMachine vmClient = new VirtualMachine();
             ComInfoGetResult comInfoGetResult = null;
             try {
                 comInfoGetResult = vmClient.getComInfo(resourceId, resourceHost);
@@ -131,8 +133,8 @@ public class CloudSceneConnectionCommon {
             }
             // com信息不同，需要创建新的连接
             if (comInfoGetResult != null) {
-                var latestConsoleIp = comInfoGetResult.getIpAddress();
-                var latestConsolePort = IntUtils.fromStr(comInfoGetResult.getPort());
+                String latestConsoleIp = comInfoGetResult.getIpAddress();
+                Integer latestConsolePort = IntUtils.fromStr(comInfoGetResult.getPort());
                 if (latestConsoleIp != null
                         && (!latestConsoleIp.equals(accessIp) || !latestConsolePort.equals(accessPort))) {
                     sceneConnection = null;
@@ -164,16 +166,16 @@ public class CloudSceneConnectionCommon {
             sceneConnection.setAccessPort(accessPort);
         }
 
-        var dataUpdateFlag = false;
-        var remoteClient = new Remote();
+        boolean dataUpdateFlag = false;
+        Remote remoteClient = new Remote();
         if (StringUtils.isEmpty(sceneConnection.getConnectionId())) {
-            var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
+            GuacamoleCreateConnectionData guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
             guacamoleCreateConnectionData.setScene(param.getSceneName());
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
             guacamoleCreateConnectionData.setHost(param.getResourceHost());
             guacamoleCreateConnectionData.setFlag(false);
-            var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
+            GuacamoleCreateConnectionData.ConnectionParams connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
             // 协议的特殊处理
             String protocol = null;
             if (Boolean.TRUE.equals(param.getEntity()) && sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
@@ -203,7 +205,7 @@ public class CloudSceneConnectionCommon {
             }
             connectionParams.setHostname(sceneConnection.getAccessIp());
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
-            var result = remoteClient.createConnection(guacamoleCreateConnectionData);
+            GuacamoleCreateConnectionResult result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
                 log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
                 return null;
@@ -213,7 +215,7 @@ public class CloudSceneConnectionCommon {
             }
         }
 
-        var result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
+        GuacamoleGetConnectionUrlResult result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
         if (result == null || StringUtils.isEmpty(result.getUrl())) {
             log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
         } else {
@@ -234,15 +236,15 @@ public class CloudSceneConnectionCommon {
 
     public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,
                                           SceneConnectionEnableRecordingExtraParam extraParam) {
-        var connectionId = sceneConnection.getConnectionId();
+        String connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
-        var result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(), extraParam.getSceneId(),
+        Remote remoteClient = new Remote();
+        String result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(), extraParam.getSceneId(),
                 extraParam.getNodeName(), extraParam.getNodeId(), extraParam.getUsername(), extraParam.getDepartment());
-        var flag = !StringUtils.isEmpty(result);
+        boolean flag = !StringUtils.isEmpty(result);
         if (flag) {
             sceneConnection.setConnectionEnableRecording(true);
             sceneConnection.setConnectionRecordingName(result);
@@ -253,14 +255,14 @@ public class CloudSceneConnectionCommon {
     }
 
     public static boolean disableRecording(CloudPluginSceneConnectionModel sceneConnection) {
-        var connectionId = sceneConnection.getConnectionId();
+        String connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
-        var result = remoteClient.disableRecording(connectionId);
-        var flag = !StringUtils.isEmpty(result);
+        Remote remoteClient = new Remote();
+        String result = remoteClient.disableRecording(connectionId);
+        boolean flag = !StringUtils.isEmpty(result);
         if (flag) {
             sceneConnection.setConnectionEnableRecording(false);
             sceneConnection.setConnectionRecordingName(result);
@@ -271,14 +273,14 @@ public class CloudSceneConnectionCommon {
     }
 
     public static boolean convertRecording(CloudPluginSceneConnectionModel sceneConnection) {
-        var connectionId = sceneConnection.getConnectionId();
+        String connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
-        var result = remoteClient.convertRecording(connectionId);
-        var flag = !StringUtils.isEmpty(result);
+        Remote remoteClient = new Remote();
+        String result = remoteClient.convertRecording(connectionId);
+        boolean flag = !StringUtils.isEmpty(result);
         sceneConnection.setDisable(true);
         if (flag) {
             sceneConnection.setConnectionRecordingName(result);

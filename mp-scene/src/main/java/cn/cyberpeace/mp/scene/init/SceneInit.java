@@ -1,12 +1,9 @@
 package cn.cyberpeace.mp.scene.init;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.config.SceneAppConfig;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -21,11 +18,6 @@ public class SceneInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        // 预热下SceneHandler中的属性,避免服务一启动就有高并发启动场景
-        // 因为通过 FactoryBeanRegistrySupport.getObjectFromFactoryBean 获取bean有排它锁
-        var sceneHandler = new SceneHandler();
-        ClassUtils.loadClassFields(sceneHandler);
-        BeanCommon.loadBeanFields(sceneHandler);
         // 本地开发环境不运行资源的更新和删除
         if (!sceneAppConfig.getBaseAppConfig().isRunInit()) {
             return;

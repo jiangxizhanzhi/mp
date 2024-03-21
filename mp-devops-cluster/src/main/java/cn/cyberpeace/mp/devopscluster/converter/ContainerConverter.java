@@ -15,6 +15,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -63,24 +64,47 @@ public class ContainerConverter implements BaseConverter {
         if (CollectionUtils.isEmpty(containers)){
             return Lists.newArrayList();
         }
-        return containers.stream().map(containerModel -> {
-            ContainerBO response = ContainerBO.builder()
-                        .id(containerModel.getId())
-                        .name(containerModel.getName()).image(containerModel.getImage())
-                        .node(containerModel.getHost())
-                        .status(containerModel.getStatus())
-                        .createdAt(containerModel.getCreatedAt())
-                        .runningTime(containerModel.getRunningTime())
-                        .build();
-                Map<String, Object> addresses = containerModel.getAddresses();
-                if (MapUtils.isNotEmpty(addresses)) {
-                    List<ContainerModel.Address> addressList = addresses.values().stream()
-                            .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v), ContainerModel.Address.class))
-                            .flatMap(List::stream).collect(Collectors.toList());
-                    response.setAddressList(addressList.stream().map(ContainerModel.Address::getAddr).collect(Collectors.toList()));
-                    response.setVlanIdList(addressList.stream().filter(v -> Objects.nonNull(v.getVlanId())).map(ContainerModel.Address::getVlanId).collect(Collectors.toList()));
+        List<ContainerBO> list = new ArrayList<>();
+        for (ContainerModel containerModel : containers) {
+            ContainerBO containerBO = getContainerBO(containerModel);
+            list.add(containerBO);
+        }
+        return list;
+    }
+
+    private static ContainerBO getContainerBO(ContainerModel containerModel) {
+        ContainerBO response = ContainerBO.builder()
+                    .id(containerModel.getId())
+                    .name(containerModel.getName()).image(containerModel.getImage())
+                    .node(containerModel.getHost())
+                    .status(containerModel.getStatus())
+                    .createdAt(containerModel.getCreatedAt())
+                    .runningTime(containerModel.getRunningTime())
+                    .build();
+        Map<String, Object> addresses = containerModel.getAddresses();
+        if (MapUtils.isNotEmpty(addresses)) {
+            List<ContainerModel.Address> addressList = new ArrayList<>();
+            for (Object o : addresses.values()) {
+                List<ContainerModel.Address> parseArray = JSONArray.parseArray(JSONArray.toJSONString(o), ContainerModel.Address.class);
+                for (ContainerModel.Address address1 : parseArray) {
+                    addressList.add(address1);
                 }
-                return response;
-            }).collect(Collectors.toList());
+            }
+            List<String> result = new ArrayList<>();
+            for (ContainerModel.Address address : addressList) {
+                String addr = address.getAddr();
+                result.add(addr);
+            }
+            response.setAddressList(result);
+            List<Integer> list = new ArrayList<>();
+            for (ContainerModel.Address v : addressList) {
+                if (Objects.nonNull(v.getVlanId())) {
+                    Integer vlanId = v.getVlanId();
+                    list.add(vlanId);
+                }
+            }
+            response.setVlanIdList(list);
+        }
+        return response;
     }
 }

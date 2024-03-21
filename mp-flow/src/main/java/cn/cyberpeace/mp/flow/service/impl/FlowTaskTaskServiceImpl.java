@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -119,7 +120,11 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         log.info("FlowTaskTaskServiceImpl.addTask begin. addFlowTaskTaskInfos:{}, sceneId:{}", addFlowTaskTaskInfos, sceneId);
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfos)) {
             // 统计任务总数
-            int total = addFlowTaskTaskInfos.stream().mapToInt(detail -> detail.getFlowInfos().size()).sum();
+            int total = 0;
+            for (AddFlowTaskTaskInfo addFlowTaskTaskInfo : addFlowTaskTaskInfos) {
+                int size = addFlowTaskTaskInfo.getFlowInfos().size();
+                total += size;
+            }
 
             for (AddFlowTaskTaskInfo detail : addFlowTaskTaskInfos) {
                 //网口信息，如果不存在则创建网口
@@ -153,8 +158,17 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     macAddress = flowTaskPortModel.getMac();
                 }
                 HumanCondition condition = new HumanCondition();
-                List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
-                Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+                List<String> flowIds = new ArrayList<>();
+                for (AddFlowTaskFlowInfo obj : detail.getFlowInfos()) {
+                    String flowId = obj.getFlowId();
+                    flowIds.add(flowId);
+                }
+                Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = new HashMap<>();
+                for (AddFlowTaskFlowInfo addFlowTaskFlowInfo : detail.getFlowInfos()) {
+                    if (addFlowTaskFlowInfoMap.put(addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo) != null) {
+                        throw new IllegalStateException("Duplicate key");
+                    }
+                }
                 condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
                 List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
                 //保存流量任务信息

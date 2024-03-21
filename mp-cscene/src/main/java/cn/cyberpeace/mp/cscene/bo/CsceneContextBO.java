@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -12,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -32,23 +35,23 @@ public class CsceneContextBO {
     }
 
     public SceneContextBO toSceneContext() {
-        var sceneContext = new SceneContextBO();
+        SceneContextBO sceneContext = new SceneContextBO();
         Map<String, Object> plugins = new HashMap<>();
-        var cloudScenePluginContext = toCloudScenePluginContext();
+        CloudScenePluginContext cloudScenePluginContext = toCloudScenePluginContext();
         plugins.put(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY, cloudScenePluginContext);
         sceneContext.setPlugins(plugins);
         return sceneContext;
     }
 
     public CloudScenePluginContext toCloudScenePluginContext() {
-        var cloudScenePluginContext = new CloudScenePluginContext();
+        CloudScenePluginContext cloudScenePluginContext = new CloudScenePluginContext();
         if (StringUtils.isNotEmpty(accessUserId)) {
             cloudScenePluginContext.setRequestUser(accessUserId);
-            var user = UserCommon.getUserDetail(accessUserId);
+            UserBo user = UserCommon.getUserDetail(accessUserId);
             if (user != null) {
-                var orgs = user.getOrgs();
+                List<OrgBO> orgs = user.getOrgs();
                 if (!CollectionUtils.isEmpty(orgs)) {
-                    var orgName = orgs.get(0).getName();
+                    String orgName = orgs.get(0).getName();
                     orgName = StringUtils.joinWith("|", user.getName(), orgName);
                     cloudScenePluginContext.setRequestUserOrg(orgName);
                 }

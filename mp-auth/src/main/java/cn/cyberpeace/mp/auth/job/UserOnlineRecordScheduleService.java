@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.auth.job;
 
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -83,7 +84,14 @@ public class UserOnlineRecordScheduleService {
 
         for (UserModel userModel : removeList) {
             CopyOnWriteArrayList<LocalDateTime> beatList = heartbeatMap.get(userModel);
-            if (beatList.stream().anyMatch(t -> t.isAfter(begin))) {
+            boolean b = false;
+            for (LocalDateTime t : beatList) {
+                if (t.isAfter(begin)) {
+                    b = true;
+                    break;
+                }
+            }
+            if (b) {
                 CopyOnWriteArrayList timestampList = new CopyOnWriteArrayList();
                 timestampList.add(begin);
                 heartbeatMap.put(userModel, timestampList);

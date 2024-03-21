@@ -27,14 +27,14 @@ public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
     @Override
     protected Map<String, ContainerGetData> getEid2Node(List<ContainerGetData> containers) {
         Map<String, ContainerGetData> result = new HashMap<>();
-        containers.forEach(container -> {
+        for (ContainerGetData container : containers) {
             if (container.getName() != null && container.getId() != null) {
                 String eid = super.getEid(container.getName());
                 if (StringUtils.isNotEmpty(eid)) {
                     result.put(eid, container);
                 }
             }
-        });
+        }
         return result;
     }
 

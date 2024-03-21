@@ -86,7 +86,7 @@ public class SnapshotService extends BaseCpService {
      * 删除
      */
     public Boolean delete(List<String> uuids) {
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("snapshot_uuids", uuids);
         BaseCloudPlatformResult model = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         return model.isSuccess();
@@ -100,7 +100,7 @@ public class SnapshotService extends BaseCpService {
     public BaseCloudPlatformResult deleteSnapshot(SnapshotDeleteRequest request) {
         String imageName = request.getDeviceUuid().concat(request.getSnapshotName());
         this.validSnapshot(imageName);
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("device_uuid", request.getDeviceUuid());
         jsonObject.put("snapshot_uuid", request.getSnapshotUuid());
         jsonObject.put("snapshot_name", request.getSnapshotName());

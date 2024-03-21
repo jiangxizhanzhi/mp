@@ -48,6 +48,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -83,80 +84,13 @@ public class RealEquipmentController {
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllConvertModel accessType = typeConverter.findAccessType();
 
-        List<RealEquipmentPageVO> list = model.getList().stream().map(v -> {
-            ExtEntity extEntity = v.getExtEntity();
-            var connection = realEquipmentService.connection(v.getUuid());
-            Boolean loginEnable = false;
-            if (connection != null && CollectionUtils.isNotEmpty(connection.getList())) {
-                loginEnable = true;
-            }
-            RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
-                    .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
-                    .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
-                    .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).build();
-            if (Objects.nonNull(l1AndL2AndL3Type)){
-               List<String> firstTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList()) ?
-                            null : l1AndL2AndL3Type.getFirstTypeList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getMainCategory()))
-                       .map(TypeConvertModel::getName).collect(Collectors.toList());
-               response.setCategoryName(CollectionUtils.isEmpty(firstTypeList) ? null : firstTypeList.get(0));
+        List<RealEquipmentPageVO> list = new ArrayList<>();
+        for (RealEquipmentBO v : model.getList()) {
+            RealEquipmentPageVO realEquipmentPageVO = getRealEquipmentPageVO(l1AndL2AndL3Type, language, systemArchitecure, accessType, v);
+            list.add(realEquipmentPageVO);
+        }
 
-                List<String> secondTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getSecondTypeList()) ? null : l1AndL2AndL3Type.getSecondTypeList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getSubCategory()))
-                        .map(TypeConvertModel::getName).collect(Collectors.toList());
-                response.setSubCategoryName(CollectionUtils.isEmpty(secondTypeList) ? null : secondTypeList.get(0));
-
-                List<String> thirdTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getThirdTypeList()) ? null : l1AndL2AndL3Type.getThirdTypeList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getThirdCategory()))
-                        .map(TypeConvertModel::getName).collect(Collectors.toList());
-                response.setThirdCategoryName(CollectionUtils.isEmpty(thirdTypeList) ? null : thirdTypeList.get(0));
-            }
-            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
-            if (Objects.nonNull(extSystemInfo)){
-                if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
-                    List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
-                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
-                            .map(TypeConvertModel::getName).collect(Collectors.toList());
-                    extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
-                }
-                if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
-                    List<String> languageTypeList = language.getIdStringModelList().stream()
-                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
-                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
-                    extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
-                }
-
-                if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
-                    List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
-                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
-                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
-                    extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
-                }
-                response.setExtSystemInfo(extSystemInfo);
-            }
-
-            if (Objects.nonNull(extEntity)){
-                response.setModel(extEntity.getStyle());
-                response.setParams(extEntity.getParams());
-            }
-
-            List<ExtEntityAccess> extEntityAccess = v.getExtEntityAccess();
-            if (CollectionUtils.isNotEmpty(extEntityAccess)){
-                String accessType1 = Objects.isNull(extEntityAccess.get(0)) ? "" : extEntityAccess.get(0).getAccessType();
-                if (Objects.nonNull(accessType) && CollectionUtils.isNotEmpty(accessType.getIdStringModelList())){
-                    List<String> accessTypeeTypeList = accessType.getIdStringModelList().stream()
-                            .filter(typeConvertModel -> typeConvertModel.getId().equals(accessType1))
-                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
-                    response.setEntityTypeName(CollectionUtils.isEmpty(accessTypeeTypeList) ? null : accessTypeeTypeList.get(0));
-                }
-                response.setEntityType(accessType1);
-
-                response.setEntityDetail(JSONArray.toJSONString(extEntityAccess, SerializerFeature.WriteNullStringAsEmpty));
-            }
-            return response;
-        }).collect(Collectors.toList());
-
-        for (var l : list) {
+        for (RealEquipmentPageVO l : list) {
             if (l.getExtSystemInfo() != null && "USB".equals(l.getExtSystemInfo().getSystemTypeName())) {
                 l.getExtSystemInfo().setSystemArchitecture(null);
                 l.getExtSystemInfo().setSystemArchitectureName(null);
@@ -167,20 +101,136 @@ public class RealEquipmentController {
         return new PageResult<>(list,model.getTotal());
     }
 
+    private RealEquipmentPageVO getRealEquipmentPageVO(TypeAllConvertModel l1AndL2AndL3Type, TypeAllConvertModel language, TypeAllConvertModel systemArchitecure, TypeAllConvertModel accessType, RealEquipmentBO v) {
+        ExtEntity extEntity = v.getExtEntity();
+        CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(v.getUuid());
+        Boolean loginEnable = false;
+        if (connection != null && CollectionUtils.isNotEmpty(connection.getList())) {
+            loginEnable = true;
+        }
+        RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
+                .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
+                .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
+                .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).build();
+        if (Objects.nonNull(l1AndL2AndL3Type)){
+           List<String> firstTypeList;
+            if (CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList())) {
+                firstTypeList = null;
+            } else {
+                List<String> result = new ArrayList<>();
+                for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getFirstTypeList()) {
+                    if (typeConvertModel.getId().equals(v.getMainCategory())) {
+                        String name = typeConvertModel.getName();
+                        result.add(name);
+                    }
+                }
+                firstTypeList = result;
+            }
+            response.setCategoryName(CollectionUtils.isEmpty(firstTypeList) ? null : firstTypeList.get(0));
+
+            List<String> secondTypeList;
+            if (CollectionUtils.isEmpty(l1AndL2AndL3Type.getSecondTypeList())) {
+                secondTypeList = null;
+            } else {
+                List<String> result = new ArrayList<>();
+                for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getSecondTypeList()) {
+                    if (typeConvertModel.getId().equals(v.getSubCategory())) {
+                        String name = typeConvertModel.getName();
+                        result.add(name);
+                    }
+                }
+                secondTypeList = result;
+            }
+            response.setSubCategoryName(CollectionUtils.isEmpty(secondTypeList) ? null : secondTypeList.get(0));
+
+            List<String> thirdTypeList;
+            if (CollectionUtils.isEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                thirdTypeList = null;
+            } else {
+                List<String> result = new ArrayList<>();
+                for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getThirdTypeList()) {
+                    if (typeConvertModel.getId().equals(v.getThirdCategory())) {
+                        String name = typeConvertModel.getName();
+                        result.add(name);
+                    }
+                }
+                thirdTypeList = result;
+            }
+            response.setThirdCategoryName(CollectionUtils.isEmpty(thirdTypeList) ? null : thirdTypeList.get(0));
+        }
+        ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                List<String> systemTypeList = new ArrayList<>();
+                for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getThirdTypeList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getSystemType())) {
+                        String name = typeConvertModel.getName();
+                        systemTypeList.add(name);
+                    }
+                }
+                extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
+            }
+            if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
+                List<String> languageTypeList = new ArrayList<>();
+                for (TypeIdStringConvertModel typeConvertModel : language.getIdStringModelList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getLanguage())) {
+                        String name = typeConvertModel.getName();
+                        languageTypeList.add(name);
+                    }
+                }
+                extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
+            }
+
+            if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
+                List<String> systemArchitecureTypeList = new ArrayList<>();
+                for (TypeIdStringConvertModel typeConvertModel : systemArchitecure.getIdStringModelList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture())) {
+                        String name = typeConvertModel.getName();
+                        systemArchitecureTypeList.add(name);
+                    }
+                }
+                extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
+            }
+            response.setExtSystemInfo(extSystemInfo);
+        }
+
+        if (Objects.nonNull(extEntity)){
+            response.setModel(extEntity.getStyle());
+            response.setParams(extEntity.getParams());
+        }
+
+        List<ExtEntityAccess> extEntityAccess = v.getExtEntityAccess();
+        if (CollectionUtils.isNotEmpty(extEntityAccess)){
+            String accessType1 = Objects.isNull(extEntityAccess.get(0)) ? "" : extEntityAccess.get(0).getAccessType();
+            if (Objects.nonNull(accessType) && CollectionUtils.isNotEmpty(accessType.getIdStringModelList())){
+                List<String> accessTypeeTypeList = new ArrayList<>();
+                for (TypeIdStringConvertModel typeConvertModel : accessType.getIdStringModelList()) {
+                    if (typeConvertModel.getId().equals(accessType1)) {
+                        String name = typeConvertModel.getName();
+                        accessTypeeTypeList.add(name);
+                    }
+                }
+                response.setEntityTypeName(CollectionUtils.isEmpty(accessTypeeTypeList) ? null : accessTypeeTypeList.get(0));
+            }
+            response.setEntityType(accessType1);
+
+            response.setEntityDetail(JSONArray.toJSONString(extEntityAccess, SerializerFeature.WriteNullStringAsEmpty));
+        }
+        return response;
+    }
+
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
     public Result<RealEquipmentByIdVO> findByUuid(@PathVariable String id){
         RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
         List<ExtEntityAccess> extEntityAccess = realEquipmentBO.getExtEntityAccess();
         if (CollectionUtils.isNotEmpty(extEntityAccess)) {
-            extEntityAccess = extEntityAccess.stream().map(v -> {
-                List<AccessProtocol> accessProtocols = v.getAccessProtocols();
-                if (CollectionUtils.isNotEmpty(accessProtocols)) {
-                    accessProtocols = accessProtocols.stream().filter(accessProtocol -> !"console".equals(accessProtocol.getProtocol())).collect(Collectors.toList());
-                }
-                v.setAccessProtocols(accessProtocols);
-                return v;
-            }).collect(Collectors.toList());
+            List<ExtEntityAccess> list = new ArrayList<>();
+            for (ExtEntityAccess v : extEntityAccess) {
+                ExtEntityAccess entityAccess = getExtEntityAccess(v);
+                list.add(entityAccess);
+            }
+            extEntityAccess = list;
         }
 
         RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipmentBO.getUuid())
@@ -189,6 +239,21 @@ public class RealEquipmentController {
                 .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
                 .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         return new Result(response);
+    }
+
+    private static ExtEntityAccess getExtEntityAccess(ExtEntityAccess v) {
+        List<AccessProtocol> accessProtocols = v.getAccessProtocols();
+        if (CollectionUtils.isNotEmpty(accessProtocols)) {
+            List<AccessProtocol> list = new ArrayList<>();
+            for (AccessProtocol accessProtocol : accessProtocols) {
+                if (!"console".equals(accessProtocol.getProtocol())) {
+                    list.add(accessProtocol);
+                }
+            }
+            accessProtocols = list;
+        }
+        v.setAccessProtocols(accessProtocols);
+        return v;
     }
 
     /**
@@ -242,7 +307,12 @@ public class RealEquipmentController {
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
                 .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
         if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
-            response.setAddress(realEquipmentBO.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
+            List<String> list = new ArrayList<>();
+            for (ExtEntityAccess extEntityAccess : realEquipmentBO.getExtEntityAccess()) {
+                String ip = extEntityAccess.getIp();
+                list.add(ip);
+            }
+            response.setAddress(list);
         }
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
@@ -251,22 +321,34 @@ public class RealEquipmentController {
         ExtSystemInfo extSystemInfo = realEquipmentBO.getExtSystemInfo();
         if (Objects.nonNull(extSystemInfo)){
             if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
-                List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
-                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                List<String> systemTypeList = new ArrayList<>();
+                for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getThirdTypeList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getSystemType())) {
+                        String name = typeConvertModel.getName();
+                        systemTypeList.add(name);
+                    }
+                }
                 extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
             }
             if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
-                List<String> languageTypeList = language.getIdStringModelList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
-                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                List<String> languageTypeList = new ArrayList<>();
+                for (TypeIdStringConvertModel typeConvertModel : language.getIdStringModelList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getLanguage())) {
+                        String name = typeConvertModel.getName();
+                        languageTypeList.add(name);
+                    }
+                }
                 extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
             }
 
             if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
-                List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
-                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
-                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                List<String> systemArchitecureTypeList = new ArrayList<>();
+                for (TypeIdStringConvertModel typeConvertModel : systemArchitecure.getIdStringModelList()) {
+                    if (typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture())) {
+                        String name = typeConvertModel.getName();
+                        systemArchitecureTypeList.add(name);
+                    }
+                }
                 extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
             }
             response.setExtSystemInfo(extSystemInfo);
@@ -308,7 +390,7 @@ public class RealEquipmentController {
                     response.setRamPercent(mem.getResult().get(extEntity.getSnmpMemOid()));
                 }
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
-                var disk = realEquipmentService.snmpForDisk(snmpParams);
+                SnmpCloudPlatform disk = realEquipmentService.snmpForDisk(snmpParams);
                 if (Objects.nonNull(disk) &&  Objects.nonNull(disk.getStatus()) && disk.getStatus()){
                     response.setDiskPercent(disk.getResult().get(extEntity.getSnmpDiskOid()));
                 }
@@ -371,9 +453,11 @@ public class RealEquipmentController {
         Integer perPage = request.getPerPage();
         Integer to = Math.min((page * perPage), model.getResult().size());
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
-        List<RealEquipmentNetworkCardPageVO> list = interfaces.stream().map(v ->
-                RealEquipmentNetworkCardPageVO.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
-                .collect(Collectors.toList());
+        List<RealEquipmentNetworkCardPageVO> list = new ArrayList<>();
+        for (SnmpInterfaceResourceCloudPlatform.Interfaces v : interfaces) {
+            RealEquipmentNetworkCardPageVO build = RealEquipmentNetworkCardPageVO.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build();
+            list.add(build);
+        }
         return new PageResult<>(list,model.getResult().size());
     }
 

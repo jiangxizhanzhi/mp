@@ -66,7 +66,7 @@ public class NetworkTrafficGroupServiceTest {
         try {
             String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks");
             JSONArray networkList = (JSONArray)JSONPath.eval(JSON.parse(result), "$.data.list");
-            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network ->{
+            networkList.stream().filter(json -> json instanceof JSONObject).map(json -> (JSONObject) json).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network -> {
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
             });
         } catch (IOException e) {

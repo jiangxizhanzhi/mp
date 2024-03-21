@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
+import cn.cyberpeace.mp.frontadmin.job.SysCtlService;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
@@ -43,17 +44,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @Description: 系统激活相关service
@@ -326,7 +317,13 @@ public class SysActivationService {
         }
 
         List<ActivationItem> items = activationResponse.getItems();
-        Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
+        Optional<ActivationItem> itemOptional = Optional.empty();
+        for (ActivationItem i : items) {
+            if (i.getKey().equals(key)) {
+                itemOptional = Optional.of(i);
+                break;
+            }
+        }
         if (!itemOptional.isPresent()) {
             log.error("config key {} not existed!", key);
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(key));
@@ -375,22 +372,22 @@ public class SysActivationService {
         JSONObject jsonObject = new JSONObject();
 
         JSONArray moduleArray = new JSONArray();
-        moduleItems.forEach(m -> {
+        for (ActivationModuleItem m : moduleItems) {
             JSONObject module = new JSONObject();
             module.put("identifier", m.getIdentifier());
             module.put("name", m.getName());
             moduleArray.add(module);
-        });
+        }
 
         JSONArray resourceArray = new JSONArray();
-        resourceItems.forEach(r -> {
+        for (ActivationResourceItem r : resourceItems) {
             JSONObject resource = new JSONObject();
             resource.put("identifier", r.getIdentifier());
             resource.put("module", r.getModule());
             resource.put("restrictName", r.getRestrictName());
             resource.put("maxValue", r.getMaxValue());
             resourceArray.add(resource);
-        });
+        }
 
         jsonObject.put("modules", moduleArray);
         jsonObject.put("resources", resourceArray);
@@ -552,9 +549,9 @@ public class SysActivationService {
     private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
         ParamCheck.notEmpty(items, AuthBasei18nCode.REQUEST_PARAMS);
         Map<String, String> map = new HashMap<>();
-        items.forEach(i -> {
+        for (ActivationItem i : items) {
             map.put(i.getKey(), i.getValue());
-        });
+        }
         return map;
     }
 
@@ -645,7 +642,7 @@ public class SysActivationService {
         updateSysActivCtlModel.setSuffix(newSuffix);
 
 
-        long delayLifeTime = Duration.of(activationRequest.getDeadline(), ChronoUnit.MONTHS).toSeconds();
+        long delayLifeTime = (31556952L / 12) * activationRequest.getDeadline();
         long oldLifeTime = Long.parseLong(Optional.ofNullable(EncryptUtils.desDecrypt(oldSysActivCtlModel.getSysLifetime())).orElse("0"));
         long updateLifeTime = delayLifeTime + oldLifeTime;
         updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(updateLifeTime)));
@@ -720,12 +717,12 @@ public class SysActivationService {
      * @return
      */
     public List<ModuleInfoResponse> getModuleInfoList() {
-        var content = status();
+        ActivationResponse content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
         if (Objects.isNull(content) || CollectionUtils.isEmpty(content.getItems())) {
             return moduleInfoList;
         }
-        var items = content.getItems();
+        List<ActivationItem> items = content.getItems();
         // 竞赛
         ModuleInfoResponse ad = ModuleInfoResponse.builder().moduleName(ModuleEnums.AD.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         // 实训
@@ -734,7 +731,12 @@ public class SysActivationService {
         ModuleInfoResponse cr = ModuleInfoResponse.builder().moduleName(ModuleEnums.CR.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         moduleInfoList.addAll(Arrays.asList(ad, oj, cr));
 
-        Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
+        Map<String, ActivationItem> key2ItemMap = new HashMap<>();
+        for (ActivationItem item : items) {
+            if (key2ItemMap.put(item.getKey(), item) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         // 任意一项激活项勾选，则该模块被激活
         for (String key : AD_MODULE_KEYS) {

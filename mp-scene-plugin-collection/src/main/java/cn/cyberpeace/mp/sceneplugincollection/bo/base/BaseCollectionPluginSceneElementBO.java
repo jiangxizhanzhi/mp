@@ -36,7 +36,7 @@ public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectio
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneElementModel::getProbes)));
         if (probes != null) {
             obj.setProbes(JsonCommon.stringify(probes));

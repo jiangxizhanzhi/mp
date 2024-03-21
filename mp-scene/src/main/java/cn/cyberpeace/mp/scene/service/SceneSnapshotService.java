@@ -24,7 +24,7 @@ public class SceneSnapshotService {
     }
 
     public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(List<String> ids) {
-        var list = snapshotMapper.list(new HumanCondition()
+        List<SceneElementSnapshotModel> list = snapshotMapper.list(new HumanCondition()
                 .filterIn(SceneElementSnapshotModel::getId, ids.toArray(new String[]{}))
                 .reverseOrderBy(SceneElementSnapshotModel::getPk));
         return new ServiceResult<>(list);
@@ -36,7 +36,7 @@ public class SceneSnapshotService {
     }
 
     public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String snapshotId) {
-        var result = snapshotMapper.get(snapshotId);
+        SceneElementSnapshotModel result = snapshotMapper.get(snapshotId);
         return new ServiceResult<>(result);
     }
 

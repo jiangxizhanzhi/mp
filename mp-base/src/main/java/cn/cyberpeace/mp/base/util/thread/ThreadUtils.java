@@ -3,15 +3,16 @@ package cn.cyberpeace.mp.base.util.thread;
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Slf4j
 public class ThreadUtils {
 
     public static Runnable format(Runnable task) {
-        var contextMap = TransferContext.getContextMap();
+        Map<String, Object> contextMap = TransferContext.getContextMap();
         return () -> {
-            var originContextMap = TransferContext.getContextMap();
+            Map<String, Object> originContextMap = TransferContext.getContextMap();
             TransferContext.setContextMap(contextMap);
             task.run();
             TransferContext.setContextMap(originContextMap);
@@ -19,9 +20,9 @@ public class ThreadUtils {
     }
 
     public static <T> Callable<T> format(Callable<T> task) {
-        var contextMap = TransferContext.getContextMap();
+        Map<String, Object> contextMap = TransferContext.getContextMap();
         return  () -> {
-            var originContextMap = TransferContext.getContextMap();
+            Map<String, Object> originContextMap = TransferContext.getContextMap();
             TransferContext.setContextMap(contextMap);
             try {
                 return task.call();

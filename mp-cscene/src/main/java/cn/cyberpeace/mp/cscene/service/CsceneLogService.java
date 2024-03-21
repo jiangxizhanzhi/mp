@@ -3,8 +3,12 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -83,13 +87,13 @@ public class CsceneLogService {
 
     private List<String> getTarget(String csceneId, boolean config) {
         if (config) {
-            var model = csceneMapper.get(csceneId);
+            CsceneModel model = csceneMapper.get(csceneId);
             if (model != null) {
                 return Arrays.asList(MessageCommon.get(DESC_SCENE_CONFIG, model.getName()));
             }
             return new ArrayList<>();
         } else {
-            var model = csceneInstanceMapper.get(csceneId);
+            CsceneInstanceModel model = csceneInstanceMapper.get(csceneId);
             if (model != null) {
                 return Arrays.asList(MessageCommon.get(DESC_SCENE, model.getName()));
             }
@@ -98,11 +102,11 @@ public class CsceneLogService {
     }
 
     private List<String> getTarget(String csceneId, String nodeId) {
-        var cscene = csceneInstanceMapper.get(csceneId);
+        CsceneInstanceModel cscene = csceneInstanceMapper.get(csceneId);
         if (cscene == null) {
             return new ArrayList<>();
         }
-        var dbs = sceneElementMapper.list(new HumanCondition()
+        List<SceneElementModel> dbs = sceneElementMapper.list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, cscene.getScene())
                 .filterEqual(SceneElementModel::getNodeId, nodeId)
         );
@@ -118,7 +122,7 @@ public class CsceneLogService {
         if (StringUtils.isEmpty(flowId)) {
             return targets;
         }
-        var flow = flowInfoService.get(flowId);
+        ObjServiceResult<FlowInfoModel> flow = flowInfoService.get(flowId);
         if (flow == null || flow.getSource() == null || flow.getSource().getObj() == null) {
             return targets;
         } else {

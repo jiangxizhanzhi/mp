@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @Deprecated
@@ -38,7 +40,7 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      * @return 表模型数据对象
      */
     public M toModel(String... ignoreFields) {
-        var obj = createModel();
+        M obj = createModel();
         BeanUtils.copyPropertiesIgnoreNull(this, obj, ignoreFields);
         return obj;
     }
@@ -50,8 +52,12 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      */
     @SafeVarargs
     public final <T> void fromModelIgnore(M obj, SerializableFunction<T>... ignoreFieldGetters) {
-        String[] ignoreFields = Arrays.stream(ignoreFieldGetters).map(BeanUtils::getBeanGetterFieldName)
-                .toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (SerializableFunction<T> ignoreFieldGetter : ignoreFieldGetters) {
+            String beanGetterFieldName = BeanUtils.getBeanGetterFieldName(ignoreFieldGetter);
+            list.add(beanGetterFieldName);
+        }
+        String[] ignoreFields = list.toArray(new String[0]);
         fromModel(obj, ignoreFields);
     }
 
@@ -62,8 +68,12 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      */
     @SafeVarargs
     public final <T> M toModelIgnore(SerializableFunction<T>... ignoreFieldGetters) {
-        String[] ignoreFields = Arrays.stream(ignoreFieldGetters).map(BeanUtils::getBeanGetterFieldName)
-                .toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (SerializableFunction<T> ignoreFieldGetter : ignoreFieldGetters) {
+            String beanGetterFieldName = BeanUtils.getBeanGetterFieldName(ignoreFieldGetter);
+            list.add(beanGetterFieldName);
+        }
+        String[] ignoreFields = list.toArray(new String[0]);
         return toModel(ignoreFields);
     }
 
@@ -83,7 +93,7 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      * @return 平行资源数据
      */
     public <P> P export(Class<P> pClass, String... ignoreFields) {
-        var pObj = ClassUtils.createInstance(pClass);
+        P pObj = ClassUtils.createInstance(pClass);
         BeanUtils.copyPropertiesIgnoreNull(export(), pObj, ignoreFields);
         return pObj;
     }
@@ -97,8 +107,12 @@ public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      */
     @SafeVarargs
     public final <P> P exportIgnore(Class<P> pClass, SerializableFunction<T>... ignoreFieldGetters) {
-        String[] ignoreFields = Arrays.stream(ignoreFieldGetters).map(BeanUtils::getBeanGetterFieldName)
-                .toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (SerializableFunction<T> ignoreFieldGetter : ignoreFieldGetters) {
+            String beanGetterFieldName = BeanUtils.getBeanGetterFieldName(ignoreFieldGetter);
+            list.add(beanGetterFieldName);
+        }
+        String[] ignoreFields = list.toArray(new String[0]);
         return export(pClass, ignoreFields);
     }
 

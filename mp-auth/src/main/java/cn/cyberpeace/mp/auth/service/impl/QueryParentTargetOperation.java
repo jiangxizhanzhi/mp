@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetOperation;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class QueryParentTargetOperation implements TargetOperation<TargetBo> {
             return targetBo;
         }
 
-        var objSrvResult = targetService.get(targetBo.getParent());
+        ObjServiceResult<TargetModel> objSrvResult = targetService.get(targetBo.getParent());
         ObjResult<TargetModel> result = objSrvResult.getSource();
         if (result != null) {
             TargetModel parentTarget = result.getObj();

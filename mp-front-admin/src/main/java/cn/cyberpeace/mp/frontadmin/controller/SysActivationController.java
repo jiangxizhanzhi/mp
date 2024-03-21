@@ -69,7 +69,7 @@ public class SysActivationController {
     @ApiOperation("查询模块激活信息，包括竞赛模块，实训模块，靶场模块")
     @GetMapping("/module_infos")
     public ServiceResult<List<ModuleInfoResponse>> moduleInfos() {
-        var moduleInfoList = activationService.getModuleInfoList();
+        List<ModuleInfoResponse> moduleInfoList = activationService.getModuleInfoList();
         return ResultCommon.success(moduleInfoList);
     }
 

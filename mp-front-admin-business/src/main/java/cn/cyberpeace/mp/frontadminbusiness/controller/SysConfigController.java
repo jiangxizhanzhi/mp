@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
-import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.common.util.FileClient;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,13 +56,6 @@ public class SysConfigController {
 
     @Autowired
     private SysConfigCheckService checkService;
-
-    /**
-     * 文件上传客户端
-     */
-    @Qualifier("fastDfsFileServiceImpl")
-    @Autowired
-    private FileService fileService;
 
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
@@ -154,7 +146,7 @@ public class SysConfigController {
             return ResultCommon.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
 
-        return fileService.uploadFile(file);
+        return FileClient.uploadFile(file);
     }
 
     /**
@@ -172,7 +164,7 @@ public class SysConfigController {
             return ResultCommon.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
 
-        return fileService.uploadFile(file);
+        return FileClient.uploadFile(file);
     }
 
 }

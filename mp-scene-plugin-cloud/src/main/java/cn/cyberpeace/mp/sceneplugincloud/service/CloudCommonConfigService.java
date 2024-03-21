@@ -35,7 +35,7 @@ public class CloudCommonConfigService {
         this.init();
         String result = CONFIG_MAP.get(SYSTEM_TYPE_TO_AGENT_SUPPORT);
         if (result != null) {
-            var map = JsonCommon.parseMap(result);
+            Map<String, Object> map = JsonCommon.parseMap(result);
             return new ServiceResult<>(map);
         }
         return new ServiceResult<>(new HashMap<>());

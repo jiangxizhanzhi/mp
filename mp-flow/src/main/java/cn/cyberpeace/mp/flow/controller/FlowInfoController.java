@@ -41,6 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -337,7 +338,11 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ServiceResult deleteCategories(@RequestBody DeleteCategoryRequest request){
         log.info("FlowInfoController.deleteCategories begin. request:{}", request);
         List<OptionModel> optionModels = optionService.findByIds(request.getIds());
-        List<String> codeList = optionModels.stream().map(OptionModel::getCode).collect(Collectors.toList());
+        List<String> codeList = new ArrayList<>();
+        for (OptionModel optionModel : optionModels) {
+            String code = optionModel.getCode();
+            codeList.add(code);
+        }
         if (flowServiceImpl.checkCategoryUsed(codeList)) {
             return ResultCommon.fail(FlowErrorCode.CATEGORY_HAS_USED);
         }

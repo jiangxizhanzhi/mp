@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler;
 
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -22,19 +21,6 @@ import cn.cyberpeace.mp.scenepluginflow.repository.FlowPluginSceneConfigMapper;
  * 场景实例的处理
  * 场景实例的功能由本类对外提供
  */
-@ClassFieldClasses({
-        FlowPluginSceneConfigBO.class,
-        FlowPluginSceneConfigElementBO.class,
-        FlowPluginSceneConfigElementPortBO.class,
-        FlowPluginSceneConfigModel.class,
-        FlowPluginSceneConfigElementModel.class,
-        FlowPluginSceneConfigElementPortModel.class,
-})
-@BeanFieldClasses({
-        FlowPluginSceneConfigMapper.class,
-        FlowPluginSceneConfigElementMapper.class,
-        FlowPluginSceneConfigElementPortMapper.class,
-})
 public class FlowSceneConfigPluginModelHandler extends BasePluginModelHandler<
         SceneConfigBO,
         SceneConfigElementBO,
@@ -52,5 +38,22 @@ public class FlowSceneConfigPluginModelHandler extends BasePluginModelHandler<
 
     public FlowSceneConfigPluginModelHandler(FlowSceneConfigPluginHandler pluginHandler) {
         init(pluginHandler);
+    }
+
+    @Override
+    protected void initClass() {
+        super.pluginSceneBOClass = FlowPluginSceneConfigBO.class;
+        super.pluginSceneElementBOClass = FlowPluginSceneConfigElementBO.class;
+        super.pluginSceneElementPortBOClass = FlowPluginSceneConfigElementPortBO.class;
+        super.pluginSceneModelClass = FlowPluginSceneConfigModel.class;
+        super.pluginSceneElementModelClass = FlowPluginSceneConfigElementModel.class;
+        super.pluginSceneElementPortModelClass = FlowPluginSceneConfigElementPortModel.class;
+    }
+
+    @Override
+    protected void initMapper() {
+        super.pluginSceneMapper = BeanCommon.getBean(FlowPluginSceneConfigMapper.class);
+        super.pluginSceneElementMapper = BeanCommon.getBean(FlowPluginSceneConfigElementMapper.class);
+        super.pluginSceneElementPortMapper = BeanCommon.getBean(FlowPluginSceneConfigElementPortMapper.class);
     }
 }

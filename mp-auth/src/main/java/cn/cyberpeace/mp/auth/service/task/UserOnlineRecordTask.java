@@ -35,11 +35,27 @@ public class UserOnlineRecordTask implements Runnable {
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time
         UserOnlineRecordService userOnlineRecordService = BeanCommon.getBean(UserOnlineRecordService.class);
 
-        List<UserModel> userModels = userModel2LastTsMap.keySet().stream().collect(Collectors.toList());
-        List<String> userIds = userModels.stream().map(UserModel::getId).collect(Collectors.toList());
+        List<UserModel> userModels = new ArrayList<>();
+        for (UserModel model1 : userModel2LastTsMap.keySet()) {
+            userModels.add(model1);
+        }
+        List<String> userIds = new ArrayList<>();
+        for (UserModel userModel1 : userModels) {
+            String id = userModel1.getId();
+            userIds.add(id);
+        }
         List<UserOnlineRecordModel> onlinedRecordList = userOnlineRecordService.listCurrentOnlined(userIds);
-        List<String> onlinedRecordedUserIds = onlinedRecordList.stream().map(UserOnlineRecordModel::getUser).collect(Collectors.toList());
-        List<UserModel> notRecordedUserModels = userModels.stream().filter(model -> !onlinedRecordedUserIds.contains(model.getId())).collect(Collectors.toList());
+        List<String> onlinedRecordedUserIds = new ArrayList<>();
+        for (UserOnlineRecordModel userOnlineRecordModel : onlinedRecordList) {
+            String user = userOnlineRecordModel.getUser();
+            onlinedRecordedUserIds.add(user);
+        }
+        List<UserModel> notRecordedUserModels = new ArrayList<>();
+        for (UserModel model : userModels) {
+            if (!onlinedRecordedUserIds.contains(model.getId())) {
+                notRecordedUserModels.add(model);
+            }
+        }
 
 
         // 存在当前用户的在线记录，直接更新

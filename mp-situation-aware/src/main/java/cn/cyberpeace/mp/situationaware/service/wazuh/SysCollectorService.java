@@ -35,11 +35,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -67,13 +67,13 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
-        var uri = "/syscollector/" + agentId + "/ports";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/syscollector/" + agentId + "/ports";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         List<Port> ports = result.getData().getAffectedItems();
@@ -94,13 +94,13 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
-        var uri = "/syscollector/" + agentId + "/processes";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/syscollector/" + agentId + "/processes";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Process> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
@@ -122,20 +122,23 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
-        var uri = "/syscollector/" + agentId + "/netiface";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/syscollector/" + agentId + "/netiface";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Netiface> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
         List<NetAddr> netAddrs = listNetAddrs(agentId, null, "ipv4");
-        Map<String, String> ifacToAddressMap = Optional.ofNullable(netAddrs).orElse(new ArrayList<>()).stream().collect(Collectors.toMap(NetAddr::getIface, NetAddr::getAddress, (a, b) -> a));
+        Map<String, String> ifacToAddressMap = new HashMap<>();
+        for (NetAddr netAddr : Optional.ofNullable(netAddrs).orElse(new ArrayList<>())) {
+            ifacToAddressMap.putIfAbsent(netAddr.getIface(), netAddr.getAddress());
+        }
 
         netifaces.forEach(n -> {
             if (!CollectionUtils.isEmpty(ifacToAddressMap)) {
@@ -156,8 +159,8 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null");
             return Collections.emptyList();
         }
-        var uri = "/syscollector/" + agentId + "/netaddr";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/syscollector/" + agentId + "/netaddr";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
@@ -171,7 +174,7 @@ public class SysCollectorService extends RequestProcessor {
 
         log.info("requestUrl:{}, params:{}", requestUrl, params);
 
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("listNetAddrs result: {}", result);
@@ -196,7 +199,7 @@ public class SysCollectorService extends RequestProcessor {
             return null;
         }
 
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/hardware";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/hardware";
 
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<Hardware> result = JSONObject.parseObject(res, new TypeReference<>() {
@@ -220,7 +223,7 @@ public class SysCollectorService extends RequestProcessor {
             return null;
         }
 
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
 
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
@@ -243,10 +246,10 @@ public class SysCollectorService extends RequestProcessor {
             return agentPortsModels;
         }
         List<String> agentIds = agentService.listAgentIds(agents);
-        var uri = "/experimental/syscollector/ports";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
+        String uri = "/experimental/syscollector/ports";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
 
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
         agentPortsModels = agentArray.toJavaList(WazuhAgentPortsModel.class);
         return agentPortsModels;
@@ -259,8 +262,8 @@ public class SysCollectorService extends RequestProcessor {
             return wazuhAgentProcessModels;
         }
         List<String> agentIds = agentService.listAgentIds(agents);
-        var uri = "/experimental/syscollector/processes";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
+        String uri = "/experimental/syscollector/processes";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
         wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
@@ -278,7 +281,7 @@ public class SysCollectorService extends RequestProcessor {
      */
     @Deprecated
     public WazuhRamRoot queryRamByAgentId(String agentId) {
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/hardware";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/hardware";
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhRamRoot.class);
     }

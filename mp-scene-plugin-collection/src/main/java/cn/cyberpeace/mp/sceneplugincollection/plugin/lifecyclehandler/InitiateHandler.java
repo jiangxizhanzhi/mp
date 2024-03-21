@@ -3,18 +3,22 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
-import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
@@ -73,7 +77,7 @@ public class InitiateHandler extends HandlerCommon {
     public void initiate() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
-        var scene = getPluginHandler().getScene();
+        CollectionPluginSceneBO scene = getPluginHandler().getScene();
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
@@ -89,7 +93,7 @@ public class InitiateHandler extends HandlerCommon {
                         getPluginHandler().addElement(nodeId, collectionElement);
                         getPluginHandler().getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(collectionElement));
                     }
-                    var collectionPort = getPluginHandler().getPort(portId);
+                    CollectionPluginSceneElementPortBO collectionPort = getPluginHandler().getPort(portId);
                     if (collectionPort == null) {
                         collectionPort = new CollectionPluginSceneElementPortBO();
                         getPluginHandler().addPort(portId, collectionPort);
@@ -109,14 +113,14 @@ public class InitiateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {
                 cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
                     // TODO: 只支持虚拟机、Linux容器
-                    var virtualType = cloudElement.getVirtualType();
+                    Integer virtualType = cloudElement.getVirtualType();
                     if (virtualType == null
                             || (virtualType != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&
                             virtualType != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                         return;
                     }
 
-                    var collectionElement = getPluginHandler().getElement(nodeId);
+                    CollectionPluginSceneElementBO collectionElement = getPluginHandler().getElement(nodeId);
                     if (collectionElement == null) {
                         collectionElement = new CollectionPluginSceneElementBO();
                         getPluginHandler().addElement(nodeId, collectionElement);
@@ -126,10 +130,12 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
-        var probeCollectionElements = getPluginHandler().getElementMap().values()
-                .stream()
-                .filter(collectionElement -> Boolean.TRUE.equals(collectionElement.getEnableProbeCollect()))
-                .collect(Collectors.toList());
+        List<CollectionPluginSceneElementBO> probeCollectionElements = new ArrayList<>();
+        for (CollectionPluginSceneElementBO collectionPluginSceneElementBO : getPluginHandler().getElementMap().values()) {
+            if (Boolean.TRUE.equals(collectionPluginSceneElementBO.getEnableProbeCollect())) {
+                probeCollectionElements.add(collectionPluginSceneElementBO);
+            }
+        }
         if (!probeCollectionElements.isEmpty()) {
             // 准备采集路由
             runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
@@ -148,26 +154,26 @@ public class InitiateHandler extends HandlerCommon {
                     if (Boolean.TRUE.equals(cloudElement.getExternal())) {
                         return;
                     }
-                    for (var network : cloudElement.getDeriveNetworks()) {
-                        var networkInfo = network.getNetwork();
+                    for (ConnectedNetworkBO network : cloudElement.getDeriveNetworks()) {
+                        CloudPluginSceneElementNetworkBO networkInfo = network.getNetwork();
                         List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), Boolean.TRUE.equals(networkInfo.getDhcp()));
                         if (CollectionUtils.isEmpty(ips)) {
                             log.info("ip pool is empty when initate collection,node {}", cloudElement.getSrcElement().getName());
                             return;
                         }
-                        var ip = ips.get(0);
+                        String ip = ips.get(0);
                         networkInfo.getExcloudIps().add(ip);
-                        var hostRoutes = network.getNetwork().getHostRoutes();
+                        List<HostRoute> hostRoutes = network.getNetwork().getHostRoutes();
                         if (hostRoutes == null) {
                             hostRoutes = new ArrayList<>();
                         }
-                        var hostRoute = new HostRoute();
+                        HostRoute hostRoute = new HostRoute();
                         hostRoute.setDestination(externalNetCidr);
                         hostRoute.setNexthop(ip);
                         hostRoutes.add(hostRoute);
                         network.getNetwork().setHostRoutes(hostRoutes);
 
-                        var routerPort = new CollectionPluginSceneProbeRouterPortModel();
+                        CollectionPluginSceneProbeRouterPortModel routerPort = new CollectionPluginSceneProbeRouterPortModel();
                         routerPort.setScene(getPluginHandler().getSrcScene().getEid());
                         routerPort.setSceneElement(nodeId);
                         routerPort.setIp(ip);
@@ -181,18 +187,18 @@ public class InitiateHandler extends HandlerCommon {
 
             // 创建探针采集器
             runSceneProgress(SceneProcess.CREATE_PROBE_COLLECTOR, () -> {
-                var collectionId = getProbeCollector().createCollector();
+                String collectionId = getProbeCollector().createCollector();
                 getPluginHandler().getScene().setProbeCollector(collectionId);
             });
 
             // 初始化安装探针脚本
-            var collectionId = getPluginHandler().getScene().getProbeCollector();
+            String collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                         .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 probeCollectionElements.forEach(collectionElement -> {
-                    var srcElement = collectionElement.getSrcElement();
-                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    SceneElementBO srcElement = collectionElement.getSrcElement();
+                    CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                     boolean isContainer = cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
                     WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
@@ -200,9 +206,9 @@ public class InitiateHandler extends HandlerCommon {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
                                 systemType, this.getLocationMap());
                     }
-                    var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
+                    List<String> probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
                             srcElement.getEid(), collectionId, controlParam, isContainer);
-                    var initCommands = srcElement.getInitCommands();
+                    List<String> initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
                     }
@@ -241,7 +247,12 @@ public class InitiateHandler extends HandlerCommon {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                List<String> collectPath = new ArrayList<>();
+                for (String s : probe.getCollectPath()) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        collectPath.add(s);
+                    }
+                }
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
@@ -249,7 +260,12 @@ public class InitiateHandler extends HandlerCommon {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
-                List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+                List<String> collectPath = new ArrayList<>();
+                for (String s : probe.getCollectPath()) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        collectPath.add(s);
+                    }
+                }
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
@@ -315,13 +331,17 @@ public class InitiateHandler extends HandlerCommon {
             wazuhModifyEventConfig = BeanCommon.getBean(WazuhModifyEventConfig.class);
         }
         WazuhControl.ControlProbeParam probeParam = new WazuhControl.ControlProbeParam();
-        var modifyProbe = wazuhModifyEventConfig.getModifyProbe();
+        WazuhModifyEventConfig.ModifyProbe modifyProbe = wazuhModifyEventConfig.getModifyProbe();
         if (Objects.isNull(modifyProbe)) {
             return probeParam;
         }
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getRemoteFile));
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            if (nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         WazuhProbeConfig.DefaultProbe.NewProbe probe;
         if (type == FILE) {

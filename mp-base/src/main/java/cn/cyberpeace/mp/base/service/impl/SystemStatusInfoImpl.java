@@ -9,6 +9,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
@@ -34,36 +35,40 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
             log.info("MP threadpools are empty");
             return null;
         }
-        List<ThreadPoolInfo> list = poolSet.stream().map(pool -> new ThreadPoolInfo() {
-            {
-                int coreSize = pool.getExecutorService().getCorePoolSize();
-                int currentSize = pool.getExecutorService().getPoolSize();
-                int activeSize = pool.getExecutorService().getActiveCount();
-                int maxSize = pool.getExecutorService().getMaximumPoolSize();
-                int largestPoolSize= pool.getExecutorService().getLargestPoolSize();
-                int taskQueueSize = pool.getExecutorService().getQueue().size();
-                long taskCount = pool.getExecutorService().getTaskCount();
-                ThreadFactory factory = pool.getExecutorService().getThreadFactory();
-                String name = pool.getClass().getName();
-                if (factory != null && factory instanceof CustomizableThreadFactory) {
-                    name = ((CustomizableThreadFactory) factory).getThreadNamePrefix();
-                    if(name.endsWith(SUFFIX)){
-                        name = name.substring(0,name.length()-1);
+        List<ThreadPoolInfo> list = new ArrayList<>();
+        for (TaskPool pool : poolSet) {
+            ThreadPoolInfo threadPoolInfo = new ThreadPoolInfo() {
+                {
+                    int coreSize = pool.getExecutorService().getCorePoolSize();
+                    int currentSize = pool.getExecutorService().getPoolSize();
+                    int activeSize = pool.getExecutorService().getActiveCount();
+                    int maxSize = pool.getExecutorService().getMaximumPoolSize();
+                    int largestPoolSize = pool.getExecutorService().getLargestPoolSize();
+                    int taskQueueSize = pool.getExecutorService().getQueue().size();
+                    long taskCount = pool.getExecutorService().getTaskCount();
+                    ThreadFactory factory = pool.getExecutorService().getThreadFactory();
+                    String name = pool.getClass().getName();
+                    if (factory != null && factory instanceof CustomizableThreadFactory) {
+                        name = ((CustomizableThreadFactory) factory).getThreadNamePrefix();
+                        if (name.endsWith(SUFFIX)) {
+                            name = name.substring(0, name.length() - 1);
+                        }
                     }
+                    this.setThreadPoolName(name);
+                    this.setCoreThreadSize(coreSize);
+                    this.setCurrentThreadSize(currentSize);
+                    this.setActiveThreadSize(activeSize);
+                    this.setMaxThreadSize(maxSize);
+                    //峰值线程数
+                    this.setLargestPoolSize(largestPoolSize);
+                    //任务队列数
+                    this.setTaskQueueSize(taskQueueSize);
+                    //总任务数
+                    this.setTaskCount(taskCount);
                 }
-                this.setThreadPoolName(name);
-                this.setCoreThreadSize(coreSize);
-                this.setCurrentThreadSize(currentSize);
-                this.setActiveThreadSize(activeSize);
-                this.setMaxThreadSize(maxSize);
-                //峰值线程数
-                this.setLargestPoolSize(largestPoolSize);
-                //任务队列数
-                this.setTaskQueueSize(taskQueueSize);
-                //总任务数
-                this.setTaskCount(taskCount);
-            }
-        }).collect(Collectors.toList());
+            };
+            list.add(threadPoolInfo);
+        }
         log.info("MP threadpool information:{}", list);
         return list;
     }

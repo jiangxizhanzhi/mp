@@ -56,7 +56,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         if (initCommands != null) {
             obj.setInitCommands(JsonCommon.stringify(initCommands));
@@ -66,9 +66,14 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
 
     @Override
     public T export() {
-        var pObj = super.export();
+        T pObj = super.export();
         if (ports != null) {
-            pObj.setPorts(ports.stream().map(port -> port.export()).collect(Collectors.toList()));
+            List<P> list = new ArrayList<>();
+            for (P port : ports) {
+                P export = port.export();
+                list.add(export);
+            }
+            pObj.setPorts(list);
         }
 
         return pObj;
@@ -81,9 +86,14 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
 
     public <P2 extends BaseSceneElementPortBO<?, P2, P1>, P1 extends BaseSceneElementBO<?, P2, P1>> P1 export(
             Class<P1> pClass, Class<P2> portClass, SerializableFunction<T>... ignoreFieldGetters) {
-        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        P1 pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (ports != null) {
-            pObj.setPorts(ports.stream().map(port -> port.export(portClass)).collect(Collectors.toList()));
+            List<P2> list = new ArrayList<>();
+            for (P port : ports) {
+                P2 export = port.export(portClass);
+                list.add(export);
+            }
+            pObj.setPorts(list);
         }
 
         return pObj;

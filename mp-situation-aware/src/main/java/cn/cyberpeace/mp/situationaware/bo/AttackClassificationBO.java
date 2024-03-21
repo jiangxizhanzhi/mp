@@ -6,9 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 聚合攻击方式
@@ -37,9 +36,11 @@ public class AttackClassificationBO {
    }
 
    public static AttackClassificationBO getBoFromJsonModel(FlowClassificationFromJsonModel flowClassificationFromJsonModel) {
-      List<Classification> classificationsFromJsonModel = flowClassificationFromJsonModel.getClassifications().stream().map(FlowClassificationFromJsonModel.FlowType::getFlow_events)
-              .flatMap(List::stream).collect(Collectors.toList());
-      AttackClassificationBO attackClassificationBO = new AttackClassificationBO(classificationsFromJsonModel);
-      return attackClassificationBO;
+      List<Classification> classificationsFromJsonModel = new ArrayList<>();
+      for (FlowClassificationFromJsonModel.FlowType flowType : flowClassificationFromJsonModel.getClassifications()) {
+         List<Classification> flowEvents = flowType.getFlow_events();
+         classificationsFromJsonModel.addAll(flowEvents);
+      }
+      return new AttackClassificationBO(classificationsFromJsonModel);
    }
 }

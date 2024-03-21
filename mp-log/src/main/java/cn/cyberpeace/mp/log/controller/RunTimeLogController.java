@@ -69,7 +69,7 @@ public class RunTimeLogController {
             throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
         }
 
-        var httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader("Content-Disposition", "attachment; filename=" + bo.getDownLoadFileName());

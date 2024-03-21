@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler;
 
 import cn.cyberpeace.mp.base.bo.DiffTargets;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -24,25 +22,11 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortM
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-
-@ClassFieldClasses({
-        CloudPluginSceneBO.class,
-        CloudPluginSceneElementBO.class,
-        CloudPluginSceneElementPortBO.class,
-        CloudPluginSceneModel.class,
-        CloudPluginSceneElementModel.class,
-        CloudPluginSceneElementPortModel.class,
-})
-@BeanFieldClasses({
-        CloudPluginSceneMapper.class,
-        CloudPluginSceneElementMapper.class,
-        CloudPluginSceneElementPortMapper.class,
-})
 public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         SceneBO,
         SceneElementBO,
@@ -87,13 +71,21 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
 
     public int createElementNetworks(List<ConnectedNetworkBO> deriveNetworks) {
         // 删除原来的
-        this.cloudPluginSceneElementNetworkMapper.bulkDelete(deriveNetworks.stream()
-                .map(d -> d.getNetwork().getId())
-                .collect(Collectors.toList())
+        List<String> list = new ArrayList<>();
+        for (ConnectedNetworkBO deriveNetwork : deriveNetworks) {
+            String id = deriveNetwork.getNetwork().getId();
+            list.add(id);
+        }
+        this.cloudPluginSceneElementNetworkMapper.bulkDelete(list
                 .toArray(new String[]{})
         );
         // 新建
-        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList())).getSuccessCount();
+        List<CloudPluginSceneElementNetworkModel> result = new ArrayList<>();
+        for (ConnectedNetworkBO d : deriveNetworks) {
+            CloudPluginSceneElementNetworkModel cloudPluginSceneElementNetworkModel = d.getNetwork().toModel();
+            result.add(cloudPluginSceneElementNetworkModel);
+        }
+        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(result).getSuccessCount();
     }
 
     public void deleteElementNetworks(String... networkIds) {
@@ -101,8 +93,8 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
     }
 
     public int updateElementNetworks(String sceneElement) {
-        var deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
-        var existNetworks = this.readElementNetworks(sceneElement);
+        List<ConnectedNetworkBO> deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
+        List<CloudPluginSceneElementNetworkModel> existNetworks = this.readElementNetworks(sceneElement);
         Map<String, CloudPluginSceneElementNetworkModel> toUpdateMap = new HashMap<>();
         deriveNetworks.forEach(deriveNetwork -> toUpdateMap.put(deriveNetwork.getNetwork().getId(), deriveNetwork.getNetwork().toModel()));
         Map<String, CloudPluginSceneElementNetworkModel> existMap = new HashMap<>();
@@ -118,9 +110,12 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
             result += r;
         }
         if (CollectionUtils.isNotEmpty(diffTargets.getRemovingTargets())) {
-            int r = this.cloudPluginSceneElementNetworkMapper.bulkDelete(diffTargets.getRemovingTargets().stream()
-                    .map(e -> e.getId())
-                    .collect(Collectors.toList())
+            List<String> list = new ArrayList<>();
+            for (CloudPluginSceneElementNetworkModel e : diffTargets.getRemovingTargets()) {
+                String id = e.getId();
+                list.add(id);
+            }
+            int r = this.cloudPluginSceneElementNetworkMapper.bulkDelete(list
                     .toArray(new String[]{})
             ).getSuccessCount();
             result += r;
@@ -130,9 +125,9 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
 
     private DiffTargets<CloudPluginSceneElementNetworkModel> diffTargets(Map<String, CloudPluginSceneElementNetworkModel> targetMap,
                                                                          Map<String, CloudPluginSceneElementNetworkModel> existTargetMap) {
-        var diff = new DiffTargets<CloudPluginSceneElementNetworkModel>();
+        DiffTargets<CloudPluginSceneElementNetworkModel> diff = new DiffTargets<CloudPluginSceneElementNetworkModel>();
         targetMap.forEach((key, target) -> {
-            var existTarget = existTargetMap.getOrDefault(key, null);
+            CloudPluginSceneElementNetworkModel existTarget = existTargetMap.getOrDefault(key, null);
             if (existTarget == null) {
                 diff.getAddingTargets().add(target);
             } else {
@@ -143,5 +138,22 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         });
         existTargetMap.forEach((key, node) -> diff.getRemovingTargets().add(node));
         return diff;
+    }
+
+    @Override
+    protected void initClass() {
+        super.pluginSceneBOClass = CloudPluginSceneBO.class;
+        super.pluginSceneElementBOClass = CloudPluginSceneElementBO.class;
+        super.pluginSceneElementPortBOClass = CloudPluginSceneElementPortBO.class;
+        super.pluginSceneModelClass = CloudPluginSceneModel.class;
+        super.pluginSceneElementModelClass = CloudPluginSceneElementModel.class;
+        super.pluginSceneElementPortModelClass = CloudPluginSceneElementPortModel.class;
+    }
+
+    @Override
+    protected void initMapper() {
+        super.pluginSceneMapper = BeanCommon.getBean(CloudPluginSceneMapper.class);
+        super.pluginSceneElementMapper = BeanCommon.getBean(CloudPluginSceneElementMapper.class);
+        super.pluginSceneElementPortMapper = BeanCommon.getBean(CloudPluginSceneElementPortMapper.class);
     }
 }

@@ -1,14 +1,19 @@
-package cn.cyberpeace.mp.cscene.service;
+package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +68,7 @@ public class SceneHostStateReportScheduleService {
     }
 
     private void reportCsceneElement(String csceneInstanceId) {
-        var csceneInstanceModel = csceneInstanceService.get(csceneInstanceId).getSource().getObj();
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceService.get(csceneInstanceId).getSource().getObj();
         if (StringUtils.isNotEmpty(csceneInstanceModel.getPassThrough())) {
             SysContextHolder.setPassThroughMap(JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
             }));
@@ -73,20 +79,27 @@ public class SceneHostStateReportScheduleService {
             return;
         }
         List<HostState> hostStates = new ArrayList<>();
-        Map<String, String> elementEid2Id = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getId()));
-        var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(csceneInstanceId, null);
+        Map<String, String> elementEid2Id = new HashMap<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (elementEid2Id.put(e.getEid(), e.getId()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(csceneInstanceId, null);
         if (CollectionUtils.isNotEmpty(agentNames)) {
             AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
             agentNameBasedRequest.setAgentNames(agentNames);
             agentNameBasedRequest.setPageSize(1);
 
             Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
-            map.forEach((k, v) -> {
-                var hostState = v.get(0);
+            for (Map.Entry<String, List<HostState>> entry : map.entrySet()) {
+                String k = entry.getKey();
+                List<HostState> v = entry.getValue();
+                HostState hostState = v.get(0);
                 hostState.setElementId(elementEid2Id.get(k));
                 hostState.setSceneId(sceneId);
                 hostStates.add(hostState);
-            });
+            }
         }
         CollectedCsceneElementCommonBO<List<HostState>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
         csceneElementCommon.setCsceneId(csceneInstanceId);

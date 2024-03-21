@@ -54,7 +54,7 @@ public class VirtualSwitch extends CloudClient {
     }
 
     public PortMappingCreateResult createPortMapping(PortMappingCreateData portMappingCreateData) {
-        var result = getHttpClient().post(CloudUrlConstant.CREATE_PORT_MAPPING, portMappingCreateData, null,
+        PortMappingCreateResult result = getHttpClient().post(CloudUrlConstant.CREATE_PORT_MAPPING, portMappingCreateData, null,
                 PortMappingCreateResult.class);
 
         log.info("portMapping result is {}", JsonCommon.stringify(result));

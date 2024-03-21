@@ -24,12 +24,12 @@ public class VirtualRouter extends CloudClient {
         CloudResponse<VirtualRouterCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {
                 }, true);
-        var virtualRouterData = result.getData();
-        var externalGatewayInfo = virtualRouterData.getExternalGatewayInfo();
+        VirtualRouterCreateData virtualRouterData = result.getData();
+        VirtualRouterCreateData.ExternalGatewayInfo externalGatewayInfo = virtualRouterData.getExternalGatewayInfo();
         if (externalGatewayInfo != null) {
-            var networks = virtualRouterData.getNetworks();
+            List<VirtualNic> networks = virtualRouterData.getNetworks();
             networks = networks == null ? new ArrayList<>() : networks;
-            var externalNetwork = new VirtualNic();
+            VirtualNic externalNetwork = new VirtualNic();
             externalNetwork.setNetworkId(externalGatewayInfo.getNetworkId());
             externalNetwork.setFixedIp(externalGatewayInfo.getFixedIp());
             networks.add(externalNetwork);

@@ -17,7 +17,7 @@ public interface BaseModelListControllerBase {
      * @return boolean
      */
     default boolean isUnlimitPagination(String listFuncName) {
-        var unlimitPaginationAnnotation = getClass().getAnnotation(UnlimitPagination.class);
+        UnlimitPagination unlimitPaginationAnnotation = getClass().getAnnotation(UnlimitPagination.class);
         if (unlimitPaginationAnnotation == null) {
             return false;
         }

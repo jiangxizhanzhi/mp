@@ -20,8 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.StringJoiner;
 
 /**
  * @Description: wazuh agent api
@@ -46,11 +47,11 @@ public class AgentService extends RequestProcessor {
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
-        var requestUri = "/agents";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
+        String requestUri = "/agents";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {});
         log.info("{}", result);
         List<Agent> agents = result.getData().getAffectedItems();
@@ -76,7 +77,11 @@ public class AgentService extends RequestProcessor {
     public List<String> listAgentIds(List<String> agentNames) {
         AgentRequest agentRequest = new AgentRequest();
         if (CollectionUtils.isNotEmpty(agentNames)) {
-            agentRequest.setName(agentNames.stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String agentName : agentNames) {
+                joiner.add(agentName);
+            }
+            agentRequest.setName(joiner.toString());
         }
         List<Agent> agents = listAgents(agentRequest);
 
@@ -84,7 +89,11 @@ public class AgentService extends RequestProcessor {
             return null;
         }
 
-        List<String> ids = agents.stream().map(a -> a.getId()).collect(Collectors.toList());
+        List<String> ids = new ArrayList<>();
+        for (Agent a : agents) {
+            String id = a.getId();
+            ids.add(id);
+        }
         return ids;
     }
 

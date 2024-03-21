@@ -17,7 +17,7 @@ public class SysContextHolder {
     }
 
     public static SysContext getSysContext() {
-        var sysContext = localSysContextHolder.get();
+        SysContext sysContext = localSysContextHolder.get();
         if (sysContext == null) {
             sysContext = new SysContext();
             sysContext.setCallChainId(TextUtils.uuid());

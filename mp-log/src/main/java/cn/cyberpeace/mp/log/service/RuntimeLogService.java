@@ -12,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -41,10 +41,14 @@ public class RuntimeLogService {
         // 时间过滤
         if (CollectionUtils.isNotEmpty(allLogReportDTOList)) {
             if (Objects.nonNull(basePageRequest.getStartDate()) && Objects.nonNull(basePageRequest.getEndDate())) {
-                allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
-                        logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
-                                && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime()))
-                        .collect(Collectors.toList());
+                List<LogReportDTO> list = new ArrayList<>();
+                for (LogReportDTO logReportDTO : allLogReportDTOList) {
+                    if (logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
+                            && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime())) {
+                        list.add(logReportDTO);
+                    }
+                }
+                allLogReportDTOList = list;
             }
 
             allLogReportDTOList.sort(Comparator.comparing(LogReportDTO::getLogReportTypeEnum).thenComparing(LogReportDTO::getUpdateTime).reversed());
@@ -53,9 +57,9 @@ public class RuntimeLogService {
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
         // 添加临时返回id
         if (CollectionUtils.isNotEmpty(runTimeLogDTOS)) {
-            runTimeLogDTOS.forEach(dto -> {
+            for (RunTimeLogDTO dto : runTimeLogDTOS) {
                 dto.setId(TextUtils.uuid());
-            });
+            }
         }
 
         int offset = (basePageRequest.getPage() - 1) * basePageRequest.getPerPage();

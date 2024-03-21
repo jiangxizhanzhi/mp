@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
@@ -109,7 +110,9 @@ public class ImagesService extends BaseCpService {
         } catch (IOException e) {
             log.error("upload file error",e);
         } finally {
-            fileList.forEach(File::delete);
+            for (File file : fileList) {
+                file.delete();
+            }
         }
         return null;
     }
@@ -125,23 +128,23 @@ public class ImagesService extends BaseCpService {
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TargetConnection.class);
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            list.forEach(l -> {
+            for (TargetConnection l : list) {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
-                    return;
+                    continue;
                 }
                 //采用http、https协议访问节点部署的web服务时，前端是直接用ip+端口号访问，这里url为空
                 if (StringUtils.isNotEmpty(l.getUrl())) {
-                    var u = URLUtils.url(l.getUrl());
+                    URL u = URLUtils.url(l.getUrl());
                     l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
                 }
                 if (config.getPublicNetProxyExcludeProtocols().contains(l.getProtocol())) {
-                    return;
+                    continue;
                 }
                 l.setIpAddress(config.getPublicNetProxyIp());
                 if (config.getPublicNetProxyPort() != null) {
                     l.setPort(config.getPublicNetProxyPort());
                 }
-            });
+            }
         }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);

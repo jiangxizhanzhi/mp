@@ -67,7 +67,7 @@ public class SceneConfigService {
     }
 
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneConfigContextBO context) {
-        var result = 0;
+        int result = 0;
         for (String id: ids) {
             if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
                 result += 1;

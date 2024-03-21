@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.service.cron;
+package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.service.ScenePluginCloudSceneCronService;

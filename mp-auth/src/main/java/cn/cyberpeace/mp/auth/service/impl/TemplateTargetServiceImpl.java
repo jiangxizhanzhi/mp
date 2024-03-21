@@ -55,7 +55,7 @@ public class TemplateTargetServiceImpl implements TargetService {
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
         HumanCondition condition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getMenuId, id);
-        var result = getModelMapper().first(condition);
+        MenuTemplateModel result = getModelMapper().first(condition);
         return Objects.nonNull(result);
     }
 
@@ -64,7 +64,9 @@ public class TemplateTargetServiceImpl implements TargetService {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
         HumanCondition condition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, getUserTemplateId()).filterEqual(MenuTemplateModel::getParent, parentId).filterEqual(MenuTemplateModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
         List<MenuTemplateModel> targetModels = getModelMapper().list(condition);
-        targetModels.forEach(t -> t.setId(t.getMenuId()));
+        for (MenuTemplateModel t : targetModels) {
+            t.setId(t.getMenuId());
+        }
         return targetModels;
     }
 
@@ -94,9 +96,9 @@ public class TemplateTargetServiceImpl implements TargetService {
             List<MenuTemplateModel> queue = new LinkedList<>();
             queue.add(parentTarget);
             while (!queue.isEmpty()) {
-                var header = queue.remove(0);
+                MenuTemplateModel header = queue.remove(0);
                 if (header != null) {
-                    var childModes = listByParent(header.getMenuId());
+                    List<MenuTemplateModel> childModes = listByParent(header.getMenuId());
                     targets.addAll(childModes);
                 }
                 if (targets.size() > 2000) {
@@ -189,11 +191,11 @@ public class TemplateTargetServiceImpl implements TargetService {
 
     // 权限树排序
     private void sortTree(List<TargetBo> targets) {
-        targets.forEach(t -> {
+        for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());
             }
-        });
+        }
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
@@ -206,10 +208,10 @@ public class TemplateTargetServiceImpl implements TargetService {
         String userMenuTemplateId = "1";
         if (UserUtils.getLoginUser() != null) {
             String userId = UserUtils.getLoginUser().getId();
-            var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
+            List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
             if (CollectionUtils.isNotEmpty(roles)) {
                 String roleId = roles.get(0).getRole();
-                var roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
+                MenuTemplateRoleModel roleMenuTemplate = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
                 if (roleMenuTemplate != null) {
                     userMenuTemplateId = roleMenuTemplate.getTemplateId();
                 }

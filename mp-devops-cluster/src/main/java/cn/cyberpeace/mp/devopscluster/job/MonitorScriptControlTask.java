@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devopscluster.task;
+package cn.cyberpeace.mp.devopscluster.job;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;

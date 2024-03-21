@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.PortConfig;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
@@ -148,8 +144,8 @@ class DeviceInfoConverter implements IConverter {
                 if (pluginPort.getAccessModes() == null) {
                     pluginPort.setAccessModes(new ArrayList<>());
                 }
-                for (var protocol : access.getAccessProtocols()) {
-                    var accessMode = new AccessMode();
+                for (AccessProtocol protocol : access.getAccessProtocols()) {
+                    AccessMode accessMode = new AccessMode();
                     accessMode.setUsername(protocol.getUsername());
                     accessMode.setPassword(protocol.getPassword());
                     accessMode.setProtocol(protocol.getProtocol());
@@ -161,7 +157,7 @@ class DeviceInfoConverter implements IConverter {
                     accessMode.setPrivateKeyFileName(protocol.getPrivateKeyFileName());
                     port.getAccessModes().add(accessMode);
 
-                    var pluginAccessMode = new CloudAccessMode();
+                    CloudAccessMode pluginAccessMode = new CloudAccessMode();
                     pluginAccessMode.setUsername(protocol.getUsername());
                     pluginAccessMode.setPassword(protocol.getPassword());
                     pluginAccessMode.setProtocol(protocol.getProtocol());

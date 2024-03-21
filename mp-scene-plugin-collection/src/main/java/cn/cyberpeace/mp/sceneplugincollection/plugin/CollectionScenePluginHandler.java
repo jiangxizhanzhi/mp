@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -20,12 +19,6 @@ import org.springframework.stereotype.Component;
 
 
 
-@ClassFieldClasses({
-        CollectionPluginSceneBO.class,
-        CollectionPluginSceneElementBO.class,
-        CollectionPluginSceneElementPortBO.class,
-        Object.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
@@ -147,5 +140,13 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         if (Boolean.TRUE.equals(element.getEnableProbeCollect())) {
             WazuhCommon.uninstallAgent(element.getSrcElement().getEid(), element.getSrcElement().getSystemType());
         }
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CollectionPluginSceneBO.class;
+        super.elementBOClass = CollectionPluginSceneElementBO.class;
+        super.elementPortBOClass = CollectionPluginSceneElementPortBO.class;
+        super.contextClass = Object.class;
     }
 }

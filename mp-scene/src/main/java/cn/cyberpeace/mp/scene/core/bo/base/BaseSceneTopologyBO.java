@@ -1,11 +1,17 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.scene.model.base.*;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseScenePieceModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,16 +53,36 @@ public abstract class BaseSceneTopologyBO<
             setScene(scene.export());
         }
         if (areas != null) {
-            setAreas(areas.stream().map(EidBO::export).collect(Collectors.toList()));
+            List<A> list = new ArrayList<>();
+            for (A a : areas) {
+                A export = a.export();
+                list.add(export);
+            }
+            setAreas(list);
         }
         if (elements != null) {
-            setElements(elements.stream().map(BaseSceneElementBO::export).collect(Collectors.toList()));
+            List<E> list = new ArrayList<>();
+            for (E e : elements) {
+                E export = e.export();
+                list.add(export);
+            }
+            setElements(list);
         }
         if (connections != null) {
-            setConnections(connections.stream().map(EidBO::export).collect(Collectors.toList()));
+            List<C> list = new ArrayList<>();
+            for (C c : connections) {
+                C export = c.export();
+                list.add(export);
+            }
+            setConnections(list);
         }
         if (pieces != null) {
-            setPieces(pieces.stream().map(EidBO::export).collect(Collectors.toList()));
+            List<P2> list = new ArrayList<>();
+            for (P2 p2 : pieces) {
+                P2 export = p2.export();
+                list.add(export);
+            }
+            setPieces(list);
         }
         return (T) this;
     }
@@ -70,25 +96,42 @@ public abstract class BaseSceneTopologyBO<
             P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P7, P8>> P8 export(
             Class<P8> pClass, Class<S9> sceneClass, Class<A9> areaClass, Class<E9> elementClass, Class<P9> portClass,
             Class<C9> connectionClass, Class<P7> pieceClass) {
-        var pObj = ClassUtils.createInstance(pClass);
+        P8 pObj = ClassUtils.createInstance(pClass);
         pObj.setAreaId(areaId);
         if (scene != null) {
             pObj.setScene(scene.export(sceneClass));
         }
         if (areas != null) {
-            pObj.setAreas(areas.stream().map(area -> area.export(areaClass)).collect(Collectors.toList()));
+            List<A9> list = new ArrayList<>();
+            for (A area : areas) {
+                A9 export = area.export(areaClass);
+                list.add(export);
+            }
+            pObj.setAreas(list);
         }
         if (elements != null) {
-            pObj.setElements(elements.stream().map(element -> element.export(elementClass, portClass))
-                    .collect(Collectors.toList()));
+            List<E9> list = new ArrayList<>();
+            for (E element : elements) {
+                E9 export = element.export(elementClass, portClass);
+                list.add(export);
+            }
+            pObj.setElements(list);
         }
         if (connections != null) {
-            pObj.setConnections(connections.stream().map(connection -> connection.export(connectionClass))
-                    .collect(Collectors.toList()));
+            List<C9> list = new ArrayList<>();
+            for (C connection : connections) {
+                C9 export = connection.export(connectionClass);
+                list.add(export);
+            }
+            pObj.setConnections(list);
         }
         if (pieces != null) {
-            pObj.setPieces(pieces.stream().map(piece -> piece.export(pieceClass))
-                    .collect(Collectors.toList()));
+            List<P7> list = new ArrayList<>();
+            for (P2 piece : pieces) {
+                P7 export = piece.export(pieceClass);
+                list.add(export);
+            }
+            pObj.setPieces(list);
         }
         return pObj;
     }

@@ -25,7 +25,7 @@ public abstract class Aggregation<T extends Aggregation<T>> {
     }
 
     public T addCalc(Function<String, String> calc) {
-        var rawCalc = this.calc;
+        Function<String, String> rawCalc = this.calc;
         if (rawCalc == null) {
             this.calc = calc;
         } else {

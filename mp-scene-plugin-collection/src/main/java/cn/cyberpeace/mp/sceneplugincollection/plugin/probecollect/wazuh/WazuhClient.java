@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.time.LocalDateTime;
@@ -52,7 +53,7 @@ public class WazuhClient {
     }
 
     private String getWazuhApiToken() {
-        var httpResult = wazuhHttpClient.get("/security/user/authenticate", null,
+        HttpResult httpResult = wazuhHttpClient.get("/security/user/authenticate", null,
                 genWazuhBaseAuthHeaders(), null);
         if (!httpResult.isSuccess()) {
             handleWazuhErrorResult(httpResult);
@@ -81,9 +82,9 @@ public class WazuhClient {
     }
 
     private List<AgentItem> getAgents() {
-        var agentsQueryHttpParam = new AgentsQueryWazuhHttpParam();
+        AgentsQueryWazuhHttpParam agentsQueryHttpParam = new AgentsQueryWazuhHttpParam();
         agentsQueryHttpParam.setStatus("active");
-        var httpResult = wazuhHttpClient.get("/agents", agentsQueryHttpParam, genWazuhAuthHeaders(), null);
+        HttpResult httpResult = wazuhHttpClient.get("/agents", agentsQueryHttpParam, genWazuhAuthHeaders(), null);
         if (!httpResult.isSuccess()) {
             handleWazuhErrorResult(httpResult);
         }
@@ -105,7 +106,7 @@ public class WazuhClient {
      * TODO 简单示例，需要优化, 缓存...
      */
     private void syncAgentInfo() {
-        var agents = getAgents();
+        List<AgentItem> agents = getAgents();
         agentNameIdMap.clear();
         agents.forEach(agent -> {
             agentNameIdMap.put(agent.getName(), agent.getId());
@@ -153,8 +154,8 @@ public class WazuhClient {
         this.wazuhPass = wazuhPass;
 
         if (!StringUtils.isEmpty(esServer)) {
-            var esHostParts = esServer.split("://")[1].split(":");
-            var restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
+            String[] esHostParts = esServer.split("://")[1].split(":");
+            RestClientBuilder restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
             this.esClient = new RestHighLevelClient(restClientBuilder);
         }
 
@@ -173,27 +174,27 @@ public class WazuhClient {
     }
 
     public void handleWazuhErrorResult(HttpResult httpResult) {
-        var error = httpResult.getResultBean(new TypeReference<WazuhErrorResponse>() {});
+        WazuhErrorResponse error = httpResult.getResultBean(new TypeReference<WazuhErrorResponse>() {});
         throw new MpRuntimeException("Request wazuh error: " + error.getTitle());
     }
 
     public <T> void handleWazuhFailResult(WazuhSuccessResponse<WazuhSuccessData<T>> response) {
-        var failedItems = response.getData().getFailedItems();
+        List<Object> failedItems = response.getData().getFailedItems();
         if (!failedItems.isEmpty()) {
             log.warn("Request wazuh with failed items: {}", failedItems);
         }
     }
 
     public Map<String, String> getAgentIds(List<String> agentNames) {
-        for (var agentName : agentNames) {
+        for (String agentName : agentNames) {
             if (!agentNameIdMap.containsKey(agentName)) {
                 syncAgentInfo();
                 break;
             }
         }
         Map<String, String> agentIds = new HashMap<>();
-        for (var agentName : agentNames) {
-            var agentId = agentNameIdMap.getOrDefault(agentName, null);
+        for (String agentName : agentNames) {
+            String agentId = agentNameIdMap.getOrDefault(agentName, null);
             if (agentId != null) {
                 agentIds.put(agentName, agentId);
             }

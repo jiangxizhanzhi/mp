@@ -28,7 +28,7 @@ public class WsProxyConfig {
     }
 
     public WsProxyTargetConfig targetConfig() {
-        var targetConfig = new WsProxyTargetConfig();
+        WsProxyTargetConfig targetConfig = new WsProxyTargetConfig();
         targetConfig.setTargetUrl(getTargetUrl());
         targetConfig.setTextMessageSizeLimit(getTextMessageSizeLimit());
         targetConfig.setBinaryMessageSizeLimit(getBinaryMessageSizeLimit());

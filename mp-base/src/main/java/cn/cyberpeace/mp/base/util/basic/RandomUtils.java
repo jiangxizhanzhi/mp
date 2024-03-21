@@ -24,8 +24,8 @@ public class RandomUtils {
         }
 
         List<T> sample = new ArrayList<>();
-        for (var i = 0; i < count; i++) {
-            var nextIndex = RANDOM.nextInt(tmpPool.size());
+        for (int i = 0; i < count; i++) {
+            int nextIndex = RANDOM.nextInt(tmpPool.size());
             sample.add(tmpPool.remove(nextIndex));
         }
 

@@ -145,10 +145,10 @@ public final class NodeLimitUtils {
         int elementCount = 0;
         if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getPlugins() != null
                 && cscene.getSceneConfig().getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
-            var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+            Map<String, Map<String, Object>> pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
             if (pluginElements != null) {
-                for (var e : pluginElements.values()) {
-                    var virtualType = e.get("virtual_type");
+                for (Map<String, Object> e : pluginElements.values()) {
+                    Object virtualType = e.get("virtual_type");
                     if (virtualType != null) {
                         if (isLimitedNode(Integer.parseInt(virtualType.toString()))) {
                             elementCount++;

@@ -12,7 +12,15 @@ import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.*;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCommonProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCommonProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCustomProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSearchCondition;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
@@ -587,11 +595,23 @@ public class CollectionTemplateService {
         List<String> probeIds = new ArrayList<>();
         if (Objects.equals("add", operate)) {
             // 从探针里面查询scriptUrl，采集模板需要单独保存一份。 防止保存采集模板之后，修改了探针脚本对采集模板产生影响
-            probeIds = customProbes.stream().map(ColTempCustomProbeRequest::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (ColTempCustomProbeRequest colTempCustomProbeRequest : customProbes) {
+                String id = colTempCustomProbeRequest.getId();
+                list.add(id);
+            }
+            probeIds = list;
         } else if (Objects.equals("update", operate)) {
             log.info("process custom probe scripts... operate:{}", operate);
             log.info("customProbes:{}", customProbes);
-            probeIds = customProbes.stream().filter(p -> Objects.equals(1, p.getReload())).map(ColTempCustomProbeRequest::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (ColTempCustomProbeRequest p : customProbes) {
+                if (Objects.equals(1, p.getReload())) {
+                    String id = p.getId();
+                    list.add(id);
+                }
+            }
+            probeIds = list;
         }
         List<ProbeDto> probeDtos = probeService.listByIds(probeIds);
 
@@ -680,7 +700,11 @@ public class CollectionTemplateService {
         if (StringUtils.isNotBlank(configJsonStr)) {
             JSONArray jsonArray = JSONObject.parseObject(configJsonStr).getJSONArray("paths");
             if (Objects.nonNull(jsonArray)) {
-                List<String> paths = jsonArray.stream().map(Object::toString).collect(Collectors.toList());
+                List<String> paths = new ArrayList<>();
+                for (Object o : jsonArray) {
+                    String s = o.toString();
+                    paths.add(s);
+                }
                 return paths;
             }
         }

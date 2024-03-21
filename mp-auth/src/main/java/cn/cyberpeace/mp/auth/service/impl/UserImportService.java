@@ -53,7 +53,7 @@ public class UserImportService {
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<TenantUserModel> tenantUserModels) {
         if (CollectionUtils.isNotEmpty(userModels)) {
 
-            for (var m : userModels) {
+            for (UserModel m : userModels) {
                 m.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
             }
 

@@ -113,10 +113,10 @@ public class Container extends CloudClient {
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {
-        var data = new ContainerArchiveData();
+        ContainerArchiveData data = new ContainerArchiveData();
         data.setFile(new File(filepath));
         data.setDstPath(dstPath);
-        var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
+        String requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
         CloudResponse<Object> result = cloudPost(requestUrl, data, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
@@ -124,12 +124,12 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
-        var data = new ContainerExecuteData();
+        ContainerExecuteData data = new ContainerExecuteData();
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
-        var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
-        var result = new CloudResponse<ContainerExecuteResult>();
+        String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+        CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
             result = cloudPost(requestUrl, data, null,
                     new TypeReference<>() {
@@ -141,12 +141,12 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command, Runnable action, Integer retryTimes) {
-        var data = new ContainerExecuteData();
+        ContainerExecuteData data = new ContainerExecuteData();
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
-        var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
-        var result = new CloudResponse<ContainerExecuteResult>();
+        String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+        CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         int times = retryTimes != null ? retryTimes : 1;
         for (int i = 0; i < times; i++) {
             if (i > 0) {
@@ -171,13 +171,13 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command,String user) {
-        var data = new ContainerExecuteData();
+        ContainerExecuteData data = new ContainerExecuteData();
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
         data.setUser(user);
-        var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
-        var result = new CloudResponse<ContainerExecuteResult>();
+        String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+        CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
             result = cloudPost(requestUrl, data, null,
                     new TypeReference<>() {
@@ -298,9 +298,9 @@ public class Container extends CloudClient {
      * @return
      */
     public HttpResult retrieveFile(String containerId, String filepath) {
-        var data = new ContainerRetrieveParam();
+        ContainerRetrieveParam data = new ContainerRetrieveParam();
         data.setContainerPath(filepath);
-        var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
+        String requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
 
         return cloudDownload(requestUrl, data);
     }

@@ -111,14 +111,14 @@ public class UserController {
     })
     @PostMapping("/no_restrict/by_ids")
     public ServiceResult<List<UserSimpleBo>> get(@RequestBody List<String> ids) {
-        var userModels = userService.getUserModelNoRestrictByUserIds(ids);
+        List<UserModel> userModels = userService.getUserModelNoRestrictByUserIds(ids);
 
         List<UserSimpleBo> userSimpleBos = new ArrayList<>();
-        userModels.forEach(userModel -> {
+        for (UserModel userModel : userModels) {
             UserSimpleBo userSimpleBo = new UserSimpleBo();
             BeanUtils.copyProperties(userModel, userSimpleBo);
             userSimpleBos.add(userSimpleBo);
-        });
+        }
 
         return ResultCommon.success(userSimpleBos);
     }

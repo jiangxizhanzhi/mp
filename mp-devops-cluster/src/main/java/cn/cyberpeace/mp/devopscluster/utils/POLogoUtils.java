@@ -21,7 +21,7 @@ public class POLogoUtils {
     public static <T> void changeLogoPathToUrl(List<T> targetList) {
         if (CollectionUtils.isNotEmpty(targetList)) {
             List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
-            targetList.forEach(target -> {
+            for (T target : targetList) {
                 try {
                     Class<?> curClass = target.getClass();
                     Field logoField = curClass.getDeclaredField("logo");
@@ -32,7 +32,7 @@ public class POLogoUtils {
                 } catch (Exception e) {
                     log.error("changePathToUrl error for {}:", target, e);
                 }
-            });
+            }
         }
     }
     

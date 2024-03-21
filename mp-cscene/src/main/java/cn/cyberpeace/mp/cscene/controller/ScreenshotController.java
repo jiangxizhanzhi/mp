@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.common.util.FileClient;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
@@ -40,9 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 public class ScreenshotController extends BaseModelController<ScreenshotModel, ScreenshotQueryParams, ScreenshotService> {
 
     @Autowired
-    private FileService fileService;
-
-    @Autowired
     public ScreenshotController(ScreenshotService screenshotService) {
         setModelService(screenshotService);
     }
@@ -65,7 +62,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     })
     @GetMapping(value = "/download")
     public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
-        fileService.downloadFile(filePath, response);
+        FileClient.downloadFile(filePath, response);
     }
 
     @ApiOperation("查询已用空间")

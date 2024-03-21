@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.scene.core.event;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
@@ -14,9 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ClassFieldClasses({
-        EventModel.class,
-})
 public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, EventModel> {
 
     public static final Map<Integer, String> EVENT_NAME_MAP = MapUtils.putAll(
@@ -44,7 +40,7 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
 
     @Override
     public String getTargetName() {
-        var targetName = getTarget().getName();
+        String targetName = getTarget().getName();
         if (StringUtils.isEmpty(targetName)) {
             targetName = getTarget().getId();
         }
@@ -62,5 +58,10 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
         formatMessage.add(String.valueOf(processStatus));
         String message = processMessage + " process[" + StringUtils.join(formatMessage, ",") + "]";
         super.logProcess(event, eventStatus, process, processStatus, message);
+    }
+
+    @Override
+    protected void initClass() {
+        super.eventModelClass = EventModel.class;
     }
 }

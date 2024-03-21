@@ -57,7 +57,7 @@ public class CloudApiProxy<T> implements MethodInterceptor {
             return result;
         } else {
             try {
-                var config = BeanCommon.getBean(CloudAppConfig.class);
+                CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                 if (Boolean.TRUE.equals(config.getEnableForceDelete()) && method.getName().equals("delete")) {
                     if (this.target instanceof VirtualSwitch) {
                         VirtualSwitch vs = (VirtualSwitch) this.target;

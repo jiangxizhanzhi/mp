@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.util;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -192,7 +193,7 @@ public class InstallerUtils {
      * @return 基础目录创建命令
      */
     public static String generateBaseDirCreateCommand(String systemType) {
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_BASE_DIR_CREATE), installerDir,
                     installerDir);
@@ -213,7 +214,7 @@ public class InstallerUtils {
         if (StringUtils.isEmpty(fileName)) {
             fileName = FileUtil.getName(fileUrl);
         }
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         String filePath;
         String downloadCommand;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
@@ -234,7 +235,7 @@ public class InstallerUtils {
      * @return 默认的安装脚本
      */
     public static String generateDefaultInstallCommand(String systemType, String filePath) {
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         systemType = systemType.toLowerCase();
         if (isNewerWindows(systemType)) {
             return String.format(WINDOWS_SPECIAL_DEFAULT_INSTALL_SOFTWARE, filePath, installerDir);
@@ -260,28 +261,28 @@ public class InstallerUtils {
     public static String generateDefaultCustomInstallCommand(String systemType, String filePath,
                                                              String installCommand) {
         String filePathLower = filePath.toLowerCase();
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
-                var fileName = FileUtil.getName(filePath);
+                String fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
                 return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_CUSTOM_NORMAL_INSTALL), installerDir,
                         installCommand);
 
             } else if (filePathLower.endsWith(".zip") || filePathLower.endsWith(".rar")) {
-                var installFolder = TextUtils.uuid();
+                String installFolder = TextUtils.uuid();
                 return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_CUSTOM_UNZIP_INSTALL), installerDir,
                         installFolder, filePath, installerDir, installFolder, installerDir, installFolder,
                         installCommand);
             }
         } else {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
-                var fileName = FileUtil.getName(filePath);
+                String fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
                 return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_NORMAL_INSTALL), installerDir,
                         installCommand);
             } else if (filePathLower.endsWith(".zip")) {
-                var installFolder = TextUtils.uuid();
+                String installFolder = TextUtils.uuid();
                 return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_UNZIP_INSTALL), installerDir,
                         installFolder, filePath, installerDir, installFolder, installerDir, installFolder, installerDir,
                         installFolder, installerDir, installFolder, installCommand);
@@ -300,12 +301,12 @@ public class InstallerUtils {
      */
     public static String generateDockerCommand(String systemType, String filePath, String imageName, String installCommand) {
         String filePathLower = filePath.toLowerCase();
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             // todo 暂不支持 windows 的docker 服务
         } else {
             if (filePathLower.endsWith(".zip")) {
-                var installFolder = TextUtils.uuid();
+                String installFolder = TextUtils.uuid();
                 return String.format(
                         SystemTypeCommandUtils.joinCommands(systemType, LINUX_DOCKER_ZIP_INSTALL),
                         installerDir, installFolder,
@@ -313,7 +314,7 @@ public class InstallerUtils {
                         installerDir, installFolder,
                         installCommand);
             } else {
-                var installFolder = TextUtils.uuid();
+                String installFolder = TextUtils.uuid();
                 return String.format(
                         SystemTypeCommandUtils.joinCommands(systemType, LINUX_DOCKER_TAR_INSTALL),
                         installerDir, installFolder,
@@ -330,9 +331,9 @@ public class InstallerUtils {
      * @return windows安装工具
      */
     private static List<Installer> getWindowsInstallerTools() {
-        var mappings = LocalFileMappingCommon.getMappings(WINDOWS_HELP_INSTALLER_GROUP);
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WINDOWS_HELP_INSTALLER_GROUP);
         return mappings.stream().map(mapping -> {
-            var installer = new Installer();
+            Installer installer = new Installer();
             installer.setName(mapping.getName());
             installer.setFile(mapping.getRemoteFile());
             return installer;
@@ -348,28 +349,28 @@ public class InstallerUtils {
         List<String> installCommands = new ArrayList<>();
         installCommands.add(generateBaseDirCreateCommand(systemType));
 
-        var hasDefaultInstaller = false;
-        for (var installer : installers) {
+        boolean hasDefaultInstaller = false;
+        for (Installer installer : installers) {
             if (!StringUtils.isEmpty(installer.getFile()) && StringUtils.isEmpty(installer.getInstallCommand())) {
                 hasDefaultInstaller = true;
                 break;
             }
         }
 
-        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         List<String> subInstallCommands = new ArrayList<>();
         if (hasDefaultInstaller && isNewerWindows(systemType)) {
-            var windowsInstallerTools = getWindowsInstallerTools();
-            for (var installerTool : windowsInstallerTools) {
-                var installerToolUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, installerTool.getFile());
-                var fileDownloadInfo = generateFileDownloadCommand(systemType,
+            List<Installer> windowsInstallerTools = getWindowsInstallerTools();
+            for (Installer installerTool : windowsInstallerTools) {
+                String installerToolUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, installerTool.getFile());
+                FileDownloadInfo fileDownloadInfo = generateFileDownloadCommand(systemType,
                         installerToolUrl, installerTool.getName());
                 subInstallCommands.add(fileDownloadInfo.getDownloadCommand());
             }
         }
 
         boolean isWindowsOS = SystemTypeCommandUtils.isWindows(systemType);
-        for (var installer : installers) {
+        for (Installer installer : installers) {
             String installerFile = installer.getFile();
             String installCommand = installer.getInstallCommand();
             if (StringUtils.isEmpty(installerFile)) {
@@ -384,9 +385,9 @@ public class InstallerUtils {
 
                 subInstallCommands.add(installCommand);
             } else {
-                var fileName = FileUtil.getName(installerFile);
+                String fileName = FileUtil.getName(installerFile);
                 String serverPath = installer.getFilePathPrefix() == null ? metadataFileServer : installer.getFilePathPrefix();
-                var fileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, serverPath, installerFile);
+                String fileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, serverPath, installerFile);
                 boolean isWinFileContainZh = isWindowsOS && TextUtils.containChinese(fileName);
                 String downloadFileName;
                 if (isWinFileContainZh) {
@@ -394,11 +395,11 @@ public class InstallerUtils {
                 } else {
                     downloadFileName = fileName;
                 }
-                var fileDownloadInfo = generateFileDownloadCommand(systemType, fileUrl,
+                FileDownloadInfo fileDownloadInfo = generateFileDownloadCommand(systemType, fileUrl,
                         downloadFileName);
                 subInstallCommands.add(fileDownloadInfo.getDownloadCommand());
 
-                var filePath = fileDownloadInfo.getFilePath();
+                String filePath = fileDownloadInfo.getFilePath();
                 List<String> innerCommands = new ArrayList<>();
                 if (isWinFileContainZh) {
                     innerCommands.add(String.format("ren %s %s", filePath, fileName));
@@ -428,14 +429,14 @@ public class InstallerUtils {
             }
         }
 
-        var installerDir = getDefaultInstallDir(systemType);
+        String installerDir = getDefaultInstallDir(systemType);
         if (hasDefaultInstaller && isNewerWindows(systemType)) {
             subInstallCommands.add(String.format(WINDOWS_SPECIAL_DEFAULT_INSTALL_SOFTWARE_START, installerDir));
         }
 
         if (isWindowsOS) {
             // windows做成脚本文件安装
-            var subInstallCommand = SystemTypeCommandUtils.joinCommands(systemType,
+            String subInstallCommand = SystemTypeCommandUtils.joinCommands(systemType,
                     subInstallCommands.toArray(new String[0]));
             String tmpFile = null;
             try {
@@ -448,7 +449,7 @@ public class InstallerUtils {
             if (tmpFile != null) {
                 installCommands.add(String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_MAKE_SCRIPT_INSTALL),
                         installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpFile), installerDir));
-                var checkCommands = SystemTypeCommandUtils.joinCommands(systemType,
+                String checkCommands = SystemTypeCommandUtils.joinCommands(systemType,
                         new String[]{
                                 "timeout /t 10",
                                 "SET CheckFile=C:\\ossec-agent\\bin\\tools\\eda72998ba654c8d8625f61eaa918eb3.py",

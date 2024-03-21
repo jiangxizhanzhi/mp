@@ -22,9 +22,9 @@ public class BaseInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        var homeDir = baseAppConfig.getHomeDir();
-        var resourcesDir = baseAppConfig.getResourcesDir();
-        var fileServerDir = baseAppConfig.getFileServerDir();
+        String homeDir = baseAppConfig.getHomeDir();
+        String resourcesDir = baseAppConfig.getResourcesDir();
+        String fileServerDir = baseAppConfig.getFileServerDir();
         FileUtil.mkdir(homeDir);
         FileUtil.mkdir(resourcesDir);
         FileUtil.mkdir(fileServerDir);

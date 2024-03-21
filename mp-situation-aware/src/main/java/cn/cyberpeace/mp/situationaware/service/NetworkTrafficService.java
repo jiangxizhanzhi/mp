@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionModel;
+import cn.cyberpeace.mp.situationaware.model.SessionRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionResult;
+import cn.cyberpeace.mp.situationaware.model.SessionSourceModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -23,6 +27,7 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,7 @@ import org.springframework.util.ObjectUtils;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -65,14 +71,14 @@ public class NetworkTrafficService extends AbstractBaseService{
     public List<SessionResult> querySessionListWithGroup(SessionRequest sessionRequest) {
         List<SessionResult> sessionResults = Lists.newArrayList();
 
-        var searchRequest = new SearchRequest(this.indices(sessionRequest.getGroupList(),sessionRequest.getStartTime(),sessionRequest.getEndTime()));
+        SearchRequest searchRequest = new SearchRequest(this.indices(sessionRequest.getGroupList(),sessionRequest.getStartTime(),sessionRequest.getEndTime()));
         // 1.创建并设置SearchSourceBuilder对象
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(sessionRequest.getPageSize());
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        var boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
-        var rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp")
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp")
             .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
 
         //构造动态条件查询
@@ -83,11 +89,11 @@ public class NetworkTrafficService extends AbstractBaseService{
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> {
-                var sessionSourceModel = JSONObject.parseObject(hit.getSourceAsString(), SessionSourceModel.class);
+                SessionSourceModel sessionSourceModel = JSONObject.parseObject(hit.getSourceAsString(), SessionSourceModel.class);
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 sessionSourceModel.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
                 sessionSourceModel.setIndex(hit.getIndex());
-                var sessionModel = new SessionModel();
+                SessionModel sessionModel = new SessionModel();
                 sessionModel.setIndex(sessionSourceModel.getIndex());
                 sessionModel.setSrcIp(sessionSourceModel.getSource().getIp());
                 sessionModel.setSrcMac(sessionSourceModel.getSource().getMac());
@@ -100,7 +106,12 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+            List<SessionResult> list = new ArrayList<>();
+            for (SessionModel sessionModel : sessionModelList) {
+                SessionResult sessionResult = this.convertSession(sessionModel);
+                list.add(sessionResult);
+            }
+            sessionResults = list;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,13 +127,13 @@ public class NetworkTrafficService extends AbstractBaseService{
     public ListObjResult<SessionResult> querySessionWithPage(SessionRequest sessionRequest) {
         List<SessionResult> sessionResults = Lists.newArrayList();
 
-        var indexArray = this.indices(sessionRequest.getGroupList(),sessionRequest.getStartTime(),sessionRequest.getEndTime());
+        String[] indexArray = this.indices(sessionRequest.getGroupList(),sessionRequest.getStartTime(),sessionRequest.getEndTime());
 
-        var searchRequest = new SearchRequest(indexArray);
+        SearchRequest searchRequest = new SearchRequest(indexArray);
         // 1.创建并设置SearchSourceBuilder对象
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(sessionRequest.getPageSize());
-        var boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
         if (Objects.nonNull(sessionRequest.getStartTime()) && Objects.nonNull(sessionRequest.getEndTime())) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
@@ -144,11 +155,11 @@ public class NetworkTrafficService extends AbstractBaseService{
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> {
-                var sessionSourceModel = JSONObject.parseObject(hit.getSourceAsString(), SessionSourceModel.class);
+                SessionSourceModel sessionSourceModel = JSONObject.parseObject(hit.getSourceAsString(), SessionSourceModel.class);
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
                 sessionSourceModel.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
                 sessionSourceModel.setIndex(hit.getIndex());
-                var sessionModel = new SessionModel();
+                SessionModel sessionModel = new SessionModel();
                 sessionModel.setIndex(sessionSourceModel.getIndex());
                 sessionModel.setSrcIp(sessionSourceModel.getSource().getIp());
                 sessionModel.setSrcMac(sessionSourceModel.getSource().getMac());
@@ -161,16 +172,21 @@ public class NetworkTrafficService extends AbstractBaseService{
                 sessionModel.setTimestamp(sessionSourceModel.getTimestamp());
                 return sessionModel;
             }).collect(Collectors.toList());
-            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+            List<SessionResult> list = new ArrayList<>();
+            for (SessionModel sessionModel : sessionModelList) {
+                SessionResult sessionResult = this.convertSession(sessionModel);
+                list.add(sessionResult);
+            }
+            sessionResults = list;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        var countRequest = new CountRequest(indexArray);
+        CountRequest countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        var total = 0;
+        int total = 0;
 
         try {
             CountResponse totalSize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
@@ -226,7 +242,7 @@ public class NetworkTrafficService extends AbstractBaseService{
         }
 
         molochUrl = molochUrl + "/spiview.json";
-        var spiMolochUrlBuilder = new StringBuilder();
+        StringBuilder spiMolochUrlBuilder = new StringBuilder();
         spiMolochUrlBuilder.append(molochUrl)
             .append("?facets=").append(1)
             .append("&spi=").append("srcIp,dstIp,ipProtocol")
@@ -264,9 +280,23 @@ public class NetworkTrafficService extends AbstractBaseService{
             boolQueryBuilder.filter(QueryBuilders.termsQuery("source.mac", sessionRequest.getMacIds()));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getSeverityEnum())){
-            List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
-            List<Integer> severityList = sessionRequest.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
-                    allSeverityList.stream().filter(v -> v <= sessionRequest.getSeverityEnum().ordinal()).collect(Collectors.toList());
+            List<Integer> allSeverityList = new ArrayList<>();
+            for (SeverityEnum severityEnum : SeverityEnum.values()) {
+                Integer ordinal = severityEnum.ordinal();
+                allSeverityList.add(ordinal);
+            }
+            List<Integer> severityList;
+            if (sessionRequest.getSeverityEnum() == SeverityEnum.ALL) {
+                severityList = allSeverityList;
+            } else {
+                List<Integer> list = new ArrayList<>();
+                for (Integer v : allSeverityList) {
+                    if (v <= sessionRequest.getSeverityEnum().ordinal()) {
+                        list.add(v);
+                    }
+                }
+                severityList = list;
+            }
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
         }
     }

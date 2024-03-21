@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.frontadmin.service.cron;
+package cn.cyberpeace.mp.frontadmin.job;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -118,18 +118,23 @@ public class SysDespireCronJob {
         //激活到期前提醒内容
         String remindContent = String.format(LICENSE_REMIND_CONTENT, sysName, daysBetween);
         // 设置了延期提醒的用户不通知
-        var humanCondition = new HumanCondition()
+        HumanCondition humanCondition = new HumanCondition()
                 .link(UserModel.class, UserRoleModel.class)
                 .filterLink(UserModel.class, UserModel::getId, UserRoleModel.class, UserRoleModel::getUser)
                 .currentLink(UserModel.class)
                 .filterLessThan(UserModel::getDelayRemindLicenseTime, LocalDateTime.now())
                 .currentLink(UserRoleModel.class)
                 .filterEqual(UserRoleModel::getRole, AuthConstant.ROLE_ADMIN_ID);
-        var users = userMapper.list(humanCondition);
+        List<UserModel> users = userMapper.list(humanCondition);
 
         List<String> userIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(users)) {
-            userIds = users.stream().map(UserModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (UserModel user : users) {
+                String id = user.getId();
+                list.add(id);
+            }
+            userIds = list;
         }
         SysNoticeRequest sysNoticeRequest =
                 SysNoticeRequest.builder()

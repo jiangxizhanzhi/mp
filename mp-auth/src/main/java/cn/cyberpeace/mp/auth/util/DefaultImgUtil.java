@@ -82,7 +82,13 @@ public class DefaultImgUtil {
             String group = splitToGroup(mayDefaultPath);
             String name = splitToName(mayDefaultPath);
             Optional<LocalFileMappingModel> mappingModelOptional =
-                    mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
+                    Optional.empty();
+            for (LocalFileMappingModel model : mappingModelList) {
+                if (model.getGroup().equals(group) && model.getName().equals(name)) {
+                    mappingModelOptional = Optional.of(model);
+                    break;
+                }
+            }
 
             if (mappingModelOptional.isPresent()) {
                 path = FsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());

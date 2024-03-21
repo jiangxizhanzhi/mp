@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,9 +54,9 @@ public class CsceneFileController {
     @PostMapping("/attachment_upload")
     public ServiceResult<SceneFileUploadResponse> attachmentUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalType = new String[]{ "zip" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalType).asResult();
     }
 
@@ -69,9 +70,9 @@ public class CsceneFileController {
     @PostMapping("/script_upload")
     public ServiceResult<SceneFileUploadResponse> scriptUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalType = new String[]{ "sh" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalType).asResult();
     }
 
@@ -85,9 +86,9 @@ public class CsceneFileController {
     @PostMapping("/icon_upload")
     public ServiceResult<SceneFileUploadResponse> iconUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "png", "svg", "jpg", "jpeg", "gif" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
     }
 
@@ -101,9 +102,9 @@ public class CsceneFileController {
     @PostMapping("/private_key_upload")
     public ServiceResult<SceneFileUploadResponse> privateKeyUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "pub", "txt" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
     }
 
@@ -117,9 +118,9 @@ public class CsceneFileController {
     @PostMapping("/scene_template_screenshot_upload")
     public ServiceResult<SceneFileUploadResponse> sceneTemplateScreenshotUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "png" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
     }
 
@@ -129,9 +130,9 @@ public class CsceneFileController {
     @PostMapping("/mib_import")
     public ServiceResult<MibFileUploadResponse> sceneMibFileUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "mib" };
-        var fileName = file.getOriginalFilename();
-        var inputStream = file.getInputStream();
-        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        InputStream inputStream = file.getInputStream();
+        String fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
         //上传文件到中间件
         ServiceResult<SceneFileUploadResponse> sceneMibFileUpload =
             csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix);

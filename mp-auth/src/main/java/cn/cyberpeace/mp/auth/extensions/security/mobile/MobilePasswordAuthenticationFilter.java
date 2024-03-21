@@ -73,7 +73,7 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
             String mobile = loginData.getOrDefault(getMobileParameter(), StringUtils.EMPTY);
             String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
             String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
-            var authRequest = new MobilePasswordAuthenticationToken(mobile, originPwd);
+            MobilePasswordAuthenticationToken authRequest = new MobilePasswordAuthenticationToken(mobile, originPwd);
             setDetails(request, authRequest);
             // 认证
             return getAuthenticationManager().authenticate(authRequest);

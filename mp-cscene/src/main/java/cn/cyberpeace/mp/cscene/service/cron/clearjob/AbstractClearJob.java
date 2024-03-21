@@ -41,7 +41,9 @@ public abstract class AbstractClearJob<Q> {
                 break;
             }
             Map<String, Q> eid2Node = this.getEid2Node(nodes);
-            eid2Node.forEach((eid, node) -> {
+            for (Map.Entry<String, Q> entry : eid2Node.entrySet()) {
+                String eid = entry.getKey();
+                Q node = entry.getValue();
                 try {
                     if (this.needToClear(eid)) {
                         log.info("find one error status node , eid is {},node info is {}", eid, JsonCommon.stringify(node));
@@ -64,7 +66,7 @@ public abstract class AbstractClearJob<Q> {
                 } catch (Exception e) {
                     log.error("failed to execute clear job {} ,eid is {},node info is {}", this.getClass().getName(), eid, JsonCommon.stringify(node), e);
                 }
-            });
+            }
         }
     }
 
@@ -78,7 +80,7 @@ public abstract class AbstractClearJob<Q> {
         if (StringUtils.isEmpty(id)) {
             return false;
         }
-        var condition = new HumanCondition().filterEqual(SceneElementModel::getId, id);
+        HumanCondition condition = new HumanCondition().filterEqual(SceneElementModel::getId, id);
         List<SceneElementModel> elements = sceneElementMapper.list(condition);
         if (CollectionUtils.isEmpty(elements)) {
             return false;
@@ -91,7 +93,7 @@ public abstract class AbstractClearJob<Q> {
             return true;
         } else {
             SceneMapper sceneMapper = BeanCommon.getBean(SceneMapper.class);
-            var scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
+            SceneModel scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
             if (scene != null && scene.getEventStatus() == EventStatus.OVER && scene.getEvent() == SceneElementModel.Event.DELETE) {
                 return true;
             } else if (scene != null && scene.getEventStatus() == EventStatus.ABNORMAL && scene.getEvent() == SceneElementModel.Event.DELETE) {

@@ -43,7 +43,7 @@ public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
     }
 
     public T sourceObj() {
-        var source = getSource();
+        ObjResult<T> source = getSource();
         if (source == null) {
             return null;
         }

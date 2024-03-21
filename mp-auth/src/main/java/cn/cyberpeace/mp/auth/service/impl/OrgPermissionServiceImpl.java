@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;
@@ -17,12 +18,14 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,9 +64,11 @@ public class OrgPermissionServiceImpl
                 .filterEqual(OrgPermissionModel::getOwner, orgId)
                 .select(OrgPermissionModel::getTarget);
         List<OrgPermissionModel> orgPermissionModels = getModelMapper().list(orgPermissionCondition);
-        List<String> targetIds = orgPermissionModels.stream()
-                .map(OrgPermissionModel::getTarget)
-                .collect(Collectors.toList());
+        List<String> targetIds = new ArrayList<>();
+        for (OrgPermissionModel orgPermissionModel : orgPermissionModels) {
+            String target = orgPermissionModel.getTarget();
+            targetIds.add(target);
+        }
         if (CollectionUtils.isEmpty(targetIds)) {
             return new HashSet<>();
         }
@@ -92,7 +97,7 @@ public class OrgPermissionServiceImpl
     public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
-        var result = orgService.get(orgId);
+        ObjServiceResult<OrgModel> result = orgService.get(orgId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ORG_NOT_EXISTED);
 
         if (cleanOldTargets) {
@@ -109,15 +114,14 @@ public class OrgPermissionServiceImpl
         }
 
         // 添加组织权限
-        targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+        for (String tid : targetIds) {// todo 校验权限是否存在
             OrgPermissionModel orgPerm = new OrgPermissionModel();
             orgPerm.setOwner(orgId);
             orgPerm.setTarget(tid);
             orgPerm.setTenant(AuthConstant.DEFAULT_TENANT);
-            var re = orgPermissionService.create(orgPerm);
+            ObjServiceResult<OrgPermissionModel> re = orgPermissionService.create(orgPerm);
             ResultUtils.throwExceptionIfError(re, AuthErrorCode.ORG_TARGET_ADD_ERROR);
-        });
+        }
 
         return true;
 

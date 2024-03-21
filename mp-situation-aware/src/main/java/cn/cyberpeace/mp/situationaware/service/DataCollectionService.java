@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
@@ -182,9 +183,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -205,8 +206,16 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+            List<WazuhFileRoot> wazuhFileRootList = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                WazuhFileRoot wazuhFileRoot = JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class);
+                wazuhFileRootList.add(wazuhFileRoot);
+            }
+            List<FileEventModel> fileEventModelList = new ArrayList<>();
+            for (WazuhFileRoot root : wazuhFileRootList) {
+                FileEventModel fileEventModel = this.getFileEventModel(root, null);
+                fileEventModelList.add(fileEventModel);
+            }
 
             String responseScrollId = response.getScrollId();
             if (wazuhEventRequest.isScroll()) {
@@ -238,9 +247,9 @@ public class DataCollectionService extends CollectionBaseService {
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -305,8 +314,16 @@ public class DataCollectionService extends CollectionBaseService {
         scrollRequest.scroll(scroll);
         try {
             SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
-            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+            List<WazuhFileRoot> wazuhFileRootList = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                WazuhFileRoot wazuhFileRoot = JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class);
+                wazuhFileRootList.add(wazuhFileRoot);
+            }
+            List<FileEventModel> fileEventModelList = new ArrayList<>();
+            for (WazuhFileRoot root : wazuhFileRootList) {
+                FileEventModel fileEventModel = this.getFileEventModel(root, null);
+                fileEventModelList.add(fileEventModel);
+            }
 
             String responseScrollId = response.getScrollId();
             fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
@@ -331,9 +348,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -353,7 +370,7 @@ public class DataCollectionService extends CollectionBaseService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
-            for (var hit : response.getHits().getHits()) {
+            for (SearchHit hit : response.getHits().getHits()) {
                 WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
@@ -393,9 +410,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 根据日期构造索引,将本地时间转化为UTC时间后构建
         String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -416,12 +433,12 @@ public class DataCollectionService extends CollectionBaseService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhVulnerabilityInfoModel> wazuhModelList = new ArrayList<>();
-            for (var hit : response.getHits().getHits()) {
+            for (SearchHit hit : response.getHits().getHits()) {
                 WazuhMonitorRoot<WazuhVulnerabilityInfoModel> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
                 if (Objects.nonNull(wazuhMonitorRoot.getData())) {
-                    var vul = wazuhMonitorRoot.getData().getVulnerability();
+                    WazuhVulnerabilityInfoModel.Vulnerability vul = wazuhMonitorRoot.getData().getVulnerability();
                     if (Objects.nonNull(vul)) {
                         WazuhVulnerabilityInfoModel vulnerability = new WazuhVulnerabilityInfoModel();
                         vulnerability.setVulnerability(vul);
@@ -461,9 +478,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 根据日期构造索引,将本地时间转化为UTC时间后构建
         String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -512,9 +529,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 //        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
@@ -539,11 +556,14 @@ public class DataCollectionService extends CollectionBaseService {
                             .collect(Collectors.groupingBy(root -> root.getAgent().getId(),
                                     Collectors.maxBy(Comparator.comparing(WazuhMonitorRoot::getTimestamp))));
 
-            wazuhFileRootList = wazuhMonitorMap.values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-            var wazuhModelList = wazuhFileRootList.stream()
+            wazuhFileRootList = wazuhMonitorMap.values().stream()
+                    .filter(wazuhMonitorRoot -> wazuhMonitorRoot.isPresent())
+                    .map(wazuhMonitorRoot -> wazuhMonitorRoot.get())
+                    .collect(Collectors.toList());
+            List<WazuhHostStateModel> wazuhModelList = wazuhFileRootList.stream()
                     .filter(model -> model.getFullLog().contains("MonitorMessage:")).map(model -> {
-                        var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
-                        var result = JSONObject.parseObject(monitorMessage, WazuhHostStateModel.class);
+                        String monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
+                        WazuhHostStateModel result = JSONObject.parseObject(monitorMessage, WazuhHostStateModel.class);
                         result.setAgentId(model.getAgent().getId());
                         result.setAgentName(model.getAgent().getName());
 //                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
@@ -577,9 +597,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
@@ -622,12 +642,15 @@ public class DataCollectionService extends CollectionBaseService {
             return Collections.emptyList();
         }
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE);
-        List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
-        var wazuhModelList = wazuhFileRootList.stream().map(model -> {
+        List<WazuhHostStateModel> wazuhModelList = wazuhFileRootList.stream().map(model -> {
             if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
                 HostStateOutput output = model.getData().getOutput();
                 WazuhHostStateModel wazuhHostStateModel = convertHostStateOutput2WazuhModel(output);
@@ -665,12 +688,15 @@ public class DataCollectionService extends CollectionBaseService {
                 if (Objects.nonNull(b.getAggregations())) {
                     String key = b.getKeyAsString();
                     TopHits topHits = b.getAggregations().get(subAggName);
-                    List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(topHits
-                            .getHits().getHits()).map(hit ->
-                            JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
-                            })).collect(Collectors.toList());
+                    List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+                    for (SearchHit hit : topHits
+                            .getHits().getHits()) {
+                        WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+                        });
+                        wazuhFileRootList.add(launchWazuhMonitorRoot);
+                    }
 
-                    var wazuhModelList = wazuhFileRootList.stream().map(model -> {
+                    List<WazuhHostStateModel> wazuhModelList = wazuhFileRootList.stream().map(model -> {
                         if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
                             HostStateOutput output = model.getData().getOutput();
                             WazuhHostStateModel wazuhHostStateModel = convertHostStateOutput2WazuhModel(output);
@@ -879,9 +905,9 @@ public class DataCollectionService extends CollectionBaseService {
     public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
 
@@ -927,9 +953,9 @@ public class DataCollectionService extends CollectionBaseService {
                                                                       String aggName, String subAggName) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
 
@@ -973,10 +999,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     public JSONObject processBaseChangeOutput(SearchResponse response) {
-        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
         if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
@@ -1014,10 +1043,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     public JSONObject processBaseRawOutput(SearchResponse response) {
-        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
+        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = new ArrayList<>();
+        for (SearchHit hit : response.getHits()
+                .getHits()) {
+            WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchWazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<>() {
+            });
+            wazuhFileRootList.add(launchWazuhMonitorRoot);
+        }
 
         if (CollectionUtils.isEmpty(wazuhFileRootList)) {
             return null;
@@ -1048,15 +1080,15 @@ public class DataCollectionService extends CollectionBaseService {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new HashMap<>();
         }
-        var searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest();
         // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         searchRequest.indices(indexArray);
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         // 查询条件
         sourceBuilder.size(0);
         sourceBuilder.trackTotalHits(true);
-        var query = QueryBuilders.boolQuery()
+        BoolQueryBuilder query = QueryBuilders.boolQuery()
                 .should(
                         QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termsQuery("agent.name", wazuhMonitorEventsRequest.getAgentNames()))
@@ -1099,15 +1131,15 @@ public class DataCollectionService extends CollectionBaseService {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new HashMap<>();
         }
-        var searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest();
         // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         searchRequest.indices(indexArray);
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         // 查询条件
         sourceBuilder.size(0);
         sourceBuilder.trackTotalHits(true);
-        var query = QueryBuilders.boolQuery()
+        BoolQueryBuilder query = QueryBuilders.boolQuery()
                 .should(
                         QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termsQuery("agent.name", wazuhMonitorEventsRequest.getAgentNames()))
@@ -1146,9 +1178,9 @@ public class DataCollectionService extends CollectionBaseService {
         }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
 
@@ -1205,8 +1237,13 @@ public class DataCollectionService extends CollectionBaseService {
                                        MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
         // macId集合都转换成小写
-        macIds = macIds.stream().map(String::toLowerCase).collect(Collectors.toList());
-        var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
+        List<String> list = new ArrayList<>();
+        for (String macId : macIds) {
+            String s = macId.toLowerCase();
+            list.add(s);
+        }
+        macIds = list;
+        Sets.SetView<String> currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
     }
 
@@ -1270,7 +1307,11 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
                                               BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-        List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream().map(DataCollectionType::getRuleId).collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        for (DataCollectionType dataCollectionType : EnumSet.allOf(DataCollectionType.class)) {
+            String ruleId = dataCollectionType.getRuleId();
+            ruleIds.add(ruleId);
+        }
         if (!CollectionUtils.isEmpty(ruleIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
         }
@@ -1287,7 +1328,7 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public MultiValueMap<String, String> queryAllAgentMacAddr() {
         MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
-        var wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
+        WazuhNetifaceRoot wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
         if (Objects.isNull(wazuhNetifaceRoot.getData())) {
             return responseMultiMap;
         }
@@ -1307,11 +1348,18 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
         // 转小写macId集合
-        List<String> lowerMacs = macs.stream().map(String::toLowerCase).collect(Collectors.toList());
+        List<String> lowerMacs = new ArrayList<>();
+        for (String s : macs) {
+            String toLowerCase = s.toLowerCase();
+            lowerMacs.add(toLowerCase);
+        }
         Set<String> agentSet = Sets.newHashSet();
         allAgentMacAddr.forEach((key, macList) -> {
-            if (macList.stream().anyMatch(lowerMacs::contains)) {
-                agentSet.add(key);
+            for (String mac : macList) {
+                if (lowerMacs.contains(mac)) {
+                    agentSet.add(key);
+                    break;
+                }
             }
         });
 
@@ -1336,9 +1384,9 @@ public class DataCollectionService extends CollectionBaseService {
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
         // build the aggregation
@@ -1381,9 +1429,9 @@ public class DataCollectionService extends CollectionBaseService {
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
         // build the aggregation
@@ -1442,9 +1490,9 @@ public class DataCollectionService extends CollectionBaseService {
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
         // build the aggregation
@@ -1494,9 +1542,9 @@ public class DataCollectionService extends CollectionBaseService {
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var countRequest = new CountRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
+        CountRequest countRequest = new CountRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -1528,8 +1576,8 @@ public class DataCollectionService extends CollectionBaseService {
         }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
+        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
@@ -1598,7 +1646,14 @@ public class DataCollectionService extends CollectionBaseService {
             builder.description(wazuhFileRoot.getRule().getDescription())
                     .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
             if (!CollectionUtils.isEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
-                fileEventType = wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE;
+                FileEventType b = FileEventType.FILE;
+                for (String s : wazuhFileRoot.getRule().getGroups()) {
+                    if ("syscheck_registry".equals(s)) {
+                        b = FileEventType.REGISTRY;
+                        break;
+                    }
+                }
+                fileEventType = b;
             }
         }
         builder.fileEventType(fileEventType);
@@ -1667,7 +1722,7 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public static String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
-        var indexArray = new String[indexList.size()];
+        String[] indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
         return indexArray;
     }
@@ -1819,10 +1874,10 @@ public class DataCollectionService extends CollectionBaseService {
      * @return count
      */
     private int queryTotalCount(String[] indexArray, BoolQueryBuilder boolQueryBuilder) {
-        var countRequest = new CountRequest(indexArray);
+        CountRequest countRequest = new CountRequest(indexArray);
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         countRequest.query(boolQueryBuilder);
-        var total = 0;
+        int total = 0;
         try {
             CountResponse totalSize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
             total = (int) totalSize.getCount();
@@ -1840,7 +1895,12 @@ public class DataCollectionService extends CollectionBaseService {
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
-        return dateStringList.stream().map(dateString -> WAZUH_ALERT_INDEX_PREFIX + dateString).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (String dateString : dateStringList) {
+            String s = WAZUH_ALERT_INDEX_PREFIX + dateString;
+            list.add(s);
+        }
+        return list;
     }
 
     /**

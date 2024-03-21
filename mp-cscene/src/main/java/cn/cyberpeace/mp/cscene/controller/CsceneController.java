@@ -123,7 +123,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
+        ListObjServiceResult<CsceneBO> result = getModelService().listCsceneBO(queryParams, false, null).asResult();
         getModelService().setSharedUser(result.getData().getList(), queryParams);
         return result;
     }
@@ -153,7 +153,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        var result = modelService.sync(csceneBO, null, true).asResult();
+        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
@@ -171,7 +171,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        var result = modelService.sync(csceneBO, null, false).asResult();
+        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, false).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
@@ -191,7 +191,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneActionRequest request) {
         request = formatActionRequest(request, id);
-        var result = modelService.clone(request.getId(), null).asResult();
+        ServiceResult<CsceneBO> result = modelService.clone(request.getId(), null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, request.getContext());
         return result;
     }
@@ -206,7 +206,7 @@ public class CsceneController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
-        var result = modelService.deleteById(request.getId(), true, false, null).asResult();
+        ServiceResult<Boolean> result = modelService.deleteById(request.getId(), true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }
@@ -216,7 +216,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
-        var result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
+        ServiceResult<Integer> result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(Arrays.asList(ids), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, null);
         return result;
     }
@@ -232,7 +232,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        ServiceResult<CsceneInstanceBO> result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }
@@ -248,7 +248,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }

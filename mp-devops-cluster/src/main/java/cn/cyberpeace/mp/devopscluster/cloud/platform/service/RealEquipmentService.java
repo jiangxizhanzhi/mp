@@ -24,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -169,13 +170,13 @@ public class RealEquipmentService extends BaseCpService {
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            list.forEach(l -> {
+            for (TargetConnection l : list) {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
-                    return;
+                    continue;
                 }
-                var u = URLUtils.url(l.getUrl());
+                URL u = URLUtils.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
-            });
+            }
         }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);

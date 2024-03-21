@@ -47,7 +47,7 @@ public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
     }
 
     public List<T> sourceObjs() {
-        var source = getSource();
+        ListObjResult<T> source = getSource();
         if (source == null) {
             return new ArrayList<>();
         }
@@ -55,7 +55,7 @@ public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
     }
 
     public List<T> sourceList() {
-        var source = getSource();
+        ListObjResult<T> source = getSource();
         if (source == null) {
             return new ArrayList<>();
         }
@@ -63,7 +63,7 @@ public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
     }
 
     public Integer sourceTotal() {
-        var source = getSource();
+        ListObjResult<T> source = getSource();
         if (source == null) {
             return null;
         }

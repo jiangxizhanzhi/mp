@@ -38,8 +38,8 @@ public class TopoReformUtils {
     public ElementWrapper addAuxiliarySwitchNode() {
         ElementWrapper wrapper = createAuxiliarySwitchNode();
         String nodeId = wrapper.getSceneElement().getId();
-        var element = wrapper.getSceneElement();
-        var pluginElement = wrapper.getPluginElement();
+        SceneElementBO element = wrapper.getSceneElement();
+        CloudPluginSceneElementBO pluginElement = wrapper.getPluginElement();
         this.pluginHandler.addElementAndSrcElement(nodeId, pluginElement, element);
         return wrapper;
     }
@@ -52,8 +52,8 @@ public class TopoReformUtils {
     public PortWrapper addAuxiliaryPort(CloudPluginSceneElementBO element) {
         PortWrapper wrapper = createAuxiliaryPort(element.getSrcElement());
         String portId = wrapper.getScenePort().getId();
-        var port = wrapper.getScenePort();
-        var pluginPort = wrapper.getPluginPort();
+        SceneElementPortBO port = wrapper.getScenePort();
+        CloudPluginSceneElementPortBO pluginPort = wrapper.getPluginPort();
         this.pluginHandler.addPortAndSrcPort(portId, pluginPort, port);
         element.getSrcElement().getPorts().add(port);
         return wrapper;

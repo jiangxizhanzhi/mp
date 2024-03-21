@@ -33,12 +33,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -59,8 +59,14 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
     private MessageSource messageSource;
 
     @PostConstruct
-    public void init(){
-        operateLogServiceMap = mpOperateLogServiceList.stream().collect(Collectors.toMap(MpOperateLogService::siteType, Function.identity()));
+    public void init() {
+        Map<SiteTypeEnums, MpOperateLogService> map = new HashMap<>();
+        for (MpOperateLogService mpOperateLogService : mpOperateLogServiceList) {
+            if (map.put(mpOperateLogService.siteType(), mpOperateLogService) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        operateLogServiceMap = map;
     }
 
     @Autowired

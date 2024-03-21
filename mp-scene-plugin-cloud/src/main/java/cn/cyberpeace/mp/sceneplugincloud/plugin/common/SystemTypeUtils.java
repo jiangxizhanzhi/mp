@@ -71,11 +71,11 @@ public class SystemTypeUtils {
 
     private static Map<String, SystemTypeItem> genKeySystemTypeMap(List<SystemTypeItem> systemTypeItems) {
         Map<String, SystemTypeItem> keySystemTypeMap = new HashMap<>();
-        systemTypeItems.forEach(systemTypeItem -> {
+        for (SystemTypeItem systemTypeItem : systemTypeItems) {
             keySystemTypeMap.put(systemTypeItem.getId().toLowerCase(), systemTypeItem);
             keySystemTypeMap.put(systemTypeItem.getName().toLowerCase(), systemTypeItem);
             keySystemTypeMap.put(systemTypeItem.getStandardName().toLowerCase(), systemTypeItem);
-        });
+        }
         return keySystemTypeMap;
     }
 

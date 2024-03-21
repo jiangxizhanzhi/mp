@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,10 +34,12 @@ public class RouterConverter implements BaseConverter{
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<RouterModel> model = routerService.page(getParams);
         List<RouterModel> routers = model.getList();
-        List<RouterBO> list = routers.stream().map(routerModel ->
-                RouterBO.builder().name(routerModel.getName())
-                        .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
-        ).collect(Collectors.toList());
+        List<RouterBO> list = new ArrayList<>();
+        for (RouterModel routerModel : routers) {
+            RouterBO build = RouterBO.builder().name(routerModel.getName())
+                    .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build();
+            list.add(build);
+        }
         BasePageBO<RouterBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());

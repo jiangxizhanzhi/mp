@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.config;
 
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import lombok.Data;
@@ -96,7 +97,7 @@ public class CsceneAppConfig {
             return sceneEditNodeLimit;
         }
 
-        var limit = IntUtils.fromStr(value);
+        Integer limit = IntUtils.fromStr(value);
         if (limit.equals(0)) {
             log.warn("SceneEditNodeLimit({}) parse as 0", value);
         }
@@ -114,7 +115,7 @@ public class CsceneAppConfig {
             return sceneUsingNodeLimit;
         }
 
-        var limit = IntUtils.fromStr(value);
+        Integer limit = IntUtils.fromStr(value);
         if (limit.equals(0)) {
             log.warn("SceneUsingNodeLimit({}) parse as 0", value);
         }
@@ -122,19 +123,21 @@ public class CsceneAppConfig {
     }
 
     public boolean getSceneEnableRecording() {
-        var config = sysConfigService.getByKeyName(sceneEnableRecordingKey);
+        SysConfigModel config = sysConfigService.getByKeyName(sceneEnableRecordingKey);
         if (config == null) {
             return sceneEnableRecording;
         }
 
-        var value = config.getValue();
+        String value = config.getValue();
         return BooleanUtils.toBoolean(value);
     }
 
     public Set<Integer> getHasOwnRecordingSet() {
         String[] values = this.hasOwnRecordingSet.split(",");
         Set<Integer> set = new HashSet<>();
-        Arrays.stream(values).forEach(v -> set.add(Integer.parseInt(v)));
+        for (String v : values) {
+            set.add(Integer.parseInt(v));
+        }
         return set;
     }
 }

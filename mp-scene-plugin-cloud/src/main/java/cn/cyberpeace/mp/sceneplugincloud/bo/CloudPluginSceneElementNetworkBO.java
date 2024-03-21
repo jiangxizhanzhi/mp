@@ -99,7 +99,7 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
 
     @Override
     public CloudPluginSceneElementNetworkModel toModel(String... ignoreFields) {
-        var obj = super.toModel(
+        CloudPluginSceneElementNetworkModel obj = super.toModel(
                 ArrayUtils.addAll(ignoreFields,
                         BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getDnsNameservers),
                         BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getAllocationPools),

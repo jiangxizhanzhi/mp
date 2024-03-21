@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigBO;
@@ -11,12 +10,6 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowSceneConfigPlugi
 import org.springframework.stereotype.Component;
 
 
-@ClassFieldClasses({
-        FlowPluginSceneConfigBO.class,
-        FlowPluginSceneConfigElementBO.class,
-        FlowPluginSceneConfigElementPortBO.class,
-        Object.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class FlowSceneConfigPluginHandler extends SceneConfigPluginHandler<FlowPluginSceneConfigBO,
@@ -82,4 +75,11 @@ public class FlowSceneConfigPluginHandler extends SceneConfigPluginHandler<FlowP
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = FlowPluginSceneConfigBO.class;
+        super.elementBOClass = FlowPluginSceneConfigElementBO.class;
+        super.elementPortBOClass = FlowPluginSceneConfigElementPortBO.class;
+        super.contextClass = Object.class;
+    }
 }

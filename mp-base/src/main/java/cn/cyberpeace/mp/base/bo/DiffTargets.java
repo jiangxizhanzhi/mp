@@ -58,9 +58,11 @@ public class DiffTargets<T> {
         Map<String, T> existTargetMapCopy = new HashMap<>(existTargetMap);
         DiffTargets<T> diff = new DiffTargets<>();
         diff.getExistTargetMap().putAll(existTargetMap);
-        targetMap.forEach((key, target) -> {
+        for (Map.Entry<String, T> entry : targetMap.entrySet()) {
+            String key = entry.getKey();
+            T target = entry.getValue();
             if (existTargetMapCopy.containsKey(key)) {
-                var existTarget = existTargetMapCopy.remove(key);
+                T existTarget = existTargetMapCopy.remove(key);
                 if (judgeKeepTarget == null) {
                     diff.getUpdatingTargets().add(target);
                 } else {
@@ -73,7 +75,7 @@ public class DiffTargets<T> {
             } else {
                 diff.getAddingTargets().add(target);
             }
-        });
+        }
         diff.getRemovingTargets().addAll(existTargetMapCopy.values());
         return diff;
     }

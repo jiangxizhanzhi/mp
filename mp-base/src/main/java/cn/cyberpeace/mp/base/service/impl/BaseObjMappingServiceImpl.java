@@ -30,19 +30,23 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     protected DiffTargets<M> diffObjMappings(String group, List<M> objMappings) {
         List<M> existMappings = modelMapper.list(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group));
-        Map<String, M> existNameMapping = existMappings.stream()
-                .collect(Collectors.toMap(BaseObjMappingModel::getName, m -> m));
+        Map<String, M> existNameMapping = new HashMap<>();
+        for (M m : existMappings) {
+            if (existNameMapping.put(m.getName(), m) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         Map<String, M> nameMapping = new HashMap<>();
-        for (var i = 0; i < objMappings.size(); i++) {
-            var objMapping = objMappings.get(i);
+        for (int i = 0; i < objMappings.size(); i++) {
+            M objMapping = objMappings.get(i);
             objMapping.setGroup(group);
             objMapping.setSeq(i + 1);
             objMapping.initDefault(BaseObjMappingModel::getName);
-            var name = objMapping.getName();
+            String name = objMapping.getName();
             nameMapping.put(name, objMapping);
 
-            var existObjMapping = existNameMapping.getOrDefault(name, null);
+            M existObjMapping = existNameMapping.getOrDefault(name, null);
             if (existObjMapping != null) {
                 objMapping.setId(existObjMapping.getId());
             }
@@ -54,8 +58,12 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     protected void saveDiffObjMappings(DiffTargets<M> diff) {
         try {
             log.info("save diff : {}" + JsonCommon.stringify(diff));
-            modelMapper.bulkDelete(diff.getRemovingTargets().stream()
-                    .map(BaseModel::getId).toArray(String[]::new));
+            List<String> list = new ArrayList<>();
+            for (M m : diff.getRemovingTargets()) {
+                String id = m.getId();
+                list.add(id);
+            }
+            modelMapper.bulkDelete(list.toArray(new String[0]));
             modelMapper.bulkCreate(diff.getAddingTargets());
             modelMapper.bulkUpdate(diff.getUpdatingTargets());
         } catch (Exception e) {
@@ -69,8 +77,12 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         resultObjMappings.addAll(diff.getAddingTargets());
         resultObjMappings.addAll(diff.getUpdatingTargets());
         resultObjMappings.addAll(diff.getKeepTargets());
-        resultObjMappings = resultObjMappings.stream()
-                .sorted(Comparator.comparing(BaseObjMappingModel::getSeq)).collect(Collectors.toList());
+        List<M> list = new ArrayList<>();
+        for (M resultObjMapping : resultObjMappings) {
+            list.add(resultObjMapping);
+        }
+        list.sort(Comparator.comparing(BaseObjMappingModel::getSeq));
+        resultObjMappings = list;
         return resultObjMappings;
     }
 

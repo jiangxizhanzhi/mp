@@ -36,9 +36,9 @@ public class SceneCommandUtils {
                 parsedCommands.add(commandContent);
             }
         } else if (command.startsWith(SCENE_COMMAND_PREFIX)) {
-            var relativeCommand = command.substring(SCENE_COMMAND_PREFIX.length());
+            String relativeCommand = command.substring(SCENE_COMMAND_PREFIX.length());
             if (StringUtils.isNotEmpty(relativeCommand)) {
-                var sceneFileDir = SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId);
+                String sceneFileDir = SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId);
                 // 为兼容在节点目录内执行系统命令，执行相对路径的命令
                 if (isWindows) {
                     parsedCommands.add(CommandUtils.windowsCdDir(sceneFileDir));
@@ -46,7 +46,7 @@ public class SceneCommandUtils {
                     parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
                 } else {
                     // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
-                    var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, sceneFileDir, relativeCommand);
+                    String absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, sceneFileDir, relativeCommand);
                     parsedCommands.add(absoluteCommand);
 
                     parsedCommands.add(CommandUtils.linuxCdDir(sceneFileDir));
@@ -54,9 +54,9 @@ public class SceneCommandUtils {
                 }
             }
         } else if (command.startsWith(NODE_COMMAND_PREFIX)) {
-            var relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
+            String relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
             if (StringUtils.isNotEmpty(relativeCommand)) {
-                var nodeFileDir = SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId);
+                String nodeFileDir = SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId);
                 // 为兼容在节点目录内执行系统命令，执行相对路径的命令
                 if (isWindows) {
                     parsedCommands.add(CommandUtils.windowsCdDir(nodeFileDir));
@@ -66,7 +66,7 @@ public class SceneCommandUtils {
                     parsedCommands.addAll(parseDirCommands(command, CommandUtils.WINDOWS_PATH_DELIMITER));
                 } else {
                     // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
-                    var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, nodeFileDir, relativeCommand);
+                    String absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, nodeFileDir, relativeCommand);
                     parsedCommands.add(absoluteCommand);
 
                     parsedCommands.add(CommandUtils.linuxCdDir(nodeFileDir));

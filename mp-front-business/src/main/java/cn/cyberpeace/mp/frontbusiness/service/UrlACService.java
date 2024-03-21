@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -68,7 +69,7 @@ public class UrlACService {
             return Collections.emptyList();
         }
         List<UrlAccessCtlDto> dtos = urlACMapper.listByTargetIds(targetIds);
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
             }
@@ -76,7 +77,7 @@ public class UrlACService {
             if (StringUtils.isNotBlank(d.getMethodStr())) {
                 d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
             }
-        });
+        }
         return dtos;
     }
 
@@ -117,7 +118,11 @@ public class UrlACService {
         }
 
         if (CollectionUtils.isNotEmpty(addReq.getMethods())) {
-            urlACModel.setMethods(addReq.getMethods().stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String s : addReq.getMethods()) {
+                joiner.add(s);
+            }
+            urlACModel.setMethods(joiner.toString());
         }
 
         boolean success = urlACMapper.create(urlACModel);
@@ -127,12 +132,14 @@ public class UrlACService {
 
         if (CollectionUtils.isNotEmpty(addReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                addReq.getTargetIds().stream().map(tid ->
-                    UrlACTargetModel.builder()
-                            .urlacId(urlacId)
-                            .target(tid)
-                            .build()
-                ).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (String tid : addReq.getTargetIds()) {
+                UrlACTargetModel build = UrlACTargetModel.builder()
+                        .urlacId(urlacId)
+                        .target(tid)
+                        .build();
+                acTargetModels.add(build);
+            }
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -157,7 +164,11 @@ public class UrlACService {
         }
 
         if (CollectionUtils.isNotEmpty(updateReq.getMethods())) {
-            urlACModel.setMethods(updateReq.getMethods().stream().collect(Collectors.joining(",")));
+            StringJoiner joiner = new StringJoiner(",");
+            for (String s : updateReq.getMethods()) {
+                joiner.add(s);
+            }
+            urlACModel.setMethods(joiner.toString());
         }
 
         boolean success = urlACMapper.update(urlACModel);
@@ -168,12 +179,14 @@ public class UrlACService {
         urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
         if (CollectionUtils.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
-                    updateReq.getTargetIds().stream().map(tid ->
-                        UrlACTargetModel.builder()
-                                .urlacId(urlacId)
-                                .target(tid)
-                                .build()
-                    ).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (String tid : updateReq.getTargetIds()) {
+                UrlACTargetModel build = UrlACTargetModel.builder()
+                        .urlacId(urlacId)
+                        .target(tid)
+                        .build();
+                acTargetModels.add(build);
+            }
 
             urlACTargetMapper.bulkCreate(acTargetModels);
         }
@@ -196,7 +209,7 @@ public class UrlACService {
     @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
             }
@@ -204,7 +217,7 @@ public class UrlACService {
             if (StringUtils.isNotBlank(d.getMethodStr())) {
                 d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
             }
-        });
+        }
 
         return dtos;
     }
@@ -217,7 +230,7 @@ public class UrlACService {
     @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
     public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
-        dtos.forEach(d -> {
+        for (UrlAccessCtlDto d : dtos) {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
             }
@@ -225,7 +238,7 @@ public class UrlACService {
             if (StringUtils.isNotBlank(d.getMethodStr())) {
                 d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
             }
-        });
+        }
 
         return dtos;
     }

@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -42,7 +43,7 @@ public class NetWorkTrafficController {
     @ApiOperation(value = "流量下载", notes = "")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
         @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
-        var httpResponse = netWorkTrafficService.queryPcapFileByGroupId(groupId, sessionId);
+        HttpResponse httpResponse = netWorkTrafficService.queryPcapFileByGroupId(groupId, sessionId);
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(httpResponse.getEntity().getContent());
@@ -50,7 +51,7 @@ public class NetWorkTrafficController {
             throw new MpRuntimeException("获取文件流失败");
         }
 
-        var httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + groupId + ".pcap");
@@ -90,7 +91,7 @@ public class NetWorkTrafficController {
     @ApiOperation("SPI视图")
     @ApiImplicitParam(name = "spiViewRequest", value = "查询请求", dataType = "body", dataTypeClass = SPIViewRequest.class)
     public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
-        var spiView = netWorkTrafficService.querySPIView(spiViewRequest);
+        String spiView = netWorkTrafficService.querySPIView(spiViewRequest);
         return ServiceResult.<JSONObject>builder().source(JSONObject.parseObject(spiView)).build().asResult();
     }
 }

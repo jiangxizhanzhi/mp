@@ -67,7 +67,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serviceAlarmStatistics(int days) {
-        var list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
 
         return processTrend(list, days);
     }
@@ -78,7 +78,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serverAlarmStatistics(int days) {
-        var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
         return processTrend(list, days);
     }
 
@@ -89,7 +89,13 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         LocalDate date = startDate.plusDays(1);
         while (!date.isAfter(nowDate)) {
             LocalDate finalDate = date;
-            Optional<AlarmStatisticsVO> optional = voList.stream().filter(vo -> vo.getAlarmDate().isEqual(finalDate)).findFirst();
+            Optional<AlarmStatisticsVO> optional = Optional.empty();
+            for (AlarmStatisticsVO alarmStatisticsVO : voList) {
+                if (alarmStatisticsVO.getAlarmDate().isEqual(finalDate)) {
+                    optional = Optional.of(alarmStatisticsVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {
@@ -217,7 +223,13 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();
         while (!endTime.isBefore(startTime)) {
             String calculatedTimeBucket = dtf.format(endTime);
-            Optional<AlarmStatisticsTrendVO> optional = trendVOList.stream().filter(vo -> Objects.equals(vo.getTimeBucket(), calculatedTimeBucket)).findFirst();
+            Optional<AlarmStatisticsTrendVO> optional = Optional.empty();
+            for (AlarmStatisticsTrendVO alarmStatisticsTrendVO : trendVOList) {
+                if (Objects.equals(alarmStatisticsTrendVO.getTimeBucket(), calculatedTimeBucket)) {
+                    optional = Optional.of(alarmStatisticsTrendVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {
@@ -250,7 +262,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         }
 
         public static DateFormatAggr f(String fieldName, String dateFormatter) {
-            var aggregation = new DateFormatAggr();
+            DateFormatAggr aggregation = new DateFormatAggr();
             aggregation.setFieldName(fieldName);
             aggregation.addCalc(genCalcDateFormatter(dateFormatter));
             return aggregation;

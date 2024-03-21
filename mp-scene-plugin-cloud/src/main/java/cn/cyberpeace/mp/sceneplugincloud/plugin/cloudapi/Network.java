@@ -15,18 +15,18 @@ import java.util.List;
 public class Network extends CloudClient {
 
     public NetworkData get(String id) {
-        var url = String.format(CloudUrlConstant.NETWORK_GET_URL, id);
+        String url = String.format(CloudUrlConstant.NETWORK_GET_URL, id);
         CloudResponse<NetworkData> result = cloudGet(url, null, new TypeReference<>() {}, true);
         return result.getData();
     }
 
     public NetworkData getByName(String name) {
-        var queryParam = new NetworkQueryParam();
+        NetworkQueryParam queryParam = new NetworkQueryParam();
         queryParam.setName(name);
         CloudResponse<CloudListData<NetworkData>> result = cloudGet(CloudUrlConstant.NETWORK_QUERY_URL, queryParam,
                 new TypeReference<>() {}, true);
 
-        var listData = result.getData();
+        CloudListData<NetworkData> listData = result.getData();
         if (listData != null && listData.getList() != null && !listData.getList().isEmpty()) {
             return listData.getList().get(0);
         } else {

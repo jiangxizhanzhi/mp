@@ -122,7 +122,9 @@ public class ServiceMonitorService {
      */
     private void changeServiceName(List<ServiceMonitorDto> serviceMonitorDtos) {
         if (CollectionUtils.isNotEmpty(serviceMonitorDtos)) {
-            serviceMonitorDtos.forEach(dto -> dto.setName(MessageCommon.get(dto.getName())));
+            for (ServiceMonitorDto dto : serviceMonitorDtos) {
+                dto.setName(MessageCommon.get(dto.getName()));
+            }
         }
     }
 
@@ -140,9 +142,27 @@ public class ServiceMonitorService {
                 systemAlarmMapper.list(new HumanCondition().filterEqual(SystemAlarmModel::getAlarmStatus,
                         AlarmStatusEnum.ENABLED.toValue()));
         if (CollectionUtils.isNotEmpty(enabledAlarms)) {
-            Long cpAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CP.toValue()).count();
-            Long crAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CR.toValue()).count();
-            Long serverAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.SERVER.toValue()).count();
+            long count1 = 0L;
+            for (SystemAlarmModel systemAlarmModel : enabledAlarms) {
+                if (systemAlarmModel.getAlarmType() == AlarmTypeEnum.CP.toValue()) {
+                    count1++;
+                }
+            }
+            Long cpAlarmCount = count1;
+            long result = 0L;
+            for (SystemAlarmModel enabledAlarm : enabledAlarms) {
+                if (enabledAlarm.getAlarmType() == AlarmTypeEnum.CR.toValue()) {
+                    result++;
+                }
+            }
+            Long crAlarmCount = result;
+            long count = 0L;
+            for (SystemAlarmModel alarm : enabledAlarms) {
+                if (alarm.getAlarmType() == AlarmTypeEnum.SERVER.toValue()) {
+                    count++;
+                }
+            }
+            Long serverAlarmCount = count;
             cloudPlatformMonitorVO.setAlarmCount(cpAlarmCount.intValue());
             bizServiceMonitorVO.setAlarmCount(crAlarmCount.intValue());
             serverMonitorVO.setAlarmCount(serverAlarmCount.intValue());
@@ -154,22 +174,27 @@ public class ServiceMonitorService {
         if (CollectionUtils.isNotEmpty(modelPage.getList())) {
             // 获取所有物理主机服务状态
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
-            modelPage.getList().forEach(model -> {
-                // 忽略DOWN状态的节点查询
-                if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getState())) {
-                    hostNameList.add(model.getName());
+            for (HypervisorBO hypervisorBO : modelPage.getList()) {// 忽略DOWN状态的节点查询
+                if (Objects.equals(CloudPlatformEnum.UP.getState(), hypervisorBO.getState())) {
+                    hostNameList.add(hypervisorBO.getName());
                 }
                 if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
-                    serviceStatusModel.getList().forEach(serviceModel -> {
-                        if (model.getName().equals(serviceModel.getHost())) {
-                            model.setServiceStatus(serviceModel.isStatus());
+                    for (ServiceStatus serviceModel : serviceStatusModel.getList()) {
+                        if (hypervisorBO.getName().equals(serviceModel.getHost())) {
+                            hypervisorBO.setServiceStatus(serviceModel.isStatus());
                         }
-                    });
+                    }
                 }
-            });
+            }
 
             int totalCount = modelPage.getTotal();
-            int errorCount = (int )modelPage.getList().stream().filter(model -> !model.isServiceStatus()).count();
+            long result = 0L;
+            for (HypervisorBO model : modelPage.getList()) {
+                if (!model.isServiceStatus()) {
+                    result++;
+                }
+            }
+            int errorCount = (int ) result;
             serverMonitorVO.setServerMonitors(modelPage.getList());
             serverMonitorVO.setErrorCount(errorCount);
             serverMonitorVO.setTotalCount(totalCount);
@@ -181,7 +206,13 @@ public class ServiceMonitorService {
             if (CollectionUtils.isNotEmpty(cpMonitorDtos)) {
                 cloudPlatformMonitorVO.setCloudPlatformMonitors(cpMonitorDtos);
                 int cpTotalCount = cpMonitorDtos.size();
-                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !MonitorStateEnum.RUNNING.getDesc().equals(cpDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(cpDto.getState())).count();
+                long count = 0L;
+                for (ServiceMonitorDto cpDto : cpMonitorDtos) {
+                    if (!MonitorStateEnum.RUNNING.getDesc().equals(cpDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(cpDto.getState())) {
+                        count++;
+                    }
+                }
+                int cpErrorCount = (int) count;
                 cloudPlatformMonitorVO.setTotalCount(cpTotalCount);
                 cloudPlatformMonitorVO.setErrorCount(cpErrorCount);
             }
@@ -193,7 +224,13 @@ public class ServiceMonitorService {
             if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
                 bizServiceMonitorVO.setBizServiceMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
-                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(bizDto.getState())).count();
+                long count = 0L;
+                for (ServiceMonitorDto bizDto : bizMonitorDtos) {
+                    if (!MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(bizDto.getState())) {
+                        count++;
+                    }
+                }
+                int bizErrorCount = (int) count;
                 bizServiceMonitorVO.setTotalCount(bizTotalCount);
                 bizServiceMonitorVO.setErrorCount(bizErrorCount);
             }
@@ -240,10 +277,13 @@ public class ServiceMonitorService {
 
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
         // 忽略DOWN状态的节点查询
-        List<String> activeHostNames = modelPage.getList().stream()
-                .filter(m -> Objects.equals(CloudPlatformEnum.UP.getState(), m.getState()))
-                .map(HypervisorBO::getName)
-                .collect(Collectors.toList());
+        List<String> activeHostNames = new ArrayList<>();
+        for (HypervisorBO m : modelPage.getList()) {
+            if (Objects.equals(CloudPlatformEnum.UP.getState(), m.getState())) {
+                String name = m.getName();
+                activeHostNames.add(name);
+            }
+        }
 
         if (CollectionUtils.isNotEmpty(activeHostNames)) {
             if (StringUtils.isNotBlank(hostName)) {
@@ -267,11 +307,11 @@ public class ServiceMonitorService {
      */
     private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<ServerMonitorConfig.MonitorProbe> monitorProbes) {
         List<String> allRestrictSrvs = new ArrayList<>();
-        monitorProbes.forEach(p -> {
+        for (ServerMonitorConfig.MonitorProbe p : monitorProbes) {
             if (CollectionUtils.isNotEmpty(p.getRestartRestrictList())) {
                 allRestrictSrvs.addAll(p.getRestartRestrictList());
             }
-        });
+        }
 
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
             dto.setDisableRestart(Boolean.FALSE);

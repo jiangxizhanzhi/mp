@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devopscluster.task;
+package cn.cyberpeace.mp.devopscluster.job;
 
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,27 +63,27 @@ public class SystemAlarmTask {
         List<HostState> allcpNodesHostStates = listAllCPNodeHostStates();
 
         if (CollectionUtils.isNotEmpty(allcpNodesHostStates)) {
-            allcpNodesHostStates.forEach(hostState -> {
-                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsClusterConfig.getDiskAlarmPercent()) {
-                        // 磁盘使用率大于阈值，添加告警
-                        SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
-                                .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsClusterConfig.getDiskAlarmPercent()))
-                                .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
-                                .alarmType(AlarmTypeEnum.SERVER.toValue())
-                                .hostname(hostState.getAgentName())
-                                .servername(hostState.getAgentName())
-                                .runningTime(RUNNING_TIME)
-                                .build();
-                        alarmModels.add(serverAlarmModel);
-                    }
-            });
+            for (HostState hostState : allcpNodesHostStates) {
+                if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsClusterConfig.getDiskAlarmPercent()) {
+                    // 磁盘使用率大于阈值，添加告警
+                    SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
+                            .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsClusterConfig.getDiskAlarmPercent()))
+                            .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
+                            .alarmType(AlarmTypeEnum.SERVER.toValue())
+                            .hostname(hostState.getAgentName())
+                            .servername(hostState.getAgentName())
+                            .runningTime(RUNNING_TIME)
+                            .build();
+                    alarmModels.add(serverAlarmModel);
+                }
+            }
         }
 
         // 云平台服务监控
         CloudPlatformMonitorVO cpMonitorVO = systemAlarmVO.getCloudPlatformMonitorVO();
         List<ServiceMonitorDto> cpMonitors = cpMonitorVO.getCloudPlatformMonitors();
         if (CollectionUtils.isNotEmpty(cpMonitors)) {
-            cpMonitors.forEach(cpMonitor -> {
+            for (ServiceMonitorDto cpMonitor : cpMonitors) {
                 if (!MonitorStateEnum.RUNNING.getDesc().equals(cpMonitor.getState())) {
                     // 添加云平台服务告警信息
                     SystemAlarmModel cpAlarmModel = SystemAlarmModel.builder()
@@ -97,14 +96,14 @@ public class SystemAlarmTask {
                             .build();
                     alarmModels.add(cpAlarmModel);
                 }
-            });
+            }
         }
 
         // 业务服务监控
         BizServiceMonitorVO crMonitorVO = systemAlarmVO.getBizServiceMonitorVO();
         List<ServiceMonitorDto> crMonitors = crMonitorVO.getBizServiceMonitors();
         if (CollectionUtils.isNotEmpty(crMonitors)) {
-            crMonitors.forEach(crMonitor -> {
+            for (ServiceMonitorDto crMonitor : crMonitors) {
                 if (!MonitorStateEnum.RUNNING.getDesc().equals(crMonitor.getState())) {
                     // 添加业务服务告警信息
                     SystemAlarmModel crAlarmModel = SystemAlarmModel.builder()
@@ -117,7 +116,7 @@ public class SystemAlarmTask {
                             .build();
                     alarmModels.add(crAlarmModel);
                 }
-            });
+            }
         }
 
         systemAlarmService.processSystemAlarm(alarmModels);
@@ -136,25 +135,41 @@ public class SystemAlarmTask {
         List<AlarmStatisticsModel> alarmStatisticsModels = alarmStatisticsService.todayAlarmStatistics();
         if (CollectionUtils.isNotEmpty(alarmStatisticsModels)) {
             List<Integer> existAlarmTypeList =
-                    alarmStatisticsModels.stream().map(AlarmStatisticsModel::getAlarmType).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (AlarmStatisticsModel statisticsModel : alarmStatisticsModels) {
+                Integer alarmType = statisticsModel.getAlarmType();
+                existAlarmTypeList.add(alarmType);
+            }
             List<AlarmCountVO> addAlarmCountVOs =
-                    alarmCountVOs.stream().filter(alarmCountVO -> !existAlarmTypeList.contains(alarmCountVO.getAlarmType())).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (AlarmCountVO countVO : alarmCountVOs) {
+                if (!existAlarmTypeList.contains(countVO.getAlarmType())) {
+                    addAlarmCountVOs.add(countVO);
+                }
+            }
             if (CollectionUtils.isNotEmpty(addAlarmCountVOs)) {
                 this.addAlarmStatistics(addAlarmCountVOs);
             }
 
             // 更新统计数量
             List<AlarmCountVO> updateAlarmCountVOs =
-                    alarmCountVOs.stream().filter(alarmCountVO -> existAlarmTypeList.contains(alarmCountVO.getAlarmType())).collect(Collectors.toList());
+                    new ArrayList<>();
+            for (AlarmCountVO alarmCountVO : alarmCountVOs) {
+                if (existAlarmTypeList.contains(alarmCountVO.getAlarmType())) {
+                    updateAlarmCountVOs.add(alarmCountVO);
+                }
+            }
             if (CollectionUtils.isNotEmpty(updateAlarmCountVOs)) {
                 List<AlarmStatisticsModel> updateAlarmStatisticsVOs = new ArrayList<>();
-                alarmStatisticsModels.forEach(alarmStatisticsModel -> updateAlarmCountVOs.forEach(updateAlarmCountVO -> {
-                    if (alarmStatisticsModel.getAlarmType().equals(updateAlarmCountVO.getAlarmType())) {
-                        alarmStatisticsModel.setAlarmCount(updateAlarmCountVO.getAlarmCount());
-                        alarmStatisticsModel.setUpdateTime(LocalDateTime.now());
-                        updateAlarmStatisticsVOs.add(alarmStatisticsModel);
+                for (AlarmStatisticsModel alarmStatisticsModel : alarmStatisticsModels) {
+                    for (AlarmCountVO updateAlarmCountVO : updateAlarmCountVOs) {
+                        if (alarmStatisticsModel.getAlarmType().equals(updateAlarmCountVO.getAlarmType())) {
+                            alarmStatisticsModel.setAlarmCount(updateAlarmCountVO.getAlarmCount());
+                            alarmStatisticsModel.setUpdateTime(LocalDateTime.now());
+                            updateAlarmStatisticsVOs.add(alarmStatisticsModel);
+                        }
                     }
-                }));
+                }
 
                 // 更新告警统计数量信息
                 if (CollectionUtils.isNotEmpty(updateAlarmStatisticsVOs)) {
@@ -174,14 +189,14 @@ public class SystemAlarmTask {
         // 新增告警统计信息
         List<AlarmStatisticsModel> addModelList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(alarmCountVOs)) {
-            alarmCountVOs.forEach(alarmCountVO -> {
+            for (AlarmCountVO alarmCountVO : alarmCountVOs) {
                 AlarmStatisticsModel addModel = AlarmStatisticsModel.builder()
                         .alarmType(alarmCountVO.getAlarmType())
                         .alarmCount(alarmCountVO.getAlarmCount())
                         .alarmDate(LocalDate.now())
                         .build();
                 addModelList.add(addModel);
-            });
+            }
         }
 
         if (CollectionUtils.isNotEmpty(addModelList)) {
@@ -192,7 +207,11 @@ public class SystemAlarmTask {
 
     private List<HostState> listAllCPNodeHostStates() {
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
-        List<String> hostNames = modelPage.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
+        List<String> hostNames = new ArrayList<>();
+        for (HypervisorBO hypervisorBO : modelPage.getList()) {
+            String name = hypervisorBO.getName();
+            hostNames.add(name);
+        }
         if (CollectionUtils.isEmpty(hostNames)) {
             return Collections.emptyList();
         }

@@ -17,7 +17,7 @@ public class HttpContextFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            var requestId = request.getHeader(X_REQUEST_ID);
+            String requestId = request.getHeader(X_REQUEST_ID);
             if (!StringUtils.isEmpty(requestId)) {
                 SysContextHolder.setCallChainId(requestId);
             }

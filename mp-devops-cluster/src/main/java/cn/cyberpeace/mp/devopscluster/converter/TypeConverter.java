@@ -65,7 +65,13 @@ public class TypeConverter {
         List<TargetType> targetTypes = Optional.ofNullable(l1AndL2Type).map(CloudPlatformPageResult::getList).orElse(Collections.emptyList());
         // task-view-12214 底层增加了id为6的工控设备, 但是目前基线版本，前台不需要展示。
         if (CollectionUtils.isNotEmpty(targetTypes)) {
-            targetTypes = targetTypes.stream().filter(type -> !INDUSTRY_CONTROL_EQUIPMENT.equals(type.getId())).collect(Collectors.toList());
+            List<TargetType> list = new ArrayList<>();
+            for (TargetType type : targetTypes) {
+                if (!INDUSTRY_CONTROL_EQUIPMENT.equals(type.getId())) {
+                    list.add(type);
+                }
+            }
+            targetTypes = list;
         }
 
         return new ListResult<>(targetTypes);
@@ -263,8 +269,11 @@ public class TypeConverter {
      * @return
      */
     private TypeAllConvertModel convertTypeItemNameModel(CloudPlatformPageResult<TypeItemNameModel> list){
-        List<TypeIdStringConvertModel> modelList = list.getList().stream()
-                .map(item -> new TypeIdStringConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
+        List<TypeIdStringConvertModel> modelList = new ArrayList<>();
+        for (TypeItemNameModel item : list.getList()) {
+            TypeIdStringConvertModel typeIdStringConvertModel = new TypeIdStringConvertModel(item.getId(), item.getName());
+            modelList.add(typeIdStringConvertModel);
+        }
         TypeAllConvertModel model =  new TypeAllConvertModel();
         model.setIdStringModelList(modelList);
         return model;
@@ -276,8 +285,11 @@ public class TypeConverter {
      * @return
      */
     private TypeAllConvertModel convertModel(CloudPlatformPageResult<TypeItemModel> list){
-        List<TypeIdIntegerConvertModel> modelList = list.getList().stream()
-                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName(), item.getParentId(), item.getChild())).collect(Collectors.toList());
+        List<TypeIdIntegerConvertModel> modelList = new ArrayList<>();
+        for (TypeItemModel item : list.getList()) {
+            TypeIdIntegerConvertModel typeIdIntegerConvertModel = new TypeIdIntegerConvertModel(item.getId(), item.getName(), item.getParentId(), item.getChild());
+            modelList.add(typeIdIntegerConvertModel);
+        }
         TypeAllConvertModel model =  new TypeAllConvertModel();
         model.setIdIntegerModelList(modelList);
         return model;

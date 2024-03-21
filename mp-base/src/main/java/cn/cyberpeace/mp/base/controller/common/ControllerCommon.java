@@ -11,8 +11,10 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -72,20 +74,20 @@ public class ControllerCommon {
         String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20").replace("%2B", "+");
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");
-        var os = response.getOutputStream();
+        ServletOutputStream os = response.getOutputStream();
         service.exportExcel(queryParams, os, textResourceClass);
     }
 
     public static <S extends BaseModelService<M, ?>, M extends BaseModel, T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(
             MultipartFile file,
             S service, Class<T> textResourceClass) throws IOException {
-        var is = file.getInputStream();
+        InputStream is = file.getInputStream();
         return service.importExcel(is, textResourceClass);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getModelBOClass(Class<?> controllerClass) {
-        var modelBOClassAnnotation = controllerClass.getAnnotation(ModelBOClass.class);
+        ModelBOClass modelBOClassAnnotation = controllerClass.getAnnotation(ModelBOClass.class);
         return (Class<T>) modelBOClassAnnotation.value();
     }
 

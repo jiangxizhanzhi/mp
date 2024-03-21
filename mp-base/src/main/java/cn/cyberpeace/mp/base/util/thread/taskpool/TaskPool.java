@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -81,27 +78,31 @@ public class TaskPool {
      */
     private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokePoolTasks(List<T1> poolTasks,
                                                                                   boolean independent, boolean format) {
-        var latch = new CountDownLatch(poolTasks.size());
-        poolTasks.forEach(poolTask -> {
+        CountDownLatch latch = new CountDownLatch(poolTasks.size());
+        for (T1 t1 : poolTasks) {
             Runnable command = () -> {
-                invokeTask(poolTask);
+                invokeTask(t1);
                 latch.countDown();
 
-                if (!independent && TaskStatus.ERROR.equals(poolTask.getStatus())) {
-                    poolTasks.forEach(itemTask -> interruptTask(itemTask, poolTask.getException()));
+                if (!independent && TaskStatus.ERROR.equals(t1.getStatus())) {
+                    for (T1 itemTask : poolTasks) {
+                        interruptTask(itemTask, t1.getException());
+                    }
                 }
             };
             if (format) {
                 command = ThreadUtils.format(command);
             }
             executor.execute(command);
-        });
+        }
 
         try {
             latch.await();
         } catch (InterruptedException e) {
             log.error("Interruption occurs, up to {} tasks will be cancelled", latch.getCount());
-            poolTasks.forEach(poolTask -> interruptTask(poolTask, e));
+            for (T1 poolTask : poolTasks) {
+                interruptTask(poolTask, e);
+            }
             Thread.currentThread().interrupt();
         }
 
@@ -118,13 +119,13 @@ public class TaskPool {
      */
     private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
                                                                              boolean format, Class<T1> poolTaskClass) {
-        List<T1> poolTasks = tasks.stream()
-                .map(task -> {
-                    var poolTask = ClassUtils.createInstance(poolTaskClass);
-                    poolTask.setTask(task);
-                    return poolTask;
-                })
-                .collect(Collectors.toList());
+        List<T1> poolTasks = new ArrayList<>();
+        for (T t : tasks) {
+            T1 poolTask = ClassUtils.createInstance(poolTaskClass);
+            poolTask.setTask(t);
+            T1 apply = poolTask;
+            poolTasks.add(apply);
+        }
         return invokePoolTasks(poolTasks, independent, format);
     }
 
@@ -157,7 +158,7 @@ public class TaskPool {
     }
 
     public void executeTask(Runnable task, boolean format) {
-        var poolTask = new DefaultPoolTask(task);
+        DefaultPoolTask poolTask = new DefaultPoolTask(task);
         Runnable command = () -> invokeTask(poolTask);
         if (format) {
             command = ThreadUtils.format(command);

@@ -34,7 +34,7 @@ public class CloudMessageConvertUtil {
 
     public static String getMessage(String target, String... params) {
         String formatMessage = target.toLowerCase();
-        for (var convert : converts) {
+        for (Convert convert : converts) {
             if (convert.hit(formatMessage)) {
                 return convert.getMessage(params);
             }

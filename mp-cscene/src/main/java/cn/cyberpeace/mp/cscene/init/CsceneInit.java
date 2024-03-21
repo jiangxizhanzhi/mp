@@ -29,7 +29,6 @@ public class CsceneInit implements ApplicationRunner {
         try {
             sceneNodeNumInitJob.executed();
             sceneUpdateStatusJob.executed();
-            LogFileUtil.init();
         } catch (Exception e) {
             log.error("failed to execute job : {}", sceneNodeNumInitJob.getClass().getName(), e);
         }

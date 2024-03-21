@@ -51,7 +51,7 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getAssetNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
@@ -71,7 +71,12 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     public T export() {
         setId(null);
         if (children != null) {
-            setChildren(children.stream().map(BaseCsceneRoleBO::export).collect(Collectors.toList()));
+            List<T> list = new ArrayList<>();
+            for (T child : children) {
+                T export = child.export();
+                list.add(export);
+            }
+            setChildren(list);
         }
         return (T) this;
     }
@@ -84,10 +89,14 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     @SafeVarargs
     public final <P extends BaseCsceneRoleBO<?, P>> P exportIgnore2(Class<P> pClass,
                                                                     SerializableFunction<T>... ignoreFieldGetters) {
-        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        P pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (children != null) {
-            pObj.setChildren(children.stream().map(child -> child.exportIgnore2(pClass, ignoreFieldGetters))
-                    .collect(Collectors.toList()));
+            List<P> list = new ArrayList<>();
+            for (T child : children) {
+                P p = child.exportIgnore2(pClass, ignoreFieldGetters);
+                list.add(p);
+            }
+            pObj.setChildren(list);
         }
         return pObj;
     }

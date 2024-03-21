@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Component
 public class LfProxyInit implements WebMvcConfigurer {
 
@@ -14,12 +16,12 @@ public class LfProxyInit implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        var lf = proxyConfig.getLf();
+        List<LfProxyConfig> lf = proxyConfig.getLf();
         if (lf == null || lf.isEmpty()) {
             return;
         }
 
-        for (var lfProxyConfig : lf) {
+        for (LfProxyConfig lfProxyConfig : lf) {
             registry.addResourceHandler(lfProxyConfig.getUrl()).addResourceLocations(lfProxyConfig.getLocation());
         }
     }

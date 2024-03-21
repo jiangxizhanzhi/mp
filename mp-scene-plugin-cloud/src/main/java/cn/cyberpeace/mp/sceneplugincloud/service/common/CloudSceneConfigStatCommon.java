@@ -23,7 +23,7 @@ public class CloudSceneConfigStatCommon extends CloudSceneStatCommonBase<CloudPl
 
     @Override
     protected HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .link(SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
                 .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
                         CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
@@ -42,7 +42,7 @@ public class CloudSceneConfigStatCommon extends CloudSceneStatCommonBase<CloudPl
 
     @Override
     protected HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .link(SceneConfigModel.class, SceneConfigElementModel.class,
                         SceneConfigElementPortModel.class, CloudPluginSceneConfigElementPortModel.class)
                 .filterLink(SceneConfigModel.class, SceneConfigModel::getId,

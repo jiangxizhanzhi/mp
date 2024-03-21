@@ -277,7 +277,7 @@ public class IpUtils {
             return ips;
         }
 
-        for (var allocationPool : allocationPools) {
+        for (AllocationPool allocationPool : allocationPools) {
             List<String> allocationPoolIps = getRangeIps(allocationPool.getStart(), allocationPool.getEnd());
             if (abandonDhcp && !allocationPoolIps.isEmpty()) {
                 // 移除第一个默认的dhcp地址
@@ -295,8 +295,8 @@ public class IpUtils {
      * @return 下一个ip地址
      */
     public static String nextIp(String ip) {
-        var ipLong = Ipv4Util.ipv4ToLong(ip);
-        var nextIpLong = ipLong + 1L;
+        long ipLong = Ipv4Util.ipv4ToLong(ip);
+        long nextIpLong = ipLong + 1L;
         String nextIp = null;
         try {
             nextIp = Ipv4Util.longToIpv4(nextIpLong);
@@ -361,8 +361,8 @@ public class IpUtils {
      * @return 上一个ip地址
      */
     private static String previousIp(String ip) {
-        var ipLong = Ipv4Util.ipv4ToLong(ip);
-        var previousIpLong = ipLong - 1L;
+        long ipLong = Ipv4Util.ipv4ToLong(ip);
+        long previousIpLong = ipLong - 1L;
         String previousIp = null;
         try {
             previousIp = Ipv4Util.longToIpv4(previousIpLong);

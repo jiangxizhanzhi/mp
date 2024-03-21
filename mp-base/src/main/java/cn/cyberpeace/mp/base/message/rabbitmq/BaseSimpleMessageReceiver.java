@@ -19,12 +19,12 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
 
     @Override
     public void receive(Message message) {
-        var formatMessage = parseMessage(message, FormatMessage.class);
+        FormatMessage formatMessage = parseMessage(message, FormatMessage.class);
         if (formatMessage == null) {
             return;
         }
 
-        var context = formatMessage.getContext();
+        Map context = formatMessage.getContext();
         if (context != null) {
             TransferContext.setContextMap(context);
         }

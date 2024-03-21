@@ -41,8 +41,8 @@ public class QueryChildOrgDtoOperation implements OrgDtoOperation<OrgDto> {
 //            return orgDto;
 //        }
 
-        var list = orgService.listByParent(orgDto.getId());
-        var childList = new ArrayList();
+        List<OrgBO> list = orgService.listByParent(orgDto.getId());
+        ArrayList childList = new ArrayList();
         for (OrgBO orgBO : list) {
             OrgDto childDto = new OrgDto();
             BeanUtils.copyProperties(orgBO, childDto);

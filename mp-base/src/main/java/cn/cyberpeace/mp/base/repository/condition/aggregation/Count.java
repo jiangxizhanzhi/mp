@@ -17,7 +17,7 @@ public class Count extends Aggregation<Count> {
     }
 
     public static Count f(String fieldName) {
-        var aggregation = new Count();
+        Count aggregation = new Count();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

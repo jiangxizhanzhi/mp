@@ -112,7 +112,11 @@ public class URLUtil {
 
         if (value instanceof Collection) {
             Collection<?> items = (Collection<?>) value;
-            List<String> values = items.stream().map(URLUtil::toStr).collect(Collectors.toList());
+            List<String> values = new ArrayList<>();
+            for (Object item : items) {
+                String str = toStr(item);
+                values.add(str);
+            }
             return Strings.join(values, ",");
         }
 
@@ -122,7 +126,11 @@ public class URLUtil {
             for(int i=0;i<size;i++){
                 objects[i] = Array.get(value, i);
             }
-            List<String> values = Arrays.stream(objects).map(URLUtil::toStr).collect(Collectors.toList());
+            List<String> values = new ArrayList<>();
+            for (Object object : objects) {
+                String str = toStr(object);
+                values.add(str);
+            }
             return Strings.join(values, ",");
         }
         return value.toString();

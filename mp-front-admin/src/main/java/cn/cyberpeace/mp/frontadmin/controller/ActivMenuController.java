@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -63,14 +64,14 @@ public class ActivMenuController {
         } else {
             visibleMenuIds = menuSetService.getVisibleMenuIdsBy(actives);
         }
-        var tree = menuSetService.getSystemTreeMenusBy(visibleMenuIds);
+        List<TargetBo> tree = menuSetService.getSystemTreeMenusBy(visibleMenuIds);
         return new ServiceResult(tree).asResult();
     }
 
     @ApiOperation(value = "刷新默认菜单模板")
     @PostMapping("/menu/reset_default_menu_template")
     public ServiceResult refreshDefaultMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
-        var result = menuSetService.refreshTemplate(template.getMenuTree(), "1");
+        MenuSetService.MenuTemplate result = menuSetService.refreshTemplate(template.getMenuTree(), "1");
         return new ServiceResult(result).asResult();
     }
 
@@ -90,7 +91,7 @@ public class ActivMenuController {
     @ApiOperation(value = "导入并覆盖默认菜单模板")
     @PostMapping("/menu/import_template")
     public ServiceResult importMenuTemplate(MultipartFile file) {
-        var result = menuSetService.importDefaultTemplate(file);
+        MenuSetService.MenuTemplate result = menuSetService.importDefaultTemplate(file);
         return new ServiceResult(result).asResult();
     }
 

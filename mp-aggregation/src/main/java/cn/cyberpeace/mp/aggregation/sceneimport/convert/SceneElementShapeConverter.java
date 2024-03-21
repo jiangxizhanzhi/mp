@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementShape;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,7 +33,7 @@ class SceneElementShapeConverter implements IConverter {
             return;
         }
         Map<String, String> nodeId2AreaId = new HashMap<>();
-        for (var shape : shapes) {
+        for (SceneElementShape shape : shapes) {
             SceneConfigAreaBO areaBO = new SceneConfigAreaBO();
             areaBO.setId(shape.getId());
             areaBO.setName(shape.getName());
@@ -52,7 +53,7 @@ class SceneElementShapeConverter implements IConverter {
                 }
             }
         }
-        for (var element : container.getAllElements()) {
+        for (SceneConfigElementBO element : container.getAllElements()) {
             if (nodeId2AreaId.containsKey(element.getId())) {
                 element.setArea(nodeId2AreaId.get(element.getId()));
             }

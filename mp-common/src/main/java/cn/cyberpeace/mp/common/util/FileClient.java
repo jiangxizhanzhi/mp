@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.common.service.impl;
+package cn.cyberpeace.mp.common.util;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
@@ -8,11 +8,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
-import cn.cyberpeace.mp.common.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,23 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * @Description: FastDFS文件操作实现类
- *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
- * @Author qiaokang
- * @Date：2021/7/29 14:47
- */
 @Slf4j
-@Service
-public class FastDfsFileServiceImpl implements FileService {
+public class FileClient {
+
 
     /**
      * 文件上传
      * @param file
      * @return
      */
-    @Override
-    public ServiceResult<FileResponseData> uploadFile(MultipartFile file) {
+    public static ServiceResult<FileResponseData> uploadFile(MultipartFile file) {
         FileResponseData responseData = uploadSample(file);
         if (responseData.isSuccess()) {
             return ResultCommon.success(responseData);
@@ -53,8 +44,7 @@ public class FastDfsFileServiceImpl implements FileService {
      * @param response
      * @throws MpRuntimeException
      */
-    @Override
-    public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
+    public static void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         InputStream is = null;
         OutputStream os = null;
         try {
@@ -80,21 +70,6 @@ public class FastDfsFileServiceImpl implements FileService {
         }
     }
 
-    /**
-     * 文件删除
-     * @param filePath
-     * @return
-     */
-    @Override
-    public ServiceResult<Void> deleteFile(String filePath) {
-        try {
-            FsCommon.delete(filePath);
-        } catch (MpRuntimeException e) {
-            log.error("deleteFile error", e);
-            return ResultCommon.fail(e.getMessage());
-        }
-        return ResultCommon.success();
-    }
 
     /**
      * 上传通用方法，只上传到服务器，不保存记录到数据库
@@ -102,7 +77,7 @@ public class FastDfsFileServiceImpl implements FileService {
      * @param file
      * @return
      */
-    private FileResponseData uploadSample(MultipartFile file) {
+    public static FileResponseData uploadSample(MultipartFile file) {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
@@ -121,5 +96,4 @@ public class FastDfsFileServiceImpl implements FileService {
 
         return responseData;
     }
-
 }

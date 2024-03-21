@@ -3,7 +3,8 @@ package cn.cyberpeace.mp.log.service;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.thread.taskpool.BasePoolTask;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.thread.taskpool.DefaultResultPoolTask;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +48,14 @@ public class LogFileServiceFactory {
     private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
 
     @PostConstruct
-    public void init(){
-        logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
+    public void init() {
+        Map<String, LogFileService> map = new HashMap<>();
+        for (LogFileService logFileService : fileServiceList) {
+            if (map.put(logFileService.logReportType(), logFileService) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        logFileServiceMap = map;
     }
 
     /**
@@ -65,7 +72,7 @@ public class LogFileServiceFactory {
                 result.addAll(logFileService.list(basePageRequest.getType().name()));
             }
         } else {
-            var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
+            ServiceResult<List<OptionBO>> res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
             List<OptionBO> options = res.getSource();
             List<String> codes = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(options)) {
@@ -75,19 +82,29 @@ public class LogFileServiceFactory {
             Set<String> codeSet = new HashSet<>(codes);
 
             List<Callable<List<LogReportDTO>>> totalLogReportCallableList = new ArrayList<>();
-            List<Callable<List<LogReportDTO>>> logReportCallableList = fileServiceList.stream()
-                    .filter(logFileService -> isReportTypeMatch(logFileService.logReportType(), codeSet))
-                    .map(logFileService -> (Callable<List<LogReportDTO>>) () -> logFileService.list(null)).collect(Collectors.toList());
+            List<Callable<List<LogReportDTO>>> logReportCallableList = new ArrayList<>();
+            for (LogFileService logFileService : fileServiceList) {
+                if (isReportTypeMatch(logFileService.logReportType(), codeSet)) {
+                    Callable<List<LogReportDTO>> listCallable = () -> logFileService.list(null);
+                    logReportCallableList.add(listCallable);
+                }
+            }
 
-            var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
-            List<Callable<List<LogReportDTO>>> reportLogReportCallableList = codeSet.stream().map(code ->
-                    (Callable<List<LogReportDTO>>) () -> logservice.list(code)).collect(Collectors.toList());
+            LogFileService logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
+            List<Callable<List<LogReportDTO>>> reportLogReportCallableList = new ArrayList<>();
+            for (String code : codeSet) {
+                Callable<List<LogReportDTO>> listCallable = () -> logservice.list(code);
+                reportLogReportCallableList.add(listCallable);
+            }
 
             totalLogReportCallableList.addAll(logReportCallableList);
             totalLogReportCallableList.addAll(reportLogReportCallableList);
 
-            List<LogReportDTO> totalLogReportList = TaskCommon.callTasks(totalLogReportCallableList).stream().map(BasePoolTask::getResult)
-                    .flatMap(List::stream).collect(Collectors.toList());
+            List<LogReportDTO> totalLogReportList = new ArrayList<>();
+            for (DefaultResultPoolTask<List<LogReportDTO>> base : TaskCommon.callTasks(totalLogReportCallableList)) {
+                List<LogReportDTO> logReportDTOS = base.getResult();
+                totalLogReportList.addAll(logReportDTOS);
+            }
             result.addAll(totalLogReportList);
         }
 

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,12 +52,15 @@ public class ElasticIpController {
      * @return
      */
     private List<ElasticIpVO> convertBOToPageVO(BasePageBO<ElasticIpBO> model){
-        return model.getList().stream().map(elasticIpModel ->
-                ElasticIpVO.builder().floatIpAddress(elasticIpModel.getFloatIpAddress())
-                        .fixedIpAddress(elasticIpModel.getFixedIpAddress())
-                        .status(elasticIpModel.getStatus())
-                        .createdAt(elasticIpModel.getCreatedAt()).build()
-        ).collect(Collectors.toList());
+        List<ElasticIpVO> list = new ArrayList<>();
+        for (ElasticIpBO elasticIpModel : model.getList()) {
+            ElasticIpVO build = ElasticIpVO.builder().floatIpAddress(elasticIpModel.getFloatIpAddress())
+                    .fixedIpAddress(elasticIpModel.getFixedIpAddress())
+                    .status(elasticIpModel.getStatus())
+                    .createdAt(elasticIpModel.getCreatedAt()).build();
+            list.add(build);
+        }
+        return list;
     }
 
 }

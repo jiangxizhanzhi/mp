@@ -38,7 +38,7 @@ public class ServletUtils {
         if (Objects.isNull(httpServletRequest)) {
             return "";
         }
-        var al = httpServletRequest.getHeader("Accept-Language");
+        String al = httpServletRequest.getHeader("Accept-Language");
         return al == null ? "" : al;
     }
 

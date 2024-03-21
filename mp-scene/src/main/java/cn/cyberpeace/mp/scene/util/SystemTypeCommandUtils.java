@@ -58,7 +58,7 @@ public class SystemTypeCommandUtils {
     }
 
     public static String getLineBreak(String systemType) {
-        var osType = getOsType(systemType);
+        String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
             return CommandUtils.WINDOWS_LINE_BREAK;
         } else if (OS_TYPE_LINUX.equals(osType)) {
@@ -69,7 +69,7 @@ public class SystemTypeCommandUtils {
     }
 
     public static String getPathDelimiter(String systemType) {
-        var osType = getOsType(systemType);
+        String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
             return CommandUtils.WINDOWS_PATH_DELIMITER;
         } else if (OS_TYPE_LINUX.equals(osType)) {
@@ -80,7 +80,7 @@ public class SystemTypeCommandUtils {
     }
 
     public static String getCommandInlineSeparator(String systemType) {
-        var osType = getOsType(systemType);
+        String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
             return WINDOWS_COMMAND_INLINE_SEPARATOR;
         } else if (OS_TYPE_LINUX.equals(osType)) {

@@ -37,7 +37,9 @@ public class LogReportServiceImpl implements LogReportService {
         int delete = logReportMapper.filterDelete(condition);
         log.info("delete history log report type:{}, num：{}",logReportTypeEnum,delete);
         List<LogReportPO> logReportPOS = logReportDTOConverter.sourceToTarget(list);
-        logReportPOS.forEach(v -> v.setType(logReportTypeEnum));
+        for (LogReportPO v : logReportPOS) {
+            v.setType(logReportTypeEnum);
+        }
         return logReportMapper.bulkCreate(logReportPOS).getSuccessCount();
     }
 
@@ -48,14 +50,14 @@ public class LogReportServiceImpl implements LogReportService {
             humanCondition.filterEqual("type", type);
         }
         List<LogReportPO> list = logReportMapper.list(humanCondition);
-        list.forEach(logReportPO -> {
+        for (LogReportPO logReportPO : list) {
             String fileName = logReportPO.getFileName();
             LogReportTypeEnum logType = logReportPO.getType();
             if (!fileName.startsWith(logType.getPrefix())) {
                 fileName = logType.getPrefix() + fileName;
                 logReportPO.setFileName(fileName);
             }
-        });
+        }
         return logReportDTOConverter.targetToSource(list);
     }
 }

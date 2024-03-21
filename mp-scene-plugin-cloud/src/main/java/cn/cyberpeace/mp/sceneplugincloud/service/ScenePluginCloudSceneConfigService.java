@@ -65,7 +65,7 @@ public class ScenePluginCloudSceneConfigService {
         Map<String, Map<Object, Long>> result = new HashMap<>();
         if (!countFieldNames.isEmpty()) {
             countFieldNames.forEach(fieldName -> {
-                var countResult = cloudSceneConfigStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, List.of(fieldName), false);
+                Map<String, Map<Object, Long>> countResult = cloudSceneConfigStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, List.of(fieldName), false);
                 result.put(fieldName, countResult.get(fieldName));
             });
         }

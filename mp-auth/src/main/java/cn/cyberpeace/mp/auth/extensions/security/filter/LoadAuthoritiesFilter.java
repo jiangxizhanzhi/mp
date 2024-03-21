@@ -69,7 +69,7 @@ public class LoadAuthoritiesFilter extends OncePerRequestFilter {
             if (Objects.nonNull(clientDetails)) {
                 // client认证, 赋有超级用户的所有角色，权限
                 Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);
-                var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
+                ClientAuthenticationToken clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(clientAuthenticationToken);
             }

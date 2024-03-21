@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
             if (Objects.nonNull(clientDetails) && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
                 // 后台接口操作统一当做admin操作
-                var result = userService.get(AuthConstant.ROOT_USER_ID);
+                ObjServiceResult<UserModel> result = userService.get(AuthConstant.ROOT_USER_ID);
                 if (Objects.nonNull(result.getSource()) && Objects.nonNull(result.getSource().getObj())) {
                     UserModel rootUser = result.getSource().getObj();
                     UserUtils.setLoginUser2RequestAttr(request, rootUser.getId(), rootUser.getUsername(), LogConstant.USER_TYPE_USER);

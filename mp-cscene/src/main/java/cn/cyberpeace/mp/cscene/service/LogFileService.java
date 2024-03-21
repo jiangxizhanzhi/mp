@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileDownloadUrlRequest;
@@ -35,10 +36,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -49,16 +55,11 @@ import java.util.stream.Collectors;
 @Service
 public class LogFileService {
 
-    private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-
     @Autowired
     private CsceneCommonService csceneCommonService;
 
     @Autowired
     private CloudCommonConfigService cloudCommonConfigService;
-
-    @Autowired
-    private SceneElementMonitorService sceneElementMonitorService;
 
     @Autowired
     private SceneMonitorService sceneMonitorService;
@@ -97,11 +98,13 @@ public class LogFileService {
         Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(pageRequest.getSceneId(), pageRequest.getElementIds());
 
         List<LogFileVO> allLogFileVOs = new ArrayList<>();
-        agentNames2ElementIdMap.forEach((agentName, elementId) -> {
+        for (Map.Entry<String, String> entry : agentNames2ElementIdMap.entrySet()) {
+            String agentName = entry.getKey();
+            String elementId = entry.getValue();
             if (elementId2LogFile.containsKey(elementId)) {
                 allLogFileVOs.addAll(elementId2LogFile.get(elementId));
             }
-        });
+        }
         if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -116,10 +119,17 @@ public class LogFileService {
 
         // 假分页处理
         int skip = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
-        List<LogFileVO> pagedLogFileVOs = allLogFileVOs.stream()
-                .skip(skip)
-                .limit(pageRequest.getPageSize())
-                .collect(Collectors.toList());
+        List<LogFileVO> pagedLogFileVOs = new ArrayList<>();
+        long limit = pageRequest.getPageSize();
+        long toSkip = skip;
+        for (LogFileVO allLogFileVO : allLogFileVOs) {
+            if (toSkip > 0) {
+                toSkip--;
+                continue;
+            }
+            if (limit-- == 0) break;
+            pagedLogFileVOs.add(allLogFileVO);
+        }
 
         PageInfo<LogFileVO> pageInfo = new PageInfo();
         pageInfo.setList(pagedLogFileVOs);
@@ -129,12 +139,12 @@ public class LogFileService {
     }
 
     public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
-        var cscene = csceneInstanceMapper.get(csceneId);
+        CsceneInstanceModel cscene = csceneInstanceMapper.get(csceneId);
         if(cscene == null){
             return new ConcurrentHashMap<>();
         }
         String sceneId = cscene.getScene();
-        var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        CollectionPluginSceneModel model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model == null || StringUtils.isEmpty(model.getProbeCollector())) {
             return new ConcurrentHashMap<>();
         }
@@ -145,26 +155,43 @@ public class LogFileService {
         Map<String, List<LogFileVO>> result = new ConcurrentHashMap<>();
         List<CompletableFuture<List<LogFileVO>>> cfList = new ArrayList<>();
         List<String> elementIds = new ArrayList<>();
-        allElements.forEach(e -> elementIds.add(e.getId()));
+        for (ElementMonitorBasicInfo e : allElements) {
+            elementIds.add(e.getId());
+        }
 
         Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(csceneId, elementIds);
-        agentNames2ElementIdMap.forEach((agentName, elementId) -> {
-            ElementMonitorBasicInfo ebasicInfo = allElements.stream().filter(element -> element.getId().equals(elementId)).findFirst().orElse(null);
+        for (Map.Entry<String, String> entry : agentNames2ElementIdMap.entrySet()) {
+            String agentName = entry.getKey();
+            String elementId = entry.getValue();
+            ElementMonitorBasicInfo ebasicInfo = null;
+            for (ElementMonitorBasicInfo element : allElements) {
+                if (element.getId().equals(elementId)) {
+                    ebasicInfo = element;
+                    break;
+                }
+            }
             if (Objects.nonNull(ebasicInfo)) {
                 String systemType = ebasicInfo.getSystemType();
                 CompletableFuture<List<LogFileVO>> cf = CompletableFuture.supplyAsync(() -> {
-                    var files = queryLogCollectFiles(agentName, elementId, systemType);
+                    List<LogFileVO> files = queryLogCollectFiles(agentName, elementId, systemType);
                     result.put(elementId, files);
                     return files;
                 });
                 cfList.add(cf);
             }
-        });
+        }
         if (CollectionUtil.isEmpty(cfList)) {
             return new ConcurrentHashMap<>();
         }
         CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
-        CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+        CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> {
+            List<List<LogFileVO>> list = new ArrayList<>();
+            for (CompletableFuture<List<LogFileVO>> listCompletableFuture : cfList) {
+                List<LogFileVO> join = listCompletableFuture.join();
+                list.add(join);
+            }
+            return list;
+        });
         finalCF.join();
         return result;
     }
@@ -175,7 +202,12 @@ public class LogFileService {
         String osType = getOsType(systemType);
         List<WazuhControl.QueryLogCollectFileData> fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
         List<LogFileVO> logFileVOS = convertLogFiles(fileList, elementId, agentName, osType);
-        log.info("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), logFileVOS.stream().map(LogFileVO::getPath).collect(Collectors.toList()));
+        List<String> list = new ArrayList<>();
+        for (LogFileVO logFileVO : logFileVOS) {
+            String path = logFileVO.getPath();
+            list.add(path);
+        }
+        log.info("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), list);
         return logFileVOS;
     }
 
@@ -211,11 +243,11 @@ public class LogFileService {
         String osType = request.getOsType();
         List<String> paths = request.getPaths();
         List<WazuhControl.ControlFileParam> uploadParams =
-            paths.stream().map(path -> {
-                WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
-                uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
-                return uploadParam;
-            }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (String s : paths) {
+            WazuhControl.ControlFileParam controlFileParam = getControlFileParam(s);
+            uploadParams.add(controlFileParam);
+        }
 
         Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
@@ -228,7 +260,9 @@ public class LogFileService {
         }
 
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
-        resultMap.forEach((paramId, fileResult) -> {
+        for (Map.Entry<String, WazuhControl.ControlFileResult> entry : resultMap.entrySet()) {
+            String paramId = entry.getKey();
+            WazuhControl.ControlFileResult fileResult = entry.getValue();
             log.info("key:{}, val:{}", paramId, fileResult);
             String downloadUrl = fileResult.getFileSrc();
             downloadUrl = collectionAppConfig.getWazuhGodfsOuterHttpServer() + downloadUrl;
@@ -237,10 +271,16 @@ public class LogFileService {
                 dto.setDownloadUrl(downloadUrl);
                 dtos.add(dto);
             }
-        });
+        }
 
         log.info("downloadUrlDtos:{}", dtos);
         return dtos;
+    }
+
+    private static WazuhControl.ControlFileParam getControlFileParam(String path) {
+        WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
+        uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
+        return uploadParam;
     }
 
 
@@ -257,32 +297,38 @@ public class LogFileService {
         }
 
         List<LogFileVO> logFileVOS = new ArrayList<>();
-        logFiles.forEach(logFile -> {
+        for (WazuhControl.QueryLogCollectFileData logFile : logFiles) {
             List<WazuhControl.QueryLogCollectRelatedFileInfo> relatedFiles = logFile.getRelatedFiles();
 
             if (CollectionUtil.isNotEmpty(relatedFiles)) {
 
-                List<LogFileVO> subDtos = relatedFiles.stream().map(f -> {
-                    LogFileVO dto =
-                            LogFileVO.builder()
-                                    .path(f.getPath())
-                                    .name(FileUtil.getName(f.getPath()))
-                                    .size(f.getSize())
-                                    .createTime(parseDateTime(f.getCreateTime()))
-                                    .modifyTime(parseDateTime(f.getModifyTime()))
-                                    .accessTime(parseDateTime(f.getAccessTime()))
-                                    .elementId(elementId)
-                                    .agentName(agentName)
-                                    .osType(osType)
-                                    .build();
-                    return dto;
-                }).collect(Collectors.toList());
+                List<LogFileVO> subDtos = new ArrayList<>();
+                for (WazuhControl.QueryLogCollectRelatedFileInfo f : relatedFiles) {
+                    LogFileVO logFileVO = getLogFileVO(elementId, agentName, osType, f);
+                    subDtos.add(logFileVO);
+                }
 
                 logFileVOS.addAll(subDtos);
             }
-        });
+        }
 
         return logFileVOS;
+    }
+
+    private LogFileVO getLogFileVO(String elementId, String agentName, String osType, WazuhControl.QueryLogCollectRelatedFileInfo f) {
+        LogFileVO dto =
+                LogFileVO.builder()
+                        .path(f.getPath())
+                        .name(FileUtil.getName(f.getPath()))
+                        .size(f.getSize())
+                        .createTime(parseDateTime(f.getCreateTime()))
+                        .modifyTime(parseDateTime(f.getModifyTime()))
+                        .accessTime(parseDateTime(f.getAccessTime()))
+                        .elementId(elementId)
+                        .agentName(agentName)
+                        .osType(osType)
+                        .build();
+        return dto;
     }
 
 

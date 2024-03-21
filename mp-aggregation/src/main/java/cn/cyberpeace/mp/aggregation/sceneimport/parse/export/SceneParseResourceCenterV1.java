@@ -22,6 +22,9 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -104,18 +107,18 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                                  Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<ConnectedNetworkBO, CloudPluginSceneElementBO> deriveNetwork2Element = new HashMap<>();
-        pluginHandler.getElementMap().values().forEach(e -> {
+        for (CloudPluginSceneElementBO e : pluginHandler.getElementMap().values()) {
             if (CollectionUtils.isNotEmpty(e.getDeriveNetworks())) {
-                for (var net : e.getDeriveNetworks()) {
+                for (ConnectedNetworkBO net : e.getDeriveNetworks()) {
                     deriveNetwork2Element.put(net, e);
                 }
             }
-        });
+        }
         int networkIndex = 1;
-        for (var net : deriveNetwork2Element.keySet()) {
-            var pluginElement = deriveNetwork2Element.get(net);
-            var element = pluginElement.getSrcElement();
-            var networkElementParseResult = this.buildNetworkElementParseResultV2(element, pluginElement);
+        for (ConnectedNetworkBO net : deriveNetwork2Element.keySet()) {
+            CloudPluginSceneElementBO pluginElement = deriveNetwork2Element.get(net);
+            SceneElementBO element = pluginElement.getSrcElement();
+            NetworkElementParseResultV2 networkElementParseResult = this.buildNetworkElementParseResultV2(element, pluginElement);
             if (StringUtils.isNotEmpty(net.getNetwork().getGateway())) {
                 networkElementParseResult.setGateway(net.getNetwork().getGateway());
             }
@@ -142,8 +145,8 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         int serverIndex = 1;
         int routerIndex = 1;
         int firewallIndex = 1;
-        for (var pluginElement : pluginHandler.getElementMap().values()) {
-            var element = pluginElement.getSrcElement();
+        for (CloudPluginSceneElementBO pluginElement : pluginHandler.getElementMap().values()) {
+            SceneElementBO element = pluginElement.getSrcElement();
             if (BaseSceneElementModel.Type.SWITCH == element.getType()) {
                 if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                     // 二层交换机不用处理
@@ -154,13 +157,13 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 } else if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
                         || pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
                         || pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                    var nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
+                    NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
                     nodeElementParseResult.setId("server-" + serverIndex++);
                     id2Node.put(element.getId(), nodeElementParseResult);
                     nodes.add(nodeElementParseResult);
                 }
             } else {
-                var nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
+                NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
                 if (element.getType() == BaseSceneElementModel.Type.ROUTER) {
                     nodeElementParseResult.setId("router-" + routerIndex++);
                 } else if (element.getType() == BaseSceneElementModel.Type.FIREWALL) {
@@ -180,28 +183,28 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
     private void addConnect(SceneHandler sceneHandler, Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         for (String nodeId : id2Node.keySet()) {
-            var node = id2Node.get(nodeId);
+            NodeElementParseResult node = id2Node.get(nodeId);
             node.setNet(new ArrayList<>());
 
-            var element = sceneHandler.getElement(nodeId);
-            var pluginElement = pluginHandler.getElement(nodeId);
+            SceneElementBO element = sceneHandler.getElement(nodeId);
+            CloudPluginSceneElementBO pluginElement = pluginHandler.getElement(nodeId);
             if (CollectionUtils.isNotEmpty(pluginElement.getDeriveNetworks())) {
-                for (var net : pluginElement.getDeriveNetworks()) {
-                    var netParseResult = id2Network.get(net.getNetwork().getId());
+                for (ConnectedNetworkBO net : pluginElement.getDeriveNetworks()) {
+                    NetworkElementParseResultV2 netParseResult = id2Network.get(net.getNetwork().getId());
                     NetElementParseResult netElementParseResult = new NetElementParseResult();
                     netElementParseResult.setId(netParseResult.getId());
-                    var port = net.getFromPorts().get(0);
+                    SceneElementPortBO port = net.getFromPorts().get(0);
                     if (pluginHandler.getHandlerUtils().isManualConfigIpPort(port)) {
                         netElementParseResult.setIp(port.getIp());
                     }
-                    var pluginPort = pluginHandler.getPort(port.getId());
+                    CloudPluginSceneElementPortBO pluginPort = pluginHandler.getPort(port.getId());
                     netElementParseResult.setAcls(this.buildAclsInfos(pluginPort));
                     node.getNet().add(netElementParseResult);
                 }
             }
             if (CollectionUtils.isNotEmpty(pluginElement.getAccessNetworks())) {
-                for (var net : pluginElement.getAccessNetworks()) {
-                    var netParseResult = id2Network.get(net.getNetwork().getId());
+                for (ConnectedNetworkBO net : pluginElement.getAccessNetworks()) {
+                    NetworkElementParseResultV2 netParseResult = id2Network.get(net.getNetwork().getId());
                     NetElementParseResult netElementParseResult = new NetElementParseResult();
                     netElementParseResult.setId(netParseResult.getId());
                     netElementParseResult.setAcls(new ArrayList<>());
@@ -209,7 +212,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                     if (pluginHandler.getHandlerUtils().isManualConfigIpPort(port)) {
                         netElementParseResult.setIp(port.getIp());
                     }
-                    var pluginPort = pluginHandler.getPort(port.getId());
+                    CloudPluginSceneElementPortBO pluginPort = pluginHandler.getPort(port.getId());
                     netElementParseResult.setAcls(this.buildAclsInfos(pluginPort));
                     node.getNet().add(netElementParseResult);
                 }
@@ -225,9 +228,11 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             networkElementParseResult.setGateway(pluginElement.getGateway());
             networkElementParseResult.setDns(pluginElement.getDnsNameservers());
             if (CollectionUtils.isNotEmpty(pluginElement.getAllocationPools())) {
-                var list = pluginElement.getAllocationPools().stream()
-                        .map(p -> p.getStart() + "-" + p.getEnd())
-                        .collect(Collectors.toList());
+                List<String> list = new ArrayList<>();
+                for (AllocationPool p : pluginElement.getAllocationPools()) {
+                    String s = p.getStart() + "-" + p.getEnd();
+                    list.add(s);
+                }
                 networkElementParseResult.setDhcpPool(StringUtils.join(list, ","));
             } else {
                 networkElementParseResult.setDhcpPool(StringUtils.EMPTY);
@@ -261,7 +266,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setName(e.getName());
         nodeElementParseResult.setInitCommands(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
-            e.getInitCommands().forEach(c -> {
+            for (String c : e.getInitCommands()) {
                 InitCommandParseResult result = new InitCommandParseResult();
                 if (c.startsWith("o:")) {
                     result.setO(StringUtils.replaceOnce(c, "o:", "").trim());
@@ -270,10 +275,10 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 } else if (c.startsWith("n:")) {
                     result.setN(StringUtils.replaceOnce(c, "n:", "").trim());
                 } else {
-                    return;
+                    continue;
                 }
                 nodeElementParseResult.getInitCommands().add(result);
-            });
+            }
         }
         if (StringUtils.isNotEmpty(e.getNodeCommand())) {
             InitCommandParseResult result = new InitCommandParseResult();
@@ -283,8 +288,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setStaticRoutes(new ArrayList<>());
         nodeElementParseResult.setStaticRouters(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(pluginElement.getStaticRoutes())) {
-            pluginElement.getStaticRoutes().forEach(s -> {
-                // staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
+            for (StaticRoute s : pluginElement.getStaticRoutes()) {// staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
                 StaticRoutesResult resulta = new StaticRoutesResult();
                 resulta.setGateway(s.getNexthop());
                 resulta.setDestination(s.getDestination());
@@ -294,7 +298,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 result.setGateway(s.getNexthop());
                 result.setDestination(s.getDestination());
                 nodeElementParseResult.getStaticRouters().add(result);
-            });
+            }
         }
         try {
             if (StringUtils.isNotEmpty(e.getPosition2())) {
@@ -312,7 +316,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
     private List<AclsInfo> buildAclsInfos(CloudPluginSceneElementPortBO pluginPort) {
         List<AclsInfo> aclsInfos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(pluginPort.getFirewallRules())) {
-            for (var r : pluginPort.getFirewallRules()) {
+            for (FirewallRule r : pluginPort.getFirewallRules()) {
                 AclsInfo aclsInfo = new AclsInfo();
                 aclsInfo.setProtocol(r.getProtocol());
                 aclsInfo.setTargetPort(r.getDestinationPort());
@@ -364,11 +368,11 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             getScene().setEvent(SceneModel.Event.DEFAULT);
             getScene().setEventStatus(EventStatus.INITIAL);
             getScene().setProcessStatus(ProcessStatus.INITIAL);
-            getElementMap().values().forEach(e -> {
+            for (SceneElementBO e : getElementMap().values()) {
                 e.setEvent(SceneElementModel.Event.DEFAULT);
                 e.setEventStatus(SceneElementModel.Event.DEFAULT);
                 e.setProcessStatus(SceneElementModel.Event.DEFAULT);
-            });
+            }
         }
 
         @Override

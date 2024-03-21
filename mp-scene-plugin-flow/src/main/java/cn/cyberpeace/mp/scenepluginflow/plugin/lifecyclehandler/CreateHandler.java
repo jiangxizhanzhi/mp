@@ -7,12 +7,14 @@ import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.FlowSceneStage;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
@@ -52,20 +54,20 @@ public class CreateHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
             List<FlowNetworkInfo> networkInfos = new ArrayList<>();
-            var flowElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+            ArrayList<FlowPluginSceneElementBO> flowElements = new ArrayList<>(getPluginHandler().getElementMap().values());
             log.info("flowElements is:{}", flowElements);
             if (CollectionUtils.isNotEmpty(flowElements)) {
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 if (cloudPluginHandler != null) {
                     Set<String> existIp = new HashSet<>();
                     List<ConnectedNetworkBO> networkBOS = new ArrayList<>();
-                    for (var cpElement : cloudPluginHandler.getElementMap().values()) {
+                    for (CloudPluginSceneElementBO cpElement : cloudPluginHandler.getElementMap().values()) {
                         if (CollectionUtils.isNotEmpty(cpElement.getDeriveNetworks())) {
                             networkBOS.addAll(cpElement.getDeriveNetworks());
                         }
                     }
                     flowElements.forEach(element -> {
-                        var cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
+                        CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
                         if (cloudElement == null || cloudElement.getVirtualType() == null) {
                             return;
                         }
@@ -76,11 +78,11 @@ public class CreateHandler extends HandlerCommon {
                         }
                         if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
                             element.getSrcElement().getPorts().forEach(port -> {
-                                var network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);
-                                var ip = port.getIp();
+                                CloudPluginSceneElementNetworkBO network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);
+                                String ip = port.getIp();
 
                                 if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network != null) {
-                                    var flowNetworkInfo = new FlowNetworkInfo();
+                                    FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
                                     flowNetworkInfo.setIp(ip);
                                     flowNetworkInfo.setNetworkId(network.getResourceId());
                                     flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
@@ -88,7 +90,7 @@ public class CreateHandler extends HandlerCommon {
                                     existIp.add(ip);
                                 } else if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network == null) {
                                     CloudPluginSceneElementNetworkBO net = null;
-                                    for (var cpNet : networkBOS) {
+                                    for (ConnectedNetworkBO cpNet : networkBOS) {
                                         List<SceneElementPortBO> list = new ArrayList<>();
                                         if (CollectionUtils.isNotEmpty(cpNet.getFromPorts())) {
                                             list.addAll(cpNet.getFromPorts());
@@ -96,7 +98,7 @@ public class CreateHandler extends HandlerCommon {
                                         if (CollectionUtils.isNotEmpty(cpNet.getToPorts())) {
                                             list.addAll(cpNet.getToPorts());
                                         }
-                                        for (var connectPort : list) {
+                                        for (SceneElementPortBO connectPort : list) {
                                             if (StringUtils.equals(port.getElement().getId(), connectPort.getElement().getId())) {
                                                 net = cpNet.getNetwork();
                                             }
@@ -104,7 +106,7 @@ public class CreateHandler extends HandlerCommon {
                                     }
 
                                     if (net != null) {
-                                        var flowNetworkInfo = new FlowNetworkInfo();
+                                        FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setIp(ip);
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
                                         flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
@@ -113,7 +115,7 @@ public class CreateHandler extends HandlerCommon {
                                     }
                                 } else if (StringUtils.isEmpty(ip) && CollectionUtils.isNotEmpty(networkBOS)) {
                                     CloudPluginSceneElementNetworkBO net = null;
-                                    for (var cpNet : networkBOS) {
+                                    for (ConnectedNetworkBO cpNet : networkBOS) {
                                         List<SceneElementPortBO> list = new ArrayList<>();
                                         if (CollectionUtils.isNotEmpty(cpNet.getFromPorts())) {
                                             list.addAll(cpNet.getFromPorts());
@@ -121,7 +123,7 @@ public class CreateHandler extends HandlerCommon {
                                         if (CollectionUtils.isNotEmpty(cpNet.getToPorts())) {
                                             list.addAll(cpNet.getToPorts());
                                         }
-                                        for (var connectPort : list) {
+                                        for (SceneElementPortBO connectPort : list) {
                                             if (StringUtils.equals(port.getElement().getId(), connectPort.getElement().getId())) {
                                                 net = cpNet.getNetwork();
                                             }
@@ -129,7 +131,7 @@ public class CreateHandler extends HandlerCommon {
                                     }
 
                                     if (net != null) {
-                                        var flowNetworkInfo = new FlowNetworkInfo();
+                                        FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
                                         flowNetworkInfo.setNetworkId(net.getResourceId());
                                         flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
                                         networkInfos.add(flowNetworkInfo);
@@ -142,13 +144,13 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
 //            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
-            var executorId = getHandlerUtils().startExecutor(getPluginHandler().getSourceSceneId());
+            String executorId = getHandlerUtils().startExecutor(getPluginHandler().getSourceSceneId());
             log.info("executorId is:{}", executorId);
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
 
             //初始化流量任务
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+            String sceneId = getPluginHandler().getSrcScene().getEid();
             List<AddFlowTaskTaskInfo> details = new ArrayList<>();
             getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
                 List<Flow> flows = flowElement.getFlows();
@@ -158,7 +160,7 @@ public class CreateHandler extends HandlerCommon {
                     String networkId = "";
                     if (CollectionUtils.isNotEmpty(getPluginHandler().getSceneHandler().getElement(nodeId).getPorts())) {
                         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                        for (var p : getPluginHandler().getSceneHandler().getElement(nodeId).getPorts()) {
+                        for (SceneElementPortBO p : getPluginHandler().getSceneHandler().getElement(nodeId).getPorts()) {
                             nodeIp = p.getIp();
                             if (StringUtils.isNotEmpty(nodeIp)) {
                                 CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);

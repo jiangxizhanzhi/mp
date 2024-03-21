@@ -23,8 +23,8 @@ public class CloudScenePluginValidation {
 
     public static <T> void handleValidateResult(Set<ConstraintViolation<T>> validateResult) {
         if (!validateResult.isEmpty()) {
-            for (var constraintViolation : validateResult) {
-                var message = constraintViolation.getMessage();
+            for (ConstraintViolation<T> constraintViolation : validateResult) {
+                String message = constraintViolation.getMessage();
                 throw new MpRuntimeException(CloudErrorCode.INVALID_IP_OR_CIDR.format(message));
             }
         }

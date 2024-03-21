@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.aggregation.task;
+package cn.cyberpeace.mp.aggregation.job;
 
 import cn.cyberpeace.mp.aggregation.service.TargetAggregationService;
 import lombok.extern.slf4j.Slf4j;
