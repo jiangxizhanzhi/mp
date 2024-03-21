@@ -706,9 +706,9 @@ public class InitiateHandler extends HandlerCommon {
             boolean dhcpOpenAndNeedMpAllocateDhcpFlag = Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())
                     && !Boolean.FALSE.equals(element.getDhcp());
 
-            boolean onlyCoreRouterConnectFlag = onlyCoreRouterConnectFlag(connectedNetwork);
+            boolean onlyVirtualRouterConnectFlag = onlyVirtualRouterConnectFlag(connectedNetwork);
 
-            if (dhcpOpenAndNeedMpAllocateDhcpFlag && !onlyCoreRouterConnectFlag) {
+            if (dhcpOpenAndNeedMpAllocateDhcpFlag && !onlyVirtualRouterConnectFlag) {
                 if (StringUtils.isEmpty(network.getDhcpIp())) {
                     List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(element.getDhcp()));
                     if (CollectionUtils.isNotEmpty(ipPool)) {
@@ -797,15 +797,15 @@ public class InitiateHandler extends HandlerCommon {
         return existIps;
     }
 
-    private boolean onlyCoreRouterConnectFlag(ConnectedNetworkBO connectedNetworkBO) {
+    private boolean onlyVirtualRouterConnectFlag(ConnectedNetworkBO connectedNetworkBO) {
         List<SceneElementPortBO> fromPorts = connectedNetworkBO.getFromPorts();
         List<SceneElementPortBO> toPorts = connectedNetworkBO.getToPorts();
 
         if (CollectionUtils.isNotEmpty(fromPorts) && CollectionUtils.isNotEmpty(toPorts)) {
             if (fromPorts.size() == toPorts.size() && fromPorts.size() == 1) {
-                if (ElementTypeUtils.isCoreRouter(
+                if (ElementTypeUtils.isVirtualRouter(
                         getPluginHandler().getElement(fromPorts.get(0).getElement().getId())) &&
-                        ElementTypeUtils.isCoreRouter(
+                        ElementTypeUtils.isVirtualRouter(
                                 getPluginHandler().getElement(toPorts.get(0).getElement().getId())
                         )) {
                     return true;
