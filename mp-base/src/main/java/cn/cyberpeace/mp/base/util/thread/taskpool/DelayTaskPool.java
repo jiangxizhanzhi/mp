@@ -67,8 +67,9 @@ public class DelayTaskPool {
      * @param task 任务
      */
     public void add(String key, Runnable task) {
+        Runnable formatTask = ThreadUtils.format(task);
         synchronized (taskMap) {
-            taskMap.put(key, task);
+            taskMap.put(key, formatTask);
         }
     }
 
@@ -114,7 +115,7 @@ public class DelayTaskPool {
 
         // 执行等待执行池任务
         waitTaskMap.forEach((key, task) -> {
-            taskPool.executeTask(() -> startCurrentTask(key), true);
+            taskPool.executeTask(() -> startCurrentTask(key), false);
         });
 
         var runNext = false;
