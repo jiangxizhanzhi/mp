@@ -4,7 +4,6 @@ gradle.ext {
         'mp-common',
         'mp-aggregation',
         'mp-auth',
-        'mp-auth-base',
         'mp-devops-cluster',
         'mp-scene',
         'mp-scene-plugin-cloud',
