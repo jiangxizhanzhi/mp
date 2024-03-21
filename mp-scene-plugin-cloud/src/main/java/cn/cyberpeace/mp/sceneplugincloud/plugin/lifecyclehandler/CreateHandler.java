@@ -1477,7 +1477,7 @@ public class CreateHandler extends HandlerCommon {
         openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts().size()));
         boolean openDhcpResult = false;
         boolean buildNetworkResult = false;
-        int tryTimes = 5;
+        int tryTimes = 10;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 先等2s,等待串口可用
