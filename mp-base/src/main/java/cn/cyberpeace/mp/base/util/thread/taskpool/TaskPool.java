@@ -151,17 +151,26 @@ public class TaskPool {
         this.executor = executor;
     }
 
-    public void executeTask(Runnable task) {
-        executeTask(task, true);
+    public DefaultPoolTask executeTask(Runnable task) {
+        return executeTask(task, true);
     }
 
-    public void executeTask(Runnable task, boolean format) {
+    public DefaultPoolTask executeTask(Runnable task, boolean format) {
         var poolTask = new DefaultPoolTask(task);
+        return executePoolTask(poolTask, format);
+    }
+
+    public <C, T extends PoolTask<C>> T executePoolTask(T poolTask) {
+        return executePoolTask(poolTask, true);
+    }
+
+    public <C, T extends PoolTask<C>> T executePoolTask(T poolTask, boolean format) {
         Runnable command = () -> invokeTask(poolTask);
         if (format) {
             command = ThreadUtils.format(command);
         }
         executor.execute(command);
+        return poolTask;
     }
 
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks) {

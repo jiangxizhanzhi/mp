@@ -27,6 +27,16 @@ public class DelayTaskPool {
      */
     private final Map<String, Runnable> taskMap = new ConcurrentHashMap<>();
 
+    /**
+     * 等待任务集合
+     */
+    private final Map<String, Runnable> waitTaskMap = new ConcurrentHashMap<>();
+
+    /**
+     * 当前任务集合
+     */
+    private final Map<String, DefaultPoolTask> currentTaskMap = new ConcurrentHashMap<>();
+
     private Integer runDelay;
 
     private final RunStatus status = new RunStatus();
@@ -57,9 +67,8 @@ public class DelayTaskPool {
      * @param task 任务
      */
     public void add(String key, Runnable task) {
-        Runnable formatTask = ThreadUtils.format(task);
         synchronized (taskMap) {
-            taskMap.put(key, formatTask);
+            taskMap.put(key, task);
         }
     }
 
@@ -86,22 +95,27 @@ public class DelayTaskPool {
             status.setRunning(true);
         }
 
-        // 运行任务
+        // 延迟运行任务
         try {
             Thread.sleep(runDelay);
         } catch (InterruptedException e) {
             log.error("Delay task pool run delay is interrupted: ", e);
         }
-        Map<String, Runnable> runTaskMap = null;
+
+        // 取出本次所有任务放入等待执行池
         synchronized (taskMap) {
             if (!taskMap.isEmpty()) {
-                runTaskMap = new HashMap<>(taskMap);
+                synchronized (waitTaskMap) {
+                    waitTaskMap.putAll(taskMap);
+                }
                 taskMap.clear();
             }
         }
-        if (runTaskMap != null) {
-            runTaskMap.forEach((key, task) -> taskPool.executeTask(task, false));
-        }
+
+        // 执行等待执行池任务
+        waitTaskMap.forEach((key, task) -> {
+            taskPool.executeTask(() -> startCurrentTask(key), true);
+        });
 
         var runNext = false;
         synchronized (status) {
@@ -116,6 +130,38 @@ public class DelayTaskPool {
 
         if (runNext) {
             run();
+        }
+    }
+
+    private void startCurrentTask(String key) {
+        while (true) {
+            // 从等待任务池取出任务放入当前任务
+            DefaultPoolTask currentTask = null;
+            synchronized (currentTaskMap) {
+                // 已存在任务直接退出
+                if (currentTaskMap.containsKey(key)) {
+                    break;
+                }
+
+                synchronized (waitTaskMap) {
+                    var waitTask = waitTaskMap.remove(key);
+                    if (waitTask != null) {
+                        currentTask = new DefaultPoolTask(waitTask);
+                        currentTaskMap.put(key, currentTask);
+                    }
+                }
+            }
+            if (currentTask == null) {
+                break;
+            }
+
+            // 执行当前任务
+            TaskPool.invokeTask(currentTask);
+
+            // 移除当前任务
+            synchronized (currentTaskMap) {
+                currentTaskMap.remove(key);
+            }
         }
     }
 

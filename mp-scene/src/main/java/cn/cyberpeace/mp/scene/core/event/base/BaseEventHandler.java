@@ -152,6 +152,8 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         var validEvents = eventTransition.getOrDefault(EventTransition.genKey(target.getEvent(),
                 target.getEventStatus()), null);
         if (validEvents == null || !validEvents.contains(event)) {
+            log.error("Target[{}] enter event[{}] failed: target_event[{}], target_event_status[{}]",
+                    target.genTarget(), event, target.getEvent(), target.getEventStatus());
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
         }
     }
