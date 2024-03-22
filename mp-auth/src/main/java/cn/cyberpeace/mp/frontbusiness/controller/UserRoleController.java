@@ -31,7 +31,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户-角色管理接口(业务)", tags = "AUTH-用户-角色管理接口(业务)")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController("userRoleFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_roles")
@@ -40,21 +40,21 @@ public class UserRoleController {
     @Autowired
     private UserRoleService userRoleService;
 
-    @ApiOperation(value = "分页查询 根据userId查询用户所有角色", notes = "")
+    @ApiOperation(value = "[用户角色管理] 分页查询 根据userId查询用户所有角色", notes = "")
     @GetMapping("/roles/page/byuser")
     public ListObjServiceResult<RoleModel> getRolesByUser(UserRolePageRequest pageRequest) {
         ListObjServiceResult result = userRoleService.pageByUserId(pageRequest);
         return result;
     }
 
-    @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
+    @ApiOperation(value = "[用户角色管理] 分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/page/byrole")
     public ListObjServiceResult<UserBo> getUsersByRole(UserRolePageRequest pageRequest) {
         ListObjServiceResult result = userRoleService.pageByRoleId(pageRequest);
         return result;
     }
 
-    @ApiOperation(value = "查询所有角色以及绑定的用户数量", notes = "")
+    @ApiOperation(value = "[用户角色管理] 查询所有角色以及绑定的用户数量", notes = "")
     @GetMapping("/statistics")
     public ServiceResult<List<UserRoleStatisticBo>> getUserRoleStatistics() {
         List statistics = userRoleService.getUserRoleStatistics();
@@ -62,7 +62,7 @@ public class UserRoleController {
     }
 
 
-    @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
+    @ApiOperation(value = "[用户角色管理] 绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
     @ApiImplicitParam(name="userRolesReq", value="绑定请求", dataTypeClass = UserRolesRequest.class)
     @PostMapping("/bind/userRoles")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -77,7 +77,7 @@ public class UserRoleController {
     }
 
 
-    @ApiOperation(value = "绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
+    @ApiOperation(value = "[用户角色管理] 绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
     @ApiImplicitParam(name="roleUsersReq", value="绑定请求", dataTypeClass = RoleUsersRequest.class)
     @PostMapping("/bind/roleUsers")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -92,7 +92,7 @@ public class UserRoleController {
     }
 
 
-    @ApiOperation(value = "删除用户-角色关系(通过 role_id 和 user_ids组合)", notes = "")
+    @ApiOperation(value = "[用户角色管理] 删除用户-角色关系(通过 role_id 和 user_ids组合)", notes = "")
     @ApiImplicitParam(name="roleUsersReq", value="删除请求", dataTypeClass = RoleUsersRequest.class)
     @PostMapping("/delete/byRoleUsers")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")

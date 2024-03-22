@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "头像管理接口(业务)", tags = "AUTH-头像管理接口(业务)")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController("avatarFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/avatar")
@@ -30,7 +30,7 @@ public class AvatarController {
     @Autowired
     private AvatarService avatarService;
 
-    @ApiOperation(value = "上传头像，返回url", notes = "")
+    @ApiOperation(value = "上传用户头像(返回url)", notes = "")
     @ApiImplicitParam(name = "file", value = "图片文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload")
     @ResponseBody

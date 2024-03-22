@@ -26,7 +26,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "权限管理接口（业务）", tags = "AUTH-权限管理接口（业务）")
+@Api(value = "权限管理接口", tags = "权限管理接口")
 @Slf4j
 @RestController("targetFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/targets")

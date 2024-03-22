@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "组织管理接口", tags = "AUTH-组织管理接口")
+@Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
@@ -34,7 +34,7 @@ public class OrgController {
     @Autowired
     private OrgService orgService;
 
-    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiOperation(value = "查询指定id组织(restful形式)", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -45,7 +45,7 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
-    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiOperation(value = "查询指定id组织", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -56,7 +56,7 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
-    @ApiOperation("创建组织")
+    @ApiOperation("新增组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })

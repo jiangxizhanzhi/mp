@@ -34,7 +34,7 @@ import java.util.Set;
  * @Author zhouxinghuai
  * @Date：2021/12/16 19:02
  */
-@Api(value = "SYS-ADMIN", tags = "ADMIN")
+@Api(value = "SYS-ADMIN", tags = "页面菜单管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/admin")

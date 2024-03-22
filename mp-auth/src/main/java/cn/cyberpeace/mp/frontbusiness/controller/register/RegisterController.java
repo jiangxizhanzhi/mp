@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "注册接口", tags = "AUTH-注册接口")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/register")
@@ -46,7 +46,7 @@ public class RegisterController {
     @Autowired
     private RegisterService registerService;
 
-    @ApiOperation(value = "注册接口", notes = "")
+    @ApiOperation(value = "注册用户", notes = "")
     @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = OpTargetEnums.USER)

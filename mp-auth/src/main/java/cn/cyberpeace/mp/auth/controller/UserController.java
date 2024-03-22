@@ -42,7 +42,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
@@ -77,7 +77,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
+    @ApiOperation(value = "查询指定id用户(附带组织、角色信息)", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -89,7 +89,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiOperation(value = "查询指定id用户(返回有限数据，无登录用户权限拦截)", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -105,7 +105,7 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
-    @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiOperation(value = "查询指定ids用户列表(返回有限数据，无登录用户权限拦截)", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
     })
@@ -124,7 +124,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
+    @ApiOperation(value = "查询当前登录用户信息(附带组织，角色信息)", notes = "")
     @GetMapping("/current")
     public ServiceResult<UserBo> getCurrentUser() {
         UserBo userBo = userService.getCurrentUserDto();
@@ -132,7 +132,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiOperation(value = "新增用户(同时完成组织，角色绑定关系)", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = UserRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -143,7 +143,7 @@ public class UserController {
         return ResultCommon.success(userModel);
     }
 
-    @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiOperation(value = "修改用户(同时完成组织，角色绑定关系)", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)

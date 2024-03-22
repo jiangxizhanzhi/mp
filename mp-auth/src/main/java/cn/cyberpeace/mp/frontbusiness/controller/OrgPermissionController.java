@@ -23,7 +23,7 @@ import java.util.Set;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "组织-权限管理接口(业务)", tags = "AUTH-组织-权限管理接口(业务)")
+@Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j
 @RestController("orgPermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_permissions")
@@ -33,7 +33,7 @@ public class OrgPermissionController {
     private OrgPermissionService orgPermissionService;
 
 
-    @ApiOperation(value = "绑定组织-权限关系，注意，该操作会清除原来绑定的所有权限， 如果targetIds为空，表示删除组织所有权限！", notes = "")
+    @ApiOperation(value = "[组织权限管理] 绑定组织-权限关系(注意，该操作会清除原来绑定的所有权限， 如果targetIds为空，表示删除组织所有权限！)", notes = "")
     @ApiImplicitParam(name = "bindOrgTargetsReq", value = "绑定组织权限请求体", dataTypeClass = BindOrgTargetsRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
@@ -48,7 +48,7 @@ public class OrgPermissionController {
     }
 
 
-    @ApiOperation(value = "查询组织所有权限")
+    @ApiOperation(value = "[组织权限管理] 查询组织所有权限")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/byorg")
     public ServiceResult<Set<TargetModel>> getOrgPermissions(@RequestParam String orgId) {
@@ -57,7 +57,7 @@ public class OrgPermissionController {
     }
 
 
-    @ApiOperation(value = "查询组织所有权限（继承上级组织权限）")
+    @ApiOperation(value = "[组织权限管理] 查询组织所有权限（继承上级组织权限）")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/byorg/includeparent")
     public ServiceResult<Set<TargetModel>> getOrgPermission(@RequestParam String orgId) {

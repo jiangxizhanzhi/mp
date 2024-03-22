@@ -47,7 +47,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
+@Api(value = "用户导入导出Excel管理接口", tags = "用户管理接口")
 @Slf4j
 @Controller
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")

@@ -30,9 +30,11 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private String logo;
     @ApiModelProperty(value = "场景模板拓扑配置")
     private SceneConfigDataBO sceneConfig;
-    @ApiModelProperty(value = "场景模板测试实例")
+    @ApiModelProperty(value = "场景模板测试实例", hidden = true)
+    @Deprecated
     private List<CsceneInstanceBO> testScenes;
-    @ApiModelProperty(value = "场景模板应用实例")
+    @Deprecated
+    @ApiModelProperty(value = "场景模板应用实例", hidden = true)
     private List<CsceneInstanceBO> appScenes;
     @ApiModelProperty(value = "场景上下文属性")
     private CsceneContextBO context;

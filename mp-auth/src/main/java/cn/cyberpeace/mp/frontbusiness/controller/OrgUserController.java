@@ -29,7 +29,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "组织-用户管理接口(业务)", tags = "AUTH-组织-用户管理接口(业务)")
+@Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j
 @RestController("orgUserFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_users")
@@ -39,7 +39,7 @@ public class OrgUserController {
     private TenantUserService tenantUserService;
 
 
-    @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
+    @ApiOperation(value = "[组织用户管理] 分页查询组织下所有用户信息 （默认查询组织下所有层级子组织的用户，" +
             "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
@@ -49,7 +49,7 @@ public class OrgUserController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-    @ApiOperation(value = "根据userId列表查询用户信息", notes = "")
+    @ApiOperation(value = "[组织用户管理] 根据userId列表查询用户信息", notes = "")
     @PostMapping("/list_by_ids")
     public ServiceResult<List<UserBo>> listByUserIds(@RequestBody List<String> ids) {
         List<UserBo> list = tenantUserService.listByUserIds(ids);
@@ -57,7 +57,7 @@ public class OrgUserController {
     }
 
 
-    @ApiOperation(value = "查询组织下所有用户信息", notes = "")
+    @ApiOperation(value = "[组织用户管理] 查询组织下所有用户信息", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/list/byorg")
     public ServiceResult<List<UserModel>> getByOrg(@RequestParam String orgId) {
@@ -66,7 +66,7 @@ public class OrgUserController {
     }
 
 
-    @ApiOperation(value = "根据userId查询所在组织信息（按照层级排列）", notes = "")
+    @ApiOperation(value = "[组织用户管理] 根据userId查询所在组织信息（按照层级排列）", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/hierarchical/byuser")
     public ServiceResult listHierarchicalOrgs(@RequestParam String userId) {
@@ -75,7 +75,7 @@ public class OrgUserController {
     }
 
 
-    @ApiOperation(value = "增量绑定组织-用户关系！", notes = "")
+    @ApiOperation(value = "[组织用户管理] 增量绑定组织-用户关系！", notes = "")
     @ApiImplicitParam(name = "bindOrgUsersReq", value = "绑定请求体", dataTypeClass = BindOrgUsersRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
@@ -89,7 +89,7 @@ public class OrgUserController {
     }
 
 
-    @ApiOperation(value = "根据userId查询所有所在组织的路径 如： 一级组织/二级组织/三级组织", notes = "")
+    @ApiOperation(value = "[组织用户管理] 根据userId查询所有所在组织的路径 如： 一级组织/二级组织/三级组织", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/allorgpath/byuser")
     public ServiceResult getAllOrgPath(@RequestParam String userId) {
@@ -97,7 +97,7 @@ public class OrgUserController {
         return ResultCommon.success(allOrgPath);
     }
 
-    @ApiOperation(value = "查询组织下的用户数量", notes = "")
+    @ApiOperation(value = "[组织用户管理] 查询组织下的用户数量", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/usercnt")
     public ServiceResult<Integer> getUserCnt(@RequestParam String orgId) {

@@ -39,7 +39,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户管理接口(业务)", tags = "AUTH-用户管理接口(业务)")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController("userFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")

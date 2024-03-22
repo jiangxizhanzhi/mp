@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "角色管理接口(业务)", tags = "AUTH-角色管理接口(业务)")
+@Api(value = "角色管理接口", tags = "角色管理接口")
 @Slf4j
 @RestController("roleFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")

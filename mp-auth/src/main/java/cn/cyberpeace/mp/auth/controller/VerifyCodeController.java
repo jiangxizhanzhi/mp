@@ -24,7 +24,7 @@ import java.io.IOException;
  * @Author shgang
  * @Date 2022/12/27
  */
-@Api(value = "认证相关接口", tags = "AUTH-获取验证码接口")
+@Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/kaptcha")

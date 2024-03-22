@@ -24,7 +24,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户-权限管理接口(业务)", tags = "AUTH-用户-权限管理接口(业务)")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController("userPermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_permissions")
@@ -34,7 +34,7 @@ public class UserPermissionController {
     private UserPermissionService userPermissionService;
 
 
-    @ApiOperation(value = "根据userId查询所有权限", notes = "")
+    @ApiOperation(value = "[用户权限管理] 根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/byuser")
     public ServiceResult getTargetsByUser(String userId) {
@@ -43,7 +43,7 @@ public class UserPermissionController {
     }
 
 
-    @ApiOperation(value = "根据userId查询所有权限", notes = "")
+    @ApiOperation(value = "[用户权限管理] 根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/tree/byuser")
     public ServiceResult getTargetsTreeByUser(@RequestParam String userId) {

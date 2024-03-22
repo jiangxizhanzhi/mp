@@ -24,7 +24,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "角色-权限管理接口(业务)", tags = "AUTH-角色-权限管理接口(业务)")
+@Api(value = "角色管理接口", tags = "角色管理接口")
 @Slf4j
 @RestController("rolePermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
@@ -33,7 +33,7 @@ public class RolePermissionController {
     @Autowired
     private RolePermissionModelService rolePermissionModelService;
 
-    @ApiOperation(value = "查询角色权限", notes = "")
+    @ApiOperation(value = "[角色权限管理] 查询角色权限", notes = "")
     @ApiImplicitParam(name="roleId", value="角色ID", dataTypeClass = String.class)
     @GetMapping("/byrole")
     public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
@@ -42,7 +42,7 @@ public class RolePermissionController {
         return ResultCommon.success(targets);
     }
 
-    @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
+    @ApiOperation(value = "[角色权限管理] 绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @ApiImplicitParam(name = "bindRoleTargetsReq", value = "角色权限绑定请求", dataTypeClass = BindRoleTargetsRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {

@@ -42,7 +42,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "公告管理接口", tags = "AUTH-公告管理接口")
+@Api(value = "公告管理接口", tags = "公告管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/notice")
@@ -69,7 +69,7 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("阅读公告接口")
+    @ApiOperation("阅读公告")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
@@ -77,7 +77,7 @@ public class SysNoticeController {
         return ResultCommon.success();
     }
 
-    @ApiOperation("置顶公告接口")
+    @ApiOperation("置顶公告")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class),
             @ApiImplicitParam(name = "type", value = "公告置顶操作类型 1:置顶(默认)  0:取消置顶", dataTypeClass = Integer.class)
@@ -89,7 +89,7 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("不再推送公告消息")
+    @ApiOperation("停止推送公告消息")
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
@@ -98,14 +98,14 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("未读公告数量")
+    @ApiOperation("查询未读公告数量")
     @GetMapping("/unread_count")
     public ServiceResult<Integer> unReadCount() {
         int unreadCnt = noticeService.unReadCount();
         return ResultCommon.success(unreadCnt);
     }
 
-    @ApiOperation("分页查询所有公告")
+    @ApiOperation("查询所有公告(分页)")
     @GetMapping("/page")
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
@@ -113,7 +113,7 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("分页查询当前用户有权看到的公告（公告消息）")
+    @ApiOperation("查询当前用户有权看到的公告(分页)")
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();

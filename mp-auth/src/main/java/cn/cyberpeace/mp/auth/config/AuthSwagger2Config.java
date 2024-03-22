@@ -33,7 +33,12 @@ public class AuthSwagger2Config {
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.auth"))
+                .apis(RequestHandlerSelectors
+                              .basePackage("cn.cyberpeace.mp.auth")
+                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.frontadmin"))
+                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.frontadminbusiness"))
+                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.frontbusiness"))
+                )
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(Collections.singletonList(authParameter))

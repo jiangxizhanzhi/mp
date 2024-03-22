@@ -29,7 +29,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "认证相关接口", tags = "AUTH-认证相关接口")
+@Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/authenticate")

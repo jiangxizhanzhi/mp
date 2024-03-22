@@ -23,7 +23,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "组织管理接口(业务)", tags = "AUTH-组织管理接口(业务)")
+@Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j
 @RestController("orgFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")

@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "配置管理接口", tags = "AUTH-配置管理接口")
+@Api(value = "配置管理接口", tags = "系统配置管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/config")

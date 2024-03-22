@@ -41,7 +41,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
+@Api(value = "角色管理接口", tags = "角色管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")
@@ -80,14 +80,14 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
+    @ApiOperation(value = "查询指定id角色，附带权限集合", notes = "")
     @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
     public ObjServiceResult get(@PathVariable String id) {
         RoleBo roleBo = roleService.getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleBo);
     }
 
-    @ApiOperation("获取指定id数据")
+    @ApiOperation("获取指定id角色")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
     })
@@ -96,7 +96,7 @@ public class RoleController {
         return roleService.get(id).asResult();
     }
 
-    @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
+    @ApiOperation(value = "新增角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
