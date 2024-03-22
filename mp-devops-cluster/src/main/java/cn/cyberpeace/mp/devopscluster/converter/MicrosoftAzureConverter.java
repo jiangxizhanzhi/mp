@@ -32,17 +32,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MicrosoftAzureConverter implements BaseConverter{
 
-    @Value("${microsoft.azure.azure_tenant_id}")
-    public String azureTenantId;
+    public final String azureTenantId = "e1039762-f748-4410-a19d-eb16ba072acd";
 
-    @Value("${microsoft.azure.azure_subscription_id}")
-    public String azureSubscriptionId;
+    public final String azureSubscriptionId = "c87ba926-f7c2-4d53-8b8e-89245dc92e26";
 
-    @Value("${microsoft.azure.azure_client_id}")
-    public String azureClientId;
+    public final String azureClientId = "a8982e4d-099d-4ab0-b6c8-178f50d16fb0";
 
-    @Value("${microsoft.azure.azure_client_secret}")
-    public String azureClientSecret;
+    public final String azureClientSecret = "26V8Q~gGDhjyHIJLopU-.mws2agepHucAD~hqb7_";
 
     @Autowired
     private MicrosoftAzureMapper microsoftAzureMapper;
