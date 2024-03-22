@@ -1,0 +1,71 @@
+package cn.cyberpeace.mp.devopscluster.controller;
+
+import cn.cyberpeace.mp.auth.util.BaseResponse;
+import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
+import com.alibaba.fastjson.JSONObject;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 镜像管理
+ */
+@Slf4j
+@RestController
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/cloudTarget")
+@Api(tags = "靶标管理-云镜像管理")
+@RequiredArgsConstructor
+public class MicrosoftAzureController {
+
+    @Autowired
+    private MicrosoftAzureConverter microsoftAzureConverter;
+
+    /**
+     * 云镜像管理页面分页查询
+     */
+    @ApiOperation(value = "云镜像管理页面分页查询", notes = "")
+    @GetMapping("/list")
+    public BaseResponse getCloudTargetList(@RequestBody(required = false) JSONObject requestData) {
+        return microsoftAzureConverter.getCloudTargetList(requestData);
+    }
+
+    /**
+     * 操作系统下拉框
+     */
+    @ApiOperation(value = "操作系统下拉框", notes = "")
+    @GetMapping("/getOS")
+    public BaseResponse getOS(@RequestBody(required = false) JSONObject requestData) {
+        return microsoftAzureConverter.getOS(requestData);
+    }
+
+    /**
+     * 云镜像删除
+     */
+    @ApiOperation(value = "云镜像删除", notes = "")
+    @DeleteMapping("/delete")
+    public BaseResponse deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
+        return microsoftAzureConverter.deleteCloudTarget(requestData);
+    }
+
+    /**
+     * 云镜像编辑
+     */
+    @ApiOperation(value = "云镜像编辑", notes = "")
+    @PostMapping("/update")
+    public BaseResponse updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
+        return microsoftAzureConverter.updateCloudTarget(requestData);
+    }
+
+    /**
+     * 云镜像管理同步
+     */
+    @ApiOperation(value = "云镜像管理同步", notes = "")
+    @GetMapping("/synchronousCloudData")
+    public BaseResponse synchronousCloudData(@RequestBody(required = false) JSONObject requestData) throws Exception {
+        return microsoftAzureConverter.synchronousCloudData(requestData);
+    }
+}

@@ -5,6 +5,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualNet;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 
+/**
+ * Azure 虚拟网络创建任务
+ */
 public class AzureVirtualNetCreateTask implements Runnable {
 
     private AzureVirtualNet azureVirtualNet;

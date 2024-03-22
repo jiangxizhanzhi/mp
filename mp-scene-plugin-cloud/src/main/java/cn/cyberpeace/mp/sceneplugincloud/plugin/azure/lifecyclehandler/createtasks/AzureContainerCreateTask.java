@@ -8,6 +8,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 
 import java.util.List;
 
+/**
+ * Azure 容器创建任务
+ */
 public class AzureContainerCreateTask implements Runnable {
 
     private AzureContainer azureContainer;

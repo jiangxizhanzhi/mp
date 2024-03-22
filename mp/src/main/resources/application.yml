@@ -90,3 +90,11 @@ mp:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/reset_menu_visibility,/sys/activation/license_status,/sys/activation/status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**,/actuator/**
   frontbusiness:
     url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**
+
+
+microsoft:
+  azure:
+    azure_tenant_id: e1039762-f748-4410-a19d-eb16ba072acd
+    azure_subscription_id: c87ba926-f7c2-4d53-8b8e-89245dc92e26
+    azure_client_id: a8982e4d-099d-4ab0-b6c8-178f50d16fb0
+    azure_client_secret: 26V8Q~gGDhjyHIJLopU-.mws2agepHucAD~hqb7_

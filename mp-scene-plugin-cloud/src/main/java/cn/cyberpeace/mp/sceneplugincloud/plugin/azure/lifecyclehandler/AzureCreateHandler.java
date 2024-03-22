@@ -20,6 +20,8 @@ import java.util.List;
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
 
+    public Integer cloudType;
+
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
     }
@@ -28,6 +30,7 @@ public class AzureCreateHandler extends CreateHandler {
 
     public AzureCreateHandler(int cloudType, CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
+        this.cloudType = cloudType;
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
     }
 

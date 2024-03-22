@@ -8,6 +8,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 
 import java.util.List;
 
+/**
+ * Azure Web 应用创建任务
+ */
 public class AzureWebAppCreateTask implements Runnable {
 
     private AzureWebApp azureWebApp;

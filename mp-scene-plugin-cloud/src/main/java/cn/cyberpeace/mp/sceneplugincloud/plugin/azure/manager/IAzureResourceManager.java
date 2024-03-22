@@ -10,7 +10,7 @@ public interface IAzureResourceManager {
 
     Region getRegin();
 
-    static IAzureResourceManager getInstance(int type) {
+    public static IAzureResourceManager getInstance(int type) {
         if (BaseSceneModel.CloudType.PUBLIC == type) {
             return BeanCommon.getBean(PublicAzureResourceManager.class);
         } else if (BaseSceneModel.CloudType.PRIVATE == type) {

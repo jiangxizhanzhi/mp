@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper">
+
+    <update id="updateCloudTarget">
+        UPDATE
+            mp_devops_cloud_target
+        SET
+            <if test="param != null and param.name != null">
+                name = #{param.name},
+            </if>
+            <if test="param != null and param.logo != null">
+                logo = #{param.logo},
+            </if>
+            <if test="param != null and param.parentSystemType != null">
+                system_type = #{param.parentSystemType},
+            </if>
+            <if test="param != null and param.parentSystemStatus != null">
+                image_type = #{param.parentSystemStatus},
+            </if>
+            <if test="param != null and param.generations != null">
+                reference_status = #{param.generations},
+            </if>
+            <if test="param != null and param.sku != null">
+                support_export = #{param.sku},
+            </if>
+            <if test="param != null and param.createUser != null">
+                system_architecure = #{param.createUser},
+            </if>
+                update_time = now()
+        WHERE
+            pk = #{pk}
+    </update>
+
+    <delete id="deleteByPk">
+        DELETE
+        FROM
+            mp_devops_cloud_target
+        WHERE
+            pk = #{pk}
+    </delete>
+
+    <select id="getCloudTargetList" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
+        SELECT
+            *
+        FROM
+            mp_devops_cloud_target
+        <where>
+            <if test="param != null and param.name != null">
+                and name like concat('%', #{param.name}, '%')
+            </if>
+            <if test="param != null and param.systemType != null">
+                and system_type = #{param.systemType}
+            </if>
+        </where>
+    </select>
+
+    <select id="getOS" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            e.code as parentSystemType,
+            e.code_name
+        FROM
+            mp_sys_code_enum e
+        WHERE
+            e.parent_code = #{parentCode}
+    </select>
+
+</mapper>

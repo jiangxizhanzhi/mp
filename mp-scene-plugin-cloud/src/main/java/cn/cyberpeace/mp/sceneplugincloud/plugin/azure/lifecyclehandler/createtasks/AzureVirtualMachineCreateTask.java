@@ -8,6 +8,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 
 import java.util.List;
 
+/**
+ * Azure 虚拟机创建任务
+ */
 public class AzureVirtualMachineCreateTask implements Runnable {
 
     private AzureVirtualMachine azureVirtualMachine;

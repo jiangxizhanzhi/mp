@@ -107,6 +107,8 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+        implementation 'com.azure:azure-ai-textanalytics:5.4.3'
+        implementation 'com.azure:azure-identity:1.11.1'
     }
 
     test {
