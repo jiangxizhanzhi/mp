@@ -45,17 +45,17 @@ public class LocalSceneEventController implements SceneEventControl {
         synchronized (this) {
             int compareEvent = this.latestEvent != null ? this.latestEvent : this.event;
             int compareEventStatus = this.latestEventStatus != null ? this.latestEventStatus : this.eventStatus;
-            log.info("scene {} , try update latest event , [{},{}] , compare event [{},{}]", sceneId, event, eventStatus, compareEvent, compareEventStatus);
+            log.debug("scene {} , try update latest event , [{},{}] , compare event [{},{}]", sceneId, event, eventStatus, compareEvent, compareEventStatus);
             List<Integer> validEvents = SceneEventTransition.SCENE_EVENT_TRANSITION.getOrDefault(
                     EventTransition.genKey(compareEvent, compareEventStatus), new ArrayList<>()
             );
             if (validEvents.contains(event) && event != compareEvent) {
                 this.latestEvent = event;
                 this.latestEventStatus = eventStatus;
-                log.info("scene {} , try update latest event success", sceneId, event, eventStatus);
+                log.debug("scene {} , try update latest event success", sceneId, event, eventStatus);
                 return true;
             }
-            log.info("scene {} , try update latest event failed", sceneId, event, eventStatus);
+            log.debug("scene {} , try update latest event failed", sceneId, event, eventStatus);
             return false;
         }
     }

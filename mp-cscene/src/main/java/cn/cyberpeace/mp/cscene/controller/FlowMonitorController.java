@@ -226,7 +226,7 @@ public class FlowMonitorController {
     @ApiOperation(value = "攻击流量各类别统计(归14大类)")
     @GetMapping("/attack_type_count_group")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCountGroup(AttackTypeTopRequest baseRequest) {
-        log.info("attack_type_count_group params: {}", JsonCommon.stringify(baseRequest));
+        log.debug("attack_type_count_group params: {}", JsonCommon.stringify(baseRequest));
         if (StringUtils.isEmpty(baseRequest.getSceneId())) {
             return ResultCommon.success(new ArrayList<>());
         }

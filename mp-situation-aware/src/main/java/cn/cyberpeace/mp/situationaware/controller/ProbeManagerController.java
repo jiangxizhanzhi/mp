@@ -72,7 +72,7 @@ public class ProbeManagerController {
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
-        log.info("query probe meta request param: {}" ,pageQueryRequest);
+        log.debug("query probe meta request param: {}" ,pageQueryRequest);
         PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }

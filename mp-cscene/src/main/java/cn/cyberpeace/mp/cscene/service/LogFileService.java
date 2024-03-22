@@ -198,7 +198,7 @@ public class LogFileService {
 
 
     private List<LogFileVO> queryLogCollectFiles(String agentName, String elementId, String systemType) {
-        log.info("queryLogFile start! thread:{}, agentName:{}, elementId:{}, systemType:{}", Thread.currentThread().getName(), agentName, elementId, systemType);
+        log.debug("queryLogFile start! thread:{}, agentName:{}, elementId:{}, systemType:{}", Thread.currentThread().getName(), agentName, elementId, systemType);
         String osType = getOsType(systemType);
         List<WazuhControl.QueryLogCollectFileData> fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
         List<LogFileVO> logFileVOS = convertLogFiles(fileList, elementId, agentName, osType);
@@ -207,7 +207,7 @@ public class LogFileService {
             String path = logFileVO.getPath();
             list.add(path);
         }
-        log.info("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), list);
+        log.debug("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), list);
         return logFileVOS;
     }
 

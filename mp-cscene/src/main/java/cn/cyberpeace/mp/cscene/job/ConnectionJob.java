@@ -56,12 +56,12 @@ public class ConnectionJob {
 
     @Scheduled(cron = "*/5 * * * * ?")
     public void execute() {
-        log.info("ConnectionJob.execute begin.");
+        log.debug("ConnectionJob.execute begin.");
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(SceneModel::getDeleted, false);
         List<SceneModel> sceneModelList = sceneMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(sceneModelList)) {
-            log.info("No scene should send connection info.");
+            log.debug("No scene should send connection info.");
             return;
         }
         List<String> idList = new ArrayList<>();
@@ -78,7 +78,7 @@ public class ConnectionJob {
         humanConditionConnection.filterLessThan(CloudPluginSceneConnectionModel::getUpdateTime, LocalDateTime.now().minusSeconds(5));
         List<CloudPluginSceneConnectionModel> cloudPluginSceneConnectionModelList = CloudPluginSceneConnectionMapper.list(humanConditionConnection);
         if (CollectionUtils.isEmpty(cloudPluginSceneConnectionModelList)) {
-            log.info("CloudPluginSceneConnectionModelList is empty. No connection should been send.");
+            log.debug("CloudPluginSceneConnectionModelList is empty. No connection should been send.");
             return;
         }
         List<String> connectionIdList = new ArrayList<>();
@@ -88,7 +88,7 @@ public class ConnectionJob {
         }
         List<String> activeConnectionIdList = new Remote().activeConnection(connectionIdList);
         if (activeConnectionIdList.size() == connectionIdList.size()) {
-            log.info("List size is same. No connection should been send.");
+            log.debug("List size is same. No connection should been send.");
             return;
         }
         List<CloudPluginSceneConnectionModel> disConnectionList = new ArrayList<>();
@@ -98,7 +98,7 @@ public class ConnectionJob {
             }
         }
         if (CollectionUtils.isEmpty(disConnectionList)) {
-            log.info("No connection should been send.");
+            log.debug("No connection should been send.");
             return;
         }
         for (CloudPluginSceneConnectionModel connectionModel : disConnectionList) {
@@ -127,6 +127,6 @@ public class ConnectionJob {
                 CsceneContextHolder.resetContext();
             }
         }
-        log.info("ConnectionJob.execute end.");
+        log.debug("ConnectionJob.execute end.");
     }
 }
