@@ -45,7 +45,8 @@ import java.util.Map;
  * 综合场景处理
  */
 @Slf4j
-public class CsceneHandler extends BaseCsceneHandler<
+@Deprecated
+public class BcSceneConfigHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
         CsceneBO, CsceneMapper, CsceneRoleMapper> {
 
@@ -102,12 +103,12 @@ public class CsceneHandler extends BaseCsceneHandler<
             String instanceId = entry.getKey();
             CsceneInstanceModel csceneInstanceObj = entry.getValue();
             List<CsceneInstanceRoleModel> roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
-            CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
+            BcSceneInstanceHandler bcSceneInstanceHandler = new BcSceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
             Integer type = csceneInstanceObj.getType();
             if (type != null && type.equals(CsceneInstanceModel.Type.TEST)) {
-                testScenes.add(csceneInstanceHandler.toData());
+                testScenes.add(bcSceneInstanceHandler.toData());
             } else if (type != null && type.equals(CsceneInstanceModel.Type.APP)) {
-                appScenes.add(csceneInstanceHandler.toData());
+                appScenes.add(bcSceneInstanceHandler.toData());
             }
         }
         getCscene().setTestScenes(testScenes);
@@ -141,7 +142,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         this.checkVlanIds(getCscene());
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
         if (!updateResult.isSuccess()) {
@@ -156,15 +157,15 @@ public class CsceneHandler extends BaseCsceneHandler<
         return result;
     }
 
-    public CsceneHandler(CsceneBO csceneBO, CsceneContextBO context) {
+    public BcSceneConfigHandler(CsceneBO csceneBO, CsceneContextBO context) {
         init(csceneBO, context);
     }
 
-    public CsceneHandler(String csceneId, CsceneContextBO context) {
+    public BcSceneConfigHandler(String csceneId, CsceneContextBO context) {
         init(csceneId, context);
     }
 
-    public CsceneHandler(CsceneModel csceneObj, List<CsceneRoleModel> roleObjs, CsceneContextBO context) {
+    public BcSceneConfigHandler(CsceneModel csceneObj, List<CsceneRoleModel> roleObjs, CsceneContextBO context) {
         init(csceneObj, roleObjs, context);
     }
 
@@ -280,7 +281,7 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (withInstance) {
             reloadCsceneInstances();
             for (CsceneInstanceBO csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
-                CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+                BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
                 instanceHandler.delete(logic);
             }
         }

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.cscene.util;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -38,7 +38,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static UpdateResult addLimitedNodeCount(CsceneInstanceHandler instance) {
+    public static UpdateResult addLimitedNodeCount(BcSceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         return addLimitedNodeCount(limitedNodeCount);
     }
@@ -48,7 +48,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static void substractLimitedNodeCount(CsceneInstanceHandler instance) {
+    public static void substractLimitedNodeCount(BcSceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         substractLimitedNodeCount(limitedNodeCount);
     }
@@ -114,7 +114,7 @@ public final class NodeLimitUtils {
      * @param handler
      * @return
      */
-    private static int countVirtualElement(CsceneInstanceHandler handler) {
+    private static int countVirtualElement(BcSceneInstanceHandler handler) {
         if (handler == null || handler.getCscene() == null || handler.getCscene().getScene() == null) {
             return 0;
         }

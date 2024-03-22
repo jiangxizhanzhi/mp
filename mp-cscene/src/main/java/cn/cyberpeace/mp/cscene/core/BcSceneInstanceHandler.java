@@ -2,13 +2,10 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
-import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -32,7 +29,8 @@ import java.util.Objects;
  * 综合场景实例处理
  */
 @Slf4j
-public class CsceneInstanceHandler extends BaseCsceneHandler<
+@Deprecated
+public class BcSceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
         CsceneInstanceBO, CsceneInstanceMapper, CsceneInstanceRoleMapper> {
 
@@ -55,11 +53,11 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         CsceneContextHolder.setCsceneInstanceId(csceneId);
     }
 
-    public CsceneInstanceHandler(CsceneInstanceBO csceneBO, CsceneContextBO context) {
+    public BcSceneInstanceHandler(CsceneInstanceBO csceneBO, CsceneContextBO context) {
         init(csceneBO, context);
     }
 
-    public CsceneInstanceHandler(String csceneId, CsceneContextBO context, boolean initLazy) {
+    public BcSceneInstanceHandler(String csceneId, CsceneContextBO context, boolean initLazy) {
         if (initLazy) {
             initLazy(csceneId, context);
         } else {
@@ -67,12 +65,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
-    public CsceneInstanceHandler(String csceneId, CsceneContextBO context) {
+    public BcSceneInstanceHandler(String csceneId, CsceneContextBO context) {
         init(csceneId, context);
     }
 
-    public CsceneInstanceHandler(CsceneInstanceModel csceneObj, List<CsceneInstanceRoleModel> roleObjs,
-                                 CsceneContextBO context) {
+    public BcSceneInstanceHandler(CsceneInstanceModel csceneObj, List<CsceneInstanceRoleModel> roleObjs,
+                                  CsceneContextBO context) {
         init(csceneObj, roleObjs, context);
     }
 
@@ -166,146 +164,6 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         getCsceneMapper().save(csceneObj);
         csceneObj.setId(cscene.getId());
         cscene.fromModel(csceneObj);
-    }
-
-    public boolean pause() {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.pause(sceneId, generateSceneContext()).getSource();
-    }
-
-    public boolean unpause() {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.unpause(sceneId, generateSceneContext()).getSource();
-    }
-
-    public boolean suspend() {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.suspend(sceneId, generateSceneContext()).getSource();
-    }
-
-    public boolean resume() {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
-    }
-
-    /**
-     * @description: 启动节点
-     * @param nodeId
-     * @return boolean
-     */
-    public boolean startElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.startElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    /**
-     * @description: 关闭节点
-     * @param nodeId
-     * @throws
-     * @return boolean
-     */
-    public boolean stopElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.stopElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean pauseElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.pauseElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean unpauseElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.unpauseElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean restartElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.restartElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean createElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.createElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean recreateElement(String nodeId, String image) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.recreateElement(sceneId, nodeId, image, generateSceneContext()).getSource();
-    }
-
-    public boolean modifyElement(ElementModifyBO element) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        String nodeId = element.getUpdate().getTopology().getElements().get(0).getId();
-        return this.sceneService.modifyElement(sceneId, nodeId, element.getUpdate(), generateSceneContext()).getSource();
-    }
-
-    public boolean deleteElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.deleteElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean suspendElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.suspendElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean resumeElement(String nodeId) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.resumeElement(sceneId, nodeId, generateSceneContext()).getSource();
-    }
-
-    public boolean snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
-        String sceneId = this.getSceneId();
-        if (sceneId == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-        }
-        return this.sceneService.snapshotElementSync(sceneId, nodeId, snapshotId, snapshotName, description, generateSceneContext()).getSource();
     }
 
     public String getSceneId() {

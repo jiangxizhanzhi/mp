@@ -32,7 +32,7 @@ import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -74,6 +74,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
@@ -218,6 +219,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private SceneElementMapper sceneElementMapper;
+
+    @Resource
+    private SceneService sceneService ;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -657,7 +661,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             String instanceId = entry.getKey();
             CsceneInstanceModel instanceObj = entry.getValue();
             List<CsceneInstanceRoleModel> roleObjs = instanceRoleObjMap.getOrDefault(instanceId, new ArrayList<>());
-            CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(instanceObj, roleObjs, context);
+            BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(instanceObj, roleObjs, context);
             instanceBOs.add(instanceHandler.toData());
         }
         return new ListObjServiceResult<>(new ListObjResult<>(instanceBOs, listResult.getSource().getTotal(),
@@ -665,7 +669,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, context);
         CsceneInstanceBO data = instanceHandler.toData();
         SceneBO scene = data.getScene().getTopology().getScene();
         SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
@@ -680,7 +684,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             try {
                 // 移除定时任务
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
-                CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+                BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, context);
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
                 String sceneId = this.getSceneId(id);
                 boolean flag = instanceHandler.delete(logic);
@@ -1299,27 +1303,35 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.pause();
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.pause(sceneId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> unpause(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.unpause();
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.unpause(sceneId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> suspend(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.suspend();
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspend(sceneId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> resume(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.resume();
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resume(sceneId, context.toSceneContext());
     }
 
     /**
@@ -1330,11 +1342,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @description: 启动节点
      */
     public ServiceResult<Boolean> startElement(String id, String nodeId, CsceneContextBO context) {
-        //获取场景实例操作对象
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        //执行节点启动
-        boolean result = instanceHandler.startElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.startElement(sceneId, nodeId, context.toSceneContext());
     }
 
     /**
@@ -1343,8 +1355,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
      */
     public void unSupportedOperation(String csceneId, String nodeId) {
-        CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneId, null, true);
-        String sceneId = csceneInstanceHandler.getSceneId();
+        String sceneId = this.getSceneId(csceneId);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudPluginSceneElementBO cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
         if (cloudElement != null && cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
@@ -1360,65 +1371,89 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @description: 关闭节点
      */
     public ServiceResult<Boolean> stopElement(String id, String nodeId, CsceneContextBO context) {
-        //获取场景实例操作对象
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        //执行节点启动
-        boolean result = instanceHandler.stopElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.stopElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.pauseElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.pauseElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.unpauseElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.unpauseElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> restartElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.restartElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.restartElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> createElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.createElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.createElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> recreateElement(String id, String nodeId, String image, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.recreateElement(nodeId, image);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.recreateElement(sceneId, nodeId, image, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> modifyElement(ElementModifyBO bo, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(bo.getId(), context, true);
-        boolean result = instanceHandler.modifyElement(bo);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(bo.getId());
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        String nodeId = bo
+                .getUpdate()
+                .getTopology()
+                .getElements()
+                .get(0)
+                .getId();
+        return this.sceneService.modifyElement(sceneId, nodeId, bo.getUpdate(), context.toSceneContext());
     }
 
     public ServiceResult<Boolean> deleteElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.deleteElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.deleteElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.suspendElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspendElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> resumeElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.resumeElement(nodeId);
-        return new ServiceResult<>(result);
+        String sceneId = this.getSceneId(id);
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resumeElement(sceneId, nodeId, context.toSceneContext());
     }
 
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
@@ -1450,8 +1485,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         // 异步创建快照
         ElementTaskPool.getInstance().executeTask(() -> {
             // 打快照
-            CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-            boolean result = instanceHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
+            String sceneId = csceneInstance.getScene();
+            if (sceneId == null) {
+                throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+            }
+            boolean result = this.sceneService
+                    .snapshotElementSync(sceneId, nodeId, snapshotId, snapshotName, description, context.toSceneContext())
+                    .getSource();
 
             // 更新场景模板靶标的快照、cscene中的关联信息
             SceneInfo sceneInfo = this.getSceneInfo(id);
@@ -1580,7 +1620,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
-        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
+        BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), null);
         // 保留隐藏节点和隐藏端口
         SceneDataBO originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
@@ -1703,7 +1743,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
 
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(instance, csceneBO.getContext());
         instanceHandler.update();
         return new ServiceResult<>(instanceHandler.toData());
     }

@@ -24,7 +24,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.core.BcSceneConfigHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -389,8 +389,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             String csceneId = entry.getKey();
             CsceneModel csceneObj = entry.getValue();
             List<CsceneRoleModel> roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
-            CsceneHandler csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
-            csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
+            BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneObj, roleObjs, context);
+            csceneBOMap.put(csceneId, bcSceneConfigHandler.toData(withInstance));
         }
         // 转为Map后顺序被打乱，此时再次排序
         for (CsceneModel m : listResult.getSource().getObjs()) {
@@ -437,21 +437,23 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        CsceneHandler csceneHandler = new CsceneHandler(id, context);
-        CsceneBO cscene = csceneHandler.toData(withInstance);
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
+        CsceneBO cscene = bcSceneConfigHandler.toData(withInstance);
         cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
         return new ServiceResult<>(cscene);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
-        CsceneHandler csceneHandler = new CsceneHandler(id, context);
-        return new ServiceResult<>(csceneHandler.toData(false).export());
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
+        return new ServiceResult<>(bcSceneConfigHandler
+                                           .toData(false).export());
     }
 
     @Transactional
     public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
-        CsceneHandler csceneHandler = new CsceneHandler(id, context);
-        return sync(csceneHandler.toDataWithoutCorrectCsceneData(false).export(), context, false);
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
+        return sync(bcSceneConfigHandler
+                            .toDataWithoutCorrectCsceneData(false).export(), context, false);
     }
 
     @Transactional
@@ -479,12 +481,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         } else {
             handlerEnableRate(csceneBO);
-            CsceneHandler csceneHandler = new CsceneHandler(csceneBO, context);
+            BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
-            csceneHandler.save();
-            return new ServiceResult<>(csceneHandler.toData());
+            bcSceneConfigHandler.save();
+            return new ServiceResult<>(bcSceneConfigHandler.toData());
         }
     }
 
@@ -522,14 +524,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> syncWithoutCheckLimit(CsceneBO csceneBO, CsceneContextBO context) {
-        CsceneHandler csceneHandler = new CsceneHandler(csceneBO, context);
-        csceneHandler.save();
-        return new ServiceResult<>(csceneHandler.toData());
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneBO, context);
+        bcSceneConfigHandler.save();
+        return new ServiceResult<>(bcSceneConfigHandler.toData());
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
-        CsceneHandler csceneHandler = new CsceneHandler(id, context);
-        boolean flag = csceneHandler.delete(logic, withInstance);
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
+        boolean flag = bcSceneConfigHandler.delete(logic, withInstance);
         if (flag) {
             // 尝试该场景模板建立的快照
             CsceneSnapshotDeleteTaskPool.getInstance().executeTask(() -> {
@@ -560,16 +562,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                                                               CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, null);
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique));
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
+        return new ServiceResult<>(bcSceneConfigHandler.createTestInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                               CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, cscene);
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
+        return new ServiceResult<>(bcSceneConfigHandler.createTestInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
@@ -579,11 +581,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, createContext.getContext());
         CsceneBO cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
-            csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
+            csceneInstance = bcSceneConfigHandler
+                    .getCscene().exportToCsceneInstance();
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
@@ -604,24 +607,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, bcSceneConfigHandler.getCscene(), createContext.getName());
         }
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
+        return new ServiceResult<>(bcSceneConfigHandler.createTestInstance(unique, csceneInstance));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, null);
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createAppInstance(unique));
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
+        return new ServiceResult<>(bcSceneConfigHandler.createAppInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                              CsceneContextBO context) {
         checkSceneUsingNodeLimit(csceneId, cscene);
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createAppInstance(unique, cscene));
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
+        return new ServiceResult<>(bcSceneConfigHandler.createAppInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
@@ -631,11 +634,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        CsceneHandler csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
+        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, createContext.getContext());
         CsceneBO cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
-            csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
+            csceneInstance = bcSceneConfigHandler
+                    .getCscene().exportToCsceneInstance();
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
@@ -656,9 +660,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, bcSceneConfigHandler.getCscene(), createContext.getName());
         }
-        return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
+        return new ServiceResult<>(bcSceneConfigHandler.createAppInstance(unique, csceneInstance));
     }
 
     public ServiceResult<Boolean> updateElementImage(String id, String nodeId, String image) {
