@@ -415,9 +415,9 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
-    public void completionTopo() {
+    public void completionTopo(Set<String> existingIpSet) {
         for (var plugin : getPlugins()) {
-            plugin.completionTopo();
+            plugin.completionTopo(existingIpSet);
         }
     }
 

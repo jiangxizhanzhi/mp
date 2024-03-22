@@ -17,10 +17,9 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import io.swagger.annotations.Api;
@@ -39,9 +38,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -286,12 +284,20 @@ public class CsceneController implements BaseModelListControllerBase {
         SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
         sceneDataBO.getTopology().setScene(new SceneBO());
 
+//        因场景初始化会分配ip 先查出所有已有ip 业务处理时把分配的ip去除
+        Set<String> existingIpSet = sceneDataBO.getTopology().getElements()
+                .stream()
+                .flatMap(element -> element.getPorts().stream())
+                .map(BaseSceneElementPortBO::getIp)
+                .filter(ip -> ip != null && !ip.isBlank())
+                .collect(Collectors.toSet());
+
         // 对场景实例对象先保存再进行初始化
         // 必须先保存 否则无法进行初始化
         SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
         instanceHandler.save();
         instanceHandler.initiate();
-        instanceHandler.completionTopo();
+        instanceHandler.completionTopo(existingIpSet);
         instanceHandler.save();
 
         // 把实例转回成模板

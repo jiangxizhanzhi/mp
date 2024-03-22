@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -135,7 +136,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    public void completionTopo() {
+    public void completionTopo(Set<String> existingIpSet) {
 
     }
 
