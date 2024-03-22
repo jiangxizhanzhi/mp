@@ -13,6 +13,8 @@ import springfox.documentation.service.RequestParameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import java.util.Collections;
+
 @Configuration
 public class CommonSwagger2Config {
 
@@ -28,16 +30,18 @@ public class CommonSwagger2Config {
     private Swagger2Config swagger2Config;
 
     @Bean
-    public Docket apiCommon() {
+    public Docket apiBase() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.common"))
+                .apis(RequestHandlerSelectors
+                              .basePackage("cn.cyberpeace.mp.common")
+                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base")))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(CollectionUtil.toList(authParameter))
-                .groupName("common");
+                .globalRequestParameters(Collections.singletonList(authParameter))
+                .groupName("base");
     }
 
 }
