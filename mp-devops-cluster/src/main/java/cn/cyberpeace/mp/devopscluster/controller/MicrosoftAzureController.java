@@ -29,7 +29,15 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像管理页面分页查询", notes = "")
     @GetMapping("/list")
-    public BaseResponse getCloudTargetList(@RequestBody(required = false) JSONObject requestData) {
+    public BaseResponse getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
+                                           @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+                                           @RequestParam("name") String name,
+                                           @RequestParam("systemType") String systemType) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("name", name);
+        requestData.put("systemType", systemType);
+        requestData.put("pageNum", pageNum);
+        requestData.put("pageSize", pageSize);
         return microsoftAzureConverter.getCloudTargetList(requestData);
     }
 
@@ -38,8 +46,8 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "操作系统下拉框", notes = "")
     @GetMapping("/getOS")
-    public BaseResponse getOS(@RequestBody(required = false) JSONObject requestData) {
-        return microsoftAzureConverter.getOS(requestData);
+    public BaseResponse getOS() {
+        return microsoftAzureConverter.getOS();
     }
 
     /**

@@ -130,7 +130,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
         }
     }
 
-    public BaseResponse getOS(JSONObject requestData) {
+    public BaseResponse getOS() {
         List<JSONObject> oslist = microsoftAzureMapper.getOS(ParentCodeEnum.PARENT_SYSTEM_TYPE.getCode());
         return ResponseUtil.success(oslist);
     }
