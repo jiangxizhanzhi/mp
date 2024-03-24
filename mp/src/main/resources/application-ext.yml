@@ -41,8 +41,8 @@ mp:
   multi-scene:
     ext-var:
       manager-center-flag: ${MANAGER_CENTER_FLAG:false}
-      manager-center-ip: ${MANAGER_CENTER_IP:10.100.7.1}
-      manager-center-port: ${MANAGER_CENTER_PORT:8001}
+      manager-center-ips: ${MANAGER_CENTER_IPS:10.100.7.1}
+      manager-center-ports: ${MANAGER_CENTER_PORTS:8001}
       heartbeat-interval: ${HEARTBEAT_INTERVAL:60}
       scan-interval: ${SCAN_INTERVAL:600}
       sub-cyber-range-flag: ${SUB_CYBER_RANGE_FLAG:false}

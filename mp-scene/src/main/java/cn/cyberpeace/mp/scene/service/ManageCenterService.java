@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.MultiSceneRegisterBo;
 import cn.cyberpeace.mp.scene.model.CyberRangeRegisterModel;
 import cn.cyberpeace.mp.scene.repository.CyberRangeRegisterMapper;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class ManageCenterService {
 
     private final CyberRangeRegisterMapper cyberRangeRegisterMapper;
+    private final MultiSceneConfig multiSceneConfig;
 
     public void receiveRegisterOrHeartbeat(MultiSceneRegisterBo multiSceneRegisterBo) {
         List<CyberRangeRegisterModel> cyberRangeRegisterModelList =
@@ -45,6 +47,16 @@ public class ManageCenterService {
         } else {
             return cyberRangeRegisterModelList.stream().map(MultiSceneRegisterBo::fromModel).collect(Collectors.toList());
         }
+    }
+
+    public List<MultiSceneRegisterBo> getAllOnlineCyberRangeWithoutSelf() {
+        List<MultiSceneRegisterBo> allOnlineRange = getAllOnlineCyberRange();
+        if (CollectionUtils.isEmpty(allOnlineRange)) {
+            return Collections.emptyList();
+        } else {
+            return allOnlineRange.stream().filter(range -> !range.getRangeIp().equals(multiSceneConfig.getCyberRangeIp())).collect(Collectors.toList());
+        }
+
     }
 
     public MultiSceneRegisterBo getTargetCyberRangeBo(String rangeTag) {

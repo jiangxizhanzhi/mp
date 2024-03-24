@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -25,8 +26,10 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.event.BroadcastCloseSceneInstanceEvent;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -49,6 +52,7 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -60,6 +64,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
@@ -629,9 +634,25 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         if (ReentrantLockUtils.tryLock(id)) {
             try {
+
+
                 // 移除定时任务
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 var instanceHandler = new CsceneInstanceHandler(id, context);
+
+                if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+                        instanceHandler.getCscene().getScene().getTopology().getScene().getMultiSceneType())) {
+                    String currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();
+                    if (currentRangeTag.equals(
+                            instanceHandler.getCscene().getScene().getTopology().getScene().getSceneCreateRangeTag())) {
+                        CsceneInstanceActionRequest csceneInstanceActionRequest = new CsceneInstanceActionRequest();
+                        csceneInstanceActionRequest.setId(id);
+                        BroadcastCloseSceneInstanceEvent broadcastCloseSceneInstanceEvent = new BroadcastCloseSceneInstanceEvent(csceneInstanceActionRequest);
+                        broadcastCloseSceneInstanceEvent.publish();
+                    }
+                }
+
+
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
                 String sceneId = this.getSceneId(id);
                 var flag = instanceHandler.delete(logic);

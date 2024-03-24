@@ -24,6 +24,9 @@ public class BaseSceneModel extends BaseModel {
     private Integer multiSceneType;
     @DefaultStr
     private String manageCenterSceneId;
+    @DefaultStr
+    private String sceneCreateRangeTag;
+
 
 
     @Override
@@ -39,7 +42,7 @@ public class BaseSceneModel extends BaseModel {
 
     public static class MultiSceneType {
         public static final Integer COMMON_SCENE = 0;
-        public static final Integer SUB_CYBER_SCENE = 1;
-        public static final Integer MANAGER_CENTER_SCENE = 2;
+
+        public static final Integer MULTI_SCENE = 1;
     }
 }

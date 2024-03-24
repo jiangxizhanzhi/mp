@@ -12,7 +12,9 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
 import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
+import cn.cyberpeace.mp.cscene.dto.event.BroadCaseCreateSceneInstanceEvent;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -22,6 +24,8 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -105,19 +109,31 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         // 先保存设置id
         save();
 
-        MultiSceneConfig multiSceneConfig = BeanCommon.getBean(MultiSceneConfig.class);
-        boolean manageCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
-                        .equals(cscene.getScene().getTopology().getScene().getMultiSceneType());
-        if (manageCenterOpenFlag) {
-            //推送启动消息
-        } else if (BaseSceneModel.MultiSceneType.SUB_CYBER_SCENE.equals(cscene.getScene().getTopology().getScene().getMultiSceneType())) {
-            //分靶场启动
 
-        } else {
-            cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
-                LogFileUtil.getLogFile(cscene.getId());
-            }).getSource());
+        MultiSceneConfig multiSceneConfig = BeanCommon.getBean(MultiSceneConfig.class);
+
+        SceneDataBO sceneDataBO = cscene.getScene();
+
+
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(this.getCscene()
+                .getScene().getTopology().getScene().getMultiSceneType())) {
+
+            sceneDataBO = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, null, true).toData();
+
+            if (multiSceneConfig.getCyberRangeTag().equals(
+                    this.getCscene().getScene().getTopology().getScene().getSceneCreateRangeTag())) {
+                CsceneActionRequest csceneActionRequest = new CsceneActionRequest();
+                csceneActionRequest.setId(this.getCscene().getCscene());
+                BroadCaseCreateSceneInstanceEvent broadCaseCreateSceneInstanceEvent = new BroadCaseCreateSceneInstanceEvent(csceneActionRequest);
+                broadCaseCreateSceneInstanceEvent.publish();
+            }
         }
+
+        // 分靶场只有部分拓扑
+        cscene.setScene(sceneService.create(sceneDataBO, generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
+            LogFileUtil.getLogFile(cscene.getId());
+        }).getSource());
+
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
         cscene.fromModel(csceneObj);

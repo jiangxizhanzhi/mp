@@ -93,8 +93,8 @@ management:
 mp:
   multi-scene:
     manager-center-flag: ${mp.multi-scene.ext-var.manager-center-flag}
-    manager-center-ip: ${mp.multi-scene.ext-var.manager-center-ip}
-    manager-center-port: ${mp.multi-scene.ext-var.manager-center-port}
+    manager-center-ips: ${mp.multi-scene.ext-var.manager-center-ips}
+    manager-center-ports: ${mp.multi-scene.ext-var.manager-center-ports}
     heartbeat-interval: ${mp.multi-scene.ext-var.heartbeat-interval}
     scan-interval: ${mp.multi-scene.ext-var.scan-interval}
     sub-cyber-range-flag: ${mp.multi-scene.ext-var.sub-cyber-range-flag}

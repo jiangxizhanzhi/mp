@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
@@ -59,6 +60,7 @@ public class SceneService {
     }
 
     public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart, Runnable callback) {
+        //如果是分靶场，sceneDataBo传入的是部分拓扑
         SceneHandler sceneHandler;
         try {
             // 使用代理 提供事件流转
@@ -74,7 +76,12 @@ public class SceneService {
 
         // 在prepare中预先判断下有多少启动流程
         sceneHandler.prepare(partialStart);
+
+
+        // todo 请求vlan
         sceneHandler.save();
+
+
 
         SceneStageRecorder.registerRecoder(sceneHandler.getSceneId(), sceneHandler.getSceneStageRecorder());
         SceneTaskPool.getInstance().executeTask(() -> {
@@ -94,7 +101,14 @@ public class SceneService {
             SceneStageRecorder.removeRecorder(sceneHandler.getSceneId());
         });
 
-        return new ServiceResult<>(sceneHandler.toData());
+        //任何靶场都需要返回全拓扑
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(sceneHandler.getScene().getMultiSceneType())) {
+            SceneHandler fullSceneHandler = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, null, false);
+            return new ServiceResult<>(fullSceneHandler.toData());
+        } else {
+            return new ServiceResult<>(sceneHandler.toData());
+        }
+
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,

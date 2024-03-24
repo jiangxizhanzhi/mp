@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.cscene.controller.request;
 
+import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class CsceneInstanceActionRequest {
+public class CsceneInstanceActionRequest implements SnakeHttpData {
     @ApiModelProperty(value = "场景id")
     private String id;
     @ApiModelProperty(value = "场景上下文")

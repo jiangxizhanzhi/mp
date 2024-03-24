@@ -7,8 +7,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 
 public class BroadCaseSaveSceneEvent extends MultiSceneBaseEvent<CsceneBO, ServiceResult<CsceneBO>> {
-    public BroadCaseSaveSceneEvent(String messageType, CsceneBO message) {
-        super(messageType, message);
+    public BroadCaseSaveSceneEvent(CsceneBO message) {
+        super(MultiSceneBaseEvent.BROADCAST_SAVE_SCENE_CONFIG, message);
     }
 
     @Override

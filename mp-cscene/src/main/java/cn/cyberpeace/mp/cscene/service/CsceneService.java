@@ -17,15 +17,15 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.event.BroadCaseSaveSceneEvent;
-import cn.cyberpeace.mp.cscene.dto.event.MultiSceneBaseEvent;
+import cn.cyberpeace.mp.cscene.dto.event.BroadcastDeleteSceneConfigEvent;
 import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -87,8 +88,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private TenantUserServiceImpl tenantUserService;
 
-    @Autowired
     private UserService userService;
+
+    private MultiSceneConfig multiSceneConfig;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -437,9 +439,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             CsceneHandler csceneHandler = null;
 
-            //联管中心需要预先初始化
-            if (BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE.equals(
-                    csceneBO.getSceneConfig().getTopology().getScene().getMultiSceneType())) {
+            boolean sceneIsMultiSceneTypeFlag = BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+                    csceneBO.getSceneConfig().getTopology().getScene().getMultiSceneType());
+            boolean sceneCreatedByCurrentNode = multiSceneConfig.getCyberRangeTag().equals(csceneBO
+                    .getSceneConfig().getTopology().getScene().getSceneCreateRangeTag());
+
+            // 当前节点创建的多靶场拓扑，保存时，需要1. 预初始化 2. 同步到另外的一个靶场
+            if (sceneIsMultiSceneTypeFlag && sceneCreatedByCurrentNode) {
 
                 handlerEnableRate(csceneBO);
                 csceneHandler = new CsceneHandler(csceneBO, context);
@@ -453,37 +459,23 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 sceneConfigHandler.save();
 
                 csceneBO.setSceneConfig(sceneConfigHandler.toData());
-                csceneBO.getSceneConfig().getTopology().getScene().setMultiSceneType(BaseSceneModel.MultiSceneType.SUB_CYBER_SCENE);
                 csceneBO.setManageCenterCsceneId(csceneHandler.getCsceneId());
                 csceneBO.getSceneConfig().getTopology().getScene().setManageCenterSceneId(sceneConfigHandler.getSceneId());
 
-                BroadCaseSaveSceneEvent broadCaseSaveSceneEvent = new BroadCaseSaveSceneEvent(
-                        MultiSceneBaseEvent.BROADCAST_SAVE_SCENE_CONFIG, csceneBO);
+                BroadCaseSaveSceneEvent broadCaseSaveSceneEvent = new BroadCaseSaveSceneEvent(csceneBO);
                 broadCaseSaveSceneEvent.publish();
-            } else if (BaseSceneModel.MultiSceneType.SUB_CYBER_SCENE.equals(csceneBO.getSceneConfig().getTopology()
-                    .getScene().getMultiSceneType())) {
-                //如果存在分发下来的拓扑，就更新，不存在，直接新增
-                String manageCenterCsceneId = csceneBO.getManageCenterCsceneId();
-                String manageCenterSceneId = csceneBO.getSceneConfig().getTopology().getScene().getManageCenterSceneId();
 
-                List<CsceneModel> csceneModelList = csceneMapper.list(new HumanCondition().filterEqual(CsceneModel::getManageCenterCsceneId, manageCenterCsceneId)
-                        .filterEqual(CsceneModel::getDeleted, false));
-                if (CollectionUtils.isEmpty(csceneModelList)) {
-                    csceneBO.setId(TextUtils.uuid());
-                    csceneBO.getSceneConfig().getTopology().getScene().setEid(TextUtils.uuid());
-
-                    csceneHandler = new CsceneHandler(csceneBO, context);
-                    csceneHandler.save();
-                } else if (csceneModelList.size() > 1) {
-                    throw new MpRuntimeException(String.format("多靶场方案%s下发异常，该分靶场有多份对应的拓扑", csceneBO.getManageCenterCsceneId()));
-                } else {
-                    csceneHandler = new CsceneHandler(csceneModelList.get(0).getId(), null);
-                    csceneHandler.updateSubRangeTopo(csceneBO);
-                }
+                //多靶场，
+            } else {
+                handlerEnableRate(csceneBO);
+                csceneHandler = new CsceneHandler(csceneBO, context);
+                // 以前没有 cscene.name , 目前都和 scene.name 保持一致
+                String sceneName = getSceneName(csceneBO.getSceneConfig());
+                csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
+                csceneHandler.save();
             }
-            assert csceneHandler != null;
             return new ServiceResult<>(csceneHandler.toData());
-        }
+        }//
     }
 
     private void handlerEnableRate(CsceneBO csceneBO) {
@@ -526,7 +518,22 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
+
+
         var csceneHandler = new CsceneHandler(id, context);
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+                csceneHandler.getCscene().getSceneConfig().getTopology().getScene().getMultiSceneType())) {
+            String currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();
+            if (currentRangeTag.equals(
+                    csceneHandler.getCscene().getSceneConfig().getTopology().getScene().getSceneCreateRangeTag())) {
+                CsceneActionRequest csceneActionRequest = new CsceneActionRequest();
+                csceneActionRequest.setId(id);
+                BroadcastDeleteSceneConfigEvent broadcastDeleteSceneConfigEvent = new BroadcastDeleteSceneConfigEvent(csceneActionRequest);
+                broadcastDeleteSceneConfigEvent.publish();
+            }
+        }
+
+
         var flag = csceneHandler.delete(logic, withInstance);
         if (flag) {
             // 尝试该场景模板建立的快照

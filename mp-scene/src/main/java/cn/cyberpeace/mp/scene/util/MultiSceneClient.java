@@ -46,6 +46,13 @@ public class MultiSceneClient {
 
     }
 
+    public <T extends SnakeHttpData, R, P extends SnakeHttpParam> R commonSnakeDelete(String url, T httpData, P httpParam, TypeReference<R> typeReference) {
+        return httpClient.delete(url, httpData, httpParam, null, TIMEOUT_TIME)
+                .snakeGetResultBean(typeReference);
+
+    }
+
+
 
 
 }

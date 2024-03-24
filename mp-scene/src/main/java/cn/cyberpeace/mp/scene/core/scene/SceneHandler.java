@@ -203,6 +203,12 @@ public class SceneHandler extends BaseSceneHandler<
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context, boolean multiSceneFlag) {
+        init(sceneId, areaId, isAreaMode, context, multiSceneFlag);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
+
+    }
+
     public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
         init(sceneId, areaId, isAreaMode, context);
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
