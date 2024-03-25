@@ -40,13 +40,13 @@ mp:
       export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
   multi-scene:
     ext-var:
-      manager-center-flag: ${MANAGER_CENTER_FLAG:false}
-      manager-center-ips: ${MANAGER_CENTER_IPS:10.100.7.1}
-      manager-center-ports: ${MANAGER_CENTER_PORTS:8001}
+      manager-center-flag: ${MANAGER_CENTER_FLAG:true}
+      manager-center-ips: ${MANAGER_CENTER_IPS:http://10.100.7.1,http://10.4.1.37}
+      manager-center-ports: ${MANAGER_CENTER_PORTS:8001,8001}
       heartbeat-interval: ${HEARTBEAT_INTERVAL:60}
       scan-interval: ${SCAN_INTERVAL:600}
-      sub-cyber-range-flag: ${SUB_CYBER_RANGE_FLAG:false}
-      cyber-range-tag: ${CYBER_RANGE_TAG:ACC}
+      sub-cyber-range-flag: ${SUB_CYBER_RANGE_FLAG:true}
+      cyber-range-tag: ${CYBER_RANGE_TAG:BBB}
       cyber-range-ip: ${MP_API_IP:10.100.7.1}
       cyber-range-port: ${MP_API_PORT:8001}
       vlanIds: ${VLAN_IDS:1111,1112,1113,1114,1115}
@@ -161,7 +161,7 @@ mp:
       authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
       authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
       authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-      authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
+      authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
       authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   sceneplugingns3:
     ext-var:

@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 public class MultiSceneConfig {
 
     @Getter
-    @Value("${mp.multi-scene.manager-center-flag:false}")
+    @Value("${mp.multi-scene.manager-center-flag:true}")
     private boolean managerCenterFlag;
 
     @Getter
-    @Value("${mp.multi-scene.manager-center-ips:10.100.7.1}")
+    @Value("${mp.multi-scene.manager-center-ips:http://10.100.7.1,http://10.4.1.37}")
     private String managerCenterIps;
 
     @Getter
-    @Value("${mp.multi-scene.manager-center-ports:8001}")
+    @Value("${mp.multi-scene.manager-center-ports:8001,8001}")
     private String managerCenterPorts;
 
     @Getter
@@ -37,24 +37,24 @@ public class MultiSceneConfig {
     private long scanInterval;
 
     @Getter
-    @Value("${mp.multi-scene.sub-cyber-range-flag}")
+    @Value("${mp.multi-scene.sub-cyber-range-flag:true}")
     private boolean subCyberRangeFlag;
 
     @Getter
-    @Value("${mp.multi-scene.cyber-range-tag}")
+    @Value("${mp.multi-scene.cyber-range-tag:BBB}")
     private String cyberRangeTag;
 
     @Getter
-    @Value("${mp.multi-scene.cyber-range-ip}")
+    @Value("${mp.multi-scene.cyber-range-ip:10.100.7.1}")
     private String cyberRangeIp;
 
 
     @Getter
-    @Value("${mp.multi-scene.cyber-range-port}")
+    @Value("${mp.multi-scene.cyber-range-port:8001}")
     private String cyberRangePort;
 
     @Getter
-    @Value("${mp.multi-scene.vlanIds}")
+    @Value("${mp.multi-scene.vlanIds:1034,1035,1036}")
     private String vlanIds;
 
     private List<String> manageServers;

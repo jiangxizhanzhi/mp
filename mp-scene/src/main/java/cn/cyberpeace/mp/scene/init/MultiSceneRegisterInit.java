@@ -35,14 +35,14 @@ public class MultiSceneRegisterInit implements ApplicationRunner {
         if (multiSceneConfig.isManagerCenterFlag()) {
             if (multiSceneConfig.getScanInterval() > multiSceneConfig.getHeartbeatInterval()) {
                 SCAN_EXECUTOR.scheduleWithFixedDelay(() -> manageCenterService.scanNotHeartBeatCyberRange(multiSceneConfig.getScanInterval()),
-                        multiSceneConfig.getHeartbeatInterval(), multiSceneConfig.getScanInterval(), TimeUnit.MILLISECONDS);
+                        multiSceneConfig.getHeartbeatInterval(), multiSceneConfig.getScanInterval(), TimeUnit.SECONDS);
             }
         }
 
         if (multiSceneConfig.isSubCyberRangeFlag()) {
             if (multiSceneConfig.getHeartbeatInterval() > 0) {
                 REGISTER_EXECUTOR.scheduleWithFixedDelay(cyberRangeHeartbeatService::registerCurrentRange,
-                        1000L, multiSceneConfig.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
+                        1L, multiSceneConfig.getHeartbeatInterval(), TimeUnit.SECONDS);
 
             }
         }

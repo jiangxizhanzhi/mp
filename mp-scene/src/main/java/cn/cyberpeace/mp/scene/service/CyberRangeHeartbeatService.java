@@ -20,16 +20,19 @@ public class CyberRangeHeartbeatService {
     }
 
     public void registerCurrentRange() {
-        if (multiSceneConfig.isSubCyberRangeFlag()) {
-            multiSceneConfig.getManageCenterServerArray().forEach(manageServer -> {
+        try {
+            if (multiSceneConfig.isSubCyberRangeFlag()) {
+                multiSceneConfig.getManageCenterServerArray().forEach(manageServer -> {
 
-                MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
-                multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());
-                multiSceneRegisterBo.setRangePort(multiSceneConfig.getCyberRangePort());
-                multiSceneRegisterBo.setRangeTag(multiSceneConfig.getCyberRangeTag());
-                multiSceneClient.registerAndHeartbeat(manageServer, multiSceneRegisterBo);
-            });
-
+                    MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
+                    multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());
+                    multiSceneRegisterBo.setRangePort(multiSceneConfig.getCyberRangePort());
+                    multiSceneRegisterBo.setRangeTag(multiSceneConfig.getCyberRangeTag());
+                    multiSceneClient.registerAndHeartbeat(manageServer, multiSceneRegisterBo);
+                });
+            }
+        } catch (Exception e) {
+            log.error(String.format("心跳失败: %s", e.getMessage()), e);
         }
     }
 }
