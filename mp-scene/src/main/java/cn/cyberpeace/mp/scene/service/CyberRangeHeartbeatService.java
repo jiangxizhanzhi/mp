@@ -22,6 +22,7 @@ public class CyberRangeHeartbeatService {
     public void registerCurrentRange() {
         try {
             if (multiSceneConfig.isSubCyberRangeFlag()) {
+                log.info("开始发送心跳");
                 multiSceneConfig.getManageCenterServerArray().forEach(manageServer -> {
                     MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
                     multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());

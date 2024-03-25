@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.init;
 import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.service.CyberRangeHeartbeatService;
 import cn.cyberpeace.mp.scene.service.ManageCenterService;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -27,8 +28,9 @@ public class MultiSceneRegisterInit implements ApplicationRunner {
     private final CyberRangeHeartbeatService cyberRangeHeartbeatService;
     private final ManageCenterService manageCenterService;
 
-    private static final ScheduledThreadPoolExecutor REGISTER_EXECUTOR = new ScheduledThreadPoolExecutor(1);
-    private static final ScheduledThreadPoolExecutor SCAN_EXECUTOR = new ScheduledThreadPoolExecutor(1);
+    private static final ScheduledThreadPoolExecutor REGISTER_EXECUTOR = new ScheduledThreadPoolExecutor(2, new ThreadFactoryBuilder().setNameFormat("scheduled-register-pool-%d").build());
+    private static final ScheduledThreadPoolExecutor SCAN_EXECUTOR = new ScheduledThreadPoolExecutor(2,
+            new ThreadFactoryBuilder().setNameFormat("scheduled-scan-pool-%d").build());
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -41,6 +43,7 @@ public class MultiSceneRegisterInit implements ApplicationRunner {
 
         if (multiSceneConfig.isSubCyberRangeFlag()) {
             if (multiSceneConfig.getHeartbeatInterval() > 0) {
+                log.info("提交心跳任务");
                 REGISTER_EXECUTOR.scheduleWithFixedDelay(cyberRangeHeartbeatService::registerCurrentRange,
                         1L, multiSceneConfig.getHeartbeatInterval(), TimeUnit.SECONDS);
 
