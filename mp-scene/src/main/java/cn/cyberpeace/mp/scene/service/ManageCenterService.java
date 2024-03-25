@@ -26,7 +26,7 @@ public class ManageCenterService {
 
     public void receiveRegisterOrHeartbeat(MultiSceneRegisterBo multiSceneRegisterBo) {
         List<CyberRangeRegisterModel> cyberRangeRegisterModelList =
-                cyberRangeRegisterMapper.list(new HumanCondition().filterEqual(CyberRangeRegisterModel::getRangeTag, multiSceneRegisterBo));
+                cyberRangeRegisterMapper.list(new HumanCondition().filterEqual(CyberRangeRegisterModel::getRangeTag, multiSceneRegisterBo.getRangeTag()));
 
         if (CollectionUtils.isEmpty(cyberRangeRegisterModelList)) {
             cyberRangeRegisterMapper.create(multiSceneRegisterBo.toModel());
