@@ -53,6 +53,9 @@
                 and system_type = #{param.systemType}
             </if>
         </where>
+        <if test="param != null and param.offset != null and param.pageSize != null">
+            limit #{param.offset}, #{param.pageSize}
+        </if>
     </select>
 
     <select id="getOS" resultType="com.alibaba.fastjson.JSONObject">

@@ -4,8 +4,12 @@ import cn.cyberpeace.mp.auth.util.BaseResponse;
 import cn.cyberpeace.mp.auth.util.BaseStatusEnum;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.auth.util.ResponseUtil;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
+import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
@@ -47,19 +51,29 @@ public class MicrosoftAzureConverter implements BaseConverter{
     @Autowired
     private MicrosoftAzureMapper microsoftAzureMapper;
 
-    public BaseResponse getCloudTargetList(JSONObject requestData) {
+    /**
+     * 云镜像管理页面分页查询
+     */
+    public ListObjServiceResult getCloudTargetList(JSONObject requestData) {
         Integer pageNum = requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
         Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
-        PageHelper.startPage(pageNum,pageSize);
+        requestData.put("offset", (pageNum - 1) * pageSize);
         List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetList(requestData);
-        PageInfo<DeviceCloudTargetPO> pageInfo = new PageInfo<>(list);
-        return ResponseUtil.success(pageInfo);
+        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+    }
+
+    /**
+     * 操作系统下拉框
+     */
+    public ListObjServiceResult getOS() {
+        List<JSONObject> oslist = microsoftAzureMapper.getOS(ParentCodeEnum.PARENT_SYSTEM_TYPE.getCode());
+        return new ListObjServiceResult<>(new ListObjResult<>(oslist, oslist.size()));
     }
 
     /**
      * 云镜像管理同步
      */
-    public BaseResponse synchronousCloudData(JSONObject requestData) throws Exception {
+    public ListObjServiceResult synchronousCloudData(JSONObject requestData) throws Exception {
 
         // 获取资源管理器
         var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
@@ -96,60 +110,51 @@ public class MicrosoftAzureConverter implements BaseConverter{
 //        System.out.println("Response Body: " + response.body());
 //
 //        //处理返回结果
-
-        return ResponseUtil.success();
+        return new ListObjServiceResult<>(null, BaseErrorCode.SUCCESS, BaseErrorCode.SUCCESS.getMessage());
     }
 
     /**
      * 云镜像删除
      */
-    public BaseResponse deleteCloudTarget(JSONObject requestData) {
+    public ListObjServiceResult deleteCloudTarget(JSONObject requestData) {
         if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString());
             if(pk>0){
-                return ResponseUtil.success();
-            }else if(pk == 0){
-                //影响行数为0
-                return ResponseUtil.error(BaseStatusEnum.RECORD_NOT_FOUND.getCode(),BaseStatusEnum.RECORD_NOT_FOUND.getMessage());
+                return new ListObjServiceResult<>();
             }else{
-                return ResponseUtil.error(BaseStatusEnum.DB_OPERATE_ERROR.getCode(),BaseStatusEnum.DB_OPERATE_ERROR.getMessage());
+                //影响行数为0
+                return new ListObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST, BaseErrorCode.DATA_NOT_EXIST.getMessage());
             }
         }else{
-            return ResponseUtil.error(BaseStatusEnum.PARAMETER_IS_NULL.getCode(),BaseStatusEnum.PARAMETER_IS_NULL.getMessage());
+            return new ListObjServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, BaseErrorCode.PARAMS_INVALID.getMessage());
         }
     }
 
-    public BaseResponse updateCloudTarget(JSONObject requestData) {
+    public ListObjServiceResult updateCloudTarget(JSONObject requestData) {
         if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.updateCloudTarget(requestData.get("pk").toString(),requestData);
             if(pk>0){
-                return ResponseUtil.success();
-            }else if(pk == 0){
-                //影响行数为0
-                return ResponseUtil.error(BaseStatusEnum.RECORD_NOT_FOUND.getCode(),BaseStatusEnum.RECORD_NOT_FOUND.getMessage());
+                return new ListObjServiceResult<>();
             }else{
-                return ResponseUtil.error(BaseStatusEnum.DB_OPERATE_ERROR.getCode(),BaseStatusEnum.DB_OPERATE_ERROR.getMessage());
+                //影响行数为0
+                return new ListObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST, BaseErrorCode.DATA_NOT_EXIST.getMessage());
             }
         }else{
-            return ResponseUtil.error(BaseStatusEnum.PARAMETER_IS_NULL.getCode(),BaseStatusEnum.PARAMETER_IS_NULL.getMessage());
+            return new ListObjServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, BaseErrorCode.PARAMS_INVALID.getMessage());
         }
     }
 
-    public BaseResponse getOS() {
-        List<JSONObject> oslist = microsoftAzureMapper.getOS(ParentCodeEnum.PARENT_SYSTEM_TYPE.getCode());
-        return ResponseUtil.success(oslist);
-    }
-
-    public BaseResponse getCloudTargetByPk(JSONObject requestData) {
+    public ListObjServiceResult getCloudTargetByPk(JSONObject requestData) {
         if(requestData != null && requestData.get("pk") != null){
-            DeviceCloudTargetPO data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
-            if(data != null){
-                return ResponseUtil.success(data);
+            List<DeviceCloudTargetPO> data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
+            if(data != null && data.size()>0){
+                return new ListObjServiceResult<>(new ListObjResult<>(data, data.size()));
             }else{
-                return ResponseUtil.error(BaseStatusEnum.DB_OPERATE_ERROR.getCode(),BaseStatusEnum.RECORD_NOT_FOUND.getMessage());
+                //影响行数为0
+                return new ListObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST, BaseErrorCode.DATA_NOT_EXIST.getMessage());
             }
         }else{
-            return ResponseUtil.error(BaseStatusEnum.PARAMETER_IS_NULL.getCode(),BaseStatusEnum.PARAMETER_IS_NULL.getMessage());
+            return new ListObjServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, BaseErrorCode.PARAMS_INVALID.getMessage());
         }
     }
 }

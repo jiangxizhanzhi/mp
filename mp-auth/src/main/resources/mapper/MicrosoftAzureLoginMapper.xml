@@ -12,6 +12,9 @@
                 and cloud_type = #{param.cloudType}
             </if>
         </where>
+        <if test="param != null and param.offset != null and param.pageSize != null">
+            limit #{param.offset}, #{param.pageSize}
+        </if>
     </select>
 
 </mapper>
