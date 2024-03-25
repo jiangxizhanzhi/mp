@@ -7,6 +7,11 @@
             *
         FROM
             mp_auth_cloud_user
+        <where>
+            <if test="param != null and param.cloudType != null and param.cloudType != ''">
+                and cloud_type = #{param.cloudType}
+            </if>
+        </where>
     </select>
 
 </mapper>

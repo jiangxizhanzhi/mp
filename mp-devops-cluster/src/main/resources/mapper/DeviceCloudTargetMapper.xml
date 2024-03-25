@@ -65,4 +65,13 @@
             e.parent_code = #{parentCode}
     </select>
 
+    <select id="getCloudTargetByPk" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
+        SELECT
+            *
+        FROM
+            mp_devops_cloud_target
+        WHERE
+            pk = #{pk}
+    </select>
+
 </mapper>

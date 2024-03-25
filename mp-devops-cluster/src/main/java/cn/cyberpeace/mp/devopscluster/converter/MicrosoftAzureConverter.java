@@ -63,6 +63,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
 
         // 获取资源管理器
         var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
+
         // todo 看云镜像到时是放在云服务本身提供的服务里还是自己部署服务
 
 //        HttpClient httpClient = HttpClient.newHttpClient();
@@ -103,7 +104,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
      * 云镜像删除
      */
     public BaseResponse deleteCloudTarget(JSONObject requestData) {
-        if(requestData.get("pk") != null){
+        if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString());
             if(pk>0){
                 return ResponseUtil.success();
@@ -119,7 +120,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
     }
 
     public BaseResponse updateCloudTarget(JSONObject requestData) {
-        if(requestData.get("pk") != null){
+        if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.updateCloudTarget(requestData.get("pk").toString(),requestData);
             if(pk>0){
                 return ResponseUtil.success();
@@ -137,5 +138,18 @@ public class MicrosoftAzureConverter implements BaseConverter{
     public BaseResponse getOS() {
         List<JSONObject> oslist = microsoftAzureMapper.getOS(ParentCodeEnum.PARENT_SYSTEM_TYPE.getCode());
         return ResponseUtil.success(oslist);
+    }
+
+    public BaseResponse getCloudTargetByPk(JSONObject requestData) {
+        if(requestData != null && requestData.get("pk") != null){
+            DeviceCloudTargetPO data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
+            if(data != null){
+                return ResponseUtil.success(data);
+            }else{
+                return ResponseUtil.error(BaseStatusEnum.DB_OPERATE_ERROR.getCode(),BaseStatusEnum.RECORD_NOT_FOUND.getMessage());
+            }
+        }else{
+            return ResponseUtil.error(BaseStatusEnum.PARAMETER_IS_NULL.getCode(),BaseStatusEnum.PARAMETER_IS_NULL.getMessage());
+        }
     }
 }

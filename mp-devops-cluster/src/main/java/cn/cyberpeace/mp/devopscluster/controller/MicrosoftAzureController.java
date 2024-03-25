@@ -31,8 +31,8 @@ public class MicrosoftAzureController {
     @GetMapping("/list")
     public BaseResponse getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                            @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
-                                           @RequestParam("name") String name,
-                                           @RequestParam("systemType") String systemType) {
+                                           @RequestParam(value = "name", required = false) String name,
+                                           @RequestParam(value = "systemType", required = false) String systemType) {
         JSONObject requestData = new JSONObject();
         requestData.put("name", name);
         requestData.put("systemType", systemType);
@@ -57,6 +57,14 @@ public class MicrosoftAzureController {
     @DeleteMapping("/delete")
     public BaseResponse deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
         return microsoftAzureConverter.deleteCloudTarget(requestData);
+    }
+
+    @ApiOperation(value = "云镜像管理页面pk查询", notes = "")
+    @GetMapping("/getByPk")
+    public BaseResponse getCloudTargetByPk(@RequestParam(value = "pk", required = false) String pk) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("pk", pk);
+        return microsoftAzureConverter.getCloudTargetByPk(requestData);
     }
 
     /**

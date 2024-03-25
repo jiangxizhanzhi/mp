@@ -21,25 +21,30 @@ import java.util.Objects;
 @Table("mp_auth_cloud_user")
 public class MicrosoftAzureUserModel extends BaseModel {
 
-    @ApiModelProperty(value = "租户")
-    @DefaultStr(AuthConstant.DEFAULT_TENANT)
-    private String tenant;
+    @ApiModelProperty(value = "主键")
+    private Integer pk;
 
-    @ApiModelProperty(value = "所属组织")
-    @DefaultStr("default")
-    private String org;
+    @ApiModelProperty(value = "id")
+    private String id;
 
-    @ApiModelProperty(value = "编号")
-    private String identifier;
+    @ApiModelProperty(value = "云类型")
+    private Integer cloudType;
 
-    @ApiModelProperty(value = "名称")
-    private String name;
+    @ApiModelProperty(value = "tenant_id")
+    private String azure_tenant_id;
 
-    @ApiModelProperty(value = "描述")
-    @DefaultStr
-    private String description;
+    @ApiModelProperty(value = "subscription_id")
+    private String azure_subscription_id;
 
-    @ApiModelProperty(value = "可见性 1：可见 0：不可见")
-    @DefaultInt(1)
-    private Integer visible;
+    @ApiModelProperty(value = "client_id")
+    private String azure_client_id;
+
+    @ApiModelProperty(value = "client_secret")
+    private String azure_client_secret;
+
+    @ApiModelProperty(value = "创建人")
+    private String creator;
+
+    @ApiModelProperty(value = "版本号")
+    private Integer vision;
 }
