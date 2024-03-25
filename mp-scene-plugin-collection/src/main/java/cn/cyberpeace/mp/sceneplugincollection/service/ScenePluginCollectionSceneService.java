@@ -2084,6 +2084,21 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 异步清理场景关闭后无用的es索引，释放存储资源
+     * @param sceneId
+     */
+    public void cleanUselessESData(String sceneId) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
+        //删除流量采集索引
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isNotEmpty(flowCollectors)) {
+            for (String indexPrefix : flowCollectors) {
+                flowAnalysisService.clearUselessArkimeESIndex(indexPrefix);
+            }
+        }
+    }
+
+    /**
      * 根据规则类型获取规则id2file map
      *
      * @param types 类型集合

@@ -1020,4 +1020,37 @@ public class FlowAnalysisService extends AbstractBaseService {
         return getIndexResponse.getIndices();
     }
 
+    public void clearUselessArkimeESIndex(String prefix) {
+        try {
+            GetIndexRequest request = new GetIndexRequest(prefix + "*");
+            request.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+            GetIndexResponse res = restHighLevelClient
+                    .indices()
+                    .get(request, RequestOptions.DEFAULT);
+            String[] allIndex = res.getIndices();
+            if (allIndex == null || allIndex.length == 0) {
+                return;
+            }
+
+            List<String> indexToDelete = new ArrayList<>();
+            for (String index : allIndex) {
+                if (!index.contains("session")) {
+                    indexToDelete.add(index);
+                }
+            }
+            if (indexToDelete.isEmpty()) {
+                return;
+            }
+
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
+            deleteIndexRequest.indices(indexToDelete.toArray(new String[]{}));
+            deleteIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+            restHighLevelClient
+                    .indices()
+                    .delete(deleteIndexRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.error("delete arkime es index error , prefix : {} , error : {}", prefix, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
 }
