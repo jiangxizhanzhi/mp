@@ -101,6 +101,7 @@ mp:
     cyber-range-tag: ${mp.multi-scene.ext-var.cyber-range-tag}
     cyber-range-ip: ${mp.multi-scene.ext-var.cyber-range-ip}
     cyber-range-port: ${mp.multi-scene.ext-var.cyber-range-port}
+    vlanIds: ${mp.multi-scene.ext-var.vlanIds}
   common: #公用配置
   #    ext-var:
   #      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址

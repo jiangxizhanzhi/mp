@@ -879,7 +879,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<PortVlanRequest> getPortVlan(@RequestBody PortVlanRequest portVlanRequest) throws IOException {
         synchronized (this) {
 
-            List<Integer> vlanResourceList = multiSceneConfig.getVlanIdList();
+            List<Integer> vlanResourceList = multiSceneConfig.getAllVlanResources();
 
             List<ConnectPortRecord> existConnectPortRecords = new ArrayList<>();
             if (Files.exists(Path.of(VLAN_FILE_PATH))) {

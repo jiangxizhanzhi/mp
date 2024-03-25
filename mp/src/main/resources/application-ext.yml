@@ -49,6 +49,7 @@ mp:
       cyber-range-tag: ${CYBER_RANGE_TAG:ACC}
       cyber-range-ip: ${MP_API_IP:10.100.7.1}
       cyber-range-port: ${MP_API_PORT:8001}
+      vlanIds: ${VLAN_IDS:1111,1112,1113,1114,1115}
   cscene:
     ext-var:
       has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}

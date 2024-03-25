@@ -439,7 +439,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             CsceneHandler csceneHandler = null;
 
-            boolean sceneIsMultiSceneTypeFlag = BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+            boolean sceneIsMultiSceneTypeFlag = BaseSceneModel.MultiSceneType.MULTI_SCENE ==(
                     csceneBO.getSceneConfig().getTopology().getScene().getMultiSceneType());
             boolean sceneCreatedByCurrentNode = multiSceneConfig.getCyberRangeTag().equals(csceneBO
                     .getSceneConfig().getTopology().getScene().getSceneCreateRangeTag());
@@ -462,7 +462,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 BroadCaseSaveSceneEvent broadCaseSaveSceneEvent = new BroadCaseSaveSceneEvent(csceneBO);
                 broadCaseSaveSceneEvent.publish();
 
-                //多靶场，
             } else {
                 handlerEnableRate(csceneBO);
                 csceneHandler = new CsceneHandler(csceneBO, context);
@@ -472,7 +471,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 csceneHandler.save();
             }
             return new ServiceResult<>(csceneHandler.toData());
-        }//
+        }
     }
 
     private void handlerEnableRate(CsceneBO csceneBO) {
@@ -518,7 +517,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
 
         var csceneHandler = new CsceneHandler(id, context);
-        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE == (
                 csceneHandler.getCscene().getSceneConfig().getTopology().getScene().getMultiSceneType())) {
             String currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();
             if (currentRangeTag.equals(

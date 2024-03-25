@@ -115,7 +115,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         SceneDataBO sceneDataBO = cscene.getScene();
 
 
-        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(this.getCscene()
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE == (this.getCscene()
                 .getScene().getTopology().getScene().getMultiSceneType())) {
 
             sceneDataBO = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, null, true).toData();

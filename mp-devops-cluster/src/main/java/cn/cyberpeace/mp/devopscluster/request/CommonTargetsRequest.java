@@ -25,7 +25,7 @@ public class CommonTargetsRequest {
 
     public MultiSceneCommonTargetsQueryParams multiSceneCommonTargetsQueryParams() {
         MultiSceneCommonTargetsQueryParams multiSceneCommonTargetsQueryParams = new MultiSceneCommonTargetsQueryParams();
-        multiSceneCommonTargetsQueryParams.setMultiSceneType(BaseSceneModel.MultiSceneType.SUB_CYBER_SCENE);
+        multiSceneCommonTargetsQueryParams.setMultiSceneType(BaseSceneModel.MultiSceneType.COMMON_SCENE);
         multiSceneCommonTargetsQueryParams.setRole(this.getRole());
         multiSceneCommonTargetsQueryParams.setImageType(this.getImageType());
         return multiSceneCommonTargetsQueryParams;

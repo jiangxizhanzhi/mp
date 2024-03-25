@@ -39,8 +39,8 @@ public class BaseSceneModel extends BaseModel {
     }
 
     public static class MultiSceneType {
-        public static final Integer COMMON_SCENE = 0;
+        public static final int COMMON_SCENE = 0;
 
-        public static final Integer MULTI_SCENE = 1;
+        public static final int MULTI_SCENE = 1;
     }
 }

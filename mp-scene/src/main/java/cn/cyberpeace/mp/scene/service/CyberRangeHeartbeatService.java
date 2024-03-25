@@ -21,13 +21,15 @@ public class CyberRangeHeartbeatService {
 
     public void registerCurrentRange() {
         if (multiSceneConfig.isSubCyberRangeFlag()) {
-            String server = String.format("%s:%s", multiSceneConfig.getManagerCenterIp(), multiSceneConfig.getManagerCenterPort());
+            multiSceneConfig.getManageCenterServerArray().forEach(manageServer -> {
 
-            MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
-            multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());
-            multiSceneRegisterBo.setRangePort(multiSceneConfig.getCyberRangePort());
-            multiSceneRegisterBo.setRangeTag(multiSceneConfig.getCyberRangeTag());
-            multiSceneClient.registerAndHeartbeat(server, multiSceneRegisterBo);
+                MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
+                multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());
+                multiSceneRegisterBo.setRangePort(multiSceneConfig.getCyberRangePort());
+                multiSceneRegisterBo.setRangeTag(multiSceneConfig.getCyberRangeTag());
+                multiSceneClient.registerAndHeartbeat(manageServer, multiSceneRegisterBo);
+            });
+
         }
     }
 }

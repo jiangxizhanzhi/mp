@@ -164,7 +164,7 @@ public class DevopsTargetController {
     @GetMapping("/listAll")
     public ServiceResult<ListResult<Device>> listAll(TargetSceneRequest request){
         boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MULTI_SCENE
-                .equals(request.getMultiSceneType()));
+                == (request.getMultiSceneType()));
         List<Device> deviceList = new ArrayList<>();
 
         if (managerCenterOpenFlag) {
@@ -312,7 +312,7 @@ public class DevopsTargetController {
     @GetMapping("/common-targets")
     public ServiceResult<ListResult<DeviceVO>> getCommonTargets(CommonTargetsRequest request){
         boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MULTI_SCENE
-                .equals(request.getMultiSceneType()));
+                 == (request.getMultiSceneType()));
 
         List<DeviceVO> deviceVOList;
 

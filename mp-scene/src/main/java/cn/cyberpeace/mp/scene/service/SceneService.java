@@ -102,7 +102,7 @@ public class SceneService {
         });
 
         //任何靶场都需要返回全拓扑
-        if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(sceneHandler.getScene().getMultiSceneType())) {
+        if (BaseSceneModel.MultiSceneType.MULTI_SCENE == (sceneHandler.getScene().getMultiSceneType())) {
             SceneHandler fullSceneHandler = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, null, false);
             return new ServiceResult<>(fullSceneHandler.toData());
         } else {

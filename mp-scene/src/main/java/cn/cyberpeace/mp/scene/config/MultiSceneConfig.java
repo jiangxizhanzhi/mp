@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.scene.config;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
-import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -14,36 +14,46 @@ import java.util.stream.Collectors;
 
 @Configuration
 @ConfigurationProperties(prefix = "mp.multi-scene")
-@Data
 public class MultiSceneConfig {
 
+    @Getter
     @Value("${mp.multi-scene.manager-center-flag:false}")
     private boolean managerCenterFlag;
 
+    @Getter
     @Value("${mp.multi-scene.manager-center-ips:10.100.7.1}")
     private String managerCenterIps;
 
+    @Getter
     @Value("${mp.multi-scene.manager-center-ports:8001}")
     private String managerCenterPorts;
 
+    @Getter
     @Value("${mp.multi-scene.heartbeat-interval:60}")
     private long heartbeatInterval;
 
+    @Getter
     @Value("${mp.multi-scene.scan-interval:600}")
     private long scanInterval;
 
+    @Getter
     @Value("${mp.multi-scene.sub-cyber-range-flag}")
     private boolean subCyberRangeFlag;
 
+    @Getter
     @Value("${mp.multi-scene.cyber-range-tag}")
     private String cyberRangeTag;
 
+    @Getter
     @Value("${mp.multi-scene.cyber-range-ip}")
     private String cyberRangeIp;
 
+
+    @Getter
     @Value("${mp.multi-scene.cyber-range-port}")
     private String cyberRangePort;
 
+    @Getter
     @Value("${mp.multi-scene.vlanIds}")
     private String vlanIds;
 
@@ -52,6 +62,59 @@ public class MultiSceneConfig {
     private List<String> manageServersWithoutSelf;
 
     private List<Integer> vlanIdList;
+
+    public void setManagerCenterFlag(boolean managerCenterFlag) {
+        this.managerCenterFlag = managerCenterFlag;
+    }
+
+    public void setManagerCenterIps(String managerCenterIps) {
+        this.managerCenterIps = managerCenterIps;
+    }
+
+    public void setManagerCenterPorts(String managerCenterPorts) {
+        this.managerCenterPorts = managerCenterPorts;
+    }
+
+    public void setHeartbeatInterval(long heartbeatInterval) {
+        this.heartbeatInterval = heartbeatInterval;
+    }
+
+    public void setScanInterval(long scanInterval) {
+        this.scanInterval = scanInterval;
+    }
+
+    public void setSubCyberRangeFlag(boolean subCyberRangeFlag) {
+        this.subCyberRangeFlag = subCyberRangeFlag;
+    }
+
+    public void setCyberRangeTag(String cyberRangeTag) {
+        this.cyberRangeTag = cyberRangeTag;
+    }
+
+    public void setCyberRangeIp(String cyberRangeIp) {
+        this.cyberRangeIp = cyberRangeIp;
+    }
+
+    public void setCyberRangePort(String cyberRangePort) {
+        this.cyberRangePort = cyberRangePort;
+    }
+
+    public void setVlanIds(String vlanIds) {
+        this.vlanIds = vlanIds;
+    }
+
+    public void setManageServers(List<String> manageServers) {
+        this.manageServers = manageServers;
+    }
+
+    public void setManageServersWithoutSelf(List<String> manageServersWithoutSelf) {
+        this.manageServersWithoutSelf = manageServersWithoutSelf;
+    }
+
+    public void setVlanIdList(List<Integer> vlanIdList) {
+        this.vlanIdList = vlanIdList;
+    }
+
 
     public List<Integer> getAllVlanResources() {
         if (CollectionUtil.isNotEmpty(vlanIdList)) {

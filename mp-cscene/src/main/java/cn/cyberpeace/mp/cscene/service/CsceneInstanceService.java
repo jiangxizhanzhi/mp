@@ -640,7 +640,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 var instanceHandler = new CsceneInstanceHandler(id, context);
 
-                if (BaseSceneModel.MultiSceneType.MULTI_SCENE.equals(
+                if (BaseSceneModel.MultiSceneType.MULTI_SCENE == (
                         instanceHandler.getCscene().getScene().getTopology().getScene().getMultiSceneType())) {
                     String currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();
                     if (currentRangeTag.equals(
