@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.scene.MultiSceneRegisterDto;
 import cn.cyberpeace.mp.scene.core.bo.MultiSceneRegisterBo;
-import cn.cyberpeace.mp.scene.service.CyberRangeHeartbeatService;
 import cn.cyberpeace.mp.scene.service.ManageCenterService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,12 +26,12 @@ public class MultiSceneController {
 
 
     private final ManageCenterService manageCenterService;
-    private final CyberRangeHeartbeatService cyberRangeHeartbeatService;
 
 
     @ApiOperation(value = "接收分靶场heartbeat")
     @PostMapping("/receive/heartbeat")
     public ServiceResult<Boolean> receiveHeartbeat(@RequestBody @Validated MultiSceneRegisterDto multiSceneRegisterDto) {
+        log.info("receive heartbeat registerInfo = {}", multiSceneRegisterDto);
         MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
         BeanUtils.copyProperties(multiSceneRegisterDto, multiSceneRegisterBo);
 

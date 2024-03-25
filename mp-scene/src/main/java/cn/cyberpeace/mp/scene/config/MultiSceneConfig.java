@@ -3,57 +3,46 @@ package cn.cyberpeace.mp.scene.config;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
-import lombok.Getter;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
-@ConfigurationProperties(prefix = "mp.multi-scene")
+@Data
 public class MultiSceneConfig {
 
-    @Getter
     @Value("${mp.multi-scene.manager-center-flag:true}")
     private boolean managerCenterFlag;
 
-    @Getter
     @Value("${mp.multi-scene.manager-center-ips:http://10.100.7.1,http://10.4.1.37}")
     private String managerCenterIps;
 
-    @Getter
     @Value("${mp.multi-scene.manager-center-ports:8001,8001}")
     private String managerCenterPorts;
 
-    @Getter
     @Value("${mp.multi-scene.heartbeat-interval:60}")
     private long heartbeatInterval;
 
-    @Getter
     @Value("${mp.multi-scene.scan-interval:600}")
     private long scanInterval;
 
-    @Getter
     @Value("${mp.multi-scene.sub-cyber-range-flag:true}")
     private boolean subCyberRangeFlag;
 
-    @Getter
     @Value("${mp.multi-scene.cyber-range-tag:BBB}")
     private String cyberRangeTag;
 
-    @Getter
     @Value("${mp.multi-scene.cyber-range-ip:10.100.7.1}")
     private String cyberRangeIp;
 
 
-    @Getter
     @Value("${mp.multi-scene.cyber-range-port:8001}")
     private String cyberRangePort;
 
-    @Getter
     @Value("${mp.multi-scene.vlanIds:1034,1035,1036}")
     private String vlanIds;
 

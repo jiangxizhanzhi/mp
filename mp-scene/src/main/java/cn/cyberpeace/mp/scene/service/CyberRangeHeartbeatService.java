@@ -23,12 +23,13 @@ public class CyberRangeHeartbeatService {
         try {
             if (multiSceneConfig.isSubCyberRangeFlag()) {
                 multiSceneConfig.getManageCenterServerArray().forEach(manageServer -> {
-
                     MultiSceneRegisterBo multiSceneRegisterBo = new MultiSceneRegisterBo();
                     multiSceneRegisterBo.setRangeIp(multiSceneConfig.getCyberRangeIp());
                     multiSceneRegisterBo.setRangePort(multiSceneConfig.getCyberRangePort());
                     multiSceneRegisterBo.setRangeTag(multiSceneConfig.getCyberRangeTag());
                     multiSceneClient.registerAndHeartbeat(manageServer, multiSceneRegisterBo);
+                    log.info("给{}发送心跳{}", manageServer, multiSceneRegisterBo);
+
                 });
             }
         } catch (Exception e) {
