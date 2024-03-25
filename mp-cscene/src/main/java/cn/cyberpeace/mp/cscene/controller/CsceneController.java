@@ -293,4 +293,10 @@ public class CsceneController implements BaseModelListControllerBase {
             throw new MpRuntimeException("非联管节点, 无注册子靶场");
         }
     }
+
+    @ApiOperation("获取当前靶场的标识")
+    @GetMapping("/multi_scene/current_range")
+    public ServiceResult<String> getCurrentRange() {
+        return new ServiceResult<>(multiSceneConfig.getCyberRangeTag()).asResult();
+    }
 }

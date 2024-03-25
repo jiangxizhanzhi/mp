@@ -163,7 +163,7 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<ListResult<Device>> listAll(TargetSceneRequest request){
-        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
+        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MULTI_SCENE
                 .equals(request.getMultiSceneType()));
         List<Device> deviceList = new ArrayList<>();
 
@@ -311,7 +311,7 @@ public class DevopsTargetController {
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
     public ServiceResult<ListResult<DeviceVO>> getCommonTargets(CommonTargetsRequest request){
-        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MANAGER_CENTER_SCENE
+        boolean managerCenterOpenFlag = multiSceneConfig.isManagerCenterFlag() && (BaseSceneModel.MultiSceneType.MULTI_SCENE
                 .equals(request.getMultiSceneType()));
 
         List<DeviceVO> deviceVOList;
