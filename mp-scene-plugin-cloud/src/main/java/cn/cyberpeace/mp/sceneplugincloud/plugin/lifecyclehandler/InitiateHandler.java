@@ -22,22 +22,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -454,12 +443,19 @@ public class InitiateHandler extends HandlerCommon {
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, true);
+                    if (validVlanNumber(port.getVlanNumber()) && StringUtils.isNotEmpty(port.getGateway())) {
+                        createNetwork.setGateway(port.getGateway());
+                    }
+
                     noCidrNetwork.add(connectedNetwork);
-                } else if (isDynamips && connectPort != null) {
+                } else if (isDynamips && (connectPort != null || validVlanNumber(port.getVlanNumber()))) {
                     // 如果是dynamips 每个连了线的端口分配一个网络
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, true);
+                    if (validVlanNumber(port.getVlanNumber()) && StringUtils.isNotEmpty(port.getGateway())) {
+                        createNetwork.setGateway(port.getGateway());
+                    }
                     noCidrNetwork.add(connectedNetwork);
                 } else {
                     // 否则加入默认网络即可
@@ -471,13 +467,23 @@ public class InitiateHandler extends HandlerCommon {
                 if (cidr.equals(defaultConnectedNetwork.getNetwork().getCidr())) {
                     // 和默认网段相同,则也加入默认网络
                     defaultConnectedNetwork.addPort(port, connectPort, true);
+                    if (validVlanNumber(port.getVlanNumber()) && StringUtils.isNotEmpty(port.getGateway())) {
+                        defaultConnectedNetwork.getNetwork().setGateway(port.getGateway());
+                    }
+
                 } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
+                    if (validVlanNumber(port.getVlanNumber()) && StringUtils.isNotEmpty(port.getGateway())) {
+                        defaultConnectedNetwork.getNetwork().setGateway(port.getGateway());
+                    }
                 } else {
                     // 和默认网段不同,构建网络
                     ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
                     if (connectedNetwork == null) {
                         var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        if (validVlanNumber(port.getVlanNumber()) && StringUtils.isNotEmpty(port.getGateway())) {
+                            createNetwork.setGateway(port.getGateway());
+                        }
                         createNetwork.setCidr(cidr);
                         connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
                         cidr2ConnectedNetwork.put(cidr, connectedNetwork);
@@ -499,16 +505,16 @@ public class InitiateHandler extends HandlerCommon {
             // 其余 有连线才接网络
             List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
             for (ConnectedNetworkBO n : noCidrNetwork) {
-                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts()) || partSceneConnectElement(n.getFromPorts())) {
                     deriveNetworks.add(n);
                 }
             }
             for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
-                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts()) || partSceneConnectElement(n.getFromPorts())) {
                     deriveNetworks.add(n);
                 }
             }
-            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts()) || partSceneConnectElement(defaultConnectedNetwork.getFromPorts())) {
                 if (defaultNetwordIsDerive) {
                     deriveNetworks.add(defaultConnectedNetwork);
                 }
@@ -539,6 +545,18 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         initiateAuxiliaryNetwork(cloudElement);
+    }
+
+    private boolean validVlanNumber(Integer vlanNumber) {
+        return Objects.nonNull(vlanNumber) && vlanNumber > 0;
+    }
+
+    private boolean partSceneConnectElement(List<SceneElementPortBO> sceneElementPortBOList) {
+        if (CollectionUtils.isEmpty(sceneElementPortBOList)){
+            return false;
+        } else {
+            return sceneElementPortBOList.stream().map(port -> validVlanNumber(port.getVlanNumber())).reduce(false, (a, b) -> a || b);
+        }
     }
 
     private synchronized List<String> allocateCidrs(int count) {

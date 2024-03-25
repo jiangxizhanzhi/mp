@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -45,6 +44,9 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer order;
     @DefaultBool
     private Boolean isAuxiliary;
+    @DefaultInt
+    private Integer vlanNumber;
+
 
     public static class Type {
         public static final int IP_PORT = 1;

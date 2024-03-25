@@ -48,6 +48,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer order;
     @ApiModelProperty(value = "是否辅助端口")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "不同分靶场直接连线端口vlan")
+    private Integer vlanNumber;
 
     @JsonIgnore
     private E element;
