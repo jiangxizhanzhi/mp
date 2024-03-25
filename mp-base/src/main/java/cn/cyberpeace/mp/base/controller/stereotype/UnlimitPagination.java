@@ -5,6 +5,7 @@ import java.lang.annotation.*;
 /**
  * 标记controller下不限制分页大小的方法名称
  */
+@Deprecated
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

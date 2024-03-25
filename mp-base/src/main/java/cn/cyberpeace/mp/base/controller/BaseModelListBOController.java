@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 
+@Deprecated
 public interface BaseModelListBOController<T extends ModelBO<M, T>, M extends BaseModel, Q extends QueryParams, S extends BaseModelService<M, Q>>
         extends BaseModelListControllerBase {
 

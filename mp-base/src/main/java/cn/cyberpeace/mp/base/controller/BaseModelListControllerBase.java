@@ -9,6 +9,7 @@ import java.util.Arrays;
 /**
  * 通用的查询列表的controller base
  */
+@Deprecated
 public interface BaseModelListControllerBase {
 
     /**

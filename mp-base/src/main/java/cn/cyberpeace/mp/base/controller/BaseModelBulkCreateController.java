@@ -15,6 +15,7 @@ import java.util.List;
  * @param <M> 数据model
  * @param <S> 数据model对应的service
  */
+@Deprecated
 public interface BaseModelBulkCreateController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
     S getModelService();

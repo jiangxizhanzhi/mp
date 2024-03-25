@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.controller.response;
 
 import lombok.Data;
 
+@Deprecated
 @Data
 public class FileUploadResponse {
     private String id;

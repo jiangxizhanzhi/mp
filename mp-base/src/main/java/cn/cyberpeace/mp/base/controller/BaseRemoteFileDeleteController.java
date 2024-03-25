@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 通用的远程文件删除controller
  * @param <S> 远程文件操作service
  */
+@Deprecated
 public interface BaseRemoteFileDeleteController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();

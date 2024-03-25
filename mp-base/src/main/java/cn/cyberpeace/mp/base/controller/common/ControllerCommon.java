@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@Deprecated
 public class ControllerCommon {
 
     public static String[] convertValidFields(String[] fields) {

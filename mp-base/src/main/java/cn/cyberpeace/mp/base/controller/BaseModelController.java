@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Data
+@Deprecated
 public abstract class BaseModelController<M extends BaseModel, Q extends QueryParams, S extends BaseModelService<M, Q>>
         implements BaseModelListController<M, Q, S>, BaseModelGetController<M, S>, BaseModelCreateController<M, S>,
         BaseModelBulkCreateController<M, S>, BaseModelUpdateController<M, S>, BaseModelBulkUpdateController<M, S>,

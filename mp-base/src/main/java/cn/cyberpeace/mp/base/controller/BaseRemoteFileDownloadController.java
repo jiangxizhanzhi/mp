@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
  * 通用的远程文件下载controller
  * @param <S> 远程文件操作service
  */
+@Deprecated
 public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();
