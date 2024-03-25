@@ -13,6 +13,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import com.alibaba.fastjson.JSONObject;
+import com.azure.core.management.AzureEnvironment;
+import com.azure.core.management.profile.AzureProfile;
+import com.azure.identity.DefaultAzureCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
@@ -58,39 +62,39 @@ public class MicrosoftAzureConverter implements BaseConverter{
     public BaseResponse synchronousCloudData(JSONObject requestData) throws Exception {
 
         // 获取资源管理器
-        var az = IAzureResourceManager.getInstance(1).getManager();
+        var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
+        // todo 看云镜像到时是放在云服务本身提供的服务里还是自己部署服务
 
-
-        HttpClient httpClient = HttpClient.newHttpClient();
-        // 替换为真实的API端点和请求参数
-        String endpoint = "https://example.api.com/api/v1/resource";
-        String apiKey = "your-api-key"; // 如果需要API密钥
-        String requestBodyJson = "{\"param1\":\"value1\",\"param2\":\"value2\"}";
-
-        HttpRequest request;
-        if (apiKey != null) {
-            // 如果API需要密钥，将其添加到请求头中
-            request = HttpRequest.newBuilder()
-                    .uri(new URI(endpoint))
-                    .header("Authorization", "Bearer " + apiKey) // 假设API使用Bearer令牌
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson, StandardCharsets.UTF_8))
-                    .build();
-        } else {
-            // 如果不需要密钥，直接发出GET请求或POST请求（无认证）
-            request = HttpRequest.newBuilder()
-                    .uri(new URI(endpoint))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson, StandardCharsets.UTF_8))
-                    .build();
-        }
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("Status Code: " + response.statusCode());
-        System.out.println("Response Body: " + response.body());
-
-        //处理返回结果
+//        HttpClient httpClient = HttpClient.newHttpClient();
+//        // 替换为真实的API端点和请求参数
+//        String endpoint = "https://example.api.com/api/v1/resource";
+//        String apiKey = "your-api-key"; // 如果需要API密钥
+//        String requestBodyJson = "{\"param1\":\"value1\",\"param2\":\"value2\"}";
+//
+//        HttpRequest request;
+//        if (apiKey != null) {
+//            // 如果API需要密钥，将其添加到请求头中
+//            request = HttpRequest.newBuilder()
+//                    .uri(new URI(endpoint))
+//                    .header("Authorization", "Bearer " + apiKey) // 假设API使用Bearer令牌
+//                    .header("Content-Type", "application/json")
+//                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson, StandardCharsets.UTF_8))
+//                    .build();
+//        } else {
+//            // 如果不需要密钥，直接发出GET请求或POST请求（无认证）
+//            request = HttpRequest.newBuilder()
+//                    .uri(new URI(endpoint))
+//                    .header("Content-Type", "application/json")
+//                    .POST(HttpRequest.BodyPublishers.ofString(requestBodyJson, StandardCharsets.UTF_8))
+//                    .build();
+//        }
+//
+//        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//
+//        System.out.println("Status Code: " + response.statusCode());
+//        System.out.println("Response Body: " + response.body());
+//
+//        //处理返回结果
 
         return ResponseUtil.success();
     }

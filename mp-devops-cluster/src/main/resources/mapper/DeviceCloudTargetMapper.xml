@@ -46,10 +46,10 @@
         FROM
             mp_devops_cloud_target
         <where>
-            <if test="param != null and param.name != null">
+            <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
             </if>
-            <if test="param != null and param.systemType != null">
+            <if test="param != null and param.systemType != null and param.systemType != ''">
                 and system_type = #{param.systemType}
             </if>
         </where>
