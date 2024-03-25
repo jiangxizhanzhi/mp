@@ -34,6 +34,7 @@ public class MultiSceneRegisterInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        log.info("执行多靶场心跳初始化");
         if (multiSceneConfig.isManagerCenterFlag()) {
             if (multiSceneConfig.getScanInterval() > multiSceneConfig.getHeartbeatInterval()) {
                 SCAN_EXECUTOR.scheduleWithFixedDelay(() -> manageCenterService.scanNotHeartBeatCyberRange(multiSceneConfig.getScanInterval()),
