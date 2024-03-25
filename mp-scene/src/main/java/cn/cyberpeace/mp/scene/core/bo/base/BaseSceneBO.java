@@ -25,6 +25,4 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
 
     @ApiModelProperty(value = "场景模板-多靶场相关类型")
     private Integer multiSceneType;
-    @ApiModelProperty(value = "联管中心中该拓扑的对应拓扑id")
-    private String manageCenterSceneId;
 }

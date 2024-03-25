@@ -9,33 +9,13 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.*;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -45,6 +25,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -59,6 +40,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -68,21 +50,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -91,11 +68,16 @@ import java.util.Map;
 @Data
 public class CsceneInstanceController implements BaseModelListControllerBase {
 
+    public static final String VLAN_FILE_PATH = "/root/.mp/resources/vlan.txt";
+
+
     private CsceneInstanceService modelService;
 
     private CsceneSpecialService csceneSpecialService;
 
     private CsceneFileService csceneFileService;
+
+    private MultiSceneConfig multiSceneConfig;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
@@ -890,5 +872,104 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    }
+
+    @ApiOperation("获取多靶场虚实结合端口")
+    @PostMapping("/physic_port/get")
+    public ServiceResult<PortVlanRequest> getPortVlan(@RequestBody PortVlanRequest portVlanRequest) throws IOException {
+        synchronized (this) {
+
+            List<Integer> vlanResourceList = multiSceneConfig.getVlanIdList();
+
+            List<ConnectPortRecord> existConnectPortRecords = new ArrayList<>();
+            if (Files.exists(Path.of(VLAN_FILE_PATH))) {
+
+                String connectInfo = "";
+                List<String> lines = Files.readAllLines(Path.of(VLAN_FILE_PATH));
+                if (CollectionUtils.isNotEmpty(lines)) {
+                    connectInfo = lines.get(0);
+                }
+
+                if (StringUtils.isNotBlank(connectInfo)) {
+                    existConnectPortRecords = JsonCommon.parse(connectInfo, new TypeReference<List<ConnectPortRecord>>() {
+                    });
+                }
+            }
+
+            List<ConnectPortRecord> requestConnectList = portVlanRequest.getConnectPortRecordList();
+            if (CollectionUtils.isEmpty(requestConnectList)) {
+                return new ServiceResult<>(portVlanRequest).asResult();
+            } else {
+                List<ConnectPortRecord> newExistConnectPortList = new ArrayList<>();
+                for (ConnectPortRecord requestPortRecord : requestConnectList) {
+                    boolean allocateFlag = false;
+
+                    for (ConnectPortRecord existPortRecord : existConnectPortRecords) {
+                        if (existPortRecord.getSourcePortId().equals(requestPortRecord.getSourcePortId()) &&
+                                existPortRecord.getTargetPortId().equals(requestPortRecord.getTargetPortId())) {
+                            allocateFlag = true;
+                            requestPortRecord.setVlanId(existPortRecord.getVlanId());
+                            break;
+                        }
+                    }
+                    if (!allocateFlag) {
+                        Set<Integer> existVlanIds = existConnectPortRecords.stream().map(ConnectPortRecord::getVlanId).collect(Collectors.toSet());
+                        for (Integer vlanId : vlanResourceList) {
+                            if (existVlanIds.contains(vlanId)) {
+                                continue;
+                            } else if (newExistConnectPortList.stream().map(ConnectPortRecord::getVlanId).collect(Collectors.toSet()).contains(vlanId)) {
+                                continue;
+                            } else {
+                                requestPortRecord.setVlanId(vlanId);
+                                allocateFlag = true;
+                                newExistConnectPortList.add(requestPortRecord);
+
+                                break;
+                            }
+                        }
+                    }
+                    if (!allocateFlag) {
+                        return ServiceResult.<PortVlanRequest>builder().serviceCode(BaseErrorCode.ERROR).build();
+                    }
+                }
+                newExistConnectPortList.addAll(existConnectPortRecords);
+                Files.write(Path.of(VLAN_FILE_PATH), List.of(JsonCommon.stringify(newExistConnectPortList)), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                return ServiceResult.<PortVlanRequest>builder().serviceCode(BaseErrorCode.SUCCESS).source(portVlanRequest).build().asResult();
+
+            }
+        }
+    }
+
+    @ApiOperation("获取多靶场虚实结合端口")
+    @PostMapping("/physic_port/release")
+    public ServiceResult<Boolean> releasePhysicPort(@RequestBody PortVlanRequest physicalPortRequest) throws IOException {
+        synchronized (this) {
+            if (CollectionUtils.isEmpty(physicalPortRequest.getConnectPortRecordList())) {
+                return ServiceResult.<Boolean>builder().serviceCode(BaseErrorCode.SUCCESS).source(true).build().asResult();
+            } else {
+                List<ConnectPortRecord> existConnectPortRecords = new ArrayList<>();
+
+                if (Files.exists(Path.of(VLAN_FILE_PATH))) {
+                    String connectInfo = "";
+                    List<String> lines = Files.readAllLines(Path.of(VLAN_FILE_PATH));
+                    if (CollectionUtils.isNotEmpty(lines)) {
+                        connectInfo = lines.get(0);
+                    }
+
+                    if (StringUtils.isNotBlank(connectInfo)) {
+                        existConnectPortRecords = JsonCommon.parse(connectInfo, new TypeReference<List<ConnectPortRecord>>() {
+                        });
+                    }
+
+                    for (ConnectPortRecord connectPortRecord : physicalPortRequest.getConnectPortRecordList()) {
+                        existConnectPortRecords.removeIf(nextPortRecord -> nextPortRecord.getVlanId().equals(connectPortRecord.getVlanId()));
+                    }
+                    Files.write(Path.of(VLAN_FILE_PATH), List.of(JsonCommon.stringify(existConnectPortRecords)), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    return ServiceResult.<Boolean>builder().serviceCode(BaseErrorCode.SUCCESS).source(true).build().asResult();
+                } else {
+                    return ServiceResult.<Boolean>builder().serviceCode(BaseErrorCode.ERROR).detail("文件锁不存在").source(false).build();
+                }
+            }
+        }
     }
 }

@@ -2,16 +2,15 @@ package cn.cyberpeace.mp.scene.config;
 
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Configuration
 @ConfigurationProperties(prefix = "mp.multi-scene")
@@ -36,19 +35,37 @@ public class MultiSceneConfig {
     @Value("${mp.multi-scene.sub-cyber-range-flag}")
     private boolean subCyberRangeFlag;
 
-    @Value(("${mp.multi-scene.cyber-range-tag}"))
+    @Value("${mp.multi-scene.cyber-range-tag}")
     private String cyberRangeTag;
 
-    @Value(("${mp.multi-scene.cyber-range-ip}"))
+    @Value("${mp.multi-scene.cyber-range-ip}")
     private String cyberRangeIp;
 
-    @Value(("${mp.multi-scene.cyber-range-port}"))
+    @Value("${mp.multi-scene.cyber-range-port}")
     private String cyberRangePort;
+
+    @Value("${mp.multi-scene.vlanIds}")
+    private String vlanIds;
 
     private List<String> manageServers;
 
     private List<String> manageServersWithoutSelf;
 
+    private List<Integer> vlanIdList;
+
+    public List<Integer> getAllVlanResources() {
+        if (CollectionUtil.isNotEmpty(vlanIdList)) {
+            return vlanIdList;
+        } else {
+            if (StringUtils.isNotEmpty(vlanIds)) {
+                this.vlanIdList = Arrays.stream(this.vlanIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+                return vlanIdList;
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+    }
     public List<String> getManageCenterServerArray() {
         if (Objects.isNull(manageServers)) {
             String[] ips = getManagerCenterIpArray();

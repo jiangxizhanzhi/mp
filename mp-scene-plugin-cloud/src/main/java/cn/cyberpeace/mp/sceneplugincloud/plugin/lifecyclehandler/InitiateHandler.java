@@ -544,6 +544,15 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setDeriveNetworks(deriveNetworks);
         }
 
+        cloudElement.getDeriveNetworks().forEach(deriveNetwork -> {
+            deriveNetwork.getFromPorts().forEach(port -> {
+                if (validVlanNumber(port.getVlanNumber())) {
+                    deriveNetwork.getNetwork().setVlan(true);
+                    deriveNetwork.getNetwork().setVlanId(port.getVlanNumber());
+                }
+            });
+        });
+
         initiateAuxiliaryNetwork(cloudElement);
     }
 

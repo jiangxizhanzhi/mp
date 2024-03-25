@@ -23,8 +23,6 @@ public class BaseSceneModel extends BaseModel {
     @DefaultInt(MultiSceneType.COMMON_SCENE)
     private Integer multiSceneType;
     @DefaultStr
-    private String manageCenterSceneId;
-    @DefaultStr
     private String sceneCreateRangeTag;
 
 

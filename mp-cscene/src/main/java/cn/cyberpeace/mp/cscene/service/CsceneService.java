@@ -459,9 +459,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 sceneConfigHandler.save();
 
                 csceneBO.setSceneConfig(sceneConfigHandler.toData());
-                csceneBO.setManageCenterCsceneId(csceneHandler.getCsceneId());
-                csceneBO.getSceneConfig().getTopology().getScene().setManageCenterSceneId(sceneConfigHandler.getSceneId());
-
                 BroadCaseSaveSceneEvent broadCaseSaveSceneEvent = new BroadCaseSaveSceneEvent(csceneBO);
                 broadCaseSaveSceneEvent.publish();
 

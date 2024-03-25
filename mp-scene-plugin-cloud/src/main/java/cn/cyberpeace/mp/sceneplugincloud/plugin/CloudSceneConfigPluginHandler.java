@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
+import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
@@ -22,7 +24,6 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
@@ -310,6 +311,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         this.getElementMap().forEach((nodeId, pluginElement) -> {
             boolean switchFlag = pluginElement.getSrcElement().getType() == BaseSceneElementModel.Type.SWITCH;
             if (switchFlag) {
+                //设置网络
                 String cidr = pluginElement.getCidr();
                 if (StringUtils.isNotEmpty(cidr)) {
                     //根据cidr，给连接的端口设置ip
@@ -320,12 +322,12 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     existCidrList.add(cidr);
                     processSwitchConnectPortIpAndGateWay(nodeId, cidr, pluginElement);
                 }
+
             }
         });
 
         this.getElementMap().forEach((nodeId, pluginElement) -> {
             boolean gatewayTypeFlag = gatewayTypeFlag(nodeId);
-
             if (gatewayTypeFlag) {
                 //对于路由器（非核心）和防火墙来说，在同一默认网络的都是同一个cidr，其他用户设置了ip的，都是由ip计算cidr
                 String defaultRandomCidr = getRandomCidrs(1, new ArrayList<>(existCidrList)).get(0);
@@ -375,8 +377,6 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             String cidrFromIp = IpUtils.getIpDefault24Cidr(toPortIp);
                             String randomFromPortIp = IpUtils.newRandomIps(cidrFromIp, 1, Collections.singletonList(toPortIp), null, false).get(0);
                             port.setIp(randomFromPortIp);
-
-
                         } else if (StringUtils.isEmpty(toPortIp)) {
                             String cidrFromIp = IpUtils.getIpDefault24Cidr(fromPortIp);
                             String randomToPortIp = IpUtils.newRandomIps(cidrFromIp, 1, Collections.singletonList(toPortIp), null, false).get(0);
@@ -386,13 +386,57 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         port.setGateway(fromPortIp);
                         connectedPort.setGateway(fromPortIp);
                     }
-
-
-
-
                 }
             }
         });
+
+        Set<String> partSceneConnectIds = getPartSceneConnects();
+        List<Integer> allVlanResourceIds = BeanCommon.getBean(MultiSceneConfig.class).getAllVlanResources().stream().distinct().collect(Collectors.toList());
+        partSceneConnectIds.forEach(connectId -> {
+            this.getSceneHandler().getElementPortConnectionMap().forEach((key, connectionBO) -> {
+                if (connectId.equals(connectionBO.getId())) {
+                    String sourcePortId = connectionBO.getSource();
+                    String targetPortId = connectionBO.getTarget();
+                    SceneConfigElementPortBO sourcePort = this.getSceneHandler().getPort(sourcePortId);
+                    SceneConfigElementPortBO targetPort = this.getSceneHandler().getPort(targetPortId);
+
+                    Integer sourceElementVlanId = getElementMap().get(sourcePort.getElement().getId()).getVlanId();
+                    Integer targetElementVlanId = getElementMap().get(targetPort.getElement().getId()).getVlanId();
+                    if (validVlan(sourceElementVlanId)) {
+                        sourcePort.setVlanNumber(sourceElementVlanId);
+                        targetPort.setVlanNumber(sourceElementVlanId);
+                        allVlanResourceIds.remove(sourceElementVlanId);
+                    } else if (validVlan(targetElementVlanId)) {
+                        sourcePort.setVlanNumber(targetElementVlanId);
+                        targetPort.setVlanNumber(targetElementVlanId);
+                        allVlanResourceIds.remove(targetElementVlanId);
+                    } else {
+                        Integer vlan = allVlanResourceIds.remove(0);
+                        sourcePort.setVlanNumber(vlan);
+                        targetPort.setVlanNumber(vlan);
+                    }
+                }
+            });
+
+        });
+    }
+
+    private Set<String> getPartSceneConnects() {
+        Set<String> partSceneConnectIdSet = new HashSet<>();
+        this.getSceneHandler().getElementPortConnectionMap().values().forEach(connect -> {
+
+            SceneConfigElementBO sourceElement = Optional.ofNullable(this.getSceneHandler().getElementPortMap().get(connect.getSource())).map(SceneConfigElementPortBO::getElement).orElse(null);
+            SceneConfigElementBO targetElement = Optional.ofNullable(this.getSceneHandler().getElementPortMap().get(connect.getTarget())).map(SceneConfigElementPortBO::getElement).orElse(null);
+            if (Objects.nonNull(sourceElement) && Objects.nonNull(targetElement)) {
+
+                if (StringUtils.isNotEmpty(sourceElement.getRangeTag()) && StringUtils.isNotEmpty(targetElement.getRangeTag())
+                        && !sourceElement.getRangeTag().equals(targetElement.getRangeTag())) {
+                    partSceneConnectIdSet.add(connect.getId());
+                }
+            }
+        });
+
+        return partSceneConnectIdSet;
     }
 
     private String getCidrFromElementAndConnectPorts(String nodeId, Set<String> existCidrList) {
@@ -432,6 +476,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             }
         }
 
+    }
+
+    private boolean validVlan(Integer vlanNumber) {
+        return Objects.nonNull(vlanNumber) && vlanNumber > 0;
     }
 
     private List<String> getRandomCidrs(int count, List<String> existCidrs) {
@@ -512,45 +560,4 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         return getElement(nodeId).getSrcElement().getType() == BaseSceneElementModel.Type.FIREWALL || BaseSceneElementModel.Type.ROUTER == getElement(nodeId).getSrcElement().getType();
     }
 
-
-    public void initCoreType(CloudPluginSceneConfigElementBO element) {
-        Integer role = element.getRole();
-        CoreType coreType = CoreType.NETWORK;
-        if (role != null) {
-            if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
-                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
-            ) {
-                coreType = CoreType.NETWORK;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK;
-                } else {
-                    coreType = CoreType.NETWORK_L2;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
-                    coreType = CoreType.ROUTER;
-                } else {
-                    coreType = CoreType.ROUTER_L2;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
-                if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(element.getImageType())) {
-                    coreType = CoreType.NETWORK_0;
-                } else {
-                    coreType = CoreType.FIREWALL;
-                }
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
-                coreType = CoreType.TERMINAL;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
-                coreType = CoreType.TERMINAL;
-            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
-                coreType = CoreType.TERMINAL;
-            }
-        }
-        element.setCoreType(coreType);
-    }
 }
