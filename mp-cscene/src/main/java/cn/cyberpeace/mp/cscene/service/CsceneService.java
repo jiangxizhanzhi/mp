@@ -88,8 +88,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private TenantUserServiceImpl tenantUserService;
 
+    @Autowired
     private UserService userService;
 
+    @Autowired
     private MultiSceneConfig multiSceneConfig;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
