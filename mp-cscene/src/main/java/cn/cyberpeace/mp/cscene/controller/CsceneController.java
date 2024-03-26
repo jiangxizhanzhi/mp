@@ -50,7 +50,9 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private BaseAppConfig baseAppConfig;
 
+    @Autowired
     private MultiSceneConfig multiSceneConfig;
+    @Autowired
     private ManageCenterService manageCenterService;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
