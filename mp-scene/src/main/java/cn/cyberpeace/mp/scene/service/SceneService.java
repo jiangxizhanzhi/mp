@@ -76,12 +76,8 @@ public class SceneService {
 
         // 在prepare中预先判断下有多少启动流程
         sceneHandler.prepare(partialStart);
-
-
         // todo 请求vlan
         sceneHandler.save();
-
-
 
         SceneStageRecorder.registerRecoder(sceneHandler.getSceneId(), sceneHandler.getSceneStageRecorder());
         SceneTaskPool.getInstance().executeTask(() -> {
