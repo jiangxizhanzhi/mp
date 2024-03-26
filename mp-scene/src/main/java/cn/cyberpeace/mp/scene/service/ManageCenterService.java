@@ -55,7 +55,7 @@ public class ManageCenterService {
         if (CollectionUtils.isEmpty(allOnlineRange)) {
             return Collections.emptyList();
         } else {
-            return allOnlineRange.stream().filter(range -> !range.getRangeIp().equals(multiSceneConfig.getCyberRangeIp())).collect(Collectors.toList());
+            return allOnlineRange.stream().filter(range -> !range.getRangeIp().contains(multiSceneConfig.getCyberRangeIp())).collect(Collectors.toList());
         }
 
     }

@@ -143,7 +143,7 @@ public class MultiSceneConfig {
         if (Objects.isNull(this.manageServersWithoutSelf)) {
             List<String> allServers = getManageCenterServerArray();
             List<String> serversWithSelf = new ArrayList<>(allServers);
-            serversWithSelf.remove(String.format("%s:%s", cyberRangeIp, cyberRangePort));
+            serversWithSelf.remove(String.format("http://%s:%s", cyberRangeIp, cyberRangePort));
             this.manageServersWithoutSelf = serversWithSelf;
             return serversWithSelf;
         } else {

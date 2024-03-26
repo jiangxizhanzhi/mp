@@ -10,12 +10,14 @@ import cn.cyberpeace.mp.scene.service.ManageCenterService;
 import cn.cyberpeace.mp.scene.util.MultiSceneClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 public abstract class MultiSceneBaseEvent<T extends SnakeHttpData, R> {
 
@@ -64,6 +66,8 @@ public abstract class MultiSceneBaseEvent<T extends SnakeHttpData, R> {
 
                 List<Runnable> runnableList = multiSceneRegisterBoList.stream().map(range -> (Runnable)(() -> {
                     String server = String.format("%s:%s", range.getRangeIp(), range.getRangePort());
+                    log.info("send {} to {}", this.messageType, server);
+
 
                     R returnData;
                     if (POST.equals(typeToMethod.get(this.getMessageType()))) {
