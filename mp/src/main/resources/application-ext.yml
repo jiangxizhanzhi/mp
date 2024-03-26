@@ -130,7 +130,7 @@ mp:
       scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
-      dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      dhcp-control: ${MP_SCENE_DHCP_CONTROL:true}
   cscene:
     ext-var:
       has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
