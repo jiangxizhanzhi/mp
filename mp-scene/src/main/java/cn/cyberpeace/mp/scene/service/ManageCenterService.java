@@ -25,6 +25,7 @@ public class ManageCenterService {
     private final MultiSceneConfig multiSceneConfig;
 
     public void receiveRegisterOrHeartbeat(MultiSceneRegisterBo multiSceneRegisterBo) {
+        multiSceneRegisterBo.setRangeIp(String.format("http://%s", multiSceneRegisterBo.getRangeIp()));
         List<CyberRangeRegisterModel> cyberRangeRegisterModelList =
                 cyberRangeRegisterMapper.list(new HumanCondition().filterEqual(CyberRangeRegisterModel::getRangeTag, multiSceneRegisterBo.getRangeTag()));
 
