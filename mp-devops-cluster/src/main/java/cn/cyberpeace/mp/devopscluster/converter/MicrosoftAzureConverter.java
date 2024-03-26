@@ -77,7 +77,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
 
         // 获取资源管理器
         var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
-
+        System.out.println("-------------登陆成功-------------");
         // todo 看云镜像到时是放在云服务本身提供的服务里还是自己部署服务
 
 //        HttpClient httpClient = HttpClient.newHttpClient();
@@ -144,17 +144,12 @@ public class MicrosoftAzureConverter implements BaseConverter{
         }
     }
 
-    public ListObjServiceResult getCloudTargetByPk(JSONObject requestData) {
-        if(requestData != null && requestData.get("pk") != null){
-            List<DeviceCloudTargetPO> data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
-            if(data != null && data.size()>0){
-                return new ListObjServiceResult<>(new ListObjResult<>(data, data.size()));
-            }else{
-                //影响行数为0
-                return new ListObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST, BaseErrorCode.DATA_NOT_EXIST.getMessage());
-            }
+    public DeviceCloudTargetPO getCloudTargetByPk(JSONObject requestData) {
+        DeviceCloudTargetPO data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
+        if(data != null){
+            return data;
         }else{
-            return new ListObjServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, BaseErrorCode.PARAMS_INVALID.getMessage());
+            return new DeviceCloudTargetPO();
         }
     }
 }

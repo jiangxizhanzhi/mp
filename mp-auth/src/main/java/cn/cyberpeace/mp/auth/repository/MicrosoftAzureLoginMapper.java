@@ -16,4 +16,6 @@ import java.util.List;
 public interface MicrosoftAzureLoginMapper extends BaseModelMapper<MicrosoftAzureUserModel> {
 
     List<MicrosoftAzureUserModel> getMicrosoftAzureUserList(@Param("param") JSONObject requestData);
+
+    MicrosoftAzureUserModel getLocalAzurer(@Param("param") JSONObject requestData);
 }

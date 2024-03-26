@@ -1,31 +1,49 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.service.impl.MicrosoftAzureLoginServiceImpl;
+import com.alibaba.fastjson.JSONObject;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.Region;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.AzureAuthorityHosts;
+import com.azure.identity.ClientSecretCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PrivateAzureResourceManager implements IAzureResourceManager {
+    //当前云环境账号
+    private MicrosoftAzureUserModel microsoftAzureUserModel;
+
+    @Autowired
+    private MicrosoftAzureLoginServiceImpl microsoftAzureLoginService;
+
     @Override
     public AzureResourceManager getManager() {
         //优先使用配置的环境变量
-        TokenCredential credential = new DefaultAzureCredentialBuilder()
-                .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
-                .build();
+//        TokenCredential credential = new DefaultAzureCredentialBuilder()
+//                .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
+//                .build();
+
+        JSONObject jsonObject = new JSONObject();
+        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+        jsonObject.put("cloudType",2);
+        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(jsonObject);
+        this.microsoftAzureUserModel = localAzurer;
 
         //根据传来的云type配置不同的认证信息,目前三套皆用同一套认证信息
-//                    ClientSecretCredential credential = new ClientSecretCredentialBuilder()
-//                            .clientId("<client-id>")
-//                            .clientSecret("<client-secret>")
-//                            .tenantId("<tenant-id>")
-//                            .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
-//                            .build();
+        ClientSecretCredential credential = new ClientSecretCredentialBuilder()
+                .clientId(localAzurer.getAzureClientId())
+                .clientSecret(localAzurer.getAzureClientSecret())
+                .tenantId(localAzurer.getAzureTenantId())
+                .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
+                .build();
 
         // If you don't set the tenant ID and subscription ID via environment variables,
         // change to create the Azure profile with tenantId, subscriptionId, and Azure environment.

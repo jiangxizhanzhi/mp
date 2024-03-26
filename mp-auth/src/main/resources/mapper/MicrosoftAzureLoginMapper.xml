@@ -17,4 +17,19 @@
         </if>
     </select>
 
+    <select id="getLocalAzurer" resultType="cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel">
+        SELECT
+        *
+        FROM
+        mp_auth_cloud_user
+        <where>
+            <if test="param != null and param.cloudType != null and param.cloudType != ''">
+                and cloud_type = #{param.cloudType}
+            </if>
+        </where>
+        ORDER BY
+        version DESC
+        limit 1
+    </select>
+
 </mapper>

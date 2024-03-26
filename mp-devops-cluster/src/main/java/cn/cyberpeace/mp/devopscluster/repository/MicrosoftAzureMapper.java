@@ -31,5 +31,5 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
      */
     List<JSONObject> getOS(@Param("parentCode") String parentCode);
 
-    List<DeviceCloudTargetPO> getCloudTargetByPk(@Param("pk") String pk);
+    DeviceCloudTargetPO getCloudTargetByPk(@Param("pk") String pk);
 }

@@ -31,20 +31,20 @@ public class MicrosoftAzureUserModel extends BaseModel {
     private Integer cloudType;
 
     @ApiModelProperty(value = "tenant_id")
-    private String azure_tenant_id;
+    private String azureTenantId;
 
     @ApiModelProperty(value = "subscription_id")
-    private String azure_subscription_id;
+    private String azureSubscriptionId;
 
     @ApiModelProperty(value = "client_id")
-    private String azure_client_id;
+    private String azureClientId;
 
     @ApiModelProperty(value = "client_secret")
-    private String azure_client_secret;
+    private String azureClientSecret;
 
     @ApiModelProperty(value = "创建人")
     private String creator;
 
     @ApiModelProperty(value = "版本号")
-    private Integer vision;
+    private Integer version;
 }
