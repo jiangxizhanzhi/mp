@@ -339,6 +339,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         continue;
                     } else {
                         SceneConfigElementPortBO connectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+                        if (Objects.isNull(connectedPort)) {
+                            continue;
+                        }
 
                         String fromPortIp = port.getIp();
                         String toPortIp = connectedPort.getIp();
