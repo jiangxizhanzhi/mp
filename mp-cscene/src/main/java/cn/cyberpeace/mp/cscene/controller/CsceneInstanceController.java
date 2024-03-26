@@ -19,9 +19,9 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.*;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
@@ -89,7 +89,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
     @Autowired
-    private CsceneMapper csceneMapper;
+    private CsceneService csceneService;
+
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -222,20 +223,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "accessUserId", value = "场景访问用户id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
-    public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
-                                               @RequestParam(required = false) String accessUserId) {
+    public ServiceResult get(@RequestParam String id,
+                                           @RequestParam(required = false) String accessUserId) {
         //多靶场,有可能传入id为config id
         CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.get(id);
         if (Objects.isNull(csceneInstanceModel)) {
             List<CsceneInstanceModel> csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, id)
                     .filterEqual(CsceneInstanceModel::getDeleted, false));
             if (CollectionUtils.isEmpty(csceneInstanceModels)) {
-                throw new MpRuntimeException("传入的id不存在对应运行中的拓扑实例");
+                // 没有实例就返回拓扑
+                return csceneService.getById(id, false, null).asResult();
             } else {
                 id = csceneInstanceModels.get(0).getId();
             }
         }
-
 
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
