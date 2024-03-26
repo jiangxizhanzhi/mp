@@ -34,12 +34,12 @@ public class VyosNetworkCommandUtils {
 
     static {
         builderChains.add(new InterfaceIpSetCmdBuilder());
-        builderChains.add(new RouterNameCmdBuilder());
         builderChains.add(new StaticRouteCmdBuilder());
         builderChains.add(new OSPFCmdBuilder());
         builderChains.add(new BGPCmdBuilder());
         builderChains.add(new RIPCmdBuilder());
         builderChains.add(new QosCmdBuilder());
+        builderChains.add(new RouterNameCmdBuilder());
     }
 
     static {
