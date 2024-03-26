@@ -51,10 +51,13 @@ public class VyosNetworkCommandUtils {
         modifyBuilderChains.add(new QosCmdBuilder());
     }
 
-    public static List<String> genOpenDhcpCommands(int ethSize) {
+    public static List<String> genOpenDhcpCommands(List<SceneElementPortBO> ports,HandlerUtils handlerUtils) {
         List<String> result = new ArrayList<>();
-        for (int i = 0; i < ethSize; i++) {
-            result.add("set interface ethernet eth" + i + " address dhcp");
+        for (int i = 0; i < ports.size(); i++) {
+            var net = handlerUtils.getNetworkByPort(ports.get(i));
+            if (net != null && Boolean.TRUE.equals(net.getDhcp())) {
+                result.add("set interface ethernet eth" + i + " address dhcp");
+            }
         }
         return result;
     }

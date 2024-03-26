@@ -1435,7 +1435,7 @@ public class CreateHandler extends HandlerCommon {
         var openDhcp = new RouterConfigCmdData();
         openDhcp.setSerialIp(port.getHost());
         openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
-        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts().size()));
+        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts(),getHandlerUtils()));
         boolean openDhcpResult = false;
         boolean buildNetworkResult = false;
         int tryTimes = 10;
