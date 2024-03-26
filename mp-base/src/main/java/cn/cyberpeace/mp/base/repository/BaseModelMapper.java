@@ -380,7 +380,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (StringUtils.isEmpty(obj.getId())) {
             return create(obj);
         } else {
-            return update(obj);
+            M existObj = get(obj.getId());
+            if (Objects.isNull(existObj)) {
+                return create(obj);
+            } else {
+                return update(obj);
+            }
         }
     }
 
