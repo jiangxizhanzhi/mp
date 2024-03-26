@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -16,6 +17,9 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.*;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -81,6 +85,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
+    @Autowired
+    private CsceneMapper csceneMapper;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -215,6 +224,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(params = "id")
     public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
                                                @RequestParam(required = false) String accessUserId) {
+        //多靶场,有可能传入id为config id
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.get(id);
+        if (Objects.isNull(csceneInstanceModel)) {
+            List<CsceneInstanceModel> csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, id)
+                    .filterEqual(CsceneInstanceModel::getDeleted, false));
+            if (CollectionUtils.isEmpty(csceneInstanceModels)) {
+                throw new MpRuntimeException("传入的id不存在对应运行中的拓扑实例");
+            } else {
+                id = csceneInstanceModels.get(0).getId();
+            }
+        }
+
+
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
 
