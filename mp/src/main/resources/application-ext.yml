@@ -6,11 +6,11 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.100.7.1}
+      db-ip: ${MP_DB_IP:10.4.1.36}
       db-port: ${MP_DB_PORT:9306}
       db-database: ${MP_DB_DATABASE:mp}
-      username: ${MP_DB_USERNAME:root}
-      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+      username: ${MP_DB_USERNAME:mp}
+      password: ${MP_DB_PASSWORD:mp@AjJhM}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:10}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:10}
 
@@ -41,13 +41,13 @@ mp:
   multi-scene:
     ext-var:
       manager-center-flag: ${MANAGER_CENTER_FLAG:true}
-      manager-center-ips: ${MANAGER_CENTER_IPS:http://10.100.7.1,http://10.4.1.37}
+      manager-center-ips: ${MANAGER_CENTER_IPS:http://10.100.7.1,http://10.4.1.36}
       manager-center-ports: ${MANAGER_CENTER_PORTS:8001,8001}
       heartbeat-interval: ${HEARTBEAT_INTERVAL:60}
       scan-interval: ${SCAN_INTERVAL:600}
       sub-cyber-range-flag: ${SUB_CYBER_RANGE_FLAG:true}
-      cyber-range-tag: ${CYBER_RANGE_TAG:BBB}
-      cyber-range-ip: ${MP_API_IP:10.100.7.1}
+      cyber-range-tag: ${CYBER_RANGE_TAG:AAA}
+      cyber-range-ip: ${MP_API_IP:10.4.1.36}
       cyber-range-port: ${MP_API_PORT:8001}
       vlanIds: ${VLAN_IDS:1111,1112,1113,1114,1115}
   cscene:
@@ -191,7 +191,7 @@ logging:
       root: ${ROOT_LEVEL:INFO}
   file:
     ext-var:
-      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
+      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:200000}
       max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
       max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}

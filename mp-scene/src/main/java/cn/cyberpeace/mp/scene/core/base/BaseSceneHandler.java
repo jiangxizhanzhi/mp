@@ -1235,7 +1235,7 @@ public abstract class BaseSceneHandler<
         this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
-        if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
+        if (!StringUtils.isEmpty(sceneId) && readScene() == null && sceneDataBO.getTopology().getScene().getMultiSceneType().equals(BaseSceneModel.MultiSceneType.COMMON_SCENE)) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
         initPlugins(scenePluginData);
@@ -1383,7 +1383,7 @@ public abstract class BaseSceneHandler<
      * 保存当前场景数据
      */
     public void save() {
-        boolean isCreate = StringUtils.isEmpty(sceneId);
+        boolean isCreate = StringUtils.isEmpty(sceneId) && getScene().getMultiSceneType().equals(BaseSceneModel.MultiSceneType.COMMON_SCENE);
         saveScene();
 
         Map<String, A0> existAreaMap = isCreate ? new HashMap<>() : readAreas().stream()
