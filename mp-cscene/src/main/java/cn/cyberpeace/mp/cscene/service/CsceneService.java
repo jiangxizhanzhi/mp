@@ -441,6 +441,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             CsceneHandler csceneHandler = null;
 
+
             boolean sceneIsMultiSceneTypeFlag = BaseSceneModel.MultiSceneType.MULTI_SCENE ==(
                     csceneBO.getSceneConfig().getTopology().getScene().getMultiSceneType());
             boolean sceneCreatedByCurrentNode = multiSceneConfig.getCyberRangeTag().equals(csceneBO

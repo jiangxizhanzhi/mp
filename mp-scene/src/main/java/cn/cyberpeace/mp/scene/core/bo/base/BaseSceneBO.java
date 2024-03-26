@@ -24,5 +24,5 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private String sceneCreateRangeTag;
 
     @ApiModelProperty(value = "场景模板-多靶场相关类型")
-    private Integer multiSceneType;
+    private Integer multiSceneType = BaseSceneModel.MultiSceneType.COMMON_SCENE;
 }

@@ -18,7 +18,7 @@ public class CommonTargetsRequest {
     private Integer role;
 
     @ApiModelProperty("多靶场类型")
-    private Integer multiSceneType;
+    private Integer multiSceneType = BaseSceneModel.MultiSceneType.COMMON_SCENE;
 
     @ApiModelProperty("靶场标识")
     private String rangeTag;
