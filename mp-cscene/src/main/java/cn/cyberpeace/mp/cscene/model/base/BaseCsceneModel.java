@@ -23,9 +23,6 @@ public class BaseCsceneModel extends BaseModel {
     @DefaultBool
     private Boolean supportPartialStart;
 
-    @DefaultStr
-    private String manageCenterCsceneId;
-
 
     @Override
     public boolean hasDeleted() {
