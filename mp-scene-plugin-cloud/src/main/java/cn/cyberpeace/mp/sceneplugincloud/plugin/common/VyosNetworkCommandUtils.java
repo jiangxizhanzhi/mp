@@ -55,7 +55,7 @@ public class VyosNetworkCommandUtils {
         List<String> result = new ArrayList<>();
         for (int i = 0; i < ports.size(); i++) {
             var net = handlerUtils.getNetworkByPort(ports.get(i));
-            if (net != null && Boolean.TRUE.equals(net.getDhcp())) {
+            if (net != null && !Boolean.FALSE.equals(net.getDhcp())) {
                 result.add("set interface ethernet eth" + i + " address dhcp");
             }
         }

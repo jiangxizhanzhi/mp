@@ -358,6 +358,9 @@ public class InitiateHandler extends HandlerCommon {
                     && !Boolean.FALSE.equals(element.getDhcp());
 
             boolean onlyVirtualRouterConnectFlag = onlyVirtualRouterConnectFlag(connectedNetwork);
+            if (onlyVirtualRouterConnectFlag) {
+                network.setDhcp(false);
+            }
 
             if (dhcpOpenAndNeedMpAllocateDhcpFlag && !onlyVirtualRouterConnectFlag) {
                 if (StringUtils.isEmpty(network.getDhcpIp())) {
