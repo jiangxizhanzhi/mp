@@ -60,6 +60,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -364,6 +365,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         });
         // 转为Map后顺序被打乱，此时再次排序
         listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
+        Map<String, CsceneInstanceModel> csceneInstanceModelMap = getCsceneInstanceBoByCsceneIds(csceneBOs.stream().map(CsceneBO::getId).collect(Collectors.toList()));
         if (CollectionUtils.isNotEmpty(listResult.getSource().getObjs())) {
             for (CsceneBO temp : csceneBOs) {
                 if (StringUtils.isNotEmpty(temp.getCreateUsername())) {
@@ -372,9 +374,23 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         temp.setCreateName(userModel.getName());
                     }
                 }
+                temp.setTestingFlag(Objects.nonNull(csceneInstanceModelMap.get(temp.getId())));
             }
         }
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal()));
+    }
+
+    private Map<String, CsceneInstanceModel> getCsceneInstanceBoByCsceneIds(List<String> csceneIds) {
+        if (CollectionUtils.isEmpty(csceneIds)) {
+            return Collections.emptyMap();
+        } else {
+            List<CsceneInstanceModel> csceneInstanceModelList = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getId, csceneIds.toArray()));
+            if (CollectionUtils.isEmpty(csceneInstanceModelList)) {
+                return Collections.emptyMap();
+            } else {
+                return csceneInstanceModelList.stream().collect(Collectors.toMap(CsceneInstanceModel::getCscene, Function.identity(), (a, b) -> a));
+            }
+        }
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {

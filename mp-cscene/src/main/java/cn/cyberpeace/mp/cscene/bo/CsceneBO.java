@@ -41,6 +41,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+    @ApiModelProperty(value = "该模板是否有测试中的实例")
+    private boolean testingFlag;
 
     @Override
     public CsceneModel createModel() {
