@@ -898,7 +898,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取多靶场虚实结合端口")
-    @PostMapping("/physic_port/get")
+    @PostMapping("/connect-vlan/get")
     public ServiceResult<PortVlanRequest> getPortVlan(@RequestBody PortVlanRequest portVlanRequest) throws IOException {
         synchronized (this) {
 
@@ -964,7 +964,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取多靶场虚实结合端口")
-    @PostMapping("/physic_port/release")
+    @PostMapping("/connect-vlan/release")
     public ServiceResult<Boolean> releasePhysicPort(@RequestBody PortVlanRequest physicalPortRequest) throws IOException {
         synchronized (this) {
             if (CollectionUtils.isEmpty(physicalPortRequest.getConnectPortRecordList())) {

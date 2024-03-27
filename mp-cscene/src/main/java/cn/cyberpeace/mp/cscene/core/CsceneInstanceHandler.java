@@ -109,7 +109,6 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         // 先保存设置id
         save();
 
-
         MultiSceneConfig multiSceneConfig = BeanCommon.getBean(MultiSceneConfig.class);
 
         SceneDataBO sceneDataBO = cscene.getScene();
@@ -153,6 +152,9 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public void saveScene(CsceneInstanceBO csceneBO) {
+        SceneHandler sceneHandler = new SceneHandler(csceneBO.getScene(), null);
+        sceneHandler.save();
+        csceneBO.setScene(sceneHandler.toData());
     }
 
     @Override
