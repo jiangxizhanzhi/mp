@@ -1,24 +1,16 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.config.websocket.SceneTestInstanceProcessHandler;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
@@ -35,6 +27,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.ScenePieceModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
@@ -48,6 +41,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal;
@@ -311,6 +305,7 @@ public class SceneHandler extends BaseSceneHandler<
     public void reportSceneUpdated() {
         var collectedScene = getCollectedSceneBO();
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportScene(collectedScene)));
+
     }
 
     public void reportElementUpdated(String nodeId) {
