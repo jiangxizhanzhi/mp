@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.util.LogFileUtil;
 import cn.cyberpeace.mp.scene.config.MultiSceneConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -116,6 +117,9 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
         if (BaseSceneModel.MultiSceneType.MULTI_SCENE == (this.getCscene()
                 .getScene().getTopology().getScene().getMultiSceneType())) {
+
+            //分靶场只用起部分拓扑
+            sceneDataBO = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, null, true).toData();
 
             if (multiSceneConfig.getCyberRangeTag().equals(
                     this.getCscene().getScene().getTopology().getScene().getSceneCreateRangeTag())) {
