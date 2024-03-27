@@ -1244,6 +1244,12 @@ public abstract class BaseSceneHandler<
         correctData();
     }
 
+    public void init(D sceneDataBO, boolean isAreaMode, C2 context, boolean multiSceneFlag) {
+        this.init(sceneDataBO, isAreaMode, context);
+        this.multiSceneFlag = multiSceneFlag;
+    }
+
+
     /**
      * 从场景id初始化
      * @param sceneId 场景id
@@ -1383,7 +1389,7 @@ public abstract class BaseSceneHandler<
      * 保存当前场景数据
      */
     public void save() {
-        boolean isCreate = StringUtils.isEmpty(sceneId) && getScene().getMultiSceneType().equals(BaseSceneModel.MultiSceneType.COMMON_SCENE);
+        boolean isCreate = StringUtils.isEmpty(sceneId);
         saveScene();
 
         Map<String, A0> existAreaMap = isCreate ? new HashMap<>() : readAreas().stream()

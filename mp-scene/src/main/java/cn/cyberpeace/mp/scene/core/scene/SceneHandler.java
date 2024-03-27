@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.config.websocket.SceneTestInstanceProcessHandler;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
@@ -20,40 +18,19 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.model.SceneAreaModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.model.ScenePieceModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
-import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
-import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
+import cn.cyberpeace.mp.scene.model.*;
+import cn.cyberpeace.mp.scene.repository.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -192,6 +169,10 @@ public class SceneHandler extends BaseSceneHandler<
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
+    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode, SceneContextBO context, boolean multiSceneFlag) {
+        init(sceneDataBO, isAreaMode, context, multiSceneFlag);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
+    }
     public SceneHandler(String sceneId, String areaId, SceneContextBO context) {
         init(sceneId, areaId, false, context);
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
