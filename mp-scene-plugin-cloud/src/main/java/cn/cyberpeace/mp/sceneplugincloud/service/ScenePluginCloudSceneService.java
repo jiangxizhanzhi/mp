@@ -740,48 +740,67 @@ public class ScenePluginCloudSceneService {
     public ServiceResult<ElementCommandExecBO> execElementCommandV2(String sceneId, String nodeId, String command, String user) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         var element = sceneHandler.getElement(nodeId);
-        if (element.getPorts() == null) {
-            ElementCommandExecBO execRes = new ElementCommandExecBO();
-            execRes.setStatus(false);
-            return new ServiceResult<>(execRes).asResult();
-        }
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        String host = null, username = null, password = null;
-        Integer port = null;
-        for (var p : element.getPorts()) {
-            var cloudPort = pluginHandler.getPort(p.getId());
-            if (cloudPort.getAccessModes() != null) {
-                for (var a : cloudPort.getAccessModes()) {
-                    if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
-                        host = a.getAccessIp();
-                        port = a.getAccessPort();
-                        username = a.getUsername();
-                        password = a.getPassword();
+
+        var cloudElement = pluginHandler.getElement(element.getId());
+        if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
+            Container container = new Container();
+            var result = container.executeCommand(cloudElement.getResourceId(), command,user);
+            if (result.getExitCode() != null && result.getExitCode() == 0) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setOutput(result.getOutput());
+                execRes.setStatus(true);
+                return new ServiceResult<>(execRes);
+            } else {
+                log.error("failed to exec command {} , nodeId is {}", command, nodeId);
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                execRes.setOutput(result.getOutput());
+                return new ServiceResult<>(execRes);
+            }
+        } else {
+            if (element.getPorts() == null) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                return new ServiceResult<>(execRes).asResult();
+            }
+            String host = null, username = null, password = null;
+            Integer port = null;
+            for (var p : element.getPorts()) {
+                var cloudPort = pluginHandler.getPort(p.getId());
+                if (cloudPort.getAccessModes() != null) {
+                    for (var a : cloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                            host = a.getAccessIp();
+                            port = a.getAccessPort();
+                            username = a.getUsername();
+                            password = a.getPassword();
+                            break;
+                        }
+                    }
+                    if (host != null) {
                         break;
                     }
                 }
-                if (host != null) {
-                    break;
-                }
             }
-        }
-        if (host == null) {
+            if (host == null) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                return new ServiceResult<>(execRes).asResult();
+            }
+
+            SshClient.SshClientBuilder builder = new SshClient.SshClientBuilder();
+            builder.configHost(host);
+            builder.configPort(port);
+            builder.configPassword(password);
+            builder.configUsername(username);
+            SshClient sshClient = builder.build();
+            var s = sshClient.execReturn(command, 5000L);
             ElementCommandExecBO execRes = new ElementCommandExecBO();
-            execRes.setStatus(false);
+            execRes.setOutput(s);
+            execRes.setStatus(true);
             return new ServiceResult<>(execRes).asResult();
         }
-
-        SshClient.SshClientBuilder builder = new SshClient.SshClientBuilder();
-        builder.configHost(host);
-        builder.configPort(port);
-        builder.configPassword(password);
-        builder.configUsername(username);
-        SshClient sshClient = builder.build();
-        var s = sshClient.execReturn(command, 5000L);
-        ElementCommandExecBO execRes = new ElementCommandExecBO();
-        execRes.setOutput(s);
-        execRes.setStatus(true);
-        return new ServiceResult<>(execRes).asResult();
     }
 
     public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String filename, String destPath) {
