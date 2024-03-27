@@ -371,7 +371,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             } else {
                                 String randomCidr = getRandomCidrs(1, new ArrayList<>(existCidrList)).get(0);
                                 existCidrList.add(randomCidr);
-                                List<String> computedIpPool = IpUtils.newRandomIps(defaultRandomCidr, 2, defaultRandomCidrExcludeIps, null, false);
+                                List<String> computedIpPool = IpUtils.newRandomIps(randomCidr, 2, new ArrayList<>(), null, false);
                                 port.setIp(computedIpPool.remove(0));
                                 connectedPort.setIp(computedIpPool.remove(0));
                             }
