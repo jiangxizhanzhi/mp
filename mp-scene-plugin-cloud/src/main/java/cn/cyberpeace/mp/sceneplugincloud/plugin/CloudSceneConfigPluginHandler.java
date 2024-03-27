@@ -301,10 +301,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         Set<String> existCidrList = new HashSet<>();
         existCidrList.addAll(
                 this.getElementMap().values().stream().map(BaseCloudPluginSceneElementBO::getCidr)
-                        .filter(StringUtils::isNoneBlank).collect(Collectors.toSet()));
+                        .filter(StringUtils::isNotBlank).collect(Collectors.toSet()));
 
         Set<String> manualSetIps = this.getSceneHandler().getElementPortMap().values().stream()
-                .map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).collect(Collectors.toSet());
+                .map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
         existCidrList.addAll(manualSetIps.stream().map(IpUtils::getIpDefault24Cidr).collect(Collectors.toSet()));
 
 
@@ -446,12 +446,12 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         List<SceneConfigElementPortBO> currentNodePorts = getElement(nodeId).getSrcElement().getPorts();
         List<String> cidrSetFromCurrentNodeIp = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(currentNodePorts)) {
-            cidrSetFromCurrentNodeIp = currentNodePorts.stream().map(SceneConfigElementPortBO::getIp).filter(StringUtils::isNoneBlank)
+            cidrSetFromCurrentNodeIp = currentNodePorts.stream().map(SceneConfigElementPortBO::getIp).filter(StringUtils::isNotBlank)
                     .map(IpUtils::getIpDefault24Cidr).collect(Collectors.toList());
 
         }
 
-        List<String> cidrSetFromConnectIp = getElementConnectedSrcPorts(nodeId).stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank)
+        List<String> cidrSetFromConnectIp = getElementConnectedSrcPorts(nodeId).stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNotBlank)
                 .map(IpUtils::getIpDefault24Cidr).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(cidrSetFromConnectIp)) {
             return cidrSetFromConnectIp.get(0);
@@ -472,7 +472,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         List<SceneConfigElementPortBO> ports = this.getElementConnectedSrcPorts(nodeId);
         String maskBit = cidr.split("/")[1];
         if (CollectionUtils.isNotEmpty(ports)) {
-            boolean manualIpNotInSwitchCidr = ports.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).map(ip -> IpUtils.getIpCidrByMaskBit(ip, maskBit))
+            boolean manualIpNotInSwitchCidr = ports.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNotBlank).map(ip -> IpUtils.getIpCidrByMaskBit(ip, maskBit))
                     .anyMatch(computedCidr -> !computedCidr.equals(cidr));
             if (manualIpNotInSwitchCidr) {
                 throw new MpRuntimeException(String.format("节点%s连接的端口ip配置和该节点cidr配置冲突", sceneConfigElementBO.getName()));
@@ -494,7 +494,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         List<SceneConfigElementPortBO> elementPortList = this.getElementConnectedSrcPorts(nodeId);
 
         List<String> excludeIps = new ArrayList<>();
-        List<String> manualSetIps = elementPortList.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNoneBlank).collect(Collectors.toList());
+        List<String> manualSetIps = elementPortList.stream().map(BaseSceneElementPortBO::getIp).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         excludeIps.addAll(manualSetIps);
 
         String gateway = this.getElement(nodeId).getGateway();

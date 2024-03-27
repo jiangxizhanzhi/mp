@@ -569,6 +569,6 @@ public class IpUtils {
     }
 
     public static String getIpCidrByMaskBit(String ip, String maskBit) {
-        return getFormatCidrIp(ip + maskBit);
+        return getFormatCidrIp(ip + "/" + maskBit);
     }
 }

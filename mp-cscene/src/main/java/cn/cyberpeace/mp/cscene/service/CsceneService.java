@@ -384,7 +384,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(csceneIds)) {
             return Collections.emptyMap();
         } else {
-            List<CsceneInstanceModel> csceneInstanceModelList = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getId, csceneIds.toArray()));
+            List<CsceneInstanceModel> csceneInstanceModelList = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getCscene, csceneIds.toArray())
+                    .filterEqual(CsceneInstanceModel::getDeleted, false));
             if (CollectionUtils.isEmpty(csceneInstanceModelList)) {
                 return Collections.emptyMap();
             } else {
