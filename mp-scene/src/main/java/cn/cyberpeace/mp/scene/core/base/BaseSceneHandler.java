@@ -131,7 +131,7 @@ public abstract class BaseSceneHandler<
     /** 是否区域模式 */
     private boolean isAreaMode;
     private boolean multiSceneFlag = false;
-    private String currentRangeTag = "";
+    private String currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();;
     /** 场景模板/场景实例id */
     private String sceneId;
     /** 区域模式下，当前区域id */
@@ -1247,6 +1247,7 @@ public abstract class BaseSceneHandler<
     public void init(D sceneDataBO, boolean isAreaMode, C2 context, boolean multiSceneFlag) {
         this.init(sceneDataBO, isAreaMode, context);
         this.multiSceneFlag = multiSceneFlag;
+        this.currentRangeTag = BeanCommon.getBean(MultiSceneConfig.class).getCyberRangeTag();
     }
 
 
