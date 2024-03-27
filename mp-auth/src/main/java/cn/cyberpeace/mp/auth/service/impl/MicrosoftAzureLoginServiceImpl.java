@@ -3,16 +3,12 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
-import cn.cyberpeace.mp.auth.util.BaseResponse;
-import cn.cyberpeace.mp.auth.util.ResponseUtil;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +33,43 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     public MicrosoftAzureUserModel getLocalAzurer(JSONObject requestData) {
         MicrosoftAzureUserModel localAzurer = microsoftAzureLoginMapper.getLocalAzurer(requestData);
         return localAzurer;
+    }
+
+    @Override
+    @Transactional
+    public Boolean addAzurer(JSONObject requestData) {
+        if(requestData != null){
+            Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
+            if(addAzurer){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public Boolean deleteAzurer(String pk) {
+        if(pk != null && !pk.equals("")){
+            Boolean deleteAzurer = microsoftAzureLoginMapper.deleteAzurer(pk);
+            if(deleteAzurer){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public Boolean updateLocalAzurer(JSONObject requestData) {
+        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
+                && !requestData.get("pk").toString().equals("")) {
+            Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.get("pk").toString(),requestData);
+            if(updateLocalAzurer){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

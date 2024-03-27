@@ -1,39 +1,18 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.util.BaseResponse;
-import cn.cyberpeace.mp.auth.util.BaseStatusEnum;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
-import cn.cyberpeace.mp.auth.util.ResponseUtil;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
-import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
-import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import com.alibaba.fastjson.JSONObject;
-import com.azure.core.management.AzureEnvironment;
-import com.azure.core.management.profile.AzureProfile;
-import com.azure.identity.DefaultAzureCredential;
-import com.azure.identity.DefaultAzureCredentialBuilder;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -73,6 +52,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
     /**
      * 云镜像管理同步
      */
+    @Transactional
     public ListObjServiceResult synchronousCloudData(JSONObject requestData) throws Exception {
 
         // 获取资源管理器
@@ -116,6 +96,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
     /**
      * 云镜像删除
      */
+    @Transactional
     public ListObjServiceResult deleteCloudTarget(JSONObject requestData) {
         if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString());
@@ -130,6 +111,7 @@ public class MicrosoftAzureConverter implements BaseConverter{
         }
     }
 
+    @Transactional
     public ListObjServiceResult updateCloudTarget(JSONObject requestData) {
         if(requestData != null && requestData.get("pk") != null){
             Integer pk = microsoftAzureMapper.updateCloudTarget(requestData.get("pk").toString(),requestData);

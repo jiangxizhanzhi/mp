@@ -24,9 +24,6 @@ public class MicrosoftAzureUserModel extends BaseModel {
     @ApiModelProperty(value = "主键")
     private Integer pk;
 
-    @ApiModelProperty(value = "id")
-    private String id;
-
     @ApiModelProperty(value = "云类型")
     private Integer cloudType;
 

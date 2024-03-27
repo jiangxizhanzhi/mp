@@ -18,4 +18,10 @@ public interface MicrosoftAzureLoginMapper extends BaseModelMapper<MicrosoftAzur
     List<MicrosoftAzureUserModel> getMicrosoftAzureUserList(@Param("param") JSONObject requestData);
 
     MicrosoftAzureUserModel getLocalAzurer(@Param("param") JSONObject requestData);
+
+    Boolean addAzurer(@Param("param") JSONObject requestData);
+
+    Boolean deleteAzurer(String pk);
+
+    Boolean updateLocalAzurer(String pk, @Param("param") JSONObject requestData);
 }

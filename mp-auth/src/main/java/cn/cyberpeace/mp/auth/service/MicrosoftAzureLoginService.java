@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
-import cn.cyberpeace.mp.auth.util.BaseResponse;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -19,4 +18,18 @@ public interface MicrosoftAzureLoginService {
      */
     MicrosoftAzureUserModel getLocalAzurer(JSONObject requestData);
 
+    /**
+     * 增加微软云用户
+     */
+    Boolean addAzurer(JSONObject requestData);
+
+    /**
+     * 删除微软云用户
+     */
+    Boolean deleteAzurer(String pk);
+
+    /**
+     * 修改微软云用户
+     */
+    Boolean updateLocalAzurer(JSONObject requestData);
 }

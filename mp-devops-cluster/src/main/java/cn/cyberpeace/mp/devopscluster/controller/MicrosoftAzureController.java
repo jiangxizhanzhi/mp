@@ -1,14 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.util.BaseResponse;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
-import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
-import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
-import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -67,7 +63,7 @@ public class MicrosoftAzureController {
 
     @ApiOperation(value = "云镜像管理页面pk查询", notes = "")
     @GetMapping("/getByPk")
-    public ServiceResult  <DeviceCloudTargetPO> getCloudTargetByPk(@RequestParam(value = "pk", required = true) String pk) {
+    public ServiceResult<DeviceCloudTargetPO> getCloudTargetByPk(@RequestParam(value = "pk", required = true) String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
         return new ServiceResult<>(microsoftAzureConverter.getCloudTargetByPk(requestData)).asResult();

@@ -2,6 +2,64 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper">
 
+    <insert id="addAzurer">
+        INSERT INTO mp_auth_cloud_user
+        (
+            cloud_type,
+            azure_tenant_id,
+            azure_subscription_id,
+            azure_client_id,
+            azure_client_secret,
+            create_time,
+            creator,
+            version
+        )
+        VALUES
+        (
+            #{param.cloudType},
+            #{param.azureTenantId},
+            #{param.azureSubscriptionId},
+            #{param.azureClientId},
+            #{param.azureClientSecret},
+            now(),
+            #{param.creator},
+            #{param.version}
+        )
+    </insert>
+
+    <update id="updateLocalAzurer">
+        UPDATE
+            mp_auth_cloud_user
+        SET
+            <if test="param.azureTenantId != null and param.azureTenantId != ''">
+                azure_tenant_id = #{param.azureTenantId},
+            </if>
+            <if test="param.azureSubscriptionId != null and param.azureSubscriptionId != ''">
+                azure_subscription_id = #{param.azureSubscriptionId},
+            </if>
+            <if test="param.azureClientId != null and param.azureClientId != ''">
+                azure_client_id = #{param.azureClientId},
+            </if>
+            <if test="param.azureClientSecret != null and param.azureClientSecret != ''">
+                azure_client_secret = #{param.azureClientSecret},
+            </if>
+            <if test="param.version != null and param.version != ''">
+                version = #{param.version},
+            </if>
+            create_time = now()
+        WHERE
+            pk = #{pk}
+
+    </update>
+
+    <delete id="deleteAzurer">
+        DELETE
+        FROM
+            mp_auth_cloud_user
+        WHERE
+            pk = #{pk}
+    </delete>
+
     <select id="getMicrosoftAzureUserList" resultType="cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel">
         SELECT
             *

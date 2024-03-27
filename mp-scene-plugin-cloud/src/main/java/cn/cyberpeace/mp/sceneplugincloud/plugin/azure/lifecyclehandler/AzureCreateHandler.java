@@ -34,6 +34,10 @@ public class AzureCreateHandler extends CreateHandler {
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
     }
 
+    public void reCreateHandler() {
+
+    }
+
     @Override
     public void create() {
         this.prepareEventProcess();
