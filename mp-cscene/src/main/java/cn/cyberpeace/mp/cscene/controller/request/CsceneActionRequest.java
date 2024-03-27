@@ -11,4 +11,6 @@ public class CsceneActionRequest implements SnakeHttpData {
     private String id;
     @ApiModelProperty(value = "场景上下文")
     private CsceneContextBO context;
+    @ApiModelProperty(value = "多靶场指定的实例id")
+    private String multiSceneTargetCsceneId;
 }

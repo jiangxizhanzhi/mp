@@ -647,6 +647,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             instanceHandler.getCscene().getScene().getTopology().getScene().getSceneCreateRangeTag())) {
                         CsceneInstanceActionRequest csceneInstanceActionRequest = new CsceneInstanceActionRequest();
                         csceneInstanceActionRequest.setId(id);
+
+
                         BroadcastCloseSceneInstanceEvent broadcastCloseSceneInstanceEvent = new BroadcastCloseSceneInstanceEvent(csceneInstanceActionRequest);
                         broadcastCloseSceneInstanceEvent.publish();
                     }

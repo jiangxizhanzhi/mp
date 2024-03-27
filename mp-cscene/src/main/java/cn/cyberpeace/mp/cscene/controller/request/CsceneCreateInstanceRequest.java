@@ -32,6 +32,7 @@ public class CsceneCreateInstanceRequest extends CsceneActionRequest {
     @ApiModelProperty(value = "场景上下文数据")
     private CsceneContextBO context;
 
+
     public CsceneInstanceCreateContextBO toCsceneInstanceCreateContextBO() {
         var csceneInstanceCreateContextBO = new CsceneInstanceCreateContextBO();
         csceneInstanceCreateContextBO.setSceneTtl(sceneTtl);
@@ -41,6 +42,7 @@ public class CsceneCreateInstanceRequest extends CsceneActionRequest {
         csceneInstanceCreateContextBO.setCscene(cscene);
         csceneInstanceCreateContextBO.setContext(context);
         csceneInstanceCreateContextBO.setName(name);
+        csceneInstanceCreateContextBO.setMultiSceneTargetCsceneId(this.getMultiSceneTargetCsceneId());
         return csceneInstanceCreateContextBO;
     }
 

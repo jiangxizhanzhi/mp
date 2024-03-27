@@ -591,6 +591,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
+        if (StringUtils.isNotEmpty(createContext.getMultiSceneTargetCsceneId())) {
+            csceneInstance.setId(createContext.getMultiSceneTargetCsceneId());
+        }
         if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
             this.correctEnableRecording(csceneInstance);
         }

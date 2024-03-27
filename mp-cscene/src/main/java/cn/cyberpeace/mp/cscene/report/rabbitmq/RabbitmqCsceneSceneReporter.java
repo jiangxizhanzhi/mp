@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.report.rabbitmq;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.websocket.SceneTestInstanceProcessHandler;
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
@@ -27,6 +28,9 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
     @Autowired
     private CsceneAppConfig csceneAppConfig;
 
+    @Autowired
+    private SceneTestInstanceProcessHandler sceneTestInstanceProcessHandler;
+
     @Override
     public void reportScene(CollectedSceneBO scene) {
         var cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
@@ -34,6 +38,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
         cscene.setCallAction(CsceneContextHolder.getCallAction());
         log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE, JsonCommon.stringify(cscene), JsonCommon.stringify(TransferContext.getContextMap()));
         messageSender.send(cscene, MESSAGE_TYPE_SCENE, null, csceneAppConfig.getSceneMessageTimeout());
+        sceneTestInstanceProcessHandler.pushCsceneInstanceSockets(cscene.getCsceneId(), cscene);
     }
 
     @Override
@@ -43,5 +48,6 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
         csceneElement.setCallAction(CsceneContextHolder.getCallAction());
         log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE_ELEMENT, JsonCommon.stringify(csceneElement), JsonCommon.stringify(TransferContext.getContextMap()));
         messageSender.send(csceneElement, MESSAGE_TYPE_SCENE_ELEMENT, null, csceneAppConfig.getSceneMessageTimeout());
+        sceneTestInstanceProcessHandler.pushCsceneInstanceSockets(csceneElement.getCsceneId(), csceneElement);
     }
 }

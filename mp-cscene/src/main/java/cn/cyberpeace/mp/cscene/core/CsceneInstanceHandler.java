@@ -121,6 +121,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
                     this.getCscene().getScene().getTopology().getScene().getSceneCreateRangeTag())) {
                 CsceneActionRequest csceneActionRequest = new CsceneActionRequest();
                 csceneActionRequest.setId(this.getCscene().getCscene());
+                csceneActionRequest.setMultiSceneTargetCsceneId(this.getCsceneId());
                 BroadCaseCreateSceneInstanceEvent broadCaseCreateSceneInstanceEvent = new BroadCaseCreateSceneInstanceEvent(csceneActionRequest);
                 broadCaseCreateSceneInstanceEvent.publish();
             }
