@@ -64,7 +64,11 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             // 使用代理 提供事件流转
-            sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, context, true));
+            if (sceneDataBO.getTopology().getScene().getMultiSceneType() == BaseSceneModel.MultiSceneType.MULTI_SCENE) {
+                sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, context, true));
+            } else {
+                sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO, false, context, true));
+            }
 
             sceneHandler.setRealTimeUpdate(true);
             if (sceneHandler.getScene() != null) {
