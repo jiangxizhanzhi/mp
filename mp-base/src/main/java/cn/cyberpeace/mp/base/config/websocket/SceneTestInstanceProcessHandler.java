@@ -43,19 +43,23 @@ public class SceneTestInstanceProcessHandler extends TextWebSocketHandler {
         String csceneInstanceId = (String) session.getAttributes().get("csceneInstanceId");
         if (StringUtils.isNotEmpty(csceneInstanceId)) {
             if (Objects.nonNull(clients.get(csceneInstanceId))) {
-                clients.get(csceneInstanceId).remove(session.getId());
+                clients.get(csceneInstanceId).remove(session.getId()).close();
             }
         }
 
     }
 
     public void pushCsceneInstanceSockets(String csceneInstanceId, Object object) {
+        log.info("尝试推送实例消息{}", csceneInstanceId);
         if (Objects.nonNull(clients.get(csceneInstanceId))) {
             clients.get(csceneInstanceId).values().forEach(webSocketSession -> {
                 try {
                     webSocketSession.sendMessage(new TextMessage(JsonCommon.snakeStringify(object)));
+                    log.info("推送实例{}消息成功", csceneInstanceId);
                 } catch (IOException e) {
                     log.error(String.format("实例%s推送消息失败，发生异常%s", csceneInstanceId, e.getMessage()), e);
+                } catch (Exception e) {
+                    log.error("实例{}推送消息失败", csceneInstanceId, e);
                 }
             });
         }

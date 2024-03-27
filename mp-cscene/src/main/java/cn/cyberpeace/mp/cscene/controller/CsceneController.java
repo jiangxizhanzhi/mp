@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.config.websocket.SceneTestInstanceProcessHandler;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,6 +56,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private MultiSceneConfig multiSceneConfig;
     @Autowired
     private ManageCenterService manageCenterService;
+    @Autowired
+    private SceneTestInstanceProcessHandler sceneTestInstanceProcessHandler;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -300,5 +304,14 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping("/multi_scene/current_range")
     public ServiceResult<String> getCurrentRange() {
         return new ServiceResult<>(multiSceneConfig.getCyberRangeTag()).asResult();
+    }
+
+    @ApiOperation("测试ws")
+    @GetMapping("/ws")
+    public ServiceResult<Boolean> testWs(@RequestParam String id) {
+        Map<String, String> test = new HashMap<>();
+        test.put("aa", "xx");
+        sceneTestInstanceProcessHandler.pushCsceneInstanceSockets(id, test);
+        return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 }
