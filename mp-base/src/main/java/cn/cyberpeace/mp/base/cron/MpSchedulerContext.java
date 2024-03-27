@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class MpSchedulerScanner implements BeanPostProcessor, ApplicationRunner {
+public class MpSchedulerContext implements BeanPostProcessor, ApplicationRunner {
 
     private List<TaskInfo> taskInfos = new ArrayList<>();
 
