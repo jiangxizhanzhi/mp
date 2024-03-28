@@ -52,11 +52,19 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
     public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
-        String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
-        boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
-        return ResultCommon.success(resourceCenterService.exportScene(
-                request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath(), sceneNumber, disableImageExport
-        ).getSource());
+        try {
+            log.info("导出场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
+            String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
+            boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
+            var result = ResultCommon.success(resourceCenterService.exportScene(
+                    request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath(), sceneNumber, disableImageExport
+            ).getSource());
+            log.info("导出场景结束 , 结果为: {}", JsonCommon.stringify(result));
+            return result;
+        }catch (Exception e){
+            log.info("导出场景出错", e);
+            throw e;
+        }
     }
 
     @ApiOperation("挂载")

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
@@ -32,7 +32,6 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,13 +135,21 @@ public class SceneExporter {
                 ExportDeviceYmlParams params = new ExportDeviceYmlParams();
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
-                var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
-                }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
-                var imageMap = result.getData();
+                CloudResponse<Map> result = null ;
+                try {
+                    result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
+                    }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
+                } catch (MpRuntimeException e) {
+                    String detail = "导出镜像接口报错 , 参数为: " + JsonCommon.stringify(params) + ",结果为: " + ExceptionUtil.stacktraceToString(e);
+                    log.error(detail, e);
+                    e.setDetail(detail);
+                    throw e;
+                }
+                Map imageMap = result.getData();
                 if (imageMap.containsKey("Cloud-init")) {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
                 }
-                var image = JsonCommon.mapToBean(imageMap, Image.class);
+                Image image = JsonCommon.mapToBean(imageMap, Image.class);
                 if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
                     String flavor = String.format("%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
                     image.set实例大小(formatFlavor(flavor));
@@ -295,23 +302,25 @@ public class SceneExporter {
         try {
             FileUtils.write(new File(filePath), content, "utf8");
         } catch (Exception e) {
-            log.error("failed to write yml file , yml content is {}, {}", content, ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            String detail = "导出场景出错 , 创建server.yml文件失败";
+            log.error("导出场景出错 , 创建server.yml文件失败 , 内容为: " + content, e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
         }
     }
 
     private void downloadNodeFile(String envPath, Map<String, String> file2Download) {
-        for (var entry : file2Download.entrySet()) {
+        for (Map.Entry<String, String> entry : file2Download.entrySet()) {
             // 下载附件
             String fdfsFilePath = entry.getValue();
             if (StringUtils.contains(entry.getValue(), "?")) {
                 fdfsFilePath = StringUtils.split(entry.getValue(), "?")[0];
             }
-            byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
             try {
+                byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + entry.getKey()), content);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                String detail = "导出场景出错 , 下载附件失败 , 附件地址为" + fdfsFilePath;
+                log.error(detail, e);
             }
         }
     }
@@ -321,8 +330,9 @@ public class SceneExporter {
             byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
             try {
                 FileUtils.writeByteArrayToFile(new File(imagePath + "/" + fileName), content);
-            } catch (IOException e) {
-                log.error("Download the private key file error:{}", e.getMessage());
+            } catch (Exception e) {
+                String detail = "导出场景出错 , 下载秘钥文件失败 , 文件地址为" + fdfsFilePath;
+                log.error(detail, e);
             }
         }
     }
@@ -337,8 +347,9 @@ public class SceneExporter {
         }
         try {
             FileUtils.write(new File(envPath + "/" + name + ".yml"), content, "utf8");
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            String detail = "导出场景出错 , 创建 " + name + ".yml 文件失败 ";
+            log.error(detail, e);
         }
     }
 

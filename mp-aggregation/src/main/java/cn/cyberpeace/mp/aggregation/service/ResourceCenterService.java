@@ -93,7 +93,9 @@ public class ResourceCenterService {
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         var cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+            String detail = "导出场景出错 , 场景 " + csceneId + " 不存在";
+            log.error(detail);
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST, detail);
         }
         String logo = cscene.getSource().getObj().getLogo();
         //存在logo图片则导出
