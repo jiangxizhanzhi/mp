@@ -103,12 +103,13 @@ public class ResourceCenterService {
         //存在logo图片则导出
         if (StringUtils.isNotEmpty(logo)) {
             String logoPath = StringUtils.replaceOnce(logo, LOGO_FILE_SUFFIX, "");
-            byte[] content = FsCommon.downloadRawContent(logoPath);
             try {
+                byte[] content = FsCommon.downloadRawContent(logoPath);
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + LOGO_NAME), content);
-            } catch (IOException e) {
-                log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
-                throw new MpRuntimeException(BaseErrorCode.ERROR);
+            } catch (Exception e) {
+                String detail = "场景logo图片导出失败, 文件地址为 " + logoPath;
+                log.error(detail, e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }
         }
 
