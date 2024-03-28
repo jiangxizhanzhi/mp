@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -64,27 +67,39 @@ public class UnpauseHandler extends HandlerCommon {
             return;
         }
         String instanceId = element.getResourceId();
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VIRTUAL_MACHINE));
-            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_VIRTUAL_MACHINE, () -> {
-                virtualMachine.unpause(instanceId);
-                checkAccessModes(element);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_CONTAINER));
-            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_CONTAINER, () -> {
-                container.unPause(instanceId);
-                checkAccessModes(element);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_DYNAMIPS));
-            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_DYNAMIPS, () -> {
-                virtualDynamips.unPause(instanceId);
-            });
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_VIRTUAL_MACHINE, () -> {
+                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                    azureVirtualMachine.unpause(instanceId);
+                    checkAccessModes(element);
+                });
+            }
         } else {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_NODE));
-            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_NODE, () -> {
-            });
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_VIRTUAL_MACHINE, () -> {
+                    virtualMachine.unpause(instanceId);
+                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_CONTAINER, () -> {
+                    container.unPause(instanceId);
+                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_DYNAMIPS));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_DYNAMIPS, () -> {
+                    virtualDynamips.unPause(instanceId);
+                });
+            } else {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_NODE));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_NODE, () -> {
+                });
+            }
         }
     }
 }

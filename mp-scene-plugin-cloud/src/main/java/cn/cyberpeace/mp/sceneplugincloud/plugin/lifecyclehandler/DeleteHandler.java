@@ -6,12 +6,15 @@ import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
@@ -435,41 +438,53 @@ public class DeleteHandler extends HandlerCommon {
                     cloudElement.getSrcElement().getId());
             return;
         }
-
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_ROUTER,
-                    () -> deleteVirtualRouter(cloudElement));
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_FIREWALL,
-                    () -> deleteVirtualFirewall(cloudElement));
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
-                    () -> {
-                        deleteVirtualMachine(cloudElement);
-                        this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_CONTAINER,
-                    () -> {
-                        deleteContainer(cloudElement);
-                        this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_ENTITY_NODE,
-                    () -> {
-                        deleteEntityNode(cloudElement);
-                        this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                    });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_NPC,
-                    () -> {
-                        recordNpcNode(cloudElement);
-                    });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_DYNAMIPS,
-                    () -> {
-                        this.dynamipsIds.add(cloudElement.getResourceId());
-                    });
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
+                        () -> {
+                            AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                            azureVirtualMachine.delete(cloudElement);
+                            closeAccessModes(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            }
+        } else {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_ROUTER,
+                        () -> deleteVirtualRouter(cloudElement));
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_FIREWALL,
+                        () -> deleteVirtualFirewall(cloudElement));
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
+                        () -> {
+                            deleteVirtualMachine(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_CONTAINER,
+                        () -> {
+                            deleteContainer(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_ENTITY_NODE,
+                        () -> {
+                            deleteEntityNode(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_NPC,
+                        () -> {
+                            recordNpcNode(cloudElement);
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_DYNAMIPS,
+                        () -> {
+                            this.dynamipsIds.add(cloudElement.getResourceId());
+                        });
+            }
         }
     }
 
@@ -517,7 +532,7 @@ public class DeleteHandler extends HandlerCommon {
         log.info("CreateHandler.deleteEntityUsbs begin. cloudElement:{}", cloudElement);
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String>  usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
         data.setEntityUsbUuids(usbUuids);
         vmClient.deleteEntityUsbs(data);
     }

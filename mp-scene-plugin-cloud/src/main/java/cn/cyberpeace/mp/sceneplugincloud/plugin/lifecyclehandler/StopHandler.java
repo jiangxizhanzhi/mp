@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -21,7 +24,7 @@ import java.util.Arrays;
  * @Version: 1.0
  */
 @Slf4j
-public class StopHandler extends HandlerCommon{
+public class StopHandler extends HandlerCommon {
     //虚拟机云平台工具类
     private final VirtualMachine virtualMachine = new VirtualMachine();
     //容器云平台工具类
@@ -44,9 +47,9 @@ public class StopHandler extends HandlerCommon{
     }
 
     /**
-     * @description: 节点关闭
      * @param element
      * @return void
+     * @description: 节点关闭
      */
     public void stopElement(CloudPluginSceneElementBO element) {
         //获取节点id
@@ -55,40 +58,54 @@ public class StopHandler extends HandlerCommon{
         Integer virtualType = element.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", element.getSrcElement().getEid(),
-                element.getSrcElement().getId());
+                    element.getSrcElement().getId());
             return;
         }
         //实例id
         String instanceId = element.getResourceId();
-        //处理虚拟机，容器等
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
-                StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE));
-            runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE, () -> {
-                //关闭接入方式可用
-                closeAccessModes(element);
-                virtualMachine.stop(instanceId);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
-                StopHandler.ElementProcess.STOP_CONTAINER));
-            runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_CONTAINER, () -> {
-                //关闭接入方式可用
-                closeAccessModes(element);
-                container.stop(instanceId);
-            });
-        }else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
-                    StopHandler.ElementProcess.STOP_DYNAMIPS));
-            runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_DYNAMIPS, () -> {
-                //关闭接入方式可用
-                virtualDynamips.stop(instanceId);
-            });
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE, () -> {
+                    //关闭接入方式可用
+                    closeAccessModes(element);
+                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                    azureVirtualMachine.stop(instanceId);
+                });
+            }
         } else {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
-                StopHandler.ElementProcess.STOP_NODE));
-            runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_NODE, () -> {
-            });
+            //处理虚拟机，容器等
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_VIRTUAL_MACHINE, () -> {
+                    //关闭接入方式可用
+                    closeAccessModes(element);
+                    virtualMachine.stop(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_CONTAINER, () -> {
+                    //关闭接入方式可用
+                    closeAccessModes(element);
+                    container.stop(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_DYNAMIPS));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_DYNAMIPS, () -> {
+                    //关闭接入方式可用
+                    virtualDynamips.stop(instanceId);
+                });
+            } else {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_NODE));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_NODE, () -> {
+                });
+            }
         }
     }
 }

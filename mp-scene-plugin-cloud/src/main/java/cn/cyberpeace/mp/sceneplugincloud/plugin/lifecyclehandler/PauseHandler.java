@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -64,27 +67,40 @@ public class PauseHandler extends HandlerCommon {
             return;
         }
         String instanceId = element.getResourceId();
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_VIRTUAL_MACHINE));
-            runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_VIRTUAL_MACHINE, () -> {
-                closeAccessModes(element);
-                virtualMachine.pause(instanceId);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_CONTAINER));
-            runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_CONTAINER, () -> {
-                closeAccessModes(element);
-                container.pause(instanceId);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_DYNAMIPS));
-            runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_DYNAMIPS, () -> {
-                virtualDynamips.pause(instanceId);
-            });
+//        判断是否是微软云
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_VIRTUAL_MACHINE, () -> {
+                    closeAccessModes(element);
+                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                    azureVirtualMachine.pause(instanceId);
+                });
+            }
         } else {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_NODE));
-            runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_NODE, () -> {
-            });
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_VIRTUAL_MACHINE, () -> {
+                    closeAccessModes(element);
+                    virtualMachine.pause(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_CONTAINER, () -> {
+                    closeAccessModes(element);
+                    container.pause(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_DYNAMIPS));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_DYNAMIPS, () -> {
+                    virtualDynamips.pause(instanceId);
+                });
+            } else {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_NODE));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_NODE, () -> {
+                });
+            }
         }
     }
 }

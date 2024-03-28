@@ -3,10 +3,14 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -105,56 +109,68 @@ public class RecreateHandler extends HandlerCommon {
                 }
                 super.vpClient.syncFlowPortInfo(portIds, "delete");
             }
-
-            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
-                        () -> deleteVirtualRouter(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_FIREWALL,
-                        () -> deleteVirtualFirewall(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
-                        () -> {
-                            deleteVirtualMachine(cloudElement);
-                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                        });
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
-                        () -> {
-                            deleteContainer(cloudElement);
-                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                                cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var pluginPort = getPluginHandler().getPort(p.getId());
-                                    if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
-                                        for (int i = 0; i < 5; i++) {
-                                            try {
-                                                Thread.sleep(1000);
-                                                if (!super.containerClient.portExists(pluginPort.getResourceId())) {
+            Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+            if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+                if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
+                            () -> {
+                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                                azureVirtualMachine.delete(cloudElement);
+                                closeAccessModes(cloudElement);
+                                this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            });
+                }
+            } else {
+                if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
+                            () -> deleteVirtualRouter(cloudElement));
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_FIREWALL,
+                            () -> deleteVirtualFirewall(cloudElement));
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
+                            () -> {
+                                deleteVirtualMachine(cloudElement);
+                                super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
+                            () -> {
+                                deleteContainer(cloudElement);
+                                super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var pluginPort = getPluginHandler().getPort(p.getId());
+                                        if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
+                                            for (int i = 0; i < 5; i++) {
+                                                try {
+                                                    Thread.sleep(1000);
+                                                    if (!super.containerClient.portExists(pluginPort.getResourceId())) {
+                                                        break;
+                                                    }
+                                                } catch (MpRuntimeException e) {
                                                     break;
+                                                } catch (Exception e) {
+                                                    log.error("faild to query port {}", pluginPort.getResourceId());
                                                 }
-                                            } catch (MpRuntimeException e) {
-                                                break;
-                                            } catch (Exception e) {
-                                                log.error("faild to query port {}", pluginPort.getResourceId());
                                             }
                                         }
-                                    }
-                                });
-                            }
-                        });
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
-                        () -> {
-                            deleteEntityNode(cloudElement);
-                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                        });
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
-                        () -> {
-                            deleteVirtualDynamips(List.of(cloudElement.getResourceId()));
-                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
-                        });
+                                    });
+                                }
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
+                            () -> {
+                                deleteEntityNode(cloudElement);
+                                super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
+                            () -> {
+                                deleteVirtualDynamips(List.of(cloudElement.getResourceId()));
+                                super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            });
+                }
             }
         }
     }
@@ -177,52 +193,72 @@ public class RecreateHandler extends HandlerCommon {
                         cloudElement.getSrcElement().getId());
                 return;
             }
+            Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+            if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+                if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
+                            () -> {
+                                if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                        // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                        if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
+                                            p.setUsing(false);
+                                        }
+                                    });
+                                }
+                                List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
+                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics);
+                            });
+                }
+            } else {
 
-            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
-                        () -> createVirtualRouter(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_FIREWALL,
-                        () -> createVirtualFirewall(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
-                        () -> {
-                            if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                                cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
-                                    // 未分配ip并且连接的网络不是外部网络 标识端口未使用
-                                    if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
-                                        p.setUsing(false);
-                                    }
-                                });
-                            }
-                            createVirtualMachine(cloudElement);
-                        });
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
-                        () -> {
-                            if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                                cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
-                                    // 未分配ip并且连接的网络不是外部网络 标识端口未使用
-                                    if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
-                                        p.setUsing(false);
-                                    }
-                                });
-                            }
-                            createContainer(cloudElement);
-                        });
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
-                        () -> createEntityNode(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
-                        () -> {
-                            createVirtualDynamips(cloudElement);
-                            configDynamic(List.of(cloudElement));
-                        } );
+                if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_ROUTER,
+                            () -> createVirtualRouter(cloudElement));
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_FIREWALL,
+                            () -> createVirtualFirewall(cloudElement));
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
+                            () -> {
+                                if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                        // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                        if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
+                                            p.setUsing(false);
+                                        }
+                                    });
+                                }
+                                createVirtualMachine(cloudElement);
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
+                            () -> {
+                                if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                        // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                        if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
+                                            p.setUsing(false);
+                                        }
+                                    });
+                                }
+                                createContainer(cloudElement);
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
+                            () -> createEntityNode(cloudElement));
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
+                            () -> {
+                                createVirtualDynamips(cloudElement);
+                                configDynamic(List.of(cloudElement));
+                            });
+                }
             }
-
             //通知云平台需要统计环境总速率的端口
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
@@ -230,7 +266,8 @@ public class RecreateHandler extends HandlerCommon {
                     for (var p : cloudElement.getSrcElement().getPorts()) {
                         if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
                             portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
-                        };
+                        }
+                        ;
                     }
                 }
                 super.vpClient.syncFlowPortInfo(portIds, "add");

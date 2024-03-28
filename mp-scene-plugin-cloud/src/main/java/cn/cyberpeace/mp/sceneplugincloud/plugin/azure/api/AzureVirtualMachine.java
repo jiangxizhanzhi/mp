@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.KnownLinuxVirtualMachineImage;
-import com.azure.resourcemanager.compute.models.KnownWindowsVirtualMachineImage;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
 import com.azure.resourcemanager.network.models.Network;
@@ -87,10 +86,57 @@ public class AzureVirtualMachine {
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
+        virtualMachine.deallocate();//停机，释放资源
+//        删除虚拟机
         azureResourceManager.virtualMachines().deleteById(cloudElement.getResourceId());
+//        删除存储账户 无法从virtualMachine直接找到存储账户name stg472874959defb
+//        virtualMachine.storageProfile().osDisk().vhd().uri() https://stg472874959defb.blob.core.windows.net/vhds/MP_SCENE_ac5a089e081147e6af2406942cdd44bf-os-disk-b6e312ca-9d10-485a-a9f7-136bee35135a.vhd
+        String uri = virtualMachine.storageProfile().osDisk().vhd().uri();
+        String storageName = extractStorageAccountNameFromVhdUri(uri);
+        String groupName = virtualMachine.resourceGroupName();
+        azureResourceManager.storageAccounts().deleteByResourceGroup(groupName, storageName);
+//        删除网络接口
+        azureResourceManager.networkInterfaces().deleteById(virtualMachine.getPrimaryNetworkInterface().id());
+    }
+
+    // 从 VHD URI 中提取存储账户 ID
+    private static String extractStorageAccountNameFromVhdUri(String vhdUri) {
+        // 假设 VHD URI 的格式为：https://<storage-account-name>.blob.core.windows.net/<container-name>/<vhd-name>.vhd
+        // 根据该格式，可以提取存储账户
+        String[] parts = vhdUri.split("/");
+        if (parts.length >= 4) {
+            return parts[2].substring(0, parts[2].indexOf('.'));
+        }
+        return null;
     }
 
     public void execCommand(String group, String vmName, List<String> commands) {
         azureResourceManager.virtualMachines().runShellScript(group, vmName, commands, new ArrayList<>());
+    }
+
+    public void pause(String instanceId) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+        virtualMachine.powerOff();
+    }
+
+    public void restart(String instanceId) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+        virtualMachine.restart();
+    }
+
+    public void start(String instanceId) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+        virtualMachine.start();
+    }
+
+    public void unpause(String instanceId) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+        virtualMachine.start();
+    }
+
+    public void stop(String instanceId) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+        virtualMachine.deallocate();
     }
 }

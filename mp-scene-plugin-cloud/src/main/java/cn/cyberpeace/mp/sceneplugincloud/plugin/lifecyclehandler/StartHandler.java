@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
  * @Version: 1.0
  */
 @Slf4j
-public class StartHandler extends HandlerCommon{
+public class StartHandler extends HandlerCommon {
 
     //虚拟机云平台工具类
     private final VirtualMachine virtualMachine = new VirtualMachine();
@@ -53,32 +56,30 @@ public class StartHandler extends HandlerCommon{
 
 
     /**
-     * @description: 节点启动处理类
      * @param element
      * @return void
+     * @description: 节点启动处理类
      */
-    public void startElement(CloudPluginSceneElementBO element) {
-        //获取节点id
+    public void startElement(CloudPluginSceneElementBO element) {        //获取节点id
         String nodeId = element.getSrcElement().getId();
         //云平台虚拟化类型
         Integer virtualType = element.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", element.getSrcElement().getEid(),
-                element.getSrcElement().getId());
+                    element.getSrcElement().getId());
             return;
         }
         //实例id
         String instanceId = element.getResourceId();
-        //虚拟机，容器等启动
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            //前置过程
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
-                StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
-            //执行过程
-            runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
+
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 //启动
-                virtualMachine.start(instanceId);
-                if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
+                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                azureVirtualMachine.start(instanceId);
+//                TODO 挂载ISO USB
+                /*if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
                     this.attachISO(element);
                 }
                 //挂载一下usb
@@ -87,30 +88,54 @@ public class StartHandler extends HandlerCommon{
                 }
                 if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getEntityUsbs())) {
                     this.attachEntityUsbs(element);
-                }
+                }*/
                 //检查接入方式是否可用
                 checkAccessModes(element);
-            });
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
-                StartHandler.ElementProcess.START_CONTAINER));
-            runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_CONTAINER, () -> {
-                //启动
-                container.start(instanceId);
-                //检查接入方式是否可用
-                checkAccessModes(element);
-            });
-        }else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
-                    StartHandler.ElementProcess.START_DYNAMIPS));
-            runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_DYNAMIPS, () -> {
-                virtualDynamips.start(instanceId);
-            });
+            }
         } else {
-            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
-                StartHandler.ElementProcess.START_NODE));
-            runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_NODE, () -> {
-            });
+            //虚拟机，容器等启动
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                //前置过程
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
+                //执行过程
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
+                    //启动
+                    virtualMachine.start(instanceId);
+                    if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
+                        this.attachISO(element);
+                    }
+                    //挂载一下usb
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getVirtualUsbs())) {
+                        this.attachVirtualUsbs(element);
+                    }
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getEntityUsbs())) {
+                        this.attachEntityUsbs(element);
+                    }
+                    //检查接入方式是否可用
+                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_CONTAINER, () -> {
+                    //启动
+                    container.start(instanceId);
+                    //检查接入方式是否可用
+                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_DYNAMIPS));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_DYNAMIPS, () -> {
+                    virtualDynamips.start(instanceId);
+                });
+            } else {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_NODE));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_NODE, () -> {
+                });
+            }
         }
     }
 
