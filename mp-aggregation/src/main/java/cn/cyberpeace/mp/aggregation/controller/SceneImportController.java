@@ -41,8 +41,11 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_resource_center")
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
+        log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
-            return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
+            String detail = "导出场景参数错误,缺少path参数 , 输入参数为: " + JsonCommon.stringify(request);
+            log.info(detail);
+            return ResultCommon.fail(detail);
         }
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ResultCommon.success(serviceResult.getSource().getId());

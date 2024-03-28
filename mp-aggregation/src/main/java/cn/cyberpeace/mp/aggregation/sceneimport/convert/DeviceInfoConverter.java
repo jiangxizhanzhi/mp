@@ -2,6 +2,10 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocol;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
@@ -62,9 +66,25 @@ class DeviceInfoConverter implements IConverter {
             request.setLikeName(false);
             //不过滤隐藏靶标
             request.setIsHide(Boolean.TRUE);
-            BasePageBO<Device> targetSceneConvertModel = this.targetConverter.allTarget(new ImagePageDTO(request));
+            BasePageBO<Device> targetSceneConvertModel = null;
+            ImagePageDTO imagePageDTOParams = new ImagePageDTO(request);
+            try {
+                targetSceneConvertModel = this.targetConverter.allTarget(imagePageDTOParams);
+            } catch (Exception e) {
+                String detail = "导入场景失败,调用云平台所有靶标接口报错,输入参数:" + JsonCommon.stringify(imagePageDTOParams) + ",响应:" + e.getMessage();
+                log.error(detail, e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+            }
             if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
-                List<Device> devices = this.targetConverter.getCommonTargets(request.getName());
+                List<Device> devices = null;
+                try {
+                    devices = this.targetConverter.getCommonTargets(request.getName());
+                } catch (Exception e) {
+                    String detail = "导入场景失败,调用云平台常用靶标接口报错,输入参数:" + request.getName() + ",响应:" + e.getMessage();
+                    log.error(detail, e);
+                    throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                }
+
                 if (CollectionUtils.isEmpty(devices)) {
                     log.info("import scene ,no device find , image is {}", request.getName());
                 } else {
@@ -148,8 +168,8 @@ class DeviceInfoConverter implements IConverter {
                 if (pluginPort.getAccessModes() == null) {
                     pluginPort.setAccessModes(new ArrayList<>());
                 }
-                for (var protocol : access.getAccessProtocols()) {
-                    var accessMode = new AccessMode();
+                for (AccessProtocol protocol : access.getAccessProtocols()) {
+                    AccessMode accessMode = new AccessMode();
                     accessMode.setUsername(protocol.getUsername());
                     accessMode.setPassword(protocol.getPassword());
                     accessMode.setProtocol(protocol.getProtocol());
@@ -161,7 +181,7 @@ class DeviceInfoConverter implements IConverter {
                     accessMode.setPrivateKeyFileName(protocol.getPrivateKeyFileName());
                     port.getAccessModes().add(accessMode);
 
-                    var pluginAccessMode = new CloudAccessMode();
+                    CloudAccessMode pluginAccessMode = new CloudAccessMode();
                     pluginAccessMode.setUsername(protocol.getUsername());
                     pluginAccessMode.setPassword(protocol.getPassword());
                     pluginAccessMode.setProtocol(protocol.getProtocol());
