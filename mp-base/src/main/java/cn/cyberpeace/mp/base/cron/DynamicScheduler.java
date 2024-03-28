@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 @Slf4j
@@ -25,12 +26,12 @@ public class DynamicScheduler {
 
     public void startJob(TaskInfo taskInfo) {
         if (TASK_INFOS.containsKey(taskInfo.getTaskId())) {
-            log.error("start cron job error , cron job {} exists ", taskInfo.getTaskId());
+            log.error("load cron job error , cron job {} exists ", taskInfo.getTaskId());
         } else {
             TASK_INFOS.put(taskInfo.getTaskId(), taskInfo);
-            ScheduledFuture<?> s = taskScheduler.schedule(taskInfo.getJob(), new CronTrigger(taskInfo.getCron()));
+            ScheduledFuture<?> s = taskScheduler.schedule(new FormatJob(taskInfo), new CronTrigger(taskInfo.getCron()));
             CRON_JOBS.put(taskInfo.getTaskId(), s);
-            log.info("start cron job , task info is [{}]", taskInfo.getShowInfo());
+            log.info("load cron job , task info is [{}]", taskInfo.getShowInfo());
         }
     }
 
@@ -44,13 +45,38 @@ public class DynamicScheduler {
             log.info("update cron job , origin info is [{}]", taskInfo.getShowInfo());
             taskInfo.setCron(cron);
             // 停止原任务
-            CRON_JOBS
-                    .remove(id)
-                    .cancel(true);
+            CRON_JOBS.remove(id)
+                    .cancel(false);
             // 开启新任务
             this.startJob(taskInfo);
             log.info("update cron job , new info is [{}]", taskInfo.getShowInfo());
         }
     }
 
+    private static class FormatJob implements Runnable {
+        private ReentrantLock lock;
+
+        private TaskInfo taskInfo;
+
+        public FormatJob(TaskInfo taskInfo) {
+            this.taskInfo = taskInfo;
+            this.lock = new ReentrantLock();
+        }
+
+        @Override
+        public void run() {
+            if (this.lock.tryLock()) {
+                try {
+                    log.debug("start job --> " + taskInfo.getShowInfo());
+                    taskInfo.getMethodTask()
+                            .action();
+                    log.debug("end job --> " + taskInfo.getShowInfo());
+                } finally {
+                    this.lock.unlock();
+                }
+            } else {
+                log.info("cron job is running , job info is [{}]", taskInfo.getShowInfo());
+            }
+        }
+    }
 }

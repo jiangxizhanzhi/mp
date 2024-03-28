@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.job;
 
-import cn.cyberpeace.mp.base.cron.MpScheduler;
+import cn.cyberpeace.mp.base.cron.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -23,7 +23,7 @@ public class CleanUselessEsDataCronJob {
     @Resource
     private ScenePluginCollectionSceneService collectionSceneService;
 
-    @MpScheduler(cron = "0/30 * * * * ?", id = "clean_useless_es_data", description = "清理已关闭场景中无效的es数据")
+    @MpScheduled(cron = "0 0 1 * * ?", id = "clean_useless_es_data", description = "清理已关闭场景中无效的es数据")
     public void action() {
         LocalDateTime twoDaysAgo = LocalDateTime
                 .now()
