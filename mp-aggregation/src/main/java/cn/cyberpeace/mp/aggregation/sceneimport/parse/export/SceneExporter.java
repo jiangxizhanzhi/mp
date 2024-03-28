@@ -140,7 +140,7 @@ public class SceneExporter {
                     result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
                     }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
                 } catch (MpRuntimeException e) {
-                    String detail = "导出镜像接口报错 , 参数为: " + JsonCommon.stringify(params) + ",结果为: " + ExceptionUtil.stacktraceToString(e);
+                    String detail = "导出镜像接口报错 , 参数为: " + JsonCommon.stringify(params) + ",结果为: " + e.getMessage();
                     log.error(detail, e);
                     e.setDetail(detail);
                     throw e;
@@ -158,7 +158,14 @@ public class SceneExporter {
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/") || device.getLogo().startsWith("group1/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
-                    byte[] content = FsCommon.downloadRawContent(logoUrl);
+                    byte[] content = null;
+                    try {
+                        content = FsCommon.downloadRawContent(logoUrl);
+                    } catch (Exception e) {
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + logoUrl;
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                    }
                     // 判断图片文件类型
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
@@ -175,8 +182,9 @@ public class SceneExporter {
                         File logo = new File(filePath);
                         content = FileUtils.readFileToByteArray(logo);
                     } catch (Exception e) {
-                        log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
-                        throw new MpRuntimeException(BaseErrorCode.ERROR);
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + device.getLogo();
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
@@ -186,7 +194,14 @@ public class SceneExporter {
                         image.setLOGO("logo.jpg");
                     }
                 } else {
-                    byte[] content = FsCommon.downloadRawContent(device.getLogo());
+                    byte[] content = null;
+                    try {
+                        content = FsCommon.downloadRawContent(device.getLogo());
+                    } catch (Exception e) {
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + device.getLogo();
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                    }
                     // 判断图片文件类型
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
@@ -293,8 +308,9 @@ public class SceneExporter {
         try {
             FileUtils.writeByteArrayToFile(new File(filePath), content);
         } catch (Exception e) {
-            log.error("failed to write file:{} ", ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            String detail = "导出场景出错 , 创建文件失败,文件地址: " + filePath;
+            log.error(detail, e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
         }
     }
 
