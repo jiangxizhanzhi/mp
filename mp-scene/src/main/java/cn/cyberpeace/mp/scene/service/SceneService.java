@@ -67,7 +67,7 @@ public class SceneService {
             if (sceneDataBO.getTopology().getScene().getMultiSceneType() == BaseSceneModel.MultiSceneType.MULTI_SCENE) {
                 sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), "", false, context, true));
             } else {
-                sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO, false, context, true));
+                sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO, false, context));
             }
 
             sceneHandler.setRealTimeUpdate(true);
