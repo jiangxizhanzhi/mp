@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.base.cron.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
+import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -21,29 +24,40 @@ public class CleanUselessEsDataCronJob {
     private CsceneInstanceMapper csceneInstanceMapper;
 
     @Resource
-    private ScenePluginCollectionSceneService collectionSceneService;
+    private CollectionPluginSceneMapper collectionPluginSceneMapper;
+
+    @Resource
+    private FlowAnalysisService flowAnalysisService;
 
     @MpScheduled(cron = "0 0 1 * * ?", id = "clean_useless_es_data", description = "清理已关闭场景中无效的es数据")
     public void action() {
-        LocalDateTime twoDaysAgo = LocalDateTime
-                .now()
+        LocalDateTime twoDaysAgo = LocalDateTime.now()
                 .minusDays(2);
-
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CsceneInstanceModel::getDeleted, true)
-                .filterGreaterThan(CsceneInstanceModel::getUpdateTime, twoDaysAgo);
+        int page = 1;
+        int pageSize = 50;
+        int maxBatchSize = 50;
+        HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneInstanceModel::getDeleted, true)
+                .filterGreaterThan(CsceneInstanceModel::getUpdateTime, twoDaysAgo)
+                .orderBy(CsceneInstanceModel::getPk)
+                .pagination(page, pageSize);
         List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(humanCondition);
-        if (CollectionUtils.isEmpty(csceneInstances)) {
-            return;
-        }
-
-        for (CsceneInstanceModel csceneInstance : csceneInstances) {
-            String sceneId = csceneInstance.getScene();
-            try {
-                collectionSceneService.cleanUselessESData(sceneId);
-            } catch (Exception e) {
-                log.error("failed to clean one scene , scene id is " + sceneId, e);
+        while (CollectionUtils.isNotEmpty(csceneInstances) && page < maxBatchSize) {
+            page++;
+            for (CsceneInstanceModel csceneInstance : csceneInstances) {
+                String sceneId = csceneInstance.getScene();
+                var queryCollectionScene = new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId);
+                CollectionPluginSceneModel scene = collectionPluginSceneMapper.first(queryCollectionScene);
+                if (scene == null || StringUtils.isEmpty(scene.getFlowCollector())) {
+                    continue;
+                }
+                try {
+                    flowAnalysisService.clearUselessArkimeESIndex(scene.getFlowCollector());
+                } catch (Exception e) {
+                    log.error("failed to clean one scene , scene id is " + sceneId, e);
+                }
             }
+            humanCondition.pagination(page, pageSize);
+            csceneInstances = csceneInstanceMapper.list(humanCondition);
         }
     }
 
