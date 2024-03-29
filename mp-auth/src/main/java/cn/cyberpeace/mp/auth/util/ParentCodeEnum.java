@@ -6,7 +6,9 @@ import java.util.Map;
 public enum ParentCodeEnum {
 
     UNKNOWN_ERROR("0000", "发生未知错误"),
-    PARENT_SYSTEM_TYPE("1001", "操作系统");
+    PARENT_SYSTEM_TYPE("1001", "操作系统"),
+
+    PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单");
 
     private String code;
     private String message;

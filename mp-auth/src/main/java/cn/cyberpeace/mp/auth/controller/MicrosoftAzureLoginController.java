@@ -72,7 +72,7 @@ public class MicrosoftAzureLoginController {
     }
 
     @ApiOperation(value = "修改账号信息", notes = "")
-    @PostMapping("/updateLocalAzurer")
+    @PutMapping("/updateLocalAzurer")
     public ServiceResult<MicrosoftAzureUserModel> updateLocalAzurer(@RequestBody(required = true) JSONObject requestData) {
         Boolean updateLocalAzurer = microsoftAzureLoginService.updateLocalAzurer(requestData);
         if(updateLocalAzurer){

@@ -7,5 +7,7 @@ public class ControllerConstant {
 
     public static final String BASE_LOAD_API_PATH = "/load";
 
+    public static final String BASE_CLOUD_SCENE_API_PATH = "/cloudScene";
+
     private ControllerConstant() {}
 }

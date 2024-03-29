@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -29,7 +30,9 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
      * @param parentCode
      * @return
      */
-    List<JSONObject> getOS(@Param("parentCode") String parentCode);
+    List<JSONObject> getSingleLayerList(@Param("parentCode") String parentCode);
 
     DeviceCloudTargetPO getCloudTargetByPk(@Param("pk") String pk);
+
+    List<MpSysCodeEnum> getAlldata(String code);
 }

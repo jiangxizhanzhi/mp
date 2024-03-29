@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 
+import java.util.List;
+
 public interface BaseConverter {
 
     default String[] getDefaultPageIgnoreField() {

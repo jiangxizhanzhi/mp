@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
+import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 镜像管理
@@ -31,7 +34,7 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像管理页面分页查询", notes = "")
     @GetMapping("/list")
-    public ListObjServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
+    public ServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                                    @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                                                    @RequestParam(value = "name", required = false) String name,
                                                    @RequestParam(value = "systemType", required = false) String systemType) {
@@ -40,7 +43,8 @@ public class MicrosoftAzureController {
         requestData.put("systemType", systemType);
         requestData.put("pageNum", pageNum);
         requestData.put("pageSize", pageSize);
-        return microsoftAzureConverter.getCloudTargetList(requestData).asResult();
+        List cloudTargetList = microsoftAzureConverter.getCloudTargetList(requestData);
+        return new Result(cloudTargetList).asResult();
     }
 
     /**
@@ -48,8 +52,9 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "操作系统下拉框", notes = "")
     @GetMapping("/getOS")
-    public ListObjServiceResult getOS() {
-        return microsoftAzureConverter.getOS().asResult();
+    public ServiceResult getOS() {
+        List<JSONObject> os = microsoftAzureConverter.getOS();
+        return new Result(os).asResult();
     }
 
     /**
@@ -57,8 +62,13 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像删除", notes = "")
     @DeleteMapping("/delete")
-    public ListObjServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
-        return microsoftAzureConverter.deleteCloudTarget(requestData);
+    public ServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
+        Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(requestData);
+        if(deleteCloudTarget){
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+        }else{
+            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+        }
     }
 
     @ApiOperation(value = "云镜像管理页面pk查询", notes = "")
@@ -73,9 +83,14 @@ public class MicrosoftAzureController {
      * 云镜像编辑
      */
     @ApiOperation(value = "云镜像编辑", notes = "")
-    @PostMapping("/update")
-    public ListObjServiceResult updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
-        return microsoftAzureConverter.updateCloudTarget(requestData);
+    @PutMapping("/update")
+    public ServiceResult updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
+        Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(requestData);
+        if(updateCloudTarget){
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+        }else{
+            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+        }
     }
 
     /**
@@ -83,7 +98,12 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像管理同步", notes = "")
     @GetMapping("/synchronousCloudData")
-    public ListObjServiceResult synchronousCloudData(@RequestBody(required = false) JSONObject requestData) throws Exception {
-        return microsoftAzureConverter.synchronousCloudData(requestData);
+    public ServiceResult synchronousCloudData(@RequestBody(required = false) JSONObject requestData) throws Exception {
+        JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(requestData);
+        if(synchronousCloudData.get("code")!=null && synchronousCloudData.get("code").equals("200")){
+            return new ServiceResult<>(synchronousCloudData).asResult();
+        }else{
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,synchronousCloudData.get("message").toString());
+        }
     }
 }

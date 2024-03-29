@@ -22,7 +22,7 @@ import java.util.List;
 public class MixAzureResourceManager implements IAzureResourceManager {
 
     //当前云环境账号
-    private MicrosoftAzureUserModel microsoftAzureUserModel;
+    public MicrosoftAzureUserModel microsoftAzureUserModel;
 
     @Autowired
     private MicrosoftAzureLoginServiceImpl microsoftAzureLoginService;

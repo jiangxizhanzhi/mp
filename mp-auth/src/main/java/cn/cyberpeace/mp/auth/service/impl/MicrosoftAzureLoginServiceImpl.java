@@ -25,6 +25,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     public ListObjServiceResult getMicrosoftAzureUserList(JSONObject requestData) {
         Integer pageNum = requestData != null && requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
         Integer pageSize = requestData != null && requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
+        requestData.put("pageSize",pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MicrosoftAzureUserModel> list = microsoftAzureLoginMapper.getMicrosoftAzureUserList(requestData);
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
