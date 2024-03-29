@@ -100,7 +100,7 @@ public class FlowQueryService {
         Map<String, List<CountBO>> severityMap = flowInfoService.queryAttackLevel();
         Map<String, TrendVO> resultMap = Maps.newHashMap();
 
-        for (int level = 1; level <= 4; level++) {
+        for (int level = 0; level <= 5; level++) {
             String levelName = getSeverityDisplayName(String.valueOf(level));
             TrendVO vo = resultMap.computeIfAbsent(levelName, k -> new TrendVO());
             vo.setName(levelName);
@@ -818,11 +818,15 @@ public class FlowQueryService {
      */
     private String getSeverityDisplayName(String severity) {
         if ("1".equals(severity)) {
-            return "高级";
+            return "极高";
         } else if ("2".equals(severity)) {
+            return "高级";
+        } else if ("3".equals(severity)) {
             return "中级";
-        } else if ("3".equals(severity) || "4".equals(severity)) {
+        } else if ("4".equals(severity)) {
             return "低级";
+        } else if ("5".equals(severity)) {
+            return "极低";
         }
 
         return "";
