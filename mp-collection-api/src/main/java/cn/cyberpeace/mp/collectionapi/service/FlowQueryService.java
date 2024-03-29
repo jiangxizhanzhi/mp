@@ -100,7 +100,7 @@ public class FlowQueryService {
         Map<String, List<CountBO>> severityMap = flowInfoService.queryAttackLevel();
         Map<String, TrendVO> resultMap = Maps.newHashMap();
 
-        for (int level = 0; level <= 5; level++) {
+        for (int level = 1; level <= 5; level++) {
             String levelName = getSeverityDisplayName(String.valueOf(level));
             TrendVO vo = resultMap.computeIfAbsent(levelName, k -> new TrendVO());
             vo.setName(levelName);
