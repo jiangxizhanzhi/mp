@@ -29,7 +29,7 @@ public class CleanUselessEsDataCronJob {
     @Resource
     private FlowAnalysisService flowAnalysisService;
 
-    @MpScheduled(cron = "0 0 1 * * ?", id = "clean_useless_es_data", description = "清理已关闭场景中无效的es数据")
+    @MpScheduled(cron = "0 0 1 * * ?", id = "clean_useless_es_data", description = "清理最近关闭的场景中多余的es数据")
     public void action() {
         LocalDateTime twoDaysAgo = LocalDateTime.now()
                 .minusDays(2);

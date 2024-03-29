@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.base.cron;
 
 import cn.cyberpeace.mp.base.annotation.LocalCallFunc;
 import cn.cyberpeace.mp.base.annotation.LocalCallServer;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -26,13 +29,28 @@ public class DynamicScheduler {
 
     public void startJob(TaskInfo taskInfo) {
         if (TASK_INFOS.containsKey(taskInfo.getTaskId())) {
-            log.error("load cron job error , cron job {} exists ", taskInfo.getTaskId());
+            String detail = "load cron job error , cron job " + taskInfo.getTaskId() + " exists ";
+            log.error(detail);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
         } else {
             TASK_INFOS.put(taskInfo.getTaskId(), taskInfo);
-            ScheduledFuture<?> s = taskScheduler.schedule(new FormatJob(taskInfo), new CronTrigger(taskInfo.getCron()));
-            CRON_JOBS.put(taskInfo.getTaskId(), s);
-            log.info("load cron job , task info is [{}]", taskInfo.getShowInfo());
+            if (taskInfo.getInitialDelaySeconds() > 0) {
+                // 在初始化后需要延迟执行的
+                var loadJobTime = new Date(System.currentTimeMillis() + taskInfo.getInitialDelaySeconds() * 1000);
+                taskScheduler.schedule(() -> {
+                    this.doLoadJob(taskInfo);
+                }, loadJobTime);
+            } else {
+                // 可以直接执行的
+                this.doLoadJob(taskInfo);
+            }
         }
+    }
+
+    private void doLoadJob(TaskInfo taskInfo) {
+        ScheduledFuture<?> s = taskScheduler.schedule(new FormatJob(taskInfo), new CronTrigger(taskInfo.getCron()));
+        CRON_JOBS.put(taskInfo.getTaskId(), s);
+        log.info("load cron job , task info is [{}]", taskInfo.getShowInfo());
     }
 
     @LocalCallFunc
@@ -48,7 +66,7 @@ public class DynamicScheduler {
             CRON_JOBS.remove(id)
                     .cancel(false);
             // 开启新任务
-            this.startJob(taskInfo);
+            this.doLoadJob(taskInfo);
             log.info("update cron job , new info is [{}]", taskInfo.getShowInfo());
         }
     }

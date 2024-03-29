@@ -22,12 +22,15 @@ public class TaskInfo {
 
     private String cron;
 
+    private int initialDelaySeconds;
+
     private MethodTask methodTask;
 
-    public TaskInfo(String taskId, String description, String cron, MethodTask methodTask) {
+    public TaskInfo(String taskId, String description, String cron, int initialDelaySeconds, MethodTask methodTask) {
         this.taskId = taskId;
         this.description = description;
         this.cron = cron;
+        this.initialDelaySeconds = initialDelaySeconds;
         this.methodTask = methodTask;
     }
 

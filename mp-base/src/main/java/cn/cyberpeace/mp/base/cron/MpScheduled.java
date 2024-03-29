@@ -13,4 +13,6 @@ public @interface MpScheduled {
     String description();
 
     String cron();
+
+    int initialDelaySeconds() default 0;
 }

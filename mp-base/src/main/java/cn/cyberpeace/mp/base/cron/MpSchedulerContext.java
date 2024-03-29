@@ -34,8 +34,9 @@ public class MpSchedulerContext implements BeanPostProcessor, ApplicationRunner 
                 String taskId = mpScheduled.id();
                 String desc = mpScheduled.description();
                 String cron = mpScheduled.cron();
+                int initialDelaySeconds = mpScheduled.initialDelaySeconds();
                 TaskInfo.MethodTask methodTask = new TaskInfo.MethodTask(method, bean);
-                taskInfos.add(new TaskInfo(taskId, desc, cron, methodTask));
+                taskInfos.add(new TaskInfo(taskId, desc, cron, initialDelaySeconds, methodTask));
             }
         });
         return bean;
