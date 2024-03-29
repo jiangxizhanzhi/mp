@@ -887,7 +887,8 @@ public abstract class BaseSceneHandler<
         S0 sceneObj = scene.toModel();
         var result = sceneMapper.save(sceneObj);
         sceneId = sceneObj.getId();
-        scene.fromModel(sceneObj);
+//        scene.fromModel(sceneObj);
+        scene.setEid(sceneObj.getId());
 
         plugins.forEach(plugin -> plugin.setSourceSceneId(sceneId));
 
