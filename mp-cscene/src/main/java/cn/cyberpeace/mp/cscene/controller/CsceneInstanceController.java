@@ -48,6 +48,8 @@ import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -593,6 +595,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @ApiOperation("查微软云列表（同步用）")
+    @PostMapping("/vm_list")
+    public ServiceResult<Boolean> vmList(@RequestBody(required = false) CsceneInstanceActionRequest request) {
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
+        azureVirtualMachine.VirtualMachinelist();
+        return new ServiceResult<Boolean>(true).asResult();
+    }
+
     @ApiOperation("暂停场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -632,7 +642,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             } finally {
                 ReentrantLockUtils.unLock("pause" + id);
             }
-        }else {
+        } else {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
         }
     }
@@ -684,11 +694,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("节点开机")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
     })
     @PostMapping("/start_element")
     public ServiceResult<Boolean> startElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
-        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        request = formatNodeActionRequest(request, request.getId(), request.getNodeId());
         modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.startElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         return result;
@@ -696,11 +706,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("节点关机")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
     })
     @PostMapping("/stop_element")
     public ServiceResult<Boolean> stopElement(@RequestBody(required = true) CsceneInstanceNodeActionRequest request) {
-        request = formatNodeActionRequest(request,request.getId(),request.getNodeId());
+        request = formatNodeActionRequest(request, request.getId(), request.getNodeId());
         modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.stopElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         return result;
@@ -746,8 +756,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @PostMapping("/create_element")
     public ServiceResult<Boolean> startElement(@RequestParam(required = false) String id,
-                                                  @RequestParam(value = "node_id", required = false) String nodeId,
-                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
+                                               @RequestParam(value = "node_id", required = false) String nodeId,
+                                               @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.createElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
 //        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
@@ -777,7 +787,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
         log.info("modify_element params,request:{}", JsonCommon.snakeStringify(elementModifyBO));
         CsceneDataModifier.removeFilePathPrefix(elementModifyBO);
-        modelService.modifyElement(elementModifyBO,elementModifyBO.getContext());
+        modelService.modifyElement(elementModifyBO, elementModifyBO.getContext());
         return new ServiceResult<>(new ElementModifyBO()).asResult();
     }
 

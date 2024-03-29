@@ -5,11 +5,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.compute.models.KnownLinuxVirtualMachineImage;
-import com.azure.resourcemanager.compute.models.VirtualMachine;
-import com.azure.resourcemanager.compute.models.VirtualMachineSizeTypes;
+import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
 
@@ -29,6 +28,44 @@ public class AzureVirtualMachine {
         this.region = resourceService.getRegin();
     }
 
+    public void VirtualMachinelist(){
+//        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(Region.ASIA_EAST);
+        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(Region.ASIA_EAST);
+        VirtualMachinePublisher chosenPublisher;
+        for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
+
+            System.out.println("Publisher - " + publisher.name());
+
+            if (publisher.name().equalsIgnoreCase("Canonical")
+                    || publisher.name().equalsIgnoreCase("Suse")
+                    || publisher.name().equalsIgnoreCase("RedHat")) {
+
+                chosenPublisher = publisher;
+                System.out.print("\n\n");
+                System.out.println("=======================================================");
+                System.out.println("Located " + chosenPublisher.name());
+                System.out.println("=======================================================");
+                System.out.println("Printing entries as publisher/offer/sku/image.version()");
+
+                for (VirtualMachineOffer offer : chosenPublisher.offers().list()) {
+                    for (VirtualMachineSku sku: offer.skus().list()) {
+//                        for (VirtualMachineImage image : sku.images().list()) {
+                            System.out.println("Image - " + chosenPublisher.name() + "/"
+                                    + offer.name() + "/"
+                                    + sku.name());
+//                        }
+                    }
+
+                }
+
+                System.out.print("\n\n");
+
+            }
+        }
+        System.out.println("end------------------------------------------------");
+
+    }
+
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         String groupName = pluginHandler.getSourceSceneId();
 
@@ -41,7 +78,6 @@ public class AzureVirtualMachine {
         String imageName = cloudElement.getImage();
         // azure todo 根据imageName 获取 对应的 image
         KnownLinuxVirtualMachineImage image = KnownLinuxVirtualMachineImage.UBUNTU_SERVER_16_04_LTS;
-
         // 获取网卡的信息
 
         // 取第一块网卡
@@ -55,15 +91,19 @@ public class AzureVirtualMachine {
                 .withSubnet("sub")
                 .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
                 .withoutPrimaryPublicIPAddress()
-                .withPopularLinuxImage(image)
+                .withLatestLinuxImage("Canonical", "0001-com-ubuntu-server-focal", "20_04-lts")
+//                .withPopularLinuxImage(image)
                 .withRootUsername("root1")
                 .withRootPassword("ycxx123#") // 必须要是6位以上,且有一个特殊字符
-                .withUnmanagedDisks()
-                .defineUnmanagedDataDisk("disk-1")
-                .withNewVhd(cloudElement.getSrcElement().getDisk())
-                .withLun(1)
-                .attach()
+//                .withUnmanagedDisks()
+//                .defineUnmanagedDataDisk("disk-1")
+//                .withNewVhd(cloudElement.getSrcElement().getDisk())
+//                .withLun(1)
+//                .attach()
                 .withSize(flavor);
+
+        // 创建虚拟机定义
+
 
         // 加其他网卡
         for (int i = 1; i < virtualNics.size(); i++) {
@@ -80,6 +120,7 @@ public class AzureVirtualMachine {
                     .create();
             creater.withExistingSecondaryNetworkInterface(ni);
         }
+
         // azure todo 创建虚拟机 回写数据
         VirtualMachine vm = creater.create();
         cloudElement.setResourceId(vm.id());
