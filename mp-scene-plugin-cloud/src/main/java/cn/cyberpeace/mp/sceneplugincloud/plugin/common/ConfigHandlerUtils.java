@@ -52,6 +52,12 @@ public class ConfigHandlerUtils {
         return auxiliaryNetworkCloudElement;
     }
 
+    /**
+     * @deprecated
+     * @param portId
+     * @return 替代方法为 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getPortConnectedSrcPort(java.lang.String)
+     */
+    @Deprecated
     public SceneConfigElementPortBO getPortConnectedOpaqueSrcPort(String portId) {
         SceneConfigElementPortBO connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
         if (connectedSrcPort == null) {

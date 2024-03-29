@@ -372,10 +372,12 @@ public class HandlerUtils {
     }
 
     /**
+     * @deprecated 替代方法 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getElementConnectedSrcElements(java.lang.String)
      * 获得节点连接的不透明元素，忽略透明模式节点
      * @param nodeId 节点id
      * @return 节点连接的不透明元素
      */
+    @Deprecated
     public List<SceneElementBO> getEleConnectedOpaqueSrcElements(String nodeId) {
         Map<String, SceneElementBO> nodeIdSrcElementMap = new HashMap<>();
         List<SceneElementPortBO> connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(nodeId);
@@ -388,10 +390,12 @@ public class HandlerUtils {
     }
 
     /**
+     * @deprecated 替代方法 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getElementConnectedSrcPorts(java.lang.String)
      * 获得节点连接的不透明端口，忽略透明模式节点
      * @param nodeId 节点id
      * @return 节点连接的不透明端口
      */
+    @Deprecated
     public List<SceneElementPortBO> getEleConnectedOpaqueSrcPorts(String nodeId) {
         List<SceneElementPortBO> connectedOpaqueSrcPorts = new ArrayList<>();
         SceneElementBO srcElement = getPluginHandler().getSrcElement(nodeId);
@@ -414,7 +418,9 @@ public class HandlerUtils {
      * 获得端口连接的不透明端口，忽略透明模式节点
      * @param portId 端口id
      * @return 节点连接的不透明元素
+     * @deprecated 替代方法为 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getPortConnectedSrcPort(java.lang.String)
      */
+    @Deprecated
     public SceneElementPortBO getPortConnectedOpaqueSrcPort(String portId) {
         SceneElementPortBO connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
         if (connectedSrcPort == null) {
@@ -453,7 +459,9 @@ public class HandlerUtils {
      * 获得端口连接的不透明节点，忽略透明模式节点
      * @param portId 端口id
      * @return 节点连接的不透明元素
+     * @deprecated 替代方法为 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getPortSrcElement(java.lang.String)
      */
+    @Deprecated
     public SceneElementBO getPortConnectedOpaqueSrcElement(String portId) {
         SceneElementPortBO connectedSrcPort = getPortConnectedOpaqueSrcPort(portId);
         if (connectedSrcPort == null) {
