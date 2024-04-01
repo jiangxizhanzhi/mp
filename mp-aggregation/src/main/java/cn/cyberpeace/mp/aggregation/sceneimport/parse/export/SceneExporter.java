@@ -14,7 +14,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -151,12 +153,35 @@ public class SceneExporter {
 
                 // 描述
                 image.set描述(imageInfo.getDescription());
-                image.set系统架构("x64");
+                // 系统架构
+                if (imageInfo.getExtSystemInfo() != null) {
+                    image.set系统架构(imageInfo.getExtSystemInfo()
+                                              .getSystemArchitecture());
+                }
+                // 系统版本
                 image.set系统版本("系统版本");
-                image.set系统类型("LINUX");
-                image.set系统语言("中文");
+                // 系统语言
+                if (imageInfo.getExtImageInfo() != null) {
+                    String language = "cn".equals(imageInfo.getExtSystemInfo()
+                                                          .getLanguage()) ? "中文" : "英文";
+                    image.set系统语言(language);
+                }
+                // 系统类型
+                if (imageInfo.getExtSystemInfo() != null) {
+                    Integer systemType = imageInfo.getExtSystemInfo()
+                            .getSystemType();
+                    if (systemType != null) {
+                        String type = SystemTypeUtils.getStandardSystemType(systemType.toString())
+                                .toUpperCase();
+                        image.set系统类型(type);
+                    }
+                }
+                if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(device.getImageType())) {
+                    image.set虚拟类型("虚拟机");
+                } else {
+                    image.set虚拟类型("容器");
+                }
                 image.set虚拟机文件("disk");
-                image.set虚拟类型("虚拟机");
                 image.set角色("终端节点");
                 image.set镜像分类("操作系统");
                 image.set镜像格式("qcow2");

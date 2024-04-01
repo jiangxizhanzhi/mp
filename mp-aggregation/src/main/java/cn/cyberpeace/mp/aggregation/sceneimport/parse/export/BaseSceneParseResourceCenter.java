@@ -94,6 +94,7 @@ public class BaseSceneParseResourceCenter {
                 Device device = new Device();
                 device.setImageUuid(node.getImageUuid());
                 device.setImage(node.getImage());
+                device.setImageType(node.getImageType());
                 device.setAccessModes(new ArrayList<>());
                 // 虚拟机导出时才有自定义的flavor信息
                 if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())) {
@@ -131,6 +132,7 @@ public class BaseSceneParseResourceCenter {
     @Getter
     public static class Device {
         private String image;
+        private String imageType;
         private String logo;
         private String imageUuid;
         private Integer cpu;
