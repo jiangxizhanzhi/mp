@@ -1,15 +1,14 @@
-package cn.cyberpeace.mp.aggregation.init;
+package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -18,13 +17,13 @@ import java.nio.file.Paths;
 
 @Slf4j
 @Component
-public class DefaultImageInit implements ApplicationRunner {
+public class DefaultImageInit {
 
     @Autowired
     private BaseAppConfig baseAppConfig;
 
-    @Override
-    public void run(ApplicationArguments args) {
+    @MpInitiate(description = "初始化默认头像和靶标文件,将文件上传并获取地址", id = "default_image_init")
+    public void run() {
         log.info("DefaultImageInit init value is {}", baseAppConfig.isRunInit());
         // 本地开发环境不运行资源的更新和删除
         if (!baseAppConfig.isRunInit()) {
