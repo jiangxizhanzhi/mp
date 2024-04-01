@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
-import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
+import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,21 +15,26 @@ import javax.annotation.Resource;
  */
 @Component
 @Slf4j
-public class ClearUselessCloudResourcesJob {
+public class CorrectSnapshotRelativeInfoJob {
 
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
     @Resource
-    private ClearService clearService;
+    private CsceneSnapshotService csceneSnapshotService;
 
-    @MpScheduled(cron = "0 0/15 * * * ?", description = "清理未正常释放的资源", id = "clear_useless_cloud_resources")
+    @MpScheduled(cron = "0 0 0/1 * * ?", description = "纠正cscene和scene快照表的数据", id = "correct_snapshot_relative_info")
     public void action() {
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
             log.debug("scene cron job is not enable");
             return;
         }
-        // 清理未正常释放的资源
-        clearService.clearUselessResource();
+        // 纠正cscene和scene快照表的数据
+        try {
+            csceneSnapshotService.correctSnapshotRelativeInfo();
+        } catch (Exception e) {
+            log.error("failed to corrcet snapshot relative info", e);
+        }
+
     }
 }

@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
+import cn.cyberpeace.mp.cscene.SceneCorrectService;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
-import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,26 +15,25 @@ import javax.annotation.Resource;
  */
 @Component
 @Slf4j
-public class CorrectSnapshotRelativeInfo {
+public class CorrectErrorSceneStatusJob {
 
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
     @Resource
-    private CsceneSnapshotService csceneSnapshotService;
+    private SceneCorrectService sceneCorrectService;
 
-    @MpScheduled(cron = "0 0 0/1 * * ?", description = "纠正cscene和scene快照表的数据", id = "correct_snapshot_relative_info")
+    @MpScheduled(cron = "0 0/15 * * * ?", description = "启动耗时很长的场景,状态置为异常", id = "correct_error_scene_status")
     public void action() {
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
             log.debug("scene cron job is not enable");
             return;
         }
-        // 纠正cscene和scene快照表的数据
+        // 启动耗时很长的场景,状态置为异常
         try {
-            csceneSnapshotService.correctSnapshotRelativeInfo();
+            sceneCorrectService.correctErrorStatusScene();
         } catch (Exception e) {
-            log.error("failed to corrcet snapshot relative info", e);
+            log.error("failed to correct error status scene", e);
         }
-
     }
 }

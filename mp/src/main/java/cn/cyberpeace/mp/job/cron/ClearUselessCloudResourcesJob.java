@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
-import cn.cyberpeace.mp.cscene.SceneCorrectService;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,25 +15,21 @@ import javax.annotation.Resource;
  */
 @Component
 @Slf4j
-public class CorrectErrorSceneStatusJob {
+public class ClearUselessCloudResourcesJob {
 
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
     @Resource
-    private SceneCorrectService sceneCorrectService;
+    private ClearService clearService;
 
-    @MpScheduled(cron = "0 0/15 * * * ?", description = "启动耗时很长的场景,状态置为异常", id = "correct_error_scene_status")
+    @MpScheduled(cron = "0 0/15 * * * ?", description = "清理未正常释放的资源", id = "clear_useless_cloud_resources")
     public void action() {
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
             log.debug("scene cron job is not enable");
             return;
         }
-        // 启动耗时很长的场景,状态置为异常
-        try {
-            sceneCorrectService.correctErrorStatusScene();
-        } catch (Exception e) {
-            log.error("failed to correct error status scene", e);
-        }
+        // 清理未正常释放的资源
+        clearService.clearUselessResource();
     }
 }

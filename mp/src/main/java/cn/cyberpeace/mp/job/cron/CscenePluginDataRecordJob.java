@@ -1,8 +1,7 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -16,7 +15,6 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataMod
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import lombok.Data;
@@ -26,14 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 @Data
-public class CscenePluginDataRecordService {
+public class CscenePluginDataRecordJob {
 
     @Resource
     private CollectionPluginSceneDataMapper collectionPluginSceneDataMapper;
@@ -61,8 +58,10 @@ public class CscenePluginDataRecordService {
                     continue;
                 }
                 List<CollectionPluginSceneDataModel> result = new ArrayList<>();
-                for (CollectionPluginSceneElementBO element : collectPlugin.getElementMap().values()) {
-                    List<Port> ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
+                for (CollectionPluginSceneElementBO element : collectPlugin.getElementMap()
+                        .values()) {
+                    List<Port> ports = collectionSceneService.listPagePorts(element.getSrcElement()
+                                                                                    .getEid());
                     if (CollectionUtils.isNotEmpty(ports)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (Port p : ports) {
@@ -71,7 +70,8 @@ public class CscenePluginDataRecordService {
                         }
                         result.addAll(models);
                     }
-                    List<Netiface> netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
+                    List<Netiface> netifaces = collectionSceneService.listNetifaces(element.getSrcElement()
+                                                                                            .getEid());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (Netiface n : netifaces) {
@@ -82,10 +82,13 @@ public class CscenePluginDataRecordService {
                     }
                     BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
                     request.setSceneId(instance.getId());
-                    request.setElementIds(List.of(element.getSrcElement().getId()));
+                    request.setElementIds(List.of(element.getSrcElement()
+                                                          .getId()));
                     request.setPage(1);
                     request.setPageSize(10);
-                    List<LogFileVO> logfiles = logFileService.pageByElementId(request).getSource().getObjs();
+                    List<LogFileVO> logfiles = logFileService.pageByElementId(request)
+                            .getSource()
+                            .getObjs();
                     if (CollectionUtils.isNotEmpty(logfiles)) {
                         List<CollectionPluginSceneDataModel> models = new ArrayList<>();
                         for (LogFileVO n : logfiles) {
@@ -109,7 +112,8 @@ public class CscenePluginDataRecordService {
         CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
         model.setType(LOGFile);
         model.setScene(instance.getScene());
-        model.setSceneElement(element.getSrcElement().getId());
+        model.setSceneElement(element.getSrcElement()
+                                      .getId());
         model.setData(n);
         return model;
     }
@@ -118,7 +122,8 @@ public class CscenePluginDataRecordService {
         CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
         model.setType(CollectionPluginSceneDataModel.Type.NETIFACE);
         model.setScene(instance.getScene());
-        model.setSceneElement(element.getSrcElement().getId());
+        model.setSceneElement(element.getSrcElement()
+                                      .getId());
         model.setData(JsonCommon.stringify(n));
         return model;
     }
@@ -127,23 +132,10 @@ public class CscenePluginDataRecordService {
         CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
         model.setType(CollectionPluginSceneDataModel.Type.PORT);
         model.setScene(instance.getScene());
-        model.setSceneElement(element.getSrcElement().getId());
+        model.setSceneElement(element.getSrcElement()
+                                      .getId());
         model.setData(JsonCommon.stringify(p));
         return model;
     }
 
-    public List<CollectionPluginSceneDataModel> getData(TimeListPageInfoQueryParams params, int type,
-                                                        LocalDateTime startTime, LocalDateTime endTime) {
-        String sceneId = params.getSceneIds().get(0);
-        String nodeId = params.getNodeIds().get(0);
-        return collectionPluginSceneDataMapper.list(new HumanCondition()
-                .filterEqual(CollectionPluginSceneDataModel::getScene, sceneId)
-                .filterEqual(CollectionPluginSceneDataModel::getSceneElement, nodeId)
-                .filterEqual(CollectionPluginSceneDataModel::getType, type)
-                .filterGreaterThan(CollectionPluginSceneDataModel::getCreateTime, startTime)
-                .filterLessThan(CollectionPluginSceneDataModel::getCreateTime, endTime)
-                .pagination(1, 10)
-                .reverseOrderBy(CollectionPluginSceneDataModel::getCreateTime)
-        );
-    }
 }

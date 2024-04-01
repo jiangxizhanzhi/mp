@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;

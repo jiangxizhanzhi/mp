@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.cscene.job.CscenePluginDataRecordService;
+import cn.cyberpeace.mp.cscene.service.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;

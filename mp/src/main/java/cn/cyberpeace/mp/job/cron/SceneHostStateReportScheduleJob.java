@@ -1,10 +1,10 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
-import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.service.SceneHostStateReportScheduleService;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
@@ -27,11 +27,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 @Slf4j
-public class SceneHostStateReportScheduleService {
+public class SceneHostStateReportScheduleJob {
     @Resource
     private CsceneInstanceService csceneInstanceService;
     @Resource
@@ -40,22 +39,12 @@ public class SceneHostStateReportScheduleService {
     private HostStateService hostStateService;
     @Resource
     private RabbitmqCsceneReporter csceneReporter;
+    @Resource
+    private SceneHostStateReportScheduleService sceneHostStateReportScheduleService;
 
-    // 每2分钟上报一次
-    public static final long REFRESH_RATE = 2;
-
-    private static final Set<String> csceneInstanceIds = new ConcurrentHashSet<>();
-
-    public static void addCsceneInstance(String csceneInstanceId) {
-        csceneInstanceIds.add(csceneInstanceId);
-    }
-
-    public static void removeCsceneInstance(String csceneInstanceId) {
-        csceneInstanceIds.remove(csceneInstanceId);
-    }
-
-    @MpScheduled(cron = "0 0/2 * * * ?", description = "定时获取主机信息(cpu等)并推送给前端", id = "report_scene_host_state",initialDelaySeconds = 120)
+    @MpScheduled(cron = "0 0/2 * * * ?", description = "定时获取主机信息(cpu等)并推送给前端", id = "report_scene_host_state", initialDelaySeconds = 120)
     public void scheduleSceneHostStateReport() {
+        List<String> csceneInstanceIds = sceneHostStateReportScheduleService.getCsceneInstanceIds();
         for (String csceneInstanceId : new ArrayList<>(csceneInstanceIds)) {
             try {
                 this.reportCsceneElement(csceneInstanceId);
@@ -66,19 +55,23 @@ public class SceneHostStateReportScheduleService {
     }
 
     private void reportCsceneElement(String csceneInstanceId) {
-        CsceneInstanceModel csceneInstanceModel = csceneInstanceService.get(csceneInstanceId).getSource().getObj();
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceService.get(csceneInstanceId)
+                .getSource()
+                .getObj();
         if (StringUtils.isNotEmpty(csceneInstanceModel.getPassThrough())) {
             SysContextHolder.setPassThroughMap(JsonCommon.parse(csceneInstanceModel.getPassThrough(), new TypeReference<Map<String, Object>>() {
             }));
         }
         String sceneId = csceneInstanceModel.getScene();
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-        if (sceneHandler.getElementMap().isEmpty()) {
+        if (sceneHandler.getElementMap()
+                .isEmpty()) {
             return;
         }
         List<HostState> hostStates = new ArrayList<>();
         Map<String, String> elementEid2Id = new HashMap<>();
-        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+        for (SceneElementBO e : sceneHandler.getElementMap()
+                .values()) {
             if (elementEid2Id.put(e.getEid(), e.getId()) != null) {
                 throw new IllegalStateException("Duplicate key");
             }
@@ -103,6 +96,7 @@ public class SceneHostStateReportScheduleService {
         csceneElementCommon.setCsceneId(csceneInstanceId);
         csceneElementCommon.setCallAction(CsceneCallAction.NODE_HOST_STATE);
         csceneElementCommon.setData(hostStates);
-        CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
+        CsceneReportTaskPool.getInstance()
+                .executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
     }
 }
