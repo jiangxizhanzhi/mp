@@ -13,7 +13,10 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -105,6 +108,8 @@ public class SceneExporter {
         // 生成server.yml与导出靶标
         if (!disableImageExport) {
             this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(), sceneNumber);
+        }else{
+            this.createServiceYml(imagePath, singleImagePath, resultV1.getDevices(), sceneNumber);
         }
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
@@ -116,6 +121,210 @@ public class SceneExporter {
         });
         exportResult.setConvertInfos(convertInfos);
         return exportResult;
+    }
+
+    private void createServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
+        if (CollectionUtils.isNotEmpty(devices)) {
+            for (var device : devices) {
+                String currentImageDir = null;
+                if (StringUtils.isNotEmpty(singleImagePath)) {
+                    currentImageDir = singleImagePath;
+                } else {
+                    currentImageDir = imagePath + "/" + (sceneNumber + device.getImage());
+                }
+                File file = new File(currentImageDir);
+                if (!file.exists()) {
+                    file.mkdirs();
+                }
+
+                ImagesConverter imagesConverter = BeanCommon.getBean(ImagesConverter.class);
+                var imageInfo = imagesConverter.findByUuid(device.getImageUuid());
+                Image image = new Image();
+
+                // cloud-init
+                image.setCloudInit(false);
+                boolean vmSupportInit = imageInfo.getExtVm() != null && Boolean.TRUE.equals(imageInfo.getExtVm()
+                                                                                                    .getInitSupport());
+                boolean containerSupportInit = imageInfo.getExtDocker() != null && Boolean.TRUE.equals(imageInfo.getExtDocker()
+                                                                                                               .getInitSupport());
+                if (vmSupportInit || containerSupportInit) {
+                    image.setCloudInit(true);
+                }
+
+                // 描述
+                image.set描述(imageInfo.getDescription());
+                // 系统架构
+                if (imageInfo.getExtSystemInfo() != null) {
+                    image.set系统架构(imageInfo.getExtSystemInfo()
+                                              .getSystemArchitecture());
+                }
+                // 系统版本
+                image.set系统版本("系统版本");
+                // 系统语言
+                if (imageInfo.getExtImageInfo() != null) {
+                    String language = "cn".equals(imageInfo.getExtSystemInfo()
+                                                          .getLanguage()) ? "中文" : "英文";
+                    image.set系统语言(language);
+                }
+                // 系统类型
+                if (imageInfo.getExtSystemInfo() != null) {
+                    Integer systemType = imageInfo.getExtSystemInfo()
+                            .getSystemType();
+                    if (systemType != null) {
+                        String type = SystemTypeUtils.getStandardSystemType(systemType.toString())
+                                .toUpperCase();
+                        image.set系统类型(type);
+                    }
+                }
+                if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(device.getImageType())) {
+                    image.set虚拟类型("虚拟机");
+                } else {
+                    image.set虚拟类型("容器");
+                }
+                image.set虚拟机文件("disk");
+                image.set角色("终端节点");
+                image.set镜像分类("操作系统");
+                image.set镜像格式("qcow2");
+
+                if (device.getCpu() != null && device.getRam() != null && device.getDisk() != null) {
+                    String flavor = String.format("%sc-%sg-%sg", device.getCpu(), device.getRam() / 1024, device.getDisk());
+                    image.set实例大小(formatFlavor(flavor));
+                }
+
+                // 下载图片
+                if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/") || device.getLogo().startsWith("group1/")) {
+                    String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
+                    byte[] content = null;
+                    try {
+                        content = FsCommon.downloadRawContent(logoUrl);
+                    } catch (Exception e) {
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + logoUrl;
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                    }
+                    // 判断图片文件类型
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
+                } else if (device.getLogo().startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX) && !device.getLogo().startsWith("/api/mp/file")) {
+                    String relativePath = StringUtils.replaceOnce(device.getLogo(), AuthConstant.DEFAULT_IMAGE_PREFIX, "");
+                    String filePath = BeanCommon.getBean(DefaultImgService.class).getDefaultImgFilePath(relativePath);
+                    byte[] content = null;
+                    try {
+                        File logo = new File(filePath);
+                        content = FileUtils.readFileToByteArray(logo);
+                    } catch (Exception e) {
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + device.getLogo();
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                    }
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
+                } else {
+                    byte[] content = null;
+                    try {
+                        content = FsCommon.downloadRawContent(device.getLogo());
+                    } catch (Exception e) {
+                        String detail = "导出场景出错 , 下载图片失败 ,文件地址:" + device.getLogo();
+                        log.error(detail, e);
+                        throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
+                    }
+                    // 判断图片文件类型
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
+                }
+                // 生成service.yml
+                if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
+                    List<AccessModeExportResult> normal = new ArrayList<>();
+                    List<AccessModeExportResult> manage = new ArrayList<>();
+                    for (var m : device.getAccessModes()) {
+                        AccessModeExportResult accessModeParseResult = new AccessModeExportResult();
+                        accessModeParseResult.setDesc(m.getDesc());
+                        if (StringUtils.isNotEmpty(m.getPath())) {
+                            accessModeParseResult.setPath(m.getPath());
+                        }
+                        accessModeParseResult.setProtocol(m.getProtocol());
+                        accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
+                        //下载密钥文件
+                        downloadPrivateKeyFile(m.getPrivateKeyPath(), currentImageDir, m.getPrivateKeyFileName());
+                        if (m.getPort() != null) {
+                            accessModeParseResult.setPort(m.getPort());
+                        }
+                        if (Boolean.TRUE.equals(m.getProxy())) {
+                            accessModeParseResult.setIsproxy(true);
+                        } else {
+                            accessModeParseResult.setIsproxy(false);
+                        }
+                        accessModeParseResult.setPassword(m.getPassword());
+                        accessModeParseResult.setUsername(m.getUsername());
+                        if (Boolean.TRUE.equals(m.getManageMode())) {
+                            manage.add(accessModeParseResult);
+                        } else {
+                            normal.add(accessModeParseResult);
+                        }
+                    }
+                    if (CollectionUtils.isNotEmpty(normal)) {
+                        image.set接入方式(normal);
+                    }
+                    if (CollectionUtils.isNotEmpty(manage)) {
+                        image.set管理接入(manage);
+                    }
+                }
+
+                // 设置发布时间
+                if (StringUtils.isEmpty(image.get发布时间())) {
+                    String time = TimeUtils.localDateToString(LocalDate.now());
+                    time = StringUtils.replace(time, "-", "timeFormatSplit");
+                    image.set发布时间(time);
+                }
+                if (StringUtils.isEmpty(image.get系统服务())) {
+                    image.set系统服务(Boolean.TRUE.equals(image.getCloudInit()) ? "CloudInit" : "hasNoSystemServer");
+                }
+                if (StringUtils.isEmpty(image.get安装软件())) {
+                    image.set安装软件("");
+                }
+                if (StringUtils.isEmpty(image.get授权类型())) {
+                    image.set授权类型("无需授权");
+                }
+                if (StringUtils.isEmpty(image.get系统语言())) {
+                    image.set系统语言("hasNoSystemServer");
+                }
+
+                ServerYml serverYml = new ServerYml();
+                Server server = new Server();
+                server.setMpYmlImageNameToChange(image);
+                serverYml.setServers(server);
+
+                DumperOptions dumperOptions = new DumperOptions();
+                dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+                Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
+                String content = yaml.dumpAs(serverYml, Tag.MAP, null);
+                content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", sceneNumber + device.getImage());
+                content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
+                content = StringUtils.replace(content, "privateKey", "private-key");
+                content = StringUtils.replace(content, "hasNoSystemServer", "");
+                content = StringUtils.replace(content, "timeFormatSplit", "-");
+                this.createFile(content, currentImageDir + "/servers.yml");
+
+                if (StringUtils.isNotEmpty(singleImagePath)) {
+                    break;
+                }
+            }
+        }
     }
 
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
