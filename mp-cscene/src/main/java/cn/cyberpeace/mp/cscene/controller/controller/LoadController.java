@@ -187,7 +187,7 @@ public class LoadController {
     @GetMapping("/getLoadExecutionResultByPk")
     public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk", required = true) String pk) {
         JSONObject requestData = new JSONObject();
-        requestData.put("sceneId", pk);
+        requestData.put("pk", pk);
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
         if(list != null  && list.size() == 1){
             return new ServiceResult<>(list.get(0), BaseErrorCode.SUCCESS,"SUCCESS").asResult();
@@ -228,10 +228,10 @@ public class LoadController {
      * 载荷执行结果导入
      * */
     @ApiOperation(value = "新增载荷执行结果", notes = "")
-    @PostMapping("/addLoadExecutionResultByPk")
-    public ServiceResult addLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
-        Boolean addLoadExecutionResultByPk = LoadService.addLoadExecutionResultByPk(requestData);
-        if(addLoadExecutionResultByPk){
+    @PostMapping("/addLoadExecutionResult")
+    public ServiceResult addLoadExecutionResult(@RequestBody(required = false) JSONObject requestData) {
+        Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
+        if(addLoadExecutionResult){
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
         }else{
             return new ServiceResult<>(null, BaseErrorCode.ERROR,"ERROR").asResult();
@@ -284,4 +284,6 @@ public class LoadController {
         }
         return new ServiceResult<>(null, BaseErrorCode.ERROR,"ERROR").asResult();
     }
+
+
 }

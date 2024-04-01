@@ -14,9 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/cloudTarget")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/outTarget")
 @Api(tags = "云靶标管理")
 @RequiredArgsConstructor
 public class CloudDevopsTargetController {
@@ -51,7 +50,17 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("查询所有信息(带过滤条件)")
     @GetMapping("/getTarget")
-    public ServiceResult getTarget(JSONObject jsonObject){
+    public ServiceResult getTarget(@RequestParam(value = "level", required = false) Integer level,
+                                   @RequestParam(value = "code", required = false) String code,
+                                   @RequestParam(value = "searchType", required = false) String searchType,
+                                   @RequestParam(value = "searchKey", required = false) String searchKey,
+                                   @RequestParam(value = "searchValue", required = false) String searchValue){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("level", level);
+        jsonObject.put("code", code);
+        jsonObject.put("searchType", searchType);
+        jsonObject.put("searchKey", searchKey);
+        jsonObject.put("searchValue", searchValue);
         List list = microsoftAzureConverter.getCloudTargetList(jsonObject);
 //        List returnData = microsoftAzureConverter.getTarget(jsonObject);
         return new Result(list).asResult();

@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class MpDevopsLoadSceneLog extends MpDevopsLoad {
 
     /**
-     * ID
+     * 结果日志
      */
     private String resultLog;
 

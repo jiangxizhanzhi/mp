@@ -113,7 +113,7 @@ public class LoadServiceImpl {
         //已有结果
         map.put("haveResult",0);
         //暂无结果
-        map.put("ooResultForTheTime",0);
+        map.put("noResultForTheTime",0);
         for (int i = 0; i < list.size(); i++) {
             //todo 统计
         }
@@ -159,14 +159,14 @@ public class LoadServiceImpl {
     /*
      * 新增载荷执行结果
      * */
-    public Boolean addLoadExecutionResultByPk(JSONObject requestData) {
-        Boolean addLoadExecutionResultByPk;
+    public Boolean addLoadExecutionResult(JSONObject requestData) {
+        Boolean addLoadExecutionResult;
         if (requestData != null) {
-            addLoadExecutionResultByPk = loadMapper.addLoadExecutionResultByPk(requestData);
+            addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
         } else {
             return false;
         }
-        return addLoadExecutionResultByPk;
+        return addLoadExecutionResult;
     }
 
     /*
