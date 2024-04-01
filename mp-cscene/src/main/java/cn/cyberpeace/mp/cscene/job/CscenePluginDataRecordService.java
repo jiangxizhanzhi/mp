@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.cron.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -22,15 +23,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,7 +47,7 @@ public class CscenePluginDataRecordService {
     @Autowired
     private LogFileService logFileService;
 
-    @Scheduled(initialDelay = 120, fixedRate = 120, timeUnit = TimeUnit.SECONDS)
+    @MpScheduled(cron = "0 0/2 * * * ?", description = "定时获取主机端口网络连接等信息并记录到表,给回放使用", id = "record_scene_host_net_and_port", initialDelaySeconds = 120)
     public void action() {
         List<CsceneInstanceModel> instances = csceneService.getRunningCscenes();
         for (CsceneInstanceModel instance : instances) {

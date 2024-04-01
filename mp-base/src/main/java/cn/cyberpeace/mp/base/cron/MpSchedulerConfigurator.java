@@ -15,7 +15,7 @@ public class MpSchedulerConfigurator {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(15); // 设置线程池大小
         scheduler.setThreadNamePrefix("mp-scheduled-task-");
-        scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
         scheduler.initialize();
         return scheduler;
     }

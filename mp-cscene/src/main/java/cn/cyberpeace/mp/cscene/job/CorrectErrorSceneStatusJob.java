@@ -1,0 +1,39 @@
+package cn.cyberpeace.mp.cscene.job;
+
+import cn.cyberpeace.mp.base.cron.MpScheduled;
+import cn.cyberpeace.mp.cscene.SceneCorrectService;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+/**
+ * @Description:
+ * @Author hewei
+ * @Date：2022/3/9 16:37
+ */
+@Component
+@Slf4j
+public class CorrectErrorSceneStatusJob {
+
+    @Resource
+    private CsceneAppConfig csceneAppConfig;
+
+    @Resource
+    private SceneCorrectService sceneCorrectService;
+
+    @MpScheduled(cron = "0 0/15 * * * ?", description = "启动耗时很长的场景,状态置为异常", id = "refresh_cache_and_db_limit_nodes")
+    public void action() {
+        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
+            log.debug("scene cron job is not enable");
+            return;
+        }
+        // 启动耗时很长的场景,状态置为异常
+        try {
+            sceneCorrectService.correctErrorStatusScene();
+        } catch (Exception e) {
+            log.error("failed to correct error status scene", e);
+        }
+    }
+}

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.cron.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class ConnectionJob {
+public class UserElementConnectionInfoJob {
 
     @Autowired
     private SceneMapper sceneMapper;
@@ -54,7 +53,7 @@ public class ConnectionJob {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
-    @Scheduled(cron = "*/5 * * * * ?")
+    @MpScheduled(cron = "*/10 * * * * ?", description = "扫描当前虚拟机的接入状态,用于推送给前端接入信息的变化", id = "scan_user_element_connection")
     public void execute() {
         log.debug("ConnectionJob.execute begin.");
         HumanCondition humanCondition = new HumanCondition();

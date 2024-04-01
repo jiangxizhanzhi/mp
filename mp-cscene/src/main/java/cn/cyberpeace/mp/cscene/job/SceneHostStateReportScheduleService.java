@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
+import cn.cyberpeace.mp.base.cron.MpScheduled;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -19,7 +20,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,7 +54,7 @@ public class SceneHostStateReportScheduleService {
         csceneInstanceIds.remove(csceneInstanceId);
     }
 
-    @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
+    @MpScheduled(cron = "0 0/2 * * * ?", description = "定时获取主机信息(cpu等)并推送给前端", id = "report_scene_host_state",initialDelaySeconds = 120)
     public void scheduleSceneHostStateReport() {
         for (String csceneInstanceId : new ArrayList<>(csceneInstanceIds)) {
             try {

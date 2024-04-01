@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.job;
+package cn.cyberpeace.mp.cscene.init;
 
 import cn.cyberpeace.mp.cscene.init.jobs.SceneNodeNumInitJob;
 import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
