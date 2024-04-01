@@ -3,25 +3,24 @@ package cn.cyberpeace.mp.base.init;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.base.localcall.LocalCallServerListener;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.base.websocket.BaseGroupServer;
 import cn.cyberpeace.mp.base.websocket.BaseServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class BaseInit implements ApplicationRunner {
+public class BaseInit {
 
     @Autowired
     private BaseAppConfig baseAppConfig;
 
-    @Override
-    public void run(ApplicationArguments args) {
+    @MpInitiate(id = "base_init", description = "初始化文件资源")
+    public void run() {
         String homeDir = baseAppConfig.getHomeDir();
         String resourcesDir = baseAppConfig.getResourcesDir();
         String fileServerDir = baseAppConfig.getFileServerDir();

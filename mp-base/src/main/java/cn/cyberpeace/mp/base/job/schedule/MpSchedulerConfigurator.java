@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.cron;
+package cn.cyberpeace.mp.base.job.schedule;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

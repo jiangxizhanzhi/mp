@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.job;
 
-import cn.cyberpeace.mp.base.cron.MpScheduled;
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import lombok.extern.slf4j.Slf4j;

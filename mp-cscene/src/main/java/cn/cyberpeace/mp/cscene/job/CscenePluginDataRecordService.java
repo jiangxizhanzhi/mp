@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.job;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.cron.MpScheduled;
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
