@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.cscene.init.jobs;
+package cn.cyberpeace.mp.job.init;
 
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
-import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
@@ -15,24 +15,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description 清理mp服务启动之前正在创建中的场景,仅修改状态
+ * @Description 清理mp服务启动之前正在创建中的场景, 仅修改状态
  * @Author zhanglin
  * @Date 2022/9/21
  */
 @Slf4j
 @Component
-public class SceneUpdateStatusJob extends AbstractInitJob {
+public class SceneUpdateStatusInit {
     @Resource
     private SceneMapper sceneMapper;
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
-    @Override
-    protected boolean doExecute() {
+    @MpInitiate(id = "scene_update_status_init_job", description = "将mp服务启动之前正在创建中的场景状态改为启动失败")
+    public void execute() {
         //忽略服务启动之前一定时间内的启动的场景
-        LocalDateTime startServiceTime = LocalDateTime.now().minusSeconds(csceneAppConfig.getIgnoreSceneCreatingSeconds());
-        HumanCondition humanCondition = new HumanCondition()
-                .filterOrStart()
+        LocalDateTime startServiceTime = LocalDateTime.now()
+                .minusSeconds(csceneAppConfig.getIgnoreSceneCreatingSeconds());
+        HumanCondition humanCondition = new HumanCondition().filterOrStart()
                 .orAndStart()
                 .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
                 .andEqual(SceneModel::getEventStatus, EventStatus.IN_PROGRESS)
@@ -53,11 +53,5 @@ public class SceneUpdateStatusJob extends AbstractInitJob {
                 }
             }
         }
-        return true;
-    }
-
-    @Override
-    protected boolean getSupportRefresh() {
-        return false;
     }
 }

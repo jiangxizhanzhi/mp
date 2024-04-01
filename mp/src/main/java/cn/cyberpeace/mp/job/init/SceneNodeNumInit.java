@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.cscene.init.jobs;
+package cn.cyberpeace.mp.job.init;
 
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
-import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -13,20 +13,14 @@ import javax.annotation.Resource;
  * @Date 2022/8/5
  */
 @Component
-public class SceneNodeNumInitJob extends AbstractInitJob {
+public class SceneNodeNumInit {
 
     @Resource
     private CsceneService csceneService;
 
-    @Override
-    protected boolean doExecute() {
+    @MpInitiate(id = "scene_node_num_init_job", description = "初始化刷新内存里的节点数量统计")
+    public void execute() {
         int count = csceneService.getActiveVirtualDeviceCount();
         NodeLimitUtils.refreshCount(count);
-        return true;
-    }
-
-    @Override
-    protected boolean getSupportRefresh() {
-        return false;
     }
 }

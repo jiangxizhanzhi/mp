@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.init;
+package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
