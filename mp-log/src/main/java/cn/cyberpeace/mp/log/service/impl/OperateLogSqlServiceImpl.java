@@ -137,14 +137,13 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
             humanCondition.filterIn(OperateLogSqlModel::getId, ids);
         }
         return getModelMapper().list(humanCondition);
+
     }
 
     public List<OperateLogSqlModel> getModulesLogs(String[] ids, Integer[] modules, Integer type,String userNameOrOpTarget){
         HumanCondition humanCondition = new HumanCondition();
-        if(Objects.nonNull(modules)){
-            for (int i = 0; i < modules.length; i++) {
-                humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, modules[i]);
-            }
+        if(Objects.nonNull(modules)&& modules.length > 0){
+                humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, modules);
         }
         if(Objects.nonNull(type)){
             humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, type);

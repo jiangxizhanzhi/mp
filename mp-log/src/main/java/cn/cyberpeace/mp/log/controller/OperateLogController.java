@@ -24,6 +24,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,10 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 用户操作日志记录
@@ -91,6 +90,20 @@ public class OperateLogController {
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<List<OptionBO>> getModules() {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
+    }
+
+    /**
+     *
+     * @param list1 modules的集合
+     * @return
+     */
+    @GetMapping("/moduless")
+    @ApiOperation(value = "查询审计日志操作模块")
+    public ServiceResult<List<OptionBO>> getModules(@RequestBody List<Integer> list1) {
+        val intOptions = optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
+        val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
+        intOptions.setData(boList);
+        return intOptions;
     }
 
     @GetMapping("/types")
