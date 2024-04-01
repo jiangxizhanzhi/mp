@@ -19,7 +19,7 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.enums.ActivationItemKeyEnums;
 import cn.cyberpeace.mp.frontadmin.enums.ModuleEnums;
-import cn.cyberpeace.mp.frontadmin.job.SysCtlService;
+import cn.cyberpeace.mp.frontadmin.service.SysCtlService;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;

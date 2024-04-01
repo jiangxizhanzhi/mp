@@ -1,9 +1,10 @@
-package cn.cyberpeace.mp.auth.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,7 +50,7 @@ public class UserOnlineRecordScheduleService {
     /**
      * 创建或者更新用户在线记录
      */
-    @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
+    @MpScheduled(cron = "0 0/2 * * * ?", initialDelaySeconds = 120, description = "创建或者更新用户在线记录", id = "update_user_online_record")
     public void scheduleUserOlRecord() {
         LocalDateTime begin = LocalDateTime.now();
         if (threadPool == null) {

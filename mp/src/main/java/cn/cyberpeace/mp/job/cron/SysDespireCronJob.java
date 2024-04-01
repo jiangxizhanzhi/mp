@@ -1,10 +1,11 @@
-package cn.cyberpeace.mp.frontadmin.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -64,7 +65,7 @@ public class SysDespireCronJob {
     @Resource
     private UserMapper userMapper;
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    @MpScheduled(cron = "0 0 3 * * ?",description = "系统过期提醒",id = "sys_despire_cron_job")
     public void configureTasks() {
         log.info("start system activation task");
         //系统过期提醒开关需开启

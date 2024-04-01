@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.frontadmin.filter;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.frontadmin.job.SysCtlService;
+import cn.cyberpeace.mp.frontadmin.service.SysCtlService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
