@@ -29,4 +29,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     Boolean updateLoadExecutionResultByPk(String pk, @Param("param")JSONObject requestData);
 
     Boolean addLoadExecutionResultByPk(@Param("param")JSONObject requestData);
+
+    Boolean addLoad(@Param("param")JSONObject requestData);
+
+    Boolean stageBindLoad(String addType, String sceneId, String stageId, String loadId,
+                          String interfaceType, String deployment, String paramListString);
 }

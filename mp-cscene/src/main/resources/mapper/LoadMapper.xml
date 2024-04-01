@@ -40,6 +40,73 @@
         )
     </insert>
 
+    <insert id="addLoad">
+        INSERT INTO
+        mp_devops_load
+        (
+            id,
+            tool_name,
+            tool_platform,
+            tool_description,
+            action_type,
+            run_table,
+            source,
+            control_type,
+            creator_id,
+            create_time,
+            control_port,
+            default_cmd,
+            read_me,
+            update_time
+        )
+        VALUES
+        (
+            UUID(),
+            #{param.toolName},
+            #{param.toolPlatform},
+            #{param.toolDescription},
+            #{param.actionType},
+            #{param.runTable},
+            #{param.source},
+            #{param.controlType},
+            #{param.creatorId},
+            now(),
+            #{param.controlPort},
+            #{param.defaultCmd},
+            #{param.readMe},
+            now()
+        )
+    </insert>
+
+    <insert id="stageBindLoad">
+        UPDATE
+        mp_devops_load_scene_log
+        <set>
+            <if test="addType != null and addType != ''">
+                add_type = #{addType},
+            </if>
+            <if test="sceneId != null and sceneId != ''">
+                scene_id = #{sceneId},
+            </if>
+            <if test="stageId != null and stageId != ''">
+                stage_id = #{stageId},
+            </if>
+            <if test="loadId != null and loadId != ''">
+                load_id = #{loadId},
+            </if>
+            <if test="interfaceType != null and interfaceType != ''">
+                interface_type = #{interfaceType},
+            </if>
+            <if test="deployment != null and deployment != ''">
+                deployment = #{deployment},
+            </if>
+            <if test="paramListString != null and paramListString != ''">
+                param_list = #{paramListString},
+            </if>
+                create_time = now()
+        </set>
+    </insert>
+
     <update id="updateLoadByPk">
         UPDATE
         mp_devops_load
@@ -165,7 +232,7 @@
         </if>
     </select>
 
-    <select id="getLoadExecutionResultStatistics" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
+        <select id="getLoadExecutionResultStatistics" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
         SELECT
         *
         FROM

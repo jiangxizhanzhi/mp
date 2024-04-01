@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -28,6 +31,9 @@ public class LoadController {
     @Autowired
     private LoadServiceImpl LoadService;
 
+    /*
+     * 载荷页面
+     * */
     @ApiOperation(value = "载荷页面", notes = "")
     @GetMapping("/getLoadList")
     public ServiceResult<List> getLoadList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
@@ -49,6 +55,9 @@ public class LoadController {
         return new ServiceResult<List>(list, BaseErrorCode.SUCCESS).asResult();
     }
 
+    /*
+     * 查询载荷
+     * */
     @ApiOperation(value = "查询载荷", notes = "")
     @GetMapping("/getLoadByPk")
     public ServiceResult getLoadList(@RequestParam(value = "pk", required = true) String pk) {
@@ -62,6 +71,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 修改载荷
+     * */
     @ApiOperation(value = "修改载荷", notes = "")
     @PutMapping("/updateLoadByPk")
     public ServiceResult updateLoadByPk(@RequestBody(required = false) JSONObject requestData) {
@@ -73,6 +85,23 @@ public class LoadController {
         }
     }
 
+    /*
+     * 新增载荷
+     * */
+    @ApiOperation(value = "新增载荷", notes = "")
+    @PostMapping("/addLoad")
+    public ServiceResult addLoad(@RequestBody(required = false) JSONObject requestData) {
+        Boolean addLoad = LoadService.addLoad(requestData);
+        if(addLoad){
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
+        }else{
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,"ERROR").asResult();
+        }
+    }
+
+    /*
+     * 删除载荷
+     * */
     @ApiOperation(value = "删除载荷", notes = "")
     @DeleteMapping("/deleteLoadByPk")
     public ServiceResult deleteLoadByPk(@RequestBody(required = false) JSONObject requestData) {
@@ -84,6 +113,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷数据同步
+     * */
     @ApiOperation(value = "载荷数据同步", notes = "")
     @GetMapping("/synchronousData")
     public ServiceResult synchronousData() {
@@ -95,6 +127,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 根据场景id获取绑定的载荷
+     * */
     @ApiOperation(value = "根据场景id获取绑定的载荷", notes = "")
     @GetMapping("/getLoadBySceneId")
     public ServiceResult getLoadBySceneId(@RequestParam(value = "sceneId", required = true) String sceneId) {
@@ -102,6 +137,9 @@ public class LoadController {
         return new ServiceResult<>(list, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
     }
 
+    /*
+     * 载荷执行结果统计
+     * */
     @ApiOperation(value = "载荷执行结果统计", notes = "")
     @GetMapping("/getLoadExecutionResultStatistics")
     public ServiceResult getLoadExecutionResultStatistics(@RequestParam(value = "sceneId", required = true) String sceneId) {
@@ -111,6 +149,9 @@ public class LoadController {
         return new ServiceResult<>(map, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
     }
 
+    /*
+     * 载荷执行结果
+     * */
     @ApiOperation(value = "载荷执行结果", notes = "")
     @GetMapping("/getLoadExecutionResult")
     public ServiceResult getLoadExecutionResult(@RequestParam(value = "sceneId", required = true) String sceneId,
@@ -139,6 +180,9 @@ public class LoadController {
         return new ServiceResult<>(list, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
     }
 
+    /*
+     * 载荷执行结果详情
+     * */
     @ApiOperation(value = "载荷执行结果详情", notes = "")
     @GetMapping("/getLoadExecutionResultByPk")
     public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk", required = true) String pk) {
@@ -152,6 +196,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷执行结果导入
+     * */
     @ApiOperation(value = "删除载荷执行结果", notes = "")
     @DeleteMapping("/deleteLoadExecutionResultByPk")
     public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
@@ -163,6 +210,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷执行结果导入
+     * */
     @ApiOperation(value = "修改载荷执行结果", notes = "")
     @PutMapping("/updateLoadExecutionResultByPk")
     public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
@@ -174,6 +224,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷执行结果导入
+     * */
     @ApiOperation(value = "新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionResultByPk")
     public ServiceResult addLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
@@ -185,6 +238,9 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷执行结果导入
+     * */
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
     public ServiceResult importLoadExecutionResult(@RequestParam(value = "file", required = true) MultipartFile file){
@@ -196,4 +252,36 @@ public class LoadController {
         }
     }
 
+    /*
+     * 载荷执行结果导出
+     * */
+    @ApiOperation(value = "载荷执行结果导出", notes = "")
+    @PostMapping("/exportLoadExecutionResult")
+    public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
+                                                   @RequestBody(required = false) JSONObject requestData) throws IOException {
+        Boolean exportLoadExecutionResult = LoadService.exportLoadExecutionResult(request, response, requestData);
+        if(exportLoadExecutionResult){
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
+        }else{
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,"ERROR").asResult();
+        }
+    }
+
+    /*
+     * 阶段测试绑定载荷工具
+     * */
+    @ApiOperation(value = "阶段测试绑定载荷工具", notes = "")
+    @PostMapping("/stageBindLoad")
+    public ServiceResult stageBindLoad(@RequestBody(required = false) JSONObject requestData) {
+        if(requestData != null && requestData.get("addType") != null){
+            String addType = requestData.get("addType").toString();
+            if(addType.equals("name") || addType.equals("loopholes") || addType.equals("tactics")){
+                Boolean stageBindLoad = LoadService.stageBindLoad(addType,requestData);
+                if(stageBindLoad){
+                    return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"SUCCESS").asResult();
+                }
+            }
+        }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR,"ERROR").asResult();
+    }
 }
