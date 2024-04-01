@@ -120,6 +120,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String initialTools;
 
+    //    Azure虚拟机镜像属性
+    @DefaultStr
+    private String publisher;
+    @DefaultStr
+    private String offer;
+    @DefaultStr
+    private String sku;
+
     // 靶标属性
     @DefaultInt
     private Integer role;
@@ -163,14 +171,16 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String FE = "FE";
         public static final String GE = "GE";
 
-        private ElectricPortType() {}
+        private ElectricPortType() {
+        }
     }
 
     public static class OpticalPortType {
         public static final String SFP = "sfp";
         public static final String SFP_PLUS = "sfp+";
 
-        private OpticalPortType() {}
+        private OpticalPortType() {
+        }
     }
 
     public static class WanPortType {
@@ -202,7 +212,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 
-        private Role() {}
+        private Role() {
+        }
     }
 
     public static class ImageType {
@@ -212,7 +223,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String ENTITY = "entity";
         public static final String DYNAMIPS = "dynamips";
 
-        private ImageType() {}
+        private ImageType() {
+        }
     }
 
     public static class NetMode {

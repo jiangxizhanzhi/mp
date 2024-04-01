@@ -116,6 +116,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "docker参数")
     private DockerParams dockerParams;
 
+    //    Azure虚拟机镜像属性
+    @ApiModelProperty(value = "发布者信息")
+    private String publisher;
+    @ApiModelProperty(value = "产品报价")
+    private String offer;
+    @ApiModelProperty(value = "产品SKU（Stock Keeping Unit）编码")
+    private String sku;
+
     // gns3 属性
     @ApiModelProperty(value = "gns3 platform")
     private String platform;
@@ -235,35 +243,50 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
         ));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>() {
+        });
         allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+                : JsonCommon.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>() {
+        });
         hostRoutes = StringUtils.isEmpty(obj.getHostRoutes()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getHostRoutes(), new TypeReference<List<HostRoute>>(){});
+                : JsonCommon.parse(obj.getHostRoutes(), new TypeReference<List<HostRoute>>() {
+        });
         staticRoutes = StringUtils.isEmpty(obj.getStaticRoutes()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
+                : JsonCommon.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>() {
+        });
         firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
+                : JsonCommon.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>() {
+        });
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
+                : JsonCommon.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>() {
+        });
         quickCreateParams = StringUtils.isEmpty(obj.getQuickCreateParams()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
+                : JsonCommon.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>() {
+        });
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>() {
+        });
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+                : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>() {
+        });
         auxiliaryNetworkHostRoutes = StringUtils.isEmpty(obj.getAuxiliaryNetworkHostRoutes()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>(){});
+                : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>() {
+        });
         virtualUsbs = StringUtils.isEmpty(obj.getVirtualUsbs()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {});
+                : JsonCommon.parse(obj.getVirtualUsbs(), new TypeReference<List<VirtualUsb>>() {
+        });
         entityUsbs = StringUtils.isEmpty(obj.getEntityUsbs()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {});
+                : JsonCommon.parse(obj.getEntityUsbs(), new TypeReference<List<EntityUsb>>() {
+        });
         dockerParams = StringUtils.isEmpty(obj.getDockerParams()) ? new DockerParams()
-                : JsonCommon.parse(obj.getDockerParams(), new TypeReference<DockerParams>() {});
+                : JsonCommon.parse(obj.getDockerParams(), new TypeReference<DockerParams>() {
+        });
         snmpConfig = StringUtils.isEmpty(obj.getSnmpConfig()) ? new SnmpConfig()
-            : JsonCommon.parse(obj.getSnmpConfig(), new TypeReference<SnmpConfig>() {});
+                : JsonCommon.parse(obj.getSnmpConfig(), new TypeReference<SnmpConfig>() {
+        });
         mibData = StringUtils.isEmpty(obj.getMibData()) ? new ArrayList<>()
-            : JsonCommon.parse(obj.getMibData(), new TypeReference<List<MibData>>() {});
+                : JsonCommon.parse(obj.getMibData(), new TypeReference<List<MibData>>() {
+        });
     }
 
     @Override
@@ -281,7 +304,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
-            ));
+        ));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
         }
@@ -318,13 +341,13 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         if (entityUsbs != null) {
             obj.setEntityUsbs(JsonCommon.stringify(entityUsbs));
         }
-        if(dockerParams != null){
+        if (dockerParams != null) {
             obj.setDockerParams(JsonCommon.stringify(dockerParams));
         }
-        if(snmpConfig != null){
+        if (snmpConfig != null) {
             obj.setSnmpConfig(JsonCommon.stringify(snmpConfig));
         }
-        if(mibData != null){
+        if (mibData != null) {
             obj.setMibData(JsonCommon.stringify(mibData));
         }
         return obj;

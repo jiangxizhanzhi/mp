@@ -12,6 +12,9 @@ import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,40 +31,17 @@ public class AzureVirtualMachine {
         this.region = resourceService.getRegin();
     }
 
-    public void VirtualMachinelist(){
-//        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(Region.ASIA_EAST);
-        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(Region.ASIA_EAST);
+    public void VirtualMachinelist() throws IOException {
+        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(Region.ASIA_EAST);
+//        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(Region.ASIA_EAST);
         VirtualMachinePublisher chosenPublisher;
-        for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
-
-            System.out.println("Publisher - " + publisher.name());
-
-            if (publisher.name().equalsIgnoreCase("Canonical")
-                    || publisher.name().equalsIgnoreCase("Suse")
-                    || publisher.name().equalsIgnoreCase("RedHat")) {
-
-                chosenPublisher = publisher;
-                System.out.print("\n\n");
-                System.out.println("=======================================================");
-                System.out.println("Located " + chosenPublisher.name());
-                System.out.println("=======================================================");
-                System.out.println("Printing entries as publisher/offer/sku/image.version()");
-
-                for (VirtualMachineOffer offer : chosenPublisher.offers().list()) {
-                    for (VirtualMachineSku sku: offer.skus().list()) {
-//                        for (VirtualMachineImage image : sku.images().list()) {
-                            System.out.println("Image - " + chosenPublisher.name() + "/"
-                                    + offer.name() + "/"
-                                    + sku.name());
-//                        }
-                    }
-
-                }
-
-                System.out.print("\n\n");
-
-            }
-        }
+        PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\liyah\\Desktop\\output2.txt", true));
+        virtualMachineImages.forEach(virtualMachineImage -> {
+            writer.println("Image - " + virtualMachineImage.publisherName() + "/"
+                    + virtualMachineImage.offer() + "/"
+                    + virtualMachineImage.sku());
+        });
+        writer.close();
         System.out.println("end------------------------------------------------");
 
     }
@@ -83,27 +63,46 @@ public class AzureVirtualMachine {
         // 取第一块网卡
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
-        VirtualMachine.DefinitionStages.WithCreate creater = resourceService.getManager().virtualMachines()
-                .define(vmName)
-                .withRegion(region)
-                .withNewResourceGroup(groupName)
-                .withExistingPrimaryNetwork(azureResourceManager.networks().getById(virtualNic.getNetworkId()))
-                .withSubnet("sub")
-                .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                .withoutPrimaryPublicIPAddress()
-                .withLatestLinuxImage("Canonical", "0001-com-ubuntu-server-focal", "20_04-lts")
+        VirtualMachine.DefinitionStages.WithCreate creater;
+        if (cloudElement.getPublisher().equalsIgnoreCase("MicrosoftWindowsServer")) {
+            creater = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(virtualNic.getNetworkId()))
+                    .withSubnet("sub")
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
+                    .withoutPrimaryPublicIPAddress()
+                    .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                    .withAdminUsername("azureuser")
+                    .withAdminPassword("Azure12345678")
+                    .withUnmanagedDisks()
+                    .defineUnmanagedDataDisk("disk-1")
+                    .withNewVhd(cloudElement.getSrcElement().getDisk())
+                    .withLun(1)
+                    .attach()
+                    .withSize(flavor);
+
+        } else {
+            creater = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(virtualNic.getNetworkId()))
+                    .withSubnet("sub")
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
+                    .withoutPrimaryPublicIPAddress()
+                    .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
 //                .withPopularLinuxImage(image)
-                .withRootUsername("root1")
-                .withRootPassword("ycxx123#") // 必须要是6位以上,且有一个特殊字符
-//                .withUnmanagedDisks()
-//                .defineUnmanagedDataDisk("disk-1")
-//                .withNewVhd(cloudElement.getSrcElement().getDisk())
-//                .withLun(1)
-//                .attach()
-                .withSize(flavor);
-
-        // 创建虚拟机定义
-
+                    .withRootUsername("root1")
+                    .withRootPassword("ycxx123#") // 必须要是6位以上,且有一个特殊字符
+//                    .withUnmanagedDisks()
+//                    .defineUnmanagedDataDisk("disk-1")
+//                    .withNewVhd(cloudElement.getSrcElement().getDisk())
+//                    .withLun(1)
+//                    .attach()
+                    .withSize(flavor);
+        }
 
         // 加其他网卡
         for (int i = 1; i < virtualNics.size(); i++) {
