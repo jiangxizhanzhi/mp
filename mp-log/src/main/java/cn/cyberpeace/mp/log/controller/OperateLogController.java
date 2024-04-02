@@ -97,7 +97,7 @@ public class OperateLogController {
      * @param list1 modules的集合
      * @return
      */
-    @GetMapping("/moduless")
+    @PostMapping("/moduless")
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<List<OptionBO>> getModules(@RequestBody List<Integer> list1) {
         val intOptions = optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
