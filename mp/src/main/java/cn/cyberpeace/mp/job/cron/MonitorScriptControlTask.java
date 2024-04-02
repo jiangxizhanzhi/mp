@@ -1,13 +1,13 @@
-package cn.cyberpeace.mp.devopscluster.job;
+package cn.cyberpeace.mp.job.cron;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -23,8 +23,8 @@ public class MonitorScriptControlTask {
     @Autowired
     private CollectionAppConfig collectionAppConfig;
 
-    @Scheduled(cron = "0 0/5 * * * ?")
-    private void configMonitorScriptControl() {
+    @MpScheduled(cron = "0 0/5 * * * ?", description = "检查控制节点和计算节点上是否需要安装或重装探针", id = "config_monitor_script_control")
+    public void configMonitorScriptControl() {
         if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
             return;
         }

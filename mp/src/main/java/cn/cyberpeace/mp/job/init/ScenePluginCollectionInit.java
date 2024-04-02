@@ -1,7 +1,8 @@
-package cn.cyberpeace.mp.sceneplugincollection.init;
+package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class ScenePluginCollectionInit implements ApplicationRunner {
+public class ScenePluginCollectionInit{
 
     @Autowired
     private CollectionAppConfig collectionAppConfig;
@@ -29,8 +30,8 @@ public class ScenePluginCollectionInit implements ApplicationRunner {
     @Autowired
     private LocalFileSyncEventPublisher eventPublisher;
 
-    @Override
-    public void run(ApplicationArguments args) {
+    @MpInitiate(description = "初始化探针配置", id = "wazuh_agent_installer_init")
+    public void execute() {
         // 初始化探针配置
         WazuhProbeConfig.init();
         WazuhLogProbeLocationConfig.init();

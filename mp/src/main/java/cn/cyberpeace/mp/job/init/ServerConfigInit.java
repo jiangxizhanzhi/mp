@@ -1,17 +1,17 @@
-package cn.cyberpeace.mp.devopscluster.init;
+package cn.cyberpeace.mp.job.init;
 
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ServerConfigListenerRunner implements ApplicationRunner {
+public class ServerConfigInit {
 
     @Autowired
     private InitRegisterService initRegisterService;
@@ -24,8 +24,8 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
         return "http://" + devopsClusterConfig.getMpIp() + ":" + devopsClusterConfig.getMpPort();
     }
 
-    @Override
-    public void run(ApplicationArguments args) {
+    @MpInitiate(description = "根据底层数据同步靶标列表", id = "sync_device_list")
+    public void action() {
         try {
             initRegisterService.register(getUrl());
             initRegisterService.initTarget();

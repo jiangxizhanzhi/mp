@@ -1,7 +1,9 @@
-package cn.cyberpeace.mp.flow.service.impl;
+package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
+import cn.cyberpeace.mp.flow.service.impl.FlowScriptDemoServiceImpl;
 import cn.cyberpeace.mp.flow.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,7 +25,7 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class InitFlowScriptDemoService implements CommandLineRunner {
+public class InitFlowScriptDemoService {
 
     @Autowired
     private FlowScriptDemoServiceImpl flowScriptDemoService;
@@ -35,8 +37,8 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
     private static final String PROBE_PY_DEMO_NAME = "get_host_name.py";
     private static final String PROBE_BAT_DEMO_NAME = "get_host_name.bat";
 
-    @Override
-    public void run(String... args) {
+    @MpInitiate(description = "流量脚本模板初始化", id = "init_flow_script_demo")
+    public void run() {
         InputStream pyDemo = null;
         InputStream shDemo = null;
         InputStream probeShDemo = null;

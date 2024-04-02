@@ -11,14 +11,14 @@ public class MpInitJobInfo extends MpJobInfo {
 
     private int order;
 
-    private boolean stopApplicationIfError;
+    private boolean ignoreCurrentError;
 
     private MethodJobWrapper methodJobWrapper;
 
-    public MpInitJobInfo(String jobId, String description, int order, boolean stopApplicationIfError, MethodJobWrapper methodJobWrapper) {
+    public MpInitJobInfo(String jobId, String description, int order, boolean ignoreCurrentError, MethodJobWrapper methodJobWrapper) {
         super(jobId, description);
         this.order = order;
-        this.stopApplicationIfError = stopApplicationIfError;
+        this.ignoreCurrentError = ignoreCurrentError;
         this.methodJobWrapper = methodJobWrapper;
     }
 }

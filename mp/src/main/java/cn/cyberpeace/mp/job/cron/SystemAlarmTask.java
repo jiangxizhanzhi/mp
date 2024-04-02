@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.devopscluster.job;
+package cn.cyberpeace.mp.job.cron;
 
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
@@ -54,8 +55,8 @@ public class SystemAlarmTask {
     /**
      * 生成告警信息
      */
-    @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
-    private void getSystemAlarm() {
+    @MpScheduled(cron = "0 0/5 * * * ?", description = "生成控制节点和计算节点告警信息", id = "create_system_alarm", initialDelaySeconds = 60)
+    public void getSystemAlarm() {
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();
 

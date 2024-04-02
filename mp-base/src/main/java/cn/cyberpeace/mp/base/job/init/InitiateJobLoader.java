@@ -40,7 +40,7 @@ public class InitiateJobLoader {
                         .action();
                 log.info("end init job {}, {} ", jobInfo.getJobId(), jobInfo.getDescription());
             } catch (Exception e) {
-                if (jobInfo.isStopApplicationIfError()) {
+                if (!jobInfo.isIgnoreCurrentError()) {
                     throw e;
                 } else {
                     String detail = "error init job , job info is " + JsonCommon.stringify(jobInfo);

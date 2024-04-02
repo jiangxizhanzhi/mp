@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.log.init;
+package cn.cyberpeace.mp.job.init;
 
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.log.service.ILogSettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
  **/
 @Slf4j
 @Component
-public class DynamicLogLevelLoader implements ApplicationRunner {
+public class DynamicLogLevelLoader {
 
     @Autowired
     private ILogSettingService logSettingService;
@@ -28,8 +29,8 @@ public class DynamicLogLevelLoader implements ApplicationRunner {
     @Value("${mp.log.dynamic-level-keeping:false}")
     private boolean dynamicLevelKeeping;
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
+    @MpInitiate(description = "动态日志级别初始化加载设置", id = "load_dynamic_log_level")
+    public void execute() {
         //系统启动后设置最近一次动态调整日志级别，不保证一定设置成功
         if(dynamicLevelKeeping){
             log.info("begin to load dynamic log levels from db");

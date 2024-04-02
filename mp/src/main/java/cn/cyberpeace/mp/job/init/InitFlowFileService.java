@@ -1,7 +1,10 @@
-package cn.cyberpeace.mp.flow.service.impl;
+package cn.cyberpeace.mp.job.init;
 
+import cn.cyberpeace.mp.base.job.init.MpInitiate;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowPcapModel;
+import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowPcapServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,7 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class InitFlowFileService implements CommandLineRunner {
+public class InitFlowFileService {
 
     @Autowired
     private FlowInfoServiceImpl flowInfoService;
@@ -25,8 +28,8 @@ public class InitFlowFileService implements CommandLineRunner {
     @Autowired
     private FlowPcapServiceImpl flowPcapService;
 
-    @Override
-    public void run(String... args) {
+    @MpInitiate(description = "初始化pcap包", id = "flow_file_init")
+    public void run() {
 
         try {
             FlowInfoModel flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");

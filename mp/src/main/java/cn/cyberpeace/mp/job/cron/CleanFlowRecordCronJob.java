@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.flow.job;
+package cn.cyberpeace.mp.job.cron;
 
+import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -17,12 +17,12 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Component
-public class CleanFlowRecord {
+public class CleanFlowRecordCronJob {
 
     @Autowired
     private FlowTaskRecordMapper flowTaskRecordMapper;
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @MpScheduled(cron = "0 0 2 * * ?", description = "删除无效的流量发生任务", id = "clean_flow_record")
     public void execute() {
         log.info("ClearFlowRecord.execute begin.");
         LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
