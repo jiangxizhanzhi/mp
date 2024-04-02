@@ -192,7 +192,7 @@ public class LoadController {
         if (list != null && list.size() == 1) {
             return new ServiceResult<>(list.get(0), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "查询载荷执行结果详情失败").asResult();
         }
     }
 
@@ -206,7 +206,7 @@ public class LoadController {
         if (deleteLoadExecutionResultByPk) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "删除载荷执行结果失败").asResult();
         }
     }
 
@@ -220,7 +220,7 @@ public class LoadController {
         if (updateLoadExecutionResultByPk) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改载荷执行结果失败").asResult();
         }
     }
 
@@ -234,7 +234,7 @@ public class LoadController {
         if (addLoadExecutionResult) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
         }
     }
 
@@ -248,7 +248,7 @@ public class LoadController {
         if (importLoadExecutionResult) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷执行结果导入失败").asResult();
         }
     }
 
@@ -263,7 +263,7 @@ public class LoadController {
         if (exportLoadExecutionResult) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷执行结果导出失败").asResult();
         }
     }
 
