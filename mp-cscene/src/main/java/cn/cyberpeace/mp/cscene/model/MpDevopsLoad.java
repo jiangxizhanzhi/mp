@@ -60,6 +60,10 @@ public class MpDevopsLoad extends BaseModel {
      */
     private String readMe;
     /**
+     * 封面
+     */
+    private String cover;
+    /**
      * 默认命令
      */
     private String defaultCmd;

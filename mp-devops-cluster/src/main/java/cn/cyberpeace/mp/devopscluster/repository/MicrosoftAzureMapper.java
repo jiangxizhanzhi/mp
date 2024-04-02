@@ -21,6 +21,8 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     List<DeviceCloudTargetPO> getCloudTargetList(@Param("param") JSONObject requestData);
 
+    Integer getCloudTargetListTotal(@Param("param") JSONObject requestData);
+
     Integer deleteByPk(String pk);
 
     Integer updateCloudTarget(@Param("pk") String pk, @Param("param") JSONObject requestData);
@@ -35,4 +37,8 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     DeviceCloudTargetPO getCloudTargetByPk(@Param("pk") String pk);
 
     List<MpSysCodeEnum> getAlldata(String code);
+
+    List<MpSysCodeEnum> getSqlByCodes(@Param("param") List<JSONObject> codes);
+
+    List<DeviceCloudTargetPO> getCloudTargetListByCodes(@Param("param") List<MpSysCodeEnum> filteredList);
 }

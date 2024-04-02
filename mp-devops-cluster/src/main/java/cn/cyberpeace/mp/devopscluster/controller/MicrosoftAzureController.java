@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
@@ -34,7 +35,7 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像管理页面分页查询", notes = "")
     @GetMapping("/list")
-    public ServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
+    public ListObjServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                                    @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                                                    @RequestParam(value = "name", required = false) String name,
                                                    @RequestParam(value = "systemType", required = false) String systemType) {
@@ -43,8 +44,9 @@ public class MicrosoftAzureController {
         requestData.put("systemType", systemType);
         requestData.put("pageNum", pageNum);
         requestData.put("pageSize", pageSize);
-        List cloudTargetList = microsoftAzureConverter.getCloudTargetList(requestData);
-        return new Result(cloudTargetList).asResult();
+        JSONObject result = microsoftAzureConverter.getCloudTargetList(requestData);
+//        List returnData = microsoftAzureConverter.getTarget(jsonObject);
+        return new ListObjServiceResult((List) result.get("source"),(int)result.get("total")).asResult();
     }
 
     /**
@@ -65,9 +67,9 @@ public class MicrosoftAzureController {
     public ServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
         Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(requestData);
         if(deleteCloudTarget){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
         }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "数据删除失败,请检查列表是否存在该数据").asResult();
         }
     }
 
@@ -87,9 +89,9 @@ public class MicrosoftAzureController {
     public ServiceResult updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
         Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(requestData);
         if(updateCloudTarget){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
         }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "数据删除失败,请检查列表是否存在该数据").asResult();
         }
     }
 
@@ -103,7 +105,7 @@ public class MicrosoftAzureController {
         if(synchronousCloudData.get("code")!=null && synchronousCloudData.get("code").equals("200")){
             return new ServiceResult<>(synchronousCloudData).asResult();
         }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR,synchronousCloudData.get("message").toString());
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,synchronousCloudData.get("message").toString()).asResult();
         }
     }
 }

@@ -53,13 +53,38 @@ public class MicrosoftAzureConverter implements BaseConverter{
     /**
      * 云镜像管理页面分页查询
      */
-    public List getCloudTargetList(JSONObject requestData) {
+    public JSONObject getCloudTargetList(JSONObject requestData) {
         Integer pageNum = requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
         Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
         requestData.put("offset", (pageNum - 1) * pageSize);
         requestData.put("pageSize",pageSize);
         List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetList(requestData);
-        return list;
+        Integer total = microsoftAzureMapper.getCloudTargetListTotal(requestData);
+        JSONObject result = new JSONObject();
+        result.put("source",list);
+        result.put("total",total);
+        return result;
+    }
+
+    public JSONObject getCloudTargetListByCodes(List<JSONObject> codes) {
+        List<MpSysCodeEnum> sqls = microsoftAzureMapper.getSqlByCodes(codes);
+        for (int i = 0; i < sqls.size(); i++) {
+            if(sqls.get(i).getRemark().contains("**")){
+                for (int j = 0; j < codes.size(); j++) {
+                    if(codes.get(j).get("code").toString().equals(sqls.get(i).getCode())){
+                        sqls.get(i).setRemark(sqls.get(i).getRemark().replace("**",codes.get(j).get("value").toString()));
+                    }
+                }
+            }
+        }
+        List<MpSysCodeEnum> filteredList = sqls.stream()
+                .filter(s -> !s.getRemark().isEmpty())
+                .collect(Collectors.toList());
+        List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetListByCodes(filteredList);
+        JSONObject result = new JSONObject();
+        result.put("source",list);
+        result.put("total",list.size());
+        return result;
     }
 
     /**
@@ -194,12 +219,16 @@ public class MicrosoftAzureConverter implements BaseConverter{
     /**
      * 查询所有镜像管理分类
      */
-    public List getImageCategories(){
+    public List getImageCategories(String cloudType){
+//        String parentCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
+//        PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
+//        PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
+//        PARENT_PUBLICCLOUD_CATEGORY_TYPE("1004", "公有云配置项菜单");
+
         //查询所有数据
-        String parentCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
-        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(parentCode);
+        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(cloudType);
         //根据parentCode字段将data数据按照父子关系处理返回新的List<MpSysCodeEnum>数据
-        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, parentCode);
+        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, cloudType);
         return dtoTreeList;
     }
 

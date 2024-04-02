@@ -18,7 +18,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<MpDevopsLoad> getLoadList(@Param("param") JSONObject requestData);
 
-    Boolean updateLoadByPk(String pk, @Param("param")JSONObject requestData);
+    Integer getLoadListotal(@Param("param") JSONObject requestData);
+
+    Boolean updateLoadByPk(String pk, @Param("param") JSONObject requestData);
 
     Boolean deleteLoadByPk(String pk);
 
@@ -26,11 +28,11 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteLoadExecutionResultByPk(String pk);
 
-    Boolean updateLoadExecutionResultByPk(String pk, @Param("param")JSONObject requestData);
+    Boolean updateLoadExecutionResultByPk(String pk, @Param("param") JSONObject requestData);
 
-    Boolean addLoadExecutionResult(@Param("param")JSONObject requestData);
+    Boolean addLoadExecutionResult(@Param("param") JSONObject requestData);
 
-    Boolean addLoad(@Param("param")JSONObject requestData);
+    Boolean addLoad(@Param("param") JSONObject requestData);
 
     Boolean stageBindLoad(String addType, String sceneId, String stageId, String loadId,
                           String interfaceType, String deployment, String paramListString);

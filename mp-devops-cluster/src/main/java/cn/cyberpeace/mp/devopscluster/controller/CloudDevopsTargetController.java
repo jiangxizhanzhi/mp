@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,33 +37,19 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/imageCategories")
-    public ServiceResult<List> imageCategories(){
-//        TypeAllVO returnData = microsoftAzureConverter.imageCategories(false);
-        List list = microsoftAzureConverter.getImageCategories();
+    public ServiceResult<List> imageCategories(@RequestParam(value = "cloudType", required = true, defaultValue = "1002") String cloudType){
+        List list = microsoftAzureConverter.getImageCategories(cloudType);
         return new ServiceResult<List>(list, BaseErrorCode.SUCCESS).asResult();
     }
 
     /**
      * 查询所有云靶标信息
-     * @param jsonObject
-     * @return
      */
     @ApiOperation("查询所有信息(带过滤条件)")
-    @GetMapping("/getTarget")
-    public ServiceResult getTarget(@RequestParam(value = "level", required = false) Integer level,
-                                   @RequestParam(value = "code", required = false) String code,
-                                   @RequestParam(value = "searchType", required = false) String searchType,
-                                   @RequestParam(value = "searchKey", required = false) String searchKey,
-                                   @RequestParam(value = "searchValue", required = false) String searchValue){
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("level", level);
-        jsonObject.put("code", code);
-        jsonObject.put("searchType", searchType);
-        jsonObject.put("searchKey", searchKey);
-        jsonObject.put("searchValue", searchValue);
-        List list = microsoftAzureConverter.getCloudTargetList(jsonObject);
-//        List returnData = microsoftAzureConverter.getTarget(jsonObject);
-        return new Result(list).asResult();
+    @PostMapping("/getTarget")
+    public ListObjServiceResult getTarget(@RequestBody(required = false) List<JSONObject> codes){
+        JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(codes);
+        return new ListObjServiceResult((List) result.get("source"),(int)result.get("total")).asResult();
     }
 
     /**

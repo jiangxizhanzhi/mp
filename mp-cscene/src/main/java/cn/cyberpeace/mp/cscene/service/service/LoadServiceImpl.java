@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
@@ -16,10 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -31,13 +26,17 @@ public class LoadServiceImpl {
     /*
      * 载荷页面
      * */
-    public List getLoadList(JSONObject requestData) {
+    public JSONObject getLoadList(JSONObject requestData) {
         Integer pageNum = requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
         Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
-        requestData.put("pageSize",pageSize);
+        requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
-        return list;
+        Integer total = loadMapper.getLoadListotal(requestData);
+        JSONObject result = new JSONObject();
+        result.put("source", list);
+        result.put("total", total);
+        return result;
     }
 
     /*
@@ -54,8 +53,8 @@ public class LoadServiceImpl {
     public Boolean updateLoadByPk(JSONObject requestData) {
         Boolean updateLoadByPk;
         if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                                && !requestData.get("pk").toString().equals("") ) {
-            updateLoadByPk = loadMapper.updateLoadByPk(requestData.get("pk").toString(),requestData);
+                && !requestData.get("pk").toString().equals("")) {
+            updateLoadByPk = loadMapper.updateLoadByPk(requestData.get("pk").toString(), requestData);
         } else {
             return false;
         }
@@ -81,7 +80,7 @@ public class LoadServiceImpl {
     public Boolean deleteLoadByPk(JSONObject requestData) {
         Boolean deleteLoadByPk;
         if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("") ) {
+                && !requestData.get("pk").toString().equals("")) {
             deleteLoadByPk = loadMapper.deleteLoadByPk(requestData.get("pk").toString());
         } else {
             return false;
@@ -94,26 +93,26 @@ public class LoadServiceImpl {
      * */
     public List getLoadBySceneId(String sceneId) {
         //todo 需要场景载荷关联表
-        List loadList = getLoadList(new JSONObject());
-        return loadList;
+        JSONObject loadList = getLoadList(new JSONObject());
+        return (List) loadList.get("source");
     }
 
     /*
      * 载荷执行结果统计
      * */
-    public Map<String,Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
+    public Map<String, Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
-        Map<String,Integer> map = new HashMap();
+        Map<String, Integer> map = new HashMap();
         //请求次数
-        map.put("askTimes",0);
+        map.put("askTimes", 0);
         //成功次数
-        map.put("successTimes",0);
+        map.put("successTimes", 0);
         //失败次数
-        map.put("failTimes",0);
+        map.put("failTimes", 0);
         //已有结果
-        map.put("haveResult",0);
+        map.put("haveResult", 0);
         //暂无结果
-        map.put("noResultForTheTime",0);
+        map.put("noResultForTheTime", 0);
         for (int i = 0; i < list.size(); i++) {
             //todo 统计
         }
@@ -134,7 +133,7 @@ public class LoadServiceImpl {
     public Boolean deleteLoadExecutionResultByPk(JSONObject requestData) {
         Boolean deleteLoadExecutionResultByPk;
         if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("") ) {
+                && !requestData.get("pk").toString().equals("")) {
             deleteLoadExecutionResultByPk = loadMapper.deleteLoadExecutionResultByPk(requestData.get("pk").toString());
         } else {
             return false;
@@ -148,8 +147,8 @@ public class LoadServiceImpl {
     public Boolean updateLoadExecutionResultByPk(JSONObject requestData) {
         Boolean updateLoadExecutionResultByPk;
         if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("") ) {
-            updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.get("pk").toString(),requestData);
+                && !requestData.get("pk").toString().equals("")) {
+            updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.get("pk").toString(), requestData);
         } else {
             return false;
         }
@@ -173,8 +172,8 @@ public class LoadServiceImpl {
      * 载荷执行结果导入
      * */
     public Boolean importLoadExecutionResult(MultipartFile file) {
-        if(file != null && file.getName() != null && !file.getName().equals("")){
-            if(file.getOriginalFilename().endsWith("xlsx") || file.getOriginalFilename().endsWith("xls")){
+        if (file != null && file.getName() != null && !file.getName().equals("")) {
+            if (file.getOriginalFilename().endsWith("xlsx") || file.getOriginalFilename().endsWith("xls")) {
                 return true;
             }
         }
@@ -194,11 +193,11 @@ public class LoadServiceImpl {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
             //创建日期对象，用于生成Excel表格名称，时间截止到秒，避免Excel名称重复
             String day = sdf.format(date);
-            //****************数据写入Excel***********************************
-            String[] title = {"主键","id","工具名称","工具描述","工具平台","作用类型","运行平台","控制类型"};
-            String fileName = "载荷执行结果"+day+".xls";
+            //***********************************数据写入Excel***********************************
+            String[] title = {"主键", "id", "工具名称", "工具描述", "工具平台", "作用类型", "运行平台", "控制类型"};
+            String fileName = "载荷执行结果" + day + ".xls";
             String sheetName = "载荷执行结果";
-            int ol =list.size()+1;
+            int ol = list.size() + 1;
             String[][] content = new String[ol][];
             String pk = "";
             String id = "";
@@ -210,7 +209,7 @@ public class LoadServiceImpl {
             String control_type = "";
             for (int i = 0; i < ol; i++) {
                 content[i] = new String[title.length];
-                if(i==list.size()){
+                if (i == list.size()) {
                     content[i][0] = pk;
                     content[i][1] = id;
                     content[i][2] = tool_name;
@@ -219,8 +218,8 @@ public class LoadServiceImpl {
                     content[i][5] = action_type;
                     content[i][6] = run_table;
                     content[i][7] = control_type;
-                }else{
-                    MpDevopsLoadSceneLog obj =  list.get(i);
+                } else {
+                    MpDevopsLoadSceneLog obj = list.get(i);
                     content[i][0] = obj.getPk().toString();
                     content[i][1] = obj.getId();
                     content[i][2] = obj.getToolName();
@@ -258,9 +257,9 @@ public class LoadServiceImpl {
         }
     }
 
-    public static HSSFWorkbook getHSSFWorkbook(String sheetName,String []title,String [][]values, HSSFWorkbook wb){
+    public static HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String[][] values, HSSFWorkbook wb) {
         // 第一步，创建一个HSSFWorkbook，对应一个Excel文件
-        if(wb == null){
+        if (wb == null) {
             wb = new HSSFWorkbook();
         }
         // 第二步，在workbook中添加一个sheet,对应Excel文件中的sheet
@@ -273,15 +272,15 @@ public class LoadServiceImpl {
         //声明列对象
         HSSFCell cell = null;
         //创建标题
-        for(int i=0;i<title.length;i++){
+        for (int i = 0; i < title.length; i++) {
             cell = row.createCell(i);
             cell.setCellValue(title[i]);
             cell.setCellStyle(style);
         }
         //创建内容
-        for(int i=0;i<values.length;i++){
+        for (int i = 0; i < values.length; i++) {
             row = sheet.createRow(i + 1);
-            for(int j=0;j<values[i].length;j++){
+            for (int j = 0; j < values[i].length; j++) {
                 //将内容按顺序赋给对应的列对象
                 row.createCell(j).setCellValue(values[i][j]);
             }
@@ -302,7 +301,7 @@ public class LoadServiceImpl {
         String deployment = requestData.get("deployment") != null ? requestData.get("deployment").toString() : "";
         List<JSONObject> paramList = requestData.get("paramList") != null ? (List<JSONObject>) requestData.get("paramList") : new ArrayList();
         String paramListString = paramList != null ? paramList.toString() : "";
-        Boolean stageBindLoad = loadMapper.stageBindLoad(addType,sceneId,stageId,loadId,interfaceType,deployment,paramListString);
+        Boolean stageBindLoad = loadMapper.stageBindLoad(addType, sceneId, stageId, loadId, interfaceType, deployment, paramListString);
         return stageBindLoad;
     }
 }

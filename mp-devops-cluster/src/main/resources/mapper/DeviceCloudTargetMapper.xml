@@ -58,6 +58,21 @@
         </if>
     </select>
 
+    <select id="getCloudTargetListTotal" resultType="java.lang.Integer">
+        SELECT
+        count(0)
+        FROM
+        mp_devops_cloud_target
+        <where>
+            <if test="param != null and param.name != null and param.name != ''">
+                and name like concat('%', #{param.name}, '%')
+            </if>
+            <if test="param != null and param.systemType != null and param.systemType != ''">
+                and system_type = #{param.systemType}
+            </if>
+        </where>
+    </select>
+
     <select id="getSingleLayerList" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
             e.code as parentSystemType,
@@ -110,4 +125,32 @@
 	              T.LEVEL;
     </select>
 
+    <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum">
+        SELECT
+            code,remark
+        FROM
+            mp_sys_code_enum
+        <where>
+            <if test="param != null and param.size != 0">
+                code in
+                <foreach collection="param" item="item" open="(" close=")" separator=",">
+                    #{item.code}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getCloudTargetListByCodes" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
+        SELECT
+            *
+        FROM
+            mp_devops_cloud_target
+        <where>
+            <if test="param != null and param.size != 0">
+                <foreach collection="param" item="item">
+                    #{item.remark}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>
