@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.job.init;
 
-import cn.cyberpeace.mp.base.job.init.MpInitiate;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import org.springframework.stereotype.Component;
 

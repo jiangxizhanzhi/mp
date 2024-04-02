@@ -1,19 +1,15 @@
 package cn.cyberpeace.mp.frontadmin.service;
 
-import cn.cyberpeace.mp.auth.util.EncryptUtils;
 import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivCtlService;
 import cn.cyberpeace.mp.frontadmin.util.RandomUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Description:

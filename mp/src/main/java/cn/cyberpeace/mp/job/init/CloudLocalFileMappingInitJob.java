@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.job.init.MpInitiate;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
