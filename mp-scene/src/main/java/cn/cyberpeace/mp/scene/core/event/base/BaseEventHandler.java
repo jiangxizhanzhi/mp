@@ -91,22 +91,9 @@ public abstract class BaseEventHandler<TEventModelInterface extends BaseEventMod
      * @return 事件触发结果
      */
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
-        if (acquireEventLock(event, eventStatus, process, processStatus)) {
-            TEventModel eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
-            if (eventObj == null) {
-                releaseEventLock(event, eventStatus, process, processStatus);
-                log.error("{} save event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
-                        getTargetName(), event, eventStatus, process, processStatus, processMessage);
-                return EventFlag.SAVE_FAILED;
-            } else {
-                logProcess(event, eventStatus, process, processStatus, processMessage);
-                return EventFlag.SUCCESS;
-            }
-        } else {
-            log.error("{} enter event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
-                    getTargetName(), event, eventStatus, process, processStatus, processMessage);
-            return EventFlag.ENTER_FAILED;
-        }
+        TEventModel eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
+        logProcess(event, eventStatus, process, processStatus, processMessage);
+        return EventFlag.SUCCESS;
     }
 
     private String getProcessName(String process) {

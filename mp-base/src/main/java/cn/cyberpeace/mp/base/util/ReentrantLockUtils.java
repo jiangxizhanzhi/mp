@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.util;
+package cn.cyberpeace.mp.base.util;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

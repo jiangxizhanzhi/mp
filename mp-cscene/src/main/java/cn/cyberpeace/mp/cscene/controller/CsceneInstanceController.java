@@ -31,7 +31,6 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsR
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -44,7 +43,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -66,7 +65,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -590,18 +588,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/pause")
     public ServiceResult<Boolean> pauseScene(@RequestParam(required = false) String id,
                                              @RequestBody(required = false) CsceneInstanceActionRequest request) {
-        if (ReentrantLockUtils.tryLock("pause" + id)) {
-            try {
-                request = formatActionRequest(request, id);
-                ServiceResult<Boolean> result = modelService.pause(request.getId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_PAUSE, request.getContext());
-                return result;
-            } finally {
-                ReentrantLockUtils.unLock("pause" + id);
-            }
-        } else {
-            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
-        }
+        request = formatActionRequest(request, id);
+        ServiceResult<Boolean> result = modelService.pause(request.getId(), request.getContext());
+        return result.asResult();
     }
 
     @ApiOperation("(从暂停)恢复场景实例")

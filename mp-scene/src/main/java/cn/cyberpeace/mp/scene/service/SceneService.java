@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.service;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
@@ -208,50 +210,85 @@ public class SceneService {
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
+
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
-        if (SceneEventUtils.hasProcessingScene(SceneModel.Event.UNPAUSE, id)) {
-            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
-        }
-        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
-        if (sceneHandler.getScene().getEvent() == SceneModel.Event.PAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
-            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
-        } else if (sceneHandler.getScene().getEvent() == SceneModel.Event.PAUSE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
+        SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
+        String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(SceneModel.Event.PAUSE));
+        eventInfo.setSceneId(id);
+        eventInfo.setEventName(action);
+
+        var originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, eventInfo);
+        if (originLockInfo != null) {
+            // 锁获取失败,说明有其他线程在执行场景操作
+            if (originLockInfo.getEvent() == SceneModel.Event.PAUSE) {
+                // 其它线程正在执行暂停 则直接返回成功
+                return new ServiceResult<>(true);
+            } else {
+                // 其他线程执行场景的其他操作 则返回报错
+                throw new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(eventInfo.getEventName()));
+            }
+        } else {
+            // 锁获取成功 没有其他线程执行操作
+            SceneHandler sceneHandler = null;
+            try {
+                sceneHandler = new SceneHandler(id, null, false, context);
+                sceneHandler.setRealTimeUpdate(true);
+            } catch (Exception e) {
+                SceneEventUtils.unLock(id);
+                throw e;
+            }
+
+            SceneHandler finalSceneHandler = sceneHandler;
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            finalSceneHandler.pause();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
             return new ServiceResult<>(true);
         }
-        SceneEventUtils.addProcessingScene(SceneModel.Event.PAUSE, id);
-        SceneTaskPool.getInstance().executeTask(() -> {
-            try {
-                sceneHandler.pause();
-            } finally {
-                SceneEventUtils.removeProcessingScene(SceneModel.Event.PAUSE, id);
-            }
-        });
-        return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
-        if (SceneEventUtils.hasProcessingScene(SceneModel.Event.PAUSE, id)) {
-            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
-        }
-        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
-        if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && (sceneHandler.getScene().getEventStatus() == EventStatus.IN_PROGRESS || sceneHandler.getScene().getEventStatus() == EventStatus.START)) {
-            throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
-        } else if (sceneHandler.getScene().getEvent() == SceneModel.Event.UNPAUSE && sceneHandler.getScene().getEventStatus() == EventStatus.OVER) {
+        SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
+        String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(SceneModel.Event.UNPAUSE));
+        eventInfo.setSceneId(id);
+        eventInfo.setEventName(action);
+
+        var originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, eventInfo);
+        if (originLockInfo != null) {
+            // 锁获取失败,说明有其他线程在执行场景恢复操作
+            if (originLockInfo.getEvent() == SceneModel.Event.UNPAUSE) {
+                // 其它线程正在执行恢复操作 则直接返回成功
+                return new ServiceResult<>(true);
+            } else {
+                // 其他线程执行场景的其他操作 则返回报错
+                throw new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(eventInfo.getEventName()));
+            }
+        } else {
+            // 锁获取成功 没有其他线程执行操作
+            SceneHandler sceneHandler = null;
+            try {
+                sceneHandler = new SceneHandler(id, null, false, context);
+                sceneHandler.setRealTimeUpdate(true);
+            } catch (Exception e) {
+                SceneEventUtils.unLock(id);
+                throw e;
+            }
+
+            SceneHandler finalSceneHandler = sceneHandler;
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            finalSceneHandler.unpause();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
             return new ServiceResult<>(true);
         }
-        SceneEventUtils.addProcessingScene(SceneModel.Event.UNPAUSE, id);
-        SceneTaskPool.getInstance().executeTask(() -> {
-            try {
-                sceneHandler.unpause();
-            } finally {
-                SceneEventUtils.removeProcessingScene(SceneModel.Event.UNPAUSE, id);
-            }
-        });
-        return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {

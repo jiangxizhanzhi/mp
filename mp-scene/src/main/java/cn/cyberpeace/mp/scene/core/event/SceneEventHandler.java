@@ -44,12 +44,6 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
     }
 
     @Override
-    protected boolean acquireEventLock(int event, int eventStatus, String process, int processStatus) {
-        SceneEventControllerUtils.acquireEventLock(getTarget().getEid(), event, eventStatus);
-        return true;
-    }
-
-    @Override
     protected void logProcess(int event, int eventStatus, String process, int processStatus, String processMessage) {
         List<String> formatMessage = new ArrayList<>();
         formatMessage.add(getTarget().getEid());
