@@ -159,14 +159,6 @@ public class ScenePluginCloudSceneService {
         return accessModeLinkInfoMap;
     }
 
-    private Map<String, AccessModeLinkInfo> collectAccessModeLinkInfo(List<String> sceneIds, List<String> nodeIds) {
-        Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = new HashMap<>();
-        for (String sceneId : sceneIds) {
-            accessModeLinkInfoMap.putAll(collectAccessModeLinkInfo(sceneId, nodeIds));
-        }
-        return accessModeLinkInfoMap;
-    }
-
     @Data
     @AllArgsConstructor
     private static class ConnectionLinkInfo {

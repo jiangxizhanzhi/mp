@@ -450,6 +450,7 @@ public class AsyncPlatFlowTaskService {
      * 异步新增虚拟机、添加网口
      *
      */
+    @Deprecated
     @Async
     public void addExecutor(String uuid, List<FlowNetworkInfo> networkInfos) {
         this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()), networkInfos);

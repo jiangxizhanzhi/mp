@@ -186,38 +186,6 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         return processedStartTime;
     }
 
-
-    /**
-     * 计算endtime
-     * @param endTime
-     * @param timeSlotEnum
-     * @return
-     */
-    private LocalDateTime processEndTime(LocalDateTime endTime, TimeSlotEnums timeSlotEnum) {
-
-        LocalDateTime processedEndTime = null;
-
-        if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
-            // 按天统计
-            processedEndTime = LocalDateTime.of(endTime.plusDays(1).toLocalDate(), LocalTime.MIN);
-        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
-        //    // 按星期统计
-        //    LocalDate firstDayOfNextWeek = endTime.toLocalDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-        //    processedEndTime = LocalDateTime.of(firstDayOfNextWeek, LocalTime.MIN);
-        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
-            // 按月统计
-            LocalDate firstDayOfNextMonth = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextMonth());
-            processedEndTime = LocalDateTime.of(firstDayOfNextMonth, LocalTime.MIN);
-        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
-            // 按年统计
-            LocalDate firstDayOfNextYear = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextYear());
-            processedEndTime = LocalDateTime.of(firstDayOfNextYear, LocalTime.MIN);
-        }
-
-        return processedEndTime;
-    }
-
-
     private List<AlarmStatisticsTrendVO> processTrendByDateProcessor(List<AlarmStatisticsTrendVO> trendVOList, TimeUnitProcessor timeUnitProcessor, LocalDateTime startTime, LocalDateTime endTime) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeUnitProcessor.getDateFormatter());
         List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();

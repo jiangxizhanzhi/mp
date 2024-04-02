@@ -84,14 +84,4 @@ public class DynamipsConverter implements BaseConverter {
         }
         return instanceBO;
     }
-
-    /**
-     * 获取虚拟机总数
-     *
-     * @param dto
-     * @return
-     */
-    public Integer getTotalInstances(InstancePageDTO dto) {
-        return 0;
-    }
 }

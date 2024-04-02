@@ -111,22 +111,4 @@ public class DefaultImgController {
 
         return ResultCommon.success(urlMap);
     }
-
-    /**
-     * 获取多个指定目录下的默认图片
-     * @param defaultImgDirEnums
-     * @return
-     */
-    private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
-        List<String> list = new ArrayList<>();
-        for (DefaultImgDirEnum v : defaultImgDirEnums) {
-            List<String> fileByDefaultImgDirEnum = defaultImgService.getFileByDefaultImgDirEnum(v);
-            for (String string : fileByDefaultImgDirEnum) {
-                list.add(string);
-            }
-        }
-        return list;
-    }
-
-
 }

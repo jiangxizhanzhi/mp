@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.frontadmin.service;
 
-import cn.cyberpeace.mp.base.job.schedule.MpScheduled;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivCtlService;

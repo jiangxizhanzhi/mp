@@ -27,6 +27,7 @@ public class DefaultImgService {
      * @param defaultImgDirEnum
      * @return
      */
+    @Deprecated
     public List<String> getFileByDefaultImgDirEnum(DefaultImgDirEnum defaultImgDirEnum) {
         String endPathName = defaultImgDirEnum.getEndPathName();
         String startWithFile = "file:";

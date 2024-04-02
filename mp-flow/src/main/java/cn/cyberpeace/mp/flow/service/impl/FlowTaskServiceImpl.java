@@ -88,6 +88,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param fields
      * @return
      */
+    @Deprecated
     public ServiceResult<FlowTaskModel> getDetail(String id, String[] fields) {
         FlowTaskModel flowTaskModel = new FlowTaskModel();
         ObjResult<FlowTaskModel> serviceResult = get(id, fields).getSource();
@@ -128,6 +129,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param queryParams
      * @return
      */
+    @Deprecated
     public ListObjResult<FlowTaskModel> pageFlowTask(QueryParams queryParams) {
         ListObjResult<FlowTaskModel> listObjResult = list(queryParams).getSource();
         if (CollectionUtils.isNotEmpty(listObjResult.getList())) {
@@ -236,6 +238,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param request
      * @return
      */
+    @Deprecated
     public ServiceResult<FlowTaskModel> updateFlowTask(AddFlowTaskRequest request) {
         if (StringUtils.isBlank(request.getOriginIps())) {
             // 设置默认来源ip
@@ -354,6 +357,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param request 批量删除请求
      * @return
      */
+    @Deprecated
     public ServiceResult<Integer> batchDeleteFlowTask(BatchDeleteFlowTaskRequest request) {
         QueryParams taskParams = new QueryParams();
         String[] taskDelIds = request.getIdList().toArray(new String[0]);
@@ -487,6 +491,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param taskId
      * @return
      */
+    @Deprecated
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
         // 批量任务传的是nodeId，直接用该值查询
         String thirdTaskId = null;
@@ -671,6 +676,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param taskIds
      * @return
      */
+    @Deprecated
     public int batchUpdateTaskStatus(Integer taskStatus, Boolean runCount, List<String> taskIds) {
         return getModelMapper().batchUpdateTaskStatus(taskStatus, runCount, taskIds);
     }
@@ -705,6 +711,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param flowTaskModel
      * @return
      */
+    @Deprecated
     public int updateFlowTaskDetail(FlowTaskModel flowTaskModel) {
         return getModelMapper().updateTaskInfo(flowTaskModel);
     }

@@ -134,18 +134,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return request;
     }
 
-    private CsceneInstanceNodesActionRequest formatNodesActionRequest(CsceneInstanceNodesActionRequest request,
-                                                                      String paramId, List<String> paramNodeIds) {
-        if (request == null) {
-            request = new CsceneInstanceNodesActionRequest();
-        }
-        request = (CsceneInstanceNodesActionRequest) formatActionRequest(request, paramId);
-        if (!CollectionUtils.isEmpty(paramNodeIds)) {
-            request.setNodeIds(paramNodeIds);
-        }
-        return request;
-    }
-
     private CsceneInstanceNodeFlowActionRequest formatNodeFlowActionRequest(
             CsceneInstanceNodeFlowActionRequest request, String paramId, String paramNodeId, String paramFlowId, String sourceIp) {
         if (request == null) {

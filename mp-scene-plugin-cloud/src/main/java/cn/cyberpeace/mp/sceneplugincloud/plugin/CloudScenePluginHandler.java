@@ -467,34 +467,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotId, snapshotName, description);
     }
 
-    public List<String> allocateOuterIps(String auxiliaryNetworkNodeId, int count) {
-        CloudPluginSceneElementBO auxiliaryNetworkCloudElement = getElement(auxiliaryNetworkNodeId);
-        String cidr = auxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr();
-        if (StringUtils.isEmpty(cidr)) {
-            return new ArrayList<>();
-        }
-
-        List<String> portIds = handlerUtils.getAuxiliaryNetworkCloudElementPortIds(auxiliaryNetworkCloudElement);
-        Set<String> existIps = new HashSet<>(handlerUtils.getOuterExistIps(auxiliaryNetworkCloudElement));
-        if (!StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
-            existIps.add(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
-        }
-        if (portIds != null && !portIds.isEmpty()) {
-            portIds.forEach(portId -> {
-                SceneElementPortBO port = getSceneHandler().getPort(portId);
-                if (StringUtils.isNotEmpty(port.getIp())) {
-                    existIps.add(port.getIp());
-                }
-            });
-        }
-
-        List<String> ips = IpUtils.newRandomIps(cidr, count, new ArrayList<>(existIps),
-                auxiliaryNetworkCloudElement.getAllocationPools(),
-                BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
-        handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);
-        return ips;
-    }
-
     @Override
     public ScenePluginDataBO toData() {
         getElementPortMap().forEach((portId, cloudPort) -> {

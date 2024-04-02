@@ -1464,6 +1464,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 初始化pcap包解析
      */
+    @Deprecated
     public void initPcapAnalyse() {
         log.info("start init pcap analyse");
         // 清空原数据
