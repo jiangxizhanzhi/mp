@@ -7,8 +7,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.constant.LogConstant;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.exportHandle.ExportHandle;
 import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
@@ -20,6 +23,7 @@ import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.cyberpeace.mp.log.request.LogExportRequest;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -68,6 +72,16 @@ public class OperateLogController {
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest) {
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
         operateLogService.create(request);
+        return ResultCommon.success();
+    }
+    @ApiOperation(value = "新增操作日志")
+    @ApiImplicitParam(name = "request", value = "操作日志请求", dataTypeClass = OperationLogRequest.class)
+    @PostMapping("/adds")
+    @OperateLog( module = OpModuleEnums.tool,type = OpTypeEnums.DOWNLOAD, title = "下载",target = OpTargetEnums.TARGET)
+    public ServiceResult add(@RequestBody JSONObject json, HttpServletRequest httpServletRequest) {
+        val request = JSONObject.parseObject(json.toString(), OperationLogRequest.class);
+        request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
+        operateLogService.createToolLog(request);
         return ResultCommon.success();
     }
 

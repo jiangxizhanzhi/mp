@@ -39,8 +39,11 @@ public enum OpTypeEnums {
     RECOVER("recover"),
     //导出
     EXPORT("export"),
+    //下载
+    DOWNLOAD("下载"),
 
     DEFAULT("");
+
 
 
     private String code;

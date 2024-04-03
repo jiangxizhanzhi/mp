@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -59,6 +60,10 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
     @Override
     public void create(OperationLogRequest request, Locale locale) {
         OperateLogSqlModel model = opRequest2Model(request, locale);
+        this.create(model);
+    }
+    public void createToolLog(OperationLogRequest request, Locale locale) {
+        OperateLogSqlModel model = opRequest2ModelToolLog(request, locale);
         this.create(model);
     }
 
@@ -264,6 +269,43 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         }
         model.setOpTarget(request.getOpTarget());
         //model.setOpTargetId(getTidFromTarget(model.getOpTarget(), locale));
+        model.setTitle(request.getTitle());
+        model.setUserId(request.getUserId());
+        model.setUserName(request.getUserName());
+        model.setUserType(request.getUserType());
+        model.setDescription(request.getDescription());
+        model.setOpIp(request.getOpIp());
+        model.setContent(request.getContent());
+        processDefaultContent(model);
+        if (StringUtils.isBlank(model.getUserName())) {
+            log.error("operationlog, username cannot be null. {}", model);
+            return null;
+        }
+        return model;
+    }
+    private OperateLogSqlModel opRequest2ModelToolLog(OperationLogRequest request, Locale locale) {
+        OperateLogSqlModel model = new OperateLogSqlModel();
+        model.setFrom(request.getFrom());
+        model.setLogType(request.getLogType());
+
+        if (Objects.nonNull(request.getOpModule())) {
+            OpModuleEnums opModuleEnum = OpModuleEnums.fromValue(request.getOpModule());
+            if (Objects.nonNull(opModuleEnum)) {
+                String localizedMsg = getlocalizedMessage(locale, opModuleEnum.getCode());
+                model.setOpModule(localizedMsg);
+                model.setOpModuleId(opModuleEnum.ordinal());
+            }
+        }
+        if (Objects.nonNull(request.getOpType())) {
+            OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(request.getOpType());
+            val split = opTypeEnum.toString().split("\\.");
+            val s = split[split.length - 1];
+            if (Objects.nonNull(s)) {
+                model.setOpType(s);
+                model.setOpTypeId(opTypeEnum.ordinal());
+            }
+        }
+        model.setOpTarget(request.getOpTarget());
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
         model.setUserName(request.getUserName());

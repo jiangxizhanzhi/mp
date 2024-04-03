@@ -31,5 +31,6 @@ public interface OperateLogService {
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request);
 
     void  exportExcel(HttpServletResponse response, LogsExportrequest request) throws IOException;
+    void createToolLog(OperationLogRequest request);
 
 }

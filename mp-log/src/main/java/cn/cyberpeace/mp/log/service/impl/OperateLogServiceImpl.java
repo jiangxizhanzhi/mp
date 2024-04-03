@@ -45,6 +45,9 @@ public class OperateLogServiceImpl implements OperateLogService {
     @Autowired
     private OperateLogDbService operateLogDbService;
 
+    @Autowired
+    private OperateLogSqlServiceImpl operateLogSqlServiceImpl;
+
     @Override
     public void create(OperationLogRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
@@ -118,6 +121,12 @@ public class OperateLogServiceImpl implements OperateLogService {
         String fileName = URLEncoder.encode(fname, "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), exportClz).sheet(sheetName).doWrite(dataLst);
+    }
+
+    @Override
+    public void createToolLog(OperationLogRequest request) {
+        Locale locale = LocaleContextHolder.getLocale();
+        operateLogSqlServiceImpl.createToolLog(request, locale);
     }
 
     @Override
