@@ -638,7 +638,7 @@ public class FlowInfoService {
         buildRuleIpQuery(esiIpFieldBOS, queryBuilder);
 
         String typeTerm = "protocol";
-        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol");
+        AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol").size(12);
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
