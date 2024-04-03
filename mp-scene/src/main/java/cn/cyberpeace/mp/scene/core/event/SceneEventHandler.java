@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventModel;
-import cn.cyberpeace.mp.scene.core.event.dispatch.SceneEventControllerUtils;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +31,7 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
                     SceneModel.Event.SNAPSHOT, EVENT_NAME_PREFIX + "snapshot",
                     SceneModel.Event.DELETE, EVENT_NAME_PREFIX + "delete",
                     SceneModel.Event.MODIFY, EVENT_NAME_PREFIX + "modify",
+                    SceneModel.Event.RECREATE, EVENT_NAME_PREFIX + "recreate",
             });
 
     public SceneEventHandler(SceneBO target, int event) {

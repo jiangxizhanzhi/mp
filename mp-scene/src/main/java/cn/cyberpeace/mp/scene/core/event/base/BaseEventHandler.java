@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.event.base;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -60,25 +59,14 @@ public abstract class BaseEventHandler<TEventModelInterface extends BaseEventMod
 
     /**
      * 保存事件状态信息
-     * 1.即时同步到事件目标上
-     * 2.存储事件状态（TODO）
+     * 即时同步到事件目标上
      */
-    private TEventModel saveEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
+    private void updateEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         target.setEvent(event);
         target.setEventStatus(eventStatus);
         target.setProcess(process);
         target.setProcessStatus(processStatus);
         target.setProcessMessage(processMessage);
-
-        TEventModel eventObj = ClassUtils.createInstance(eventModelClass);
-        eventObj.setTarget(target.genTarget());
-        eventObj.setEvent(event);
-        eventObj.setEventStatus(eventStatus);
-        eventObj.setProcess(process);
-        eventObj.setProcessStatus(processStatus);
-        eventObj.setProcessMessage(processMessage);
-        // TODO: 缓存eventObj
-        return eventObj;
     }
 
     /**
@@ -91,7 +79,7 @@ public abstract class BaseEventHandler<TEventModelInterface extends BaseEventMod
      * @return 事件触发结果
      */
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
-        TEventModel eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
+        updateEvent(event, eventStatus, process, processStatus, processMessage);
         logProcess(event, eventStatus, process, processStatus, processMessage);
         return EventFlag.SUCCESS;
     }

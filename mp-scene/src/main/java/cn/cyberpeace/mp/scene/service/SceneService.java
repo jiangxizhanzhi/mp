@@ -10,12 +10,9 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
-import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
-import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -60,7 +57,7 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             // 使用代理 提供事件流转
-            sceneHandler = SceneHandlerProxyBuilder.build(new SceneHandler(sceneDataBO, false, context));
+            sceneHandler = new SceneHandler(sceneDataBO, false, context);
             sceneHandler.setRealTimeUpdate(true);
             if (sceneHandler.getScene() != null) {
                 sceneHandler.getScene().setCreateTime(null);
@@ -113,7 +110,8 @@ public class SceneService {
         try {
 //            sceneHandler = new SceneHandler(id, null, false, context);
 //            sceneHandler.setRealTimeUpdate(true);
-            sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
+            sceneHandler = new SceneHandler(id, null, false, context);
+            sceneHandler.setRealTimeUpdate(true);
             if (logic) {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
@@ -145,6 +143,13 @@ public class SceneService {
     }
 
     public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.MODIFY);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
+        if (originLockInfo != null) {
+            // 更新曹邹只能有一个请求成功
+            throw this.createOperateException(originLockInfo);
+        }
+
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
         // 场景信息目前只更新显示参数
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
@@ -201,118 +206,111 @@ public class SceneService {
                     e.setEventStatus(EventStatus.INITIAL);
                 }
             }
-            SceneHandlerProxyBuilder.build(updatedSceneHandler);
-            SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
-            proxy.modify(originSceneHandler, updateElementIds);
+            updatedSceneHandler.modify(originSceneHandler, updateElementIds);
             //W:Refresh scene after updating
             runner.run();
         });
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
-
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
-        SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
-        String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(SceneModel.Event.PAUSE));
-        eventInfo.setSceneId(id);
-        eventInfo.setEventName(action);
-
-        var originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, eventInfo);
-        if (originLockInfo != null) {
-            // 锁获取失败,说明有其他线程在执行场景操作
-            if (originLockInfo.getEvent() == SceneModel.Event.PAUSE) {
-                // 其它线程正在执行暂停 则直接返回成功
-                return new ServiceResult<>(true);
-            } else {
-                // 其他线程执行场景的其他操作 则返回报错
-                throw new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(eventInfo.getEventName()));
-            }
-        } else {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.PAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
-            SceneHandler sceneHandler = null;
-            try {
-                sceneHandler = new SceneHandler(id, null, false, context);
-                sceneHandler.setRealTimeUpdate(true);
-            } catch (Exception e) {
-                SceneEventUtils.unLock(id);
-                throw e;
-            }
-
-            SceneHandler finalSceneHandler = sceneHandler;
             SceneTaskPool.getInstance()
                     .executeTask(() -> {
                         try {
-                            finalSceneHandler.pause();
+                            sceneHandler.pause();
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
                     });
             return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.PAUSE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
         }
     }
 
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
-        SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
-        String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(SceneModel.Event.UNPAUSE));
-        eventInfo.setSceneId(id);
-        eventInfo.setEventName(action);
-
-        var originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, eventInfo);
-        if (originLockInfo != null) {
-            // 锁获取失败,说明有其他线程在执行场景恢复操作
-            if (originLockInfo.getEvent() == SceneModel.Event.UNPAUSE) {
-                // 其它线程正在执行恢复操作 则直接返回成功
-                return new ServiceResult<>(true);
-            } else {
-                // 其他线程执行场景的其他操作 则返回报错
-                throw new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(eventInfo.getEventName()));
-            }
-        } else {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.UNPAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
-            SceneHandler sceneHandler = null;
-            try {
-                sceneHandler = new SceneHandler(id, null, false, context);
-                sceneHandler.setRealTimeUpdate(true);
-            } catch (Exception e) {
-                SceneEventUtils.unLock(id);
-                throw e;
-            }
-
-            SceneHandler finalSceneHandler = sceneHandler;
             SceneTaskPool.getInstance()
                     .executeTask(() -> {
                         try {
-                            finalSceneHandler.unpause();
+                            sceneHandler.unpause();
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
                     });
             return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.UNPAUSE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
         }
     }
 
     public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
-        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
-        sceneHandler.getElementMap().values().forEach(e -> {
-            List<Integer> validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
-                    EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
-            );
-            if (!validEvents.contains(SceneElementModel.Event.SUSPEND)) {
-                throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
-            }
-        });
-        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.suspend());
-        return new ServiceResult<>(true);
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.SUSPEND);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.suspend();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.SUSPEND) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> resume(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
-        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
-        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.resume());
-        return new ServiceResult<>(true);
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, null, null, SceneModel.Event.RESUME);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            SceneTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.resume();
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneModel.Event.RESUME) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     /**
@@ -325,9 +323,28 @@ public class SceneService {
     public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        //执行任务启动节点
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.startElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.START);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.startElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.START) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     /**
@@ -340,60 +357,201 @@ public class SceneService {
     public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        //执行任务关闭节点
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.stopElement(nodeId));
-        return new ServiceResult<>(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.STOP);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.stopElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.STOP) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.pauseElement(nodeId));
-        return new ServiceResult<>(true);
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.PAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.pauseElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.PAUSE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.unpauseElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.UNPAUSE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.unpauseElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.UNPAUSE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> restartElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.restartElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.RESTART);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.restartElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.RESTART) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> createElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.initiateElement(nodeId);
-            sceneHandler.createElement(nodeId);
-        });
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.CREATE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.initiateElement(nodeId);
+                            sceneHandler.createElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.CREATE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.recreateElement(nodeId,image);
-        });
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.RECREATE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.recreateElement(nodeId, image);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.RECREATE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> deleteElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.deleteElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.DELETE);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.deleteElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.DELETE) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneDataBO newDataBO, SceneContextBO context) {
         SceneHandler originHandler = new SceneHandler(id, null, false, context);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, originHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.MODIFY);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo != null) {
+            throw this.createOperateException(originLockInfo);
+        }
+
         newDataBO.getTopology().setScene(originHandler.getScene());
         SceneHandler updateHandler = new SceneHandler(newDataBO, context);
 
@@ -423,21 +581,93 @@ public class SceneService {
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.suspendElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.SUSPEND);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.suspendElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.SUSPEND) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> resumeElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.resumeElement(nodeId));
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.RESUME);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            ElementTaskPool.getInstance()
+                    .executeTask(() -> {
+                        try {
+                            sceneHandler.resumeElement(nodeId);
+                        } finally {
+                            SceneEventUtils.unLock(id);
+                        }
+                    });
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.RESUME) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
     }
 
     public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotId, String snapshotName, String description, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
-        return new ServiceResult<>(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.SNAPSHOT);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            sceneHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.SNAPSHOT) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
+    private SceneEventUtils.SceneEventInfo createSceneEventInfo(String id, String nodeId, String nodeName, int event) {
+        SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
+        String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(event));
+        eventInfo.setSceneId(id);
+        eventInfo.setEventName(action);
+        eventInfo.setEvent(event);
+        eventInfo.setNodeId(nodeId);
+        eventInfo.setNodeName(nodeName);
+        return eventInfo;
+    }
+
+    private MpRuntimeException createOperateException(SceneEventUtils.SceneEventInfo originLockInfo) {
+        if (originLockInfo.getNodeId() == null) {
+            return new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(originLockInfo.getEventName()));
+        } else {
+            return new MpRuntimeException(SceneErrorCode.SCENE_NODE_EVENT_OPERATE_CONFLICT.format(originLockInfo.getNodeName(), originLockInfo.getEventName()));
+        }
     }
 }

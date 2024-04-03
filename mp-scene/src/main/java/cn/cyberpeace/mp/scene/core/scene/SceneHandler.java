@@ -757,6 +757,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void pauseElement(String nodeId) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.PAUSE);
         startElementEvent(nodeId, SceneElementModel.Event.PAUSE);
