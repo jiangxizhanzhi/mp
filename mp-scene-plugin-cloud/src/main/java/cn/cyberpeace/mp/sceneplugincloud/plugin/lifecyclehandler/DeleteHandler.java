@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -446,6 +447,13 @@ public class DeleteHandler extends HandlerCommon {
                             AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                             azureVirtualMachine.delete(cloudElement);
                             closeAccessModes(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_CONTAINER,
+                        () -> {
+                            AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
+                            azureContainer.delete(cloudElement.getResourceId());
                             this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                         });
             }

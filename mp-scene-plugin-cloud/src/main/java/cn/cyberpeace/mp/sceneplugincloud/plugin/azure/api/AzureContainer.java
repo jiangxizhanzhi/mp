@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
+import com.azure.resourcemanager.containerinstance.models.ContainerGroupRestartPolicy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +34,13 @@ public class AzureContainer {
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
-        String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+//        容器名中只能包含-字符
+        String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()).replace("_", "-").toLowerCase();
         // azure todo 根据imageName 获取 对应的 image
         String image = cloudElement.getImage();
-
+        final String containerImageName1 = "mcr.microsoft.com/azuredocs/aci-helloworld";
         String containerGroupName = cloudElement.getSrcElement().getEid();
-        var container = azureResourceManager.containerGroups().define(containerGroupName)
+       /* var container = azureResourceManager.containerGroups().define(containerGroupName)
                 .withRegion(this.region)
                 .withNewResourceGroup(groupName)
                 .withLinux()
@@ -50,6 +52,24 @@ public class AzureContainer {
                     .withCpuCoreCount(cloudElement.getSrcElement().getCpu())
                     .withMemorySizeInGB(cloudElement.getSrcElement().getRam())
                 .attach()
+                .create();*/
+
+        ContainerGroup container = azureResourceManager.containerGroups().define(containerGroupName)
+                .withRegion(this.region)
+                .withNewResourceGroup(groupName)
+                .withLinux()
+                .withPublicImageRegistryOnly()
+                .withoutVolume()
+                .defineContainerInstance(containerName)
+                .withImage(containerImageName1)
+                .withExternalTcpPort(80)
+//                .withoutPorts()
+//                TODO 前端未传先写死
+                .withCpuCoreCount(0.5)
+                .withMemorySizeInGB(0.8)
+                .attach()
+                .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
+                .withDnsPrefix(containerGroupName)
                 .create();
 
         // azure todo  怎么添加网卡呢?
@@ -60,8 +80,10 @@ public class AzureContainer {
         cloudElement.setResourceId(container.id());
     }
 
-    public void delete(CloudPluginSceneElementBO cloudElement) {
-        azureResourceManager.containerGroups().deleteById(cloudElement.getResourceId());
+    public void delete(String instanceId) {
+//        todo 若是一个容器分配一个容器组 可直接删除容器组
+        azureResourceManager.containerGroups()
+                .deleteById(instanceId);
     }
 
     public void execCommand(CloudPluginSceneElementBO element, String command) {
@@ -70,5 +92,37 @@ public class AzureContainer {
                 .getById(containerGroupName).containers()
                 .get(element.getResourceId())
                 .withCommand(Arrays.asList(command));
+    }
+
+    public void pause(CloudPluginSceneElementBO element) {
+        String containerGroupName = element.getSrcElement().getEid();
+        ContainerGroup containerGroup = azureResourceManager.containerGroups()
+                .getById(containerGroupName);
+        containerGroup.stop();
+    }
+
+    public void restart(String instanceId) {
+        ContainerGroup containerGroup = azureResourceManager.containerGroups()
+                .getById(instanceId);
+        containerGroup.restart();
+    }
+
+    public void start(String instanceId) {
+        ContainerGroup containerGroup = azureResourceManager.containerGroups()
+                .getById(instanceId);
+        azureResourceManager.containerGroups().start(containerGroup.resourceGroupName(), containerGroup.name());
+    }
+
+    public void unpause(CloudPluginSceneElementBO element) {
+        String containerGroupName = element.getSrcElement().getEid();
+        ContainerGroup containerGroup = azureResourceManager.containerGroups()
+                .getById(containerGroupName);
+        containerGroup.restart();
+    }
+
+    public void stop(String instanceId) {
+        ContainerGroup containerGroup = azureResourceManager.containerGroups()
+                .getById(instanceId);
+        containerGroup.stop();
     }
 }

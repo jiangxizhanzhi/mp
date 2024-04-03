@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -91,6 +92,16 @@ public class StartHandler extends HandlerCommon {
                 }*/
                 //检查接入方式是否可用
                 checkAccessModes(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_CONTAINER, () -> {
+                    //启动
+                    AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
+                    azureContainer.start(instanceId);
+                    //检查接入方式是否可用
+                    checkAccessModes(element);
+                });
             }
         } else {
             //虚拟机，容器等启动

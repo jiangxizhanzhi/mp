@@ -18,7 +18,7 @@ public class AzureContainerDeleteTask implements Runnable {
 
     @Override
     public void run() {
-        azureContainer.delete(element);
+        azureContainer.delete(element.getResourceId());
     }
 
 }

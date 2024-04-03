@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
@@ -119,6 +120,32 @@ public class RecreateHandler extends HandlerCommon {
                                 closeAccessModes(cloudElement);
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
+                            () -> {
+                                AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
+                                azureContainer.delete(cloudElement.getResourceId());
+                                super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var pluginPort = getPluginHandler().getPort(p.getId());
+                                        if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
+                                            for (int i = 0; i < 5; i++) {
+                                                try {
+                                                    Thread.sleep(1000);
+                                                    if (!super.containerClient.portExists(pluginPort.getResourceId())) {
+                                                        break;
+                                                    }
+                                                } catch (MpRuntimeException e) {
+                                                    break;
+                                                } catch (Exception e) {
+                                                    log.error("faild to query port {}", pluginPort.getResourceId());
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            });
                 }
             } else {
                 if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
@@ -210,6 +237,21 @@ public class RecreateHandler extends HandlerCommon {
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
                                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                                 azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics);
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
+                            () -> {
+                                if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                        // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                        if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
+                                            p.setUsing(false);
+                                        }
+                                    });
+                                }
+                                new AzureContainer(IAzureResourceManager.getInstance(cloudType))
+                                        .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement));
                             });
                 }
             } else {

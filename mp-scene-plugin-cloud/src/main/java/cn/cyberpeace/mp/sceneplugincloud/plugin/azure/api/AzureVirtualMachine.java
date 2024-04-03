@@ -93,14 +93,13 @@ public class AzureVirtualMachine {
                     .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
                     .withoutPrimaryPublicIPAddress()
                     .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-//                .withPopularLinuxImage(image)
                     .withRootUsername("root1")
                     .withRootPassword("ycxx123#") // 必须要是6位以上,且有一个特殊字符
-//                    .withUnmanagedDisks()
-//                    .defineUnmanagedDataDisk("disk-1")
-//                    .withNewVhd(cloudElement.getSrcElement().getDisk())
-//                    .withLun(1)
-//                    .attach()
+                    .withUnmanagedDisks()
+                    .defineUnmanagedDataDisk("disk-1")
+                    .withNewVhd(cloudElement.getSrcElement().getDisk())
+                    .withLun(1)
+                    .attach()
                     .withSize(flavor);
         }
 
@@ -152,6 +151,10 @@ public class AzureVirtualMachine {
     }
 
     public void execCommand(String group, String vmName, List<String> commands) {
+        azureResourceManager.virtualMachines().runShellScript(group, vmName, commands, new ArrayList<>());
+    }
+
+    public void execCoand(String group, String vmName, List<String> commands) {
         azureResourceManager.virtualMachines().runShellScript(group, vmName, commands, new ArrayList<>());
     }
 

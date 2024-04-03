@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -73,6 +74,15 @@ public class StopHandler extends HandlerCommon {
                     closeAccessModes(element);
                     AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                     azureVirtualMachine.stop(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_CONTAINER, () -> {
+                    //关闭接入方式可用
+                    closeAccessModes(element);
+                    AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
+                    azureContainer.stop(instanceId);
                 });
             }
         } else {
