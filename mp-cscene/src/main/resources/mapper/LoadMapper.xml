@@ -216,6 +216,12 @@
             <if test="param != null and param.pk != null and param.pk != ''">
                 and pk = #{param.pk}
             </if>
+            <if test="param != null and param.pks != null and param.pks.size != 0">
+                and pk in
+                <foreach collection="param.pks" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="param != null and param.toolName != null and param.toolName != ''">
                 and tool_name like concat('%', #{param.toolName}, '%')
             </if>

@@ -185,7 +185,7 @@ public class LoadServiceImpl {
      * */
     public Boolean exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
                                              JSONObject requestData) throws IOException {
-        //导出文件
+        //导出文件xlsx
         try {
             List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
             Date date = new Date();
@@ -232,7 +232,10 @@ public class LoadServiceImpl {
             }
             //创建HSSFWorkbook
             HSSFWorkbook wb = getHSSFWorkbook(sheetName, title, content, null);
-            this.setResponseHeader(response, fileName);
+            Boolean setResponseHeader = this.setResponseHeader(response, fileName);
+            if(!setResponseHeader){
+                return false;
+            }
             OutputStream os = response.getOutputStream();
             wb.write(os);
             os.flush();
