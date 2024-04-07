@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -46,7 +46,7 @@ public class InfoCollectionService {
             return FilePortUtil.xlsxImport(file);
         }
 
-        return ResultCommon.fail(AuthErrorCode.FILE_SUFFIX_TYPE_ERROR);
+        return ResultCommon.success();
     }
 
     /**
