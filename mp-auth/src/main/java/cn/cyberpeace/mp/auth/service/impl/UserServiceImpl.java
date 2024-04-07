@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
+import cn.cyberpeace.mp.auth.request.user.ThirdUserRequest;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
@@ -330,11 +331,57 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
         opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
+        UserModel userCreated = upsertUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelation(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+        saveUserRoleRelation(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modify(UserRequest modifyRequest) {
+        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
+            // 如果操作的对象不是自己，则进行权限校验
+            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+        }
+
+        UserModel userModified = upsertUserModel(modifyRequest);
+        String userId = userModified.getId();
+
+        saveUserOrgRelation(modifyRequest.getOrgIds(), userId);
+        saveUserRoleRelation(modifyRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        return userModified;
+    }
+
+    private UserModel upsertUserModel(UserModel userModel) {
+        if (StringUtils.isNotBlank(userModel.getId())) {
+            UserModel existUser = super.getModelMapper().get(userModel.getId());
+            if (Objects.nonNull(existUser)) {
+                return updateExistUser(userModel);
+            } else {
+                return saveNewUser(userModel);
+            }
+        } else {
+            return saveNewUser(userModel);
+        }
+    }
+
+    private UserModel saveNewUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        BeanUtils.copyProperties(createRequest, userModel);
+        BeanUtils.copyProperties(inputUserModel, userModel);
 
-        String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
+        String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
         userModel.setId(null);
@@ -352,56 +399,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
-        UserModel userCreated = result.getSource().getObj();
-        String userId = userCreated.getId();
-        log.info("user create success id:{}", userId);
-
-        // 保存组织-用户关系
-        if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
-            createRequest.getOrgIds().forEach(id -> {
-                boolean isOrgExist = orgService.exists(id);
-                if (!isOrgExist) {
-                    log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
-                }
-                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                var re = tenantUserService.create(tenantUserModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-            });
-        }
-
-        // 保存角色-用户关系
-        if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
-            createRequest.getRoleIds().forEach(id -> {
-                boolean isRoleExist = roleService.exists(id);
-                if (!isRoleExist) {
-                    log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
-                }
-                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            });
-        }
-
-        userCacheService.evictAllUserCache();
-        return userModel;
+        return result.getSource().getObj();
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserModel modify(UserRequest modifyRequest) {
-        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
-            // 如果操作的对象不是自己，则进行权限校验
-            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
-        }
-
+    private UserModel updateExistUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
+        org.springframework.beans.BeanUtils.copyProperties(inputUserModel, userModel);
 
-        if (StringUtils.isNotBlank(modifyRequest.getPassword())) {
-            String decryptedPwd = PasswordUtils.desDecrypt(modifyRequest.getPassword());
+        if (StringUtils.isNotBlank(inputUserModel.getPassword())) {
+            String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
             userModel.setPassword(decryptedPwd);
         } else {
             userModel.setPassword(null);
@@ -424,15 +431,37 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
 
-        UserModel userModified = result.getSource().getObj();
-        String userId = userModified.getId();
+        return result.getSource().getObj();
+    }
+
+
+    private void saveUserRoleRelation(List<String> roleIds, String userId) {
+        // 保存角色-用户关系
+        if (CollectionUtil.isNotEmpty(roleIds)) {
+            // 清除原来所有用户关联的角色
+            userRoleService.deleteByUserId(userId);
+
+            roleIds.forEach(id -> {
+                boolean isRoleExist = roleService.exists(id);
+                if (!isRoleExist) {
+                    log.error("role id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
+                }
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            });
+        }
+    }
+
+    private void saveUserOrgRelation(List<String> orgIds, String userId) {
 
         // 保存组织-用户关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
+        if (CollectionUtil.isNotEmpty(orgIds)) {
             // 清除原来所有用户关联的组织
             tenantUserService.deleteByUserId(userId);
 
-            modifyRequest.getOrgIds().forEach(id -> {
+            orgIds.forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
                     log.error("org id:{} not existed!", id);
@@ -444,28 +473,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             });
         }
 
-
-        // 保存角色-用户关系
-        if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
-            // 清除原来所有用户关联的角色
-            userRoleService.deleteByUserId(userId);
-
-            modifyRequest.getRoleIds().forEach(id -> {
-                boolean isRoleExist = roleService.exists(id);
-                if (!isRoleExist) {
-                    log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
-                }
-                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            });
-        }
-
-        userCacheService.evictAllUserCache();
-        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
-        return userModel;
     }
+
+
 
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
@@ -1160,6 +1170,46 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void upsertThirdUser(ThirdUserRequest thirdUserRequest) {
+        String userId = upsertThirdUserModel(thirdUserRequest);
+        upsertThirdUserOrg(thirdUserRequest.getOrg(), userId);
+        upsertThirdUserRole(thirdUserRequest.getRole(), userId);
+    }
+
+    private String upsertThirdUserModel(ThirdUserRequest thirdUserRequest) {
+        UserModel userModel = new UserModel();
+        userModel.setId(thirdUserRequest.getId());
+        userModel.setName(thirdUserRequest.getName());
+        userModel.setUsername(thirdUserRequest.getUsername());
+        userModel.setInitCheck(0);
+        userModel.setPassword(String.format("X%sctfoj01", thirdUserRequest.getName()));
+
+        UserModel existUser = getModelMapper().get(thirdUserRequest.getId());
+        boolean successFlag;
+        if (Objects.isNull(existUser)) {
+            successFlag = getModelMapper().create(userModel);
+        } else {
+            successFlag = getModelMapper().update(userModel);
+        }
+        if (!successFlag) {
+            throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);
+        }
+        return userModel.getId();
+
+    }
+
+    private void upsertThirdUserOrg(String orgPath, String userId) {
+        OrgBO orgBO = orgService.getByPath(orgPath);
+        saveUserOrgRelation(Collections.singletonList(orgBO.getId()), userId);
+    }
+
+    private void upsertThirdUserRole(String roleName, String userId) {
+        RoleModel roleModel = roleService.getByName(roleName);
+        saveUserRoleRelation(Collections.singletonList(roleModel.getId()), userId);
     }
 }
 

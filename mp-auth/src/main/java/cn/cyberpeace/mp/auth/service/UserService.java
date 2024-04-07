@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.ThirdUserRequest;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -113,5 +114,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
+
+   void upsertThirdUser(ThirdUserRequest thirdUserRequest);
 
 }
