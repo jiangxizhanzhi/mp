@@ -25,6 +25,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserBo getUserDto(String id);
 
+    UserModel getUserModelById(String id);
+
     UserBo getUserDtoNoRestrict(String id);
 
     List<UserModel> getUserModelNoRestrictByUserIds(List<String> ids);
@@ -117,4 +119,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    void upsertThirdUser(ThirdUserRequest thirdUserRequest);
 
+    void updateUserHaiboToken(UserModel userModel, String haiboToken);
 }

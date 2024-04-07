@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.ThirdAuthService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
@@ -52,6 +53,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
 
     @Autowired
     private UserEventPublisher userEventPublisher ;
+    @Autowired
+    private ThirdAuthService thirdAuthService;
 
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
@@ -77,6 +80,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
                     updateUser.setId(user.getId());
                     updateUser.initDefault("tokenSecret");
                     userService.update(updateUser);
+
+                    thirdAuthService.logout(user.getId());
                 }
             }
             userName = user.getName();
@@ -87,6 +92,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         if (StringUtils.isNotBlank(userName)) {
             log.info("user:{} has logout!", userName);
         }
+
+
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);

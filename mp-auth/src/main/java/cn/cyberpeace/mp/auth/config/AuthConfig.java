@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.config;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,4 +55,13 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    @Value("mp.auth.haibo.token-url")
+    private String haiboTokenUrl;
+
+    @Value("mp.auth.haibo.mp-homepage-view-url")
+    private String mpHomePageViewUrl;
+
+    @Value("mp.auth.haibo.logout-url")
+    private String haiboLogoutUrl;
 }

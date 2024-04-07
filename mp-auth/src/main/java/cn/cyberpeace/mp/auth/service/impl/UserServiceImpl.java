@@ -158,6 +158,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public UserModel getUserModelById(String id) {
+        return getModelMapper().get(id);
+    }
+
+    @Override
     public UserBo getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
         setDefaultIfNoAvatar(userModel);
@@ -1180,6 +1185,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         upsertThirdUserRole(thirdUserRequest.getRole(), userId);
     }
 
+    @Override
+    public void updateUserHaiboToken(UserModel userModel, String haiboToken) {
+        userModel.setHaiboToken(haiboToken);
+        this.update(userModel);
+    }
+
     private String upsertThirdUserModel(ThirdUserRequest thirdUserRequest) {
         UserModel userModel = new UserModel();
         userModel.setId(thirdUserRequest.getId());
@@ -1211,6 +1222,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         RoleModel roleModel = roleService.getByName(roleName);
         saveUserRoleRelation(Collections.singletonList(roleModel.getId()), userId);
     }
+
+
 }
 
 class GroupConcat extends Aggregation<GroupConcat> {

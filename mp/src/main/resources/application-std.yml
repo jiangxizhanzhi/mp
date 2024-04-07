@@ -55,6 +55,7 @@ logging:
     ext-var:
       root: ${ROOT_LEVEL:INFO}
     root: ${logging.level.ext-var.root}
+    org.springframework.web.client.RestTemplate: ${logging.level.ext-var.root}
   file:
 #    ext-var:
 #      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
@@ -214,6 +215,10 @@ mp:
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
+    haibo:
+      token-url: ${mp.auth.ext-var.haibo.token-url}
+      mp-homepage-view-url: ${mp.auth.ext-var.haibo.mp-homepage-view-url}
+      logout-url: ${mp.auth.ext-var.haibo.logout-url}
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

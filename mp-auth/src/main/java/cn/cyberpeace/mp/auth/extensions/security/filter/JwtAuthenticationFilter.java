@@ -119,22 +119,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-
-    private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setPath(path);
-        if (StringUtils.isNotBlank(domain)) {
-            cookie.setDomain(domain);
-        }
-        cookie.setMaxAge(maxAge);
+    public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
+        Cookie cookie = new Cookie("cr_jwttoken", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(Integer.MAX_VALUE);
         // httponly = false
         cookie.setHttpOnly(false);
         try {
-            cookie.setValue(URLEncoder.encode(value, "utf-8"));
+            cookie.setValue(URLEncoder.encode(newJwt, "utf-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         response.addCookie(cookie);
+
+    }
+
+
+    private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
+
     }
 
 }

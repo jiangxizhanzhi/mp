@@ -141,7 +141,10 @@ public enum AuthErrorCode implements ErrorCode {
     VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty"),
 
     // 演示环境禁止访问某些操作
-    DEMO_ACCESS_ERROR("MP-110163", "demo_access_error");
+    DEMO_ACCESS_ERROR("MP-110163", "demo_access_error"),
+    LOGOUT_FAIL("MP-110164", "log_out_fail"),
+
+    ;
 
 
     AuthErrorCode(String code, String message) {

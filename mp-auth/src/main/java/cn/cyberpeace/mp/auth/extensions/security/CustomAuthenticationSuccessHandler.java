@@ -101,29 +101,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 loginResp.setUser(userBo);
                 loginResp.setToken(jwt);
 
-                // 角色
-//                List<RoleModel> roles = userRoleService.listByUserId(user.getId());
-//                loginResp.setRoles(roles);
-
-                // 权限 暂时不用返回
-                /*
-                List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
-                loginResp.setTargets(targets);
-                */
-
-                // 菜单 暂时不用返回
-                /*
-                List<TargetModel> menuTargets = new ArrayList<>();
-                if (CollectionUtil.isNotEmpty(targets)) {
-                    menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
-                }
-                loginResp.setMenus(menuTargets);
-                */
-
-                // 组织
-//                List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
-//                loginResp.setOrgs(orgDtos);
-
                 result = ServiceResult.builder().source(loginResp).build();
 
                 // 首次登陆，需要修改密码, 返回code:MP-110005 提示前端弹出修改初始密码的页面

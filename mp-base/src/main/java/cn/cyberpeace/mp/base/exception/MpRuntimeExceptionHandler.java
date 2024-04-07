@@ -26,7 +26,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<Object> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
+        log.error(ex.getMessage(), ex);
         var serviceCode = ex.getServiceCode();
         if (serviceCode == null) {
             serviceCode = BaseErrorCode.ERROR;
