@@ -432,6 +432,7 @@ public class HttpUtils {
             log.info("请求参数================> jsonObj = null");
         }
         entityBuilder.addBinaryBody(fileField, fileByte, ContentType.MULTIPART_FORM_DATA, fileName);
+        httpPost.setEntity(entityBuilder.build());
         String result = send(httpPost);
         log.info("=======postFile response: {}", result);
         return result;
