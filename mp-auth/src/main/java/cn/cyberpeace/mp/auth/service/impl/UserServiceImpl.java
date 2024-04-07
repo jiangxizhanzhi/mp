@@ -12,7 +12,10 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -26,7 +29,6 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
@@ -57,7 +59,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -359,11 +360,57 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
         opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
+        UserModel userCreated = upsertUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelation(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+        saveUserRoleRelation(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modify(UserRequest modifyRequest) {
+        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
+            // 如果操作的对象不是自己，则进行权限校验
+            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+        }
+
+        UserModel userModified = upsertUserModel(modifyRequest);
+        String userId = userModified.getId();
+
+        saveUserOrgRelation(modifyRequest.getOrgIds(), userId);
+        saveUserRoleRelation(modifyRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        return userModified;
+    }
+
+    private UserModel upsertUserModel(UserModel userModel) {
+        if (StringUtils.isNotBlank(userModel.getId())) {
+            UserModel existUser = super.getModelMapper().get(userModel.getId());
+            if (Objects.nonNull(existUser)) {
+                return updateExistUser(userModel);
+            } else {
+                return saveNewUser(userModel);
+            }
+        } else {
+            return saveNewUser(userModel);
+        }
+    }
+
+    private UserModel saveNewUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        BeanUtils.copyProperties(createRequest, userModel);
+        BeanUtils.copyProperties(inputUserModel, userModel);
 
-        String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
+        String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
         userModel.setId(null);
@@ -378,60 +425,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
-        userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
-        UserModel userCreated = result.getSource().getObj();
-        String userId = userCreated.getId();
-        log.info("user create success id:{}", userId);
-
-        // 保存组织-用户关系
-        if (CollectionUtils.isNotEmpty(createRequest.getOrgIds())) {
-            for (String id : createRequest.getOrgIds()) {
-                boolean isOrgExist = orgService.exists(id);
-                if (!isOrgExist) {
-                    log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
-                }
-                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                ObjServiceResult<TenantUserModel> re = tenantUserService.create(tenantUserModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-            }
-        }
-
-        // 保存角色-用户关系
-        if (CollectionUtils.isNotEmpty(createRequest.getRoleIds())) {
-            for (String id : createRequest.getRoleIds()) {
-                boolean isRoleExist = roleService.exists(id);
-                if (!isRoleExist) {
-                    log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
-                }
-                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                ObjServiceResult<UserRoleModel> re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            }
-        }
-
-        userCacheService.evictAllUserCache();
-        return userModel;
+        return result.getSource().getObj();
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserModel modify(UserRequest modifyRequest) {
-        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
-            // 如果操作的对象不是自己，则进行权限校验
-            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
-        }
-
+    private UserModel updateExistUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
+        org.springframework.beans.BeanUtils.copyProperties(inputUserModel, userModel);
 
-        if (StringUtils.isNotBlank(modifyRequest.getPassword())) {
-            String decryptedPwd = PasswordUtils.desDecrypt(modifyRequest.getPassword());
+        if (StringUtils.isNotBlank(inputUserModel.getPassword())) {
+            String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
             userModel.setPassword(decryptedPwd);
         } else {
             userModel.setPassword(null);
@@ -454,48 +460,50 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
 
-        UserModel userModified = result.getSource().getObj();
-        String userId = userModified.getId();
-
-        // 保存组织-用户关系
-        if (CollectionUtils.isNotEmpty(modifyRequest.getOrgIds())) {
-            // 清除原来所有用户关联的组织
-            tenantUserService.deleteByUserId(userId);
-
-            for (String id : modifyRequest.getOrgIds()) {
-                boolean isOrgExist = orgService.exists(id);
-                if (!isOrgExist) {
-                    log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
-                }
-                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                ObjServiceResult<TenantUserModel> re = tenantUserService.create(tenantUserModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-            }
-        }
+        return result.getSource().getObj();
+    }
 
 
+    private void saveUserRoleRelation(List<String> roleIds, String userId) {
         // 保存角色-用户关系
-        if (CollectionUtils.isNotEmpty(modifyRequest.getRoleIds())) {
+        if (CollectionUtils.isNotEmpty(roleIds)) {
             // 清除原来所有用户关联的角色
             userRoleService.deleteByUserId(userId);
 
-            for (String id : modifyRequest.getRoleIds()) {
+            roleIds.forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
                     log.error("role id:{} not existed!", id);
                     throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                ObjServiceResult<UserRoleModel> re = userRoleService.create(userRoleModel);
+                var re = userRoleService.create(userRoleModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            }
+            });
+        }
+    }
+
+    private void saveUserOrgRelation(List<String> orgIds, String userId) {
+
+        // 保存组织-用户关系
+        if (CollectionUtils.isNotEmpty(orgIds)) {
+            // 清除原来所有用户关联的组织
+            tenantUserService.deleteByUserId(userId);
+
+            orgIds.forEach(id -> {
+                boolean isOrgExist = orgService.exists(id);
+                if (!isOrgExist) {
+                    log.error("org id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
+                }
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+            });
         }
 
-        userCacheService.evictAllUserCache();
-        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
-        return userModel;
     }
+
 
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
