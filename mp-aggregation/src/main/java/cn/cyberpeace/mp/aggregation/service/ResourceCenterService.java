@@ -95,7 +95,7 @@ public class ResourceCenterService {
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         ObjServiceResult<CsceneModel> cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
-            String detail = "导出场景出错 , 场景 " + csceneId + " 不存在";
+            String detail = "[" + csceneId + "]-场景不存在";
             log.error(detail);
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST, detail);
         }
@@ -107,7 +107,7 @@ public class ResourceCenterService {
                 byte[] content = FsCommon.downloadRawContent(logoPath);
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + LOGO_NAME), content);
             } catch (Exception e) {
-                String detail = "场景logo图片导出失败, 文件地址为 " + logoPath;
+                String detail = "[" + logoPath + "]-场景logo导出失败," + e.getMessage();
                 log.error(detail, e);
                 throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }
