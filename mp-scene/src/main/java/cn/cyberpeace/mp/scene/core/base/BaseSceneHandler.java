@@ -885,9 +885,12 @@ public abstract class BaseSceneHandler<
      */
     private boolean saveScene() {
         S0 sceneObj = scene.toModel();
+        var isCreate = StringUtils.isEmpty(sceneObj.getId());
         var result = sceneMapper.save(sceneObj);
         sceneId = sceneObj.getId();
-        scene.fromModel(sceneObj);
+        if (isCreate) {
+            scene.fromModel(sceneObj);
+        }
 
         plugins.forEach(plugin -> plugin.setSourceSceneId(sceneId));
 
