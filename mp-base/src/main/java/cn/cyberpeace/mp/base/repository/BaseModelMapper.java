@@ -454,6 +454,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         for (List<M> validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+            Collections.sort(validFieldsObjs, Comparator.comparing(BaseModel::getId));
             Object[] updateParams = convertUpdateParams(validFieldsObjs);
             if (updateParams.length == 0) {
                 result.addFail(objs);
