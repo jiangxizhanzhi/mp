@@ -91,7 +91,7 @@ public class FilePortUtil {
         if (StringUtils.isBlank(filename)) {
             return suffixName;
         }
-        int dotIndex = filename.lastIndexOf(AuthConstant.SEPARATOR_CHAR_DOT);
+        int dotIndex = filename.lastIndexOf(".");
         if (dotIndex > 0 && dotIndex < filename.length() - 1) {
             suffixName = filename.substring(dotIndex + 1);
         }
