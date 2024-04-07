@@ -67,7 +67,7 @@ public class LoadController {
         if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
             return new ServiceResult(((List) result.get("source")).get(0), BaseErrorCode.SUCCESS).asResult();
         } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "不存在该载荷").asResult();
         }
     }
 
@@ -124,6 +124,32 @@ public class LoadController {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+        }
+    }
+
+    /*
+     * 载荷数据同步设置查看
+     * */
+    @ApiOperation(value = "载荷数据同步设置查看", notes = "")
+    @GetMapping("/getSynchronousDataSource")
+    public ServiceResult getSynchronousDataSource(@RequestParam(value = "pk", required = false) String pk) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("pk", pk);
+        JSONObject result = LoadService.getSynchronousDataSource(requestData);
+        return new ServiceResult(result, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /*
+     * 载荷数据同步设置保存
+     * */
+    @ApiOperation(value = "载荷数据同步设置保存", notes = "")
+    @PostMapping("/synchronousDataSource")
+    public ServiceResult synchronousDataSource(@RequestBody(required = false) JSONObject requestData) {
+        Boolean synchronousDataSource = LoadService.synchronousDataSource(requestData);
+        if (synchronousDataSource) {
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        } else {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
         }
     }
 

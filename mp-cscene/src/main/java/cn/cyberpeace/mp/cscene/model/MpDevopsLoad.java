@@ -5,11 +5,11 @@ import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * 载荷同步表(MpDevopsLoad)实体类
+ *
  * @since 2024-03-28 16:41:10
  */
 @Data
@@ -76,7 +76,15 @@ public class MpDevopsLoad extends BaseModel {
      */
     private LocalDateTime createTime;
     /**
+     * 同步时间
+     */
+    private LocalDateTime synchronizationTime;
+    /**
      * 创建人Id
      */
     private String creatorId;
+    /**
+     * 漏洞情报
+     */
+    private List Loopholes;
 }

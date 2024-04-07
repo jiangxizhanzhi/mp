@@ -233,7 +233,7 @@ public class LoadServiceImpl {
             //创建HSSFWorkbook
             HSSFWorkbook wb = getHSSFWorkbook(sheetName, title, content, null);
             Boolean setResponseHeader = this.setResponseHeader(response, fileName);
-            if(!setResponseHeader){
+            if (!setResponseHeader) {
                 return false;
             }
             OutputStream os = response.getOutputStream();
@@ -306,6 +306,41 @@ public class LoadServiceImpl {
         String paramListString = paramList != null ? paramList.toString() : "";
         Boolean stageBindLoad = loadMapper.stageBindLoad(addType, sceneId, stageId, loadId, interfaceType, deployment, paramListString);
         return stageBindLoad;
+    }
+
+    public Boolean synchronousDataSource(JSONObject requestData) {
+        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
+        String ip = requestData.get("ip") != null ? requestData.get("ip").toString() : "";
+        String synchronizationProtocol = requestData.get("synchronizationProtocol") != null ? requestData.get("synchronizationProtocol").toString() : "";
+        String authenticationType = requestData.get("authenticationType") != null ? requestData.get("authenticationType").toString() : "";
+        //认证方式(1:密码认证 2:cookie)
+        if (authenticationType.equals("1")) {
+            String userName = requestData.get("userName") != null ? requestData.get("userName").toString() : "";
+            String password = requestData.get("password") != null ? requestData.get("password").toString() : "";
+            if (ip.equals("") || synchronizationProtocol.equals("") || authenticationType.equals("") ||
+                    userName.equals("") || password.equals("")) {
+                return false;
+            }
+        } else if (authenticationType.equals("2")) {
+            String cookie = requestData.get("cookie") != null ? requestData.get("cookie").toString() : "";
+            if (ip.equals("") || synchronizationProtocol.equals("") || authenticationType.equals("") || cookie.equals("")) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        if (pk.equals("")) {
+            Boolean addSynchronousDataSource = loadMapper.addSynchronousDataSource(requestData);
+            return addSynchronousDataSource;
+        } else {
+            Boolean synchronousDataSource = loadMapper.synchronousDataSource(requestData);
+            return synchronousDataSource;
+        }
+    }
+
+    public JSONObject getSynchronousDataSource(JSONObject requestData) {
+        JSONObject result = loadMapper.getSynchronousDataSource();
+        return result;
     }
 }
 

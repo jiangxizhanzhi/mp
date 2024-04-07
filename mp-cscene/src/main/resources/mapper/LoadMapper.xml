@@ -86,6 +86,24 @@
                 now())
     </insert>
 
+    <insert id="addSynchronousDataSource">
+        INSERT INTO mp_devops_load_source
+        (ip,
+         synchronization_protocol,
+         authentication_type,
+         user_name,
+         cookie,
+         create_time,
+         creator_id)
+        VALUES (#{param.ip},
+                #{param.synchronizationProtocol},
+                #{param.authenticationType},
+                #{param.userName},
+                #{param.cookie},
+                now(),
+                #{param.creatorId})
+    </insert>
+
     <update id="updateLoadByPk">
         UPDATE
         mp_devops_load
@@ -163,6 +181,34 @@
         </set>
         WHERE
         pk = #{pk}
+    </update>
+
+    <update id="synchronousDataSource">
+        UPDATE
+        mp_devops_load_source
+        <set>
+            <if test="param != null and param.ip != null and param.ip != ''">
+                ip = #{param.ip},
+            </if>
+            <if test="param != null and param.synchronizationProtocol != null and param.synchronizationProtocol != ''">
+                synchronization_protocol = #{param.synchronizationProtocol},
+            </if>
+            <if test="param != null and param.authenticationType != null and param.authenticationType != ''">
+                authentication_type = #{param.authenticationType},
+            </if>
+            <if test="param != null and param.userName != null and param.userName != ''">
+                user_name = #{param.userName},
+            </if>
+            <if test="param != null and param.cookie != null and param.cookie != ''">
+                cookie = #{param.cookie},
+            </if>
+            <if test="param != null and param.createTime != null and param.createTime != ''">
+                create_time = #{param.createTime},
+            </if>
+            update_time = now()
+        </set>
+        WHERE
+        pk = #{param.pk}
     </update>
 
     <delete id="deleteLoadByPk">
@@ -277,6 +323,11 @@
                 and control_type = #{param.controlType}
             </if>
         </where>
+    </select>
+
+    <select id="getSynchronousDataSource" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT *
+        FROM mp_devops_load_source LIMIT 1
     </select>
 
 </mapper>
