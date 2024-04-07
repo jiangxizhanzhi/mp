@@ -573,7 +573,7 @@ public class SceneExporter {
         try {
             FileUtils.write(new File(envPath + "/" + name + ".yml"), content, "utf8");
         } catch (Exception e) {
-            String detail = "导出场景出错 , 创建 " + name + ".yml 文件失败 ";
+            String detail = "[" + envPath + "/" + name + ".yml" + "]-文件创建失败";
             log.error(detail, e);
         }
     }

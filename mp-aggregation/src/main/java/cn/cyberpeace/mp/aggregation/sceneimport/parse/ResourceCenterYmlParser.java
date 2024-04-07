@@ -48,7 +48,7 @@ public final class ResourceCenterYmlParser {
                     result = resultV2.convert();
                 }
             } else {
-                String detail = "场景导入失败: " + filePath + FILE_PATH_SEPARATOR + "topo.yml 文件不存在";
+                String detail = "[" + filePath + FILE_PATH_SEPARATOR + "topo.yml]-文件不存在";
                 log.error(detail);
                 throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }

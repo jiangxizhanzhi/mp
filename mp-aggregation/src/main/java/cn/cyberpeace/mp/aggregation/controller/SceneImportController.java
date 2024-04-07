@@ -43,7 +43,7 @@ public class SceneImportController {
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
         log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
-            String detail = "导出场景参数错误,缺少path参数 , 输入参数为: " + JsonCommon.stringify(request);
+            String detail = "导入场景参数错误,缺少path参数 , 输入参数为: " + JsonCommon.stringify(request);
             log.info(detail);
             return ResultCommon.fail(detail);
         }
