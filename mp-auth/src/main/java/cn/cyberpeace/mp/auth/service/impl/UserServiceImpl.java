@@ -1201,6 +1201,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel existUser = getModelMapper().get(thirdUserRequest.getId());
         boolean successFlag;
+        userModel.encodePassword();
         if (Objects.isNull(existUser)) {
             successFlag = getModelMapper().create(userModel);
         } else {

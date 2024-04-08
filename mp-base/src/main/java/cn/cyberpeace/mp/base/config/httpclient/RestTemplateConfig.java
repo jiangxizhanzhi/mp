@@ -16,14 +16,20 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class RestTemplateConfig {
 
+    private static final Long CONNECT_TIME_OUT = 5L;
+    private static final Long READ_TIME_OUT = 10L;
+    private static final Long WRITE_TIME_OUT = 10L;
+
+    private static final Long CALL_TIME_OUT = 15L;
+
     @Bean("snakeRestTemplate")
     public RestTemplate sankeRestTemplate() {
         // 创建一个RestTemplate实例
         RestTemplate restTemplate = new RestTemplate();
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(3L, TimeUnit.SECONDS)
-                .readTimeout(5L, TimeUnit.SECONDS).writeTimeout(5L, TimeUnit.SECONDS)
-                .callTimeout(10L, TimeUnit.SECONDS).build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIME_OUT, TimeUnit.SECONDS).writeTimeout(WRITE_TIME_OUT, TimeUnit.SECONDS)
+                .callTimeout(CALL_TIME_OUT, TimeUnit.SECONDS).build();
         restTemplate.setRequestFactory(new OkHttp3ClientHttpRequestFactory(okHttpClient));
 
         restTemplate.setMessageConverters(getMessageConverters());
@@ -36,9 +42,9 @@ public class RestTemplateConfig {
         // 创建一个RestTemplate实例
         RestTemplate restTemplate = new RestTemplate();
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(3L, TimeUnit.SECONDS)
-                .readTimeout(5L, TimeUnit.SECONDS).writeTimeout(5L, TimeUnit.SECONDS)
-                .callTimeout(10L, TimeUnit.SECONDS).build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIME_OUT, TimeUnit.SECONDS).writeTimeout(WRITE_TIME_OUT, TimeUnit.SECONDS)
+                .callTimeout(CALL_TIME_OUT, TimeUnit.SECONDS).build();
         restTemplate.setRequestFactory(new OkHttp3ClientHttpRequestFactory(okHttpClient));
         return restTemplate;
     }

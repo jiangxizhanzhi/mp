@@ -44,8 +44,8 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
         this.camelRestTemplate = camelRestTemplate;
         this.userService = userService;
 
-        this.VERIFY_USER_BY_TOKEN = String.format("%s?token={}", authConfig.getHaiboTokenUrl());
-        this.LOGOUT_USER_BY_TOKEN = String.format("%s?token={}", authConfig.getHaiboLogoutUrl());
+        this.VERIFY_USER_BY_TOKEN = String.format("%s?token={token}", authConfig.getHaiboTokenUrl());
+        this.LOGOUT_USER_BY_TOKEN = String.format("%s?token={token}", authConfig.getHaiboLogoutUrl());
     }
 
     @Override

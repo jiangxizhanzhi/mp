@@ -56,12 +56,12 @@ public class AuthConfig {
     // mq消息过期时间
     private Long mqMsgTimeout;
 
-    @Value("mp.auth.haibo.token-url")
+    @Value("${mp.auth.haibo.token-url}")
     private String haiboTokenUrl;
 
-    @Value("mp.auth.haibo.mp-homepage-view-url")
+    @Value("${mp.auth.haibo.mp-homepage-view-url}")
     private String mpHomePageViewUrl;
 
-    @Value("mp.auth.haibo.logout-url")
+    @Value("${mp.auth.haibo.logout-url}")
     private String haiboLogoutUrl;
 }

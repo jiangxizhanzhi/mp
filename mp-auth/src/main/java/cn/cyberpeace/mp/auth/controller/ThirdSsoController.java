@@ -24,6 +24,7 @@ public class ThirdSsoController {
     @Resource(name = "jiangXiHaiboAuthServiceImpl")
     private ThirdAuthService thirdLoginService;
 
+    @Resource
     private AuthConfig authConfig;
 
     @GetMapping
