@@ -9,6 +9,9 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroupRestartPolicy;
+import com.azure.resourcemanager.containerregistry.models.AccessKeyType;
+import com.azure.resourcemanager.containerregistry.models.Registry;
+import com.azure.resourcemanager.containerregistry.models.RegistryCredentials;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,43 +31,34 @@ public class AzureContainer {
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         String groupName = pluginHandler.getSourceSceneId();
-
-        // azure todo 调用微软云api 查询或者创建一个 flavor
-        String flavor = "";
-
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
 //        容器名中只能包含-字符
         String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()).replace("_", "-").toLowerCase();
-        // azure todo 根据imageName 获取 对应的 image
-        String image = cloudElement.getImage();
-        final String containerImageName1 = "mcr.microsoft.com/azuredocs/aci-helloworld";
         String containerGroupName = cloudElement.getSrcElement().getEid();
-       /* var container = azureResourceManager.containerGroups().define(containerGroupName)
-                .withRegion(this.region)
-                .withNewResourceGroup(groupName)
-                .withLinux()
-                .withPublicImageRegistryOnly()
-                .withoutVolume()
-                .defineContainerInstance(containerName)
-                    .withImage(image)
-                    .withoutPorts()
-                    .withCpuCoreCount(cloudElement.getSrcElement().getCpu())
-                    .withMemorySizeInGB(cloudElement.getSrcElement().getRam())
-                .attach()
-                .create();*/
 
-        ContainerGroup container = azureResourceManager.containerGroups().define(containerGroupName)
+//        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
+        Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
+        RegistryCredentials acrCredentials = registrytest0407.getCredentials();
+        String imageName = cloudElement.getImage();
+//        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
+        ContainerGroup container = azureResourceManager
+                .containerGroups()
+                .define(containerGroupName)
                 .withRegion(this.region)
                 .withNewResourceGroup(groupName)
                 .withLinux()
-                .withPublicImageRegistryOnly()
+//                .withPublicImageRegistryOnly()
+                .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
                 .defineContainerInstance(containerName)
-                .withImage(containerImageName1)
+                .withImage(imageName)
+//                TODO 前端未传先写死
                 .withExternalTcpPort(80)
 //                .withoutPorts()
-//                TODO 前端未传先写死
+//                TODO 设置网络
+//                .withEnvironmentVariables(Collections.singletonList(new EnvironmentVariable().withName("KEY").withValue("VALUE")))
+//                .withVolumeMountSetting("/mnt/myvolume1", "rw")
                 .withCpuCoreCount(0.5)
                 .withMemorySizeInGB(0.8)
                 .attach()
@@ -81,7 +75,6 @@ public class AzureContainer {
     }
 
     public void delete(String instanceId) {
-//        todo 若是一个容器分配一个容器组 可直接删除容器组
         azureResourceManager.containerGroups()
                 .deleteById(instanceId);
     }
