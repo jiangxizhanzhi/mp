@@ -1221,6 +1221,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     private void upsertThirdUserRole(String roleName, String userId) {
         RoleModel roleModel = roleService.getByName(roleName);
+        if (Objects.isNull(roleModel)) {
+            throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(roleName));
+        }
         saveUserRoleRelation(Collections.singletonList(roleModel.getId()), userId);
     }
 

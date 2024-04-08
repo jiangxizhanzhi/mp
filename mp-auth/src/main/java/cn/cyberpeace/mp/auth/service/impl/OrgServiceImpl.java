@@ -578,9 +578,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     private OrgModel getLastOrgByPath(List<String> pathList, List<OrgModel> orgModelList) {
+        String path = String.join("/", pathList);
+
         Map<String, List<OrgModel>> orgNameMap = orgModelList.stream().collect(Collectors.groupingBy(OrgModel::getName, Collectors.toList()));
         List<OrgModel> lastOrgNodeModels = orgNameMap.get(pathList.get(pathList.size() - 1));
-        String path = String.join("/", pathList);
+        if (CollectionUtil.isEmpty(lastOrgNodeModels)) {
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(path));
+        }
 
 
         for (OrgModel orgModel : lastOrgNodeModels) {
@@ -589,7 +593,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 return orgModel;
             }
         }
-        throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
+        throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(path));
     }
 
     private String getOrgPathByLastOrg(OrgModel lastOrgModel, List<OrgModel> fullOrgModelList) {
@@ -602,8 +606,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             pathOrgList.add(tempModel);
             while (StringUtils.isNotBlank(tempModel.getParent())) {
                 tempModel = idToOrgModelMap.get(tempModel.getParent());
+                if (Objects.isNull(tempModel)) {
+                    break;
+                }
                 pathOrgList.add(tempModel);
             }
+            Collections.reverse(pathOrgList);
             return pathOrgList.stream().map(OrgModel::getName).collect(Collectors.joining("/"));
 
         }
