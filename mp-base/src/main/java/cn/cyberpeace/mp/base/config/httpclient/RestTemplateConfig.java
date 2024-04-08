@@ -17,10 +17,10 @@ import java.util.concurrent.TimeUnit;
 public class RestTemplateConfig {
 
     private static final Long CONNECT_TIME_OUT = 5L;
-    private static final Long READ_TIME_OUT = 10L;
-    private static final Long WRITE_TIME_OUT = 10L;
+    private static final Long READ_TIME_OUT = 20L;
+    private static final Long WRITE_TIME_OUT = 20L;
 
-    private static final Long CALL_TIME_OUT = 15L;
+    private static final Long CALL_TIME_OUT = 25L;
 
     @Bean("snakeRestTemplate")
     public RestTemplate sankeRestTemplate() {
