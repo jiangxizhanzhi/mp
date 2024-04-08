@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文件json解析
@@ -435,6 +436,8 @@ public class WazuhFileRoot {
         private Sca sca;
 
         private String sicLaunchId;
+
+        private Map<String, Object> sicLaunchOutput;
 
         @Data
         public static class Win {

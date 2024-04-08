@@ -212,6 +212,11 @@ public class BatchSceneHandler {
         return this.id2SceneHandler.get(sceneId).getPluginHandler(PluginConstant.PLUGIN_KEY);
     }
 
+    public CloudScenePluginHandler getCloudScenePluginHandler(String sceneId) {
+        return this.id2SceneHandler.get(sceneId)
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);

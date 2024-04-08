@@ -433,6 +433,7 @@ public class SceneElementMonitorService {
         basicInfo.setCategory(cpSceneElementBO.getCategory());
     }
 
+    @Deprecated
     public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
                                                                      String path) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);

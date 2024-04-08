@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneHostCollectQueryService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
@@ -26,12 +28,15 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,12 +54,8 @@ public class ElementMonitorController {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    @Autowired
-    private CsceneSpecialService csceneSpecialService;
-
-
-    @Autowired
-    private HostStateService hostStateService;
+    @Resource
+    private CsceneHostCollectQueryService csceneHostCollectQueryService ;
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -109,7 +110,22 @@ public class ElementMonitorController {
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
+        int from = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
+        int size = pageRequest.getPageSize();
+        String csceneId = pageRequest.getSceneId();
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+        if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        }
+        List<String> nodeIds = pageRequest.getElementIds();
+        List<Integer> levels = pageRequest.getLevels();
+
+        var result = csceneHostCollectQueryService.getFileModifyData(from, size, csceneId, nodeIds, startTime, endTime, levels, path);
+        return result.asResult();
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
