@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
@@ -128,7 +129,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             cookie.setValue(URLEncoder.encode(newJwt, "utf-8"));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
         response.addCookie(cookie);
 
