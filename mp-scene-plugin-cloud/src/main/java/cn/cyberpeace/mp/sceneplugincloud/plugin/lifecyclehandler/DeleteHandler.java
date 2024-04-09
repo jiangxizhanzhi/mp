@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -71,6 +72,7 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess DELETE_ENTITY_NODE = new EventProcess("delete_entity_node", "sceneplugincloud.event.delete_entity_node");
         public static final EventProcess DELETE_NPC = new EventProcess("delete_npc", "sceneplugincloud.event.delete_npc");
         public static final EventProcess DELETE_DYNAMIPS = new EventProcess("delete_dynamips", "sceneplugincloud.event.delete_dynamips");
+        public static final EventProcess DELETE_LOAD = new EventProcess("delete_load", "sceneplugincloud.event.delete_load");
     }
 
     @Data
@@ -454,6 +456,13 @@ public class DeleteHandler extends HandlerCommon {
                         () -> {
                             AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                             azureContainer.delete(cloudElement.getResourceId());
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
+                        () -> {
+                            Load load = new Load();
+                            load.delete(cloudElement.getResourceId());
                             this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                         });
             }

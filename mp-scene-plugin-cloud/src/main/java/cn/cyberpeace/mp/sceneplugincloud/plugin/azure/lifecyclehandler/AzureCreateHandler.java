@@ -5,10 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureResourceGroup;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.AzureContainerCreateTask;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.AzureVirtualMachineCreateTask;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.AzureVirtualNetCreateTask;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.AzureWebAppCreateTask;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
@@ -92,6 +89,17 @@ public class AzureCreateHandler extends CreateHandler {
         }
         createTerminalTasks.addAll(createContainerTasks);
 
+        // 载荷
+        List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
+        List<Runnable> createLoadTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : filteredLoadElements) {
+            String nodeId = element.getSrcElement().getId();
+            LoadCreateTask task = new LoadCreateTask(element);
+            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
+            createLoadTasks.add(formatTask);
+        }
+        createTerminalTasks.addAll(createLoadTasks);
+
         // webapp
         List<CloudPluginSceneElementBO> filteredWebAppElements = this.filterWebAppElements(allElements);
         List<Runnable> createWebAppTasks = new ArrayList<>();
@@ -107,6 +115,16 @@ public class AzureCreateHandler extends CreateHandler {
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }
+    }
+
+    private List<CloudPluginSceneElementBO> filterLoadElements(List<CloudPluginSceneElementBO> allElements) {
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.VirtualType.LOAD == c.getVirtualType()) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
     }
 
     private Runnable formatElementTask(String nodeId, int stepPercentage, EventProcess elementProcess, Runnable action) {

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
@@ -39,6 +40,7 @@ public class PauseHandler extends HandlerCommon {
         public static final EventProcess PAUSE_CONTAINER = new EventProcess("pause_container", "sceneplugincloud.event.pause_container");
         public static final EventProcess PAUSE_NODE = new EventProcess("pause_node", "sceneplugincloud.event.pause_node");
         public static final EventProcess PAUSE_DYNAMIPS = new EventProcess("pause_dynamips", "sceneplugincloud.event.pause_dynamips");
+        public static final EventProcess PAUSE_LOAD = new EventProcess("pause_load", "sceneplugincloud.event.pause_load");
     }
 
     public PauseHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -76,6 +78,13 @@ public class PauseHandler extends HandlerCommon {
                     closeAccessModes(element);
                     AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                     azureVirtualMachine.pause(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_LOAD));
+                runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_LOAD, () -> {
+                    closeAccessModes(element);
+                    Load load = new Load();
+                    load.pause(instanceId);
                 });
             }
         } else {

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
@@ -41,6 +42,8 @@ public class StopHandler extends HandlerCommon {
         //关闭节点
         public static final EventProcess STOP_NODE = new EventProcess("stop_node", "sceneplugincloud.event.stop_node");
         public static final EventProcess STOP_DYNAMIPS = new EventProcess("stop_dynamips", "sceneplugincloud.event.stop_dynamips");
+        //关闭载荷
+        public static final EventProcess STOP_LOAD = new EventProcess("stop_load", "sceneplugincloud.event.stop_load");
     }
 
     public StopHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -83,6 +86,15 @@ public class StopHandler extends HandlerCommon {
                     closeAccessModes(element);
                     AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                     azureContainer.stop(instanceId);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(
+                        StopHandler.ElementProcess.STOP_CONTAINER));
+                runElementProgress(nodeId, SceneElementModel.Event.STOP, ElementProcess.STOP_LOAD, () -> {
+                    //关闭接入方式可用
+                    closeAccessModes(element);
+                    Load load = new Load();
+                    load.stop(instanceId);
                 });
             }
         } else {

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
@@ -49,6 +50,7 @@ public class StartHandler extends HandlerCommon {
         //启动节点
         public static final EventProcess START_NODE = new EventProcess("start_node", "sceneplugincloud.event.start_node");
         public static final EventProcess START_DYNAMIPS = new EventProcess("start_dynamips", "sceneplugincloud.event.start_dynamips");
+        public static final EventProcess START_LOAD = new EventProcess("start_load", "sceneplugincloud.event.start_load");
     }
 
     public StartHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -99,6 +101,16 @@ public class StartHandler extends HandlerCommon {
                     //启动
                     AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                     azureContainer.start(instanceId);
+                    //检查接入方式是否可用
+                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_LOAD));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_LOAD, () -> {
+                    //启动
+                    Load load = new Load();
+                    load.start(instanceId);
                     //检查接入方式是否可用
                     checkAccessModes(element);
                 });

@@ -161,6 +161,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int NPC = 7;
         public static final int DYNAMIPS = 8;
         public static final int WEBAPP = 9;
+        public static final int LOAD = 10;
 
         private VirtualType() {
         }

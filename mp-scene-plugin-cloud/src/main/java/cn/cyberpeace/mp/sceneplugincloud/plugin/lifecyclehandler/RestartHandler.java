@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
@@ -34,6 +35,7 @@ public class RestartHandler extends HandlerCommon {
         public static final EventProcess RESTART_VIRTUAL_MACHINE = new EventProcess("restart_virtual_machine", "sceneplugincloud.event.restart_virtual_machine");
         public static final EventProcess RESTART_CONTAINER = new EventProcess("restart_container", "sceneplugincloud.event.restart_container");
         public static final EventProcess RESTART_DYNAMIPS = new EventProcess("restart_dynamips", "sceneplugincloud.event.restart_dynamips");
+        public static final EventProcess RESTART_LOAD = new EventProcess("restart_load", "sceneplugincloud.event.restart_load");
     }
 
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -68,6 +70,13 @@ public class RestartHandler extends HandlerCommon {
 //                    container.addRoute(instanceId);
 //                    container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
 //                    checkAccessModes(element);
+                });
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_LOAD));
+                runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_LOAD, () -> {
+                    closeAccessModes(element);
+                    Load load = new Load();
+                    load.restart(instanceId);
                 });
             }
 

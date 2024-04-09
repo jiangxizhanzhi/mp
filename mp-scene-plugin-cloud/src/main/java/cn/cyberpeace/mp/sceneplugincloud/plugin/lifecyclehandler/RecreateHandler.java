@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -39,6 +40,7 @@ public class RecreateHandler extends HandlerCommon {
         public static final EventProcess RECREATE_CONTAINER = new EventProcess("recreate_container", "sceneplugincloud.event.recreate_container");
         public static final EventProcess RECREATE_ENTITY_NODE = new EventProcess("recreate_entity_node", "sceneplugincloud.event.recreate_entity_node");
         public static final EventProcess RECREATE_DYNAMIPS = new EventProcess("recreate_dynamips", "sceneplugincloud.event.recreate_dynamips");
+        public static final EventProcess RECREATE_LOAD = new EventProcess("recreate_load", "sceneplugincloud.event.recreate_load");
     }
 
     private DeleteInRecreateHandler deleteHandler;
@@ -79,6 +81,8 @@ public class RecreateHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_CONTAINER));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_ENTITY_NODE));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_LOAD));
         }
     }
 
@@ -145,6 +149,14 @@ public class RecreateHandler extends HandlerCommon {
                                         }
                                     });
                                 }
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
+                            () -> {
+                                Load load = new Load();
+                                load.delete(cloudElement.getResourceId());
+                                closeAccessModes(cloudElement);
+                                this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
                 }
             } else {
@@ -252,6 +264,21 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 new AzureContainer(IAzureResourceManager.getInstance(cloudType))
                                         .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement));
+                            });
+                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                    runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_LOAD,
+                            () -> {
+                                if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                    cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                        var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                        // 未分配ip并且连接的网络不是外部网络 标识端口未使用
+                                        if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
+                                            p.setUsing(false);
+                                        }
+                                    });
+                                }
+                                new Load()
+                                        .create(cloudElement);
                             });
                 }
             } else {

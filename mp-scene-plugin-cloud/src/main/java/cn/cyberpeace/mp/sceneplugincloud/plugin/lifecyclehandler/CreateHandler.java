@@ -74,6 +74,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
         public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
+        public static final EventProcess CREATE_LOAD = new EventProcess("create_load", "sceneplugincloud.event.create_load");
     }
 
     @Data
@@ -476,9 +477,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 生成实体设备网口
      * @param cloudElement
      * @return List<Interface>
+     * @description: 生成实体设备网口
      */
     private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
         List<EntityNodeCreateData.Interface> entityInterfaces = new ArrayList<>();
@@ -531,7 +532,7 @@ public class CreateHandler extends HandlerCommon {
                 }).collect(Collectors.toList()));
             }
             //不存在任何接入方式则初始化一个空的
-            if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
+            if (CollectionUtil.isEmpty(entityInterface.getAccessModes())) {
                 entityInterface.setAccessModes(new ArrayList<>());
             }
             //配置勾选了snmp，则单独处理snmp协议
@@ -749,16 +750,16 @@ public class CreateHandler extends HandlerCommon {
 
                         try {
                             // 安装探针失败要重试
-                            List<String> checks = new ArrayList<>(){{
+                            List<String> checks = new ArrayList<>() {{
                                 this.add("sleep 180 ;");
                                 this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
                                 this.add("then echo \"wazuh ok\"");
                                 this.add("else sh install_wazuh.sh ;");
                                 this.add("fi");
                             }};
-                            containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks,"\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
+                            containerClient.executeCommand(containerId, "echo \"" + StringUtils.join(checks, "\n") + "\" >>" + " " + "/tmp/tmp_installers" + "/check_wazuh.sh");
                             containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/check_wazuh.sh > nohup.out 2>&1 &");
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             log.error("failed to add wazuh check script ");
                         }
                     } else {
@@ -1147,9 +1148,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     /**
-     * @description: 创建实体设备
      * @param cloudElement 云平台场景节点业务信息
      * @return void
+     * @description: 创建实体设备
      */
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
@@ -1363,7 +1364,7 @@ public class CreateHandler extends HandlerCommon {
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
             List<String> portIds = new ArrayList<>();
             Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-            portMap.forEach((key,value) -> {
+            portMap.forEach((key, value) -> {
                 if (StringUtils.isNotEmpty(value.getResourceId())) {
                     portIds.add(value.getResourceId());
                 }
