@@ -84,11 +84,12 @@ public class WazuhFileModifyService {
         FileModifySicLaunchOutput output = JsonCommon.snakeMapToBean(launchOutput, FileModifySicLaunchOutput.class);
         fileEventModel.setFilePath(output.getData());
         if (Boolean.TRUE.equals(output.getExists())) {
-            fileEventModel.setDescription("-");
-        } else {
-            String fileSize = output.getFileSize() == null ? "0" : output.getFileSize().toString();
+            String fileSize = output.getFileSize() == null ? "" : output.getFileSize().toString();
             fileEventModel.setSize(fileSize);
             fileEventModel.setDescription("");
+        } else {
+            fileEventModel.setSize("");
+            fileEventModel.setDescription("-");
         }
     }
 

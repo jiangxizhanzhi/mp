@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.WazuhResult;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.filemodify.WazuhFileModifyService;
+import cn.cyberpeace.mp.sceneplugincollection.service.collect.registrymodify.WazuhRegistryModifyService;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,9 @@ public class CsceneHostCollectQueryService {
 
     @Resource
     private WazuhFileModifyService wazuhFileModifyService;
+
+    @Resource
+    private WazuhRegistryModifyService wazuhRegistryModifyService ;
 
     public ListObjServiceResult<CollectionHostEventBO> getFileModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
         String sceneId = csceneInstanceService.getSceneId(csceneId);
@@ -49,6 +53,39 @@ public class CsceneHostCollectQueryService {
 
         List<String> agentNames = new ArrayList<>(agentNameToElement.keySet());
         WazuhResult<FileEventModel> result = wazuhFileModifyService.queryFileModifyData(from, size, agentNames, startTime, endTime, levels, filePath);
+
+        List<CollectionHostEventBO> hostEvents = new ArrayList<>();
+        for (FileEventModel fileEventModel : result.getList()) {
+            CollectionHostEventBO hostEvent = new CollectionHostEventBO();
+            hostEvent.setSceneId(csceneId);
+            this.writeBaseInfo(fileEventModel, hostEvent);
+            this.writeNodeInfo(fileEventModel.getAgentName(), sceneHandler, cloudScenePluginHandler, hostEvent);
+            hostEvent.setAppName("");
+            hostEvents.add(hostEvent);
+        }
+        return new ListObjServiceResult<>(hostEvents, (int) result.getTotal());
+    }
+
+    public ListObjServiceResult<CollectionHostEventBO> getRegistryModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
+        String sceneId = csceneInstanceService.getSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ArrayList<>(), 0);
+        }
+
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), nodeIds);
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getCollectionScenePluginHandler(sceneId);
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getCloudScenePluginHandler(sceneId);
+        // 无采集插件 直接返回
+        if (collectionScenePluginHandler == null) {
+            return new ListObjServiceResult<>(new ArrayList<>(), 0);
+        }
+
+        LocalDateTime startTime = queryStartAt != null ? queryStartAt : sceneHandler.getEarliestStartTime();
+        LocalDateTime endTime = queryEndAt != null ? queryEndAt : sceneHandler.getLatestSceneRunningTime();
+        Map<String, SceneElementBO> agentNameToElement = sceneHandler.getAllEid2ElementMap();
+
+        List<String> agentNames = new ArrayList<>(agentNameToElement.keySet());
+        WazuhResult<FileEventModel> result = wazuhRegistryModifyService.queryRegistryModifyData(from, size, agentNames, startTime, endTime, levels, filePath);
 
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         for (FileEventModel fileEventModel : result.getList()) {

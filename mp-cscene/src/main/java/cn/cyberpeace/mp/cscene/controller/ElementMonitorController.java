@@ -155,7 +155,22 @@ public class ElementMonitorController {
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
+        int from = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
+        int size = pageRequest.getPageSize();
+        String csceneId = pageRequest.getSceneId();
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+        if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        }
+        List<String> nodeIds = pageRequest.getElementIds();
+        List<Integer> levels = pageRequest.getLevels();
+
+        var result = csceneHostCollectQueryService.getRegistryModifyData(from, size, csceneId, nodeIds, startTime, endTime, levels, path);
+        return result.asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
