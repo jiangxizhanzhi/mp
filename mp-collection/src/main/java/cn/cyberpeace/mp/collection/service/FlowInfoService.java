@@ -781,7 +781,7 @@ public class FlowInfoService {
         String srcIpTerm = "src_ip", desIpTerm = "des_ip";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm).size(size)
                 .field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
+                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip").size(1000));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();
