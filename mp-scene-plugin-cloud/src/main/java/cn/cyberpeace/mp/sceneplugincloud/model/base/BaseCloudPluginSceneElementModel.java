@@ -30,12 +30,22 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
      */
     @DefaultStr
     private String resourceId;
+    @DefaultStr
+    private String loadResourceInstanceId;
+    @DefaultStr
+    private String loadTaskName;
+    @DefaultStr
+    private String loadTaskDescribe;
+    @DefaultStr
+    private String loadExecCommand;
+    @DefaultStr
+    private String loadToolId;
+
     /**
      * 三层防火墙对应防火墙资源id
      */
     @DefaultStr
     private String firewallResourceId;
-
     // 虚拟交换机/路由/防火墙属性
     @DefaultInt
     private Integer electricPortNumber;
@@ -223,6 +233,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String CONTAINER = "container";
         public static final String ENTITY = "entity";
         public static final String DYNAMIPS = "dynamips";
+        public static final String LOAD = "load";
 
         private ImageType() {
         }

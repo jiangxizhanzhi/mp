@@ -462,7 +462,7 @@ public class DeleteHandler extends HandlerCommon {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
                         () -> {
                             Load load = new Load();
-                            load.delete(cloudElement.getResourceId());
+                            load.delete(cloudElement);
                             this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                         });
             }

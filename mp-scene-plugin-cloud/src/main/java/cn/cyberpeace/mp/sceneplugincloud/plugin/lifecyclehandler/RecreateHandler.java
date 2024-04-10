@@ -61,13 +61,22 @@ public class RecreateHandler extends HandlerCommon {
             return;
         }
         this.prepareElementProcess(nodeId, element.getVirtualType());
-        try {
-            this.deleteHandler.deleteElementProcess(element);
-        } catch (Exception e) {
-            log.error("faild to execute delete process when recreate element,nodeId is {}", nodeId, e);
+        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_LOAD));
+            runElementProgress(nodeId, SceneElementModel.Event.RECREATE, ElementProcess.RECREATE_LOAD, () -> {
+                closeAccessModes(element);
+                Load load = new Load();
+                load.recreate(element);
+            });
+        } else {
+            try {
+                this.deleteHandler.deleteElementProcess(element);
+            } catch (Exception e) {
+                log.error("faild to execute delete process when recreate element,nodeId is {}", nodeId, e);
+            }
+            this.createHandler.createElementProcess(element);
+            getPluginHandler().updateElements(element.getSrcElement().getId());
         }
-        this.createHandler.createElementProcess(element);
-        getPluginHandler().updateElements(element.getSrcElement().getId());
     }
 
     private void prepareElementProcess(String nodeId, Integer virtualType) {
@@ -154,7 +163,7 @@ public class RecreateHandler extends HandlerCommon {
                     runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
                             () -> {
                                 Load load = new Load();
-                                load.delete(cloudElement.getResourceId());
+                                load.delete(cloudElement);
                                 closeAccessModes(cloudElement);
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });

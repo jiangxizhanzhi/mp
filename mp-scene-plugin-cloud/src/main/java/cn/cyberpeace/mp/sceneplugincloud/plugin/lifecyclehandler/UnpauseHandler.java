@@ -83,7 +83,7 @@ public class UnpauseHandler extends HandlerCommon {
                 runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_LOAD, () -> {
                     closeAccessModes(element);
                     Load load = new Load();
-                    load.unpause(instanceId);
+                    load.unpause(element.getLoadResourceInstanceId());
                 });
             }
         } else {

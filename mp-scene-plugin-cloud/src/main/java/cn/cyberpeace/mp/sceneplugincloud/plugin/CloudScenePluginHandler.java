@@ -20,7 +20,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -29,25 +28,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureDeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementCreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementDeleteHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementInitiateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementModifyHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PrepareHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SnapshotHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.StartHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.StopHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
@@ -57,15 +38,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -373,7 +346,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             var newElement = getElement(nodeId).getSrcElement();
             var originElement = originHandler.getElement(nodeId);
             Map<String, SceneElementPortBO> portId2Port = new HashMap<>();
-            CloudScenePluginHandler originHandlerPluginHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY) ;
+            CloudScenePluginHandler originHandlerPluginHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             if (CollectionUtils.isNotEmpty(originElement.getPorts())) {
                 for (var p : originElement.getPorts()) {
                     portId2Port.put(p.getId(), p);
@@ -553,19 +526,19 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             List<SceneElementBO> connectedElements = getElementConnectedSrcElements(element.getSrcElement().getId());
 //             下方if逻辑要换 要所有ip都有交换机连线
 //                     ports为空||ports的ip为空||ports的ip在ip池中不存在 走第一个
-            if (CollectionUtils.isEmpty(connectedElements)&&notIpPortsByNotConnectedPorts.isEmpty()) {
+            if (CollectionUtils.isEmpty(connectedElements) && notIpPortsByNotConnectedPorts.isEmpty()) {
                 if (!element.getDeriveNetworks().isEmpty()) {
 //                    List<SceneElementPortBO> ports = element.getSrcElement().getPorts();
-                        TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
-                        nodeWrapper.getSceneElement().setIsAuxiliary(false);
-                        TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
-                        TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
-                        port1Wrapper.getScenePort().setIsAuxiliary(false);
-                        port2Wrapper.getScenePort().setIsAuxiliary(false);
-                        topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
+                    TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
+                    nodeWrapper.getSceneElement().setIsAuxiliary(false);
+                    TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
+                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
+                    port1Wrapper.getScenePort().setIsAuxiliary(false);
+                    port2Wrapper.getScenePort().setIsAuxiliary(false);
+                    topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
                 }
 //                n个未连线ip节点需要n交换机
-            }else if (CollectionUtils.isNotEmpty(notIpPortsByNotConnectedPorts)) {
+            } else if (CollectionUtils.isNotEmpty(notIpPortsByNotConnectedPorts)) {
                 notIpPortsByNotConnectedPorts.forEach(p -> {
                     //                    加交换机节点
                     TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
@@ -584,16 +557,18 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                         String gateway = ip.substring(0, ip.lastIndexOf(".")) + ".254";
                         Map<String, Map<String, Object>> elements = this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).getElements();
                         Map<String, Object> stringObjectMap = elements.get(nodeWrapper.getSceneElement().getId());
-                        stringObjectMap.put("gateway",gateway);
-                        stringObjectMap.put("cidr",cidr);
+                        stringObjectMap.put("gateway", gateway);
+                        stringObjectMap.put("cidr", cidr);
                         this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).setElements(elements);
                     }
                 });
             }
         }
     }
+
     /**
      * 向插件和topo中新增一个节点
+     *
      * @param nodeId
      * @param pluginElement
      * @param srcElement
@@ -608,6 +583,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     /**
      * 向插件和topo中新增一个端口
+     *
      * @param portId
      * @param pluginPort
      * @param srcPort
@@ -634,7 +610,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 correctElementImageTypeRelated(element.getSrcElement(), element, imageType);
             });
         }
-        
+
         // 连接外部网络,而且开启公网映射,就打开端口映射
         if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
             getElementMap().forEach((id, element) -> {
@@ -774,6 +750,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.LOAD)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.LOAD);
         }
     }
 
@@ -888,10 +866,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     /**
      * 获取未获得网元连接&非初始化分配的网元
-     * @param nodeId 网元节点id
+     *
+     * @param nodeId        网元节点id
      * @param existingIpSet 已分配ip集合
      */
-    public List<SceneElementPortBO> getNotIpPortsByNotConnectedPorts(String nodeId,Set<String> existingIpSet) {
+    public List<SceneElementPortBO> getNotIpPortsByNotConnectedPorts(String nodeId, Set<String> existingIpSet) {
         List<SceneElementPortBO> elementNotConnectedPorts = getElementNotConnectedPorts(nodeId);
 //        去除分配ip
         List<SceneElementPortBO> sceneElementPortBOS = elementNotConnectedPorts.stream()
@@ -902,6 +881,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     /**
      * 获取未获得网元连接的网元
+     *
      * @param nodeId 网元节点id
      */
     public List<SceneElementPortBO> getElementNotConnectedPorts(String nodeId) {
@@ -913,7 +893,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         List<SceneElementPortBO> notConnectedPorts = new ArrayList<>();
         ports.forEach(port -> {
             var connectedPort = this.getSceneHandler().getPortConnectedPort(port.getId());
-            if(connectedPort ==null){
+            if (connectedPort == null) {
                 notConnectedPorts.add(port);
             }
         });

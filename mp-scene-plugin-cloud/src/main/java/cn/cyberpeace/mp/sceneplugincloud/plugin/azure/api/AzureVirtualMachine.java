@@ -64,7 +64,7 @@ public class AzureVirtualMachine {
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
         VirtualMachine.DefinitionStages.WithCreate creater;
-        if (cloudElement.getPublisher().equalsIgnoreCase("MicrosoftWindowsServer")) {
+        if (cloudElement.getPublisher().toLowerCase().contains("microsoft") || cloudElement.getPublisher().toLowerCase().contains("windows")) {
             creater = resourceService.getManager().virtualMachines()
                     .define(vmName)
                     .withRegion(region)

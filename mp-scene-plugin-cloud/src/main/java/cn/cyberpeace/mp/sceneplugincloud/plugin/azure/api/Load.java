@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,10 +22,11 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 @Slf4j
 public class Load {
 
-    public void create(CloudPluginSceneElementBO cloudElement) {
-//        创建任务 /stgj/task/create
-        String url = "http://***/stgj/task/create";
+    //    @Value("${load.url}")
+    public String loadUrl = "http://10.108.1.10:5002";
 
+    public void create(CloudPluginSceneElementBO cloudElement) {
+//        创建任务
 //        "taskName，任务名称
         //taskDescribe，任务描述
         //toolId，所使用的工具ID
@@ -38,13 +40,15 @@ public class Load {
         String result;
         Map<String, Object> dataMap;
         try {
-            result = HttpUtils.sendHttpPost(url, JSON.toJSONString(formMap), headersMap);
+            String s = loadUrl + LoadUrlConstant.CREATE_TASK_URL;
+            result = HttpUtils.sendHttpPost(s, JSON.toJSONString(formMap), headersMap);
             dataMap = JsonUtils.parseMap(result);
-            if (!"0".equals(dataMap.get("code"))) {
+
+            if (!"0".equals(dataMap.get("code").toString())) {
                 throw new MpRuntimeException("load task create post request failed");
             }
         } catch (IOException e) {
-            log.error("{} request error:", url, e);
+            log.error("{} request error:", loadUrl + LoadUrlConstant.CREATE_TASK_URL, e);
             throw new MpRuntimeException("load task create post request failed");
         }
         /*"code,创建任务结果，0表示创建成功，1表示创建失败
@@ -52,29 +56,44 @@ public class Load {
         */
         Map data = (Map) dataMap.get("data");
 //            回写id
-        cloudElement.setResourceId((String) data.get("instanceId"));
+        cloudElement.setResourceId(data.get("id").toString());
+        cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
 //            创建任务成功后启动实例
-        String instanceStartUrl = "http://***/stgj/instance/start";
         formMap.clear();
         formMap.put("instanceId", data.get("instanceId"));
         try {
-            result = HttpUtils.sendHttpPost(instanceStartUrl, JSON.toJSONString(formMap), headersMap);
+            result = HttpUtils.sendHttpPost(loadUrl + LoadUrlConstant.START_INSTANCE_URL, JSON.toJSONString(formMap), headersMap);
             dataMap = JsonUtils.parseMap(result);
-            if (!"0".equals(dataMap.get("code"))) {
+            if (!"0".equals(dataMap.get("code").toString())) {
                 throw new MpRuntimeException("load instance start post request failed");
             }
         } catch (IOException e) {
-            log.error("{} request error:", url, e);
+            log.error("{} request error:", loadUrl + LoadUrlConstant.START_INSTANCE_URL, e);
             throw new MpRuntimeException("load instance start post request failed");
         }
     }
 
-    public void delete(String instanceId) {
-        //TODO 删除任务是否需要重新启动实例 taskId
+    public void delete(CloudPluginSceneElementBO cloudElement) {
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("instanceId", cloudElement.getLoadResourceInstanceId());
         //删除实例
-        sendPost("http://***/stgj/instance/delete", instanceId, "load instance delete post request failed");
+        sendPost(loadUrl + LoadUrlConstant.DELETE_INSTANCE_URL, JSON.toJSONString(formMap), "load instance delete post request failed");
         //删除任务
-        sendPost("http://***/stgj/task/delete", instanceId, "load task delete post request failed");
+        String resourceId = cloudElement.getResourceId();
+        String body = JSON.toJSONString(new String[]{resourceId});
+
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        try {
+            String result = HttpUtils.sendHttpPost(loadUrl + LoadUrlConstant.DELETE_TASK_URL, body, headersMap);
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if (!"0".equals(dataMap.get("code").toString())) {
+                throw new MpRuntimeException("load task delete post request failed");
+            }
+        } catch (IOException e) {
+            log.error("{} request error:", loadUrl + LoadUrlConstant.DELETE_TASK_URL, e);
+            throw new MpRuntimeException("load task delete post request failed");
+        }
     }
 
     public void execCommand(CloudPluginSceneElementBO element, String command) {
@@ -82,35 +101,36 @@ public class Load {
     }
 
     public void pause(String instanceId) {
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("instanceId", instanceId);
         //暂停实例
-        sendPost("http://***/stgj/instance/pause", instanceId, "load instance pause post request failed");
+        sendPost(loadUrl + LoadUrlConstant.PAUSE_INSTANCE_URL, JSON.toJSONString(formMap), "load instance pause post request failed");
     }
 
     public void restart(String instanceId) {
-        //TODO 重置任务是否需要重新启动实例 taskId
-        sendPost("http://***/stgj/task/reset", instanceId, "load task reset post request failed");
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("instanceId", instanceId);
         //停止实例
-        sendPost("http://***/stgj/instance/stop", instanceId, "load instance stop post request failed");
+        sendPost(loadUrl + LoadUrlConstant.STOP_INSTANCE_URL, JSON.toJSONString(formMap), "load instance stop post request failed");
         //启动实例
-        sendPost("http://***/stgj/instance/start", instanceId, "load instance start post request failed");
-
+        sendPost(loadUrl + LoadUrlConstant.START_INSTANCE_URL, JSON.toJSONString(formMap), "load instance start post request failed");
 
     }
 
     public void start(String instanceId) {
-        //启动实例
-        sendPost("http://***/stgj/instance/start", instanceId, "load instance start post request failed");
-    }
-
-    private static Map<String, Object> sendPost(String url, String instanceId, String message) {
         HashMap<String, Object> formMap = new HashMap<>();
         formMap.put("instanceId", instanceId);
+        //启动实例
+        sendPost(loadUrl + LoadUrlConstant.START_INSTANCE_URL, JSON.toJSONString(formMap), "load instance start post request failed");
+    }
+
+    private static Map<String, Object> sendPost(String url, String body, String message) {
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
         try {
-            String result = HttpUtils.sendHttpPost(url, JSON.toJSONString(formMap), headersMap);
+            String result = HttpUtils.sendHttpPost(url, body, headersMap);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
-            if (!"0".equals(dataMap.get("code"))) {
+            if (!"0".equals(dataMap.get("code").toString())) {
                 throw new MpRuntimeException(message);
             }
             return dataMap;
@@ -121,12 +141,27 @@ public class Load {
     }
 
     public void unpause(String instanceId) {
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("instanceId", instanceId);
         //恢复实例
-        sendPost("http://***/stgj/instance/unpause", instanceId, "load instance unpause post request failed");
+        sendPost(loadUrl + LoadUrlConstant.UNPAUSE_INSTANCE_URL, JSON.toJSONString(formMap), "load instance unpause post request failed");
     }
 
     public void stop(String instanceId) {
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("instanceId", instanceId);
         //关闭实例
-        sendPost("http://***/stgj/instance/stop", instanceId, "load instance stop post request failed");
+        sendPost(loadUrl + LoadUrlConstant.STOP_INSTANCE_URL, JSON.toJSONString(formMap), "load instance stop post request failed");
+    }
+
+    public void recreate(CloudPluginSceneElementBO element) {
+        HashMap<String, Object> formMap = new HashMap<>();
+        formMap.put("taskId", element.getResourceId());
+        //重置任务
+        sendPost(loadUrl + LoadUrlConstant.RESET_TASK_URL, JSON.toJSONString(formMap), "load task reset post request failed");
+        formMap.clear();
+        formMap.put("instanceId", element.getLoadResourceInstanceId());
+        //启动实例
+        sendPost(loadUrl + LoadUrlConstant.START_INSTANCE_URL, JSON.toJSONString(formMap), "load instance start post request failed");
     }
 }

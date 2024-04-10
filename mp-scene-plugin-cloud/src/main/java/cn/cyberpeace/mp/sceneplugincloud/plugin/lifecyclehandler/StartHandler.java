@@ -110,7 +110,7 @@ public class StartHandler extends HandlerCommon {
                 runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_LOAD, () -> {
                     //启动
                     Load load = new Load();
-                    load.start(instanceId);
+                    load.start(element.getLoadResourceInstanceId());
                     //检查接入方式是否可用
                     checkAccessModes(element);
                 });

@@ -76,7 +76,7 @@ public class RestartHandler extends HandlerCommon {
                 runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_LOAD, () -> {
                     closeAccessModes(element);
                     Load load = new Load();
-                    load.restart(instanceId);
+                    load.restart(element.getLoadResourceInstanceId());
                 });
             }
 

@@ -34,6 +34,16 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
+    @ApiModelProperty(value = "云平台虚拟化资源实例id（载荷实例id）")
+    private String loadResourceInstanceId;
+    @ApiModelProperty(value = "载荷任务名称")
+    private String loadTaskName;
+    @ApiModelProperty(value = "载荷任务描述")
+    private String loadTaskDescribe;
+    @ApiModelProperty(value = "载荷访问工具控制页面执行的命令，vmware平台不需要")
+    private String loadExecCommand;
+    @ApiModelProperty(value = "载荷工具id")
+    private String loadToolId;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 

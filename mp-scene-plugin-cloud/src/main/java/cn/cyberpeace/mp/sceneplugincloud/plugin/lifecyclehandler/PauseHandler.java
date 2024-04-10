@@ -84,7 +84,7 @@ public class PauseHandler extends HandlerCommon {
                 runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_LOAD, () -> {
                     closeAccessModes(element);
                     Load load = new Load();
-                    load.pause(instanceId);
+                    load.pause(element.getLoadResourceInstanceId());
                 });
             }
         } else {

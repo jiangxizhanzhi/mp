@@ -94,7 +94,7 @@ public class StopHandler extends HandlerCommon {
                     //关闭接入方式可用
                     closeAccessModes(element);
                     Load load = new Load();
-                    load.stop(instanceId);
+                    load.stop(element.getLoadResourceInstanceId());
                 });
             }
         } else {
