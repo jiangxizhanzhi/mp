@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager;
 
-import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import com.azure.core.management.Region;
@@ -11,8 +10,6 @@ public interface IAzureResourceManager {
 
     Region getRegin();
 
-     int cloudType = 0;
-
     public static IAzureResourceManager getInstance(int type) {
         if (BaseSceneModel.CloudType.PUBLIC == type) {
             return BeanCommon.getBean(PublicAzureResourceManager.class);
@@ -22,18 +19,6 @@ public interface IAzureResourceManager {
             return BeanCommon.getBean(MixAzureResourceManager.class);
         } else {
             return BeanCommon.getBean(MixAzureResourceManager.class);
-        }
-    }
-
-    public static MicrosoftAzureUserModel getAzureUser(int type){
-        if (BaseSceneModel.CloudType.PUBLIC == type) {
-            return BeanCommon.getBean(PublicAzureResourceManager.class).microsoftAzureUserModel;
-        } else if (BaseSceneModel.CloudType.PRIVATE == type) {
-            return BeanCommon.getBean(PrivateAzureResourceManager.class).microsoftAzureUserModel;
-        } else if (BaseSceneModel.CloudType.MIX == type) {
-            return BeanCommon.getBean(MixAzureResourceManager.class).microsoftAzureUserModel;
-        } else {
-            return BeanCommon.getBean(MixAzureResourceManager.class).microsoftAzureUserModel;
         }
     }
 }

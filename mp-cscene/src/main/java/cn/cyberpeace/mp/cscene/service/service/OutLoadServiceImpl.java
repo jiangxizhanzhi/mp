@@ -1,12 +1,18 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+
+import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
 public class OutLoadServiceImpl  {
@@ -62,8 +68,33 @@ public class OutLoadServiceImpl  {
         return null;
     }
 
-    public List<JSONObject> getToolList(JSONObject requestData) {
-        return null;
+    public List getToolList(JSONObject requestData) {
+        //todo 根据载荷同步设置获取具体地址、认证和协议
+        String url = "http://10.108.1.10:5002/stgj/tool/list";
+        Map<String, String> formMap = new HashMap();
+        formMap.put("pagenum", requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "0");
+        formMap.put("pagesize", requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20");
+        formMap.put("keyword", requestData.get("keyword") != null ? requestData.get("keyword").toString() : "");
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        List dataList = new ArrayList();
+        String result = null;
+        try {
+            result = HttpUtils.sendHttpGet(url, formMap, 100);
+        } catch (IOException e) {
+            return dataList;
+        }
+        Map<String, Object> dataMap;
+        dataMap = JsonUtils.parseMap(result);
+        if ("0".equals(dataMap.get("code").toString())) {
+            LinkedHashMap data = (LinkedHashMap) dataMap.get("data");
+            if(data != null && data.get("toolList") != null && data.get("toolList") instanceof List){
+                dataList = (List) data.get("toolList");
+            }
+        }
+        return dataList;
     }
 
     public Boolean addTool(JSONObject requestData) {

@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -22,6 +26,9 @@ public class LoadServiceImpl {
 
     @Autowired
     private LoadMapper loadMapper;
+
+    @Autowired
+    OutLoadServiceImpl outLoadService;
 
     /*
      * 载荷页面
@@ -42,9 +49,70 @@ public class LoadServiceImpl {
     /*
      * 载荷数据同步
      * */
+    @Transactional
     public Boolean synchronousData() {
-        //todo httpClient方式请求 同步数据
+        JSONObject requestData = new JSONObject();
+        List<LinkedHashMap> toolList = outLoadService.getToolList(requestData);
+        if (toolList == null || toolList.isEmpty()) {
+            return false;
+        }
+        List<JSONObject> list = new ArrayList<>();
+        for (LinkedHashMap tool : toolList) {
+            if (tool != null) {
+                list.add(convertToolToJSONObject(tool));
+            }
+        }
+        try {
+            Boolean deleteData = loadMapper.deleteData();
+            if (deleteData) {
+                return loadMapper.addLoads(list);
+            }
+        } catch (Exception e) {
+            // 记录错误日志、回滚事务等
+            throw e; // 或者包装成自定义异常抛出
+        }
         return true;
+    }
+
+    private JSONObject convertToolToJSONObject(LinkedHashMap tool) {
+        JSONObject jsonObject = new JSONObject(true);
+
+        jsonObject.put("id", tool.get("id"));
+        jsonObject.put("controlPort", tool.get("controlPort"));
+        jsonObject.put("controlType", tool.get("controlType"));
+        jsonObject.put("creatorId", tool.get("creatorId"));
+        jsonObject.put("defaultCmd", tool.get("defaultCmd"));
+        jsonObject.put("imageName", tool.get("imageName"));
+        jsonObject.put("toolDescription", tool.get("toolDescribe")); //这里的键名与原始数据中的键名不一致
+        jsonObject.put("toolName", tool.get("toolName"));
+        jsonObject.put("toolPlatform", tool.get("toolPlatform"));
+        jsonObject.put("readMe", tool.get("toolReadme"));
+
+        Object createTimeObj = tool.get("createTime");
+        if (createTimeObj != null) {
+            try {
+                LocalDateTime createTime = LocalDateTime.parse(createTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                jsonObject.put("createTime", createTime.toString());
+            } catch (DateTimeParseException e) {
+                // 记录错误日志，跳过此条数据或使用默认值
+                LocalDateTime createTime = LocalDateTime.now();
+                jsonObject.put("createTime", createTime.toString());
+            }
+        }
+
+        Object updateTimeObj = tool.get("updateTime");
+        if (updateTimeObj != null) {
+            try {
+                LocalDateTime updateTime = LocalDateTime.parse(updateTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                jsonObject.put("updateTime", updateTime.toString());
+            } catch (DateTimeParseException e) {
+                // 记录错误日志，跳过此条数据或使用默认值
+                LocalDateTime updateTime = LocalDateTime.now();
+                jsonObject.put("updateTime", updateTime.toString());
+            }
+        }
+
+        return jsonObject;
     }
 
     /*

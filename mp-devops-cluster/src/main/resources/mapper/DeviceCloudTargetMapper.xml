@@ -122,7 +122,7 @@
       FROM
                   recursion T
       ORDER BY
-	              T.LEVEL;
+	              T.LEVEL
     </select>
 
     <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum">

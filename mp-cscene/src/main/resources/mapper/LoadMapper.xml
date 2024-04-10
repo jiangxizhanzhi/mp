@@ -104,6 +104,18 @@
                 #{param.creatorId})
     </insert>
 
+    <insert id="addLoads">
+        INSERT INTO mp_devops_load (id, tool_name, tool_platform, tool_description,
+                                    action_type, run_table, source, control_type, creator_id,
+                                    create_time, control_port, default_cmd, read_me, update_time)
+        VALUES
+        <foreach item="item" collection="param" separator=",">
+            (#{item.id}, #{item.toolName}, #{item.toolPlatform}, #{item.toolDescription},
+             #{item.actionType}, #{item.runTable}, #{item.source}, #{item.controlType}, #{item.creatorId},
+            #{item.createTime}, #{item.controlPort}, #{item.defaultCmd}, #{item.readMe}, #{item.updateTime})
+        </foreach>
+    </insert>
+
     <update id="updateLoadByPk">
         UPDATE
         mp_devops_load
@@ -221,6 +233,10 @@
         DELETE
         FROM mp_devops_load_scene_result_log
         WHERE pk = #{pk}
+    </delete>
+
+    <delete id="deleteData">
+        delete from mp_devops_load
     </delete>
 
     <select id="getLoadList" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">

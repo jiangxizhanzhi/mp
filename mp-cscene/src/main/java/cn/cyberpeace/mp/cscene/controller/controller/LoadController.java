@@ -167,10 +167,33 @@ public class LoadController {
      * 载荷执行结果统计
      * */
     @ApiOperation(value = "载荷执行结果统计", notes = "")
-    @GetMapping("/getLoadExecutionResultStatistics")
-    public ServiceResult getLoadExecutionResultStatistics(@RequestParam(value = "sceneId", required = true) String sceneId) {
+    @PostMapping("/getLoadExecutionResultStatistics")
+    public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) JSONObject request) {
+
         JSONObject requestData = new JSONObject();
+        String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
+        if (sceneId.equals("")) {
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
+        }
         requestData.put("sceneId", sceneId);
+        //将time转换成LocaldateTime
+        LocalDateTime beginTimeLocalDateTime = null;
+        LocalDateTime overTimeLocalDateTime = null;
+        if (request.get("beginTime") != null && request.get("overTime") != null) {
+            try {
+                beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                //比较时间
+                if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
+                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
+                }
+            } catch (Exception e) {
+                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
+            }
+        }
+        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
+        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        requestData.put("pks", request.get("pks"));
         Map<String, Integer> map = LoadService.getLoadExecutionResultStatistics(requestData);
         return new ServiceResult<>(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
@@ -183,8 +206,8 @@ public class LoadController {
     public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) JSONObject request) {
         JSONObject requestData = new JSONObject();
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
-        if(sceneId.equals("")){
-            return new ListObjServiceResult(null,BaseErrorCode.ERROR,"sceneId不能为空").asResult();
+        if (sceneId.equals("")) {
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
         }
         requestData.put("sceneId", sceneId);
         //将time转换成LocaldateTime
@@ -196,15 +219,15 @@ public class LoadController {
                 overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 //比较时间
                 if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
-                    return new ListObjServiceResult(null, BaseErrorCode.ERROR, "结束时间不能小于开始时间");
+                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
                 }
             } catch (Exception e) {
-                return new ListObjServiceResult(null, BaseErrorCode.ERROR, "开始时间转换时间类型错误");
+                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
             }
         }
-        requestData.put("beginTime", beginTimeLocalDateTime.toString());
-        requestData.put("overTime", overTimeLocalDateTime.toString());
-        requestData.put("pks",request.get("pks"));
+        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
+        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        requestData.put("pks", request.get("pks"));
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
         return new ListObjServiceResult(list, list.size()).asResult();
     }

@@ -205,7 +205,7 @@ public class OutLoadController {
         requestData.put("pageSize", pageSize);
         requestData.put("keyWord", keyWord);
         requestData.put("sortBy", sortBy);
-        List<JSONObject> list = outLoadService.getToolList(requestData);
+        List list = outLoadService.getToolList(requestData);
         return new ServiceResult<List>(list, BaseErrorCode.SUCCESS).asResult();
     }
 

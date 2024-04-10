@@ -46,7 +46,7 @@ public class MicrosoftAzureController {
         requestData.put("pageSize", pageSize);
         JSONObject result = microsoftAzureConverter.getCloudTargetList(requestData);
 //        List returnData = microsoftAzureConverter.getTarget(jsonObject);
-        return new ListObjServiceResult((List) result.get("source"),(int)result.get("total")).asResult();
+        return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
     }
 
     /**
@@ -66,9 +66,9 @@ public class MicrosoftAzureController {
     @DeleteMapping("/delete")
     public ServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
         Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(requestData);
-        if(deleteCloudTarget){
+        if (deleteCloudTarget) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
-        }else{
+        } else {
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "数据删除失败,请检查列表是否存在该数据").asResult();
         }
     }
@@ -88,9 +88,9 @@ public class MicrosoftAzureController {
     @PutMapping("/update")
     public ServiceResult updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
         Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(requestData);
-        if(updateCloudTarget){
+        if (updateCloudTarget) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
-        }else{
+        } else {
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "数据删除失败,请检查列表是否存在该数据").asResult();
         }
     }
@@ -102,10 +102,11 @@ public class MicrosoftAzureController {
     @GetMapping("/synchronousCloudData")
     public ServiceResult synchronousCloudData(@RequestBody(required = false) JSONObject requestData) throws Exception {
         JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(requestData);
-        if(synchronousCloudData.get("code")!=null && synchronousCloudData.get("code").equals("200")){
+        if (synchronousCloudData.get("code") != null && synchronousCloudData.get("code").equals("200")) {
             return new ServiceResult<>(synchronousCloudData).asResult();
-        }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR,synchronousCloudData.get("message").toString()).asResult();
+        } else {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, synchronousCloudData.get("message") != null
+                    ? synchronousCloudData.get("message").toString() : "同步失败").asResult();
         }
     }
 }

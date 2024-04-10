@@ -42,4 +42,8 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     Boolean addSynchronousDataSource(@Param("param") JSONObject requestData);
 
     JSONObject getSynchronousDataSource();
+
+    Boolean addLoads(@Param("param") List<JSONObject> list);
+
+    Boolean deleteData();
 }
