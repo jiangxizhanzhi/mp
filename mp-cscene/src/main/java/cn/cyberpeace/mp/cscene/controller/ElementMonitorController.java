@@ -143,8 +143,19 @@ public class ElementMonitorController {
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
         }
-        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
-                intervalMinutes, bucketSize)).asResult();
+        String csceneId = pageRequest.getSceneId();
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+        if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        }
+        List<String> nodeIds = pageRequest.getElementIds();
+
+        var result = csceneHostCollectQueryService.aggsFileModifyData(csceneId, nodeIds, startTime, endTime, intervalMinutes, bucketSize);
+        return new ServiceResult<>(result).asResult();
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -188,8 +199,19 @@ public class ElementMonitorController {
         if (Objects.isNull(bucketSize)) {
             bucketSize = 15;
         }
-        return new ServiceResult<>(sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
-                intervalMinutes, bucketSize)).asResult();
+
+        String csceneId = pageRequest.getSceneId();
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+        if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+            startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+            endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
+        }
+        List<String> nodeIds = pageRequest.getElementIds();
+        var result = csceneHostCollectQueryService.aggsRegistryModifyData(csceneId, nodeIds, startTime, endTime, intervalMinutes, bucketSize);
+        return new ServiceResult<>(result).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")

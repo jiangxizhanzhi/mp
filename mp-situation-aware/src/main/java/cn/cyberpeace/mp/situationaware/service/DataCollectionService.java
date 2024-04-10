@@ -1422,57 +1422,6 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-
-    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval, String minBounds, String maxBounds) {
-        String aggregationName = "aggs_date_histogram";
-        Map<String, Long> resultMap = new LinkedHashMap<>();
-
-        //根据日期构造索引
-        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
-        SearchRequest searchRequest = new SearchRequest(indexArray);
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.size(0);
-
-        // build the aggregation
-        DateHistogramAggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(aggregationName)
-                .field(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
-                .fixedInterval(new DateHistogramInterval(interval))
-                .order(BucketOrder.key(false))
-                .minDocCount(0)
-                .extendedBounds(new LongBounds(minBounds, maxBounds))
-                .format("yyyy-MM-dd HH:mm")
-                .timeZone(ZoneId.systemDefault());
-        sourceBuilder.aggregation(aggrBuilder);
-
-        //构造查询条件
-        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
-        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-
-        log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
-
-        try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-
-            if (Objects.nonNull(response.getAggregations())) {
-                Histogram histogram = response.getAggregations().get(aggregationName);
-                histogram.getBuckets().forEach(b -> {
-                    resultMap.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
-                });
-            }
-
-            return resultMap;
-
-        } catch (IOException e) {
-            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
-        }
-    }
-
-
     /**
      * 查询一个节点所有的rule id
      *

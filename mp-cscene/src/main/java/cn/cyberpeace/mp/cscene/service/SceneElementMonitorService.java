@@ -578,61 +578,6 @@ public class SceneElementMonitorService {
         }
     }
 
-    /**
-     * 按时间分桶查询事件数
-     *
-     * @param pageRequest
-     * @param ruleGroups
-     * @param intervalMinutes
-     * @return
-     */
-    public List<ElementHistogramInfo> listEventHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer intervalMinutes, Integer bucketSize) {
-        if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
-            log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        }
-        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
-        if (CollectionUtil.isEmpty(agentNames)) {
-            return Collections.emptyList();
-        }
-
-        List<ElementHistogramInfo> infos = new ArrayList<>();
-        WazuhEventRequest wazuhEventRequest = buildWazuhRequest(pageRequest);
-        wazuhEventRequest.setAgentNames(agentNames);
-        wazuhEventRequest.setRuleGroups(ruleGroups);
-        wazuhEventRequest.setLevels(pageRequest.getLevels());
-        wazuhEventRequest.setPageSize(0);
-
-        String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize)));
-        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes(1));
-
-        Map<String, Long> resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
-
-        if (CollectionUtil.isNotEmpty(resultMap)) {
-            for (Map.Entry<String, Long> entry : resultMap.entrySet()) {
-                String key = entry.getKey();
-                Long value = entry.getValue();
-                infos.add(ElementHistogramInfo.builder().time(key).count(Objects.isNull(value) ? 0 : value.intValue()).build());
-            }
-        }
-
-        //LocalDateTime endTime = null;
-        //if (Objects.nonNull(wazuhEventRequest) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-        //    endTime = wazuhEventRequest.getEndTime();
-        //} else {
-        //    endTime = LocalDateTime.now();
-        //}
-        //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
-        List<ElementHistogramInfo> finalList = new ArrayList<>();
-        long limit = bucketSize;
-        for (ElementHistogramInfo info : infos) {
-            if (limit-- == 0) break;
-            finalList.add(info);
-        }
-        Collections.reverse(finalList);
-        return finalList;
-    }
-
     @Deprecated
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);

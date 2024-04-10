@@ -26,11 +26,13 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
     private LocalDateTime endTime;
     private List<Integer> levels;
     private boolean single = true;
+    private boolean sicLaunchData;
 
-    public WazuhRegistryModifyDataQueryParamsBuilder(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime) {
+    public WazuhRegistryModifyDataQueryParamsBuilder(boolean sicLaunchData, List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.agentNames = agentNames;
+        this.sicLaunchData = sicLaunchData;
     }
 
     @Override
@@ -43,8 +45,10 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
         }
 
         // 指定文件变更数据的判断条件
-        BoolQueryBuilder necessaryQuery = QueryBuilders.boolQuery().should(SYS_CHECK_FILE_MATCH)
-                .should(SIC_LAUNCH_ID_MATCH);
+        BoolQueryBuilder necessaryQuery = QueryBuilders.boolQuery().should(SYS_CHECK_FILE_MATCH);
+        if (this.sicLaunchData) {
+            necessaryQuery.should(SIC_LAUNCH_ID_MATCH);
+        }
         finalQueryBuilder.must(necessaryQuery);
 
         // 指定查询哪些文件路径

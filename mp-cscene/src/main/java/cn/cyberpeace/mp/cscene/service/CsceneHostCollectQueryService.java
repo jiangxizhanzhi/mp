@@ -1,16 +1,25 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
+import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.TimeHistogramInfo;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.base.WazuhResult;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.filemodify.WazuhFileModifyService;
 import cn.cyberpeace.mp.sceneplugincollection.service.collect.registrymodify.WazuhRegistryModifyService;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+@Slf4j
 @Service
 public class CsceneHostCollectQueryService {
 
@@ -31,29 +42,24 @@ public class CsceneHostCollectQueryService {
     private WazuhFileModifyService wazuhFileModifyService;
 
     @Resource
-    private WazuhRegistryModifyService wazuhRegistryModifyService ;
+    private WazuhRegistryModifyService wazuhRegistryModifyService;
 
     public ListObjServiceResult<CollectionHostEventBO> getFileModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
-        String sceneId = csceneInstanceService.getSceneId(csceneId);
-        if (StringUtils.isEmpty(sceneId)) {
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
             return new ListObjServiceResult<>(new ArrayList<>(), 0);
         }
 
-        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), nodeIds);
-        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getCollectionScenePluginHandler(sceneId);
-        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getCloudScenePluginHandler(sceneId);
-        // 无采集插件 直接返回
-        if (collectionScenePluginHandler == null) {
-            return new ListObjServiceResult<>(new ArrayList<>(), 0);
-        }
+        BatchSceneHandler sceneHandler = checkResult.getSceneHandler();
+        String sceneId = checkResult.getSceneId();
 
         LocalDateTime startTime = queryStartAt != null ? queryStartAt : sceneHandler.getEarliestStartTime();
         LocalDateTime endTime = queryEndAt != null ? queryEndAt : sceneHandler.getLatestSceneRunningTime();
-        Map<String, SceneElementBO> agentNameToElement = sceneHandler.getAllEid2ElementMap();
 
-        List<String> agentNames = new ArrayList<>(agentNameToElement.keySet());
+        List<String> agentNames = checkResult.getAgentNames();
         WazuhResult<FileEventModel> result = wazuhFileModifyService.queryFileModifyData(from, size, agentNames, startTime, endTime, levels, filePath);
 
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getCloudScenePluginHandler(sceneId);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         for (FileEventModel fileEventModel : result.getList()) {
             CollectionHostEventBO hostEvent = new CollectionHostEventBO();
@@ -67,26 +73,19 @@ public class CsceneHostCollectQueryService {
     }
 
     public ListObjServiceResult<CollectionHostEventBO> getRegistryModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
-        String sceneId = csceneInstanceService.getSceneId(csceneId);
-        if (StringUtils.isEmpty(sceneId)) {
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
             return new ListObjServiceResult<>(new ArrayList<>(), 0);
         }
 
-        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), nodeIds);
-        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getCollectionScenePluginHandler(sceneId);
-        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getCloudScenePluginHandler(sceneId);
-        // 无采集插件 直接返回
-        if (collectionScenePluginHandler == null) {
-            return new ListObjServiceResult<>(new ArrayList<>(), 0);
-        }
-
+        BatchSceneHandler sceneHandler = checkResult.getSceneHandler();
+        String sceneId = checkResult.getSceneId();
         LocalDateTime startTime = queryStartAt != null ? queryStartAt : sceneHandler.getEarliestStartTime();
         LocalDateTime endTime = queryEndAt != null ? queryEndAt : sceneHandler.getLatestSceneRunningTime();
-        Map<String, SceneElementBO> agentNameToElement = sceneHandler.getAllEid2ElementMap();
-
-        List<String> agentNames = new ArrayList<>(agentNameToElement.keySet());
+        List<String> agentNames = checkResult.getAgentNames();
         WazuhResult<FileEventModel> result = wazuhRegistryModifyService.queryRegistryModifyData(from, size, agentNames, startTime, endTime, levels, filePath);
 
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getCloudScenePluginHandler(sceneId);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         for (FileEventModel fileEventModel : result.getList()) {
             CollectionHostEventBO hostEvent = new CollectionHostEventBO();
@@ -97,6 +96,72 @@ public class CsceneHostCollectQueryService {
             hostEvents.add(hostEvent);
         }
         return new ListObjServiceResult<>(hostEvents, (int) result.getTotal());
+    }
+
+    public List<ElementHistogramInfo> aggsRegistryModifyData(String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, Integer intervalMinutes, Integer bucketSize) {
+        if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
+            log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
+            return new ArrayList<>();
+        }
+
+        List<String> agentNames = checkResult.getAgentNames();
+        LocalDateTime startTime = queryStartAt != null ? queryStartAt : checkResult.getSceneStartTime();
+        LocalDateTime endTime = queryEndAt != null ? queryEndAt : checkResult.getLatestSceneRunningTime();
+
+        LocalDateTime minBoundsTime = endTime.minusMinutes((long) intervalMinutes * (bucketSize));
+        LocalDateTime maxBoundsTime = endTime.minusMinutes(1);
+        String minBounds = TimeUtils.localTime2yyyyMMddHHmm(minBoundsTime);
+        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(maxBoundsTime);
+        List<TimeHistogramInfo> data = wazuhRegistryModifyService.aggsDateHistogram(agentNames, startTime, endTime, intervalMinutes + "m", minBounds, maxBounds);
+        int num = data.size();
+        if (num > bucketSize) {
+            data = data.subList(num - bucketSize, num);
+        }
+        List<ElementHistogramInfo> result = new ArrayList<>();
+        for (TimeHistogramInfo info : data) {
+            ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
+            histogramInfo.setCount((int) info.getCount());
+            histogramInfo.setTime(info.getTime());
+            result.add(histogramInfo);
+        }
+        return result;
+    }
+
+    public List<ElementHistogramInfo> aggsFileModifyData(String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, Integer intervalMinutes, Integer bucketSize) {
+        if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
+            log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
+        if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
+            return new ArrayList<>();
+        }
+
+        List<String> agentNames = checkResult.getAgentNames();
+        LocalDateTime startTime = queryStartAt != null ? queryStartAt : checkResult.getSceneStartTime();
+        LocalDateTime endTime = queryEndAt != null ? queryEndAt : checkResult.getLatestSceneRunningTime();
+
+        LocalDateTime minBoundsTime = endTime.minusMinutes((long) intervalMinutes * (bucketSize));
+        LocalDateTime maxBoundsTime = endTime.minusMinutes(1);
+        String minBounds = TimeUtils.localTime2yyyyMMddHHmm(minBoundsTime);
+        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(maxBoundsTime);
+        List<TimeHistogramInfo> data = wazuhFileModifyService.aggsDateHistogram(agentNames, startTime, endTime, intervalMinutes + "m", minBounds, maxBounds);
+        int num = data.size();
+        if (num > bucketSize) {
+            data = data.subList(num - bucketSize, num);
+        }
+        List<ElementHistogramInfo> result = new ArrayList<>();
+        for (TimeHistogramInfo info : data) {
+            ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
+            histogramInfo.setCount((int) info.getCount());
+            histogramInfo.setTime(info.getTime());
+            result.add(histogramInfo);
+        }
+        return result;
     }
 
     private void writeNodeInfo(String nodeEid, BatchSceneHandler sceneHandler, CloudScenePluginHandler cloudScenePluginHandler, CollectionHostEventBO hostEvent) {
@@ -133,6 +198,58 @@ public class CsceneHostCollectQueryService {
         hostEventBO.setMd5Before(fileEventModel.getMd5Before());
         hostEventBO.setMd5After(fileEventModel.getMd5After());
         hostEventBO.setScrollId(fileEventModel.getScrollId());
+    }
+
+    private CheckResult checkAndGetInfo(String csceneId, List<String> nodeIds) {
+        String sceneId = csceneInstanceService.getSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new CheckResult(CheckEnum.SCENE_NOT_EXISTS);
+        }
+
+        BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), nodeIds);
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getCollectionScenePluginHandler(sceneId);
+        // 无采集插件 直接返回
+        if (collectionScenePluginHandler == null) {
+            return new CheckResult(CheckEnum.COLLECTION_PLUGIN_NOT_EXISTS);
+        }
+
+        Map<String, SceneElementBO> agentNameToElement = sceneHandler.getAllEid2ElementMap();
+        List<String> agentNames = new ArrayList<>(agentNameToElement.keySet());
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return new CheckResult(CheckEnum.AGENT_NAMES_NOT_EXISTS);
+        }
+
+        LocalDateTime startTime = sceneHandler.getEarliestStartTime();
+        LocalDateTime latestSceneRunningTime = sceneHandler.getLatestSceneRunningTime();
+        return new CheckResult(sceneId, sceneHandler, startTime, latestSceneRunningTime, agentNames);
+    }
+
+    @Getter
+    @Setter
+    private static class CheckResult {
+        private CheckEnum checkEnum;
+        private String sceneId;
+        private BatchSceneHandler sceneHandler;
+        private LocalDateTime sceneStartTime;
+        private LocalDateTime latestSceneRunningTime;
+        private List<String> agentNames;
+
+        public CheckResult(CheckEnum checkEnum) {
+            this.checkEnum = checkEnum;
+        }
+
+        public CheckResult(String sceneId, BatchSceneHandler sceneHandler, LocalDateTime sceneStartTime, LocalDateTime latestSceneRunningTime, List<String> agentNames) {
+            this.checkEnum = CheckEnum.SUCCESS;
+            this.sceneHandler = sceneHandler;
+            this.sceneStartTime = sceneStartTime;
+            this.latestSceneRunningTime = latestSceneRunningTime;
+            this.agentNames = agentNames;
+            this.sceneId = sceneId;
+        }
+    }
+
+    private enum CheckEnum {
+        SUCCESS, SCENE_NOT_EXISTS, AGENT_NAMES_NOT_EXISTS, COLLECTION_PLUGIN_NOT_EXISTS
     }
 
 }
