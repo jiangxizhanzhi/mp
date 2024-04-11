@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -26,6 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/collection/type")
 @Api(value = "采集类型管理", tags = "采集类型管理")
+@AuthTarget({TargetEnum.RANGE_TEST, TargetEnum.RED_VS_BLUE_WEB_FOLDER, TargetEnum.GROUP_TRAINING,
+        TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE})
 public class CollectionTypeController {
 
     @Autowired
@@ -38,6 +42,7 @@ public class CollectionTypeController {
         List<CollectionType> list = collectionTypeService.typeTrees(baseRequest);
         return ResultCommon.success(list);
     }
+
 
 
 

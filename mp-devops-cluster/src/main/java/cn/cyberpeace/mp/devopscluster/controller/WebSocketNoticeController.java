@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -39,6 +41,7 @@ import java.util.Objects;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/ws")
 @Api(tags = "WS通知管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class WebSocketNoticeController {
 
     private final ImagesService imagesService;

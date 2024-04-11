@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -117,6 +119,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
 @Api(tags = "靶标管理-镜像管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.IMAGE_MANAGE)
 public class ImagesController {
 
     private final ImagesConverter imagesConverter;
@@ -167,6 +170,7 @@ public class ImagesController {
     /**
      * 分页查询
      */
+    @AuthTarget(TargetEnum.DEVOPS_IMAGE_GROUP)
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
@@ -381,6 +385,7 @@ public class ImagesController {
     /**
      * 查询快照历史
      */
+    @AuthTarget(TargetEnum.DEVOPS_SNAPSHOT_GROUP)
     @ApiOperation("查询快照历史")
     @ApiImplicitParam(name = "uuid", value = "靶标id", paramType = "path", dataTypeClass = String.class)
     @GetMapping("/{id}/snapshot/list")
@@ -424,6 +429,7 @@ public class ImagesController {
     /**
      * 查询快照历史
      */
+    @AuthTarget(TargetEnum.DEVOPS_SNAPSHOT_GROUP)
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @ApiImplicitParam(name = "name", value = "镜像名称", dataTypeClass = String.class)
     @GetMapping("/snapshot/by-name")
@@ -527,6 +533,7 @@ public class ImagesController {
         return new Result<>(flavorList);
     }
 
+    @AuthTarget(TargetEnum.DEVOPS_DYNAMIPS_TARGET_GROUP)
     @ApiOperation("查询dynamips 相关的信息")
     @GetMapping("/dynamic_image_info")
     public Result<DynamicImageInfo> getDynamicImageInfo(@RequestParam(required = false) String platform) {
@@ -534,6 +541,7 @@ public class ImagesController {
         return new Result<>(info);
     }
 
+    @AuthTarget(TargetEnum.DEVOPS_DYNAMIPS_TARGET_GROUP)
     @ApiOperation("查询dynamips flavor 相关的信息")
     @GetMapping("/dynamic_type_info")
     public Result<Map<String, Object>> getDynamicTypeInfo() {

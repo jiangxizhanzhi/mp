@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController("roleFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")
+@AuthTarget(TargetEnum.USER_MANAGE)
 public class RoleController {
 
     @Autowired

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 @ModelClass(TargetApiModel.class)
+@Deprecated
 public interface TargetApiMapper extends BaseModelMapper<TargetApiModel> {
 
 }

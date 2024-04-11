@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -33,6 +35,7 @@ import java.util.List;
 @Slf4j
 @RestController("orgUserFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_users")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class OrgUserController {
 
     @Autowired

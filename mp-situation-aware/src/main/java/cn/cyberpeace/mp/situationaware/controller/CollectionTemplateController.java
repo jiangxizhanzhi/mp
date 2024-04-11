@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -29,12 +31,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/collection/template")
 @Api(value = "采集模板管理", tags = "采集模板管理")
+@AuthTarget({TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
 public class CollectionTemplateController {
 
     @Autowired
     private CollectionTemplateService templateService;
 
 
+    @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @GetMapping("/page")
     @ApiOperation(value = "分页查询采集模板，不含自定义探针如脚本，参数等）")
     public ListObjServiceResult<CollectionTemplatePageItemDto> page(CollectionTemplatePageQueryRequest pageQueryRequest) {
@@ -43,6 +47,7 @@ public class CollectionTemplateController {
     }
 
 
+    @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @GetMapping
     @ApiOperation(value = "查询采集模板，包含自定义探针参数，不含自定义探针脚本")
     @ApiImplicitParam(name = "id", value = "模板ID", dataTypeClass = String.class)
@@ -92,6 +97,7 @@ public class CollectionTemplateController {
      * @param addRequest 新增采集模板请求体
      * @return ServiceResult
      */
+    @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @PostMapping
     @ApiOperation(value = "新增采集模板")
     @ApiImplicitParam(name = "addRequest", value = "采集模板新增请求体")
@@ -105,6 +111,7 @@ public class CollectionTemplateController {
      *
      * @return ServiceResult<Void>
      */
+    @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @PatchMapping
     @ApiOperation(value = "修改采集模板")
     @ApiImplicitParam(name = "updateRequest", value = "采集模板修改请求体")
@@ -114,6 +121,7 @@ public class CollectionTemplateController {
     }
 
 
+    @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @DeleteMapping()
     @ApiOperation(value = "删除采集模板")
     @ApiImplicitParam(name = "ids", value = "模板ID集合", dataTypeClass = String[].class)

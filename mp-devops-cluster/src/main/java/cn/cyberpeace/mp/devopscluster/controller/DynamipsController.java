@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dynamips")
 @Api(tags = "计算实例管理-dynamips")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.CLUSTER_MANAGEMENT)
 public class DynamipsController {
 
     private final DynamipsConverter dynamipsConverter;

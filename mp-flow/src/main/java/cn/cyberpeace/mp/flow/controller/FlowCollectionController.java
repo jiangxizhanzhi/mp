@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -48,6 +50,7 @@ import java.util.Objects;
 @Api(tags = "流量集合管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/collection")
+@AuthTarget(TargetEnum.TRAFFIC_SCHEME_LIST)
 public class FlowCollectionController extends BaseModelController<FlowCollectionModel, FlowCollectionQueryParams, FlowCollectionService> {
 
     @Autowired
@@ -63,6 +66,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
      * @param queryParams
      * @return
      */
+    @AuthTarget(TargetEnum.FLOW_GROUP)
     @ApiOperation("分页查询流量集合信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowCollectionResponse> pageFlowCollection(FlowCollectionQueryParams queryParams) {

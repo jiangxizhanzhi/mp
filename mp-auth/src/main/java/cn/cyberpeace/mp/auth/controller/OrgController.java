@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
+@AuthTarget(TargetEnum.USER_MANAGE)
 public class OrgController {
 
     @Autowired
@@ -39,6 +42,7 @@ public class OrgController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
     @GetMapping("/{id}")
+    @AuthTarget(TargetEnum.USER_MANAGE)
     public ObjServiceResult get(@PathVariable String id) {
         ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
         OrgModel orgModel = orgModelObjServiceResult.getData();
@@ -50,6 +54,7 @@ public class OrgController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
     @GetMapping
+    @AuthTarget(TargetEnum.USER_MANAGE)
     public ObjServiceResult getByParam(@RequestParam String id) {
         ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
         OrgModel orgModel = orgModelObjServiceResult.getData();
@@ -62,6 +67,7 @@ public class OrgController {
     })
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "创建组织", target = OpTargetEnums.ORG)
     @PostMapping
+    @AuthTarget(TargetEnum.ADMIN)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
         ObjServiceResult<OrgModel> result = orgService.create(obj, fields);
@@ -75,6 +81,7 @@ public class OrgController {
     })
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新组织", target = OpTargetEnums.ORG)
     @PatchMapping("/{id}")
+    @AuthTarget(TargetEnum.ADMIN)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult update(@PathVariable String id, @RequestBody OrgModel obj,
                                       @RequestParam(required = false) String[] fields) {
@@ -87,6 +94,7 @@ public class OrgController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
+    @AuthTarget(TargetEnum.ADMIN)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除组织", target = OpTargetEnums.ORG)
     public ServiceResult<Boolean> delete(@PathVariable String id) {

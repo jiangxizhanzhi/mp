@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -42,6 +44,7 @@ import java.util.List;
 @Api(value = "用户管理接口(业务)", tags = "AUTH-用户管理接口(业务)")
 @Slf4j
 @RestController("userFrontController")
+@AuthTarget({TargetEnum.LEARN_STATISTICS, TargetEnum.USER_MANAGE})
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserController {
 
@@ -65,6 +68,7 @@ public class UserController {
         return ResultCommon.success();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "修改自己的密码", notes = "")
     @ApiImplicitParam(name="req", value="修改请求", dataTypeClass = ResetSelfPwdRequest.class)
     @PostMapping("/resetpwd/self")
@@ -118,6 +122,7 @@ public class UserController {
     }
 
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
     @PostMapping("/heartbeat")
     public ServiceResult heartbeat() throws MpRuntimeException {
@@ -125,6 +130,7 @@ public class UserController {
         return ResultCommon.success();
     }
 
+    @AuthTarget(TargetEnum.DASHBOARD)
     @ApiOperation(value = "用户在线报告", notes = "")
     @GetMapping("/olreport")
     public ServiceResult onlineReport(UserOnlineRecordSummaryPageRequest pageRequest) {
@@ -133,6 +139,7 @@ public class UserController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+    @AuthTarget(TargetEnum.DASHBOARD)
     @ApiOperation(value = "在线用户数量", notes = "")
     @GetMapping("/olUserCnt")
     public ServiceResult<UserOnlineCntBo> onlineUserCnt() {

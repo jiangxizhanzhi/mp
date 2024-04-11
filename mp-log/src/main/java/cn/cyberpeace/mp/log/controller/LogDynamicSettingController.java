@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.log.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.request.LogLevelBatchRequest;
@@ -24,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/settings")
 @Api(tags = "日志级别动态设置")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class LogDynamicSettingController {
 
     @Autowired

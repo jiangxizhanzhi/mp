@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.frontadminbusiness.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -49,6 +51,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/sys/config")
 @UnlimitPagination("list")
+@AuthTarget(TargetEnum.SYSTEM_CONFIG)
 public class SysConfigController {
 
     @Autowired
@@ -65,6 +68,7 @@ public class SysConfigController {
     private FileService fileService;
 
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<SysConfigModel>> listAll() {
@@ -72,6 +76,7 @@ public class SysConfigController {
         return ResultCommon.success(configs);
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询系统名称", notes = "")
     @GetMapping("/public")
     public ServiceResult<List<SysConfigModel>> getSystemName() {

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 @ModelClass(TargetMenuModel.class)
+@Deprecated
 public interface TargetMenuMapper extends BaseModelMapper<TargetMenuModel> {
 
 }

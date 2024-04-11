@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
  * @Author zhouxinghuai
  * @Date：2021/11/01 14:13
  */
+@Deprecated
 public interface TargetApiService extends BaseModelService<TargetApiModel, QueryParams> {
 
 }

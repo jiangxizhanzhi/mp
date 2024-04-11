@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -46,6 +48,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("新增流量任务")
     @PostMapping("/task/add")
     public ServiceResult addTask(@RequestBody AddFlowTaskTaskRequest request) {
@@ -64,6 +67,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("删除流量任务")
     @ApiImplicitParam(name = "id", value = "流量任务ID", dataTypeClass = String.class)
     @DeleteMapping("/task/delete")
@@ -79,6 +83,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RED_VS_BLUE_WEB_FOLDER})
     @ApiOperation("流量任务列表查询")
     @GetMapping("/task/list")
     public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
@@ -94,6 +99,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE})
     @ApiOperation("条件查询任务id集合")
     @GetMapping("/task_ids/list")
     public ServiceResult<List<String>> taskIdsList(FlowTaskPageQueryParams request) {
@@ -106,6 +112,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("编辑流量任务配置")
     @PostMapping("/task/conf/edit")
     public ServiceResult editTaskConf(@RequestBody EditFlowTaskConfRequest request) {
@@ -120,6 +127,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param taskId
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量任务配置查询")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
@@ -135,6 +143,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量仿真概况")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/summary")
@@ -150,6 +159,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量仿真统计")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/statistics")
@@ -165,6 +175,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RED_VS_BLUE_WEB_FOLDER})
     @ApiOperation("流量仿真所有统计")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/statistics_all")
@@ -180,6 +191,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("TOP5实时速率")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/top5_node_txbps")
@@ -195,6 +207,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("TOP5流量协议")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/top5_protocols")
@@ -210,6 +223,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param taskId
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量任务启动")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @PostMapping("/task/start")
@@ -225,6 +239,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量任务批量启动")
     @PostMapping("/task/batch_start")
     public ServiceResult batchStartTasks(@RequestBody FlowTaskBatchStartRequest request) {
@@ -239,6 +254,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param taskId
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量任务停止")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @PostMapping("/task/stop")
@@ -254,6 +270,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("流量任务批量停止")
     @PostMapping("/task/batch_stop")
     public ServiceResult batchStopTasks(@RequestBody FlowTaskBatchStopRequest request) {
@@ -268,6 +285,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RED_VS_BLUE_WEB_FOLDER})
     @ApiOperation("目标设备下拉选项")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/node_option")
@@ -283,6 +301,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.CSCENE_FLOW_TASK_GROUP)
     @ApiOperation("环境总速率")
     @ApiImplicitParam(name = "id", value = "环境总速率", dataTypeClass = String.class)
     @GetMapping("/total_rate")

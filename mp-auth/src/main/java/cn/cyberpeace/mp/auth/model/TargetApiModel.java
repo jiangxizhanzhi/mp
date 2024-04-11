@@ -24,6 +24,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table("mp_auth_target_api")
 @Builder
+@Deprecated
 public class TargetApiModel extends BaseModel {
 
     @ApiModelProperty(value = "编号")

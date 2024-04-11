@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugingns3.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.sceneplugingns3.bo.Gns3PluginSceneConfigDataBO;
 import cn.cyberpeace.mp.sceneplugingns3.bo.Gns3PluginSceneDataBO;
 import cn.cyberpeace.mp.sceneplugingns3.constant.ControllerConstant;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH)
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class Gns3PluginFlowController {
 
     @ApiOperation("场景模板云平台插件数据说明，非API")

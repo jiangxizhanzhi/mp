@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/types")
 @Api(tags = "靶标管理-分类管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class TypeController {
 
     private static final String CCM_1 = "CCM-1";
@@ -89,6 +92,7 @@ public class TypeController {
      * 查询所有分类
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_CATEGORY_GROUP)
     @ApiOperation("查询所有镜像管理分类")
     @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
@@ -126,6 +130,7 @@ public class TypeController {
      * 查询所有分类
      * @return
      */
+    @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询所有分类")
     @GetMapping("/categories")
     public Result<TypeAllVO> list(){
@@ -142,6 +147,7 @@ public class TypeController {
      * 查询所有分类
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_CATEGORY_GROUP)
     @ApiOperation("查询所有二级分类")
     @ApiImplicitParam(name = "firstTypeId", value = "一级分类id", dataTypeClass = Integer.class)
     @GetMapping("/l2-categories")
@@ -275,6 +281,7 @@ public class TypeController {
      * 查询所有服务分类
      * @return
      */
+    @AuthTarget(TargetEnum.SERVICE_MANAGE)
     @ApiOperation("查询所有服务管理分类")
     @GetMapping("/service-mg-categories")
     public Result<TypeAllVO> serviceMgCategories(){
@@ -322,6 +329,7 @@ public class TypeController {
      * 查询所有服务分类
      * @return
      */
+    @AuthTarget(TargetEnum.IMAGE_MANAGE)
     @ApiOperation("查询所有服务分类")
     @GetMapping("/service-categories")
     public Result<TypeAllVO> serviceCategories(){
@@ -367,6 +375,7 @@ public class TypeController {
 
     }
 
+    @AuthTarget({TargetEnum.REAL_EQUIPMENT_MANAGEMENT, TargetEnum.REAL_MANAGE})
     @ApiOperation("查询串口配置")
     @GetMapping("/serial-port-list")
     public Result<List<SerialPortVO>> serialPortList(){
@@ -374,12 +383,14 @@ public class TypeController {
         return new Result<>(Lists.newArrayList(new SerialPortVO(CCM_1,CCM_1,list)));
     }
 
+    @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询交换机部分信息数据")
     @GetMapping("/switch-tree-list")
     public Result<List<SwitchConvertModel>> treeList(){
         return new Result<>(switchConverter.treeList());
     }
 
+    @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("查询交换机所有信息")
     @GetMapping("/switch-list")
     public Result<List<Switches>> switchList(){

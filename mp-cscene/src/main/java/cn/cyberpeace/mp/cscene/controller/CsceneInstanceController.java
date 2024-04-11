@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -12,28 +14,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -48,7 +32,6 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -71,13 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -94,6 +71,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscene_instances")
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneInstanceService modelService;
@@ -213,6 +191,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         setCsceneFileService(csceneFileService);
     }
 
+    @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)
     @ApiOperation("获取分页数据")
     @GetMapping
     public ListObjServiceResult<CsceneInstanceBO> list(CsceneInstanceQueryParams queryParams) {
@@ -220,6 +199,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return getModelService().listCsceneInstanceBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
+    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.INSTANCE_MONITORING})
     @ApiOperation("获取分页的聚合数据")
     @GetMapping("/list_stat")
     public ListObjServiceResult<CsceneInstanceStat> listStat(CsceneInstanceStatQueryParams queryParams) {
@@ -227,6 +207,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)
     @ApiOperation("获取指定id场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -238,6 +219,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)
     @ApiOperation("删除场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -253,6 +235,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.INSTANCE_MONITORING)
     @ApiOperation("批量删除场景实例")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = CsceneInstancesActionRequest.class)
     @DeleteMapping("/bulk_delete")
@@ -263,6 +246,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.INSTANCE_MONITORING)
     @ApiOperation("清理场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -278,6 +262,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.INSTANCE_MONITORING)
     @ApiOperation("批量清理场景实例")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = CsceneInstancesActionRequest.class)
     @DeleteMapping("/bulk_clear")
@@ -361,6 +346,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE})
     @ApiOperation("场景实例查询节点流量执行记录")
     @ApiImplicitParam(name = "request", value = "查询数据请求体", dataTypeClass = CsceneInstanceNodeFlowRecordsRequest.class)
     @PostMapping(value = "/query_flow_records")
@@ -403,6 +389,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 request.getContext()).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_INSTANCE_CONNECT_GROUP)
     @ApiOperation("场景实例获取远程连接")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -483,6 +470,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.getNodeSessions(ids, nodeIds, userIds, type).asResult();
     }
 
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST})
     @ApiOperation("场景实例获取分页录屏列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
@@ -519,6 +507,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostStates(id, queryParams).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("查询场景实例事件列表（分页列表）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -530,12 +519,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostEvents(id, queryParams).asResult();
     }
 
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE})
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
     @GetMapping(value = "/query_data_count")
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
         return getModelService().queryCollectionDataCount(params).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("查询场景实例事件类型")
     @GetMapping(value = "/list_host_events_type")
     public ServiceResult<List<CollectionHostEventTypeBO>> listHostEvents() {
@@ -562,6 +553,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.scrollHostEvents(id, scrollId, queryParams).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("场景实例获取探针采集数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -587,6 +579,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
     }
 
+    @AuthTarget(TargetEnum.RED_BLUE)
     @ApiOperation("更新场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = CsceneUpdateBO.class)
@@ -688,6 +681,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.RED_VS_BLUE_WEB_FOLDER)
     @ApiOperation("节点开机")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
@@ -700,6 +694,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.RED_VS_BLUE_WEB_FOLDER)
     @ApiOperation("节点关机")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
@@ -778,6 +773,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.RED_BLUE)
     @ApiOperation("更新节点")
     @PostMapping("/modify_element")
     public ServiceResult<ElementModifyBO> recreateElement(@RequestBody ElementModifyBO elementModifyBO) {
@@ -787,6 +783,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(new ElementModifyBO()).asResult();
     }
 
+    @AuthTarget(TargetEnum.RED_VS_BLUE_WEB_FOLDER)
     @ApiOperation("删除节点")
     @PostMapping("/delete_element")
     public ServiceResult<ElementModifyBO> recreateElement(@RequestBody CsceneInstanceNodeActionRequest request) {
@@ -827,6 +824,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.CSCENE_INSTANCE_CONNECT_GROUP)
     @ApiOperation("场景链路状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
@@ -886,12 +884,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         }
     }
 
+    @AuthTarget(TargetEnum.INSTANCE_MONITORING)
     @GetMapping("/status")
     @ApiOperation(value = "查询靶场监控的场景实例状态")
     public ServiceResult<List<OptionBO>> getSceneStatus() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
     }
 
+    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.INSTANCE_MONITORING})
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {

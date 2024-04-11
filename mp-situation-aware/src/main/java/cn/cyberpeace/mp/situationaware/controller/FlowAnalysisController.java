@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 @Validated
 @Api(tags = "流量分析")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class FlowAnalysisController {
 
     private final FlowAnalysisService flowAnalysisService;

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -38,12 +40,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/screenrecord")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
 public class ScreenrecordController {
 
     private final ScreenrecordService screenrecordService;
 
     private final CsceneInstanceMapper csceneInstanceMapper;
 
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RESOURCE_USAGE_MANAGEMENT})
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {

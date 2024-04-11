@@ -14,7 +14,9 @@ import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -73,6 +75,7 @@ public class UserExcelController {
     private TenantUserService tenantUserService;
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = UserExportRequest.class)
     @PostMapping("/excel/export")
@@ -108,6 +111,7 @@ public class UserExcelController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @ApiImplicitParam(name="file", value="文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/excel/import")
@@ -127,6 +131,7 @@ public class UserExcelController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "下载用户导入excel模板", notes = "")
     @GetMapping("/excel/template")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")

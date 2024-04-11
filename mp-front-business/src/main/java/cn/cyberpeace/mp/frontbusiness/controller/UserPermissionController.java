@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -28,6 +30,7 @@ import java.util.List;
 @Slf4j
 @RestController("userPermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_permissions")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class UserPermissionController {
 
     @Autowired

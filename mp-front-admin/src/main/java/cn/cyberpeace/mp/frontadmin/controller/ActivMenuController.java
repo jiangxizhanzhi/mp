@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.service.MenuSetService;
@@ -37,6 +39,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping("/sys/admin")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ActivMenuController {
 
     @Autowired

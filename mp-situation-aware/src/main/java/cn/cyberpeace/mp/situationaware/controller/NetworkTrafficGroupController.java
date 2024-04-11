@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -18,6 +20,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/flow_group")
 @Api(value = "态势感知-场景的操作接口", tags = "态势感知-场景的操作接口")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class NetworkTrafficGroupController {
 
     @Autowired

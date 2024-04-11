@@ -36,6 +36,7 @@ import java.util.List;
 @Api(value = "接口访问控制", tags = "接口访问控制")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/urlac")
+@Deprecated(since = "5.4.2")
 public class UrlACController {
 
     @Autowired

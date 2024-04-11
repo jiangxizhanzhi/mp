@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.ImportConverter;
 import cn.cyberpeace.mp.devopscluster.vo.ImportDiskSpaceVO;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/import")
 @Api(tags = "靶标导入管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ImportController {
 
     private final ImportConverter importConverter;

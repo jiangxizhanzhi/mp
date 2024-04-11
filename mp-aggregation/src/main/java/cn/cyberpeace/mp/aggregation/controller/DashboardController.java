@@ -12,6 +12,8 @@ import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -38,6 +40,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dashboard")
+@AuthTarget(TargetEnum.DASHBOARD)
 public class DashboardController {
 
     @Autowired
@@ -98,6 +101,7 @@ public class DashboardController {
         return dashboardService.getUserNodeSessions(userId);
     }
 
+    @AuthTarget(TargetEnum.PERSONAL_FOLDER)
     @ApiOperation(value = "用户资源")
     @GetMapping("/user_resource")
     public ServiceResult<UserResourceResponse> userResource() {

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigDataBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneDataBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ControllerConstant;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH)
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ScenePluginCollectionController {
 
     @ApiOperation("场景模板采集插件数据，非API")

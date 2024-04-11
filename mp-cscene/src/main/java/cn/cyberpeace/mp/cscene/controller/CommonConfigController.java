@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
@@ -19,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/config")
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class CommonConfigController {
 
     @Resource

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/firewall")
 @Api(tags = "网络实例管理-防火墙")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class FirewallController {
 
     private final FirewallConverter firewallConverter;

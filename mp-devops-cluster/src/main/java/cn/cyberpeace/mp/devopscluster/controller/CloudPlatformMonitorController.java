@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -87,6 +89,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
 @Api(tags = "云平台监控")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.CLOUD_PLATFORM_MONITORING)
 public class CloudPlatformMonitorController {
 
     private final VmConverter vmConverter;
@@ -213,6 +216,7 @@ public class CloudPlatformMonitorController {
      * 节点管理
      * @return
      */
+    @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.DASHBOARD})
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(BasePageRequest request){
@@ -345,6 +349,7 @@ public class CloudPlatformMonitorController {
      * @param request
      * @return
      */
+    @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.SYSTEM_ALARM})
     @ApiOperation("设备运行监控")
     @GetMapping("/server/state")
     public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){

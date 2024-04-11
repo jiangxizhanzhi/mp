@@ -24,6 +24,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table("mp_auth_target_menu")
 @Builder
+@Deprecated
 public class TargetMenuModel extends BaseModel {
 
     @ApiModelProperty(value = "上级")

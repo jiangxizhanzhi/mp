@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigDataBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneDataBO;
 import cn.cyberpeace.mp.scenepluginflow.constant.ControllerConstant;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH)
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ScenePluginFlowController {
 
     @ApiOperation("场景模板流量插件数据，非API")

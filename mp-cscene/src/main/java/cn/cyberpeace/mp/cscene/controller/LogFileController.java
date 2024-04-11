@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
@@ -56,6 +58,7 @@ public class LogFileController {
      * @param pageRequest
      * @return
      */
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RED_VS_BLUE_WEB_FOLDER})
     @ApiOperation(value = "分页查询日志文件")
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
@@ -103,6 +106,7 @@ public class LogFileController {
      *
      * @return
      */
+    @AuthTarget({TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE_WEB_FOLDER})
     @ApiOperation(value = "查询日志原始文件下载地址")
     @GetMapping("/download_urls")
     public ListObjServiceResult<LogFileDownloadUrlDto> getDownloadUrl(LogFileDownloadUrlRequest request) {

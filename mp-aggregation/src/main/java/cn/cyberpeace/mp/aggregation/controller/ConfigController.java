@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.response.SingleIpResponse;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import io.swagger.annotations.Api;
@@ -16,6 +18,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/config")
+@AuthTarget(TargetEnum.ADMIN)
 public class ConfigController {
 
     @Resource

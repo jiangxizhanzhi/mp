@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.common.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
 import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -24,6 +26,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/markdown")
 @Data
+@AuthTarget(TargetEnum.ADMIN)
 public class MarkdownFileController {
 
     private MarkdownFileService markdownFileService;

@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -28,6 +30,7 @@ import java.util.List;
 @Slf4j
 @RestController("rolePermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class RolePermissionController {
 
     @Autowired

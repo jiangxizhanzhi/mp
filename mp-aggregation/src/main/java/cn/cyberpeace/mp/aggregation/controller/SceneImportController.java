@@ -6,8 +6,10 @@ import cn.cyberpeace.mp.aggregation.request.sceneimport.MoundRequest;
 import cn.cyberpeace.mp.aggregation.request.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -32,6 +34,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscenes")
+@AuthTarget(TargetEnum.ADMIN)
 public class SceneImportController {
 
     @Resource

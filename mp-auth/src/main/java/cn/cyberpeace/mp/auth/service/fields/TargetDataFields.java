@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
+@Deprecated
 @Component
 public class TargetDataFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TargetDataModel.class));

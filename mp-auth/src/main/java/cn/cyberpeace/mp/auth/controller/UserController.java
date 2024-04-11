@@ -8,7 +8,9 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -51,6 +53,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -67,6 +70,7 @@ public class UserController {
      * @param ids 数据id集
      * @return 成功数量
      */
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("批量删除用户")
     @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -77,6 +81,7 @@ public class UserController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -89,6 +94,7 @@ public class UserController {
     }
 
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
@@ -105,6 +111,7 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
@@ -124,6 +131,7 @@ public class UserController {
     }
 
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
     public ServiceResult<UserBo> getCurrentUser() {
@@ -132,6 +140,7 @@ public class UserController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = UserRequest.class)
     @PostMapping("/add")
@@ -143,6 +152,7 @@ public class UserController {
         return ResultCommon.success(userModel);
     }
 
+    @AuthTarget({TargetEnum.OJ_COURSE, TargetEnum.PERSONAL_CENTER, TargetEnum.PERSONAL_FOLDER, TargetEnum.USER_MANAGE})
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)
     @PostMapping("/modify")

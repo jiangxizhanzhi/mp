@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.log.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.log.request.LogReportRequest;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/report")
 @Api(value = "日志模块", tags = "日志模块")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class LogFileReportController {
 
     private final LogReportService logReportService;

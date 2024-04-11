@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.ElasticIpConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.ElasticIpBO;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/elasticip")
 @Api(tags = "网络实例管理-弹性IP")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class ElasticIpController {
 
     private final ElasticIpConverter elasticIpConverter;
