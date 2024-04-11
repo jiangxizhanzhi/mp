@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -46,6 +48,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequestMapping("/sys/notice")
+@AuthTarget(TargetEnum.SYSTEM_NOTICE_FOLDER)
 public class SysNoticeController {
 
     @Autowired
@@ -54,6 +57,7 @@ public class SysNoticeController {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("查询单个公告")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @GetMapping("/{id}")
@@ -70,6 +74,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告")
+    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
@@ -90,6 +95,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("停止推送公告消息")
+    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
@@ -99,6 +105,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("查询未读公告数量")
+    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @GetMapping("/unread_count")
     public ServiceResult<Integer> unReadCount() {
         int unreadCnt = noticeService.unReadCount();
@@ -114,6 +121,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("查询当前用户有权看到的公告(分页)")
+    @AuthTarget({TargetEnum.NO_AUTH, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();

@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -38,6 +40,7 @@ public class TargetSceneReferController {
         this.csceneSpecialService = csceneSpecialService;
     }
 
+    @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("分页查询")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "name", value = "名称", dataTypeClass = String.class),

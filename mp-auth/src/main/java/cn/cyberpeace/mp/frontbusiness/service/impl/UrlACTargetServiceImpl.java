@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
  * @Date 2022/9/22
  */
 @Service
+@Deprecated(since = "5.4.2")
 public class UrlACTargetServiceImpl extends BaseModelServiceImpl<UrlACTargetModel, UrlACTargetMapper, UrlACTargetFields, QueryParams>
     implements UrlACTargetService {
 

@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.service.AvatarService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -25,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController("avatarFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/avatar")
+@AuthTarget({TargetEnum.PERSONAL_FOLDER, TargetEnum.USER_MANAGE})
 public class AvatarController {
 
     @Autowired

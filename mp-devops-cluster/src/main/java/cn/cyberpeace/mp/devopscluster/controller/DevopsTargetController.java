@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -53,6 +55,7 @@ import java.util.*;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/target")
 @Api(tags = "靶标管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.IMAGE_MANAGE)
 public class DevopsTargetController {
 
     private final TargetConverter targetConverter;
@@ -93,6 +96,7 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
     public ServiceResult<TargetSceneVO> list(TargetSceneRequest request) {
@@ -170,6 +174,7 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
@@ -346,6 +351,7 @@ public class DevopsTargetController {
         return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
 
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
     public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request){

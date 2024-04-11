@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -27,11 +29,13 @@ import java.util.List;
 @Slf4j
 @RestController("orgFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
+@AuthTarget(TargetEnum.USER_MANAGE)
 public class OrgController {
 
     @Autowired
     private OrgService orgService;
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
     @GetMapping("/byparent")
@@ -43,6 +47,7 @@ public class OrgController {
     @ApiOperation(value = "根据组织路径查询", notes = "")
     @ApiImplicitParam(name = "path", value = "组织路径", dataTypeClass = String.class)
     @GetMapping("/bypath")
+    @AuthTarget(TargetEnum.USER_MANAGE)
     public ServiceResult<OrgBO> getByPath(@RequestParam String path) {
         OrgBO orgBO = orgService.getByPath(path.trim());
         return ResultCommon.success(orgBO);
@@ -51,6 +56,7 @@ public class OrgController {
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
+    @AuthTarget(TargetEnum.NO_AUTH)
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
         List<OrgDto> tree = orgService.getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();

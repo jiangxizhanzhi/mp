@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -48,6 +50,7 @@ import java.util.Objects;
 @Api(tags = "告警信息接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/system_alarm")
+@AuthTarget(TargetEnum.SYSTEM_ALARM)
 public class SystemAlarmController extends BaseModelController<SystemAlarmModel, QueryParams, SystemAlarmService> {
 
     @Autowired

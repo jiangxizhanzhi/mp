@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.ControllerConstant;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH)
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ScenePluginCloudController {
 
     @ApiOperation("场景模板云平台插件数据说明，非API")

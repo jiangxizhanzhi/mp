@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/network")
 @Api(tags = "网络实例管理-网络")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class NetworkController {
 
     private final NetworkConverter networkConverter;

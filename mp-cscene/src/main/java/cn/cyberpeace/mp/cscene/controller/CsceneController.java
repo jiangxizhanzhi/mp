@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -42,7 +44,9 @@ import java.util.Map;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscenes")
 @Data
+@AuthTarget({TargetEnum.CT_AD_LIST, TargetEnum.CT_CFS_LIST, TargetEnum.CT_OPERATION_LIST})
 public class CsceneController implements BaseModelListControllerBase {
+
 
     private CsceneService modelService;
 
@@ -106,6 +110,7 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("授权场景模板")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
     @PostMapping("/authorize")
@@ -113,6 +118,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("获取指定场景模板授权信息")
     @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
     @GetMapping("/get_authorize")
@@ -120,6 +126,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.getCsceneAuthorizeInfo(id).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
@@ -128,6 +135,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -146,6 +154,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/sync")
@@ -196,6 +205,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),

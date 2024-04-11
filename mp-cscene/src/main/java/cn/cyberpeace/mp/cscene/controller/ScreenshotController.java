@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -44,6 +46,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         setModelService(screenshotService);
     }
 
+    @AuthTarget({TargetEnum.COURSES, TargetEnum.OJ_ALL_COURSE})
     @ApiOperation("截屏文件上传")
     @PostMapping("/upload")
     public ServiceResult<ScreenshotModel> screenshotUpload(@Validated ScreenshotUploadRequest request) {
@@ -56,6 +59,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
      * @param filePath 文件地址
      * @param response
      */
+    @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("截屏文件下载")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filePath", value = "请求参数", dataTypeClass = String.class),
@@ -65,12 +69,14 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         FileClient.downloadFile(filePath, response);
     }
 
+    @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("查询已用空间")
     @GetMapping("/used_space")
     public ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace() {
         return getModelService().queryUsedSpace();
     }
 
+    @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("按时间删除截屏文件")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ScreenshotDeleteRequest.class)
     @DeleteMapping("/time_delete")
@@ -78,6 +84,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         return getModelService().timeDelete(request);
     }
 
+    @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("批量删除截屏文件")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ScreenshotBatchDeleteRequest.class)
     @DeleteMapping("/batch_delete")

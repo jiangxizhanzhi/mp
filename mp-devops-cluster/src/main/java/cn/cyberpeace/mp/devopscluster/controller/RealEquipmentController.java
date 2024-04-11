@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -52,11 +54,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cn.cyberpeace.mp.base.constant.TargetEnum.REAL_EQUIPMENT_MANAGEMENT;
+import static cn.cyberpeace.mp.base.constant.TargetEnum.REAL_MANAGE;
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/real-equipment")
 @Api(tags = "靶标管理-实装管理")
 @RequiredArgsConstructor
+@AuthTarget({REAL_EQUIPMENT_MANAGEMENT, REAL_MANAGE})
 public class RealEquipmentController {
 
     private final RealEquipmentConverter realEquipmentConverter;
@@ -71,6 +77,7 @@ public class RealEquipmentController {
     /**
      * 分页查询
      */
+    @AuthTarget({TargetEnum.DEVOPS_EQUIPMENT_PAGE_GROUP, REAL_EQUIPMENT_MANAGEMENT, REAL_MANAGE})
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){

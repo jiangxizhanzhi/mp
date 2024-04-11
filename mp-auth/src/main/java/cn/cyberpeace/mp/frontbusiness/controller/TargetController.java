@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.auth.service.MenuConfigService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -43,6 +45,7 @@ public class TargetController {
     @Autowired
     private UserPermissionService userPermissionService;
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "查询权限树", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "targetId", value = "权限id", paramType = "query", dataTypeClass = String.class),
@@ -55,6 +58,7 @@ public class TargetController {
     }
 
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询当前用户菜单")
     @GetMapping("/current_user/tree")
     public ServiceResult getTree() {

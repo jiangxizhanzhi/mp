@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -45,6 +47,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")
+@AuthTarget(TargetEnum.USER_MANAGE)
 public class RoleController {
 
     @Autowired
@@ -71,6 +74,7 @@ public class RoleController {
      * @param ids 数据id集
      * @return 成功数量
      */
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("批量删除角色")
     @ApiImplicitParam(name="ids", value="角色ID列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -79,6 +83,7 @@ public class RoleController {
         return roleService.bulkDelete(ids).asResult();
     }
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id角色，附带权限集合", notes = "")
     @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
@@ -88,6 +93,7 @@ public class RoleController {
     }
 
     @ApiOperation("获取指定id角色")
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
     })
@@ -96,7 +102,8 @@ public class RoleController {
         return roleService.get(id).asResult();
     }
 
-    @ApiOperation(value = "新增角色，同时完成角色-权限绑定关系", notes = "")
+    @AuthTarget(TargetEnum.USER_MANAGE)
+    @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -106,7 +113,7 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
-
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/modify")
@@ -117,6 +124,7 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
+    @AuthTarget({TargetEnum.USER_MANAGE, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @ApiOperation(value = "查询所有角色，不分页，仅查询角色信息", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<RoleModel>> listAll(RolePageRequest rolePageRequest) {

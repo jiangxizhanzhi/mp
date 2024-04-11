@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -27,6 +29,7 @@ import java.util.Set;
 @Slf4j
 @RestController("orgPermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_permissions")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class OrgPermissionController {
 
     @Autowired

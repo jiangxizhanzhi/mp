@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.MibInfoQueryRequest;
@@ -8,8 +10,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
@@ -24,6 +27,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/protocol/collection")
+@AuthTarget(TargetEnum.CSCENE_PROTOCOL_GROUP)
 public class ProtocolCollectionController {
 
     @Resource

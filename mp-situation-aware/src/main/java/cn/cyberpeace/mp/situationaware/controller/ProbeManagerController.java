@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -43,6 +45,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/probes")
 @Api(value = "探针管理", tags = "探针管理")
+@AuthTarget({TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
 public class ProbeManagerController {
 
     @Autowired
@@ -69,6 +72,7 @@ public class ProbeManagerController {
         return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
     }
 
+    @AuthTarget(TargetEnum.SITUATION_AWARE_GROUP)
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {

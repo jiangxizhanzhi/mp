@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/biz_monitor")
 @Api(tags = "业务服务监控")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.BUSINESS_SERVICE_MONITORING)
 public class BizServiceMonitorController {
 
     private final ServiceMonitorService serviceMonitorService;

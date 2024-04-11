@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -49,6 +51,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/scene/element")
+@AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class ElementMonitorController {
 
     @Autowired

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -33,6 +35,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/sessions")
 @Api(value = "态势感知-流量接口", tags = "态势感知-流量接口")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class NetWorkTrafficController {
 
     @Autowired

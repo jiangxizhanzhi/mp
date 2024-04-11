@@ -35,6 +35,7 @@ import java.util.*;
 @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG)
+@Deprecated(since = "5.4.2")
 public class UrlACService {
 
     public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";

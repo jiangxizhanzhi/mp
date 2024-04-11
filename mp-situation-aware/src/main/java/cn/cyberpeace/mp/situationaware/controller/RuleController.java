@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.rule.Rule;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/wazuh/rules")
 @Api(value = "探针采集规则管理", tags = "探针采集规则管理")
+@AuthTarget(TargetEnum.COLLECTION_ANALYSE)
 public class RuleController {
 
     @Autowired

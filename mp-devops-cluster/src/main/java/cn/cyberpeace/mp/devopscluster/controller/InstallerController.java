@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -57,6 +59,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/service")
 @Api(tags = "靶标管理-服务管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.SERVICE_MANAGE)
 public class InstallerController {
 
     private final InstallerConverter installerConverter;

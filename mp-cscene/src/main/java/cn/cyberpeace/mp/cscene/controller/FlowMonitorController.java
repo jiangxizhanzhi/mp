@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -71,6 +73,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
+@AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class FlowMonitorController {
 
     @Autowired
@@ -192,6 +195,7 @@ public class FlowMonitorController {
         return ResultCommon.success(riskCount);
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "攻击流量各类别统计")
     @GetMapping("/attack_type_count")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(AttackTypeTopRequest baseRequest) {

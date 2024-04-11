@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.OpenFlowConverter;
 import cn.cyberpeace.mp.devopscluster.converter.model.OpenFlowPageConverterModel;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/openflow")
 @Api(tags = "流表监控")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class OpenFlowController {
 
     private final OpenFlowConverter openFlowConverter;

@@ -18,6 +18,7 @@ import java.util.List;
 @Mapper
 @Repository
 @ModelClass(UrlACModel.class)
+@Deprecated(since = "5.4.2")
 public interface UrlACMapper extends BaseModelMapper<UrlACModel> {
 
     List<UrlAccessCtlDto> listAllUrlAccessCtlDtos();
