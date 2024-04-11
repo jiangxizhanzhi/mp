@@ -216,8 +216,7 @@ public class LoadServiceImpl {
      * */
     public Boolean updateLoadExecutionResultByPk(JSONObject requestData) {
         Boolean updateLoadExecutionResultByPk;
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.get("pk").toString(), requestData);
         } else {
             return false;
