@@ -51,7 +51,7 @@ public class CleanExpiredEsIndexScheduleJob {
     @Resource
     private CollectionPluginSceneElementMapper elementMapper;
 
-    @MpScheduled(cron = "0 * * * * ?", id = "clean_expired_es_data", description = "每个活动场景保留15天的ES数据,天数可配")
+    @MpScheduled(cron = "0 10 1 * * ?", id = "clean_expired_es_data", description = "每个活动场景保留15天的ES数据,天数可配")
     public void action() {
         int nDays = 15;
         String key = "clean_expired_es_data_day";
