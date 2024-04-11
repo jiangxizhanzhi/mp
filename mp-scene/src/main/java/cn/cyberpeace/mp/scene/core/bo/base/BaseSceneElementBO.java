@@ -47,6 +47,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Boolean isAuxiliary;
     @ApiModelProperty(value = "物理位置")
     private String physicalLocation;
+    @ApiModelProperty(value = "位置信息")
+    private String place;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.model.BasePageConvertModel;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.util.List;
@@ -135,4 +136,10 @@ public class RealEquipmentBO extends BasePageConvertModel {
      * 实体USB信息
      */
     private EntityUsb extEntityUsb;
+
+    /**
+     * 位置信息
+     */
+    private String place;
+
 }

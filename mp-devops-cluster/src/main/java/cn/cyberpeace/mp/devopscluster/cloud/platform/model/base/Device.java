@@ -210,4 +210,9 @@ public class Device extends BaseCloudPlatformResult {
      * 靶标管理中启动过的时长
      */
     private Integer useDuration;
+
+    /**
+     * 位置信息
+     */
+    private String place;
 }

@@ -192,4 +192,12 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastCreateTime;
+
+    /**
+     * 位置信息
+     */
+    private String place;
+
+
+
 }

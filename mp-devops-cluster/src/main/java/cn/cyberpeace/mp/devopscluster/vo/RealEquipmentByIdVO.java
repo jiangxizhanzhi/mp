@@ -94,6 +94,12 @@ public class RealEquipmentByIdVO extends BaseVO {
     @ApiModelProperty("描述")
     private String description;
 
+    /**
+     * 位置信息
+     */
+    @ApiModelProperty("位置信息")
+    private String place;
+
 
 
 }

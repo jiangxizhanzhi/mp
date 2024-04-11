@@ -236,6 +236,7 @@ public class RealEquipmentConverter implements BaseConverter{
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
         device.setExtEntityUsb(request.getExtEntityUsb());
+        device.setPlace(request.getPlace());
         return device;
     }
 
