@@ -122,8 +122,7 @@ public class LoadServiceImpl {
      * */
     public Boolean updateLoadByPk(JSONObject requestData) {
         Boolean updateLoadByPk;
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             updateLoadByPk = loadMapper.updateLoadByPk(requestData.get("pk").toString(), requestData);
         } else {
             return false;
@@ -149,8 +148,7 @@ public class LoadServiceImpl {
      * */
     public Boolean deleteLoadByPk(JSONObject requestData) {
         Boolean deleteLoadByPk;
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             deleteLoadByPk = loadMapper.deleteLoadByPk(requestData.get("pk").toString());
         } else {
             return false;
@@ -202,8 +200,7 @@ public class LoadServiceImpl {
      * */
     public Boolean deleteLoadExecutionResultByPk(JSONObject requestData) {
         Boolean deleteLoadExecutionResultByPk;
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             deleteLoadExecutionResultByPk = loadMapper.deleteLoadExecutionResultByPk(requestData.get("pk").toString());
         } else {
             return false;

@@ -325,7 +325,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
      */
     @Transactional
     public Boolean deleteCloudTarget(JSONObject requestData) {
-        if (requestData != null && requestData.get("pk") != null) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString());
             if (pk > 0) {
                 return true;
@@ -340,7 +340,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Transactional
     public Boolean updateCloudTarget(JSONObject requestData) {
-        if (requestData != null && requestData.get("pk") != null) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             Integer pk = microsoftAzureMapper.updateCloudTarget(requestData.get("pk").toString(), requestData);
             if (pk > 0) {
                 return true;

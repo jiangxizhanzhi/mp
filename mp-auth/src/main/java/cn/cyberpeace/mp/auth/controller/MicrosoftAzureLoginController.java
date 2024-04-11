@@ -61,8 +61,7 @@ public class MicrosoftAzureLoginController {
     @DeleteMapping("/deleteAzurer")
     public ServiceResult<MicrosoftAzureUserModel> deleteAzurer(@RequestBody(required = true) JSONObject requestData) {
         Boolean deleteAzurer = null;
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             deleteAzurer = microsoftAzureLoginService.deleteAzurer(requestData.get("pk").toString());
             if (deleteAzurer) {
                 return new ServiceResult<>(null, BaseErrorCode.SUCCESS);

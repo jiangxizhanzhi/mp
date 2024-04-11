@@ -63,8 +63,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     @Override
     @Transactional
     public Boolean updateLocalAzurer(JSONObject requestData) {
-        if (requestData != null && requestData.get("pk") != null && requestData.get("pk") instanceof String
-                && !requestData.get("pk").toString().equals("")) {
+        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
             Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.get("pk").toString(),requestData);
             if(updateLocalAzurer){
                 return true;
