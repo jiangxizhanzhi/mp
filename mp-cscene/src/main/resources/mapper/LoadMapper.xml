@@ -4,7 +4,8 @@
 
     <insert id="addLoadExecutionResult">
         INSERT INTO mp_devops_load_scene_result_log
-        (tool_name,
+        (id,
+         tool_name,
          action_type,
          run_table,
          source,
@@ -18,7 +19,8 @@
          create_time,
          control_port,
          default_cmd)
-        VALUES (#{param.toolName},
+        VALUES (#{param.id},
+                #{param.toolName},
                 #{param.actionType},
                 #{param.runTable},
                 #{param.source},
@@ -173,6 +175,9 @@
             </if>
             <if test="param != null and param.defaultCmd != null and param.defaultCmd != ''">
                 default_cmd = #{param.defaultCmd},
+            </if>
+            <if test="param != null and param.id != null and param.id != ''">
+                id = #{param.id},
             </if>
             <if test="param != null and param.toolName != null and param.toolName != ''">
                 tool_name = #{param.toolName},
@@ -342,8 +347,38 @@
     </select>
 
     <select id="getSynchronousDataSource" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT *
-        FROM mp_devops_load_source LIMIT 1
+        SELECT
+        *
+        FROM
+        mp_devops_load_source
+            LIMIT 1
+    </select>
+
+    <select id="getNamesByCode" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+        *
+        FROM
+        mp_sys_code_enum
+        <where>
+            <if test="param != null and param.code != null and param.code != ''">
+                and parent_code = #{param.code}
+            </if>
+        </where>
+    </select>
+
+    <select id="getLoadListByIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+        SELECT
+        *
+        FROM
+        mp_devops_load
+        <where>
+            <if test="param != null and param.size != 0">
+                and id in
+                <foreach collection="param" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
     </select>
 
 </mapper>

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -230,6 +231,51 @@ public class LoadController {
         requestData.put("pks", request.get("pks"));
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
         return new ListObjServiceResult(list, list.size()).asResult();
+    }
+
+    /*
+     * 载荷执行结果左侧工具列表
+     * */
+    @ApiOperation(value = "载荷执行结果左侧工具列表", notes = "")
+    @PostMapping("/getToolListByResult")
+    public ServiceResult getToolListByResult(@RequestBody(required = false) JSONObject request) {
+        JSONObject requestData = new JSONObject();
+        String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
+        if (sceneId.equals("")) {
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
+        }
+        requestData.put("sceneId", sceneId);
+        //将time转换成LocaldateTime
+        LocalDateTime beginTimeLocalDateTime = null;
+        LocalDateTime overTimeLocalDateTime = null;
+        if (request.get("beginTime") != null && request.get("overTime") != null) {
+            try {
+                beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                //比较时间
+                if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
+                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
+                }
+            } catch (Exception e) {
+                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
+            }
+        }
+        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
+        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        List<MpDevopsLoad> list = LoadService.getToolListByResult(requestData);
+        return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    /*
+     * code码对应组
+     * */
+    @ApiOperation(value = "code码对应组", notes = "")
+    @GetMapping("/getNamesByCode")
+    public ServiceResult getNamesByCode(@RequestParam(value = "code", required = true) String code) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("code", code);
+        List<JSONObject> list = LoadService.getNamesByCode(requestData);
+        return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*

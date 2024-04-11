@@ -37,8 +37,8 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/imageCategories")
-    public ServiceResult<List> imageCategories(@RequestParam(value = "cloudType", required = true, defaultValue = "1002") String cloudType) {
-        List list = microsoftAzureConverter.getImageCategories(cloudType);
+    public ServiceResult<List> imageCategories(@RequestParam(value = "code", required = true, defaultValue = "1002") String code) {
+        List list = microsoftAzureConverter.getImageCategories(code);
         return new ServiceResult<List>(list, BaseErrorCode.SUCCESS).asResult();
     }
 

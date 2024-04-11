@@ -77,16 +77,16 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public JSONObject getCloudTargetListByCodes(List<JSONObject> codes) {
         List<MpSysCodeEnum> sqls = microsoftAzureMapper.getSqlByCodes(codes);
         for (int i = 0; i < sqls.size(); i++) {
-            if (sqls.get(i).getRemark().contains("**")) {
+            if (sqls.get(i).getSupplement().contains("**")) {
                 for (int j = 0; j < codes.size(); j++) {
                     if (codes.get(j).get("code").toString().equals(sqls.get(i).getCode())) {
-                        sqls.get(i).setRemark(sqls.get(i).getRemark().replace("**", codes.get(j).get("value").toString()));
+                        sqls.get(i).setRemark(sqls.get(i).getSupplement().replace("**", codes.get(j).get("value").toString()));
                     }
                 }
             }
         }
         List<MpSysCodeEnum> filteredList = sqls.stream()
-                .filter(s -> !s.getRemark().isEmpty())
+                .filter(s -> !s.getSupplement().isEmpty())
                 .collect(Collectors.toList());
         List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetListByCodes(filteredList);
         JSONObject result = new JSONObject();
@@ -395,16 +395,16 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 查询所有镜像管理分类
      */
-    public List getImageCategories(String cloudType) {
-//        String parentCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
+    public List getImageCategories(String code) {
+        String parentCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
 //        PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
 //        PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
 //        PARENT_PUBLICCLOUD_CATEGORY_TYPE("1004", "公有云配置项菜单");
 
         //查询所有数据
-        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(cloudType);
+        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(code);
         //根据parentCode字段将data数据按照父子关系处理返回新的List<MpSysCodeEnum>数据
-        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, cloudType);
+        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, code);
         return dtoTreeList;
     }
 

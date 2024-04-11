@@ -40,6 +40,11 @@ public class MpSysCodeEnum {
 	private String remark;
 
 	/**
+	 * 补充
+	 */
+	private String supplement;
+
+	/**
 	 * 父级code
 	 */
 	private String parentCode;

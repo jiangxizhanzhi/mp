@@ -72,7 +72,7 @@ public class OutLoadServiceImpl  {
         //todo 根据载荷同步设置获取具体地址、认证和协议
         String url = "http://10.108.1.10:5002/stgj/tool/list";
         Map<String, String> formMap = new HashMap();
-        formMap.put("pagenum", requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "0");
+        formMap.put("pagenum", requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1");
         formMap.put("pagesize", requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20");
         formMap.put("keyword", requestData.get("keyword") != null ? requestData.get("keyword").toString() : "");
         //请求头设置
@@ -82,7 +82,7 @@ public class OutLoadServiceImpl  {
         List dataList = new ArrayList();
         String result = null;
         try {
-            result = HttpUtils.sendHttpGet(url, formMap, 100);
+            result = HttpUtils.sendHttpGet(url, formMap, 2000);
         } catch (IOException e) {
             return dataList;
         }

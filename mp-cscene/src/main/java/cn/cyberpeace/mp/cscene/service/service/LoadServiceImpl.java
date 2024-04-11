@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class LoadServiceImpl {
@@ -410,5 +412,34 @@ public class LoadServiceImpl {
         JSONObject result = loadMapper.getSynchronousDataSource();
         return result;
     }
+
+    public List<JSONObject> getNamesByCode(JSONObject requestData) {
+        return loadMapper.getNamesByCode(requestData);
+    }
+
+    public List<MpDevopsLoad> getToolListByResult(JSONObject requestData) {
+        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
+        List<String> newList = new ArrayList();
+        for (int i = 0; i < list.size(); i++) {
+            if (!newList.contains("list.get(i).getId()")) {
+                newList.add(list.get(i).getId());
+            }
+        }
+        //根据ids查询工具
+        List<MpDevopsLoad> data = new ArrayList<>();
+        if (newList != null && newList.size() > 0) {
+            data = loadMapper.getLoadListByIds(newList);
+        }
+        return data;
+    }
+
+//    public JSONObject getThirdTypesAndToolsByTopoId(String topoId, String cloudType) {
+//        JSONObject requestData = new JSONObject();
+//        requestData.put("sceneId",topoId);
+//        getToolListByResult(requestData);
+//        loadMapper.getToolsByTopoId();
+//
+//        return null;
+//    }
 }
 
