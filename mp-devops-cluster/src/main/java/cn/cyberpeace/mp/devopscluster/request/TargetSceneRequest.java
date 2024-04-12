@@ -135,4 +135,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "操作系统类型：1 WINDOWS, 2 LINUX, 3 UNIX, 4 BSD, 5 OTHER")
     private Integer parentSystemType;
 
+    @ApiModelProperty(value = "true:过滤支持cloud-init的靶标")
+    private Boolean initSupport;
+
 }

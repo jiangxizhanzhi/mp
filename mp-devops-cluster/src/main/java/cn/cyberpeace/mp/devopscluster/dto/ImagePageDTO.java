@@ -168,6 +168,8 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private String ordersType;
 
+    private Boolean initSupport;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -267,5 +269,6 @@ public class ImagePageDTO extends BasePageDTO{
         this.setImageTypeList(request.getImageTypeList());
         this.setPreTypeList(request.getPreTypeList());
         this.setParentSystemType(request.getParentSystemType());
+        this.setInitSupport(request.getInitSupport());
     }
 }
