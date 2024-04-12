@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
@@ -21,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class LoadServiceImpl {
@@ -237,13 +238,59 @@ public class LoadServiceImpl {
     /*
      * 载荷执行结果导入
      * */
-    public Boolean importLoadExecutionResult(MultipartFile file) {
-        if (file != null && file.getName() != null && !file.getName().equals("")) {
-            if (file.getOriginalFilename().endsWith("xlsx") || file.getOriginalFilename().endsWith("xls")) {
+    public Boolean importLoadExecutionResult(MultipartFile multipartFile) throws IOException {
+        if (multipartFile != null && multipartFile.getName() != null && !multipartFile.getName().equals("")) {
+            if (multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")) {
+                // 创建临时文件对象（使用UUID作为文件名以避免冲突）
+                File excelFile = File.createTempFile("temp_excel_", ".xlsx");
+                // 将MultipartFile的内容转移到临时文件
+                multipartFile.transferTo(excelFile);
+                try (FileInputStream fis = new FileInputStream(excelFile)) {
+                    Workbook workbook = new XSSFWorkbook(fis);
+                    Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
+                    //数据集初始化
+                    List<List<Object>> data = new ArrayList<>();
+                    for (Row row : sheet) {
+                        List<Object> rowData = new ArrayList<>();
+                        for (Cell cell : row) {
+                            rowData.add(getCellValue(cell));
+                        }
+                        data.add(rowData);
+                    }
+                    //打印
+                    for (List<Object> row : data) {
+                        for (Object cellValue : row) {
+                            System.out.print(cellValue + "\t");
+                        }
+                        System.out.println();
+                    }
+                    workbook.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    private static Object getCellValue(Cell cell) {
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue();
+                } else {
+                    return cell.getNumericCellValue();
+                }
+            case BOOLEAN:
+                return cell.getBooleanCellValue();
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return null;
+        }
     }
 
     /*
@@ -363,6 +410,7 @@ public class LoadServiceImpl {
     public Boolean stageBindLoad(String addType, JSONObject requestData) {
         String sceneId = requestData.get("sceneId") != null ? requestData.get("sceneId").toString() : "";
         String stageId = requestData.get("stageId") != null ? requestData.get("stageId").toString() : "";
+        //载荷id(可以直接指定,可以根据靶标漏洞关联的载荷id,可以根据关联技战术筛选出的载荷id)
         String loadId = requestData.get("loadId") != null ? requestData.get("loadId").toString() : "";
         //界面类型
         String interfaceType = requestData.get("interfaceType") != null ? requestData.get("interfaceType").toString() : "";
@@ -374,6 +422,9 @@ public class LoadServiceImpl {
         return stageBindLoad;
     }
 
+    /*
+     * 载荷数据同步
+     * */
     public Boolean synchronousDataSource(JSONObject requestData) {
         String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
         String ip = requestData.get("ip") != null ? requestData.get("ip").toString() : "";
@@ -404,15 +455,24 @@ public class LoadServiceImpl {
         }
     }
 
+    /*
+     * 载荷数据同步设置查看
+     * */
     public JSONObject getSynchronousDataSource(JSONObject requestData) {
         JSONObject result = loadMapper.getSynchronousDataSource();
         return result;
     }
 
+    /*
+     * 获取code码对应组
+     * */
     public List<JSONObject> getNamesByCode(JSONObject requestData) {
         return loadMapper.getNamesByCode(requestData);
     }
 
+    /*
+     * 根据载荷执行结果工具列表
+     * */
     public List<MpDevopsLoad> getToolListByResult(JSONObject requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
         List<String> newList = new ArrayList();
@@ -428,14 +488,5 @@ public class LoadServiceImpl {
         }
         return data;
     }
-
-//    public JSONObject getThirdTypesAndToolsByTopoId(String topoId, String cloudType) {
-//        JSONObject requestData = new JSONObject();
-//        requestData.put("sceneId",topoId);
-//        getToolListByResult(requestData);
-//        loadMapper.getToolsByTopoId();
-//
-//        return null;
-//    }
 }
 

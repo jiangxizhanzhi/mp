@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -82,7 +81,7 @@ public class LoadController {
         if (updateLoadByPk) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改失败").asResult();
         }
     }
 
@@ -96,7 +95,7 @@ public class LoadController {
         if (addLoad) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增失败").asResult();
         }
     }
 
@@ -124,7 +123,7 @@ public class LoadController {
         if (synchronousData) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷数据同步失败").asResult();
         }
     }
 
@@ -170,13 +169,10 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果统计", notes = "")
     @PostMapping("/getLoadExecutionResultStatistics")
     public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) JSONObject request) {
-
-        JSONObject requestData = new JSONObject();
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
             return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
         }
-        requestData.put("sceneId", sceneId);
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
         LocalDateTime overTimeLocalDateTime = null;
@@ -192,10 +188,9 @@ public class LoadController {
                 return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
             }
         }
-        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
-        requestData.put("pks", request.get("pks"));
-        Map<String, Integer> map = LoadService.getLoadExecutionResultStatistics(requestData);
+        request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
+        request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        Map<String, Integer> map = LoadService.getLoadExecutionResultStatistics(request);
         return new ServiceResult<>(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -205,12 +200,10 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果", notes = "")
     @PostMapping("/getLoadExecutionResult")
     public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) JSONObject request) {
-        JSONObject requestData = new JSONObject();
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
             return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
         }
-        requestData.put("sceneId", sceneId);
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
         LocalDateTime overTimeLocalDateTime = null;
@@ -226,44 +219,10 @@ public class LoadController {
                 return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
             }
         }
-        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
-        requestData.put("pks", request.get("pks"));
-        List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
+        request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
+        request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(request);
         return new ListObjServiceResult(list, list.size()).asResult();
-    }
-
-    /*
-     * 载荷执行结果左侧工具列表
-     * */
-    @ApiOperation(value = "载荷执行结果左侧工具列表", notes = "")
-    @PostMapping("/getToolListByResult")
-    public ServiceResult getToolListByResult(@RequestBody(required = false) JSONObject request) {
-        JSONObject requestData = new JSONObject();
-        String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
-        if (sceneId.equals("")) {
-            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
-        }
-        requestData.put("sceneId", sceneId);
-        //将time转换成LocaldateTime
-        LocalDateTime beginTimeLocalDateTime = null;
-        LocalDateTime overTimeLocalDateTime = null;
-        if (request.get("beginTime") != null && request.get("overTime") != null) {
-            try {
-                beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                //比较时间
-                if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
-                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
-                }
-            } catch (Exception e) {
-                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
-            }
-        }
-        requestData.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        requestData.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
-        List<MpDevopsLoad> list = LoadService.getToolListByResult(requestData);
-        return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -341,7 +300,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
-    public ServiceResult importLoadExecutionResult(@RequestParam(value = "file", required = true) MultipartFile file) {
+    public ServiceResult importLoadExecutionResult(@RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
         Boolean importLoadExecutionResult = LoadService.importLoadExecutionResult(file);
         if (importLoadExecutionResult) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -371,7 +330,7 @@ public class LoadController {
     @ApiOperation(value = "阶段测试绑定载荷工具", notes = "")
     @PostMapping("/stageBindLoad")
     public ServiceResult stageBindLoad(@RequestBody(required = false) JSONObject requestData) {
-        if (requestData != null && requestData.get("addType") != null) {
+        if (requestData != null && requestData.get("addType") != null && !requestData.get("addType").toString().equals("")) {
             String addType = requestData.get("addType").toString();
             if (addType.equals("name") || addType.equals("loopholes") || addType.equals("tactics")) {
                 Boolean stageBindLoad = LoadService.stageBindLoad(addType, requestData);
@@ -380,8 +339,10 @@ public class LoadController {
                 }
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "ERROR").asResult();
+        return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, "addType参数无效").asResult();
     }
 
+    //todo 根据靶标漏洞List获取载荷
 
+    //todo 根据关联技战术获取载荷
 }

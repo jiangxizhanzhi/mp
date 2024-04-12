@@ -289,6 +289,18 @@
                     #{item}
                 </foreach>
             </if>
+            <if test="param != null and param.sceneId != null and param.sceneId != ''">
+                and scene_id = #{param.sceneId}
+            </if>
+            <if test="param != null and param.id != null and param.id != ''">
+                and id = #{param.id}
+            </if>
+            <if test="param != null and param.ids != null and param.ids.size != 0">
+                and id in
+                <foreach collection="param.ids" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="param != null and param.toolName != null and param.toolName != ''">
                 and tool_name like concat('%', #{param.toolName}, '%')
             </if>
