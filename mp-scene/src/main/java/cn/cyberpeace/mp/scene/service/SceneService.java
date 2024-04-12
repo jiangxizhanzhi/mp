@@ -56,7 +56,6 @@ public class SceneService {
     public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart) {
         SceneHandler sceneHandler;
         try {
-            // 使用代理 提供事件流转
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
             sceneHandler.setRealTimeUpdate(true);
             if (sceneHandler.getScene() != null) {
