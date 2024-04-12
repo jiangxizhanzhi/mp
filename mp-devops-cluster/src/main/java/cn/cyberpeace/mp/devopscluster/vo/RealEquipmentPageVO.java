@@ -138,4 +138,10 @@ public class RealEquipmentPageVO extends BaseVO {
      */
     @ApiModelProperty("是否可登录")
     private Boolean loginEnable;
+
+    /**
+     * 位置信息
+     */
+    @ApiModelProperty("位置信息")
+    private String place;
 }

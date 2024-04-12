@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.CsceneTargetBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -15,11 +17,11 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneTargetMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -54,15 +56,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -91,7 +85,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private DeleteHandler deleteHandler;
     private ModifyHandler modifyHandler;
     private PrepareHandler prepareHandler;
-
     private volatile boolean networksCreated = false;
 
     private void loadRelated() {
@@ -206,6 +199,18 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 });
             }
         });
+        //
+        for(var e:getElementMap().values()){
+            String uuid = e.getImageUuid();
+            if (!StringUtils.isBlank(uuid)){
+                CsceneTargetMapper bean = BeanCommon.getBean(CsceneTargetMapper.class);
+                String place = bean.findByEid(uuid).getPlace();
+                if (place != null){
+                    e.getSrcElement().setPlace(null);
+                }
+                e.getSrcElement().setPlace(place);
+            }
+        }
     }
 
     @Override

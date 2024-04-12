@@ -35,6 +35,7 @@ public class DeviceTargetPO extends BaseModel {
     /**
      * 图标
      */
+    @DefaultStr
     private String logo;
 
     /**

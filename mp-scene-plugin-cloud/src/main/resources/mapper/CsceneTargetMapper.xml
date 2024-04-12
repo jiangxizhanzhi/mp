@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.sceneplugincloud.repository.CsceneTargetMapper">
+
+
+    <select id="findByEid" resultType="cn.cyberpeace.mp.scene.core.bo.CsceneTargetBO">
+        select * from mp_devops_target where uuid = #{ids}
+    </select>
+</mapper>

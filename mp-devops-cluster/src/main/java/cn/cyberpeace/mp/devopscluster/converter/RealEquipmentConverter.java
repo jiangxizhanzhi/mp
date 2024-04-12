@@ -155,6 +155,8 @@ public class RealEquipmentConverter implements BaseConverter{
         if (Objects.isNull(result) || !result.isSuccess()){
             return result;
         }
+        result.setPlace(request.getPlace());
+        result.setBusinessTag(1);
         devopsTargetService.insert(Arrays.asList(result));
         return result;
     }

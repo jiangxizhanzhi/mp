@@ -44,6 +44,8 @@ public class DevopsTargetService {
 
     private final SupportExportConvert supportExportConvert;
 
+
+
     /**
      * 分页
      * @param dto
@@ -102,8 +104,14 @@ public class DevopsTargetService {
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
             d.setInPosition(StatusEnum.NO);
         });
-        var ret = deviceTargetMapper.bulkCreate(deviceTargetPOS);
-        return ret.getSuccessCount();
+        deviceTargetPOS.forEach(d->{
+            d.setReferenceNums(d.getReferenceNums()!=null ? d.getReferenceNums():1);
+            d.setUseDuration(d.getUseDuration()!=null ? d.getUseDuration():0);
+        });
+//        var ret = deviceTargetMapper.bulkCreate(deviceTargetPOS);
+//        return ret.getSuccessCount();
+        Integer ret = deviceTargetMapper.batchInsert(deviceTargetPOS);
+        return ret;
     }
 
     public void updateInPosition(List<Device> deviceList) {
@@ -172,6 +180,7 @@ public class DevopsTargetService {
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
         deviceTargetPO.setUseStatus(StatusEnum.NO);
         deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        deviceTargetPO.setPlace(device.getPlace());
         return deviceTargetPO;
     }
 

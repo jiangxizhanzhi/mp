@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
@@ -45,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -68,6 +70,9 @@ public class RealEquipmentController {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    @Resource
+    private DeviceTargetMapper deviceTargetMapper;
+
     /**
      * 分页查询
      */
@@ -84,6 +89,8 @@ public class RealEquipmentController {
         TypeAllConvertModel accessType = typeConverter.findAccessType();
 
         List<RealEquipmentPageVO> list = model.getList().stream().map(v -> {
+            //位置信息
+            String place = deviceTargetMapper.findByUuid(v.getUuid()).getPlace();
             ExtEntity extEntity = v.getExtEntity();
             var connection = realEquipmentService.connection(v.getUuid());
             Boolean loginEnable = false;
@@ -93,7 +100,7 @@ public class RealEquipmentController {
             RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
-                    .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).build();
+                    .inPosition(v.getInPosition()).extEntityUsb(v.getExtEntityUsb()).loginEnable(loginEnable).place(place).build();
             if (Objects.nonNull(l1AndL2AndL3Type)){
                List<String> firstTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList()) ?
                             null : l1AndL2AndL3Type.getFirstTypeList().stream()
